@@ -361,6 +361,16 @@ function card(p){
   el.className = "card card-hover p-4 flex flex-col gap-3 cursor-pointer";
   el.addEventListener("click", ()=>openDetail(p));
   const g = genderLabel(p.gender);
+  // 카드 상단에 제품 이미지 (등록된 경우만)
+  if(typeof IMAGES !== "undefined" && p.shopNo && IMAGES[p.shopNo]){
+    const topImg = document.createElement("img");
+    topImg.className = "card-thumb-top";
+    topImg.src = IMAGES[p.shopNo];
+    topImg.loading = "lazy";
+    topImg.alt = p.품명 || p.품번 || "";
+    topImg.onerror = function(){ this.remove(); };
+    el.appendChild(topImg);
+  }
   let stockBadge;
   if(p.busanTotal>0){
     if(p.hasLast && p.busanTotal<=2) stockBadge = '<span class="badge badge-last">● 부산 '+p.busanTotal+' · 라스트</span>';
@@ -386,12 +396,9 @@ function card(p){
   el.appendChild(top);
 
   const title = document.createElement("div");
-  title.className = "min-w-0 flex items-start gap-2";
-  const thumbImg = (typeof IMAGES !== "undefined" && p.shopNo && IMAGES[p.shopNo])
-    ? '<img class="card-thumb" src="'+escapeHtml(IMAGES[p.shopNo])+'" alt="" loading="lazy" onerror="this.remove()">'
-    : '';
-  title.innerHTML = thumbImg
-    + '<div class="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">'
+  title.className = "min-w-0";
+  title.innerHTML =
+      '<div class="flex flex-wrap items-center gap-1.5 min-w-0">'
     +   '<button type="button" class="copyable" data-copy="'+escapeHtml(p.품명||"")+'" title="클릭해서 품명 복사">'+escapeHtml(p.품명||"-")+'</button>'
     +   '<button type="button" class="copyable code" data-copy="'+escapeHtml(p.품번||"")+'" title="클릭해서 품번 복사">'+escapeHtml(p.품번||"-")+'</button>'
     + '</div>';
@@ -436,7 +443,10 @@ function tile(label, n, color){
 }
 function openDetail(p){
   const g = genderLabel(p.gender);
-  $("#detailHead").innerHTML =
+  const detailImg = (typeof IMAGES !== "undefined" && p.shopNo && IMAGES[p.shopNo])
+    ? '<img class="detail-thumb" src="'+escapeHtml(IMAGES[p.shopNo])+'" alt="'+escapeHtml(p.품명||"")+'" loading="lazy" onerror="this.remove()">'
+    : '';
+  $("#detailHead").innerHTML = detailImg +
       '<div class="flex flex-wrap items-center gap-1.5 mb-1">'
     +   '<span class="badge badge-cat">'+escapeHtml(p.카테고리||"-")+'</span>'
     +   '<span class="badge badge-brand">'+escapeHtml(p.브랜드||"-")+'</span>'
@@ -729,7 +739,6 @@ async function runImageSync(){
   }catch(e){ msg.className="img-progress err"; msg.textContent="이미지 동기화 실패: "+e.message; }
 }
 
-// Bind sync button (delayed to ensure DOM ready)
 setTimeout(()=>{ const b=document.getElementById("syncImagesBtn"); if(b) b.addEventListener("click", runImageSync); }, 100);
 
 loadGhConfig();
