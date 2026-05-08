@@ -1,4 +1,4 @@
-// RACEMENT Haeundae Inventory — app.js (v4.2 스마트 컬러 / 기능 완벽 복구 버전)
+// RACEMENT Haeundae Inventory — app.js (v4.3 이미지 동시로딩 / 메모 / 색상 패치)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -10,6 +10,8 @@ const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
+let IMAGES = {}; // 글로벌 이미지 객체
+let MEMOS = []; // 글로벌 메모 객체
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -35,7 +37,7 @@ function detectGender(code, sex){
   return "U";
 }
 
-// 🔥 스마트 컬러 코딩 (파스텔 톤 뱃지로 0.1초 인지) 🔥
+// 스마트 컬러 뱃지 (파스텔 톤)
 function genderBadge(g){
   if(g==="M") return `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded text-[11px] font-bold">남성</span>`;
   if(g==="W") return `<span class="bg-pink-50 text-pink-600 border border-pink-100 px-1.5 py-0.5 rounded text-[11px] font-bold">여성</span>`;
@@ -68,21 +70,48 @@ async function copyText(text, btn){
   }catch(e){ alert("복사 실패"); }
 }
 
+// 🔥 데이터 동시 로딩 패치 (이미지 누락 완벽 해결) 🔥
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+  
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-    RAW = cached.rows; CURRENT_META = cached.meta;
-    rebuildIndex(); render(); return;
+      RAW = cached.rows || []; 
+      CURRENT_META = cached.meta || null;
+      IMAGES = cached.images || {};
+      MEMOS = cached.memos || [];
+      rebuildIndex(); render(); 
+      return;
   }
-  try{
-    const r = await fetch("./" + DATA_PATH + "?t=" + Date.now());
-    if(!r.ok) throw new Error();
-    const data = await r.json();
-    RAW = data.rows; CURRENT_META = data.meta;
-    data._timestamp = Date.now();
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    rebuildIndex(); render();
-  }catch(e){ if(cached){ RAW=cached.rows; rebuildIndex(); render(); } }
+  
+  try {
+      // 재고, 이미지, 메모를 동시에 다 받아올 때까지 기다림
+      const [invRes, imgRes, memoRes] = await Promise.all([
+          fetch("./" + DATA_PATH + "?t=" + Date.now()),
+          fetch("./images.json?t=" + Date.now()).catch(()=>null),
+          fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null)
+      ]);
+
+      if(!invRes.ok) throw new Error("재고 로드 실패");
+      const invData = await invRes.json();
+      RAW = invData.rows || []; 
+      CURRENT_META = invData.meta || null;
+
+      if(imgRes && imgRes.ok) IMAGES = await imgRes.json();
+      else IMAGES = {};
+
+      if(memoRes && memoRes.ok) MEMOS = await memoRes.json();
+      else MEMOS = [];
+
+      // 캐시에 이미지, 메모도 같이 저장해서 다음번 로딩 속도 향상
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, _timestamp: Date.now() }));
+      
+      rebuildIndex(); render();
+  } catch(e) { 
+      if(cached) { 
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; 
+          rebuildIndex(); render(); 
+      } 
+  }
 }
 
 async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
@@ -91,10 +120,7 @@ function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 async function commitInventoryToGitHub(rows, meta){
   const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DATA_PATH}`;
   let sha = null;
-  try{
-    const r = await fetch(apiBase + "?t=" + Date.now(), { headers:{ Authorization:"Bearer "+getPat() } });
-    if(r.ok){ const j=await r.json(); sha=j.sha; }
-  }catch(e){}
+  try{ const r = await fetch(apiBase + "?t=" + Date.now(), { headers:{ Authorization:"Bearer "+getPat() } }); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
   const body = { message:"update", content: utf8ToB64(JSON.stringify({ meta, rows })), branch: GH.branch };
   if(sha) body.sha = sha;
   const r2 = await ghPut(apiBase, body);
@@ -108,7 +134,7 @@ function rebuildIndex(){
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[] });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -128,12 +154,14 @@ function rebuildIndex(){
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
+    // 메모 여부 매핑
+    p.hasMemo = MEMOS.some(m => m.shopNo === p.shopNo || m.product === p.품명);
+
     const hay = [p.품번, p.품명, p.브랜드].join(" ").toLowerCase();
     p._hay = hay; p._chosung = getChosung(hay);
     return p;
   });
   
-  // 🔥 브랜드 '전체' 버튼 작동안하던 이슈 수정 🔥
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
   const wrap = $("#brandChips"); 
   wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
@@ -148,9 +176,6 @@ function rebuildIndex(){
       btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
       wrap.appendChild(btn);
   });
-  
-  $("#statItems").textContent = fmt(PRODUCTS.length);
-  $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
 function card(p){
@@ -162,25 +187,23 @@ function card(p){
     if(!e.target.closest('button')) openDetail(p); 
   };
   
-  const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
+  const imgSrc = IMAGES[p.shopNo] || null;
   
   let deltaHtml = "";
-  if (p.delta > 0) deltaHtml = `<span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▲+${p.delta}</span>`;
-  else if (p.delta < 0) deltaHtml = `<span class="bg-red-50 text-red-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▼${p.delta}</span>`;
+  if (p.delta > 0) deltaHtml = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▲+${p.delta}</span>`;
+  else if (p.delta < 0) deltaHtml = `<span class="bg-red-50 text-red-600 border border-red-100 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▼${p.delta}</span>`;
 
-  // 스마트 컬러 태그 적용
-  const smartTags = `
-      <span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span>
-      <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span>
-      ${genderBadge(p.gender)}
-  `;
+  let memoHtml = p.hasMemo ? `<span class="bg-yellow-50 text-yellow-700 border border-yellow-200 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">📝 메모있음</span>` : "";
+
+  const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
+  const imgHtml = imgSrc ? `<img src="${imgSrc}" class="boxless-img" onerror="this.style.display='none'">` : '';
 
   el.innerHTML = `
     <button class="fav-btn text-xl absolute top-4 right-4 z-10" style="${imgSrc?'right:85px;':''}">${FAVS.includes(p.품번)?'★':'☆'}</button>
-    ${imgSrc ? `<img src="${imgSrc}" class="absolute top-4 right-4 w-[60px] h-[60px] object-contain mix-blend-multiply dark:mix-blend-normal">` : ''}
+    ${imgHtml}
     
     <div class="pr-[70px]">
-        <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}</div>
+        <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}${memoHtml}</div>
         <div class="copyable font-bold text-[16px] leading-tight mb-1 truncate text-left w-full" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
         <div class="copyable text-[14px] text-[#666] mb-3 text-left w-full" data-copy="${escapeHtml(p.품번)}">${escapeHtml(p.품번)}</div>
     </div>
@@ -202,7 +225,8 @@ function getFilters(){
     brand: ($$('#brandChips .chip').find(b=>b.dataset.active==="1")||{}).dataset?.brand || "ALL",
     q: $("#q").value.trim().toLowerCase(),
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
-    favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1")
+    favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
+    memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1") // 메모 필터 연동
   };
 }
 
@@ -232,17 +256,21 @@ function render(){
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.stock && p.busanTotal <= 0) return false;
+    if(f.memoOnly && !p.hasMemo) return false; // 메모 필터 작동
+    
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
         for(const t of tokens){
-            if(isAllChosung(t)){ if(!p._chosung.includes(t)) return false; } 
-            else { if(!p._hay.includes(t)) return false; }
+            if(isAllChosung(t)){ 
+                if(!p._chosung.includes(t)) return false; 
+            } else { 
+                if(!p._hay.includes(t)) return false; 
+            }
         }
     }
     return true;
   });
 
-  // 🔥 3. 기본 정렬 및 클로드 필터 셀렉트박스 완벽 적용 🔥
   const sortMode = $("#sortSel").value;
   filteredList.sort((a,b) => {
     if(sortMode === "default") {
@@ -263,8 +291,9 @@ function render(){
   });
 
   filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
-  if(filteredList.length === 0) $("#emptyState").classList.remove("hidden");
-  else $("#emptyState").classList.add("hidden");
+  
+  if(filteredList.length === 0){ $("#emptyState").classList.remove("hidden"); } 
+  else { $("#emptyState").classList.add("hidden"); }
 
   if(window.lucide) lucide.createIcons();
   updateCartStatus();
@@ -297,7 +326,7 @@ window.deleteCartItem = (idx) => { CART.splice(idx, 1); localStorage.setItem('CA
 
 function openDetail(p){
   CURRENT_PRODUCT = p;
-  const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
+  const imgSrc = IMAGES[p.shopNo] || null;
   const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
   
   $("#detailHead").innerHTML = `
@@ -328,149 +357,4 @@ function openDetail(p){
           </div>
           <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
       `;
-      $("#detailBody").appendChild(adminImgBox);
-
-      adminImgBox.querySelector("#quickImgSave").onclick = async () => {
-          const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
-          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
-          try {
-              if (typeof IMAGES === "undefined") window.IMAGES = {};
-              IMAGES[p.shopNo] = url; 
-              
-              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
-              let sha = null;
-              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
-              if(sha) body.sha = sha;
-              const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-              if(!r2.ok) throw new Error("API 에러");
-
-              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!";
-              render(); 
-              setTimeout(()=>{openDetail(p);}, 500);
-          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
-      };
-  }
-
-  // 직원 메모 기능 (드롭다운 적용)
-  $("#addMemoBtn").onclick = async () => {
-      const staff = $("#memoStaff").value; // 드롭다운에서 선택된 값
-      const tag = $("#memoTag").value;
-      const text = $("#memoText").value.trim();
-      const msg = $("#memoMsg");
-      
-      if(!staff) { msg.style.color="red"; msg.textContent="직원 이름을 선택해주세요."; return; }
-      if(!text) { msg.style.color="red"; msg.textContent="내용을 입력하세요."; return; }
-      msg.style.color="black"; msg.textContent="메모 저장 중...";
-
-      try {
-          const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
-          let sha = null; let oldData = [];
-          try { 
-              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
-              if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
-          }catch(e){}
-          
-          oldData.push({ date: new Date().toLocaleString(), product: p.품명, shopNo: p.shopNo, staff, tag, text });
-          const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
-          if(sha) body.sha = sha;
-          
-          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-          if(!r2.ok) throw new Error("API 에러");
-          
-          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다. (21시 보고 예정)";
-          $("#memoText").value = "";
-      } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
-  };
-
-  $("#detailModal").classList.remove("hidden");
-}
-
-// 🔥 4. 모든 모달 바깥쪽 클릭 시 닫기 완벽 지원 🔥
-$$('.modal-backdrop').forEach(modal => {
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal || e.target.classList.contains("modal-outer")) {
-            modal.classList.add("hidden");
-        }
-    });
-});
-$$('button[id^="close"]').forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        e.target.closest('.modal-backdrop').classList.add("hidden");
-    });
-});
-
-$("#addCartBtn").onclick=()=>{
-  CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
-  localStorage.setItem('CART', JSON.stringify(CART)); updateCartStatus(); 
-  $("#detailModal").classList.add("hidden"); alert("장바구니에 담겼습니다.");
-};
-
-$("#copyExcelBtn").onclick = () => {
-  const header = "품명\t품번\t사이즈\t개수\n";
-  const rows = CART.map(c => `${c.품명}\t${c.품번}\t${c.사이즈}\t${c.수량}`).join("\n");
-  copyText(header + rows, $("#copyExcelBtn"));
-};
-$("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
-$("#cartBtn").onclick = openCartModal;
-
-$$('button.chip[data-cat], button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.addEventListener("click",()=>{ 
-    if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
-    else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
-    visibleCount=60; render(); 
-}));
-
-// 🔥 5. 전체 초기화 완벽 구현 (브랜드 포함) 🔥
-$("#resetAll").onclick=()=>{ 
-    $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); 
-    $$('button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.dataset.active="0"); 
-    $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
-    $("#sortSel").value="default";
-    $("#q").value=""; visibleCount=60; render(); 
-};
-
-$("#sortSel").onchange=()=> { visibleCount=60; render(); };
-
-let qTimer;
-$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
-$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
-$("#refreshBtn").onclick=()=>loadData(true);
-
-$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
-$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
-
-$("#file").onchange = async (e) => { 
-    const f = e.target.files[0]; if(!f) return;
-    localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
-        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
-        const meta = { fileName:f.name };
-        try { 
-            await commitInventoryToGitHub(rows, meta); 
-            RAW = rows; CURRENT_META = meta; 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, _timestamp: Date.now()})); 
-            applyMeta(CURRENT_META);
-            rebuildIndex(); render();
-            $("#adminModal").classList.add("hidden");
-            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
-        } catch(err) { alert("업로드 실패! 깃허브 권한을 확인하세요."); }
-        $("#file").value = ""; 
-    };
-    reader.readAsArrayBuffer(f);
-};
-
-// 어드민 뒤로가기 연동
-$("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
-$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
-$("#drop").onclick=()=>$("#file").click(); 
-$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
-
-$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
-$("#ghSave").onclick=()=>{
-    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
-    saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
-};
-
-loadGhConfig(); loadData();
+      $("#detail
