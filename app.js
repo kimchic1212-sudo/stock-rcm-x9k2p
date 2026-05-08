@@ -357,4 +357,147 @@ function openDetail(p){
           </div>
           <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
       `;
-      $("#detail
+      $("#detailBody").appendChild(adminImgBox);
+
+      adminImgBox.querySelector("#quickImgSave").onclick = async () => {
+          const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
+          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
+          try {
+              IMAGES[p.shopNo] = url; 
+              
+              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
+              let sha = null;
+              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
+              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
+              if(sha) body.sha = sha;
+              const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+              if(!r2.ok) throw new Error("API 에러");
+
+              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!";
+              render(); 
+              setTimeout(()=>{openDetail(p);}, 500);
+          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
+      };
+  }
+
+  // 직원 메모 기능 
+  $("#addMemoBtn").onclick = async () => {
+      const staff = $("#memoStaff").value; 
+      const tag = $("#memoTag").value;
+      const text = $("#memoText").value.trim();
+      const msg = $("#memoMsg");
+      
+      if(!staff) { msg.style.color="red"; msg.textContent="직원 이름을 선택해주세요."; return; }
+      if(!text) { msg.style.color="red"; msg.textContent="내용을 입력하세요."; return; }
+      msg.style.color="black"; msg.textContent="메모 저장 중...";
+
+      try {
+          const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
+          let sha = null; let oldData = [];
+          try { 
+              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+              if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
+          }catch(e){}
+          
+          oldData.push({ date: new Date().toLocaleString(), product: p.품명, shopNo: p.shopNo, staff, tag, text });
+          const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
+          if(sha) body.sha = sha;
+          
+          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+          if(!r2.ok) throw new Error("API 에러");
+          
+          MEMOS = oldData; // 즉시 반영
+          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다. (18시 보고 예정)";
+          $("#memoText").value = "";
+          render(); // 뱃지 즉시 추가
+      } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
+  };
+
+  $("#detailModal").classList.remove("hidden");
+}
+
+$$('.modal-backdrop').forEach(modal => {
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.classList.contains("modal-outer")) {
+            modal.classList.add("hidden");
+        }
+    });
+});
+$$('button[id^="close"]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.target.closest('.modal-backdrop').classList.add("hidden");
+    });
+});
+
+$("#addCartBtn").onclick=()=>{
+  CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
+  localStorage.setItem('CART', JSON.stringify(CART)); updateCartStatus(); 
+  $("#detailModal").classList.add("hidden"); alert("장바구니에 담겼습니다.");
+};
+
+$("#copyExcelBtn").onclick = () => {
+  const header = "품명\t품번\t사이즈\t개수\n";
+  const rows = CART.map(c => `${c.품명}\t${c.품번}\t${c.사이즈}\t${c.수량}`).join("\n");
+  copyText(header + rows, $("#copyExcelBtn"));
+};
+$("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
+$("#cartBtn").onclick = openCartModal;
+
+$$('button.chip[data-cat], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.addEventListener("click",()=>{ 
+    if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
+    else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
+    visibleCount=60; render(); 
+}));
+
+$("#resetAll").onclick=()=>{ 
+    $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); 
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0"); 
+    $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
+    $("#sortSel").value="default";
+    $("#q").value=""; visibleCount=60; render(); 
+};
+
+$("#sortSel").onchange=()=> { visibleCount=60; render(); };
+
+let qTimer;
+$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
+$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
+$("#refreshBtn").onclick=()=>loadData(true);
+
+$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
+$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
+
+$("#file").onchange = async (e) => { 
+    const f = e.target.files[0]; if(!f) return;
+    localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+        const meta = { fileName:f.name };
+        try { 
+            await commitInventoryToGitHub(rows, meta); 
+            RAW = rows; CURRENT_META = meta; 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, _timestamp: Date.now()})); 
+            applyMeta(CURRENT_META);
+            rebuildIndex(); render();
+            $("#adminModal").classList.add("hidden");
+            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+        } catch(err) { alert("업로드 실패! 깃허브 권한을 확인하세요."); }
+        $("#file").value = ""; 
+    };
+    reader.readAsArrayBuffer(f);
+};
+
+$("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
+$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
+$("#drop").onclick=()=>$("#file").click(); 
+$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
+
+$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#ghSave").onclick=()=>{
+    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
+    saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
+};
+
+loadGhConfig(); loadData();
