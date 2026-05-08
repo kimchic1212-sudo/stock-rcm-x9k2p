@@ -14,94 +14,42 @@
     --ink:#0A0A0A; --ink-2:#3D3D3D; --muted:#8A8A8A;
     --line:#E8E3D5;
     --accent:#FF4D1F; --green:#10B981; --warn:#F59E0B;
-    
-    /* 사이즈 박스 통합 변수 (Basic) */
     --cell-bg: #FFFFFF; --cell-border: #E0E0E0; --cell-text: #333333; --cell-sz: #666666;
-    /* 품절 (Zero) */
     --cell-zero-bg: #F5F5F5; --cell-zero-border: #EEEEEE; --cell-zero-text: #BDBDBD;
-    /* 소량/라스트 (Low) */
     --cell-low-bg: #FFEBEE; --cell-low-border: #FFCDD2; --cell-low-text: #D32F2F;
   }
   :root.dark-mode {
-    --bg: #121212; --surface: #1E1E1E;
-    --ink: #F3F4F6; --ink-2: #9CA3AF; --muted: #6B7280;
-    --line: #374151;
-    
+    --bg: #121212; --surface: #1E1E1E; --ink: #F3F4F6; --ink-2: #9CA3AF; --muted: #6B7280; --line: #374151;
     --cell-bg: #1E1E1E; --cell-border: #374151; --cell-text: #F3F4F6; --cell-sz: #9CA3AF;
     --cell-zero-bg: #121212; --cell-zero-border: #1F2937; --cell-zero-text: #4B5563;
     --cell-low-bg: #451a1e; --cell-low-border: #7f1d1d; --cell-low-text: #fca5a5;
   }
-  
   *{ -webkit-tap-highlight-color: transparent; }
   html,body{ background:var(--bg); color:var(--ink); transition: background 0.2s, color 0.2s; }
   body{ font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif; }
   .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-feature-settings:"tnum","zero"; letter-spacing:-.005em; }
-  .tnum{ font-variant-numeric:tabular-nums; }
-  
-  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 0 rgba(10,10,10,.02); }
-  .card-hover{ transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease; }
-  .card-hover:hover{ transform:translateY(-1px); border-color:#0A0A0A; }
-  
-  .hairline{ border:1px solid var(--line); border-radius:10px; }
-  .ipt{ border:1px solid var(--line); background:var(--surface); padding:.6rem .8rem; border-radius:10px; font-weight:600; color:var(--ink); }
-  .brutal{ border:2px solid var(--ink); border-radius:10px; box-shadow:3px 3px 0 0 var(--ink); transition:transform .06s ease; }
-  
-  .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); font-weight:600; font-size:.82rem; cursor:pointer; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; }
+  .card-hover:hover{ border-color:#0A0A0A; }
+  .ipt{ border:1px solid var(--line); background:var(--surface); padding:.6rem .8rem; border-radius:10px; color:var(--ink); }
+  .brutal{ border:2px solid var(--ink); border-radius:10px; box-shadow:3px 3px 0 0 var(--ink); }
+  .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--surface); font-weight:600; font-size:.82rem; cursor:pointer; }
   .chip[data-active="1"]{ background:var(--ink); color:#fff; border-color:var(--ink); }
-  
-  /* UX 개편: 텍스트 복사 버튼 장식 제거 */
   .copyable { cursor: pointer; transition: opacity 0.1s; }
-  .copyable:active { opacity: 0.5; }
-  .copyable.copied { color: var(--green) !important; }
-
-  /* UX 개편: 사이즈 그리드 반응형 (44x44 터치 보장) */
-  .size-cell {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-width: 44px; min-height: 44px; padding: 4px; border-radius: 8px;
-    background: var(--cell-bg); border: 1px solid var(--cell-border); color: var(--cell-text);
-    transition: all 0.1s;
-  }
-  .size-cell .sz { font-size: 0.75rem; font-weight: 600; color: var(--cell-sz); line-height: 1.1; }
-  .size-cell .qty { font-size: 1.05rem; font-weight: 800; line-height: 1.1; margin-top: 2px; }
-  
+  .size-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 8px; background: var(--cell-bg); border: 1px solid var(--cell-border); color: var(--cell-text); }
+  .size-cell .sz { font-size: 0.75rem; font-weight: 600; color: var(--cell-sz); }
+  .size-cell .qty { font-size: 1.05rem; font-weight: 800; }
   .size-cell.zero { background: var(--cell-zero-bg); border-color: var(--cell-zero-border); }
-  .size-cell.zero .sz, .size-cell.zero .qty { color: var(--cell-zero-text); text-decoration: line-through; }
-  
+  .size-cell.zero span { color: var(--cell-zero-text); text-decoration: line-through; }
   .size-cell.low { background: var(--cell-low-bg); border-color: var(--cell-low-border); color: var(--cell-low-text); }
-  .size-cell.low .sz, .size-cell.low .qty { color: var(--cell-low-text); }
-
-  .fav-btn { cursor:pointer; color:var(--warn); transition:transform 0.1s; }
-  .fav-btn:active { transform:scale(1.2); }
+  .fav-btn { cursor:pointer; color:var(--warn); }
   .modal-backdrop{ background:rgba(10,10,10,.55); backdrop-filter:blur(2px); }
-
-  /* 쇼룸 모드 (고객 대면) */
-  body.showroom-mode .delta-badge,
-  body.showroom-mode .urgent-badge,
-  body.showroom-mode .loc-text { display: none !important; }
   body.showroom-mode .real-qty { display: none !important; }
   body.showroom-mode .showroom-qty { display: inline !important; }
-  body.showroom-mode .detail-grid table td:nth-child(3),
-  body.showroom-mode .detail-grid table td:nth-child(4),
-  body.showroom-mode .detail-grid table th:nth-child(3),
-  body.showroom-mode .detail-grid table th:nth-child(4) { display: none !important; }
 </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen pb-20">
 
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg"><symbol id="rcm-logo" viewBox="0 0 649 250"><path d="M 112.640625 108.160156 C 112.640625 102.378906 107.171875 101.089844 100.03125 101.089844 L 90.070312 101.089844 L 90.070312 115.230469 L 100.03125 115.230469 C 107.179688 115.230469 112.640625 114.019531 112.640625 108.160156 "/><path d="M 158.878906 128.089844 L 175.359375 128.089844 L 167.160156 104.261719 Z M 158.878906 128.089844 "/><path d="M 564.710938 101.601562 L 564.710938 151.210938 L 549.558594 151.210938 L 549.558594 101.601562 L 529.128906 101.601562 L 529.128906 88.671875 L 585.25 88.671875 L 585.25 101.601562 Z M 523.859375 151.210938 L 505.539062 151.210938 L 479.921875 108.050781 L 479.921875 151.210938 L 465.390625 151.210938 L 465.390625 88.628906 L 483.710938 88.628906 L 509.328125 131.789062 L 509.328125 88.628906 L 523.859375 88.628906 Z M 456.800781 101.601562 L 422.898438 101.601562 L 422.898438 112.582031 L 454.96875 112.582031 L 454.96875 125.628906 L 422.898438 125.628906 L 422.898438 138.25 L 456.800781 138.25 L 456.800781 151.300781 L 407.820312 151.300781 L 407.820312 88.640625 L 456.800781 88.640625 L 456.800781 101.609375 Z M 397.160156 151.210938 L 382.550781 151.210938 L 382.550781 101.089844 L 368.289062 151.25 L 354.109375 151.25 L 339.738281 101.171875 L 339.738281 151.25 L 325.128906 151.25 L 325.128906 88.628906 L 348.921875 88.628906 L 361.179688 133.511719 L 373.679688 88.628906 L 397.191406 88.628906 L 397.191406 151.210938 L 397.148438 151.210938 Z M 316.550781 101.601562 L 282.648438 101.601562 L 282.648438 112.582031 L 314.71875 112.582031 L 314.71875 125.628906 L 282.648438 125.628906 L 282.648438 138.25 L 316.550781 138.25 L 316.550781 151.300781 L 267.570312 151.300781 L 267.570312 88.640625 L 316.550781 88.640625 L 316.550781 101.609375 Z M 230.511719 152.339844 C 210.589844 152.339844 198.519531 139.921875 198.519531 119.878906 C 198.519531 99.839844 211.019531 87.609375 230.941406 87.609375 C 246.988281 87.609375 258.238281 97.808594 260.46875 112.019531 L 245.671875 112.019531 C 243.988281 103.46875 237.578125 99.75 230.441406 99.75 C 221.460938 99.75 214.511719 107.089844 214.511719 119.871094 C 214.511719 132.648438 221.460938 140.140625 230.640625 140.140625 C 237.160156 140.140625 244.390625 137.371094 246.148438 127.871094 L 260.949219 127.871094 C 258.609375 142.398438 246.648438 152.320312 230.519531 152.320312 L 230.519531 152.339844 Z M 183.289062 151.210938 L 179.421875 140.082031 L 154.738281 140.082031 L 150.949219 151.210938 L 134.898438 151.210938 L 158.960938 88.628906 L 175.519531 88.628906 L 199.660156 151.210938 Z M 512.609375 0 L 100.71875 88.671875 C 116.730469 88.832031 128.570312 92.808594 128.570312 108.011719 C 128.570312 117.230469 123.378906 122.5 116.070312 125.269531 L 131.851562 151.25 L 114.121094 151.25 L 100.289062 127.691406 L 90.058594 127.691406 L 90.058594 151.25 L 74.980469 151.25 L 74.980469 94.21875 L 0 110.351562 L 135.679688 250 L 648.289062 139.648438 Z M 512.609375 0 "/></symbol></svg>
-
-<div id="viewerGate" class="hidden fixed inset-0 z-60 bg-[color:var(--bg)] flex items-center justify-center p-4">
-  <div class="w-full max-w-sm bg-[color:var(--surface)] border-2 border-[color:var(--ink)] rounded-2xl p-6 text-center shadow-[6px_6px_0_0_var(--ink)]">
-    <svg class="h-16 mx-auto mb-3" viewBox="0 0 649 250" fill="currentColor"><use href="#rcm-logo"/></svg>
-    <div class="mono text-[10px] tracking-[.18em] text-[color:var(--muted)]">HAEUNDAE · INVENTORY</div>
-    <h2 class="text-lg font-extrabold mt-1">직원 로그인</h2>
-    <div class="mt-4 flex gap-2">
-      <input id="viewerPwdInput" type="password" class="ipt w-full mono text-base" placeholder="비밀번호" />
-      <button id="viewerPwdGo" class="brutal mono font-black px-4 bg-[color:var(--ink)] text-white">열기</button>
-    </div>
-    <div id="viewerPwdMsg" class="mt-2 mono text-xs text-[color:var(--accent)]"></div>
-  </div>
-</div>
 
 <header class="sticky top-0 z-30 no-print" style="background:var(--bg); border-bottom:1px solid var(--line);">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
@@ -113,131 +61,91 @@
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <button id="copyCartBtn" class="chip mono text-[11px] hidden" style="background:var(--accent); color:#fff; border:none;"><i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> 리스트 복사</button>
-      <button id="showroomBtn" class="chip mono text-[11px]" title="고객 대면용 쇼룸 모드"><i data-lucide="eye" class="w-3.5 h-3.5"></i>쇼룸</button>
-      <button id="darkModeBtn" class="chip mono text-[11px]" title="다크모드 토글">🌙</button>
-      <span id="syncStatus" data-kind="loading" class="hidden md:inline-flex chip mono text-[11px]">동기화 대기</span>
-      <button id="refreshBtn" class="chip mono text-xs" title="새로고침"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
-      <button id="adminBtn" class="brutal mono font-black px-3 py-2 text-sm bg-[color:var(--surface)]"><i data-lucide="lock" class="w-4 h-4 inline-block -mt-0.5"></i> ADMIN</button>
+      <button id="cartBtn" class="chip mono text-[11px] hidden" style="background:var(--accent); color:#fff; border:none;"><i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> 요청함 (<span id="cartCount">0</span>)</button>
+      <button id="showroomBtn" class="chip mono text-[11px]"><i data-lucide="eye" class="w-3.5 h-3.5"></i>쇼룸</button>
+      <button id="darkModeBtn" class="chip mono text-[11px]">🌙</button>
+      <button id="refreshBtn" class="chip mono text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
+      <button id="adminBtn" class="brutal mono font-black px-3 py-2 text-sm bg-[color:var(--surface)]">ADMIN</button>
     </div>
   </div>
 </header>
 
 <section class="mx-auto max-w-7xl px-4 sm:px-6 mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
-  <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">TOTAL ITEMS</div><div id="statItems" class="mt-1 text-2xl font-black tnum">0</div></div>
-  <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">BUSAN STOCK</div><div id="statBusan" class="mt-1 text-2xl font-black tnum text-[color:var(--accent)]">0</div></div>
-  <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">CATEGORY</div>
-    <div class="mt-1 text-sm font-bold flex flex-wrap gap-1.5"><span class="badge" style="background:#000;color:#fff;">신발</span><span class="badge" style="background:#000;color:#fff;">의류</span><span class="badge" style="background:#000;color:#fff;">용품</span></div>
-  </div>
-  <div class="card p-3 min-w-0"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">DATA SOURCE</div><div id="statSrc" class="mt-1 text-sm font-bold truncate">—</div></div>
+  <div class="card p-3"><div class="mono text-[10px] text-[color:var(--muted)]">TOTAL ITEMS</div><div id="statItems" class="mt-1 text-2xl font-black">0</div></div>
+  <div class="card p-3"><div class="mono text-[10px] text-[color:var(--muted)]">BUSAN STOCK</div><div id="statBusan" class="mt-1 text-2xl font-black text-[color:var(--accent)]">0</div></div>
+  <div class="card p-3 min-w-0"><div class="mono text-[10px] text-[color:var(--muted)]">DATA SOURCE</div><div id="statSrc" class="mt-1 text-sm font-bold truncate">—</div></div>
 </section>
 
 <section class="mx-auto max-w-7xl px-4 sm:px-6 mt-4">
   <div class="card p-3 sm:p-4">
-    <div class="relative">
-      <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[color:var(--muted)]"></i>
-      <input id="q" type="search" autocomplete="off" placeholder="검색어 입력" class="ipt w-full pl-11 pr-12 py-3 text-base font-bold" />
-      <button id="clearQ" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[color:var(--muted)]"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <input id="q" type="search" placeholder="품명, 품번 검색 (초성 지원)" class="ipt w-full font-bold" />
+    <div id="recentSearches" class="hidden flex gap-1.5 mt-2 overflow-x-auto"></div>
+    <div id="filterDetails" class="mt-3 flex flex-wrap gap-2">
+      <button class="chip" data-cat="ALL" data-active="1">전체</button>
+      <button class="chip" data-cat="신발">신발</button>
+      <button class="chip" data-cat="의류">의류</button>
+      <button class="chip" data-fav="1">★ 즐겨찾기</button>
+      <button class="chip" data-stock="1">재고있음</button>
+      <button id="resetAll" class="chip" style="color:var(--accent);">초기화</button>
+      <div id="brandChips" class="flex flex-wrap gap-1.5"><button class="chip" data-brand="ALL" data-active="1">브랜드 전체</button></div>
     </div>
-    
-    <div id="recentSearches" class="hidden flex gap-1.5 mt-2 overflow-x-auto pb-1 items-center"></div>
-
-    <div id="filterDetails" class="mt-3 grid gap-3" style="grid-template-columns:1fr;">
-      <div class="flex items-start gap-2 flex-wrap">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0 mt-1.5 w-12">카테고리</span>
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <button class="chip" data-cat="ALL" data-active="1">전체</button>
-          <button class="chip" data-cat="신발">신발</button>
-          <button class="chip" data-cat="의류">의류</button>
-          <button class="chip" data-cat="용품">용품</button>
-        </div>
-      </div>
-      <div class="flex items-start gap-2 flex-wrap">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0 mt-1.5 w-12">성별</span>
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <button class="chip" data-gender="ALL" data-active="1">전체</button>
-          <button class="chip" data-gender="M">남성</button>
-          <button class="chip" data-gender="W">여성</button>
-          <button class="chip" data-gender="U">공용</button>
-        </div>
-      </div>
-      <div class="flex items-start gap-2 flex-wrap">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0 mt-1.5 w-12">필터</span>
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <button class="chip" data-fav="1">★ 즐겨찾기</button>
-          <button class="chip" data-stock="1">재고있음</button>
-          <button class="chip" data-other="1">타지점 가능</button>
-          <button class="chip" data-last="1">라스트피스</button>
-          <button id="resetAll" class="chip" style="color:var(--accent); border-color:var(--accent)">전체 초기화</button>
-        </div>
-      </div>
-      <div class="flex items-start gap-2 flex-wrap">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0 mt-1.5 w-12">브랜드</span>
-        <div id="brandChips" class="flex flex-wrap items-center gap-1.5 py-0.5 min-w-0 flex-1">
-          <button class="chip" data-brand="ALL" data-active="1">전체</button>
-        </div>
-      </div>
-    </div>
-    <div id="filterSummary" class="mt-3 mono text-[12px] text-[color:var(--ink-2)]"></div>
   </div>
 </section>
 
-<main class="mx-auto max-w-7xl px-4 sm:px-6 mt-4 mb-6">
-  <div id="emptyState" class="card p-8 sm:p-12 text-center">
-    <h2 class="text-xl sm:text-2xl font-extrabold">데이터 없음</h2>
-    <p class="mt-2 text-sm text-[color:var(--ink-2)]">관리자 업로드가 필요합니다.</p>
-  </div>
-  <div id="results" class="hidden">
-    <div id="grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
-    <div id="moreWrap" class="mt-5 flex justify-center"><button id="moreBtn" class="brutal mono font-black px-4 py-2.5 text-sm hidden bg-[color:var(--surface)]">더 보기 (+60)</button></div>
-    <div id="noMatch" class="hidden card p-8 text-center text-xl font-black">NO MATCH</div>
-  </div>
+<main id="results" class="mx-auto max-w-7xl px-4 sm:px-6 mt-4 mb-6">
+  <div id="grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+  <div id="emptyState" class="card p-12 text-center hidden">데이터가 없습니다.</div>
 </main>
 
 <div id="detailModal" class="hidden fixed inset-0 z-40 modal-backdrop no-print">
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
-    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[90vh] overflow-auto relative bg-[color:var(--surface)]">
-      <div class="flex items-start justify-between gap-3 mb-2">
-        <div id="detailHead" class="min-w-0 w-full"></div>
-        <button id="closeDetail" class="hairline absolute top-4 right-4 px-2 py-1.5 bg-[color:var(--surface)] z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div id="detailBody" class="mt-2"></div>
-      
-      <div id="cartUI" class="mt-4 p-3 rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)]">
-        <div class="text-xs font-bold text-[color:var(--muted)] mb-2">🛒 타지점/물류 이동 요청 (장바구니 담기)</div>
-        <div class="flex gap-2 items-center">
-            <select id="cartSize" class="ipt py-1.5 text-sm flex-1"></select>
-            <input type="number" id="cartQty" class="ipt w-16 py-1.5 text-center" value="1" min="1">
-            <button id="addCartBtn" class="brutal px-3 py-1.5 text-sm font-black bg-[color:var(--ink)] text-white">담기</button>
+    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[90vh] overflow-auto relative">
+      <button id="closeDetail" class="absolute top-4 right-4 p-2"><i data-lucide="x"></i></button>
+      <div id="detailHead"></div>
+      <div id="detailBody"></div>
+      <div id="cartUI" class="mt-4 p-3 rounded-lg border bg-[color:var(--bg)]">
+        <div class="text-xs font-bold mb-2">🛒 타지점 이동 요청 담기</div>
+        <div class="flex gap-2">
+          <select id="cartSize" class="ipt flex-1 text-sm"></select>
+          <input type="number" id="cartQty" class="ipt w-16 text-center" value="1" min="1">
+          <button id="addCartBtn" class="brutal px-4 bg-black text-white font-black">담기</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<div id="cartModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
+    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[80vh] flex flex-col relative">
+      <button id="closeCart" class="absolute top-4 right-4 p-2"><i data-lucide="x"></i></button>
+      <h3 class="text-xl font-black mb-4">🛒 이동 요청 목록</h3>
+      <div id="cartList" class="flex-1 overflow-y-auto border-y py-2 mb-4"></div>
+      <div class="flex gap-2">
+        <button id="clearCart" class="chip" style="color:var(--accent);">전체 삭제</button>
+        <button id="copyExcelBtn" class="brutal flex-1 py-3 bg-green-600 text-white font-black">엑셀용 리스트 복사</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="adminModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
-  <div class="modal-outer absolute inset-0 grid place-items-center p-3">
-    <div class="card w-full max-w-lg p-5 sm:p-6 max-h-[90vh] overflow-auto">
-      <div class="flex justify-between mb-4"><h3 class="text-xl font-extrabold">ADMIN</h3><button id="closeAdmin"><i data-lucide="x"></i></button></div>
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
+    <div class="card w-full max-w-lg p-6">
       <div id="authPanel">
-        <input id="pwd" type="password" class="ipt w-full mono text-lg mb-2" placeholder="비밀번호" />
-        <button id="pwdGo" class="brutal w-full py-2 bg-[color:var(--ink)] text-white font-black">UNLOCK</button>
-        <div id="pwdMsg" class="mt-2 text-xs text-[color:var(--accent)]"></div>
+        <input id="pwd" type="password" class="ipt w-full mb-2" placeholder="비밀번호" />
+        <button id="pwdGo" class="brutal w-full py-2 bg-black text-white font-black">UNLOCK</button>
       </div>
       <div id="uploadPanel" class="hidden">
-        <button id="openSettings" class="hairline px-3 py-1 mb-3 text-xs">설정 변경</button>
-        <div id="drop" class="hairline p-8 text-center cursor-pointer bg-[color:var(--bg)] border-dashed border-2">
-          <div class="font-extrabold">엑셀 파일 클릭 또는 드래그</div>
-          <input id="file" type="file" class="hidden" accept=".xlsx,.xls,.csv" />
-        </div>
-        <div id="parseMsg" class="mt-3 text-sm font-bold"></div>
+        <button id="openSettings" class="text-xs mb-3 border px-2 py-1">설정 변경</button>
+        <div id="drop" class="border-2 border-dashed p-10 text-center cursor-pointer bg-gray-50">엑셀 파일 클릭/드래그</div>
+        <input id="file" type="file" class="hidden" accept=".xlsx,.xls,.csv" />
       </div>
       <div id="settingsPanel" class="hidden">
         <input id="ghOwner" class="ipt w-full mb-2" placeholder="GitHub 사용자명" />
         <input id="ghRepo" class="ipt w-full mb-2" placeholder="저장소 이름" />
-        <input id="ghBranch" class="ipt w-full mb-2" value="main" />
         <input id="ghPat" type="password" class="ipt w-full mb-4" placeholder="PAT 토큰" />
-        <button id="ghSave" class="brutal w-full py-2 bg-[color:var(--ink)] text-white font-black">저장</button>
+        <button id="ghSave" class="brutal w-full py-2 bg-black text-white font-black">저장</button>
       </div>
     </div>
   </div>
