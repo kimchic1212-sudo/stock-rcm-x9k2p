@@ -13,59 +13,73 @@
     --bg:#FAF8F2; --surface:#FFFFFF;
     --ink:#0A0A0A; --ink-2:#3D3D3D; --muted:#8A8A8A;
     --line:#E8E3D5;
-    --men:#1D4ED8; --women:#DB2777; --uni:#525252; --kids:#0EA5A4;
-    --accent:#FF4D1F; --green:#10B981; --green-soft:#ECFDF5;
-    --warn:#F59E0B; --warn-soft:#FEF3C7;
-    --last:#E11D48; --last-soft:#FFE4E6;
-    --barcode:#7C3AED; --barcode-soft:#F3E8FF;
+    --accent:#FF4D1F; --green:#10B981; --warn:#F59E0B;
+    
+    /* 사이즈 박스 통합 변수 (Basic) */
+    --cell-bg: #FFFFFF; --cell-border: #E0E0E0; --cell-text: #333333; --cell-sz: #666666;
+    /* 품절 (Zero) */
+    --cell-zero-bg: #F5F5F5; --cell-zero-border: #EEEEEE; --cell-zero-text: #BDBDBD;
+    /* 소량/라스트 (Low) */
+    --cell-low-bg: #FFEBEE; --cell-low-border: #FFCDD2; --cell-low-text: #D32F2F;
   }
-  /* 다크모드 색상 */
   :root.dark-mode {
     --bg: #121212; --surface: #1E1E1E;
     --ink: #F3F4F6; --ink-2: #9CA3AF; --muted: #6B7280;
     --line: #374151;
-    --green-soft: #064E3B; --warn-soft: #78350F; --last-soft: #831843; --barcode-soft: #4C1D95;
+    
+    --cell-bg: #1E1E1E; --cell-border: #374151; --cell-text: #F3F4F6; --cell-sz: #9CA3AF;
+    --cell-zero-bg: #121212; --cell-zero-border: #1F2937; --cell-zero-text: #4B5563;
+    --cell-low-bg: #451a1e; --cell-low-border: #7f1d1d; --cell-low-text: #fca5a5;
   }
+  
   *{ -webkit-tap-highlight-color: transparent; }
   html,body{ background:var(--bg); color:var(--ink); transition: background 0.2s, color 0.2s; }
   body{ font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif; }
   .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-feature-settings:"tnum","zero"; letter-spacing:-.005em; }
   .tnum{ font-variant-numeric:tabular-nums; }
+  
   .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:0 1px 0 rgba(10,10,10,.02); }
   .card-hover{ transition:transform .08s ease,box-shadow .12s ease,border-color .12s ease; }
   .card-hover:hover{ transform:translateY(-1px); border-color:#0A0A0A; }
+  
   .hairline{ border:1px solid var(--line); border-radius:10px; }
   .ipt{ border:1px solid var(--line); background:var(--surface); padding:.6rem .8rem; border-radius:10px; font-weight:600; color:var(--ink); }
   .brutal{ border:2px solid var(--ink); border-radius:10px; box-shadow:3px 3px 0 0 var(--ink); transition:transform .06s ease; }
+  
   .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); font-weight:600; font-size:.82rem; cursor:pointer; }
   .chip[data-active="1"]{ background:var(--ink); color:#fff; border-color:var(--ink); }
-  .badge{ display:inline-flex; align-items:center; gap:.3rem; padding:.18rem .5rem; border-radius:6px; font-size:.72rem; font-weight:700; border:1px solid transparent; }
-  .badge-men{ background:#EFF4FF; color:var(--men); border-color:#DBE6FF; }
-  .badge-women{ background:#FCE7F3; color:var(--women); border-color:#FBCFE8; }
-  .badge-uni{ background:#F4F4F4; color:var(--uni); border-color:#E5E5E5; }
-  .badge-cat{ background:#0A0A0A; color:#fff; }
-  .badge-brand{ background:#FAF6EB; color:#3D3D3D; border-color:var(--line); }
-  .size-cell{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:10px; padding:.5rem .35rem; min-height:54px; border:1px solid var(--line); }
-  .size-cell .sz{ font-size:.7rem; font-weight:700; color:var(--muted); }
-  .size-cell .qty{ font-size:1.15rem; font-weight:800; color:var(--ink); }
-  .size-cell.zero{ opacity:0.4; }
-  .size-cell.last{ background:var(--last-soft); border-color:#FDA4AF; } .size-cell.last .qty{ color:var(--last); }
-  .loc{ margin-top:auto; display:flex; align-items:center; gap:.55rem; padding:.5rem .7rem; border-radius:10px; border:1px solid var(--line); font-size:.78rem; flex-wrap:wrap; }
-  .loc-item{ display:inline-flex; align-items:center; gap:.3rem; font-weight:600; color:var(--ink-2); }
-  .loc-item .dot{ width:.4rem; height:.4rem; border-radius:99px; background:var(--muted); }
-  .loc-item.has .dot{ background:var(--green); }
-  .modal-backdrop{ background:rgba(10,10,10,.55); backdrop-filter:blur(2px); }
-  .copyable{ display:inline-flex; align-items:center; gap:.25rem; font-size:.95rem; font-weight:800; padding:.3rem .6rem; border:1.5px solid var(--line); border-radius:8px; background:var(--surface); cursor:pointer; }
-  .fav-btn { font-size:1.2rem; cursor:pointer; color:var(--warn); transition:transform 0.1s; }
-  .fav-btn:active { transform:scale(1.2); }
+  
+  /* UX 개편: 텍스트 복사 버튼 장식 제거 */
+  .copyable { cursor: pointer; transition: opacity 0.1s; }
+  .copyable:active { opacity: 0.5; }
+  .copyable.copied { color: var(--green) !important; }
 
-  /* 쇼룸 모드 활성화 시 내부 정보 숨김 */
-  body.showroom-mode .loc,
-  body.showroom-mode .callout,
-  body.showroom-mode .badge-barcode,
+  /* UX 개편: 사이즈 그리드 반응형 (44x44 터치 보장) */
+  .size-cell {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-width: 44px; min-height: 44px; padding: 4px; border-radius: 8px;
+    background: var(--cell-bg); border: 1px solid var(--cell-border); color: var(--cell-text);
+    transition: all 0.1s;
+  }
+  .size-cell .sz { font-size: 0.75rem; font-weight: 600; color: var(--cell-sz); line-height: 1.1; }
+  .size-cell .qty { font-size: 1.05rem; font-weight: 800; line-height: 1.1; margin-top: 2px; }
+  
+  .size-cell.zero { background: var(--cell-zero-bg); border-color: var(--cell-zero-border); }
+  .size-cell.zero .sz, .size-cell.zero .qty { color: var(--cell-zero-text); text-decoration: line-through; }
+  
+  .size-cell.low { background: var(--cell-low-bg); border-color: var(--cell-low-border); color: var(--cell-low-text); }
+  .size-cell.low .sz, .size-cell.low .qty { color: var(--cell-low-text); }
+
+  .fav-btn { cursor:pointer; color:var(--warn); transition:transform 0.1s; }
+  .fav-btn:active { transform:scale(1.2); }
+  .modal-backdrop{ background:rgba(10,10,10,.55); backdrop-filter:blur(2px); }
+
+  /* 쇼룸 모드 (고객 대면) */
   body.showroom-mode .delta-badge,
   body.showroom-mode .urgent-badge,
-  body.showroom-mode #statBusan { display: none !important; }
+  body.showroom-mode .loc-text { display: none !important; }
+  body.showroom-mode .real-qty { display: none !important; }
+  body.showroom-mode .showroom-qty { display: inline !important; }
   body.showroom-mode .detail-grid table td:nth-child(3),
   body.showroom-mode .detail-grid table td:nth-child(4),
   body.showroom-mode .detail-grid table th:nth-child(3),
@@ -113,7 +127,7 @@
   <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">TOTAL ITEMS</div><div id="statItems" class="mt-1 text-2xl font-black tnum">0</div></div>
   <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">BUSAN STOCK</div><div id="statBusan" class="mt-1 text-2xl font-black tnum text-[color:var(--accent)]">0</div></div>
   <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">CATEGORY</div>
-    <div class="mt-1 text-sm font-bold flex flex-wrap gap-1.5"><span class="badge badge-cat">신발</span><span class="badge badge-cat">의류</span><span class="badge badge-cat">용품</span></div>
+    <div class="mt-1 text-sm font-bold flex flex-wrap gap-1.5"><span class="badge" style="background:#000;color:#fff;">신발</span><span class="badge" style="background:#000;color:#fff;">의류</span><span class="badge" style="background:#000;color:#fff;">용품</span></div>
   </div>
   <div class="card p-3 min-w-0"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)]">DATA SOURCE</div><div id="statSrc" class="mt-1 text-sm font-bold truncate">—</div></div>
 </section>
@@ -125,6 +139,9 @@
       <input id="q" type="search" autocomplete="off" placeholder="검색어 입력" class="ipt w-full pl-11 pr-12 py-3 text-base font-bold" />
       <button id="clearQ" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[color:var(--muted)]"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
+    
+    <div id="recentSearches" class="hidden flex gap-1.5 mt-2 overflow-x-auto pb-1 items-center"></div>
+
     <div id="filterDetails" class="mt-3 grid gap-3" style="grid-template-columns:1fr;">
       <div class="flex items-start gap-2 flex-wrap">
         <span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0 mt-1.5 w-12">카테고리</span>
@@ -178,13 +195,13 @@
 </main>
 
 <div id="detailModal" class="hidden fixed inset-0 z-40 modal-backdrop no-print">
-  <div class="modal-outer absolute inset-0 grid place-items-center p-3">
-    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[90vh] overflow-auto">
-      <div class="flex items-start justify-between gap-3">
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
+    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[90vh] overflow-auto relative bg-[color:var(--surface)]">
+      <div class="flex items-start justify-between gap-3 mb-2">
         <div id="detailHead" class="min-w-0 w-full"></div>
-        <button id="closeDetail" class="hairline px-2 py-1.5 hover:bg-[color:var(--bg)]"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button id="closeDetail" class="hairline absolute top-4 right-4 px-2 py-1.5 bg-[color:var(--surface)] z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
-      <div id="detailBody" class="mt-4"></div>
+      <div id="detailBody" class="mt-2"></div>
       
       <div id="cartUI" class="mt-4 p-3 rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)]">
         <div class="text-xs font-bold text-[color:var(--muted)] mb-2">🛒 타지점/물류 이동 요청 (장바구니 담기)</div>
