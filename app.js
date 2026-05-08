@@ -1,10 +1,11 @@
-// RACEMENT Haeundae Inventory — app.js (v3.3 최종 안정화 버전)
+// RACEMENT Haeundae Inventory — app.js (v3.5 진짜 최종 안정화 및 복구 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
 const GH_PAT_KEY = "racement_gh_pat_v1";
 const CACHE_KEY = "racement_inventory_cache_v1";
 const DATA_PATH = "inventory.json";
+// 🔥 정렬 기준 1순위: 카테고리 순서 🔥
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -27,7 +28,6 @@ function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH))
 function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
-// 헬퍼 함수
 function detectGender(code, sex){
   const g = String(sex||"").trim();
   if(g==="남성"||g==="남"||g.toUpperCase()==="M") return "M";
@@ -65,25 +65,36 @@ async function copyText(text, btn){
   }catch(e){}
 }
 
-// 데이터 로드 (API 방어 로직 포함)
+function applyMeta(meta){
+  if(meta && meta.fileName) $("#statSrc").textContent = meta.fileName;
+}
+function setSyncStatus(kind, text){ const el=$("#syncStatus"); if(!el) return; el.textContent=text; el.dataset.kind=kind; }
+
 async function loadData(force = false){
+  setSyncStatus("loading","동기화 중…");
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-    RAW = cached.rows; CURRENT_META = cached.meta;
-    rebuildIndex(); render(); return;
+    RAW = cached.rows || []; CURRENT_META = cached.meta;
+    applyMeta(CURRENT_META); rebuildIndex(); render();
+    setSyncStatus("ok","동기화 완료 (캐시)");
+    renderRecentSearches(); return;
   }
   try{
     const r = await fetch("./" + DATA_PATH + "?t=" + Date.now());
     if(!r.ok) throw new Error();
     const data = await r.json();
-    RAW = data.rows; CURRENT_META = data.meta;
+    RAW = data.rows || []; CURRENT_META = data.meta;
     data._timestamp = Date.now();
     sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    rebuildIndex(); render();
-  }catch(e){ if(cached){ RAW=cached.rows; rebuildIndex(); render(); } }
+    applyMeta(CURRENT_META); rebuildIndex(); render();
+    setSyncStatus("ok","동기화 완료");
+  }catch(e){ 
+    if(cached){ RAW=cached.rows||[]; CURRENT_META=cached.meta; applyMeta(CURRENT_META); rebuildIndex(); render(); setSyncStatus("warn","오프라인 캐시 표시"); }
+    else { RAW=[]; render(); setSyncStatus("err","데이터 없음"); }
+  }
+  renderRecentSearches();
 }
 
-// 업로드 핵심 로직 (에러 방지 패치)
 async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
@@ -100,29 +111,67 @@ async function commitInventoryToGitHub(rows, meta){
   if(!r2.ok) throw new Error();
 }
 
-// 인덱스 재구성 및 렌더링
 function rebuildIndex(){
   const map = new Map();
   const prevRaw = JSON.parse(localStorage.getItem('PREV_RAW') || '[]');
+  
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[] });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[] });
     }
     const p = map.get(code);
-    p.sizes.push({ size:r["규격"], busan:Number(r["매장 (부산)"]||0), sinsa:Number(r["매장 (신사동)"]||0), center:Number(r["물류센터"]||0) });
+    const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
+    const sinsa = Number(r["매장 (신사동)"] ?? r["매장(신사동)"] ?? 0);
+    const center = Number(r["물류센터"] ?? 0);
+    
+    const found = p.sizes.find(s=>String(s.size)===String(r["규격"]));
+    if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; }
+    else p.sizes.push({ size:r["규격"], busan, sinsa, center });
   }
+  
+  const GOLDEN_M = ['260','265','270','275'];
+  const GOLDEN_W = ['235','240','245'];
+
   PRODUCTS = Array.from(map.values()).map(p=>{
     p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
-    p.urgentRestock = p.sizes.some(s=> s.busan===0 && (['260','265','270','275','235','240','245'].includes(String(s.size))));
-    const pt = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"]||0),0);
-    p.delta = prevRaw.length? p.busanTotal-pt : 0;
+    p.otherTotal = p.sinsaTotal + p.centerTotal;
+    
+    // 🔥 타지점 가능, 라스트피스 필터 기준 복구 🔥
+    p.canRequest = (p.busanTotal===0) && (p.otherTotal>0);
+    p.hasLast = p.sizes.some(s=>(s.busan||0)===1);
+    
+    let urgent = false;
+    p.sizes.forEach(s => {
+        if (s.busan === 0) {
+            if (p.gender === 'M' && GOLDEN_M.includes(String(s.size))) urgent = true;
+            if (p.gender === 'W' && GOLDEN_W.includes(String(s.size))) urgent = true;
+        }
+    });
+    p.urgentRestock = urgent;
+
+    const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
+    p.delta = prevRaw.length? p.busanTotal-prevTotal : 0;
+    
     const hay = [p.품번, p.품명, p.브랜드].join(" ").toLowerCase();
     p._hay = hay; p._chosung = getChosung(hay);
     return p;
   });
+  
+  const BRANDS = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
+  const wrap = $("#brandChips");
+  const first = wrap.querySelector('[data-brand="ALL"]');
+  wrap.innerHTML = ""; wrap.appendChild(first);
+  BRANDS.forEach(b => {
+      const btn = document.createElement("button"); btn.className="chip"; btn.dataset.brand=b; btn.textContent=b;
+      btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
+      wrap.appendChild(btn);
+  });
+  
+  $("#statItems").textContent = fmt(PRODUCTS.length);
+  $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
 function card(p){
@@ -168,6 +217,20 @@ function card(p){
   return el;
 }
 
+// 🔥 모든 필터 상태 완벽 복구 🔥
+function getFilters(){
+  return {
+    cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
+    gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
+    brand: ($$('#brandChips .chip').find(b=>b.dataset.active==="1")||{}).dataset?.brand || "ALL",
+    q: $("#q").value.trim().toLowerCase(),
+    inStock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
+    otherOnly: !!$$('button.chip[data-other]').find(b=>b.dataset.active==="1"),
+    lastOnly: !!$$('button.chip[data-last]').find(b=>b.dataset.active==="1"),
+    favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1")
+  };
+}
+
 function renderRecentSearches() {
     const wrap = $("#recentSearches");
     if(!wrap) return;
@@ -183,7 +246,7 @@ function render(){
   $("#emptyState").classList.toggle("hidden", PRODUCTS.length>0);
   $("#results").classList.toggle("hidden", PRODUCTS.length===0);
   
-  const f = { q: $("#q").value.trim().toLowerCase(), fav: !!$('[data-fav]').dataset.active==="1" };
+  const f = getFilters();
   
   if(f.q && (!RECENT_SEARCHES.length || RECENT_SEARCHES[0] !== f.q)) {
       RECENT_SEARCHES = RECENT_SEARCHES.filter(q => q !== f.q);
@@ -194,10 +257,33 @@ function render(){
   }
 
   const filteredList = PRODUCTS.filter(p=>{
-    if(f.fav && !FAVS.includes(p.품번)) return false;
-    if(f.q) { if(isAllChosung(f.q)) return p._chosung.includes(f.q); return p._hay.includes(f.q); }
+    if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
+    if(f.gender!=="ALL" && p.gender!==f.gender) return false;
+    if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
+    if(f.inStock && p.busanTotal<=0) return false;
+    if(f.otherOnly && !p.canRequest) return false;
+    if(f.lastOnly && !p.hasLast) return false;
+    if(f.favOnly && !FAVS.includes(p.품번)) return false; 
+    if(f.q) { 
+        const tokens = f.q.split(/\s+/).filter(Boolean);
+        for(const t of tokens){
+            if(isAllChosung(t)){ if(!p._chosung.includes(t)) return false; } 
+            else { if(!p._hay.includes(t)) return false; }
+        }
+    }
     return true;
   });
+
+  // 🔥 2. 정렬 기준 완벽 복구 (카테고리 > 재고유무 > 가나다순) 🔥
+  filteredList.sort((a,b) => {
+    const ca=(CAT_ORDER[a.카테고리]!==undefined)?CAT_ORDER[a.카테고리]:9;
+    const cb=(CAT_ORDER[b.카테고리]!==undefined)?CAT_ORDER[b.카테고리]:9;
+    if(ca!==cb) return ca-cb;
+    const sa=a.busanTotal>0?0:1; const sb=b.busanTotal>0?0:1;
+    if(sa!==sb) return sa-sb;
+    return String(a.품명).localeCompare(String(b.품명));
+  });
+
   filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
   if(window.lucide) lucide.createIcons();
   updateCartCopyBtn();
@@ -232,7 +318,7 @@ function openDetail(p){
             </div>
           </div>
           <div class="flex gap-2">
-              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="실패 시 주소 직접 복붙">
+              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="주소 직접 복붙">
               <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
           </div>
           <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
@@ -253,14 +339,18 @@ function openDetail(p){
           } catch (e) { msg.style.color = "red"; msg.textContent = "통신 에러"; }
       });
 
+      // 🔥 3. 이미지 저장 시 함수 에러 완벽 해결 (commitImagesToGitHub로 연결) 🔥
       adminImgBox.querySelector("#quickImgSave").addEventListener("click", async () => {
           const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
           const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
           try {
-              if (typeof commitImagesAndMeta !== "undefined") {
-                  IMAGES[p.shopNo] = url; await commitImagesAndMeta(1);
+              if (typeof commitImagesToGitHub !== "undefined") {
+                  IMAGES[p.shopNo] = url; 
+                  await commitImagesToGitHub(IMAGES, { fetchedCount: 0 }); // images.js의 함수 호출
                   msg.style.color = "green"; msg.textContent = "✓ 깃허브 저장 완료!";
                   render(); openDetail(p); 
+              } else {
+                  throw new Error("images.js 로드 오류");
               }
           } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
       });
@@ -268,7 +358,6 @@ function openDetail(p){
   $("#detailModal").classList.remove("hidden");
 }
 
-// 이벤트 리스너들
 $("#closeDetail").onclick=()=>$("#detailModal").classList.add("hidden");
 $("#detailModal").onclick=(e)=>{if(e.target===$("#detailModal")||e.target.closest('.modal-outer')===e.target) $("#detailModal").classList.add("hidden");};
 $("#addCartBtn").onclick=()=>{
@@ -278,46 +367,60 @@ $("#addCartBtn").onclick=()=>{
 function updateCartCopyBtn(){ const b=$("#copyCartBtn"); b.classList.toggle("hidden", !CART.length); b.textContent=`🛒 복사 (${CART.length})`; }
 $("#copyCartBtn").onclick=()=>{
   const txt = CART.map(c=>`${c.품명} / ${c.품번} / ${c.사이즈} / ${c.수량}개`).join("\n");
-  copyText("[해운대점 이동요청]\n"+txt, $("#copyCartBtn")); CART=[]; localStorage.removeItem('CART'); updateCartCopyBtn();
+  copyText("[해운대점 이동요청]\n"+txt, $("#copyCartBtn")); CART=[]; localStorage.removeItem('CART'); updateCartCopyBtn(); 
 };
 
-$("#q").oninput=()=>render();
-$("#clearQ").onclick=()=>{ $("#q").value=""; render(); $("#q").focus(); };
-$("#refreshBtn").onclick=()=>loadData(true);
-$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
-$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
-$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav]').forEach(b=>b.addEventListener("click",()=>{ 
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-other], button.chip[data-last]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat||b.dataset.gender) { $$('button.chip[data-'+(b.dataset.cat?'cat':'gender')+']').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
     visibleCount=60; render(); 
 }));
-$("#resetAll").onclick=()=>{ ["cat","gender"].forEach(g=>$$('button.chip[data-'+g+']').forEach(b=>b.dataset.active=(b.dataset[g]==="ALL"?"1":"0"))); $$('button.chip[data-fav]').forEach(b=>b.dataset.active="0"); $("#q").value=""; render(); };
 
-// 🔥 실수로 빠졌던 어드민 패널 클릭 스위치 완벽 복구 🔥
+$("#resetAll").onclick=()=>{ 
+    ["cat","gender"].forEach(g=>$$('button.chip[data-'+g+']').forEach(b=>b.dataset.active=(b.dataset[g]==="ALL"?"1":"0"))); 
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-other], button.chip[data-last]').forEach(b=>b.dataset.active="0"); 
+    $("#q").value=""; render(); 
+};
+
+let qTimer;
+$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
+$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
+$("#refreshBtn").onclick=()=>loadData(true);
+
+$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
+$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
+
+$("#file").onchange = async (e) => { 
+    const f = e.target.files[0]; if(!f) return;
+    localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+        const meta = { fileName:f.name };
+        try { 
+            await commitInventoryToGitHub(rows, meta); 
+            RAW = rows; CURRENT_META = meta; 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, _timestamp: Date.now()})); 
+            applyMeta(CURRENT_META);
+            rebuildIndex(); render();
+            $("#adminModal").classList.add("hidden");
+            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+        } catch(err) { alert("업로드 실패! 깃허브 권한을 확인하세요."); }
+        $("#file").value = ""; 
+    };
+    reader.readAsArrayBuffer(f);
+};
+
 $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
 $("#closeAdmin").onclick=()=>$("#adminModal").classList.add("hidden");
 $("#drop").onclick=()=>$("#file").click(); 
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
 
-$("#file").onchange=async(e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  localStorage.setItem('PREV_RAW', JSON.stringify(RAW));
-  const reader = new FileReader();
-  reader.onload=async(ev)=>{
-    const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:""});
-    try {
-      await commitInventoryToGitHub(rows, { fileName:f.name });
-      alert("업로드 성공!"); location.reload();
-    } catch(e) { alert("업로드 실패! 설정을 확인하세요."); }
-  };
-  reader.readAsArrayBuffer(f);
-};
-
-$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비번 오류"); };
+$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{
-  GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
-  saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
+    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
+    saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
 };
 
 loadGhConfig(); loadData();
