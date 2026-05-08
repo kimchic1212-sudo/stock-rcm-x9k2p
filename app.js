@@ -1,4 +1,3 @@
-// RACEMENT Haeundae Inventory — app.js (v5.1 실무 찐막 11개 버그 완벽 패치 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -17,7 +16,6 @@ let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
 
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
-let CART = JSON.parse(localStorage.getItem('CART') || '[]');
 let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES') || '[]');
 
 const $ = (s,r=document)=>r.querySelector(s);
@@ -35,12 +33,6 @@ function detectGender(code, sex){
   if(g==="남성"||g==="남"||g.toUpperCase()==="M") return "M";
   if(g==="여성"||g==="여"||g.toUpperCase()==="W") return "W";
   return "U";
-}
-
-function genderBadge(g){
-  if(g==="M") return `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded text-[11px] font-bold">남성</span>`;
-  if(g==="W") return `<span class="bg-pink-50 text-pink-600 border border-pink-100 px-1.5 py-0.5 rounded text-[11px] font-bold">여성</span>`;
-  return `<span class="bg-gray-100 text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded text-[11px] font-bold">공용</span>`;
 }
 
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -63,18 +55,18 @@ async function copyText(text, btn){
       document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
     }
     if(btn){
-      const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = "✓ 복사됨";
-      setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); }, 1200);
+      const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
+      if(window.lucide) lucide.createIcons();
+      setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); if(window.lucide) lucide.createIcons(); }, 1200);
     }
   }catch(e){ alert("복사 실패"); }
 }
 
-// 🔥 업데이트 시간 완벽 표기 로직 🔥
 function applyMeta(meta){
     if(meta) {
         const el = $("#statSrc");
         if(el) {
-            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">[${meta.uploadedAt || ''}] 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>`;
+            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>`;
         }
     }
 }
@@ -161,11 +153,11 @@ function rebuildIndex(){
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
     
-    // 증감 계산
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
-    p.hasMemo = MEMOS.some(m => m.shopNo === p.shopNo || m.product === p.품명);
+    // 🔥 메모 체크 로직: 품명이나 샵넘버 말고 확실한 '품번(code)' 기준으로 매칭 🔥
+    p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
     const hay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ").toLowerCase();
     p._hay = hay; p._chosung = getChosung(hay);
@@ -193,7 +185,7 @@ function rebuildIndex(){
 
 function card(p){
   const el = document.createElement("article");
-  el.className = "card card-hover p-4 flex flex-col";
+  el.className = "card card-hover p-4 flex flex-col pt-[42px]"; // 버튼 자리 확보
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
@@ -202,50 +194,56 @@ function card(p){
   
   const imgSrc = IMAGES[p.shopNo] || null;
   
-  // 증감 뱃지 (입고는 초록계열, 판매는 파란계열)
   let deltaHtml = "";
-  if (p.delta > 0) deltaHtml = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded ml-1 text-[11px] font-black">▲ 입고 +${p.delta}</span>`;
-  else if (p.delta < 0) deltaHtml = `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded ml-1 text-[11px] font-black">▼ 판매 ${p.delta}</span>`;
+  if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
+  else if (p.delta < 0) deltaHtml = `<span class="text-red-600 font-black">▼${p.delta}</span>`;
 
-  // 카드 내부 메모 렌더링 (가장 최신 메모 1개만 요약해서 띄워줌)
-  const productMemos = MEMOS.filter(m => m.shopNo === p.shopNo || m.product === p.품명);
+  // 🔥 해당 카드의 모든 메모 다 불러오기 🔥
+  const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
-      const m = productMemos[productMemos.length - 1]; // 최신 메모
-      memoHtml = `
-      <div class="mt-2 mb-2 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
-         <div class="text-[11px] leading-snug">
+      memoHtml = `<div class="showroom-hide mt-2 mb-3 space-y-1">`;
+      productMemos.forEach(m => {
+          memoHtml += `
+          <div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[11px] leading-snug">
              <div class="flex items-center justify-between mb-0.5">
                  <span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
                  <span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span>
              </div>
-             <div class="text-yellow-900 truncate">${escapeHtml(m.text)}</div>
-         </div>
-      </div>`;
+             <div class="text-yellow-900">${escapeHtml(m.text)}</div>
+          </div>`;
+      });
+      memoHtml += `</div>`;
   }
 
-  const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
+  const isFav = FAVS.includes(p.품번);
 
-  // 🔥 썸네일 80px로 확대 및 패딩 우측 90px 부여 (겹침 완전 방지) 🔥
   el.innerHTML = `
-    <div class="relative w-full pr-[90px] min-h-[90px]">
-       <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}</div>
-       
-       <div class="flex items-start gap-1 mb-1">
-          <button class="fav-btn text-[22px] leading-none -mt-1 outline-none" style="color:var(--warn);">${FAVS.includes(p.품번)?'★':'☆'}</button>
-          <div class="copyable font-bold text-[17px] leading-tight text-left flex-1 hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
-       </div>
+    <button class="fav-btn absolute top-3 right-3 p-2 text-gray-400 hover:text-black z-10 outline-none" data-active="${isFav?'1':'0'}">
+        <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-current text-black' : ''}"></i>
+    </button>
+    
+    <div class="flex gap-2 text-xs font-bold text-gray-500 mb-1">
+        <span>${escapeHtml(p.카테고리||"-")}</span>
+        <span>${escapeHtml(p.브랜드||"-")}</span>
+        ${deltaHtml}
+    </div>
 
-       <div class="copyable text-[15.5px] font-bold text-[#555] mb-3 text-left w-full hover:text-blue-600 flex items-center gap-1.5" data-copy="${escapeHtml(p.품번)}">
-          ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-4 h-4 opacity-50"></i>
+    <div class="flex justify-between items-start w-full pr-[90px] min-h-[90px] relative">
+       <div class="flex-1 min-w-0">
+          <div class="copyable font-extrabold text-[17px] leading-tight mb-1 text-left w-full hover:text-blue-600 truncate" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+          
+          <div class="copyable text-[15.5px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
+              ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i>
+          </div>
        </div>
        
-       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[80px] h-[80px] bg-transparent"></div>'}
+       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[80px] h-[80px]"></div>'}
     </div>
     
     ${memoHtml}
 
-    <div class="grid gap-1.5 mb-4" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
+    <div class="grid gap-1.5 mb-4 mt-auto" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
       ${p.sizes.map(s=>{
           const q = s.busan||0; 
           let cls = "size-cell tnum ";
@@ -258,7 +256,14 @@ function card(p){
        <div class="price-clean">${krw(p.소비자가)}</div>
     </div>
   `;
-  el.querySelector('.fav-btn').onclick=(e)=>{ e.stopPropagation(); if(FAVS.includes(p.품번)) FAVS=FAVS.filter(id=>id!==p.품번); else FAVS.push(p.품번); localStorage.setItem('FAVS', JSON.stringify(FAVS)); render(); };
+  
+  el.querySelector('.fav-btn').onclick=(e)=>{ 
+      e.stopPropagation(); 
+      if(FAVS.includes(p.품번)) FAVS=FAVS.filter(id=>id!==p.품번); 
+      else FAVS.push(p.품번); 
+      localStorage.setItem('FAVS', JSON.stringify(FAVS)); 
+      render(); 
+  };
   return el;
 }
 
@@ -274,15 +279,7 @@ function getFilters(){
   };
 }
 
-function renderRecentSearches() {
-    const wrap = $("#recentSearches"); if(!wrap) return;
-    if (RECENT_SEARCHES.length === 0) { wrap.classList.add("hidden"); return; }
-    wrap.classList.remove("hidden");
-    wrap.innerHTML = `<span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0">최근검색</span>` + 
-        RECENT_SEARCHES.map(q => `<button class="chip recent-q" style="padding:0.2rem 0.5rem; font-size:0.75rem;">${escapeHtml(q)}</button>`).join("");
-    $$('.recent-q', wrap).forEach(b => b.addEventListener("click", () => { $("#q").value = b.textContent; visibleCount = 60; render(); }));
-}
-
+// 🔥 검색 안 나오던 버그 수정 (조건식 단순화) 🔥
 function render(){
   const grid = $("#grid"); grid.innerHTML = "";
   
@@ -293,17 +290,10 @@ function render(){
   }
   
   $("#emptyState").classList.add("hidden");
+  $("#results").classList.remove("hidden");
 
   const f = getFilters();
   
-  if(f.q && (!RECENT_SEARCHES.length || RECENT_SEARCHES[0] !== f.q)) {
-      RECENT_SEARCHES = RECENT_SEARCHES.filter(q => q !== f.q);
-      RECENT_SEARCHES.unshift(f.q);
-      if(RECENT_SEARCHES.length > 5) RECENT_SEARCHES.pop();
-      localStorage.setItem('RECENT_SEARCHES', JSON.stringify(RECENT_SEARCHES));
-      renderRecentSearches();
-  }
-
   let filteredList = PRODUCTS.filter(p=>{
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
     if(f.gender!=="ALL" && p.gender!==f.gender) return false;
@@ -314,13 +304,15 @@ function render(){
     
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
+        let matchAll = true;
         for(const t of tokens){
             if(isAllChosung(t)){ 
-                if(!p._chosung.includes(t)) return false; 
+                if(!p._chosung.includes(t)) matchAll = false; 
             } else { 
-                if(!p._hay.includes(t)) return false; 
+                if(!p._hay.includes(t)) matchAll = false; 
             }
         }
+        if(!matchAll) return false;
     }
     return true;
   });
@@ -344,7 +336,6 @@ function render(){
     return String(a.품명).localeCompare(String(b.품명),"ko");
   });
 
-  // 🔥 더보기(+60) 기능 완벽 연동 🔥
   if(filteredList.length === 0){
       $("#noMatch").classList.remove("hidden");
       $("#grid").parentElement.classList.remove("hidden");
@@ -365,58 +356,101 @@ function render(){
   }
 
   if(window.lucide) lucide.createIcons();
-  updateCartStatus();
 }
 
 $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
-function updateCartStatus(){
-  const btn = $("#cartBtn");
-  if(btn){ btn.classList.toggle("hidden", !CART.length); $("#cartCount").textContent = CART.length; }
-}
+// 🔥 오늘의 메모 모아보기 (신규) 🔥
+$("#allMemosBtn").onclick = () => {
+    const listEl = $("#allMemosList");
+    listEl.innerHTML = "";
+    if(MEMOS.length === 0) {
+        listEl.innerHTML = "<div class='text-center py-10 text-gray-500'>오늘 작성된 메모가 없습니다.</div>";
+    } else {
+        MEMOS.slice().reverse().forEach(m => {
+            listEl.innerHTML += `
+            <div class="p-3 bg-white rounded-lg border text-sm mb-2 shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-black text-yellow-700">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
+                    <span class="text-xs text-gray-400">${escapeHtml(m.date)}</span>
+                </div>
+                <div class="font-bold text-gray-800 mb-1">${escapeHtml(m.product)}</div>
+                <div class="text-gray-600">${escapeHtml(m.text)}</div>
+            </div>`;
+        });
+    }
+    $("#allMemosModal").classList.remove("hidden");
+};
 
-function openCartModal(){
-  const listEl = $("#cartList"); listEl.innerHTML = "";
-  if(!CART.length) { listEl.innerHTML = "<p class='text-center py-10 text-gray-400'>담긴 상품이 없습니다.</p>"; }
-  CART.forEach((item, idx) => {
-    const row = document.createElement("div");
-    row.className = "flex justify-between items-center py-2 border-b text-sm";
-    row.innerHTML = `
-      <div class="flex-1">
-        <div class="font-bold">${item.품명}</div>
-        <div class="text-xs text-gray-500">${item.품번} | ${item.사이즈} | ${item.수량}개</div>
-      </div>
-      <button class="p-2 text-red-500" onclick="deleteCartItem(${idx})"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-    `;
-    listEl.appendChild(row);
-  });
-  if(window.lucide) lucide.createIcons();
-  $("#cartModal").classList.remove("hidden");
-}
-window.deleteCartItem = (idx) => { CART.splice(idx, 1); localStorage.setItem('CART', JSON.stringify(CART)); openCartModal(); updateCartStatus(); };
+// 🔥 개별 메모 삭제 로직 🔥
+window.deleteMemo = async (memoId) => {
+    if(!confirm("이 메모를 삭제하시겠습니까?")) return;
+    try {
+        const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
+        const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+        if(!r.ok) throw new Error("로드 실패");
+        const j = await r.json(); 
+        let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+        
+        // 해당 아이디(시간 등으로 대체 가능)의 메모를 지움
+        oldData = oldData.filter(m => m.id !== memoId);
+        
+        const body = { message:"delete memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
+        const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        if(!r2.ok) throw new Error("API 에러");
+        
+        MEMOS = oldData;
+        alert("삭제되었습니다.");
+        
+        // 현재 열려있는 창 리렌더링
+        if(CURRENT_PRODUCT) {
+            CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번);
+            openDetail(CURRENT_PRODUCT); 
+        }
+        render();
+    } catch(e) { alert("메모 삭제 실패"); }
+};
 
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
-  const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
   
   $("#detailHead").innerHTML = `
     ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-[color:var(--line)] mix-blend-multiply dark:mix-blend-normal" style="max-height: 200px; background:var(--surface);">` : ''}
-    <div class="flex gap-1 mb-2 items-center">${smartTags}</div>
+    <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
+
+  // 🔥 상세창 내부에 해당 제품 메모 모두 나열 + 삭제 버튼 추가 🔥
+  const productMemos = MEMOS.filter(m => m.code === p.품번);
+  let detailMemoHtml = "";
+  if(productMemos.length > 0) {
+      productMemos.forEach(m => {
+          detailMemoHtml += `
+          <div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[12px] mb-2 relative">
+             <button onclick="deleteMemo('${m.id}')" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+             <div class="flex items-center gap-2 mb-1">
+                 <span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
+                 <span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span>
+             </div>
+             <div class="text-yellow-900 pr-5">${escapeHtml(m.text)}</div>
+          </div>`;
+      });
+  }
+  $("#detailMemosWrap").innerHTML = detailMemoHtml;
+
   $("#detailBody").innerHTML = `
     <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
       <tr class="text-[#888] border-b border-[color:var(--line)]"><th class="py-2 px-2 text-left">사이즈</th><th class="px-2 text-center">부산</th><th class="px-2 text-center">신사</th><th class="px-2 text-center">물류</th></tr>
       ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
     </table>
   `;
-  const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size} (신사:${s.sinsa} / 물류:${s.center})</option>`).join("");
   
   if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
       const adminImgBox = document.createElement("div");
       adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
       const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
+      
       adminImgBox.innerHTML = `
           <div class="text-xs font-bold text-gray-800 mb-2">🖼️ 제품 이미지 웹 등록 툴</div>
           <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">
@@ -434,9 +468,7 @@ function openDetail(p){
           const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
           const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
           try {
-              if (typeof IMAGES === "undefined") window.IMAGES = {};
               IMAGES[p.shopNo] = url; 
-              
               const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
               let sha = null;
               try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
@@ -446,8 +478,7 @@ function openDetail(p){
               if(!r2.ok) throw new Error("API 에러");
 
               msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!";
-              render(); 
-              setTimeout(()=>{openDetail(p);}, 500);
+              render(); setTimeout(()=>{openDetail(p);}, 500);
           } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
       };
   }
@@ -470,11 +501,12 @@ function openDetail(p){
               if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
           }catch(e){}
           
-          // 🔥 가독성 좋은 날짜 포맷팅 🔥
           const d = new Date();
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+          const uniqueId = "memo_" + Date.now(); // 개별 삭제를 위한 고유 ID 부여
           
-          oldData.push({ date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
+          // 🔥 품명이 아닌 "고유 품번(code)"으로 정확하게 저장 🔥
+          oldData.push({ id: uniqueId, code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
           const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
           
@@ -482,22 +514,20 @@ function openDetail(p){
           if(!r2.ok) throw new Error("API 에러");
           
           MEMOS = oldData; 
-          
-          // 메모 추가 시 즉각 상태 갱신
           CURRENT_PRODUCT.hasMemo = true;
-          const prodIndex = PRODUCTS.findIndex(pr => pr.품번 === CURRENT_PRODUCT.품번);
-          if (prodIndex > -1) PRODUCTS[prodIndex].hasMemo = true;
           
-          msg.style.color="green"; msg.textContent="✓ 저장 완료! (목록에 즉시 반영됩니다)";
+          msg.style.color="green"; msg.textContent="✓ 저장 완료!";
           $("#memoText").value = "";
           render(); 
+          openDetail(p); // 리스트 바로 업데이트
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
   $("#detailModal").classList.remove("hidden");
+  if(window.lucide) lucide.createIcons();
 }
 
-// 🔥 ESC 키 누르면 모든 팝업 닫기 🔥
+// 🔥 5. ESC 키로 팝업 닫기 완벽 지원 🔥
 document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") {
         $$('.modal-backdrop').forEach(m => m.classList.add("hidden"));
@@ -516,20 +546,6 @@ $$('button[id^="close"]').forEach(btn => {
         e.target.closest('.modal-backdrop').classList.add("hidden");
     });
 });
-
-$("#addCartBtn").onclick=()=>{
-  CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
-  localStorage.setItem('CART', JSON.stringify(CART)); updateCartStatus(); 
-  $("#detailModal").classList.add("hidden"); alert("장바구니에 담겼습니다.");
-};
-
-$("#copyExcelBtn").onclick = () => {
-  const header = "품명\t품번\t사이즈\t개수\n";
-  const rows = CART.map(c => `${c.품명}\t${c.품번}\t${c.사이즈}\t${c.수량}`).join("\n");
-  copyText(header + rows, $("#copyExcelBtn"));
-};
-$("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
-$("#cartBtn").onclick = openCartModal;
 
 $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
@@ -559,8 +575,6 @@ $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode");
 
 $("#file").onchange = async (e) => { 
     const f = e.target.files[0]; if(!f) return;
-    
-    // 🔥 업데이트 시간 생성 및 메타데이터 주입 🔥
     const d = new Date();
     const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     
