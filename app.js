@@ -1,4 +1,4 @@
-// RACEMENT Haeundae Inventory — app.js (v4.3 이미지 동시로딩 / 메모 / 색상 패치)
+// RACEMENT Haeundae Inventory — app.js (v5.0 진짜 실무 완성판)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -10,8 +10,8 @@ const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
-let IMAGES = {}; // 글로벌 이미지 객체
-let MEMOS = []; // 글로벌 메모 객체
+let IMAGES = {}; 
+let MEMOS = []; 
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -37,7 +37,7 @@ function detectGender(code, sex){
   return "U";
 }
 
-// 스마트 컬러 뱃지 (파스텔 톤)
+// 스마트 컬러 뱃지
 function genderBadge(g){
   if(g==="M") return `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded text-[11px] font-bold">남성</span>`;
   if(g==="W") return `<span class="bg-pink-50 text-pink-600 border border-pink-100 px-1.5 py-0.5 rounded text-[11px] font-bold">여성</span>`;
@@ -64,13 +64,12 @@ async function copyText(text, btn){
       document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
     }
     if(btn){
-      const orig = btn.textContent; btn.classList.add("copied"); btn.textContent = "✓ 복사 완료";
-      setTimeout(()=>{ btn.textContent = orig; btn.classList.remove("copied"); }, 1200);
+      const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = "✓ 복사됨";
+      setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); }, 1200);
     }
   }catch(e){ alert("복사 실패"); }
 }
 
-// 🔥 데이터 동시 로딩 패치 (이미지 누락 완벽 해결) 🔥
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   
@@ -84,7 +83,6 @@ async function loadData(force = false){
   }
   
   try {
-      // 재고, 이미지, 메모를 동시에 다 받아올 때까지 기다림
       const [invRes, imgRes, memoRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
@@ -102,15 +100,15 @@ async function loadData(force = false){
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json();
       else MEMOS = [];
 
-      // 캐시에 이미지, 메모도 같이 저장해서 다음번 로딩 속도 향상
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, _timestamp: Date.now() }));
-      
       rebuildIndex(); render();
   } catch(e) { 
       if(cached) { 
           RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; 
           rebuildIndex(); render(); 
-      } 
+      } else {
+          RAW=[]; render();
+      }
   }
 }
 
@@ -154,10 +152,10 @@ function rebuildIndex(){
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
-    // 메모 여부 매핑
+    // 메모 존재 여부 확인
     p.hasMemo = MEMOS.some(m => m.shopNo === p.shopNo || m.product === p.품명);
 
-    const hay = [p.품번, p.품명, p.브랜드].join(" ").toLowerCase();
+    const hay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ").toLowerCase();
     p._hay = hay; p._chosung = getChosung(hay);
     return p;
   });
@@ -196,20 +194,32 @@ function card(p){
   let memoHtml = p.hasMemo ? `<span class="bg-yellow-50 text-yellow-700 border border-yellow-200 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">📝 메모있음</span>` : "";
 
   const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
-  const imgHtml = imgSrc ? `<img src="${imgSrc}" class="boxless-img" onerror="this.style.display='none'">` : '';
 
+  // 🔥 이미지 사이즈업(80x80) & 별표 위치 고정 컨테이너 🔥
   el.innerHTML = `
-    <button class="fav-btn text-xl absolute top-4 right-4 z-10" style="${imgSrc?'right:85px;':''}">${FAVS.includes(p.품번)?'★':'☆'}</button>
-    ${imgHtml}
-    
-    <div class="pr-[70px]">
-        <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}${memoHtml}</div>
-        <div class="copyable font-bold text-[16px] leading-tight mb-1 truncate text-left w-full" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
-        <div class="copyable text-[14px] text-[#666] mb-3 text-left w-full" data-copy="${escapeHtml(p.품번)}">${escapeHtml(p.품번)}</div>
+    <div class="flex justify-between items-start gap-3 w-full mb-2">
+       <div class="flex-1 min-w-0 pt-1">
+          <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}${memoHtml}</div>
+          <button class="copyable font-extrabold text-[17px] leading-tight mb-1 truncate text-left w-full hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</button>
+          <button class="copyable text-[15px] font-bold text-[#555] text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
+              ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-50"></i>
+          </button>
+       </div>
+       <div class="shrink-0 flex flex-col items-end gap-2 relative w-[80px]">
+          <button class="fav-btn text-2xl leading-none z-10">${FAVS.includes(p.품번)?'★':'☆'}</button>
+          ${imgSrc ? `<img src="${imgSrc}" class="w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="w-[80px] h-[80px] bg-transparent"></div>'}
+       </div>
     </div>
-    <div class="grid gap-1.5 mt-1 mb-4" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
-      ${p.sizes.map(s=>`<div class="size-cell ${s.busan===0?'zero':(s.busan<=2?'low':'')}"><span class="sz">${s.size}</span><span class="qty real-qty">${s.busan}</span><span class="qty showroom-qty hidden">${s.busan>0?'O':'X'}</span></div>`).join("")}
+
+    <div class="grid gap-1.5 mt-2 mb-4" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
+      ${p.sizes.map(s=>{
+          const q = s.busan||0; 
+          let cls = "size-cell tnum ";
+          if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
+          return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span><span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+      }).join("")}
     </div>
+
     <div class="loc-simple">
        <div class="flex gap-1 items-center"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
        <div class="price-clean">${krw(p.소비자가)}</div>
@@ -222,11 +232,12 @@ function card(p){
 function getFilters(){
   return {
     cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
+    gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
     brand: ($$('#brandChips .chip').find(b=>b.dataset.active==="1")||{}).dataset?.brand || "ALL",
     q: $("#q").value.trim().toLowerCase(),
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
-    memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1") // 메모 필터 연동
+    memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1") 
   };
 }
 
@@ -239,8 +250,19 @@ function renderRecentSearches() {
     $$('.recent-q', wrap).forEach(b => b.addEventListener("click", () => { $("#q").value = b.textContent; visibleCount = 60; render(); }));
 }
 
+// 🔥 검색 결과 노출 오류 완벽 수정 🔥
 function render(){
   const grid = $("#grid"); grid.innerHTML = "";
+  
+  if(!RAW.length) { 
+      $("#emptyState").classList.remove("hidden"); 
+      $("#results").classList.add("hidden"); 
+      return; 
+  }
+  
+  $("#emptyState").classList.add("hidden");
+  $("#results").classList.remove("hidden");
+
   const f = getFilters();
   
   if(f.q && (!RECENT_SEARCHES.length || RECENT_SEARCHES[0] !== f.q)) {
@@ -253,10 +275,11 @@ function render(){
 
   let filteredList = PRODUCTS.filter(p=>{
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
+    if(f.gender!=="ALL" && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.stock && p.busanTotal <= 0) return false;
-    if(f.memoOnly && !p.hasMemo) return false; // 메모 필터 작동
+    if(f.memoOnly && !p.hasMemo) return false;
     
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
@@ -290,14 +313,26 @@ function render(){
     return String(a.품명).localeCompare(String(b.품명),"ko");
   });
 
-  filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
-  
-  if(filteredList.length === 0){ $("#emptyState").classList.remove("hidden"); } 
-  else { $("#emptyState").classList.add("hidden"); }
+  if(filteredList.length === 0){
+      $("#noMatch").classList.remove("hidden");
+      $("#moreWrap").classList.add("hidden");
+  } else {
+      $("#noMatch").classList.add("hidden");
+      filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
+      
+      // 🔥 더보기 버튼 로직 부활 🔥
+      if(filteredList.length > visibleCount) {
+          $("#moreWrap").classList.remove("hidden");
+      } else {
+          $("#moreWrap").classList.add("hidden");
+      }
+  }
 
   if(window.lucide) lucide.createIcons();
   updateCartStatus();
 }
+
+$("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
 function updateCartStatus(){
   const btn = $("#cartBtn");
@@ -346,8 +381,10 @@ function openDetail(p){
       const adminImgBox = document.createElement("div");
       adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
       const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
+      
+      // 🔥 툴 이름 변경 🔥
       adminImgBox.innerHTML = `
-          <div class="text-xs font-bold text-gray-800 mb-2">👑 점장 이미지 관리</div>
+          <div class="text-xs font-bold text-gray-800 mb-2">🖼️ 제품 이미지 웹 등록 툴</div>
           <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">
               🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)
           </a>
@@ -363,6 +400,7 @@ function openDetail(p){
           const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
           const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
           try {
+              if (typeof IMAGES === "undefined") window.IMAGES = {};
               IMAGES[p.shopNo] = url; 
               
               const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
@@ -380,7 +418,6 @@ function openDetail(p){
       };
   }
 
-  // 직원 메모 기능 
   $("#addMemoBtn").onclick = async () => {
       const staff = $("#memoStaff").value; 
       const tag = $("#memoTag").value;
@@ -406,15 +443,28 @@ function openDetail(p){
           const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
           if(!r2.ok) throw new Error("API 에러");
           
-          MEMOS = oldData; // 즉시 반영
-          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다. (18시 보고 예정)";
+          MEMOS = oldData; 
+          
+          // 🔥 메모 저장 즉시 상태 변경 및 화면 갱신 (버그 해결) 🔥
+          CURRENT_PRODUCT.hasMemo = true;
+          const prodIndex = PRODUCTS.findIndex(pr => pr.품번 === CURRENT_PRODUCT.품번);
+          if (prodIndex > -1) PRODUCTS[prodIndex].hasMemo = true;
+          
+          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다.";
           $("#memoText").value = "";
-          render(); // 뱃지 즉시 추가
+          render(); 
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
   $("#detailModal").classList.remove("hidden");
 }
+
+// 🔥 ESC 키 누르면 팝업 닫기 추가 🔥
+document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape") {
+        $$('.modal-backdrop').forEach(m => m.classList.add("hidden"));
+    }
+});
 
 $$('.modal-backdrop').forEach(modal => {
     modal.addEventListener("click", (e) => {
@@ -443,14 +493,16 @@ $("#copyExcelBtn").onclick = () => {
 $("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
 $("#cartBtn").onclick = openCartModal;
 
-$$('button.chip[data-cat], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.addEventListener("click",()=>{ 
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
+    else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
     visibleCount=60; render(); 
 }));
 
 $("#resetAll").onclick=()=>{ 
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); 
+    $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0")); 
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0"); 
     $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
     $("#sortSel").value="default";
