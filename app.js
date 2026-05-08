@@ -296,4 +296,181 @@ function openCartModal(){
 window.deleteCartItem = (idx) => { CART.splice(idx, 1); localStorage.setItem('CART', JSON.stringify(CART)); openCartModal(); updateCartStatus(); };
 
 function openDetail(p){
-  CURRENT
+  CURRENT_PRODUCT = p;
+  const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
+  const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
+  
+  $("#detailHead").innerHTML = `
+    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-[color:var(--line)] mix-blend-multiply dark:mix-blend-normal" style="max-height: 200px; background:var(--surface);">` : ''}
+    <div class="flex gap-1 mb-2 items-center">${smartTags}</div>
+    <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
+  `;
+  $("#detailBody").innerHTML = `
+    <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
+      <tr class="text-[#888] border-b border-[color:var(--line)]"><th class="py-2 px-2 text-left">사이즈</th><th class="px-2 text-center">부산</th><th class="px-2 text-center">신사</th><th class="px-2 text-center">물류</th></tr>
+      ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
+    </table>
+  `;
+  const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size} (신사:${s.sinsa} / 물류:${s.center})</option>`).join("");
+  
+  if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
+      const adminImgBox = document.createElement("div");
+      adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
+      const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
+      adminImgBox.innerHTML = `
+          <div class="text-xs font-bold text-gray-800 mb-2">👑 점장 이미지 관리</div>
+          <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">
+              🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)
+          </a>
+          <div class="flex gap-2">
+              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="여기에 복사한 이미지 주소 붙여넣기">
+              <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
+          </div>
+          <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
+      `;
+      $("#detailBody").appendChild(adminImgBox);
+
+      adminImgBox.querySelector("#quickImgSave").onclick = async () => {
+          const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
+          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
+          try {
+              if (typeof IMAGES === "undefined") window.IMAGES = {};
+              IMAGES[p.shopNo] = url; 
+              
+              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
+              let sha = null;
+              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
+              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
+              if(sha) body.sha = sha;
+              const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+              if(!r2.ok) throw new Error("API 에러");
+
+              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!";
+              render(); 
+              setTimeout(()=>{openDetail(p);}, 500);
+          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
+      };
+  }
+
+  // 직원 메모 기능 (드롭다운 적용)
+  $("#addMemoBtn").onclick = async () => {
+      const staff = $("#memoStaff").value; // 드롭다운에서 선택된 값
+      const tag = $("#memoTag").value;
+      const text = $("#memoText").value.trim();
+      const msg = $("#memoMsg");
+      
+      if(!staff) { msg.style.color="red"; msg.textContent="직원 이름을 선택해주세요."; return; }
+      if(!text) { msg.style.color="red"; msg.textContent="내용을 입력하세요."; return; }
+      msg.style.color="black"; msg.textContent="메모 저장 중...";
+
+      try {
+          const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
+          let sha = null; let oldData = [];
+          try { 
+              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+              if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
+          }catch(e){}
+          
+          oldData.push({ date: new Date().toLocaleString(), product: p.품명, shopNo: p.shopNo, staff, tag, text });
+          const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
+          if(sha) body.sha = sha;
+          
+          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+          if(!r2.ok) throw new Error("API 에러");
+          
+          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다. (21시 보고 예정)";
+          $("#memoText").value = "";
+      } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
+  };
+
+  $("#detailModal").classList.remove("hidden");
+}
+
+// 🔥 4. 모든 모달 바깥쪽 클릭 시 닫기 완벽 지원 🔥
+$$('.modal-backdrop').forEach(modal => {
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.classList.contains("modal-outer")) {
+            modal.classList.add("hidden");
+        }
+    });
+});
+$$('button[id^="close"]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.target.closest('.modal-backdrop').classList.add("hidden");
+    });
+});
+
+$("#addCartBtn").onclick=()=>{
+  CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
+  localStorage.setItem('CART', JSON.stringify(CART)); updateCartStatus(); 
+  $("#detailModal").classList.add("hidden"); alert("장바구니에 담겼습니다.");
+};
+
+$("#copyExcelBtn").onclick = () => {
+  const header = "품명\t품번\t사이즈\t개수\n";
+  const rows = CART.map(c => `${c.품명}\t${c.품번}\t${c.사이즈}\t${c.수량}`).join("\n");
+  copyText(header + rows, $("#copyExcelBtn"));
+};
+$("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
+$("#cartBtn").onclick = openCartModal;
+
+$$('button.chip[data-cat], button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.addEventListener("click",()=>{ 
+    if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
+    else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
+    visibleCount=60; render(); 
+}));
+
+// 🔥 5. 전체 초기화 완벽 구현 (브랜드 포함) 🔥
+$("#resetAll").onclick=()=>{ 
+    $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); 
+    $$('button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.dataset.active="0"); 
+    $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
+    $("#sortSel").value="default";
+    $("#q").value=""; visibleCount=60; render(); 
+};
+
+$("#sortSel").onchange=()=> { visibleCount=60; render(); };
+
+let qTimer;
+$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
+$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
+$("#refreshBtn").onclick=()=>loadData(true);
+
+$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
+$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
+
+$("#file").onchange = async (e) => { 
+    const f = e.target.files[0]; if(!f) return;
+    localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+        const meta = { fileName:f.name };
+        try { 
+            await commitInventoryToGitHub(rows, meta); 
+            RAW = rows; CURRENT_META = meta; 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, _timestamp: Date.now()})); 
+            applyMeta(CURRENT_META);
+            rebuildIndex(); render();
+            $("#adminModal").classList.add("hidden");
+            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+        } catch(err) { alert("업로드 실패! 깃허브 권한을 확인하세요."); }
+        $("#file").value = ""; 
+    };
+    reader.readAsArrayBuffer(f);
+};
+
+// 어드민 뒤로가기 연동
+$("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
+$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
+$("#drop").onclick=()=>$("#file").click(); 
+$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
+
+$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#ghSave").onclick=()=>{
+    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
+    saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
+};
+
+loadGhConfig(); loadData();
