@@ -1,4 +1,4 @@
-// RACEMENT Haeundae Inventory — app.js (v3.2 긴급 복구 버전)
+// RACEMENT Haeundae Inventory — app.js (v3.3 최종 안정화 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -51,6 +51,19 @@ function getChosung(str){
   }
   return r;
 }
+async function copyText(text, btn){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } 
+    else {
+      const ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    }
+    if(btn){
+      const orig = btn.textContent; btn.classList.add("copied"); btn.textContent = "✓ 복사됨";
+      setTimeout(()=>{ btn.textContent = orig; btn.classList.remove("copied"); }, 1100);
+    }
+  }catch(e){}
+}
 
 // 데이터 로드 (API 방어 로직 포함)
 async function loadData(force = false){
@@ -87,7 +100,7 @@ async function commitInventoryToGitHub(rows, meta){
   if(!r2.ok) throw new Error();
 }
 
-// 인덱스 재구성 및 렌더링 (점장님 UI 지침 적용)
+// 인덱스 재구성 및 렌더링
 function rebuildIndex(){
   const map = new Map();
   const prevRaw = JSON.parse(localStorage.getItem('PREV_RAW') || '[]');
@@ -115,35 +128,54 @@ function rebuildIndex(){
 function card(p){
   const el = document.createElement("article");
   el.className = "card card-hover p-4 relative flex flex-col gap-0";
-  el.onclick = (e)=>{ if(!e.target.closest('button')) openDetail(p); };
+  el.onclick = (e)=>{ 
+    const copyBtn = e.target.closest('[data-copy]');
+    if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
+    if(!e.target.closest('button')) openDetail(p); 
+  };
   
   const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
   const tags = [p.카테고리, p.브랜드, genderLabel(p.gender).label].filter(Boolean).join(" · ");
   
+  let extraBadges = "";
+  if (p.delta > 0) extraBadges += `<span class="delta-badge ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700">▲+${p.delta}</span>`;
+  else if (p.delta < 0) extraBadges += `<span class="delta-badge ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700">▼${p.delta}</span>`;
+  if (p.urgentRestock) extraBadges += `<span class="urgent-badge ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold border border-red-500 text-red-600">🚨 황금결품</span>`;
+
   el.innerHTML = `
-    <div class="flex justify-between items-start gap-3 w-full">
+    <div class="flex justify-between items-start gap-3 w-full pr-6">
        <div class="flex-1 min-w-0 pt-1">
-          <div class="text-[12px] text-[#888] font-semibold mb-1">${tags}</div>
-          <div class="font-bold text-[16px] leading-tight mb-1 truncate">${escapeHtml(p.품명)}</div>
-          <div class="text-[14px] text-[#666] mb-3">${escapeHtml(p.품번)}</div>
+          <div class="text-[12px] text-[#888] font-semibold mb-1 leading-tight">${tags}${extraBadges}</div>
+          <div class="copyable font-bold text-[16px] leading-tight mb-1 truncate text-left w-full" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+          <div class="copyable text-[14px] text-[#666] mb-3 text-left w-full" data-copy="${escapeHtml(p.품번)}">${escapeHtml(p.품번)}</div>
        </div>
        <div class="shrink-0 flex flex-col items-end gap-2">
-          <button class="fav-btn text-xl">${FAVS.includes(p.품번)?'★':'☆'}</button>
-          ${imgSrc ? `<img src="${imgSrc}" class="w-[60px] h-[60px] object-contain">` : ''}
+          <button class="fav-btn text-xl absolute top-4 right-4 z-10">${FAVS.includes(p.품번)?'★':'☆'}</button>
+          ${imgSrc ? `<img src="${imgSrc}" class="w-[60px] h-[60px] object-contain mix-blend-multiply dark:mix-blend-normal bg-transparent">` : ''}
        </div>
     </div>
     <div class="grid gap-1.5 mt-1" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
       ${p.sizes.map(s=>`<div class="size-cell ${s.busan===0?'zero':(s.busan<=2?'low':'')}"><span class="sz">${s.size}</span><span class="qty real-qty">${s.busan}</span><span class="qty showroom-qty hidden">${s.busan>0?'O':'X'}</span></div>`).join("")}
     </div>
     <div class="mt-4 pt-3 border-t border-[color:var(--line)] flex justify-between items-center text-[13px]">
-       <div class="loc-text flex gap-1.5 font-medium text-[#666]">
-          <span class="font-bold text-[#111]">부산 ${p.busanTotal}</span> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}
+       <div class="loc-text flex gap-1.5 font-medium text-[#666] dark:text-gray-400">
+          <span class="font-bold text-[#111] dark:text-gray-100">부산 ${p.busanTotal}</span> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}
        </div>
-       <div class="font-semibold text-black" style="font-size:15px;">${krw(p.소비자가)}</div>
+       <div class="font-semibold text-black dark:text-white" style="font-size:15px; font-family:sans-serif;">${krw(p.소비자가)}</div>
     </div>
   `;
   el.querySelector('.fav-btn').onclick=(e)=>{ e.stopPropagation(); if(FAVS.includes(p.품번)) FAVS=FAVS.filter(id=>id!==p.품번); else FAVS.push(p.품번); localStorage.setItem('FAVS', JSON.stringify(FAVS)); render(); };
   return el;
+}
+
+function renderRecentSearches() {
+    const wrap = $("#recentSearches");
+    if(!wrap) return;
+    if (RECENT_SEARCHES.length === 0) { wrap.classList.add("hidden"); return; }
+    wrap.classList.remove("hidden");
+    wrap.innerHTML = `<span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0">최근검색</span>` + 
+        RECENT_SEARCHES.map(q => `<button class="chip recent-q" style="padding:0.2rem 0.5rem; font-size:0.75rem;">${escapeHtml(q)}</button>`).join("");
+    $$('.recent-q', wrap).forEach(b => b.addEventListener("click", () => { $("#q").value = b.textContent; visibleCount = 60; render(); }));
 }
 
 function render(){
@@ -152,49 +184,120 @@ function render(){
   $("#results").classList.toggle("hidden", PRODUCTS.length===0);
   
   const f = { q: $("#q").value.trim().toLowerCase(), fav: !!$('[data-fav]').dataset.active==="1" };
-  const filtered = PRODUCTS.filter(p=>{
+  
+  if(f.q && (!RECENT_SEARCHES.length || RECENT_SEARCHES[0] !== f.q)) {
+      RECENT_SEARCHES = RECENT_SEARCHES.filter(q => q !== f.q);
+      RECENT_SEARCHES.unshift(f.q);
+      if(RECENT_SEARCHES.length > 5) RECENT_SEARCHES.pop();
+      localStorage.setItem('RECENT_SEARCHES', JSON.stringify(RECENT_SEARCHES));
+      renderRecentSearches();
+  }
+
+  const filteredList = PRODUCTS.filter(p=>{
     if(f.fav && !FAVS.includes(p.품번)) return false;
     if(f.q) { if(isAllChosung(f.q)) return p._chosung.includes(f.q); return p._hay.includes(f.q); }
     return true;
   });
-  filtered.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
+  filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
   if(window.lucide) lucide.createIcons();
+  updateCartCopyBtn();
 }
 
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
   $("#detailHead").innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-48 object-contain mb-4">` : ''}
-    <div class="text-xl font-bold">${p.품명}</div><div class="text-[#666]">${p.품번}</div>
+    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-[color:var(--line)]" style="max-height: 200px; background:var(--surface);">` : ''}
+    <div class="text-[12px] text-[#888] font-semibold mb-1">${p.브랜드} · ${genderLabel(p.gender).label}</div>
+    <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
   $("#detailBody").innerHTML = `
-    <table class="w-full mt-4 text-sm">
-      <tr class="text-[#888] border-b"><th class="py-2 text-left">사이즈</th><th>부산</th><th>신사</th><th>물류</th></tr>
-      ${p.sizes.map(s=>`<tr class="border-b"><td class="py-2 font-bold">${s.size}</td><td class="text-center font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden">${s.busan>0?'O':'X'}</span></td><td class="text-center">${s.sinsa}</td><td class="text-center">${s.center}</td></tr>`).join("")}
+    <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
+      <tr class="text-[#888] border-b border-[color:var(--line)]"><th class="py-2 px-2 text-left">사이즈</th><th class="px-2 text-center">부산</th><th class="px-2 text-center">신사</th><th class="px-2 text-center">물류</th></tr>
+      ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
     </table>
   `;
-  const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size}</option>`).join("");
+  const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size} (신사:${s.sinsa} / 물류:${s.center})</option>`).join("");
+  
+  if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
+      const adminImgBox = document.createElement("div");
+      adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-dashed border-gray-400 bg-gray-50";
+      const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
+      adminImgBox.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-bold text-gray-600">👑 이미지 관리</div>
+            <div class="flex gap-1">
+                <a href="${targetUrl}" target="_blank" class="px-2 py-1.5 text-[11px] font-black bg-blue-600 text-white rounded no-underline">자사몰 열기</a>
+                <button id="autoFetchBtn" class="px-2 py-1.5 text-[11px] font-black bg-green-600 text-white rounded">오토스크랩</button>
+            </div>
+          </div>
+          <div class="flex gap-2">
+              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="실패 시 주소 직접 복붙">
+              <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
+          </div>
+          <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
+      `;
+      $("#detailBody").appendChild(adminImgBox);
+
+      adminImgBox.querySelector("#autoFetchBtn").addEventListener("click", async () => {
+          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "탐색 중... (2~4초)";
+          try {
+              const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+              const res = await fetch(proxyUrl); const data = await res.json();
+              const match = data.contents.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
+              if (match && match[1]) {
+                  let imgUrl = match[1]; if (imgUrl.startsWith("//")) imgUrl = "https:" + imgUrl; 
+                  adminImgBox.querySelector("#quickImgUrl").value = imgUrl;
+                  msg.style.color = "green"; msg.textContent = "✓ 추출 성공! '저장'을 누르세요.";
+              } else { msg.style.color = "red"; msg.textContent = "실패. '자사몰 열기'를 눌러 직접 복사하세요."; }
+          } catch (e) { msg.style.color = "red"; msg.textContent = "통신 에러"; }
+      });
+
+      adminImgBox.querySelector("#quickImgSave").addEventListener("click", async () => {
+          const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
+          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
+          try {
+              if (typeof commitImagesAndMeta !== "undefined") {
+                  IMAGES[p.shopNo] = url; await commitImagesAndMeta(1);
+                  msg.style.color = "green"; msg.textContent = "✓ 깃허브 저장 완료!";
+                  render(); openDetail(p); 
+              }
+          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
+      });
+  }
   $("#detailModal").classList.remove("hidden");
 }
 
 // 이벤트 리스너들
 $("#closeDetail").onclick=()=>$("#detailModal").classList.add("hidden");
-$("#detailModal").onclick=(e)=>{if(e.target===$("#detailModal")||e.target.closest('.modal-outer')) $("#detailModal").classList.add("hidden");};
+$("#detailModal").onclick=(e)=>{if(e.target===$("#detailModal")||e.target.closest('.modal-outer')===e.target) $("#detailModal").classList.add("hidden");};
 $("#addCartBtn").onclick=()=>{
   CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
-  localStorage.setItem('CART', JSON.stringify(CART)); updateCartBtn(); $("#detailModal").classList.add("hidden");
+  localStorage.setItem('CART', JSON.stringify(CART)); updateCartCopyBtn(); $("#detailModal").classList.add("hidden");
 };
-function updateCartBtn(){ const b=$("#copyCartBtn"); b.classList.toggle("hidden", !CART.length); b.textContent=`🛒 복사 (${CART.length})`; }
+function updateCartCopyBtn(){ const b=$("#copyCartBtn"); b.classList.toggle("hidden", !CART.length); b.textContent=`🛒 복사 (${CART.length})`; }
 $("#copyCartBtn").onclick=()=>{
   const txt = CART.map(c=>`${c.품명} / ${c.품번} / ${c.사이즈} / ${c.수량}개`).join("\n");
-  copyText("[해운대점 이동요청]\n"+txt, $("#copyCartBtn")); CART=[]; localStorage.removeItem('CART'); updateCartBtn();
+  copyText("[해운대점 이동요청]\n"+txt, $("#copyCartBtn")); CART=[]; localStorage.removeItem('CART'); updateCartCopyBtn();
 };
 
 $("#q").oninput=()=>render();
+$("#clearQ").onclick=()=>{ $("#q").value=""; render(); $("#q").focus(); };
 $("#refreshBtn").onclick=()=>loadData(true);
 $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
-$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); };
+$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav]').forEach(b=>b.addEventListener("click",()=>{ 
+    if(b.dataset.cat||b.dataset.gender) { $$('button.chip[data-'+(b.dataset.cat?'cat':'gender')+']').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
+    else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
+    visibleCount=60; render(); 
+}));
+$("#resetAll").onclick=()=>{ ["cat","gender"].forEach(g=>$$('button.chip[data-'+g+']').forEach(b=>b.dataset.active=(b.dataset[g]==="ALL"?"1":"0"))); $$('button.chip[data-fav]').forEach(b=>b.dataset.active="0"); $("#q").value=""; render(); };
+
+// 🔥 실수로 빠졌던 어드민 패널 클릭 스위치 완벽 복구 🔥
+$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
+$("#closeAdmin").onclick=()=>$("#adminModal").classList.add("hidden");
+$("#drop").onclick=()=>$("#file").click(); 
+$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
 
 $("#file").onchange=async(e)=>{
   const f=e.target.files[0]; if(!f) return;
@@ -211,8 +314,6 @@ $("#file").onchange=async(e)=>{
   reader.readAsArrayBuffer(f);
 };
 
-$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
-$("#closeAdmin").onclick=()=>$("#adminModal").classList.add("hidden");
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비번 오류"); };
 $("#ghSave").onclick=()=>{
   GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
