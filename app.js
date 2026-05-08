@@ -1,4 +1,3 @@
-// RACEMENT Haeundae Inventory — app.js (v6.0 찐막 완벽 복구 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -17,7 +16,6 @@ let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
 
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
-let CART = JSON.parse(localStorage.getItem('CART') || '[]');
 let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES') || '[]');
 
 const $ = (s,r=document)=>r.querySelector(s);
@@ -48,7 +46,6 @@ function getChosung(str){
   }
   return r;
 }
-function isAllChosung(s){ return /^[ㄱ-ㅎ]+$/.test(s); }
 
 async function copyText(text, btn){
   try{
@@ -78,8 +75,13 @@ async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; CURRENT_META = cached.meta || null; IMAGES = cached.images || {}; MEMOS = cached.memos || [];
-      applyMeta(CURRENT_META); rebuildIndex(); render(); return;
+      RAW = cached.rows || []; 
+      CURRENT_META = cached.meta || null;
+      IMAGES = cached.images || {};
+      MEMOS = cached.memos || [];
+      applyMeta(CURRENT_META);
+      rebuildIndex(); render(); 
+      return;
   }
   
   try {
@@ -91,17 +93,26 @@ async function loadData(force = false){
 
       if(!invRes.ok) throw new Error("재고 로드 실패");
       const invData = await invRes.json();
-      RAW = invData.rows || []; CURRENT_META = invData.meta || null;
+      RAW = invData.rows || []; 
+      CURRENT_META = invData.meta || null;
 
-      if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
-      if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
+      if(imgRes && imgRes.ok) IMAGES = await imgRes.json();
+      else IMAGES = {};
+
+      if(memoRes && memoRes.ok) MEMOS = await memoRes.json();
+      else MEMOS = [];
 
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, _timestamp: Date.now() }));
       
-      applyMeta(CURRENT_META); rebuildIndex(); render();
+      applyMeta(CURRENT_META);
+      rebuildIndex(); render();
   } catch(e) { 
-      if(cached) { RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; applyMeta(CURRENT_META); rebuildIndex(); render(); } 
-      else { RAW=[]; render(); }
+      if(cached) { 
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; 
+          applyMeta(CURRENT_META); rebuildIndex(); render(); 
+      } else {
+          RAW=[]; render();
+      }
   }
 }
 
@@ -145,10 +156,10 @@ function rebuildIndex(){
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
-    // 메모 품번으로 정확히 매칭
+    // 🔥 메모 체크 로직: 품명이나 샵넘버 말고 확실한 '품번(code)' 기준으로 매칭 🔥
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    const hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||""].join(" ").toLowerCase();
+    const hay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ").toLowerCase();
     p._hay = hay; p._chosung = getChosung(hay);
     return p;
   });
@@ -158,8 +169,10 @@ function rebuildIndex(){
   wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
   
   wrap.querySelector('[data-brand="ALL"]').onclick = function() {
-      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0")); visibleCount=60; render();
+      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0"));
+      visibleCount=60; render();
   };
+  
   brands.forEach(b => {
       const btn = document.createElement("button"); btn.className="chip"; btn.dataset.brand=b; btn.textContent=b;
       btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
@@ -172,7 +185,7 @@ function rebuildIndex(){
 
 function card(p){
   const el = document.createElement("article");
-  el.className = "card card-hover p-4 flex flex-col pt-[42px]";
+  el.className = "card card-hover p-4 flex flex-col pt-[42px]"; // 버튼 자리 확보
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
@@ -185,6 +198,7 @@ function card(p){
   if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
   else if (p.delta < 0) deltaHtml = `<span class="text-red-600 font-black">▼${p.delta}</span>`;
 
+  // 🔥 해당 카드의 모든 메모 다 불러오기 🔥
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -205,24 +219,26 @@ function card(p){
   const isFav = FAVS.includes(p.품번);
 
   el.innerHTML = `
-    <button class="fav-btn-fixed" data-active="${isFav?'1':'0'}">
-        <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-current text-black' : 'text-gray-400'}"></i>
+    <button class="fav-btn absolute top-3 right-3 p-2 text-gray-400 hover:text-black z-10 outline-none" data-active="${isFav?'1':'0'}">
+        <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-current text-black' : ''}"></i>
     </button>
     
     <div class="flex gap-2 text-xs font-bold text-gray-500 mb-1">
-        <span class="text-black">${escapeHtml(p.카테고리||"-")}</span>
+        <span>${escapeHtml(p.카테고리||"-")}</span>
         <span>${escapeHtml(p.브랜드||"-")}</span>
         ${deltaHtml}
     </div>
 
-    <div class="flex justify-between items-start w-full pr-[100px] min-h-[90px] relative">
+    <div class="flex justify-between items-start w-full pr-[90px] min-h-[90px] relative">
        <div class="flex-1 min-w-0">
           <div class="copyable font-extrabold text-[17px] leading-tight mb-1 text-left w-full hover:text-blue-600 truncate" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+          
           <div class="copyable text-[15.5px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
               ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i>
           </div>
        </div>
-       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[90px] h-[90px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[90px] h-[90px]"></div>'}
+       
+       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[80px] h-[80px]"></div>'}
     </div>
     
     ${memoHtml}
@@ -241,7 +257,7 @@ function card(p){
     </div>
   `;
   
-  el.querySelector('.fav-btn-fixed').onclick=(e)=>{ 
+  el.querySelector('.fav-btn').onclick=(e)=>{ 
       e.stopPropagation(); 
       if(FAVS.includes(p.품번)) FAVS=FAVS.filter(id=>id!==p.품번); 
       else FAVS.push(p.품번); 
@@ -263,41 +279,18 @@ function getFilters(){
   };
 }
 
-function saveRecentSearch(val) {
-    if(!val) return;
-    RECENT_SEARCHES = RECENT_SEARCHES.filter(q => q !== val);
-    RECENT_SEARCHES.unshift(val);
-    if(RECENT_SEARCHES.length > 5) RECENT_SEARCHES.pop();
-    localStorage.setItem('RECENT_SEARCHES', JSON.stringify(RECENT_SEARCHES));
-    renderRecentSearches();
-}
-
-function renderRecentSearches() {
-    const wrap = $("#recentSearches"); if(!wrap) return;
-    if (RECENT_SEARCHES.length === 0) { wrap.classList.add("hidden"); return; }
-    wrap.classList.remove("hidden");
-    wrap.innerHTML = `<span class="text-[11px] font-bold text-[color:var(--muted)] shrink-0">최근검색</span>` + 
-        RECENT_SEARCHES.map(q => `<button class="chip recent-q" style="padding:0.2rem 0.5rem; font-size:0.75rem;">${escapeHtml(q)}</button>`).join("");
-    $$('.recent-q', wrap).forEach(b => b.addEventListener("click", () => { 
-        $("#q").value = b.textContent; 
-        visibleCount = 60; 
-        render(); 
-    }));
-}
-renderRecentSearches();
-
-// 🔥 검색 렉/먹통 완벽 해결 (무조건 검색됨) 🔥
+// 🔥 검색 안 나오던 버그 수정 (조건식 단순화) 🔥
 function render(){
   const grid = $("#grid"); grid.innerHTML = "";
   
   if(!RAW.length) { 
       $("#emptyState").classList.remove("hidden"); 
-      $("#noMatch").classList.add("hidden");
-      $("#grid").parentElement.classList.add("hidden"); 
+      $("#results").classList.add("hidden"); 
       return; 
   }
   
   $("#emptyState").classList.add("hidden");
+  $("#results").classList.remove("hidden");
 
   const f = getFilters();
   
@@ -327,7 +320,8 @@ function render(){
   const sortMode = $("#sortSel").value;
   filteredList.sort((a,b) => {
     if(sortMode === "default") {
-        const ca = CAT_ORDER[a.카테고리] ?? 9; const cb = CAT_ORDER[b.카테고리] ?? 9;
+        const ca = CAT_ORDER[a.카테고리] ?? 9; 
+        const cb = CAT_ORDER[b.카테고리] ?? 9;
         if(ca!==cb) return ca-cb;
         const sa=a.busanTotal>0?0:1; const sb=b.busanTotal>0?0:1;
         if(sa!==sb) return sa-sb;
@@ -362,34 +356,21 @@ function render(){
   }
 
   if(window.lucide) lucide.createIcons();
-  updateCartStatus();
 }
 
 $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
-
-// 🔥 검색 렉 제거 (디바운스) 및 최근 검색어 엔터 저장 🔥
-let qTimer;
-$("#q").addEventListener("input", () => {
-    clearTimeout(qTimer);
-    qTimer = setTimeout(() => { visibleCount=60; render(); }, 100);
-});
-$("#q").addEventListener("keydown", (e) => {
-    if(e.key === "Enter") { e.preventDefault(); saveRecentSearch($("#q").value.trim().toLowerCase()); $("#q").blur(); }
-});
-$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 
 // 🔥 오늘의 메모 모아보기 (신규) 🔥
 $("#allMemosBtn").onclick = () => {
     const listEl = $("#allMemosList");
     listEl.innerHTML = "";
     if(MEMOS.length === 0) {
-        listEl.innerHTML = "<div class='text-center py-10 text-gray-500 font-bold'>오늘 등록된 메모가 없습니다.</div>";
+        listEl.innerHTML = "<div class='text-center py-10 text-gray-500'>오늘 작성된 메모가 없습니다.</div>";
     } else {
         MEMOS.slice().reverse().forEach(m => {
             listEl.innerHTML += `
-            <div class="p-3 bg-white rounded-lg border border-gray-200 text-sm mb-2 shadow-sm relative">
-                <button onclick="deleteMemo('${m.id}')" class="absolute top-3 right-3 text-red-400 hover:text-red-600 p-1 bg-white rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                <div class="flex justify-between items-center mb-1 pr-6">
+            <div class="p-3 bg-white rounded-lg border text-sm mb-2 shadow-sm">
+                <div class="flex justify-between items-center mb-1">
                     <span class="font-black text-yellow-700">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
                     <span class="text-xs text-gray-400">${escapeHtml(m.date)}</span>
                 </div>
@@ -399,9 +380,9 @@ $("#allMemosBtn").onclick = () => {
         });
     }
     $("#allMemosModal").classList.remove("hidden");
-    if(window.lucide) lucide.createIcons();
 };
 
+// 🔥 개별 메모 삭제 로직 🔥
 window.deleteMemo = async (memoId) => {
     if(!confirm("이 메모를 삭제하시겠습니까?")) return;
     try {
@@ -411,6 +392,7 @@ window.deleteMemo = async (memoId) => {
         const j = await r.json(); 
         let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
         
+        // 해당 아이디(시간 등으로 대체 가능)의 메모를 지움
         oldData = oldData.filter(m => m.id !== memoId);
         
         const body = { message:"delete memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
@@ -420,40 +402,14 @@ window.deleteMemo = async (memoId) => {
         MEMOS = oldData;
         alert("삭제되었습니다.");
         
+        // 현재 열려있는 창 리렌더링
         if(CURRENT_PRODUCT) {
             CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번);
             openDetail(CURRENT_PRODUCT); 
         }
-        
-        if(!$("#allMemosModal").classList.contains("hidden")) { $("#allMemosBtn").click(); }
         render();
     } catch(e) { alert("메모 삭제 실패"); }
 };
-
-function updateCartStatus(){
-  const btn = $("#cartBtn");
-  if(btn){ btn.classList.toggle("hidden", !CART.length); $("#cartCount").textContent = CART.length; }
-}
-
-function openCartModal(){
-  const listEl = $("#cartList"); listEl.innerHTML = "";
-  if(!CART.length) { listEl.innerHTML = "<p class='text-center py-10 text-gray-400'>담긴 상품이 없습니다.</p>"; }
-  CART.forEach((item, idx) => {
-    const row = document.createElement("div");
-    row.className = "flex justify-between items-center py-2 border-b text-sm";
-    row.innerHTML = `
-      <div class="flex-1">
-        <div class="font-bold">${item.품명}</div>
-        <div class="text-xs text-gray-500">${item.품번} | ${item.사이즈} | ${item.수량}개</div>
-      </div>
-      <button class="p-2 text-red-500" onclick="deleteCartItem(${idx})"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-    `;
-    listEl.appendChild(row);
-  });
-  if(window.lucide) lucide.createIcons();
-  $("#cartModal").classList.remove("hidden");
-}
-window.deleteCartItem = (idx) => { CART.splice(idx, 1); localStorage.setItem('CART', JSON.stringify(CART)); openCartModal(); updateCartStatus(); };
 
 function openDetail(p){
   CURRENT_PRODUCT = p;
@@ -465,19 +421,19 @@ function openDetail(p){
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
 
-  // 상세창 내부에 해당 제품 메모 모두 나열 + 삭제 버튼
+  // 🔥 상세창 내부에 해당 제품 메모 모두 나열 + 삭제 버튼 추가 🔥
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let detailMemoHtml = "";
   if(productMemos.length > 0) {
       productMemos.forEach(m => {
           detailMemoHtml += `
           <div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[12px] mb-2 relative">
-             <button onclick="deleteMemo('${m.id}')" class="absolute top-2 right-2 text-red-400 hover:text-red-600 bg-yellow-50 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-             <div class="flex items-center gap-2 mb-1 pr-6">
+             <button onclick="deleteMemo('${m.id}')" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+             <div class="flex items-center gap-2 mb-1">
                  <span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
                  <span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span>
              </div>
-             <div class="text-yellow-900 pr-2">${escapeHtml(m.text)}</div>
+             <div class="text-yellow-900 pr-5">${escapeHtml(m.text)}</div>
           </div>`;
       });
   }
@@ -489,7 +445,6 @@ function openDetail(p){
       ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
     </table>
   `;
-  const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size} (신사:${s.sinsa} / 물류:${s.center})</option>`).join("");
   
   if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
       const adminImgBox = document.createElement("div");
@@ -548,8 +503,9 @@ function openDetail(p){
           
           const d = new Date();
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-          const uniqueId = "memo_" + Date.now(); 
+          const uniqueId = "memo_" + Date.now(); // 개별 삭제를 위한 고유 ID 부여
           
+          // 🔥 품명이 아닌 "고유 품번(code)"으로 정확하게 저장 🔥
           oldData.push({ id: uniqueId, code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
           const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
@@ -559,13 +515,11 @@ function openDetail(p){
           
           MEMOS = oldData; 
           CURRENT_PRODUCT.hasMemo = true;
-          const prodIndex = PRODUCTS.findIndex(pr => pr.품번 === CURRENT_PRODUCT.품번);
-          if (prodIndex > -1) PRODUCTS[prodIndex].hasMemo = true;
           
           msg.style.color="green"; msg.textContent="✓ 저장 완료!";
           $("#memoText").value = "";
           render(); 
-          openDetail(p); 
+          openDetail(p); // 리스트 바로 업데이트
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
@@ -573,10 +527,10 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
-// ESC 키 및 모달 닫기
+// 🔥 5. ESC 키로 팝업 닫기 완벽 지원 🔥
 document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") { 
-        $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); 
+    if(e.key === "Escape") {
+        $$('.modal-backdrop').forEach(m => m.classList.add("hidden"));
     }
 });
 
@@ -592,20 +546,6 @@ $$('button[id^="close"]').forEach(btn => {
         e.target.closest('.modal-backdrop').classList.add("hidden");
     });
 });
-
-$("#addCartBtn").onclick=()=>{
-  CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
-  localStorage.setItem('CART', JSON.stringify(CART)); updateCartStatus(); 
-  $("#detailModal").classList.add("hidden"); alert("장바구니에 담겼습니다.");
-};
-
-$("#copyExcelBtn").onclick = () => {
-  const header = "품명\t품번\t사이즈\t개수\n";
-  const rows = CART.map(c => `${c.품명}\t${c.품번}\t${c.사이즈}\t${c.수량}`).join("\n");
-  copyText(header + rows, $("#copyExcelBtn"));
-};
-$("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
-$("#cartBtn").onclick = openCartModal;
 
 $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
@@ -625,7 +565,11 @@ $("#resetAll").onclick=()=>{
 
 $("#sortSel").onchange=()=> { visibleCount=60; render(); };
 
+let qTimer;
+$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
+$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 $("#refreshBtn").onclick=()=>loadData(true);
+
 $("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
 $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
 
