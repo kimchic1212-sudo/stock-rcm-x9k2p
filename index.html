@@ -31,9 +31,6 @@
   .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); font-weight:600; font-size:.82rem; cursor:pointer; }
   .chip[data-active="1"]{ background:var(--ink); color:#fff; border-color:var(--ink); }
   
-  .boxless-img { position: absolute; top: 16px; right: 16px; width: 60px; height: 60px; object-fit: contain; background: transparent; pointer-events: none; }
-  
-  .tags-text { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 4px; display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
   .loc-simple { font-size: 13px; color: #666; margin-top: auto; padding-top:12px; border-top: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
   .loc-simple b { font-weight: 700; color: var(--ink); }
   .price-clean { font-family: sans-serif; font-weight: 600; color: var(--ink); font-size: 15px; letter-spacing: -0.01em; }
@@ -65,7 +62,6 @@
   body.showroom-mode .detail-grid table th:nth-child(4),
   body.showroom-mode .detail-grid table td:nth-child(4) { display: none !important; }
 
-  /* 로고 사이즈 조정 */
   .logo-symbol{ display:block; height:38px; width:auto; }
   .logo-symbol-lg{ display:block; height:64px; width:auto; margin:0 auto; }
 </style>
@@ -115,6 +111,7 @@
       <div class="flex flex-wrap gap-2 items-center">
         <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">정렬기준</span>
         <select id="sortSel" class="ipt py-1.5 text-xs">
+          <option value="default">기본 정렬 (분류 · 재고순)</option>
           <option value="brand">브랜드 · 품명 가나다순</option>
           <option value="name">품명 가나다순</option>
           <option value="stock">부산재고 많은 순</option>
@@ -155,7 +152,14 @@
       <div id="memoUI" class="mt-3 p-3 rounded-lg border bg-[color:var(--bg)]">
         <div class="text-xs font-bold mb-2">📝 직원 메모 남기기 (21시 일일보고 연동)</div>
         <div class="flex gap-2 mb-2">
-            <input type="text" id="memoStaff" class="ipt w-24 text-xs py-1.5" placeholder="직원이름">
+            <select id="memoStaff" class="ipt w-24 text-xs py-1.5">
+                <option value="" disabled selected>직원선택</option>
+                <option value="종훈">종훈</option>
+                <option value="기태">기태</option>
+                <option value="민정">민정</option>
+                <option value="경준">경준</option>
+                <option value="서영">서영</option>
+            </select>
             <select id="memoTag" class="ipt flex-1 text-xs py-1.5">
                 <option value="DP필요">🚨 DP필요</option>
                 <option value="고객예약">👤 고객예약</option>
