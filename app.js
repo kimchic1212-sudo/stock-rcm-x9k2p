@@ -47,6 +47,11 @@ function getChosung(str){
   return r;
 }
 
+// 🔥 누락되었던 초성 검사 함수 추가 🔥
+function isAllChosung(str) {
+    return /^[ㄱ-ㅎ]+$/.test(str);
+}
+
 async function copyText(text, btn){
   try{
     if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } 
@@ -156,11 +161,14 @@ function rebuildIndex(){
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
-    // 🔥 메모 체크 로직: 품명이나 샵넘버 말고 확실한 '품번(code)' 기준으로 매칭 🔥
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    const hay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ").toLowerCase();
-    p._hay = hay; p._chosung = getChosung(hay);
+    // 🔥 검색용 데이터 강화: 띄어쓰기와 특수문자가 제거된 데이터 추가 🔥
+    const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
+    p._hay = rawHay.toLowerCase();
+    p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
+    p._chosung = getChosung(p._hayClean); 
+    
     return p;
   });
   
@@ -185,7 +193,7 @@ function rebuildIndex(){
 
 function card(p){
   const el = document.createElement("article");
-  el.className = "card card-hover p-4 flex flex-col pt-[42px]"; // 버튼 자리 확보
+  el.className = "card card-hover p-4 flex flex-col pt-[42px]"; 
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
@@ -198,7 +206,6 @@ function card(p){
   if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
   else if (p.delta < 0) deltaHtml = `<span class="text-red-600 font-black">▼${p.delta}</span>`;
 
-  // 🔥 해당 카드의 모든 메모 다 불러오기 🔥
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -279,7 +286,6 @@ function getFilters(){
   };
 }
 
-// 🔥 검색 안 나오던 버그 수정 (조건식 단순화) 🔥
 function render(){
   const grid = $("#grid"); grid.innerHTML = "";
   
@@ -302,14 +308,19 @@ function render(){
     if(f.stock && p.busanTotal <= 0) return false;
     if(f.memoOnly && !p.hasMemo) return false;
     
+    // 🔥 검색 필터링 로직 강화: 띄어쓰기/특수문자 무시 검색 지원 🔥
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
         let matchAll = true;
         for(const t of tokens){
-            if(isAllChosung(t)){ 
-                if(!p._chosung.includes(t)) matchAll = false; 
+            const cleanT = t.replace(/[\s\-_]/g, "").toLowerCase(); // 검색어도 공백/특수문자 제거
+            
+            if(isAllChosung(cleanT)){ 
+                if(!p._chosung.includes(cleanT)) matchAll = false; 
             } else { 
-                if(!p._hay.includes(t)) matchAll = false; 
+                if(!p._hay.includes(t) && !p._hayClean.includes(cleanT)) {
+                    matchAll = false; 
+                }
             }
         }
         if(!matchAll) return false;
@@ -360,7 +371,6 @@ function render(){
 
 $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
-// 🔥 오늘의 메모 모아보기 (신규) 🔥
 $("#allMemosBtn").onclick = () => {
     const listEl = $("#allMemosList");
     listEl.innerHTML = "";
@@ -382,7 +392,6 @@ $("#allMemosBtn").onclick = () => {
     $("#allMemosModal").classList.remove("hidden");
 };
 
-// 🔥 개별 메모 삭제 로직 🔥
 window.deleteMemo = async (memoId) => {
     if(!confirm("이 메모를 삭제하시겠습니까?")) return;
     try {
@@ -392,7 +401,6 @@ window.deleteMemo = async (memoId) => {
         const j = await r.json(); 
         let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
         
-        // 해당 아이디(시간 등으로 대체 가능)의 메모를 지움
         oldData = oldData.filter(m => m.id !== memoId);
         
         const body = { message:"delete memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
@@ -402,7 +410,6 @@ window.deleteMemo = async (memoId) => {
         MEMOS = oldData;
         alert("삭제되었습니다.");
         
-        // 현재 열려있는 창 리렌더링
         if(CURRENT_PRODUCT) {
             CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번);
             openDetail(CURRENT_PRODUCT); 
@@ -421,7 +428,6 @@ function openDetail(p){
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
 
-  // 🔥 상세창 내부에 해당 제품 메모 모두 나열 + 삭제 버튼 추가 🔥
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let detailMemoHtml = "";
   if(productMemos.length > 0) {
@@ -503,9 +509,8 @@ function openDetail(p){
           
           const d = new Date();
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-          const uniqueId = "memo_" + Date.now(); // 개별 삭제를 위한 고유 ID 부여
+          const uniqueId = "memo_" + Date.now(); 
           
-          // 🔥 품명이 아닌 "고유 품번(code)"으로 정확하게 저장 🔥
           oldData.push({ id: uniqueId, code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
           const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
@@ -519,7 +524,7 @@ function openDetail(p){
           msg.style.color="green"; msg.textContent="✓ 저장 완료!";
           $("#memoText").value = "";
           render(); 
-          openDetail(p); // 리스트 바로 업데이트
+          openDetail(p); 
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
@@ -527,7 +532,6 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
-// 🔥 5. ESC 키로 팝업 닫기 완벽 지원 🔥
 document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") {
         $$('.modal-backdrop').forEach(m => m.classList.add("hidden"));
