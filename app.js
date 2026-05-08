@@ -1,10 +1,11 @@
+// RACEMENT Haeundae Inventory — app.js (v4.1 기능 완벽 복구 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
 const GH_PAT_KEY = "racement_gh_pat_v1";
 const CACHE_KEY = "racement_inventory_cache_v1";
 const DATA_PATH = "inventory.json";
-const REQUESTS_PATH = "requests.json"; // 메모 저장용
+const REQUESTS_PATH = "requests.json"; 
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -56,7 +57,7 @@ async function copyText(text, btn){
       document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
     }
     if(btn){
-      const orig = btn.textContent; btn.classList.add("copied"); btn.textContent = "✓ 복사 성공";
+      const orig = btn.textContent; btn.classList.add("copied"); btn.textContent = "✓ 복사 완료";
       setTimeout(()=>{ btn.textContent = orig; btn.classList.remove("copied"); }, 1200);
     }
   }catch(e){ alert("복사 실패"); }
@@ -119,7 +120,6 @@ function rebuildIndex(){
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
     
-    // Feature A: 재고 변동량 계산
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
@@ -129,7 +129,7 @@ function rebuildIndex(){
   });
   
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
-  const wrap = $("#brandChips"); wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">브랜드 전체</button>';
+  const wrap = $("#brandChips"); wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
   brands.forEach(b => {
       const btn = document.createElement("button"); btn.className="chip"; btn.dataset.brand=b; btn.textContent=b;
       btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
@@ -140,7 +140,6 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// === 극단적 UX 개편 적용된 카드 ===
 function card(p){
   const el = document.createElement("article");
   el.className = "card card-hover p-4 flex flex-col";
@@ -157,23 +156,19 @@ function card(p){
   if (p.delta > 0) deltaHtml = `<span class="bg-red-50 text-red-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▲+${p.delta}</span>`;
   else if (p.delta < 0) deltaHtml = `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▼${p.delta}</span>`;
 
-  // Boxless 썸네일 (우측 상단 둥둥 떠있는 느낌)
   const imgHtml = imgSrc ? `<img src="${imgSrc}" class="boxless-img" onerror="this.style.display='none'">` : '';
 
   el.innerHTML = `
     <button class="fav-btn text-xl absolute top-4 right-4 z-10" style="${imgSrc?'right:85px;':''}">${FAVS.includes(p.품번)?'★':'☆'}</button>
     ${imgHtml}
-    
     <div class="pr-[70px]">
         <div class="tags-text">${escapeHtml(tagsStr)}${deltaHtml}</div>
         <div class="copyable font-bold text-[16px] leading-tight mb-1 truncate text-left w-full" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
         <div class="copyable text-[14px] text-[#666] mb-3 text-left w-full" data-copy="${escapeHtml(p.품번)}">${escapeHtml(p.품번)}</div>
     </div>
-
     <div class="grid gap-1.5 mt-1 mb-4" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
       ${p.sizes.map(s=>`<div class="size-cell ${s.busan===0?'zero':(s.busan<=2?'low':'')}"><span class="sz">${s.size}</span><span class="qty real-qty">${s.busan}</span><span class="qty showroom-qty hidden">${s.busan>0?'O':'X'}</span></div>`).join("")}
     </div>
-
     <div class="loc-simple">
        <div class="flex gap-1 items-center"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
        <div class="price-clean">${krw(p.소비자가)}</div>
@@ -188,6 +183,7 @@ function getFilters(){
     cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
     brand: ($$('#brandChips .chip').find(b=>b.dataset.active==="1")||{}).dataset?.brand || "ALL",
     q: $("#q").value.trim().toLowerCase(),
+    stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1")
   };
 }
@@ -213,29 +209,51 @@ function render(){
       renderRecentSearches();
   }
 
-  const filteredList = PRODUCTS.filter(p=>{
+  // 1. 필터링 처리 & 검색 결과 안 나오던 오류 수정!
+  let filteredList = PRODUCTS.filter(p=>{
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
+    if(f.stock && p.busanTotal <= 0) return false;
+    
+    // 검색어가 있을 경우
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
         for(const t of tokens){
-            if(isAllChosung(t)){ if(!p._chosung.includes(t)) return false; } else { if(!p._hay.includes(t)) return false; }
+            if(isAllChosung(t)){ 
+                if(!p._chosung.includes(t)) return false; 
+            } else { 
+                if(!p._hay.includes(t)) return false; 
+            }
         }
     }
     return true;
   });
 
+  // 2. 정렬 기능(클로드 원본) 완벽 복구
+  const sortMode = $("#sortSel").value;
   filteredList.sort((a,b) => {
-    const ca=(CAT_ORDER[a.카테고리]!==undefined)?CAT_ORDER[a.카테고리]:9;
-    const cb=(CAT_ORDER[b.카테고리]!==undefined)?CAT_ORDER[b.카테고리]:9;
+    if(sortMode==="stock") return b.busanTotal - a.busanTotal || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode==="name") return String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode==="priceAsc") return (a.소비자가||0) - (b.소비자가||0);
+    if(sortMode==="priceDesc") return (b.소비자가||0) - (a.소비자가||0);
+    
+    // 기본 정렬: 카테고리 > 브랜드 > 품명
+    const ca = CAT_ORDER[a.카테고리] ?? 9; 
+    const cb = CAT_ORDER[b.카테고리] ?? 9;
     if(ca!==cb) return ca-cb;
-    const sa=a.busanTotal>0?0:1; const sb=b.busanTotal>0?0:1;
-    if(sa!==sb) return sa-sb;
-    return String(a.품명).localeCompare(String(b.품명));
+    const br = String(a.브랜드).localeCompare(String(b.브랜드),"ko"); if(br!==0) return br;
+    return String(a.품명).localeCompare(String(b.품명),"ko");
   });
 
   filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
+  
+  if(filteredList.length === 0){
+      $("#emptyState").classList.remove("hidden");
+  } else {
+      $("#emptyState").classList.add("hidden");
+  }
+
   if(window.lucide) lucide.createIcons();
   updateCartStatus();
 }
@@ -283,7 +301,6 @@ function openDetail(p){
   `;
   const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size} (신사:${s.sinsa} / 물류:${s.center})</option>`).join("");
   
-  // 관리자 직링크 툴
   if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
       const adminImgBox = document.createElement("div");
       adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
@@ -323,7 +340,7 @@ function openDetail(p){
       };
   }
 
-  // Feature B: 직원 메모 저장 로직
+  // 직원 메모 저장 로직
   $("#addMemoBtn").onclick = async () => {
       const staff = $("#memoStaff").value.trim();
       const tag = $("#memoTag").value;
@@ -358,7 +375,7 @@ function openDetail(p){
   $("#detailModal").classList.remove("hidden");
 }
 
-// 모든 모달 바깥 터치 닫기 완벽 적용
+// 모든 모달 바깥 터치 닫기 강제 적용
 $$('.modal-backdrop').forEach(modal => {
     modal.addEventListener("click", (e) => {
         if (e.target === modal || e.target.classList.contains("modal-outer")) {
@@ -366,7 +383,6 @@ $$('.modal-backdrop').forEach(modal => {
         }
     });
 });
-
 $$('button[id^="close"]').forEach(btn => {
     btn.addEventListener("click", (e) => {
         e.target.closest('.modal-backdrop').classList.add("hidden");
@@ -387,17 +403,25 @@ $("#copyExcelBtn").onclick = () => {
 $("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
 $("#cartBtn").onclick = openCartModal;
 
+// 버튼 필터 토글 & 브랜드 칩 클릭 연동
 $$('button.chip[data-cat], button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
     visibleCount=60; render(); 
 }));
 
+// 초기화 버튼 완벽 구현 (브랜드 포함 전부 리셋)
 $("#resetAll").onclick=()=>{ 
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); 
     $$('button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.dataset.active="0"); 
-    $("#q").value=""; render(); 
+    $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
+    $("#sortSel").value="brand";
+    $("#q").value=""; 
+    visibleCount=60; render(); 
 };
+
+// 정렬 변경 이벤트
+$("#sortSel").onchange=()=> { visibleCount=60; render(); };
 
 let qTimer;
 $("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
@@ -429,6 +453,8 @@ $("#file").onchange = async (e) => {
     reader.readAsArrayBuffer(f);
 };
 
+// 어드민 뒤로가기 버튼 연동
+$("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
 $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
 $("#drop").onclick=()=>$("#file").click(); 
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
