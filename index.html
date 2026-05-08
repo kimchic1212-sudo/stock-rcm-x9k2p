@@ -35,37 +35,40 @@
   .loc-simple b { font-weight: 700; color: var(--ink); }
   .price-clean { font-family: sans-serif; font-weight: 600; color: var(--ink); font-size: 15px; letter-spacing: -0.01em; }
   
-  /* 재고 셀 공통 */
   .size-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 8px; background: #FFFFFF; border: 1px solid #E0E0E0; color: #333333; }
   body.dark-mode .size-cell { background: #1E1E1E; border-color: #374151; color: #F3F4F6; }
   .size-cell .sz { font-size: 0.75rem; font-weight: 600; color: #666; }
   body.dark-mode .size-cell .sz { color: #9CA3AF; }
   .size-cell .qty { font-size: 1.05rem; font-weight: 800; }
   
-  /* 재고 0 (품절) */
   .size-cell.zero { background: #F5F5F5; border-color: #EEEEEE; color: #BDBDBD; }
   body.dark-mode .size-cell.zero { background: #121212; border-color: #1F2937; color: #4B5563; }
   .size-cell.zero .qty, .size-cell.zero .sz { color: inherit; text-decoration: line-through; }
   
-  /* 재고 1 (Danger - 찐 빨강) */
   .size-cell.danger { background: #FEF2F2; border-color: #FECDD3; color: #E11D48; }
   body.dark-mode .size-cell.danger { background: #4c0519; border-color: #881337; color: #fecdd3; }
   .size-cell.danger .qty, .size-cell.danger .sz { color: inherit; }
 
-  /* 재고 2 (Warning - 주황) */
   .size-cell.warn { background: #FFF7ED; border-color: #FED7AA; color: #D97706; }
   body.dark-mode .size-cell.warn { background: #451a03; border-color: #78350f; color: #fde68a; }
   .size-cell.warn .qty, .size-cell.warn .sz { color: inherit; }
 
-  .copyable { cursor: pointer; transition: opacity 0.1s; display:inline-flex; align-items:center; gap:4px; }
-  .copyable:active { opacity: 0.5; }
-  .copyable:hover { color: #2563EB; }
+  .copyable { cursor: pointer; transition: opacity 0.1s; display:inline-flex; align-items:center; gap:4px; padding: 2px 6px -ml-1; border-radius: 6px; }
+  .copyable:active { opacity: 0.5; background: #eee; }
+  .copyable:hover { color: #2563EB; background: #f0f4ff; }
+  
+  /* 즐겨찾기 북마크 아이콘으로 크기 키움 */
+  .fav-btn { padding: 8px; border-radius: 8px; color: #A1A1AA; transition: all 0.2s; cursor:pointer; }
+  .fav-btn:hover { background: #F3F4F6; color: #111; }
+  .fav-btn[data-active="1"] { color: var(--ink); fill: var(--ink); }
   
   .modal-backdrop{ background:rgba(10,10,10,.55); backdrop-filter:blur(2px); }
   
+  /* 쇼룸 모드 켤 때 메모 가리기 추가 */
   body.showroom-mode .real-qty { display: none !important; }
   body.showroom-mode .showroom-qty { display: inline !important; }
   body.showroom-mode .loc-simple { display: none !important; }
+  body.showroom-mode .showroom-hide { display: none !important; }
   body.showroom-mode .detail-grid table th:nth-child(3),
   body.showroom-mode .detail-grid table td:nth-child(3),
   body.showroom-mode .detail-grid table th:nth-child(4),
@@ -89,7 +92,7 @@
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <button id="cartBtn" class="chip mono text-[11px] hidden" style="background:var(--accent); color:#fff; border:none;"><i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> 요청함 (<span id="cartCount">0</span>)</button>
+      <button id="allMemosBtn" class="chip mono text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200"><i data-lucide="bell-ring" class="w-3.5 h-3.5"></i> 오늘의 메모</button>
       <button id="showroomBtn" class="chip mono text-[11px]"><i data-lucide="eye" class="w-3.5 h-3.5"></i>쇼룸</button>
       <button id="darkModeBtn" class="chip mono text-[11px]">🌙</button>
       <button id="refreshBtn" class="chip mono text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
@@ -102,7 +105,7 @@
   <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)] mb-1">TOTAL ITEMS</div><div id="statItems" class="text-2xl font-black tnum">0</div></div>
   <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)] mb-1">BUSAN STOCK</div><div id="statBusan" class="text-2xl font-black tnum" style="color:var(--accent)">0</div></div>
   <div class="card p-3"><div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)] mb-1">CATEGORY</div>
-    <div class="mt-1 text-sm font-bold flex flex-wrap gap-1.5"><span class="badge" style="background:#0A0A0A;color:#fff;">신발</span><span class="badge" style="background:#0A0A0A;color:#fff;">의류</span><span class="badge" style="background:#0A0A0A;color:#fff;">용품</span></div>
+    <div class="mt-1 text-sm font-bold text-gray-600 flex gap-2"><span>신발</span><span>의류</span><span>용품</span></div>
   </div>
   <div class="card p-3 min-w-0 flex flex-col justify-center">
     <div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)] mb-1">DATA SOURCE</div>
@@ -135,7 +138,7 @@
       </div>
       <div class="flex flex-wrap gap-2 items-center">
         <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">필터</span>
-        <button class="chip" data-fav="1">★ 즐겨찾기</button>
+        <button class="chip" data-fav="1">🔖 즐겨찾기</button>
         <button class="chip" data-stock="1">재고있음</button>
         <button class="chip" data-memo="1">📝 메모있음</button>
       </div>
@@ -177,23 +180,28 @@
   </div>
 </main>
 
+<div id="allMemosModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
+    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[80vh] flex flex-col relative bg-[color:var(--surface)]">
+      <button id="closeAllMemos" class="absolute top-4 right-4 p-2 z-10"><i data-lucide="x"></i></button>
+      <h3 class="text-xl font-black mb-1">🔔 오늘의 직원 메모 모아보기</h3>
+      <div class="text-xs text-gray-500 mb-4">현재 등록된 모든 이슈를 한눈에 파악합니다.</div>
+      <div id="allMemosList" class="flex-1 overflow-y-auto border-y py-2 mb-2 space-y-2"></div>
+    </div>
+  </div>
+</div>
+
 <div id="detailModal" class="hidden fixed inset-0 z-40 modal-backdrop no-print">
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
     <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[90vh] overflow-auto relative">
       <button id="closeDetail" class="absolute top-4 right-4 p-2 z-10"><i data-lucide="x"></i></button>
       <div id="detailHead"></div>
+      
+      <div id="detailMemosWrap" class="showroom-hide mt-3 mb-2"></div>
+
       <div id="detailBody"></div>
       
-      <div id="cartUI" class="mt-4 p-3 rounded-lg border bg-[color:var(--bg)]">
-        <div class="text-xs font-bold mb-2">🛒 타지점 이동 요청 담기</div>
-        <div class="flex gap-2">
-          <select id="cartSize" class="ipt flex-1 text-sm py-1.5"></select>
-          <input type="number" id="cartQty" class="ipt w-16 text-center py-1.5" value="1" min="1">
-          <button id="addCartBtn" class="brutal px-4 bg-black text-white font-black py-1.5 text-sm">담기</button>
-        </div>
-      </div>
-
-      <div id="memoUI" class="mt-3 p-3 rounded-lg border bg-[color:var(--bg)]">
+      <div id="memoUI" class="showroom-hide mt-3 p-3 rounded-lg border bg-[color:var(--bg)]">
         <div class="text-xs font-bold mb-2">📝 직원 메모 남기기</div>
         <div class="flex gap-2 mb-2">
             <select id="memoStaff" class="ipt w-24 text-xs py-1.5">
@@ -220,20 +228,6 @@
   </div>
 </div>
 
-<div id="cartModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
-  <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
-    <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[80vh] flex flex-col relative bg-[color:var(--surface)]">
-      <button id="closeCart" class="absolute top-4 right-4 p-2 z-10"><i data-lucide="x"></i></button>
-      <h3 class="text-xl font-black mb-4">🛒 이동 요청 목록</h3>
-      <div id="cartList" class="flex-1 overflow-y-auto border-y py-2 mb-4"></div>
-      <div class="flex gap-2">
-        <button id="clearCart" class="chip" style="color:var(--accent);">전체 삭제</button>
-        <button id="copyExcelBtn" class="brutal flex-1 py-3 bg-green-600 text-white font-black text-sm">엑셀용 리스트 복사</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="adminModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
     <div class="card w-full max-w-lg p-6 relative">
@@ -251,7 +245,7 @@
         <div id="drop" class="border-2 border-dashed border-gray-400 p-10 text-center cursor-pointer bg-gray-50 dark:bg-gray-800 rounded-xl">
             <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400 mb-2"></i>
             <div class="font-bold">엑셀 파일 클릭 또는 드래그</div>
-            <div class="text-xs text-gray-500 mt-1">업로드 시 재고 변동량(▲/▼) 자동 계산</div>
+            <div class="text-xs text-gray-500 mt-1">업로드 시 재고 변동량 자동 계산</div>
         </div>
         <input id="file" type="file" class="hidden" accept=".xlsx,.xls,.csv" />
       </div>
