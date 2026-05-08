@@ -1,4 +1,4 @@
-// RACEMENT Haeundae Inventory — app.js (v5.0 진짜 실무 완성판)
+// RACEMENT Haeundae Inventory — app.js (v5.1 실무 찐막 11개 버그 완벽 패치 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -37,7 +37,6 @@ function detectGender(code, sex){
   return "U";
 }
 
-// 스마트 컬러 뱃지
 function genderBadge(g){
   if(g==="M") return `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded text-[11px] font-bold">남성</span>`;
   if(g==="W") return `<span class="bg-pink-50 text-pink-600 border border-pink-100 px-1.5 py-0.5 rounded text-[11px] font-bold">여성</span>`;
@@ -70,6 +69,16 @@ async function copyText(text, btn){
   }catch(e){ alert("복사 실패"); }
 }
 
+// 🔥 업데이트 시간 완벽 표기 로직 🔥
+function applyMeta(meta){
+    if(meta) {
+        const el = $("#statSrc");
+        if(el) {
+            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">[${meta.uploadedAt || ''}] 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>`;
+        }
+    }
+}
+
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   
@@ -78,6 +87,7 @@ async function loadData(force = false){
       CURRENT_META = cached.meta || null;
       IMAGES = cached.images || {};
       MEMOS = cached.memos || [];
+      applyMeta(CURRENT_META);
       rebuildIndex(); render(); 
       return;
   }
@@ -101,11 +111,13 @@ async function loadData(force = false){
       else MEMOS = [];
 
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, _timestamp: Date.now() }));
+      
+      applyMeta(CURRENT_META);
       rebuildIndex(); render();
   } catch(e) { 
       if(cached) { 
           RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; 
-          rebuildIndex(); render(); 
+          applyMeta(CURRENT_META); rebuildIndex(); render(); 
       } else {
           RAW=[]; render();
       }
@@ -149,10 +161,10 @@ function rebuildIndex(){
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
     
+    // 증감 계산
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
-    // 메모 존재 여부 확인
     p.hasMemo = MEMOS.some(m => m.shopNo === p.shopNo || m.product === p.품명);
 
     const hay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ").toLowerCase();
@@ -174,6 +186,9 @@ function rebuildIndex(){
       btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
       wrap.appendChild(btn);
   });
+  
+  $("#statItems").textContent = fmt(PRODUCTS.length);
+  $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
 function card(p){
@@ -187,31 +202,50 @@ function card(p){
   
   const imgSrc = IMAGES[p.shopNo] || null;
   
+  // 증감 뱃지 (입고는 초록계열, 판매는 파란계열)
   let deltaHtml = "";
-  if (p.delta > 0) deltaHtml = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▲+${p.delta}</span>`;
-  else if (p.delta < 0) deltaHtml = `<span class="bg-red-50 text-red-600 border border-red-100 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▼${p.delta}</span>`;
+  if (p.delta > 0) deltaHtml = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded ml-1 text-[11px] font-black">▲ 입고 +${p.delta}</span>`;
+  else if (p.delta < 0) deltaHtml = `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded ml-1 text-[11px] font-black">▼ 판매 ${p.delta}</span>`;
 
-  let memoHtml = p.hasMemo ? `<span class="bg-yellow-50 text-yellow-700 border border-yellow-200 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">📝 메모있음</span>` : "";
+  // 카드 내부 메모 렌더링 (가장 최신 메모 1개만 요약해서 띄워줌)
+  const productMemos = MEMOS.filter(m => m.shopNo === p.shopNo || m.product === p.품명);
+  let memoHtml = "";
+  if(productMemos.length > 0) {
+      const m = productMemos[productMemos.length - 1]; // 최신 메모
+      memoHtml = `
+      <div class="mt-2 mb-2 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+         <div class="text-[11px] leading-snug">
+             <div class="flex items-center justify-between mb-0.5">
+                 <span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
+                 <span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span>
+             </div>
+             <div class="text-yellow-900 truncate">${escapeHtml(m.text)}</div>
+         </div>
+      </div>`;
+  }
 
   const smartTags = `<span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span> <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span> ${genderBadge(p.gender)}`;
 
-  // 🔥 이미지 사이즈업(80x80) & 별표 위치 고정 컨테이너 🔥
+  // 🔥 썸네일 80px로 확대 및 패딩 우측 90px 부여 (겹침 완전 방지) 🔥
   el.innerHTML = `
-    <div class="flex justify-between items-start gap-3 w-full mb-2">
-       <div class="flex-1 min-w-0 pt-1">
-          <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}${memoHtml}</div>
-          <button class="copyable font-extrabold text-[17px] leading-tight mb-1 truncate text-left w-full hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</button>
-          <button class="copyable text-[15px] font-bold text-[#555] text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
-              ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-50"></i>
-          </button>
+    <div class="relative w-full pr-[90px] min-h-[90px]">
+       <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}</div>
+       
+       <div class="flex items-start gap-1 mb-1">
+          <button class="fav-btn text-[22px] leading-none -mt-1 outline-none" style="color:var(--warn);">${FAVS.includes(p.품번)?'★':'☆'}</button>
+          <div class="copyable font-bold text-[17px] leading-tight text-left flex-1 hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
        </div>
-       <div class="shrink-0 flex flex-col items-end gap-2 relative w-[80px]">
-          <button class="fav-btn text-2xl leading-none z-10">${FAVS.includes(p.품번)?'★':'☆'}</button>
-          ${imgSrc ? `<img src="${imgSrc}" class="w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="w-[80px] h-[80px] bg-transparent"></div>'}
-       </div>
-    </div>
 
-    <div class="grid gap-1.5 mt-2 mb-4" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
+       <div class="copyable text-[15.5px] font-bold text-[#555] mb-3 text-left w-full hover:text-blue-600 flex items-center gap-1.5" data-copy="${escapeHtml(p.품번)}">
+          ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-4 h-4 opacity-50"></i>
+       </div>
+       
+       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[80px] h-[80px] bg-transparent"></div>'}
+    </div>
+    
+    ${memoHtml}
+
+    <div class="grid gap-1.5 mb-4" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
       ${p.sizes.map(s=>{
           const q = s.busan||0; 
           let cls = "size-cell tnum ";
@@ -219,7 +253,6 @@ function card(p){
           return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span><span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
       }).join("")}
     </div>
-
     <div class="loc-simple">
        <div class="flex gap-1 items-center"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
        <div class="price-clean">${krw(p.소비자가)}</div>
@@ -250,7 +283,6 @@ function renderRecentSearches() {
     $$('.recent-q', wrap).forEach(b => b.addEventListener("click", () => { $("#q").value = b.textContent; visibleCount = 60; render(); }));
 }
 
-// 🔥 검색 결과 노출 오류 완벽 수정 🔥
 function render(){
   const grid = $("#grid"); grid.innerHTML = "";
   
@@ -261,7 +293,6 @@ function render(){
   }
   
   $("#emptyState").classList.add("hidden");
-  $("#results").classList.remove("hidden");
 
   const f = getFilters();
   
@@ -313,16 +344,21 @@ function render(){
     return String(a.품명).localeCompare(String(b.품명),"ko");
   });
 
+  // 🔥 더보기(+60) 기능 완벽 연동 🔥
   if(filteredList.length === 0){
       $("#noMatch").classList.remove("hidden");
+      $("#grid").parentElement.classList.remove("hidden");
       $("#moreWrap").classList.add("hidden");
   } else {
       $("#noMatch").classList.add("hidden");
-      filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
+      $("#grid").parentElement.classList.remove("hidden");
       
-      // 🔥 더보기 버튼 로직 부활 🔥
+      const slice = filteredList.slice(0, visibleCount);
+      slice.forEach(p=>grid.appendChild(card(p)));
+      
       if(filteredList.length > visibleCount) {
           $("#moreWrap").classList.remove("hidden");
+          $("#moreBtn").textContent = `더 보기 (+${Math.min(60, filteredList.length - visibleCount)})`;
       } else {
           $("#moreWrap").classList.add("hidden");
       }
@@ -381,8 +417,6 @@ function openDetail(p){
       const adminImgBox = document.createElement("div");
       adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
       const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
-      
-      // 🔥 툴 이름 변경 🔥
       adminImgBox.innerHTML = `
           <div class="text-xs font-bold text-gray-800 mb-2">🖼️ 제품 이미지 웹 등록 툴</div>
           <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">
@@ -436,7 +470,11 @@ function openDetail(p){
               if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
           }catch(e){}
           
-          oldData.push({ date: new Date().toLocaleString(), product: p.품명, shopNo: p.shopNo, staff, tag, text });
+          // 🔥 가독성 좋은 날짜 포맷팅 🔥
+          const d = new Date();
+          const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+          
+          oldData.push({ date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
           const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
           
@@ -445,12 +483,12 @@ function openDetail(p){
           
           MEMOS = oldData; 
           
-          // 🔥 메모 저장 즉시 상태 변경 및 화면 갱신 (버그 해결) 🔥
+          // 메모 추가 시 즉각 상태 갱신
           CURRENT_PRODUCT.hasMemo = true;
           const prodIndex = PRODUCTS.findIndex(pr => pr.품번 === CURRENT_PRODUCT.품번);
           if (prodIndex > -1) PRODUCTS[prodIndex].hasMemo = true;
           
-          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다.";
+          msg.style.color="green"; msg.textContent="✓ 저장 완료! (목록에 즉시 반영됩니다)";
           $("#memoText").value = "";
           render(); 
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
@@ -459,7 +497,7 @@ function openDetail(p){
   $("#detailModal").classList.remove("hidden");
 }
 
-// 🔥 ESC 키 누르면 팝업 닫기 추가 🔥
+// 🔥 ESC 키 누르면 모든 팝업 닫기 🔥
 document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") {
         $$('.modal-backdrop').forEach(m => m.classList.add("hidden"));
@@ -521,12 +559,17 @@ $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode");
 
 $("#file").onchange = async (e) => { 
     const f = e.target.files[0]; if(!f) return;
+    
+    // 🔥 업데이트 시간 생성 및 메타데이터 주입 🔥
+    const d = new Date();
+    const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    
     localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
     const reader = new FileReader();
     reader.onload = async (ev) => {
         const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
         let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
-        const meta = { fileName:f.name };
+        const meta = { fileName:f.name, uploadedAt: dateStr };
         try { 
             await commitInventoryToGitHub(rows, meta); 
             RAW = rows; CURRENT_META = meta; 
