@@ -1,4 +1,4 @@
-// RACEMENT Haeundae Inventory — app.js (v4.1 기능 완벽 복구 버전)
+// RACEMENT Haeundae Inventory — app.js (v4.2 스마트 컬러 / 기능 완벽 복구 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -34,9 +34,14 @@ function detectGender(code, sex){
   if(g==="여성"||g==="여"||g.toUpperCase()==="W") return "W";
   return "U";
 }
-function genderLabel(g){
-  if(g==="M") return {label:"남성"}; if(g==="W") return {label:"여성"}; return {label:"공용"};
+
+// 🔥 스마트 컬러 코딩 (파스텔 톤 뱃지로 0.1초 인지) 🔥
+function genderBadge(g){
+  if(g==="M") return `<span class="bg-blue-50 text-blue-600 border border-blue-100 px-1.5 py-0.5 rounded text-[11px] font-bold">남성</span>`;
+  if(g==="W") return `<span class="bg-pink-50 text-pink-600 border border-pink-100 px-1.5 py-0.5 rounded text-[11px] font-bold">여성</span>`;
+  return `<span class="bg-gray-100 text-gray-600 border border-gray-200 px-1.5 py-0.5 rounded text-[11px] font-bold">공용</span>`;
 }
+
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 function getChosung(str){
@@ -128,8 +133,16 @@ function rebuildIndex(){
     return p;
   });
   
+  // 🔥 브랜드 '전체' 버튼 작동안하던 이슈 수정 🔥
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
-  const wrap = $("#brandChips"); wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
+  const wrap = $("#brandChips"); 
+  wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
+  
+  wrap.querySelector('[data-brand="ALL"]').onclick = function() {
+      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0"));
+      visibleCount=60; render();
+  };
+  
   brands.forEach(b => {
       const btn = document.createElement("button"); btn.className="chip"; btn.dataset.brand=b; btn.textContent=b;
       btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
@@ -150,19 +163,24 @@ function card(p){
   };
   
   const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
-  const tagsStr = [p.카테고리, p.브랜드, genderLabel(p.gender).label].filter(Boolean).join(" · ");
   
   let deltaHtml = "";
-  if (p.delta > 0) deltaHtml = `<span class="bg-red-50 text-red-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▲+${p.delta}</span>`;
-  else if (p.delta < 0) deltaHtml = `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▼${p.delta}</span>`;
+  if (p.delta > 0) deltaHtml = `<span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▲+${p.delta}</span>`;
+  else if (p.delta < 0) deltaHtml = `<span class="bg-red-50 text-red-600 px-1.5 py-0.5 rounded ml-1 text-[10px] font-bold">▼${p.delta}</span>`;
 
-  const imgHtml = imgSrc ? `<img src="${imgSrc}" class="boxless-img" onerror="this.style.display='none'">` : '';
+  // 스마트 컬러 태그 적용
+  const smartTags = `
+      <span class="bg-black text-white px-1.5 py-0.5 rounded text-[11px] font-bold">${escapeHtml(p.카테고리||"-")}</span>
+      <span class="text-[#666] font-bold text-[11px]">${escapeHtml(p.브랜드||"-")}</span>
+      ${genderBadge(p.gender)}
+  `;
 
   el.innerHTML = `
     <button class="fav-btn text-xl absolute top-4 right-4 z-10" style="${imgSrc?'right:85px;':''}">${FAVS.includes(p.품번)?'★':'☆'}</button>
-    ${imgHtml}
+    ${imgSrc ? `<img src="${imgSrc}" class="absolute top-4 right-4 w-[60px] h-[60px] object-contain mix-blend-multiply dark:mix-blend-normal">` : ''}
+    
     <div class="pr-[70px]">
-        <div class="tags-text">${escapeHtml(tagsStr)}${deltaHtml}</div>
+        <div class="flex items-center flex-wrap gap-1 mb-2">${smartTags}${deltaHtml}</div>
         <div class="copyable font-bold text-[16px] leading-tight mb-1 truncate text-left w-full" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
         <div class="copyable text-[14px] text-[#666] mb-3 text-left w-full" data-copy="${escapeHtml(p.품번)}">${escapeHtml(p.품번)}</div>
     </div>
@@ -209,50 +227,44 @@ function render(){
       renderRecentSearches();
   }
 
-  // 1. 필터링 처리 & 검색 결과 안 나오던 오류 수정!
   let filteredList = PRODUCTS.filter(p=>{
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.stock && p.busanTotal <= 0) return false;
-    
-    // 검색어가 있을 경우
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
         for(const t of tokens){
-            if(isAllChosung(t)){ 
-                if(!p._chosung.includes(t)) return false; 
-            } else { 
-                if(!p._hay.includes(t)) return false; 
-            }
+            if(isAllChosung(t)){ if(!p._chosung.includes(t)) return false; } 
+            else { if(!p._hay.includes(t)) return false; }
         }
     }
     return true;
   });
 
-  // 2. 정렬 기능(클로드 원본) 완벽 복구
+  // 🔥 3. 기본 정렬 및 클로드 필터 셀렉트박스 완벽 적용 🔥
   const sortMode = $("#sortSel").value;
   filteredList.sort((a,b) => {
+    if(sortMode === "default") {
+        const ca = CAT_ORDER[a.카테고리] ?? 9; 
+        const cb = CAT_ORDER[b.카테고리] ?? 9;
+        if(ca!==cb) return ca-cb;
+        const sa=a.busanTotal>0?0:1; const sb=b.busanTotal>0?0:1;
+        if(sa!==sb) return sa-sb;
+        return String(a.품명).localeCompare(String(b.품명),"ko");
+    }
     if(sortMode==="stock") return b.busanTotal - a.busanTotal || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode==="name") return String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode==="priceAsc") return (a.소비자가||0) - (b.소비자가||0);
     if(sortMode==="priceDesc") return (b.소비자가||0) - (a.소비자가||0);
     
-    // 기본 정렬: 카테고리 > 브랜드 > 품명
-    const ca = CAT_ORDER[a.카테고리] ?? 9; 
-    const cb = CAT_ORDER[b.카테고리] ?? 9;
-    if(ca!==cb) return ca-cb;
     const br = String(a.브랜드).localeCompare(String(b.브랜드),"ko"); if(br!==0) return br;
     return String(a.품명).localeCompare(String(b.품명),"ko");
   });
 
   filteredList.slice(0, visibleCount).forEach(p=>grid.appendChild(card(p)));
-  
-  if(filteredList.length === 0){
-      $("#emptyState").classList.remove("hidden");
-  } else {
-      $("#emptyState").classList.add("hidden");
-  }
+  if(filteredList.length === 0) $("#emptyState").classList.remove("hidden");
+  else $("#emptyState").classList.add("hidden");
 
   if(window.lucide) lucide.createIcons();
   updateCartStatus();
@@ -284,185 +296,4 @@ function openCartModal(){
 window.deleteCartItem = (idx) => { CART.splice(idx, 1); localStorage.setItem('CART', JSON.stringify(CART)); openCartModal(); updateCartStatus(); };
 
 function openDetail(p){
-  CURRENT_PRODUCT = p;
-  const imgSrc = (typeof IMAGES !== "undefined" && IMAGES[p.shopNo]) ? IMAGES[p.shopNo] : null;
-  const tagsStr = [p.카테고리, p.브랜드, genderLabel(p.gender).label].filter(Boolean).join(" · ");
-  
-  $("#detailHead").innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-[color:var(--line)]" style="max-height: 200px; background:var(--surface);">` : ''}
-    <div class="tags-text">${escapeHtml(tagsStr)}</div>
-    <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
-  `;
-  $("#detailBody").innerHTML = `
-    <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
-      <tr class="text-[#888] border-b border-[color:var(--line)]"><th class="py-2 px-2 text-left">사이즈</th><th class="px-2 text-center">부산</th><th class="px-2 text-center">신사</th><th class="px-2 text-center">물류</th></tr>
-      ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
-    </table>
-  `;
-  const sz = $("#cartSize"); sz.innerHTML = p.sizes.map(s=>`<option value="${s.size}">${s.size} (신사:${s.sinsa} / 물류:${s.center})</option>`).join("");
-  
-  if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
-      const adminImgBox = document.createElement("div");
-      adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
-      const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
-      adminImgBox.innerHTML = `
-          <div class="text-xs font-bold text-gray-800 mb-2">👑 점장 이미지 관리</div>
-          <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">
-              🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)
-          </a>
-          <div class="flex gap-2">
-              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="여기에 복사한 이미지 주소 붙여넣기">
-              <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
-          </div>
-          <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
-      `;
-      $("#detailBody").appendChild(adminImgBox);
-
-      adminImgBox.querySelector("#quickImgSave").onclick = async () => {
-          const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
-          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
-          try {
-              if (typeof IMAGES === "undefined") window.IMAGES = {};
-              IMAGES[p.shopNo] = url; 
-              
-              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
-              let sha = null;
-              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
-              if(sha) body.sha = sha;
-              const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-              if(!r2.ok) throw new Error("API 에러");
-
-              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!";
-              render(); 
-              setTimeout(()=>{openDetail(p);}, 500);
-          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
-      };
-  }
-
-  // 직원 메모 저장 로직
-  $("#addMemoBtn").onclick = async () => {
-      const staff = $("#memoStaff").value.trim();
-      const tag = $("#memoTag").value;
-      const text = $("#memoText").value.trim();
-      const msg = $("#memoMsg");
-      
-      if(!staff || !text) { msg.style.color="red"; msg.textContent="이름과 내용을 입력하세요."; return; }
-      msg.style.color="black"; msg.textContent="메모 저장 중...";
-
-      try {
-          const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
-          let sha = null;
-          let oldData = [];
-          try { 
-              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
-              if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
-          }catch(e){}
-          
-          oldData.push({ date: new Date().toLocaleString(), product: p.품명, shopNo: p.shopNo, staff, tag, text });
-          
-          const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
-          if(sha) body.sha = sha;
-          
-          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-          if(!r2.ok) throw new Error("API 에러");
-          
-          msg.style.color="green"; msg.textContent="✓ 메모가 저장되었습니다. (21시 보고 예정)";
-          $("#memoText").value = "";
-      } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
-  };
-
-  $("#detailModal").classList.remove("hidden");
-}
-
-// 모든 모달 바깥 터치 닫기 강제 적용
-$$('.modal-backdrop').forEach(modal => {
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal || e.target.classList.contains("modal-outer")) {
-            modal.classList.add("hidden");
-        }
-    });
-});
-$$('button[id^="close"]').forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        e.target.closest('.modal-backdrop').classList.add("hidden");
-    });
-});
-
-$("#addCartBtn").onclick=()=>{
-  CART.push({ 품명:CURRENT_PRODUCT.품명, 품번:CURRENT_PRODUCT.품번, 사이즈:$("#cartSize").value, 수량:$("#cartQty").value });
-  localStorage.setItem('CART', JSON.stringify(CART)); updateCartStatus(); 
-  $("#detailModal").classList.add("hidden"); alert("장바구니에 담겼습니다.");
-};
-
-$("#copyExcelBtn").onclick = () => {
-  const header = "품명\t품번\t사이즈\t개수\n";
-  const rows = CART.map(c => `${c.품명}\t${c.품번}\t${c.사이즈}\t${c.수량}`).join("\n");
-  copyText(header + rows, $("#copyExcelBtn"));
-};
-$("#clearCart").onclick = () => { if(confirm("전체 삭제할까요?")){ CART=[]; localStorage.removeItem('CART'); openCartModal(); updateCartStatus(); }};
-$("#cartBtn").onclick = openCartModal;
-
-// 버튼 필터 토글 & 브랜드 칩 클릭 연동
-$$('button.chip[data-cat], button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.addEventListener("click",()=>{ 
-    if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
-    else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
-    visibleCount=60; render(); 
-}));
-
-// 초기화 버튼 완벽 구현 (브랜드 포함 전부 리셋)
-$("#resetAll").onclick=()=>{ 
-    $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); 
-    $$('button.chip[data-fav], button.chip[data-stock]').forEach(b=>b.dataset.active="0"); 
-    $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
-    $("#sortSel").value="brand";
-    $("#q").value=""; 
-    visibleCount=60; render(); 
-};
-
-// 정렬 변경 이벤트
-$("#sortSel").onchange=()=> { visibleCount=60; render(); };
-
-let qTimer;
-$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
-$("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
-$("#refreshBtn").onclick=()=>loadData(true);
-
-$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
-$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
-
-$("#file").onchange = async (e) => { 
-    const f = e.target.files[0]; if(!f) return;
-    localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
-        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
-        const meta = { fileName:f.name };
-        try { 
-            await commitInventoryToGitHub(rows, meta); 
-            RAW = rows; CURRENT_META = meta; 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, _timestamp: Date.now()})); 
-            applyMeta(CURRENT_META);
-            rebuildIndex(); render();
-            $("#adminModal").classList.add("hidden");
-            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
-        } catch(err) { alert("업로드 실패! 깃허브 권한을 확인하세요."); }
-        $("#file").value = ""; 
-    };
-    reader.readAsArrayBuffer(f);
-};
-
-// 어드민 뒤로가기 버튼 연동
-$("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
-$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
-$("#drop").onclick=()=>$("#file").click(); 
-$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
-
-$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
-$("#ghSave").onclick=()=>{
-    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
-    saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
-};
-
-loadGhConfig(); loadData();
+  CURRENT
