@@ -1,4 +1,4 @@
-// RACEMENT Haeundae Inventory — app.js (v5.2 검색 기능 완벽 복구 및 렉 제거)
+// RACEMENT Haeundae Inventory — app.js (v6.0 찐막 완벽 복구 버전)
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -76,10 +76,12 @@ function applyMeta(meta){
 
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+  
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
       RAW = cached.rows || []; CURRENT_META = cached.meta || null; IMAGES = cached.images || {}; MEMOS = cached.memos || [];
       applyMeta(CURRENT_META); rebuildIndex(); render(); return;
   }
+  
   try {
       const [invRes, imgRes, memoRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
@@ -142,9 +144,11 @@ function rebuildIndex(){
     
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
+    
+    // 메모 품번으로 정확히 매칭
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    const hay = `${p.품번||""} ${p.품명||""} ${p.브랜드||""}`.toLowerCase();
+    const hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||""].join(" ").toLowerCase();
     p._hay = hay; p._chosung = getChosung(hay);
     return p;
   });
@@ -201,24 +205,24 @@ function card(p){
   const isFav = FAVS.includes(p.품번);
 
   el.innerHTML = `
-    <button class="fav-btn absolute top-3 right-3 p-2 text-gray-400 hover:text-black z-10 outline-none" data-active="${isFav?'1':'0'}">
-        <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-current text-black' : ''}"></i>
+    <button class="fav-btn-fixed" data-active="${isFav?'1':'0'}">
+        <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-current text-black' : 'text-gray-400'}"></i>
     </button>
     
     <div class="flex gap-2 text-xs font-bold text-gray-500 mb-1">
-        <span>${escapeHtml(p.카테고리||"-")}</span>
+        <span class="text-black">${escapeHtml(p.카테고리||"-")}</span>
         <span>${escapeHtml(p.브랜드||"-")}</span>
         ${deltaHtml}
     </div>
 
-    <div class="flex justify-between items-start w-full pr-[90px] min-h-[90px] relative">
+    <div class="flex justify-between items-start w-full pr-[100px] min-h-[90px] relative">
        <div class="flex-1 min-w-0">
           <div class="copyable font-extrabold text-[17px] leading-tight mb-1 text-left w-full hover:text-blue-600 truncate" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
           <div class="copyable text-[15.5px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
               ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i>
           </div>
        </div>
-       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[80px] h-[80px]"></div>'}
+       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[90px] h-[90px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[90px] h-[90px]"></div>'}
     </div>
     
     ${memoHtml}
@@ -237,7 +241,7 @@ function card(p){
     </div>
   `;
   
-  el.querySelector('.fav-btn').onclick=(e)=>{ 
+  el.querySelector('.fav-btn-fixed').onclick=(e)=>{ 
       e.stopPropagation(); 
       if(FAVS.includes(p.품번)) FAVS=FAVS.filter(id=>id!==p.품번); 
       else FAVS.push(p.품번); 
@@ -259,7 +263,6 @@ function getFilters(){
   };
 }
 
-// 🔥 메모리 부하 주범이었던 최근검색어 타이핑 이슈 완전 해결 🔥
 function saveRecentSearch(val) {
     if(!val) return;
     RECENT_SEARCHES = RECENT_SEARCHES.filter(q => q !== val);
@@ -281,14 +284,15 @@ function renderRecentSearches() {
         render(); 
     }));
 }
-renderRecentSearches(); // 최초 1회 렌더
+renderRecentSearches();
 
-// 🔥 검색 렉 / 먹통 버그 완전 소멸 🔥
+// 🔥 검색 렉/먹통 완벽 해결 (무조건 검색됨) 🔥
 function render(){
   const grid = $("#grid"); grid.innerHTML = "";
   
   if(!RAW.length) { 
       $("#emptyState").classList.remove("hidden"); 
+      $("#noMatch").classList.add("hidden");
       $("#grid").parentElement.classList.add("hidden"); 
       return; 
   }
@@ -305,16 +309,17 @@ function render(){
     if(f.stock && p.busanTotal <= 0) return false;
     if(f.memoOnly && !p.hasMemo) return false;
     
-    // 심플하고 무조건 작동하는 검색 로직
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
+        let matchAll = true;
         for(const t of tokens){
             if(isAllChosung(t)){ 
-                if(!p._chosung.includes(t)) return false; 
+                if(!p._chosung.includes(t)) matchAll = false; 
             } else { 
-                if(!p._hay.includes(t)) return false; 
+                if(!p._hay.includes(t)) matchAll = false; 
             }
         }
+        if(!matchAll) return false;
     }
     return true;
   });
@@ -362,25 +367,18 @@ function render(){
 
 $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
-// 🔥 검색창 입력 안정성 확보 (렉 방지) 🔥
+// 🔥 검색 렉 제거 (디바운스) 및 최근 검색어 엔터 저장 🔥
 let qTimer;
 $("#q").addEventListener("input", () => {
     clearTimeout(qTimer);
     qTimer = setTimeout(() => { visibleCount=60; render(); }, 100);
 });
-
-// 엔터 누를 때만 최근 검색어 저장 (렉 완벽 해결)
 $("#q").addEventListener("keydown", (e) => {
-    if(e.key === "Enter") {
-        e.preventDefault();
-        saveRecentSearch($("#q").value.trim().toLowerCase());
-        $("#q").blur(); 
-    }
+    if(e.key === "Enter") { e.preventDefault(); saveRecentSearch($("#q").value.trim().toLowerCase()); $("#q").blur(); }
 });
-
 $("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 
-// 오늘의 메모 모아보기
+// 🔥 오늘의 메모 모아보기 (신규) 🔥
 $("#allMemosBtn").onclick = () => {
     const listEl = $("#allMemosList");
     listEl.innerHTML = "";
@@ -427,11 +425,7 @@ window.deleteMemo = async (memoId) => {
             openDetail(CURRENT_PRODUCT); 
         }
         
-        // 메모 모아보기 창이 열려있다면 즉시 갱신
-        if(!$("#allMemosModal").classList.contains("hidden")) {
-            $("#allMemosBtn").click();
-        }
-        
+        if(!$("#allMemosModal").classList.contains("hidden")) { $("#allMemosBtn").click(); }
         render();
     } catch(e) { alert("메모 삭제 실패"); }
 };
@@ -581,13 +575,22 @@ function openDetail(p){
 
 // ESC 키 및 모달 닫기
 document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") { $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); }
+    if(e.key === "Escape") { 
+        $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); 
+    }
 });
+
 $$('.modal-backdrop').forEach(modal => {
-    modal.addEventListener("click", (e) => { if (e.target === modal || e.target.classList.contains("modal-outer")) modal.classList.add("hidden"); });
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal || e.target.classList.contains("modal-outer")) {
+            modal.classList.add("hidden");
+        }
+    });
 });
 $$('button[id^="close"]').forEach(btn => {
-    btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
+    btn.addEventListener("click", (e) => {
+        e.target.closest('.modal-backdrop').classList.add("hidden");
+    });
 });
 
 $("#addCartBtn").onclick=()=>{
