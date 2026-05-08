@@ -31,6 +31,9 @@
   .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.4rem .7rem; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--ink-2); font-weight:600; font-size:.82rem; cursor:pointer; }
   .chip[data-active="1"]{ background:var(--ink); color:#fff; border-color:var(--ink); }
   
+  .boxless-img { position: absolute; top: 16px; right: 16px; width: 60px; height: 60px; object-fit: contain; background: transparent; pointer-events: none; }
+  
+  .tags-text { font-size: 12px; color: #888; font-weight: 600; margin-bottom: 4px; display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
   .loc-simple { font-size: 13px; color: #666; margin-top: auto; padding-top:12px; border-top: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
   .loc-simple b { font-weight: 700; color: var(--ink); }
   .price-clean { font-family: sans-serif; font-weight: 600; color: var(--ink); font-size: 15px; letter-spacing: -0.01em; }
@@ -107,6 +110,7 @@
         <div class="border-l border-[color:var(--line)] h-4 mx-1"></div>
         <button class="chip" data-fav="1">★ 즐겨찾기</button>
         <button class="chip" data-stock="1">재고있음</button>
+        <button class="chip" data-memo="1">📝 메모있음</button>
       </div>
       <div class="flex flex-wrap gap-2 items-center">
         <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">정렬기준</span>
@@ -150,7 +154,7 @@
       </div>
 
       <div id="memoUI" class="mt-3 p-3 rounded-lg border bg-[color:var(--bg)]">
-        <div class="text-xs font-bold mb-2">📝 직원 메모 남기기 (21시 일일보고 연동)</div>
+        <div class="text-xs font-bold mb-2">📝 직원 메모 남기기 (매일 18시 텔레그램 일일보고 연동)</div>
         <div class="flex gap-2 mb-2">
             <select id="memoStaff" class="ipt w-24 text-xs py-1.5">
                 <option value="" disabled selected>직원선택</option>
@@ -213,17 +217,3 @@
       </div>
 
       <div id="settingsPanel" class="hidden">
-        <button id="backToUpload" class="text-xs mb-3 border px-2 py-1 text-gray-600 hover:bg-gray-100">← 이전 화면으로</button>
-        <input id="ghOwner" class="ipt w-full mb-2" placeholder="GitHub 사용자명" />
-        <input id="ghRepo" class="ipt w-full mb-2" placeholder="저장소 이름" />
-        <input id="ghPat" type="password" class="ipt w-full mb-4" placeholder="PAT 토큰" />
-        <button id="ghSave" class="brutal w-full py-2 bg-black text-white font-black">설정 저장</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="./app.js"></script>
-<script src="./images.js"></script>
-</body>
-</html>
