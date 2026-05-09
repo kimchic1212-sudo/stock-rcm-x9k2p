@@ -5,12 +5,14 @@ const GH_PAT_KEY = "racement_gh_pat_v1";
 const CACHE_KEY = "racement_inventory_cache_v1";
 const DATA_PATH = "inventory.json";
 const REQUESTS_PATH = "requests.json"; 
+const TRANSFERS_PATH = "transfers.json"; 
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {}; 
 let MEMOS = []; 
+let TRANSFERS = []; 
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -47,7 +49,6 @@ function getChosung(str){
   return r;
 }
 
-// 🔥 누락되었던 초성 검사 함수 추가 🔥
 function isAllChosung(str) {
     return /^[ㄱ-ㅎ]+$/.test(str);
 }
@@ -84,16 +85,18 @@ async function loadData(force = false){
       CURRENT_META = cached.meta || null;
       IMAGES = cached.images || {};
       MEMOS = cached.memos || [];
+      TRANSFERS = cached.transfers || [];
       applyMeta(CURRENT_META);
       rebuildIndex(); render(); 
       return;
   }
   
   try {
-      const [invRes, imgRes, memoRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
-          fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
 
       if(!invRes.ok) throw new Error("재고 로드 실패");
@@ -107,13 +110,16 @@ async function loadData(force = false){
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json();
       else MEMOS = [];
 
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, _timestamp: Date.now() }));
+      if(trRes && trRes.ok) TRANSFERS = await trRes.json();
+      else TRANSFERS = [];
+
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, _timestamp: Date.now() }));
       
       applyMeta(CURRENT_META);
       rebuildIndex(); render();
   } catch(e) { 
       if(cached) { 
-          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; 
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; 
           applyMeta(CURRENT_META); rebuildIndex(); render(); 
       } else {
           RAW=[]; render();
@@ -137,10 +143,14 @@ async function commitInventoryToGitHub(rows, meta){
 function rebuildIndex(){
   const map = new Map();
   const prevRaw = JSON.parse(localStorage.getItem('PREV_RAW') || '[]');
+  const allSizes = new Set(); // 🔥 사이즈 필터를 위한 데이터 수집
   
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
+    if(r["규격"]) allSizes.add(String(r["규격"]).trim()); // 규격 추가
+
     if(!map.has(code)){
+      // 🔥 성별 데이터(p.성별) 원본 저장 추가
       map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false });
     }
     const p = map.get(code);
@@ -163,7 +173,6 @@ function rebuildIndex(){
     
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    // 🔥 검색용 데이터 강화: 띄어쓰기와 특수문자가 제거된 데이터 추가 🔥
     const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
     p._hay = rawHay.toLowerCase();
     p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
@@ -172,6 +181,25 @@ function rebuildIndex(){
     return p;
   });
   
+  // 🔥 동적 사이즈 필터 박스 생성 로직 🔥
+  const sortedSizes = Array.from(allSizes).sort((a,b) => {
+      const numA = parseInt(a), numB = parseInt(b);
+      if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+  });
+
+  if(!$("#sizeSel") && $("#sortSel")) {
+      const sel = document.createElement("select");
+      sel.id = "sizeSel";
+      sel.className = "ipt text-[13px] font-bold ml-2 bg-white border-gray-300 rounded shrink-0 px-2 py-1.5";
+      $("#sortSel").parentNode.insertBefore(sel, $("#sortSel"));
+      sel.onchange = () => { visibleCount=60; render(); };
+  }
+  if($("#sizeSel")) {
+      const currentSize = $("#sizeSel").value || "ALL";
+      $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
+  }
+
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
   const wrap = $("#brandChips"); 
   wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
@@ -193,7 +221,8 @@ function rebuildIndex(){
 
 function card(p){
   const el = document.createElement("article");
-  el.className = "card card-hover p-4 flex flex-col pt-[42px]"; 
+  // 🔥 상단 패딩 축소 및 레이아웃 최적화
+  el.className = "card card-hover p-4 flex flex-col relative bg-white"; 
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
@@ -225,27 +254,30 @@ function card(p){
 
   const isFav = FAVS.includes(p.품번);
 
+  // 🔥 이미지 확대, 성별 뱃지 추가, 즐겨찾기 우상단 배치 🔥
   el.innerHTML = `
-    <button class="fav-btn absolute top-3 right-3 p-2 text-gray-400 hover:text-black z-10 outline-none" data-active="${isFav?'1':'0'}">
-        <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-current text-black' : ''}"></i>
-    </button>
-    
-    <div class="flex gap-2 text-xs font-bold text-gray-500 mb-1">
-        <span>${escapeHtml(p.카테고리||"-")}</span>
-        <span>${escapeHtml(p.브랜드||"-")}</span>
-        ${deltaHtml}
+    <div class="flex justify-between items-start mb-2 z-10 relative">
+        <div class="flex flex-wrap gap-1.5 text-[11px] font-bold text-gray-500 mt-0.5">
+            <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span>
+            <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span>
+            <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>
+            ${deltaHtml}
+        </div>
+        <button class="fav-btn p-1.5 -mt-1.5 -mr-1.5 text-gray-300 hover:text-yellow-500 outline-none shrink-0" data-active="${isFav?'1':'0'}">
+            <i data-lucide="bookmark" class="w-6 h-6 ${isFav ? 'fill-yellow-400 text-yellow-400' : ''}"></i>
+        </button>
     </div>
 
-    <div class="flex justify-between items-start w-full pr-[90px] min-h-[90px] relative">
-       <div class="flex-1 min-w-0">
-          <div class="copyable font-extrabold text-[17px] leading-tight mb-1 text-left w-full hover:text-blue-600 truncate" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+    <div class="flex justify-between items-start w-full min-h-[120px] relative mb-2">
+       <div class="flex-1 min-w-0 pr-[130px]">
+          <div class="copyable font-extrabold text-[17px] leading-tight mb-1.5 text-left w-full hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
           
-          <div class="copyable text-[15.5px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
+          <div class="copyable text-[14px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
               ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i>
           </div>
        </div>
        
-       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[80px] h-[80px] object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="absolute top-0 right-0 w-[80px] h-[80px]"></div>'}
+       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
     </div>
     
     ${memoHtml}
@@ -258,7 +290,7 @@ function card(p){
           return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span><span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
       }).join("")}
     </div>
-    <div class="loc-simple">
+    <div class="loc-simple mt-auto">
        <div class="flex gap-1 items-center"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
        <div class="price-clean">${krw(p.소비자가)}</div>
     </div>
@@ -282,7 +314,8 @@ function getFilters(){
     q: $("#q").value.trim().toLowerCase(),
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
-    memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1") 
+    memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
+    size: $("#sizeSel") ? $("#sizeSel").value : "ALL" // 🔥 사이즈 필터값 읽어오기
   };
 }
 
@@ -305,22 +338,26 @@ function render(){
     if(f.gender!=="ALL" && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
-    if(f.stock && p.busanTotal <= 0) return false;
     if(f.memoOnly && !p.hasMemo) return false;
     
-    // 🔥 검색 필터링 로직 강화: 띄어쓰기/특수문자 무시 검색 지원 🔥
+    // 🔥 사이즈 필터 & 재고 조건 통합 처리 🔥
+    if(f.size !== "ALL") {
+        const sizeObj = p.sizes.find(s => String(s.size).trim() === f.size);
+        if(!sizeObj) return false; // 선택한 사이즈 자체가 없는 제품 제외
+        if(f.stock && sizeObj.busan <= 0) return false; // 사이즈는 있지만 부산 재고가 없으면 제외
+    } else {
+        if(f.stock && p.busanTotal <= 0) return false; // 전체 사이즈일 때는 총 재고 확인
+    }
+
     if(f.q) { 
         const tokens = f.q.split(/\s+/).filter(Boolean);
         let matchAll = true;
         for(const t of tokens){
-            const cleanT = t.replace(/[\s\-_]/g, "").toLowerCase(); // 검색어도 공백/특수문자 제거
-            
+            const cleanT = t.replace(/[\s\-_]/g, "").toLowerCase();
             if(isAllChosung(cleanT)){ 
                 if(!p._chosung.includes(cleanT)) matchAll = false; 
             } else { 
-                if(!p._hay.includes(t) && !p._hayClean.includes(cleanT)) {
-                    matchAll = false; 
-                }
+                if(!p._hay.includes(t) && !p._hayClean.includes(cleanT)) { matchAll = false; }
             }
         }
         if(!matchAll) return false;
@@ -371,16 +408,44 @@ function render(){
 
 $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
-$("#allMemosBtn").onclick = () => {
+let currentMemoDate = ""; 
+
+function renderAllMemos() {
     const listEl = $("#allMemosList");
-    listEl.innerHTML = "";
-    if(MEMOS.length === 0) {
-        listEl.innerHTML = "<div class='text-center py-10 text-gray-500'>오늘 작성된 메모가 없습니다.</div>";
+    
+    const availableDates = [...new Set(MEMOS.map(m => m.date.split(' ')[0]))].sort((a,b) => {
+        const [am, ad] = a.split('/').map(Number);
+        const [bm, bd] = b.split('/').map(Number);
+        return (bm - am) || (bd - ad);
+    });
+    
+    if(!currentMemoDate && availableDates.length > 0) {
+        currentMemoDate = availableDates[0]; 
+    }
+
+    let html = `
+        <div class="flex gap-2 mb-4 bg-gray-100 p-2 rounded-lg items-center">
+            <select id="memoDateSelect" class="ipt flex-1 text-sm font-bold bg-white border-gray-300">
+                <option value="ALL">🗓️ 전체 날짜 보기</option>
+                ${availableDates.map(d => `<option value="${d}" ${d===currentMemoDate?'selected':''}>${d} 메모</option>`).join('')}
+            </select>
+            <button id="bulkDeleteMemosBtn" class="px-3 py-2 bg-red-50 text-red-600 border border-red-200 font-bold rounded text-sm hover:bg-red-500 hover:text-white transition-colors">
+                일괄 삭제
+            </button>
+        </div>
+        <div class="space-y-2">
+    `;
+    
+    let filtered = currentMemoDate === "ALL" ? MEMOS.slice().reverse() : MEMOS.filter(m => m.date.startsWith(currentMemoDate + " ")).slice().reverse();
+    
+    if(filtered.length === 0) {
+        html += "<div class='text-center py-10 text-gray-500 font-bold'>해당 조건에 맞는 메모가 없습니다.</div>";
     } else {
-        MEMOS.slice().reverse().forEach(m => {
-            listEl.innerHTML += `
-            <div class="p-3 bg-white rounded-lg border text-sm mb-2 shadow-sm">
-                <div class="flex justify-between items-center mb-1">
+        filtered.forEach(m => {
+            html += `
+            <div class="p-3 bg-white rounded-lg border text-sm shadow-sm relative">
+                <button onclick="deleteMemo('${m.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <div class="flex justify-between items-center mb-1 pr-6">
                     <span class="font-black text-yellow-700">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
                     <span class="text-xs text-gray-400">${escapeHtml(m.date)}</span>
                 </div>
@@ -389,6 +454,54 @@ $("#allMemosBtn").onclick = () => {
             </div>`;
         });
     }
+    html += "</div>";
+    
+    listEl.innerHTML = html;
+    if(window.lucide) lucide.createIcons();
+
+    $("#memoDateSelect").onchange = (e) => {
+        currentMemoDate = e.target.value;
+        renderAllMemos();
+    };
+    
+    $("#bulkDeleteMemosBtn").onclick = async () => {
+        const targetText = currentMemoDate === 'ALL' ? '전체' : `${currentMemoDate} 일자`;
+        if(!confirm(`⚠️ 정말 [${targetText}] 메모를 일괄 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+        
+        try {
+            const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
+            const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+            if(!r.ok) throw new Error("로드 실패");
+            const j = await r.json(); 
+            let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+            
+            if(currentMemoDate === "ALL") {
+                oldData = [];
+            } else {
+                oldData = oldData.filter(m => !m.date.startsWith(currentMemoDate + " "));
+            }
+            
+            const body = { message:"bulk delete memos", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
+            const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+            if(!r2.ok) throw new Error("API 에러");
+            
+            MEMOS = oldData;
+            alert("🗑️ 일괄 삭제가 완료되었습니다.");
+            
+            if(CURRENT_PRODUCT) {
+                CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번);
+                openDetail(CURRENT_PRODUCT); 
+            }
+            render();
+            currentMemoDate = "ALL"; 
+            renderAllMemos();
+        } catch(e) { alert("메모 일괄 삭제 실패"); }
+    };
+}
+
+$("#allMemosBtn").onclick = () => {
+    currentMemoDate = ""; 
+    renderAllMemos();
     $("#allMemosModal").classList.remove("hidden");
 };
 
@@ -415,7 +528,81 @@ window.deleteMemo = async (memoId) => {
             openDetail(CURRENT_PRODUCT); 
         }
         render();
+        if(!$("#allMemosModal").classList.contains("hidden")) renderAllMemos();
     } catch(e) { alert("메모 삭제 실패"); }
+};
+
+window.deleteTransfer = async (trId) => {
+    if(!confirm("이 이동 요청을 삭제/취소하시겠습니까?")) return;
+    try {
+        const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+        const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+        if(!r.ok) throw new Error("로드 실패");
+        const j = await r.json(); 
+        let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+        
+        oldData = oldData.filter(m => m.id !== trId);
+        
+        const body = { message:"delete transfer", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
+        const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        if(!r2.ok) throw new Error("API 에러");
+        
+        TRANSFERS = oldData;
+        alert("이동 요청이 삭제되었습니다.");
+        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) {
+            window.renderTransfers();
+        }
+    } catch(e) { alert("삭제 실패"); }
+};
+
+window.renderTransfers = () => {
+    let listEl = $("#transfersList");
+    if(!listEl) {
+        const modal = document.createElement("div");
+        modal.id = "transfersModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99]"; 
+        modal.innerHTML = `
+            <div class="modal-outer absolute inset-0 bg-black/50"></div>
+            <div class="modal-content relative bg-[color:var(--bg)] w-[90%] max-w-md max-h-[80vh] flex flex-col rounded-xl overflow-hidden shadow-2xl z-10">
+                <div class="p-4 border-b border-[color:var(--line)] flex justify-between items-center bg-[color:var(--surface)]">
+                    <h2 class="font-black text-lg text-blue-800">🚚 상품 이동 요청 목록</h2>
+                    <button id="closeTransfers" class="p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-2"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        $("#closeTransfers").onclick = () => modal.classList.add("hidden");
+        modal.querySelector(".modal-outer").onclick = () => modal.classList.add("hidden");
+        listEl = $("#transfersList");
+    }
+
+    $("#transfersModal").classList.remove("hidden");
+    
+    if(TRANSFERS.length === 0) {
+        listEl.innerHTML = "<div class='text-center py-10 text-gray-500 font-bold'>대기 중인 이동 요청이 없습니다.</div>";
+        return;
+    }
+
+    let html = "";
+    TRANSFERS.slice().reverse().forEach(t => {
+        html += `
+        <div class="p-3 bg-white rounded-lg border border-blue-100 text-sm shadow-sm relative">
+            <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            <div class="flex justify-between items-center mb-1 pr-6">
+                <span class="font-black text-blue-700">${escapeHtml(t.code)}</span>
+                <span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
+            </div>
+            <div class="font-bold text-gray-800 mb-2">${escapeHtml(t.product)}</div>
+            <div class="flex gap-2 text-xs font-bold text-gray-600 mb-2">
+                <span class="bg-gray-100 px-2 py-0.5 rounded">사이즈: ${escapeHtml(t.size)}</span>
+                <span class="bg-gray-100 px-2 py-0.5 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+            </div>
+            <div class="text-blue-900 bg-blue-50 p-2 rounded font-medium text-xs">${escapeHtml(t.memo)}</div>
+        </div>`;
+    });
+    listEl.innerHTML = html;
+    if(window.lucide) lucide.createIcons();
 };
 
 function openDetail(p){
@@ -463,7 +650,7 @@ function openDetail(p){
               🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)
           </a>
           <div class="flex gap-2">
-              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="여기에 복사한 이미지 주소 붙여넣기">
+              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="복사한 주소 붙여넣기">
               <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
           </div>
           <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
@@ -488,6 +675,58 @@ function openDetail(p){
           } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
       };
   }
+
+  const trBox = document.createElement("div");
+  trBox.className = "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg";
+  trBox.innerHTML = `
+      <div class="font-bold text-blue-800 mb-2">🚚 상품 이동 요청</div>
+      <div class="flex gap-2 mb-2">
+          <select id="trSize" class="ipt flex-1 text-xs"><option value="">사이즈 선택</option>${p.sizes.map(s=>`<option value="${s.size}">${s.size}</option>`).join('')}</select>
+          <input type="number" id="trQty" class="ipt w-16 text-xs" placeholder="수량">
+      </div>
+      <div class="flex gap-2">
+          <input type="text" id="trMemo" class="ipt flex-1 text-xs" placeholder="요청 내용 (예: 본사 -> 부산)">
+          <button id="addTransferBtn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-black shrink-0 transition-colors">전송</button>
+      </div>
+      <div id="trMsg" class="text-[11px] font-bold mt-1"></div>
+  `;
+  $("#detailBody").appendChild(trBox);
+
+  trBox.querySelector("#addTransferBtn").onclick = async () => {
+      const size = trBox.querySelector("#trSize").value;
+      const qty = trBox.querySelector("#trQty").value;
+      const memo = trBox.querySelector("#trMemo").value.trim();
+      const msg = trBox.querySelector("#trMsg");
+
+      if(!size) { msg.style.color="red"; msg.textContent="사이즈를 선택하세요."; return; }
+      if(!qty || qty <= 0) { msg.style.color="red"; msg.textContent="수량을 정확히 입력하세요."; return; }
+      if(!memo) { msg.style.color="red"; msg.textContent="요청 내용을 입력하세요."; return; }
+      msg.style.color="black"; msg.textContent="이동 요청 전송 중...";
+
+      try {
+          const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+          let sha = null; let oldData = [];
+          try { 
+              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+              if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
+          }catch(e){}
+          
+          const d = new Date();
+          const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+          
+          oldData.push({ id: "tr_" + Date.now(), code: p.품번, product: p.품명, date: shortDate, size, qty, memo });
+          const body = { message:"add transfer request", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
+          if(sha) body.sha = sha;
+          
+          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+          if(!r2.ok) throw new Error("API 에러");
+          
+          TRANSFERS = oldData; 
+          msg.style.color="green"; msg.textContent="✓ 요청 전송 완료!";
+          trBox.querySelector("#trQty").value = "";
+          trBox.querySelector("#trMemo").value = "";
+      } catch(e) { msg.style.color="red"; msg.textContent="요청 실패!"; }
+  };
 
   $("#addMemoBtn").onclick = async () => {
       const staff = $("#memoStaff").value; 
@@ -564,6 +803,7 @@ $("#resetAll").onclick=()=>{
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0"); 
     $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
     $("#sortSel").value="default";
+    if($("#sizeSel")) $("#sizeSel").value="ALL";
     $("#q").value=""; visibleCount=60; render(); 
 };
 
@@ -591,7 +831,7 @@ $("#file").onchange = async (e) => {
         try { 
             await commitInventoryToGitHub(rows, meta); 
             RAW = rows; CURRENT_META = meta; 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, _timestamp: Date.now()})); 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, _timestamp: Date.now()})); 
             applyMeta(CURRENT_META);
             rebuildIndex(); render();
             $("#adminModal").classList.add("hidden");
@@ -612,5 +852,16 @@ $("#ghSave").onclick=()=>{
     GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
     saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
 };
+
+window.addEventListener('DOMContentLoaded', () => {
+    if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
+        const trBtn = document.createElement("button");
+        trBtn.id = "allTransfersBtn";
+        trBtn.className = $("#allMemosBtn").className.replace(/yellow/g, 'blue');
+        trBtn.innerHTML = `🚚 이동요청 목록`;
+        trBtn.onclick = window.renderTransfers;
+        $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
+    }
+});
 
 loadGhConfig(); loadData();
