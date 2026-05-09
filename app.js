@@ -7,6 +7,7 @@ const DATA_PATH = "inventory.json";
 const REQUESTS_PATH = "requests.json"; 
 const TRANSFERS_PATH = "transfers.json"; 
 const PROMOTIONS_PATH = "promotions.json"; 
+const SALES_GUIDE_PATH = "sales_guide.json"; 
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -14,7 +15,8 @@ let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {}; 
 let MEMOS = []; 
 let TRANSFERS = []; 
-let PROMOTIONS = {}; // 🔥 기획전 객체
+let PROMOTIONS = {}; 
+let SALES_GUIDES = {}; 
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -89,18 +91,20 @@ async function loadData(force = false){
       MEMOS = cached.memos || [];
       TRANSFERS = cached.transfers || [];
       PROMOTIONS = cached.promotions || {};
+      SALES_GUIDES = cached.salesGuides || {};
       applyMeta(CURRENT_META);
       rebuildIndex(); render(); 
       return;
   }
   
   try {
-      const [invRes, imgRes, memoRes, trRes, promoRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
           fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
 
       if(!invRes.ok) throw new Error("재고 로드 실패");
@@ -115,14 +119,19 @@ async function loadData(force = false){
           const pData = await promoRes.json();
           PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
       } else { PROMOTIONS = {}; }
+      
+      if(sgRes && sgRes.ok) {
+          const sgData = await sgRes.json();
+          SALES_GUIDES = Object.keys(sgData).length > 0 ? sgData : {};
+      } else { SALES_GUIDES = {}; }
 
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, _timestamp: Date.now() }));
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, _timestamp: Date.now() }));
       
       applyMeta(CURRENT_META);
       rebuildIndex(); render();
   } catch(e) { 
       if(cached) { 
-          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {};
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {};
           applyMeta(CURRENT_META); rebuildIndex(); render(); 
       } else {
           RAW=[]; render();
@@ -133,15 +142,11 @@ async function loadData(force = false){
 async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
-// 🔥 현재 날짜 기준 어느 주차의 카테고리가 위클리 특가 대상인지 판단하는 함수 🔥
 function getActiveWeeklyCategory() {
     const now = Date.now();
-    // 1주차(FOOTWEAR) : 5.8 ~ 5.15
     const t1 = new Date('2026-05-08T00:00:00+09:00').getTime();
     const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
-    // 2주차(APPAREL) : 5.15 ~ 5.22
     const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
-    // 3주차(ACC/GEAR) : 5.22 ~ 5.29
     const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
 
     if (now >= t1 && now < t2) return "FOOTWEAR";
@@ -154,7 +159,7 @@ function rebuildIndex(){
   const map = new Map();
   const prevRaw = JSON.parse(localStorage.getItem('PREV_RAW') || '[]');
   const allSizes = new Set(); 
-  const activeWeeklyCat = getActiveWeeklyCategory(); // 🔥 이번 주 특가 카테고리
+  const activeWeeklyCat = getActiveWeeklyCategory(); 
   
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
@@ -183,20 +188,23 @@ function rebuildIndex(){
     
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    // 🔥 동적 기획전(위클리특가 및 쿠폰가) 매칭 로직 🔥
+    // 🔥 동적 기획전 & 날짜 매칭 로직 🔥
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
         const promo = PROMOTIONS.items[p.품번];
-        // 현재 카테고리가 해당 주차 타겟이면 '위클리특가' 적용
         if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
             p.currentPromoPrice = promo.weeklyPrice;
             p.promoType = 'weekly';
             p.promoRate = promo.weeklyRate || 0;
+            if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15';
+            else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22';
+            else if(promo.targetCat === 'ACC/GEAR') p.promoEndDate = '5/29';
+            else p.promoEndDate = '5/29';
         } 
-        // 타겟 주차가 아니면 '최종할인가(기본쿠폰가 등)' 적용
         else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
             p.currentPromoPrice = promo.finalPrice;
             p.promoType = 'general';
             p.promoRate = promo.finalRate || 0;
+            p.promoEndDate = '5/29'; 
         }
     }
 
@@ -226,7 +234,7 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  // 🔥 기획전 동적 필터 UI 주입 🔥
+  // 🔥 기획전 세부 구분 필터 동적 생성 🔥
   let promoWrap = $("#promoFilters");
   if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
       promoWrap = document.createElement("div");
@@ -240,8 +248,13 @@ function rebuildIndex(){
               <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">
                   🎁 ${escapeHtml(PROMOTIONS.meta.name)}
               </button>
+              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
+                  <option value="ALL">기획전 전체보기</option>
+                  <option value="weekly">🔥 위클리특가만</option>
+                  <option value="general">🎟️ 쿠폰사용가능만</option>
+              </select>
               <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
-                  <option value="0">할인율 전체보기</option>
+                  <option value="0">할인율 전체</option>
                   <option value="10">🔥 10% 이상</option>
                   <option value="20">🔥 20% 이상</option>
                   <option value="30">🔥 30% 이상</option>
@@ -252,14 +265,18 @@ function rebuildIndex(){
               this.dataset.active = isActive ? "0" : "1";
               if(!isActive) {
                   this.classList.add('ring-2', 'ring-purple-400', 'ring-offset-1');
+                  $("#promoTypeSel").classList.remove("hidden");
                   $("#promoRateSel").classList.remove("hidden");
               } else {
                   this.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
+                  $("#promoTypeSel").classList.add("hidden");
                   $("#promoRateSel").classList.add("hidden");
+                  $("#promoTypeSel").value = "ALL";
                   $("#promoRateSel").value = "0";
               }
               visibleCount=60; render();
           };
+          $("#promoTypeSel").onchange = () => { visibleCount=60; render(); };
           $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
       }
   } else if (promoWrap) {
@@ -285,12 +302,73 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
+window.openSalesGuide = (code) => {
+    const guide = SALES_GUIDES[code];
+    const p = PRODUCTS.find(x => x.품번 === code);
+    if(!guide) return;
+
+    let modal = $("#salesGuideModal");
+    if(!modal) {
+        modal = document.createElement("div");
+        modal.id = "salesGuideModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100]";
+        modal.innerHTML = `
+            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div class="modal-content relative bg-white w-[90%] max-w-md flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-indigo-100">
+                <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <span class="bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded font-black tracking-wider">AI SALES GUIDE</span>
+                        </div>
+                        <h2 id="sgTitle" class="font-black text-lg text-indigo-950 leading-tight"></h2>
+                    </div>
+                    <button id="closeSalesGuide" class="p-1 -mr-2 text-indigo-400 hover:text-indigo-800 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div class="p-5 overflow-y-auto max-h-[70vh] space-y-5">
+                    <div>
+                        <div id="sgKeywords" class="flex flex-wrap gap-1.5 mb-3"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xs text-indigo-400 flex items-center gap-1 mb-1.5"><i data-lucide="zap" class="w-4 h-4"></i> 핵심 특징</h3>
+                        <div id="sgFeatures" class="text-sm text-gray-800 font-medium leading-relaxed bg-gray-50 p-3 rounded-lg"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xs text-indigo-400 flex items-center gap-1 mb-1.5"><i data-lucide="target" class="w-4 h-4"></i> 추천 고객</h3>
+                        <div id="sgTarget" class="text-sm text-gray-800 font-medium leading-relaxed bg-gray-50 p-3 rounded-lg"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xs text-indigo-400 flex items-center gap-1 mb-1.5"><i data-lucide="message-circle" class="w-4 h-4"></i> 실전 응대 멘트</h3>
+                        <div id="sgPitch" class="text-sm text-indigo-900 font-bold leading-relaxed bg-indigo-50/50 border border-indigo-100 p-3 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        $("#closeSalesGuide").onclick = () => modal.classList.add("hidden");
+        modal.querySelector(".modal-outer").onclick = () => modal.classList.add("hidden");
+    }
+
+    modal.querySelector("#sgTitle").textContent = p ? p.품명 : code;
+    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw => `<span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-[11px] font-black border border-indigo-200">#${escapeHtml(kw)}</span>`).join('');
+    modal.querySelector("#sgFeatures").textContent = guide.features || "내용 없음";
+    modal.querySelector("#sgTarget").textContent = guide.target || "내용 없음";
+    modal.querySelector("#sgPitch").textContent = guide.pitch || "내용 없음";
+
+    modal.classList.remove("hidden");
+    if(window.lucide) lucide.createIcons();
+};
+
 function card(p){
   const el = document.createElement("article");
   el.className = "card card-hover p-4 flex flex-col relative bg-white"; 
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
+    if(e.target.closest('.btn-sales')) {
+        e.stopPropagation();
+        window.openSalesGuide(p.품번);
+        return;
+    }
     if(!e.target.closest('button')) openDetail(p); 
   };
   
@@ -299,6 +377,12 @@ function card(p){
   let deltaHtml = "";
   if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
   else if (p.delta < 0) deltaHtml = `<span class="text-red-600 font-black">▼${p.delta}</span>`;
+
+  // 🔥 1. 부산점 ONLY 뱃지 로직 🔥
+  let busanOnlyBadge = "";
+  if (p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0) {
+      busanOnlyBadge = `<span class="bg-blue-800 text-white px-1.5 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
+  }
 
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
@@ -317,26 +401,51 @@ function card(p){
       memoHtml += `</div>`;
   }
 
+  let salesHtml = "";
+  const guide = SALES_GUIDES[p.품번];
+  if (guide && guide.keywords && guide.keywords.length > 0) {
+      salesHtml = `<div class="flex flex-wrap gap-1 mt-1.5 mb-1.5">` + 
+          guide.keywords.map(kw => `<span class="bg-indigo-50 text-indigo-600 border border-indigo-100 text-[10px] font-black px-1.5 py-0.5 rounded cursor-pointer hover:bg-indigo-600 hover:text-white transition-colors btn-sales shadow-sm">#${escapeHtml(kw.trim())}</span>`).join('') +
+      `</div>`;
+  }
+
   const isFav = FAVS.includes(p.품번);
 
-  // 🔥 동적 기획전 UI 반영 (위클리특가 vs 일반기획전) 🔥
+  // 🔥 2. 기획전 할인율(%) 및 쿠폰가능 여부, 기간 노출 🔥
   let promoBadge = "";
   let priceDisplay = `<div class="price-clean">${krw(p.소비자가)}</div>`;
 
   if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
-      const rateStr = p.promoRate ? `-${Math.round(p.promoRate*100)}%` : '';
+      const rateInt = Math.round((p.promoRate || 0) * 100);
+      const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
+
       if (p.promoType === 'weekly') {
-          promoBadge = `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black flex items-center gap-0.5"><i data-lucide="flame" class="w-3 h-3"></i>위클리특가 ${rateStr}</span>`;
-          priceDisplay = `<div class="flex flex-col items-end leading-tight mt-0.5"><span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span><span class="text-[16px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span></div>`;
+          promoBadge = `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="flame" class="w-3 h-3"></i>위클리특가 (~${p.promoEndDate})</span>`;
+          priceDisplay = `
+            <div class="flex flex-col items-end leading-tight mt-0.5">
+                <span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[16px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span>
+                    ${rateLabel ? `<span class="text-[11px] font-black text-red-600 bg-red-50 border border-red-100 px-1 rounded">${rateLabel}</span>` : ''}
+                </div>
+            </div>`;
       } else {
-          promoBadge = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5"><i data-lucide="gift" class="w-3 h-3"></i>기획전 ${rateStr}</span>`;
-          priceDisplay = `<div class="flex flex-col items-end leading-tight mt-0.5"><span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span><span class="text-[15px] font-black text-purple-700">🎁${krw(p.currentPromoPrice)}</span></div>`;
+          promoBadge = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="ticket" class="w-3 h-3"></i>쿠폰적용가 (~${p.promoEndDate})</span>`;
+          priceDisplay = `
+            <div class="flex flex-col items-end leading-tight mt-0.5">
+                <span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[15px] font-black text-purple-700">🎟️${krw(p.currentPromoPrice)}</span>
+                    ${rateLabel ? `<span class="text-[11px] font-black text-purple-600 bg-purple-50 border border-purple-100 px-1 rounded">${rateLabel}</span>` : ''}
+                </div>
+            </div>`;
       }
   }
 
   el.innerHTML = `
     <div class="flex justify-between items-start mb-2 z-10 relative">
         <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
+            ${busanOnlyBadge}
             ${promoBadge}
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span>
@@ -355,6 +464,7 @@ function card(p){
           <div class="copyable text-[14px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
               ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i>
           </div>
+          ${salesHtml}
        </div>
        
        ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
@@ -400,7 +510,8 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
     size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
     promoOnly: promoOnly,
-    promoRate: promoOnly ? Number($("#promoRateSel").value) : 0 // 할인율 필터
+    promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", // 🔥 추가된 타입 필터
+    promoRate: promoOnly && $("#promoRateSel") ? Number($("#promoRateSel").value) : 0
   };
 }
 
@@ -425,10 +536,11 @@ function render(){
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
     
-    // 🔥 할인율 필터 처리 🔥
+    // 🔥 세분화된 기획전 필터 적용 🔥
     if(f.promoOnly) {
-        if(!p.currentPromoPrice) return false; // 기획전 상품이 아니면 제외
-        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) < f.promoRate) return false; // 설정된 할인율 미만 제외
+        if(!p.currentPromoPrice) return false; 
+        if(f.promoType !== "ALL" && p.promoType !== f.promoType) return false;
+        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) < f.promoRate) return false; 
     }
 
     if(f.size !== "ALL") {
@@ -468,7 +580,6 @@ function render(){
     if(sortMode==="stock") return b.busanTotal - a.busanTotal || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode==="name") return String(a.품명).localeCompare(String(b.품명),"ko");
     
-    // 🔥 가격 정렬 시 할인가 우선 적용 🔥
     const priceA = a.currentPromoPrice || a.소비자가 || 0;
     const priceB = b.currentPromoPrice || b.소비자가 || 0;
     if(sortMode==="priceAsc") return priceA - priceB;
@@ -897,11 +1008,14 @@ $("#resetAll").onclick=()=>{
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0"); 
     $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
     
-    // 기획전 필터 리셋 추가
     const promoBtn = $('button[data-promo]');
     if(promoBtn) {
         promoBtn.dataset.active = "0";
         promoBtn.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
+        if($("#promoTypeSel")) {
+            $("#promoTypeSel").classList.add("hidden");
+            $("#promoTypeSel").value = "ALL";
+        }
         if($("#promoRateSel")) {
             $("#promoRateSel").classList.add("hidden");
             $("#promoRateSel").value = "0";
@@ -937,7 +1051,7 @@ $("#file").onchange = async (e) => {
         try { 
             await commitInventoryToGitHub(rows, meta); 
             RAW = rows; CURRENT_META = meta; 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, _timestamp: Date.now()})); 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, _timestamp: Date.now()})); 
             applyMeta(CURRENT_META);
             rebuildIndex(); render();
             $("#adminModal").classList.add("hidden");
@@ -959,7 +1073,6 @@ $("#ghSave").onclick=()=>{
     saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
 };
 
-// 🔥 기획전 전용 관리자 UI 동적 생성 및 파일 업로드 처리기 🔥
 window.renderPromoAdmin = () => {
     const box = $("#promoAdminBox");
     if(!box) return;
@@ -1049,13 +1162,74 @@ window.renderPromoAdmin = () => {
                     rebuildIndex(); render();
                     window.renderPromoAdmin();
                     alert("기획전 데이터가 성공적으로 반영되었습니다!");
-                    $("#adminModal").classList.add("hidden");
                 } catch(err) { alert("업로드 실패: " + err.message); }
                 $("#promoFile").value = "";
             };
             reader.readAsArrayBuffer(f);
         };
     }
+};
+
+window.renderSalesAdmin = () => {
+    const box = $("#salesAdminBox");
+    if(!box) return;
+    
+    box.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+            <div class="font-black text-indigo-800">🧠 AI 세일즈 가이드 DB</div>
+            <span class="text-[10px] font-bold text-indigo-500 bg-white px-2 py-0.5 rounded">현재 ${Object.keys(SALES_GUIDES).length}개 등록됨</span>
+        </div>
+        <div class="text-center cursor-pointer group mt-3 bg-white border border-indigo-100 rounded-lg p-3 hover:bg-indigo-600 transition-colors" id="salesUploadTrigger">
+            <div class="font-black text-indigo-600 text-sm mb-1 group-hover:text-white">엑셀 등록 / 업데이트</div>
+            <div class="text-[10px] text-indigo-400 font-bold group-hover:text-indigo-200">(품번, 키워드, 특징, 추천고객, 응대멘트 포함)</div>
+        </div>
+        <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
+    `;
+    
+    $("#salesUploadTrigger").onclick = () => $("#salesFile").click();
+    $("#salesFile").onchange = async (e) => {
+        const f = e.target.files[0]; if(!f) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, {defval: ""}); 
+
+            let newGuides = {};
+            rows.forEach(r => {
+                const code = String(r["품번"] || r["상품코드"] || "").trim();
+                if(!code) return;
+                
+                const rawKw = String(r["키워드"] || r["핵심키워드"] || "");
+                const keywords = rawKw ? rawKw.split(',').map(k=>k.trim()).filter(Boolean) : [];
+                
+                newGuides[code] = {
+                    keywords: keywords,
+                    features: String(r["특징"] || r["제품특징"] || ""),
+                    target: String(r["추천고객"] || r["타겟고객"] || ""),
+                    pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
+                };
+            });
+
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+                let sha = null;
+                try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                const body = { message:"update sales guide", content: utf8ToB64(JSON.stringify(newGuides, null, 2)), branch: GH.branch };
+                if(sha) body.sha = sha;
+                const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                if(!r2.ok) throw new Error("API 에러");
+
+                SALES_GUIDES = newGuides;
+                sessionStorage.removeItem(CACHE_KEY); 
+                rebuildIndex(); render();
+                window.renderSalesAdmin();
+                alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
+            } catch(err) { alert("업로드 실패: " + err.message); }
+            $("#salesFile").value = "";
+        };
+        reader.readAsArrayBuffer(f);
+    };
 };
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -1068,14 +1242,22 @@ window.addEventListener('DOMContentLoaded', () => {
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
     }
     
-    // 기획전 관리자 UI 구역 동적 추가
     if ($("#uploadPanel") && !$("#promoAdminBox")) {
         const box = document.createElement("div");
         box.id = "promoAdminBox";
         box.className = "mt-4 p-4 border-2 border-purple-200 bg-purple-50 rounded-xl";
         $("#uploadPanel").appendChild(box);
     }
+    
+    if ($("#uploadPanel") && !$("#salesAdminBox")) {
+        const sgBox = document.createElement("div");
+        sgBox.id = "salesAdminBox";
+        sgBox.className = "mt-4 p-4 border-2 border-indigo-200 bg-indigo-50 rounded-xl";
+        $("#uploadPanel").appendChild(sgBox);
+    }
+
     window.renderPromoAdmin();
+    if(window.renderSalesAdmin) window.renderSalesAdmin();
 });
 
 loadGhConfig(); loadData();
