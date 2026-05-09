@@ -6,6 +6,7 @@ const CACHE_KEY = "racement_inventory_cache_v1";
 const DATA_PATH = "inventory.json";
 const REQUESTS_PATH = "requests.json"; 
 const TRANSFERS_PATH = "transfers.json"; 
+const PROMOTIONS_PATH = "promotions.json"; 
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -13,6 +14,7 @@ let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {}; 
 let MEMOS = []; 
 let TRANSFERS = []; 
+let PROMOTIONS = {}; // 🔥 기획전 객체
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -86,17 +88,19 @@ async function loadData(force = false){
       IMAGES = cached.images || {};
       MEMOS = cached.memos || [];
       TRANSFERS = cached.transfers || [];
+      PROMOTIONS = cached.promotions || {};
       applyMeta(CURRENT_META);
       rebuildIndex(); render(); 
       return;
   }
   
   try {
-      const [invRes, imgRes, memoRes, trRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
           fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
 
       if(!invRes.ok) throw new Error("재고 로드 실패");
@@ -104,22 +108,21 @@ async function loadData(force = false){
       RAW = invData.rows || []; 
       CURRENT_META = invData.meta || null;
 
-      if(imgRes && imgRes.ok) IMAGES = await imgRes.json();
-      else IMAGES = {};
+      if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
+      if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
+      if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+      if(promoRes && promoRes.ok) {
+          const pData = await promoRes.json();
+          PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
+      } else { PROMOTIONS = {}; }
 
-      if(memoRes && memoRes.ok) MEMOS = await memoRes.json();
-      else MEMOS = [];
-
-      if(trRes && trRes.ok) TRANSFERS = await trRes.json();
-      else TRANSFERS = [];
-
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, _timestamp: Date.now() }));
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, _timestamp: Date.now() }));
       
       applyMeta(CURRENT_META);
       rebuildIndex(); render();
   } catch(e) { 
       if(cached) { 
-          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; 
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {};
           applyMeta(CURRENT_META); rebuildIndex(); render(); 
       } else {
           RAW=[]; render();
@@ -130,27 +133,34 @@ async function loadData(force = false){
 async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
-async function commitInventoryToGitHub(rows, meta){
-  const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DATA_PATH}`;
-  let sha = null;
-  try{ const r = await fetch(apiBase + "?t=" + Date.now(), { headers:{ Authorization:"Bearer "+getPat() } }); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-  const body = { message:"update", content: utf8ToB64(JSON.stringify({ meta, rows })), branch: GH.branch };
-  if(sha) body.sha = sha;
-  const r2 = await ghPut(apiBase, body);
-  if(!r2.ok) throw new Error("업로드 실패");
+// 🔥 현재 날짜 기준 어느 주차의 카테고리가 위클리 특가 대상인지 판단하는 함수 🔥
+function getActiveWeeklyCategory() {
+    const now = Date.now();
+    // 1주차(FOOTWEAR) : 5.8 ~ 5.15
+    const t1 = new Date('2026-05-08T00:00:00+09:00').getTime();
+    const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
+    // 2주차(APPAREL) : 5.15 ~ 5.22
+    const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
+    // 3주차(ACC/GEAR) : 5.22 ~ 5.29
+    const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
+
+    if (now >= t1 && now < t2) return "FOOTWEAR";
+    if (now >= t2 && now < t3) return "APPAREL";
+    if (now >= t3 && now <= t4) return "ACC/GEAR";
+    return null;
 }
 
 function rebuildIndex(){
   const map = new Map();
   const prevRaw = JSON.parse(localStorage.getItem('PREV_RAW') || '[]');
-  const allSizes = new Set(); // 🔥 사이즈 필터를 위한 데이터 수집
+  const allSizes = new Set(); 
+  const activeWeeklyCat = getActiveWeeklyCategory(); // 🔥 이번 주 특가 카테고리
   
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
-    if(r["규격"]) allSizes.add(String(r["규격"]).trim()); // 규격 추가
+    if(r["규격"]) allSizes.add(String(r["규격"]).trim()); 
 
     if(!map.has(code)){
-      // 🔥 성별 데이터(p.성별) 원본 저장 추가
       map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false });
     }
     const p = map.get(code);
@@ -173,6 +183,23 @@ function rebuildIndex(){
     
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
+    // 🔥 동적 기획전(위클리특가 및 쿠폰가) 매칭 로직 🔥
+    if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
+        const promo = PROMOTIONS.items[p.품번];
+        // 현재 카테고리가 해당 주차 타겟이면 '위클리특가' 적용
+        if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
+            p.currentPromoPrice = promo.weeklyPrice;
+            p.promoType = 'weekly';
+            p.promoRate = promo.weeklyRate || 0;
+        } 
+        // 타겟 주차가 아니면 '최종할인가(기본쿠폰가 등)' 적용
+        else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
+            p.currentPromoPrice = promo.finalPrice;
+            p.promoType = 'general';
+            p.promoRate = promo.finalRate || 0;
+        }
+    }
+
     const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
     p._hay = rawHay.toLowerCase();
     p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
@@ -181,7 +208,6 @@ function rebuildIndex(){
     return p;
   });
   
-  // 🔥 동적 사이즈 필터 박스 생성 로직 🔥
   const sortedSizes = Array.from(allSizes).sort((a,b) => {
       const numA = parseInt(a), numB = parseInt(b);
       if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
@@ -200,9 +226,49 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
+  // 🔥 기획전 동적 필터 UI 주입 🔥
+  let promoWrap = $("#promoFilters");
+  if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
+      promoWrap = document.createElement("div");
+      promoWrap.id = "promoFilters";
+      promoWrap.className = "flex gap-2 mb-3 items-center w-full overflow-x-auto no-scrollbar pb-1";
+      $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
+  }
+  if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
+      if(promoWrap) {
+          promoWrap.innerHTML = `
+              <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">
+                  🎁 ${escapeHtml(PROMOTIONS.meta.name)}
+              </button>
+              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
+                  <option value="0">할인율 전체보기</option>
+                  <option value="10">🔥 10% 이상</option>
+                  <option value="20">🔥 20% 이상</option>
+                  <option value="30">🔥 30% 이상</option>
+              </select>
+          `;
+          promoWrap.querySelector('button').onclick = function() {
+              const isActive = this.dataset.active === "1";
+              this.dataset.active = isActive ? "0" : "1";
+              if(!isActive) {
+                  this.classList.add('ring-2', 'ring-purple-400', 'ring-offset-1');
+                  $("#promoRateSel").classList.remove("hidden");
+              } else {
+                  this.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
+                  $("#promoRateSel").classList.add("hidden");
+                  $("#promoRateSel").value = "0";
+              }
+              visibleCount=60; render();
+          };
+          $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
+      }
+  } else if (promoWrap) {
+      promoWrap.innerHTML = "";
+  }
+
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
   const wrap = $("#brandChips"); 
-  wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체</button>';
+  wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체 브랜드</button>';
   
   wrap.querySelector('[data-brand="ALL"]').onclick = function() {
       $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0"));
@@ -221,7 +287,6 @@ function rebuildIndex(){
 
 function card(p){
   const el = document.createElement("article");
-  // 🔥 상단 패딩 축소 및 레이아웃 최적화
   el.className = "card card-hover p-4 flex flex-col relative bg-white"; 
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
@@ -254,10 +319,25 @@ function card(p){
 
   const isFav = FAVS.includes(p.품번);
 
-  // 🔥 이미지 확대, 성별 뱃지 추가, 즐겨찾기 우상단 배치 🔥
+  // 🔥 동적 기획전 UI 반영 (위클리특가 vs 일반기획전) 🔥
+  let promoBadge = "";
+  let priceDisplay = `<div class="price-clean">${krw(p.소비자가)}</div>`;
+
+  if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
+      const rateStr = p.promoRate ? `-${Math.round(p.promoRate*100)}%` : '';
+      if (p.promoType === 'weekly') {
+          promoBadge = `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black flex items-center gap-0.5"><i data-lucide="flame" class="w-3 h-3"></i>위클리특가 ${rateStr}</span>`;
+          priceDisplay = `<div class="flex flex-col items-end leading-tight mt-0.5"><span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span><span class="text-[16px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span></div>`;
+      } else {
+          promoBadge = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5"><i data-lucide="gift" class="w-3 h-3"></i>기획전 ${rateStr}</span>`;
+          priceDisplay = `<div class="flex flex-col items-end leading-tight mt-0.5"><span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span><span class="text-[15px] font-black text-purple-700">🎁${krw(p.currentPromoPrice)}</span></div>`;
+      }
+  }
+
   el.innerHTML = `
     <div class="flex justify-between items-start mb-2 z-10 relative">
-        <div class="flex flex-wrap gap-1.5 text-[11px] font-bold text-gray-500 mt-0.5">
+        <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
+            ${promoBadge}
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span>
             <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>
@@ -292,7 +372,7 @@ function card(p){
     </div>
     <div class="loc-simple mt-auto">
        <div class="flex gap-1 items-center"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
-       <div class="price-clean">${krw(p.소비자가)}</div>
+       ${priceDisplay}
     </div>
   `;
   
@@ -307,6 +387,9 @@ function card(p){
 }
 
 function getFilters(){
+  const promoBtn = $('button[data-promo]');
+  const promoOnly = promoBtn ? promoBtn.dataset.active === "1" : false;
+
   return {
     cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
     gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
@@ -315,7 +398,9 @@ function getFilters(){
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
-    size: $("#sizeSel") ? $("#sizeSel").value : "ALL" // 🔥 사이즈 필터값 읽어오기
+    size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
+    promoOnly: promoOnly,
+    promoRate: promoOnly ? Number($("#promoRateSel").value) : 0 // 할인율 필터
   };
 }
 
@@ -340,13 +425,18 @@ function render(){
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
     
-    // 🔥 사이즈 필터 & 재고 조건 통합 처리 🔥
+    // 🔥 할인율 필터 처리 🔥
+    if(f.promoOnly) {
+        if(!p.currentPromoPrice) return false; // 기획전 상품이 아니면 제외
+        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) < f.promoRate) return false; // 설정된 할인율 미만 제외
+    }
+
     if(f.size !== "ALL") {
         const sizeObj = p.sizes.find(s => String(s.size).trim() === f.size);
-        if(!sizeObj) return false; // 선택한 사이즈 자체가 없는 제품 제외
-        if(f.stock && sizeObj.busan <= 0) return false; // 사이즈는 있지만 부산 재고가 없으면 제외
+        if(!sizeObj) return false; 
+        if(f.stock && sizeObj.busan <= 0) return false; 
     } else {
-        if(f.stock && p.busanTotal <= 0) return false; // 전체 사이즈일 때는 총 재고 확인
+        if(f.stock && p.busanTotal <= 0) return false; 
     }
 
     if(f.q) { 
@@ -377,8 +467,12 @@ function render(){
     }
     if(sortMode==="stock") return b.busanTotal - a.busanTotal || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode==="name") return String(a.품명).localeCompare(String(b.품명),"ko");
-    if(sortMode==="priceAsc") return (a.소비자가||0) - (b.소비자가||0);
-    if(sortMode==="priceDesc") return (b.소비자가||0) - (a.소비자가||0);
+    
+    // 🔥 가격 정렬 시 할인가 우선 적용 🔥
+    const priceA = a.currentPromoPrice || a.소비자가 || 0;
+    const priceB = b.currentPromoPrice || b.소비자가 || 0;
+    if(sortMode==="priceAsc") return priceA - priceB;
+    if(sortMode==="priceDesc") return priceB - priceA;
     
     const br = String(a.브랜드).localeCompare(String(b.브랜드),"ko"); if(br!==0) return br;
     return String(a.품명).localeCompare(String(b.품명),"ko");
@@ -548,7 +642,7 @@ window.deleteTransfer = async (trId) => {
         if(!r2.ok) throw new Error("API 에러");
         
         TRANSFERS = oldData;
-        alert("이동 요청이 삭제되었습니다.");
+        alert("이 이동 요청이 삭제되었습니다.");
         if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) {
             window.renderTransfers();
         }
@@ -802,6 +896,18 @@ $("#resetAll").onclick=()=>{
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0")); 
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0"); 
     $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
+    
+    // 기획전 필터 리셋 추가
+    const promoBtn = $('button[data-promo]');
+    if(promoBtn) {
+        promoBtn.dataset.active = "0";
+        promoBtn.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
+        if($("#promoRateSel")) {
+            $("#promoRateSel").classList.add("hidden");
+            $("#promoRateSel").value = "0";
+        }
+    }
+
     $("#sortSel").value="default";
     if($("#sizeSel")) $("#sizeSel").value="ALL";
     $("#q").value=""; visibleCount=60; render(); 
@@ -831,7 +937,7 @@ $("#file").onchange = async (e) => {
         try { 
             await commitInventoryToGitHub(rows, meta); 
             RAW = rows; CURRENT_META = meta; 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, _timestamp: Date.now()})); 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, _timestamp: Date.now()})); 
             applyMeta(CURRENT_META);
             rebuildIndex(); render();
             $("#adminModal").classList.add("hidden");
@@ -853,6 +959,105 @@ $("#ghSave").onclick=()=>{
     saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
 };
 
+// 🔥 기획전 전용 관리자 UI 동적 생성 및 파일 업로드 처리기 🔥
+window.renderPromoAdmin = () => {
+    const box = $("#promoAdminBox");
+    if(!box) return;
+    if(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
+        box.innerHTML = `
+            <div class="flex justify-between items-center mb-2">
+                <div class="font-black text-purple-800">🎁 진행 중인 기획전</div>
+                <button id="endPromoBtn" class="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-black rounded hover:bg-red-500 hover:text-white transition-colors">기획전 종료</button>
+            </div>
+            <div class="text-xs font-black text-purple-600 mb-1">${escapeHtml(PROMOTIONS.meta.name)}</div>
+            <div class="text-[11px] font-bold text-purple-500 bg-white p-2 rounded">${escapeHtml(PROMOTIONS.meta.period)}</div>
+        `;
+        $("#endPromoBtn").onclick = async () => {
+            if(!confirm("진행 중인 기획전을 완전히 종료하고 모든 상품을 정가로 복구하시겠습니까?")) return;
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
+                let sha = null;
+                try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
+                const body = { message:"end promotion", content: utf8ToB64(JSON.stringify({}, null, 2)), branch: GH.branch };
+                if(sha) body.sha = sha;
+                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                PROMOTIONS = {};
+                sessionStorage.removeItem(CACHE_KEY);
+                rebuildIndex(); render();
+                window.renderPromoAdmin();
+                alert("기획전이 성공적으로 종료되었습니다.");
+            } catch(e) { alert("종료 실패!"); }
+        }
+    } else {
+        box.innerHTML = `
+            <div class="text-center cursor-pointer group" id="promoUploadTrigger">
+                <div class="font-black text-purple-800 text-sm mb-1 group-hover:text-purple-600">🎁 위클리 특가 엑셀 등록</div>
+                <div class="text-[11px] text-purple-500 font-bold">MD가 공유한 프로모션 시트를 그대로 올리세요</div>
+            </div>
+            <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
+        `;
+        $("#promoUploadTrigger").onclick = () => $("#promoFile").click();
+        $("#promoFile").onchange = async (e) => {
+            const f = e.target.files[0]; if(!f) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
+
+                const promoName = String(rows[0][0]||"").replace("기획전명 :", "").trim() || "기획전";
+                const promoPeriod = String(rows[1][0]||"").replace("기간 :", "").trim() || "";
+
+                let items = {};
+                let headerRowIdx = rows.findIndex(r => r.includes('품번'));
+                if(headerRowIdx > -1) {
+                    const headers = rows[headerRowIdx];
+                    const codeIdx = headers.indexOf('품번');
+                    const catIdx = headers.indexOf('특가 카테고리');
+                    const wpIdx = headers.indexOf('위클리특가');
+                    const wrIdx = headers.indexOf('특가할인율');
+                    const fpIdx = headers.indexOf('최종할인가');
+                    const frIdx = headers.indexOf('최종 할인율');
+
+                    for(let i=headerRowIdx+1; i<rows.length; i++) {
+                        const r = rows[i];
+                        const code = String(r[codeIdx]||"").trim();
+                        if(!code) continue;
+                        items[code] = {
+                            targetCat: String(r[catIdx]||"").trim().toUpperCase(),
+                            weeklyPrice: Number(String(r[wpIdx]).replace(/,/g,'')) || null,
+                            weeklyRate: parseFloat(r[wrIdx]) || 0,
+                            finalPrice: Number(String(r[fpIdx]).replace(/,/g,'')) || null,
+                            finalRate: parseFloat(r[frIdx]) || 0
+                        };
+                    }
+                }
+
+                const newPromo = { meta: { name: promoName, period: promoPeriod }, items };
+
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
+                    let sha = null;
+                    try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
+                    const body = { message:"update promotion", content: utf8ToB64(JSON.stringify(newPromo, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    if(!r2.ok) throw new Error("API 에러");
+
+                    PROMOTIONS = newPromo;
+                    sessionStorage.removeItem(CACHE_KEY); 
+                    rebuildIndex(); render();
+                    window.renderPromoAdmin();
+                    alert("기획전 데이터가 성공적으로 반영되었습니다!");
+                    $("#adminModal").classList.add("hidden");
+                } catch(err) { alert("업로드 실패: " + err.message); }
+                $("#promoFile").value = "";
+            };
+            reader.readAsArrayBuffer(f);
+        };
+    }
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
         const trBtn = document.createElement("button");
@@ -862,6 +1067,15 @@ window.addEventListener('DOMContentLoaded', () => {
         trBtn.onclick = window.renderTransfers;
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
     }
+    
+    // 기획전 관리자 UI 구역 동적 추가
+    if ($("#uploadPanel") && !$("#promoAdminBox")) {
+        const box = document.createElement("div");
+        box.id = "promoAdminBox";
+        box.className = "mt-4 p-4 border-2 border-purple-200 bg-purple-50 rounded-xl";
+        $("#uploadPanel").appendChild(box);
+    }
+    window.renderPromoAdmin();
 });
 
 loadGhConfig(); loadData();
