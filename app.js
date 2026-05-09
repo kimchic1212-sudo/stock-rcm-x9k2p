@@ -8,6 +8,7 @@ const REQUESTS_PATH = "requests.json";
 const TRANSFERS_PATH = "transfers.json"; 
 const PROMOTIONS_PATH = "promotions.json"; 
 const SALES_GUIDE_PATH = "sales_guide.json"; 
+const SALES_HISTORY_PATH = "sales_history.json"; // 🔥 판매 실적 데이터 분리
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -17,6 +18,7 @@ let MEMOS = [];
 let TRANSFERS = []; 
 let PROMOTIONS = {}; 
 let SALES_GUIDES = {}; 
+let SALES_HISTORY = { meta: {}, items: {} }; // 🔥 판매 실적 전역 객체
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -92,19 +94,21 @@ async function loadData(force = false){
       TRANSFERS = cached.transfers || [];
       PROMOTIONS = cached.promotions || {};
       SALES_GUIDES = cached.salesGuides || {};
+      SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
       applyMeta(CURRENT_META);
       rebuildIndex(); render(); 
       return;
   }
   
   try {
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
           fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
 
       if(!invRes.ok) throw new Error("재고 로드 실패");
@@ -115,6 +119,7 @@ async function loadData(force = false){
       if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
       if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+      
       if(promoRes && promoRes.ok) {
           const pData = await promoRes.json();
           PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
@@ -125,13 +130,18 @@ async function loadData(force = false){
           SALES_GUIDES = Object.keys(sgData).length > 0 ? sgData : {};
       } else { SALES_GUIDES = {}; }
 
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, _timestamp: Date.now() }));
+      if(shRes && shRes.ok) {
+          const shData = await shRes.json();
+          SALES_HISTORY = shData.items ? shData : { meta: {}, items: {} };
+      } else { SALES_HISTORY = { meta: {}, items: {} }; }
+
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
       
       applyMeta(CURRENT_META);
       rebuildIndex(); render();
   } catch(e) { 
       if(cached) { 
-          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {};
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || {meta:{},items:{}};
           applyMeta(CURRENT_META); rebuildIndex(); render(); 
       } else {
           RAW=[]; render();
@@ -166,7 +176,7 @@ function rebuildIndex(){
     if(r["규격"]) allSizes.add(String(r["규격"]).trim()); 
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -185,16 +195,13 @@ function rebuildIndex(){
     
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
-    
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    // 🔥 동적 기획전 & 할인율 수동 계산 (보완 로직) 🔥
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
         const promo = PROMOTIONS.items[p.품번];
         if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
             p.currentPromoPrice = promo.weeklyPrice;
             p.promoType = 'weekly';
-            // 엑셀에서 파싱을 못했더라도 가격 차이로 무조건 할인율 계산!
             p.promoRate = promo.weeklyRate || ((p.소비자가 - promo.weeklyPrice) / p.소비자가);
             if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15';
             else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22';
@@ -235,7 +242,30 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  // 🔥 기획전 세부 구분 필터 동적 생성 (텍스트 수정) 🔥
+  // 🔥 1. 판매분석 드롭다운 UI 동적 생성 🔥
+  if(!$("#salesPeriodSel") && $("#sortSel")) {
+      const sel = document.createElement("select");
+      sel.id = "salesPeriodSel";
+      sel.className = "ipt text-[13px] font-bold ml-2 bg-orange-50 border-orange-200 text-orange-700 rounded shrink-0 px-2 py-1.5 outline-none";
+      sel.innerHTML = `
+          <option value="">📊 판매분석 (끄기)</option>
+          <option value="7">최근 7일</option>
+          <option value="30">최근 30일</option>
+          <option value="90">최근 3개월</option>
+          <option value="ALL">전체 누적실적</option>
+      `;
+      $("#sortSel").parentNode.insertBefore(sel, $("#sortSel").nextSibling);
+      sel.onchange = () => { visibleCount=60; render(); };
+  }
+
+  // 🔥 2. 판매량 정렬(Sort) 옵션 추가 🔥
+  if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
+      const opt = document.createElement("option");
+      opt.value = "salesDesc";
+      opt.innerHTML = "🔥 판매량 높은순";
+      $("#sortSel").appendChild(opt);
+  }
+
   let promoWrap = $("#promoFilters");
   if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
       promoWrap = document.createElement("div");
@@ -384,6 +414,20 @@ function card(p){
       busanOnlyBadge = `<span class="bg-blue-800 text-white px-1.5 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
   }
 
+  // 🔥 3. 판매 분석 뱃지 로직 (스마트 트랜스퍼 & 베스트셀러) 🔥
+  let salesBadge = "";
+  if ($("#salesPeriodSel") && $("#salesPeriodSel").value !== "" && p.periodSales > 0) {
+      salesBadge += `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm">📈 ${p.periodSales}개 판매</span>`;
+      // 판매량 3개 이상인데, 부산재고가 1개 이하이고 다른 곳엔 재고가 있을 때 보충 알림
+      if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) {
+          salesBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
+      }
+      // 기간 내 10개 이상 팔렸으면 인기상품 뱃지
+      if (p.periodSales >= 10) {
+          salesBadge += `<span class="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-black shadow-sm">🏆 인기</span>`;
+      }
+  }
+
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -411,7 +455,6 @@ function card(p){
 
   const isFav = FAVS.includes(p.품번);
 
-  // 🔥 기획전 할인율(%) 명확히 파싱하여 노출 🔥
   let promoBadge = "";
   let priceDisplay = `<div class="price-clean">${krw(p.소비자가)}</div>`;
 
@@ -445,6 +488,7 @@ function card(p){
         <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
             ${busanOnlyBadge}
             ${promoBadge}
+            ${salesBadge}
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span>
             <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>
@@ -508,6 +552,7 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), 
     size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
+    salesPeriod: $("#salesPeriodSel") ? $("#salesPeriodSel").value : "", // 🔥 판매분석 필터 추가
     promoOnly: promoOnly,
     promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", 
     promoRate: promoOnly && $("#promoRateSel") ? Number($("#promoRateSel").value) : 0
@@ -528,13 +573,30 @@ function render(){
 
   const f = getFilters();
   
+  // 🔥 기간 필터 기반 동적 판매량 집계 처리 🔥
+  let cutoffDate = "0000-00-00";
+  if (f.salesPeriod && f.salesPeriod !== "ALL") {
+      const d = new Date(Date.now() - Number(f.salesPeriod) * 86400000);
+      cutoffDate = d.toISOString().split('T')[0];
+  }
+
+  PRODUCTS.forEach(p => {
+      p.periodSales = 0;
+      if (f.salesPeriod && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+          for (let date in SALES_HISTORY.items[p.품번]) {
+              if (f.salesPeriod === "ALL" || date >= cutoffDate) {
+                  p.periodSales += SALES_HISTORY.items[p.품번][date];
+              }
+          }
+      }
+  });
+
   let filteredList = PRODUCTS.filter(p=>{
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
     if(f.gender!=="ALL" && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
-
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
     
     if(f.promoOnly) {
@@ -569,6 +631,9 @@ function render(){
 
   const sortMode = $("#sortSel").value;
   filteredList.sort((a,b) => {
+    // 🔥 판매량 높은순 정렬 로직 추가 🔥
+    if(sortMode === "salesDesc") return (b.periodSales||0) - (a.periodSales||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    
     if(sortMode === "default") {
         const ca = CAT_ORDER[a.카테고리] ?? 9; 
         const cb = CAT_ORDER[b.카테고리] ?? 9;
@@ -881,7 +946,6 @@ function openDetail(p){
       };
   }
 
-  // 🔥 상품 이동 요청 폼 (스마트 드롭다운 UI 적용) 🔥
   const trBox = document.createElement("div");
   trBox.className = "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg";
   trBox.innerHTML = `
@@ -1051,6 +1115,7 @@ $("#resetAll").onclick=()=>{
 
     $("#sortSel").value="default";
     if($("#sizeSel")) $("#sizeSel").value="ALL";
+    if($("#salesPeriodSel")) $("#salesPeriodSel").value=""; // 필터 초기화 시 판매분석도 리셋
     $("#q").value=""; visibleCount=60; render(); 
 };
 
@@ -1078,7 +1143,7 @@ $("#file").onchange = async (e) => {
         try { 
             await commitInventoryToGitHub(rows, meta); 
             RAW = rows; CURRENT_META = meta; 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, _timestamp: Date.now()})); 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, _timestamp: Date.now()})); 
             applyMeta(CURRENT_META);
             rebuildIndex(); render();
             $("#adminModal").classList.add("hidden");
@@ -1098,6 +1163,95 @@ $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setIte
 $("#ghSave").onclick=()=>{
     GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
     saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
+};
+
+// 🔥 판매 데이터(POS 엑셀) 업로드 관리자 패널 동적 추가 🔥
+window.renderSalesHistoryAdmin = () => {
+    const box = $("#salesHistoryAdminBox");
+    if(!box) return;
+    
+    const count = Object.keys(SALES_HISTORY.items || {}).length;
+    box.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+            <div class="font-black text-orange-800">📊 POS 판매 실적 DB</div>
+            <span class="text-[10px] font-bold text-orange-500 bg-white px-2 py-0.5 rounded">품목 ${count}개 누적됨</span>
+        </div>
+        <div class="text-center cursor-pointer group mt-3 bg-white border border-orange-100 rounded-lg p-3 hover:bg-orange-500 transition-colors" id="shUploadTrigger">
+            <div class="font-black text-orange-600 text-sm mb-1 group-hover:text-white">판매 엑셀 누적 업데이트</div>
+            <div class="text-[10px] text-orange-400 font-bold group-hover:text-orange-100">POS에서 받은 기간별 판매데이터 그대로 업로드</div>
+        </div>
+        <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
+    `;
+    
+    $("#shUploadTrigger").onclick = () => $("#shFile").click();
+    $("#shFile").onchange = async (e) => {
+        const f = e.target.files[0]; if(!f) return;
+        
+        const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 부산점 실적", f.name);
+        if(!periodName) {
+            $("#shFile").value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
+
+            // 엑셀에서 품번, 수량, 날짜 헤더 찾기
+            let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && r.includes('거래명세서일'));
+            if(headerRowIdx === -1) {
+                alert("엑셀에서 '품번', '수량', '거래명세서일' 열을 찾을 수 없습니다.");
+                return;
+            }
+
+            const headers = rows[headerRowIdx].map(h => String(h||"").trim());
+            const codeIdx = headers.indexOf('품번');
+            const qtyIdx = headers.indexOf('수량');
+            const dateIdx = headers.indexOf('거래명세서일');
+
+            let sessionData = {};
+            for(let i=headerRowIdx+1; i<rows.length; i++) {
+                const r = rows[i];
+                const code = String(r[codeIdx]||"").trim();
+                const date = String(r[dateIdx]||"").trim();
+                const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
+                if(!code || !date) continue;
+
+                if(!sessionData[code]) sessionData[code] = {};
+                sessionData[code][date] = (sessionData[code][date] || 0) + qty;
+            }
+
+            let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
+            for(let code in sessionData) {
+                if(!newItems[code]) newItems[code] = {};
+                for(let date in sessionData[code]) {
+                    newItems[code][date] = sessionData[code][date];
+                }
+            }
+
+            const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems };
+
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
+                let sha = null;
+                try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                const body = { message:"update sales history", content: utf8ToB64(JSON.stringify(newHistory, null, 2)), branch: GH.branch };
+                if(sha) body.sha = sha;
+                const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                if(!r2.ok) throw new Error("API 에러");
+
+                SALES_HISTORY = newHistory;
+                sessionStorage.removeItem(CACHE_KEY); 
+                rebuildIndex(); render();
+                window.renderSalesHistoryAdmin();
+                alert(`성공적으로 업데이트 되었습니다!\n(${periodName})`);
+            } catch(err) { alert("업로드 실패: " + err.message); }
+            $("#shFile").value = "";
+        };
+        reader.readAsArrayBuffer(f);
+    };
 };
 
 window.renderPromoAdmin = () => {
@@ -1138,7 +1292,6 @@ window.renderPromoAdmin = () => {
         `;
         $("#promoUploadTrigger").onclick = () => $("#promoFile").click();
         
-        // 🔥 엑셀 데이터 파싱 보완 처리 🔥
         $("#promoFile").onchange = async (e) => {
             const f = e.target.files[0]; if(!f) return;
             const reader = new FileReader();
@@ -1153,7 +1306,6 @@ window.renderPromoAdmin = () => {
                 let items = {};
                 let headerRowIdx = rows.findIndex(r => r.includes('품번'));
                 if(headerRowIdx > -1) {
-                    // 헤더의 공백문자 제거하여 매칭 확률 100% 보장
                     const headers = rows[headerRowIdx].map(h => String(h||"").trim());
                     const codeIdx = headers.indexOf('품번');
                     const catIdx = headers.indexOf('특가 카테고리');
@@ -1169,7 +1321,7 @@ window.renderPromoAdmin = () => {
                         if(!code) continue;
 
                         let wRate = parseFloat(r[wrIdx]) || 0;
-                        if(wRate > 1) wRate /= 100; // 엑셀에서 10을 적었을 경우 방어코드
+                        if(wRate > 1) wRate /= 100; 
                         
                         let fRate = parseFloat(r[frIdx]) || 0;
                         if(fRate > 1) fRate /= 100;
@@ -1280,7 +1432,6 @@ window.addEventListener('DOMContentLoaded', () => {
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
     }
     
-    // 부산 ONLY 버튼 동적 주입
     const stockBtn = $('button.chip[data-stock]');
     if(stockBtn && !$('button.chip[data-busanonly]')) {
         const busanOnlyBtn = document.createElement("button");
@@ -1301,11 +1452,19 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // 🔥 관리자 패널 동적 추가 구역 🔥
+    if ($("#uploadPanel") && !$("#salesHistoryAdminBox")) {
+        const shBox = document.createElement("div");
+        shBox.id = "salesHistoryAdminBox";
+        shBox.className = "mt-4 p-4 border-2 border-orange-200 bg-orange-50 rounded-xl";
+        $("#uploadPanel").appendChild(shBox);
+    }
+
     if ($("#uploadPanel") && !$("#promoAdminBox")) {
-        const box = document.createElement("div");
-        box.id = "promoAdminBox";
-        box.className = "mt-4 p-4 border-2 border-purple-200 bg-purple-50 rounded-xl";
-        $("#uploadPanel").appendChild(box);
+        const promoBox = document.createElement("div");
+        promoBox.id = "promoAdminBox";
+        promoBox.className = "mt-4 p-4 border-2 border-purple-200 bg-purple-50 rounded-xl";
+        $("#uploadPanel").appendChild(promoBox);
     }
     
     if ($("#uploadPanel") && !$("#salesAdminBox")) {
@@ -1315,6 +1474,7 @@ window.addEventListener('DOMContentLoaded', () => {
         $("#uploadPanel").appendChild(sgBox);
     }
 
+    if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
     window.renderPromoAdmin();
     if(window.renderSalesAdmin) window.renderSalesAdmin();
 });
