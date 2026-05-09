@@ -188,12 +188,14 @@ function rebuildIndex(){
     
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
+    // 🔥 동적 기획전 & 할인율 수동 계산 (보완 로직) 🔥
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
         const promo = PROMOTIONS.items[p.품번];
         if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
             p.currentPromoPrice = promo.weeklyPrice;
             p.promoType = 'weekly';
-            p.promoRate = promo.weeklyRate || 0;
+            // 엑셀에서 파싱을 못했더라도 가격 차이로 무조건 할인율 계산!
+            p.promoRate = promo.weeklyRate || ((p.소비자가 - promo.weeklyPrice) / p.소비자가);
             if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15';
             else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22';
             else if(promo.targetCat === 'ACC/GEAR') p.promoEndDate = '5/29';
@@ -202,7 +204,7 @@ function rebuildIndex(){
         else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
             p.currentPromoPrice = promo.finalPrice;
             p.promoType = 'general';
-            p.promoRate = promo.finalRate || 0;
+            p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가);
             p.promoEndDate = '5/29'; 
         }
     }
@@ -233,7 +235,7 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  // 🔥 기획전 세부 구분 필터 동적 생성 🔥
+  // 🔥 기획전 세부 구분 필터 동적 생성 (텍스트 수정) 🔥
   let promoWrap = $("#promoFilters");
   if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
       promoWrap = document.createElement("div");
@@ -377,7 +379,6 @@ function card(p){
   if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
   else if (p.delta < 0) deltaHtml = `<span class="text-red-600 font-black">▼${p.delta}</span>`;
 
-  // 🔥 1. 부산점 ONLY 뱃지 로직 🔥
   let busanOnlyBadge = "";
   if (p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0) {
       busanOnlyBadge = `<span class="bg-blue-800 text-white px-1.5 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
@@ -410,7 +411,7 @@ function card(p){
 
   const isFav = FAVS.includes(p.품번);
 
-  // 🔥 2. 기획전 할인율(%) 및 쿠폰가능 여부, 기간 노출 🔥
+  // 🔥 기획전 할인율(%) 명확히 파싱하여 노출 🔥
   let promoBadge = "";
   let priceDisplay = `<div class="price-clean">${krw(p.소비자가)}</div>`;
 
@@ -505,7 +506,7 @@ function getFilters(){
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
-    busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), // 🔥 부산점 ONLY 필터
+    busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), 
     size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
     promoOnly: promoOnly,
     promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", 
@@ -534,13 +535,12 @@ function render(){
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
 
-    // 🔥 부산점 ONLY 로직 🔥
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
     
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
         if(f.promoType !== "ALL" && p.promoType !== f.promoType) return false;
-        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false; // 🔥 정확히 해당 % 일치할때만
+        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false; 
     }
 
     if(f.size !== "ALL") {
@@ -881,7 +881,7 @@ function openDetail(p){
       };
   }
 
-  // 🔥 4. 이동요청 스마트 폼으로 교체 (드롭다운 + 숫자) 🔥
+  // 🔥 상품 이동 요청 폼 (스마트 드롭다운 UI 적용) 🔥
   const trBox = document.createElement("div");
   trBox.className = "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg";
   trBox.innerHTML = `
@@ -1015,7 +1015,6 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
     else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
     
-    // 부산 ONLY 버튼 UI 갱신
     if(b.dataset.busanonly) {
         if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400');
         else b.classList.remove('ring-2', 'ring-blue-400');
@@ -1138,6 +1137,8 @@ window.renderPromoAdmin = () => {
             <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
         `;
         $("#promoUploadTrigger").onclick = () => $("#promoFile").click();
+        
+        // 🔥 엑셀 데이터 파싱 보완 처리 🔥
         $("#promoFile").onchange = async (e) => {
             const f = e.target.files[0]; if(!f) return;
             const reader = new FileReader();
@@ -1152,24 +1153,33 @@ window.renderPromoAdmin = () => {
                 let items = {};
                 let headerRowIdx = rows.findIndex(r => r.includes('품번'));
                 if(headerRowIdx > -1) {
-                    const headers = rows[headerRowIdx];
+                    // 헤더의 공백문자 제거하여 매칭 확률 100% 보장
+                    const headers = rows[headerRowIdx].map(h => String(h||"").trim());
                     const codeIdx = headers.indexOf('품번');
                     const catIdx = headers.indexOf('특가 카테고리');
                     const wpIdx = headers.indexOf('위클리특가');
                     const wrIdx = headers.indexOf('특가할인율');
                     const fpIdx = headers.indexOf('최종할인가');
-                    const frIdx = headers.indexOf('최종 할인율');
+                    let frIdx = headers.indexOf('최종 할인율');
+                    if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
 
                     for(let i=headerRowIdx+1; i<rows.length; i++) {
                         const r = rows[i];
                         const code = String(r[codeIdx]||"").trim();
                         if(!code) continue;
+
+                        let wRate = parseFloat(r[wrIdx]) || 0;
+                        if(wRate > 1) wRate /= 100; // 엑셀에서 10을 적었을 경우 방어코드
+                        
+                        let fRate = parseFloat(r[frIdx]) || 0;
+                        if(fRate > 1) fRate /= 100;
+
                         items[code] = {
                             targetCat: String(r[catIdx]||"").trim().toUpperCase(),
-                            weeklyPrice: Number(String(r[wpIdx]).replace(/,/g,'')) || null,
-                            weeklyRate: parseFloat(r[wrIdx]) || 0,
-                            finalPrice: Number(String(r[fpIdx]).replace(/,/g,'')) || null,
-                            finalRate: parseFloat(r[frIdx]) || 0
+                            weeklyPrice: Number(String(r[wpIdx]||"").replace(/,/g,'')) || null,
+                            weeklyRate: wRate,
+                            finalPrice: Number(String(r[fpIdx]||"").replace(/,/g,'')) || null,
+                            finalRate: fRate
                         };
                     }
                 }
@@ -1270,7 +1280,7 @@ window.addEventListener('DOMContentLoaded', () => {
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
     }
     
-    // 부산 ONLY 버튼 동적 주입 (기존 재고있음 버튼 옆)
+    // 부산 ONLY 버튼 동적 주입
     const stockBtn = $('button.chip[data-stock]');
     if(stockBtn && !$('button.chip[data-busanonly]')) {
         const busanOnlyBtn = document.createElement("button");
