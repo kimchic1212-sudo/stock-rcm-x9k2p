@@ -1,3 +1,12 @@
+// 🔥 1. 관리자 팝업창 등 스크롤 문제 해결을 위한 전역 CSS 자동 주입 🔥
+const style = document.createElement('style');
+style.innerHTML = `
+    #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+`;
+document.head.appendChild(style);
+
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -8,7 +17,7 @@ const REQUESTS_PATH = "requests.json";
 const TRANSFERS_PATH = "transfers.json"; 
 const PROMOTIONS_PATH = "promotions.json"; 
 const SALES_GUIDE_PATH = "sales_guide.json"; 
-const SALES_HISTORY_PATH = "sales_history.json"; // 🔥 판매 실적 데이터 분리
+const SALES_HISTORY_PATH = "sales_history.json"; 
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -18,7 +27,7 @@ let MEMOS = [];
 let TRANSFERS = []; 
 let PROMOTIONS = {}; 
 let SALES_GUIDES = {}; 
-let SALES_HISTORY = { meta: {}, items: {} }; // 🔥 판매 실적 전역 객체
+let SALES_HISTORY = { meta: {}, items: {} }; 
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -78,7 +87,8 @@ function applyMeta(meta){
     if(meta) {
         const el = $("#statSrc");
         if(el) {
-            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>`;
+            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] text-orange-600 mt-0.5">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
+            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>${addInfo}`;
         }
     }
 }
@@ -242,23 +252,55 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  // 🔥 1. 판매분석 드롭다운 UI 동적 생성 🔥
-  if(!$("#salesPeriodSel") && $("#sortSel")) {
-      const sel = document.createElement("select");
-      sel.id = "salesPeriodSel";
-      sel.className = "ipt text-[13px] font-bold ml-2 bg-orange-50 border-orange-200 text-orange-700 rounded shrink-0 px-2 py-1.5 outline-none";
-      sel.innerHTML = `
-          <option value="">📊 판매분석 (끄기)</option>
-          <option value="7">최근 7일</option>
-          <option value="30">최근 30일</option>
-          <option value="90">최근 3개월</option>
-          <option value="ALL">전체 누적실적</option>
+  // 🔥 2. 판매분석 드롭다운 UI (직접지정 기능 추가) 🔥
+  if(!$("#salesPeriodWrap") && $("#sortSel")) {
+      const wrap = document.createElement("div");
+      wrap.className = "flex items-center gap-1.5 shrink-0";
+      wrap.id = "salesPeriodWrap";
+      
+      wrap.innerHTML = `
+          <select id="salesPeriodSel" class="ipt text-[13px] font-bold bg-orange-50 border-orange-200 text-orange-700 rounded px-2 py-1.5 outline-none">
+              <option value="">📊 판매분석 (끄기)</option>
+              <option value="7">최근 7일</option>
+              <option value="30">최근 30일</option>
+              <option value="90">최근 3개월</option>
+              <option value="CUSTOM">📅 직접 지정</option>
+              <option value="ALL">전체 누적실적</option>
+          </select>
+          <div id="customDateWrap" class="hidden items-center gap-1 bg-white p-1 border border-orange-200 rounded">
+              <input type="date" id="customStartDate" class="ipt text-[11px] px-1 py-1 w-[90px] border-none outline-none text-gray-600 font-bold"> ~ 
+              <input type="date" id="customEndDate" class="ipt text-[11px] px-1 py-1 w-[90px] border-none outline-none text-gray-600 font-bold">
+              <button id="customDateApply" class="px-2 py-1 bg-orange-500 text-white rounded text-[11px] font-bold shrink-0">적용</button>
+          </div>
+          <button id="openAnalyticsBtn" class="hidden px-2 py-1.5 bg-gray-800 text-white text-[12px] font-black rounded flex items-center gap-1 shadow-sm shrink-0 hover:bg-black transition-colors">
+              <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i> 리포트
+          </button>
       `;
-      $("#sortSel").parentNode.insertBefore(sel, $("#sortSel").nextSibling);
-      sel.onchange = () => { visibleCount=60; render(); };
+      $("#sortSel").parentNode.insertBefore(wrap, $("#sortSel").nextSibling);
+      
+      $("#salesPeriodSel").onchange = (e) => { 
+          if(e.target.value === "CUSTOM") {
+              $("#customDateWrap").classList.replace("hidden", "flex");
+              $("#openAnalyticsBtn").classList.add("hidden"); // 적용하기 전엔 감춤
+          } else {
+              $("#customDateWrap").classList.replace("flex", "hidden");
+              if(e.target.value !== "") $("#openAnalyticsBtn").classList.remove("hidden");
+              else $("#openAnalyticsBtn").classList.add("hidden");
+              visibleCount=60; render(); 
+          }
+      };
+      
+      $("#customDateApply").onclick = () => {
+          if(!$("#customStartDate").value || !$("#customEndDate").value) {
+              alert("시작일과 종료일을 모두 선택해주세요."); return;
+          }
+          $("#openAnalyticsBtn").classList.remove("hidden");
+          visibleCount=60; render();
+      };
+      
+      $("#openAnalyticsBtn").onclick = () => window.openAnalyticsReport();
   }
 
-  // 🔥 2. 판매량 정렬(Sort) 옵션 추가 🔥
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
       const opt = document.createElement("option");
       opt.value = "salesDesc";
@@ -332,6 +374,139 @@ function rebuildIndex(){
   $("#statItems").textContent = fmt(PRODUCTS.length);
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
+
+// 🔥 3. 종합 판매 분석 리포트 대시보드 팝업 생성 함수 🔥
+window.openAnalyticsReport = () => {
+    let f = getFilters();
+    let titleDate = "전체 누적 기간";
+    if(f.salesPeriod === "7") titleDate = "최근 7일간";
+    else if(f.salesPeriod === "30") titleDate = "최근 30일간";
+    else if(f.salesPeriod === "90") titleDate = "최근 3개월간";
+    else if(f.salesPeriod === "CUSTOM") titleDate = `${f.customStart} ~ ${f.customEnd}`;
+
+    // 현재 렌더링된 filteredList를 기준으로 통계 추출 (필터가 걸려있으면 걸린것만, 아니면 전체 제품중 판매된것)
+    // 좀 더 정확한 전체 통계를 위해 PRODUCTS에서 직접 기간 내 판매량을 계산
+    let totalSales = 0;
+    let catData = { "신발":0, "의류":0, "용품":0 };
+    let genderData = { "M":0, "W":0, "U":0 };
+    let brandData = {};
+
+    let soldItems = [];
+
+    PRODUCTS.forEach(p => {
+        if(p.periodSales > 0) {
+            totalSales += p.periodSales;
+            
+            const cat = p.카테고리 || "기타";
+            catData[cat] = (catData[cat] || 0) + p.periodSales;
+            
+            const g = p.gender || "U";
+            genderData[g] = (genderData[g] || 0) + p.periodSales;
+            
+            const b = p.브랜드 || "기타";
+            brandData[b] = (brandData[b] || 0) + p.periodSales;
+
+            soldItems.push(p);
+        }
+    });
+
+    soldItems.sort((a,b) => b.periodSales - a.periodSales);
+    const top5 = soldItems.slice(0, 5);
+
+    // 바 차트 렌더링 헬퍼 함수
+    const buildBar = (label, value, max, color) => {
+        const pct = totalSales > 0 ? Math.round((value/totalSales)*100) : 0;
+        const widthPct = max > 0 ? (value/max)*100 : 0;
+        return `
+        <div class="mb-2">
+            <div class="flex justify-between text-[11px] font-bold mb-1">
+                <span class="text-gray-700">${escapeHtml(label)}</span>
+                <span class="text-gray-900">${fmt(value)}개 <span class="text-gray-400">(${pct}%)</span></span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="bg-${color}-500 h-2 rounded-full" style="width: ${widthPct}%"></div>
+            </div>
+        </div>`;
+    };
+
+    const maxCat = Math.max(...Object.values(catData), 1);
+    const maxGen = Math.max(...Object.values(genderData), 1);
+    const maxBrand = Math.max(...Object.values(brandData), 1);
+
+    const sortedBrands = Object.entries(brandData).sort((a,b)=>b[1]-a[1]).slice(0,5); // 탑 5 브랜드만
+
+    let modal = $("#analyticsModal");
+    if(!modal) {
+        modal = document.createElement("div");
+        modal.id = "analyticsModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[105]";
+        document.body.appendChild(modal);
+    }
+    
+    modal.innerHTML = `
+        <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.parentNode.classList.add('hidden')"></div>
+        <div class="modal-content relative bg-[#f8fafc] w-[90%] max-w-md flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-gray-200">
+            <div class="p-4 bg-gray-900 border-b border-gray-800 flex justify-between items-center sticky top-0 z-20">
+                <h2 class="font-black text-lg text-white flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-orange-400"></i> 판매 분석 리포트</h2>
+                <button onclick="this.closest('#analyticsModal').classList.add('hidden')" class="p-1 -mr-2 text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-5">
+                
+                <div class="text-center pb-4 border-b border-gray-200">
+                    <div class="text-xs font-bold text-gray-500 mb-1">${titleDate}</div>
+                    <div class="text-3xl font-black text-gray-900">${fmt(totalSales)}<span class="text-lg text-gray-500 ml-1">개 판매됨</span></div>
+                </div>
+
+                <div>
+                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="layers" class="w-4 h-4 text-blue-500"></i> 카테고리별 비중</h3>
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                        ${buildBar('신발', catData['신발']||0, maxCat, 'blue')}
+                        ${buildBar('의류', catData['의류']||0, maxCat, 'blue')}
+                        ${buildBar('용품(기타)', catData['용품']||0, maxCat, 'blue')}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="users" class="w-4 h-4 text-pink-500"></i> 성별 비중</h3>
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                        ${buildBar('남성 (M)', genderData['M']||0, maxGen, 'pink')}
+                        ${buildBar('여성 (W)', genderData['W']||0, maxGen, 'pink')}
+                        ${buildBar('공용/기타 (U)', genderData['U']||0, maxGen, 'pink')}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="tag" class="w-4 h-4 text-emerald-500"></i> TOP 브랜드</h3>
+                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                        ${sortedBrands.map(b => buildBar(b[0], b[1], maxBrand, 'emerald')).join('')}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="award" class="w-4 h-4 text-orange-500"></i> 🔥 제품 판매 TOP 5</h3>
+                    <div class="space-y-2">
+                        ${top5.map((p, idx) => `
+                            <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-orange-100 shadow-sm cursor-pointer hover:border-orange-300" onclick="openDetail(PRODUCTS.find(x=>x.품번==='${p.품번}'))">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="font-black text-orange-600 text-sm w-4 text-center shrink-0">${idx+1}</span>
+                                    <div class="min-w-0">
+                                        <div class="text-[11px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
+                                        <div class="text-[13px] font-black text-gray-800 truncate">${escapeHtml(p.품명)}</div>
+                                    </div>
+                                </div>
+                                <div class="font-black text-orange-600 shrink-0 ml-2 bg-orange-50 px-2 py-1 rounded text-xs">${fmt(p.periodSales)}개</div>
+                            </div>
+                        `).join('')}
+                        ${top5.length === 0 ? '<div class="text-center text-xs font-bold text-gray-400 py-4">판매 데이터가 없습니다.</div>' : ''}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    `;
+    modal.classList.remove("hidden");
+    if(window.lucide) lucide.createIcons();
+};
 
 window.openSalesGuide = (code) => {
     const guide = SALES_GUIDES[code];
@@ -414,15 +589,13 @@ function card(p){
       busanOnlyBadge = `<span class="bg-blue-800 text-white px-1.5 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
   }
 
-  // 🔥 3. 판매 분석 뱃지 로직 (스마트 트랜스퍼 & 베스트셀러) 🔥
   let salesBadge = "";
-  if ($("#salesPeriodSel") && $("#salesPeriodSel").value !== "" && p.periodSales > 0) {
+  const periodSel = $("#salesPeriodSel");
+  if (periodSel && periodSel.value !== "" && p.periodSales > 0) {
       salesBadge += `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm">📈 ${p.periodSales}개 판매</span>`;
-      // 판매량 3개 이상인데, 부산재고가 1개 이하이고 다른 곳엔 재고가 있을 때 보충 알림
       if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) {
           salesBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
       }
-      // 기간 내 10개 이상 팔렸으면 인기상품 뱃지
       if (p.periodSales >= 10) {
           salesBadge += `<span class="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-black shadow-sm">🏆 인기</span>`;
       }
@@ -552,7 +725,9 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), 
     size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
-    salesPeriod: $("#salesPeriodSel") ? $("#salesPeriodSel").value : "", // 🔥 판매분석 필터 추가
+    salesPeriod: $("#salesPeriodSel") ? $("#salesPeriodSel").value : "",
+    customStart: $("#customStartDate") ? $("#customStartDate").value : "",
+    customEnd: $("#customEndDate") ? $("#customEndDate").value : "",
     promoOnly: promoOnly,
     promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", 
     promoRate: promoOnly && $("#promoRateSel") ? Number($("#promoRateSel").value) : 0
@@ -573,9 +748,13 @@ function render(){
 
   const f = getFilters();
   
-  // 🔥 기간 필터 기반 동적 판매량 집계 처리 🔥
+  // 🔥 동적 기간 필터링 로직 (직접 지정 포함) 🔥
   let cutoffDate = "0000-00-00";
-  if (f.salesPeriod && f.salesPeriod !== "ALL") {
+  let endDate = "9999-99-99";
+  if (f.salesPeriod === "CUSTOM") {
+      cutoffDate = f.customStart || "0000-00-00";
+      endDate = f.customEnd || "9999-99-99";
+  } else if (f.salesPeriod && f.salesPeriod !== "ALL") {
       const d = new Date(Date.now() - Number(f.salesPeriod) * 86400000);
       cutoffDate = d.toISOString().split('T')[0];
   }
@@ -584,7 +763,7 @@ function render(){
       p.periodSales = 0;
       if (f.salesPeriod && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
           for (let date in SALES_HISTORY.items[p.품번]) {
-              if (f.salesPeriod === "ALL" || date >= cutoffDate) {
+              if (f.salesPeriod === "ALL" || (date >= cutoffDate && date <= endDate)) {
                   p.periodSales += SALES_HISTORY.items[p.품번][date];
               }
           }
@@ -631,7 +810,6 @@ function render(){
 
   const sortMode = $("#sortSel").value;
   filteredList.sort((a,b) => {
-    // 🔥 판매량 높은순 정렬 로직 추가 🔥
     if(sortMode === "salesDesc") return (b.periodSales||0) - (a.periodSales||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     
     if(sortMode === "default") {
@@ -682,16 +860,13 @@ let currentMemoDate = "";
 
 function renderAllMemos() {
     const listEl = $("#allMemosList");
-    
     const availableDates = [...new Set(MEMOS.map(m => m.date.split(' ')[0]))].sort((a,b) => {
         const [am, ad] = a.split('/').map(Number);
         const [bm, bd] = b.split('/').map(Number);
         return (bm - am) || (bd - ad);
     });
     
-    if(!currentMemoDate && availableDates.length > 0) {
-        currentMemoDate = availableDates[0]; 
-    }
+    if(!currentMemoDate && availableDates.length > 0) currentMemoDate = availableDates[0]; 
 
     let html = `
         <div class="flex gap-2 mb-4 bg-gray-100 p-2 rounded-lg items-center">
@@ -699,18 +874,13 @@ function renderAllMemos() {
                 <option value="ALL">🗓️ 전체 날짜 보기</option>
                 ${availableDates.map(d => `<option value="${d}" ${d===currentMemoDate?'selected':''}>${d} 메모</option>`).join('')}
             </select>
-            <button id="bulkDeleteMemosBtn" class="px-3 py-2 bg-red-50 text-red-600 border border-red-200 font-bold rounded text-sm hover:bg-red-500 hover:text-white transition-colors">
-                일괄 삭제
-            </button>
-        </div>
-        <div class="space-y-2">
+            <button id="bulkDeleteMemosBtn" class="px-3 py-2 bg-red-50 text-red-600 border border-red-200 font-bold rounded text-sm hover:bg-red-500 hover:text-white transition-colors">일괄 삭제</button>
+        </div><div class="space-y-2">
     `;
     
     let filtered = currentMemoDate === "ALL" ? MEMOS.slice().reverse() : MEMOS.filter(m => m.date.startsWith(currentMemoDate + " ")).slice().reverse();
-    
-    if(filtered.length === 0) {
-        html += "<div class='text-center py-10 text-gray-500 font-bold'>해당 조건에 맞는 메모가 없습니다.</div>";
-    } else {
+    if(filtered.length === 0) html += "<div class='text-center py-10 text-gray-500 font-bold'>해당 조건에 맞는 메모가 없습니다.</div>";
+    else {
         filtered.forEach(m => {
             html += `
             <div class="p-3 bg-white rounded-lg border text-sm shadow-sm relative">
@@ -725,56 +895,30 @@ function renderAllMemos() {
         });
     }
     html += "</div>";
-    
     listEl.innerHTML = html;
     if(window.lucide) lucide.createIcons();
-
-    $("#memoDateSelect").onchange = (e) => {
-        currentMemoDate = e.target.value;
-        renderAllMemos();
-    };
-    
+    $("#memoDateSelect").onchange = (e) => { currentMemoDate = e.target.value; renderAllMemos(); };
     $("#bulkDeleteMemosBtn").onclick = async () => {
         const targetText = currentMemoDate === 'ALL' ? '전체' : `${currentMemoDate} 일자`;
         if(!confirm(`⚠️ 정말 [${targetText}] 메모를 일괄 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
-        
         try {
             const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
             const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
             if(!r.ok) throw new Error("로드 실패");
             const j = await r.json(); 
             let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
-            
-            if(currentMemoDate === "ALL") {
-                oldData = [];
-            } else {
-                oldData = oldData.filter(m => !m.date.startsWith(currentMemoDate + " "));
-            }
-            
+            if(currentMemoDate === "ALL") oldData = [];
+            else oldData = oldData.filter(m => !m.date.startsWith(currentMemoDate + " "));
             const body = { message:"bulk delete memos", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
-            const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-            if(!r2.ok) throw new Error("API 에러");
-            
-            MEMOS = oldData;
-            alert("🗑️ 일괄 삭제가 완료되었습니다.");
-            
-            if(CURRENT_PRODUCT) {
-                CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번);
-                openDetail(CURRENT_PRODUCT); 
-            }
-            render();
-            currentMemoDate = "ALL"; 
-            renderAllMemos();
+            await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+            MEMOS = oldData; alert("🗑️ 일괄 삭제가 완료되었습니다.");
+            if(CURRENT_PRODUCT) { CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번); openDetail(CURRENT_PRODUCT); }
+            render(); currentMemoDate = "ALL"; renderAllMemos();
         } catch(e) { alert("메모 일괄 삭제 실패"); }
     };
 }
 
-$("#allMemosBtn").onclick = () => {
-    currentMemoDate = ""; 
-    renderAllMemos();
-    $("#allMemosModal").classList.remove("hidden");
-};
-
+$("#allMemosBtn").onclick = () => { currentMemoDate = ""; renderAllMemos(); $("#allMemosModal").classList.remove("hidden"); };
 window.deleteMemo = async (memoId) => {
     if(!confirm("이 메모를 삭제하시겠습니까?")) return;
     try {
@@ -783,22 +927,12 @@ window.deleteMemo = async (memoId) => {
         if(!r.ok) throw new Error("로드 실패");
         const j = await r.json(); 
         let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
-        
         oldData = oldData.filter(m => m.id !== memoId);
-        
         const body = { message:"delete memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
-        const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-        if(!r2.ok) throw new Error("API 에러");
-        
-        MEMOS = oldData;
-        alert("삭제되었습니다.");
-        
-        if(CURRENT_PRODUCT) {
-            CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번);
-            openDetail(CURRENT_PRODUCT); 
-        }
-        render();
-        if(!$("#allMemosModal").classList.contains("hidden")) renderAllMemos();
+        await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        MEMOS = oldData; alert("삭제되었습니다.");
+        if(CURRENT_PRODUCT) { CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번); openDetail(CURRENT_PRODUCT); }
+        render(); if(!$("#allMemosModal").classList.contains("hidden")) renderAllMemos();
     } catch(e) { alert("메모 삭제 실패"); }
 };
 
@@ -810,18 +944,11 @@ window.deleteTransfer = async (trId) => {
         if(!r.ok) throw new Error("로드 실패");
         const j = await r.json(); 
         let oldData = JSON.parse(decodeURIComponent(escape(atob(j.content))));
-        
         oldData = oldData.filter(m => m.id !== trId);
-        
         const body = { message:"delete transfer", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
-        const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-        if(!r2.ok) throw new Error("API 에러");
-        
-        TRANSFERS = oldData;
-        alert("이 이동 요청이 삭제되었습니다.");
-        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) {
-            window.renderTransfers();
-        }
+        await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        TRANSFERS = oldData; alert("이 이동 요청이 삭제되었습니다.");
+        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) window.renderTransfers();
     } catch(e) { alert("삭제 실패"); }
 };
 
@@ -833,40 +960,30 @@ window.renderTransfers = () => {
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99]"; 
         modal.innerHTML = `
             <div class="modal-outer absolute inset-0 bg-black/50"></div>
-            <div class="modal-content relative bg-[color:var(--bg)] w-[90%] max-w-md max-h-[80vh] flex flex-col rounded-xl overflow-hidden shadow-2xl z-10">
+            <div class="modal-content relative bg-[color:var(--bg)] w-[90%] max-w-md flex flex-col rounded-xl overflow-hidden shadow-2xl z-10">
                 <div class="p-4 border-b border-[color:var(--line)] flex justify-between items-center bg-[color:var(--surface)]">
                     <h2 class="font-black text-lg text-blue-800">🚚 상품 이동 요청 목록</h2>
                     <button id="closeTransfers" class="p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
-                </div>
-                <div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-2"></div>
-            </div>
-        `;
+                </div><div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-2"></div>
+            </div>`;
         document.body.appendChild(modal);
         $("#closeTransfers").onclick = () => modal.classList.add("hidden");
         modal.querySelector(".modal-outer").onclick = () => modal.classList.add("hidden");
         listEl = $("#transfersList");
     }
-
     $("#transfersModal").classList.remove("hidden");
-    
-    if(TRANSFERS.length === 0) {
-        listEl.innerHTML = "<div class='text-center py-10 text-gray-500 font-bold'>대기 중인 이동 요청이 없습니다.</div>";
-        return;
-    }
-
+    if(TRANSFERS.length === 0) { listEl.innerHTML = "<div class='text-center py-10 text-gray-500 font-bold'>대기 중인 이동 요청이 없습니다.</div>"; return; }
     let html = "";
     TRANSFERS.slice().reverse().forEach(t => {
         html += `
         <div class="p-3 bg-white rounded-lg border border-blue-100 text-sm shadow-sm relative">
             <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             <div class="flex justify-between items-center mb-1 pr-6">
-                <span class="font-black text-blue-700">${escapeHtml(t.code)}</span>
-                <span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
+                <span class="font-black text-blue-700">${escapeHtml(t.code)}</span><span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
             </div>
             <div class="font-bold text-gray-800 mb-2">${escapeHtml(t.product)}</div>
             <div class="flex gap-2 text-xs font-bold text-gray-600 mb-2">
-                <span class="bg-gray-100 px-2 py-0.5 rounded">사이즈: ${escapeHtml(t.size)}</span>
-                <span class="bg-gray-100 px-2 py-0.5 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+                <span class="bg-gray-100 px-2 py-0.5 rounded">사이즈: ${escapeHtml(t.size)}</span><span class="bg-gray-100 px-2 py-0.5 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
             </div>
             <div class="text-blue-900 bg-blue-50 p-2 rounded font-medium text-xs">${escapeHtml(t.memo)}</div>
         </div>`;
@@ -878,13 +995,11 @@ window.renderTransfers = () => {
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
-  
   $("#detailHead").innerHTML = `
     ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-[color:var(--line)] mix-blend-multiply dark:mix-blend-normal" style="max-height: 200px; background:var(--surface);">` : ''}
     <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
-
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let detailMemoHtml = "";
   if(productMemos.length > 0) {
@@ -892,10 +1007,7 @@ function openDetail(p){
           detailMemoHtml += `
           <div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[12px] mb-2 relative">
              <button onclick="deleteMemo('${m.id}')" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-             <div class="flex items-center gap-2 mb-1">
-                 <span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
-                 <span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span>
-             </div>
+             <div class="flex items-center gap-2 mb-1"><span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span><span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span></div>
              <div class="text-yellow-900 pr-5">${escapeHtml(m.text)}</div>
           </div>`;
       });
@@ -913,20 +1025,15 @@ function openDetail(p){
       const adminImgBox = document.createElement("div");
       adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
       const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
-      
       adminImgBox.innerHTML = `
           <div class="text-xs font-bold text-gray-800 mb-2">🖼️ 제품 이미지 웹 등록 툴</div>
-          <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">
-              🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)
-          </a>
+          <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)</a>
           <div class="flex gap-2">
               <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="복사한 주소 붙여넣기">
               <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
-          </div>
-          <div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
+          </div><div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
       `;
       $("#detailBody").appendChild(adminImgBox);
-
       adminImgBox.querySelector("#quickImgSave").onclick = async () => {
           const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
           const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
@@ -937,11 +1044,8 @@ function openDetail(p){
               try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
               const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
               if(sha) body.sha = sha;
-              const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-              if(!r2.ok) throw new Error("API 에러");
-
-              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!";
-              render(); setTimeout(()=>{openDetail(p);}, 500);
+              await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!"; render(); setTimeout(()=>{openDetail(p);}, 500);
           } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
       };
   }
@@ -980,9 +1084,7 @@ function openDetail(p){
       if(!from) { msg.style.color="red"; msg.textContent="출발지를 선택하세요."; return; }
       if(!to) { msg.style.color="red"; msg.textContent="도착지를 선택하세요."; return; }
       if(from === to) { msg.style.color="red"; msg.textContent="출발지와 도착지가 같습니다."; return; }
-      
       const finalMemo = `[${from} -> ${to}] ${memoInput}`.trim();
-
       msg.style.color="black"; msg.textContent="이동 요청 전송 중...";
 
       try {
@@ -992,23 +1094,15 @@ function openDetail(p){
               const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
               if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
           }catch(e){}
-          
           const d = new Date();
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-          
           oldData.push({ id: "tr_" + Date.now(), code: p.품번, product: p.품명, date: shortDate, size, qty, memo: finalMemo });
           const body = { message:"add transfer request", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
-          
-          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-          if(!r2.ok) throw new Error("API 에러");
-          
+          await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
           TRANSFERS = oldData; 
           msg.style.color="green"; msg.textContent="✓ 요청 전송 완료!";
-          trBox.querySelector("#trQty").value = "";
-          trBox.querySelector("#trMemo").value = "";
-          trBox.querySelector("#trFrom").value = "";
-          trBox.querySelector("#trTo").value = "";
+          trBox.querySelector("#trQty").value = ""; trBox.querySelector("#trMemo").value = ""; trBox.querySelector("#trFrom").value = ""; trBox.querySelector("#trTo").value = "";
       } catch(e) { msg.style.color="red"; msg.textContent="요청 실패!"; }
   };
 
@@ -1017,7 +1111,6 @@ function openDetail(p){
       const tag = $("#memoTag").value;
       const text = $("#memoText").value.trim();
       const msg = $("#memoMsg");
-      
       if(!staff) { msg.style.color="red"; msg.textContent="직원 이름을 선택해주세요."; return; }
       if(!text) { msg.style.color="red"; msg.textContent="내용을 입력하세요."; return; }
       msg.style.color="black"; msg.textContent="메모 저장 중...";
@@ -1029,25 +1122,15 @@ function openDetail(p){
               const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
               if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
           }catch(e){}
-          
           const d = new Date();
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
           const uniqueId = "memo_" + Date.now(); 
-          
           oldData.push({ id: uniqueId, code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
           const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
-          
-          const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-          if(!r2.ok) throw new Error("API 에러");
-          
-          MEMOS = oldData; 
-          CURRENT_PRODUCT.hasMemo = true;
-          
-          msg.style.color="green"; msg.textContent="✓ 저장 완료!";
-          $("#memoText").value = "";
-          render(); 
-          openDetail(p); 
+          await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+          MEMOS = oldData; CURRENT_PRODUCT.hasMemo = true;
+          msg.style.color="green"; msg.textContent="✓ 저장 완료!"; $("#memoText").value = ""; render(); openDetail(p); 
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
@@ -1056,34 +1139,26 @@ function openDetail(p){
 }
 
 document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") {
-        $$('.modal-backdrop').forEach(m => m.classList.add("hidden"));
-    }
+    if(e.key === "Escape") { $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); }
 });
 
 $$('.modal-backdrop').forEach(modal => {
     modal.addEventListener("click", (e) => {
-        if (e.target === modal || e.target.classList.contains("modal-outer")) {
-            modal.classList.add("hidden");
-        }
+        if (e.target === modal || e.target.classList.contains("modal-outer")) modal.classList.add("hidden");
     });
 });
 $$('button[id^="close"]').forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        e.target.closest('.modal-backdrop').classList.add("hidden");
-    });
+    btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
 });
 
 $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
-    
     if(b.dataset.busanonly) {
         if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400');
         else b.classList.remove('ring-2', 'ring-blue-400');
     }
-
     visibleCount=60; render(); 
 }));
 
@@ -1097,35 +1172,27 @@ $("#resetAll").onclick=()=>{
     if(promoBtn) {
         promoBtn.dataset.active = "0";
         promoBtn.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
-        if($("#promoTypeSel")) {
-            $("#promoTypeSel").classList.add("hidden");
-            $("#promoTypeSel").value = "ALL";
-        }
-        if($("#promoRateSel")) {
-            $("#promoRateSel").classList.add("hidden");
-            $("#promoRateSel").value = "0";
-        }
+        if($("#promoTypeSel")) { $("#promoTypeSel").classList.add("hidden"); $("#promoTypeSel").value = "ALL"; }
+        if($("#promoRateSel")) { $("#promoRateSel").classList.add("hidden"); $("#promoRateSel").value = "0"; }
     }
-
     const busanOnlyBtn = $('button.chip[data-busanonly]');
-    if(busanOnlyBtn) {
-        busanOnlyBtn.dataset.active = "0";
-        busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
-    }
+    if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400'); }
 
     $("#sortSel").value="default";
     if($("#sizeSel")) $("#sizeSel").value="ALL";
-    if($("#salesPeriodSel")) $("#salesPeriodSel").value=""; // 필터 초기화 시 판매분석도 리셋
+    if($("#salesPeriodSel")) {
+        $("#salesPeriodSel").value="";
+        $("#customDateWrap").classList.replace("flex", "hidden");
+        $("#openAnalyticsBtn").classList.add("hidden");
+    }
     $("#q").value=""; visibleCount=60; render(); 
 };
 
 $("#sortSel").onchange=()=> { visibleCount=60; render(); };
-
 let qTimer;
 $("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
 $("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 $("#refreshBtn").onclick=()=>loadData(true);
-
 $("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
 $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
 
@@ -1133,7 +1200,6 @@ $("#file").onchange = async (e) => {
     const f = e.target.files[0]; if(!f) return;
     const d = new Date();
     const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    
     localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
     const reader = new FileReader();
     reader.onload = async (ev) => {
@@ -1144,9 +1210,7 @@ $("#file").onchange = async (e) => {
             await commitInventoryToGitHub(rows, meta); 
             RAW = rows; CURRENT_META = meta; 
             sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, _timestamp: Date.now()})); 
-            applyMeta(CURRENT_META);
-            rebuildIndex(); render();
-            $("#adminModal").classList.add("hidden");
+            applyMeta(CURRENT_META); rebuildIndex(); render(); $("#adminModal").classList.add("hidden");
             alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
         } catch(err) { alert("업로드 실패! 깃허브 권한을 확인하세요."); }
         $("#file").value = ""; 
@@ -1158,18 +1222,12 @@ $("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $(
 $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
 $("#drop").onclick=()=>$("#file").click(); 
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
-
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
-$("#ghSave").onclick=()=>{
-    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
-    saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨");
-};
+$("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
-// 🔥 판매 데이터(POS 엑셀) 업로드 관리자 패널 동적 추가 🔥
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox");
     if(!box) return;
-    
     const count = Object.keys(SALES_HISTORY.items || {}).length;
     box.innerHTML = `
         <div class="flex justify-between items-center mb-2">
@@ -1186,26 +1244,15 @@ window.renderSalesHistoryAdmin = () => {
     $("#shUploadTrigger").onclick = () => $("#shFile").click();
     $("#shFile").onchange = async (e) => {
         const f = e.target.files[0]; if(!f) return;
-        
         const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 부산점 실적", f.name);
-        if(!periodName) {
-            $("#shFile").value = "";
-            return;
-        }
-
+        if(!periodName) { $("#shFile").value = ""; return; }
         const reader = new FileReader();
         reader.onload = async (ev) => {
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
             const sheet = wb.Sheets[wb.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
-
-            // 엑셀에서 품번, 수량, 날짜 헤더 찾기
             let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && r.includes('거래명세서일'));
-            if(headerRowIdx === -1) {
-                alert("엑셀에서 '품번', '수량', '거래명세서일' 열을 찾을 수 없습니다.");
-                return;
-            }
-
+            if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', '거래명세서일' 열을 찾을 수 없습니다."); return; }
             const headers = rows[headerRowIdx].map(h => String(h||"").trim());
             const codeIdx = headers.indexOf('품번');
             const qtyIdx = headers.indexOf('수량');
@@ -1218,19 +1265,14 @@ window.renderSalesHistoryAdmin = () => {
                 const date = String(r[dateIdx]||"").trim();
                 const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
                 if(!code || !date) continue;
-
                 if(!sessionData[code]) sessionData[code] = {};
                 sessionData[code][date] = (sessionData[code][date] || 0) + qty;
             }
-
             let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
             for(let code in sessionData) {
                 if(!newItems[code]) newItems[code] = {};
-                for(let date in sessionData[code]) {
-                    newItems[code][date] = sessionData[code][date];
-                }
+                for(let date in sessionData[code]) { newItems[code][date] = sessionData[code][date]; }
             }
-
             const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems };
 
             try {
@@ -1239,13 +1281,9 @@ window.renderSalesHistoryAdmin = () => {
                 try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
                 const body = { message:"update sales history", content: utf8ToB64(JSON.stringify(newHistory, null, 2)), branch: GH.branch };
                 if(sha) body.sha = sha;
-                const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                if(!r2.ok) throw new Error("API 에러");
-
-                SALES_HISTORY = newHistory;
-                sessionStorage.removeItem(CACHE_KEY); 
-                rebuildIndex(); render();
-                window.renderSalesHistoryAdmin();
+                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY); 
+                rebuildIndex(); render(); window.renderSalesHistoryAdmin();
                 alert(`성공적으로 업데이트 되었습니다!\n(${periodName})`);
             } catch(err) { alert("업로드 실패: " + err.message); }
             $("#shFile").value = "";
@@ -1275,11 +1313,8 @@ window.renderPromoAdmin = () => {
                 const body = { message:"end promotion", content: utf8ToB64(JSON.stringify({}, null, 2)), branch: GH.branch };
                 if(sha) body.sha = sha;
                 await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                PROMOTIONS = {};
-                sessionStorage.removeItem(CACHE_KEY);
-                rebuildIndex(); render();
-                window.renderPromoAdmin();
-                alert("기획전이 성공적으로 종료되었습니다.");
+                PROMOTIONS = {}; sessionStorage.removeItem(CACHE_KEY);
+                rebuildIndex(); render(); window.renderPromoAdmin(); alert("기획전이 성공적으로 종료되었습니다.");
             } catch(e) { alert("종료 실패!"); }
         }
     } else {
@@ -1291,7 +1326,6 @@ window.renderPromoAdmin = () => {
             <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
         `;
         $("#promoUploadTrigger").onclick = () => $("#promoFile").click();
-        
         $("#promoFile").onchange = async (e) => {
             const f = e.target.files[0]; if(!f) return;
             const reader = new FileReader();
@@ -1299,7 +1333,6 @@ window.renderPromoAdmin = () => {
                 const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
                 const sheet = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
-
                 const promoName = String(rows[0][0]||"").replace("기획전명 :", "").trim() || "기획전";
                 const promoPeriod = String(rows[1][0]||"").replace("기간 :", "").trim() || "";
 
@@ -1319,13 +1352,8 @@ window.renderPromoAdmin = () => {
                         const r = rows[i];
                         const code = String(r[codeIdx]||"").trim();
                         if(!code) continue;
-
-                        let wRate = parseFloat(r[wrIdx]) || 0;
-                        if(wRate > 1) wRate /= 100; 
-                        
-                        let fRate = parseFloat(r[frIdx]) || 0;
-                        if(fRate > 1) fRate /= 100;
-
+                        let wRate = parseFloat(r[wrIdx]) || 0; if(wRate > 1) wRate /= 100; 
+                        let fRate = parseFloat(r[frIdx]) || 0; if(fRate > 1) fRate /= 100;
                         items[code] = {
                             targetCat: String(r[catIdx]||"").trim().toUpperCase(),
                             weeklyPrice: Number(String(r[wpIdx]||"").replace(/,/g,'')) || null,
@@ -1335,23 +1363,16 @@ window.renderPromoAdmin = () => {
                         };
                     }
                 }
-
                 const newPromo = { meta: { name: promoName, period: promoPeriod }, items };
-
                 try {
                     const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
                     let sha = null;
                     try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
                     const body = { message:"update promotion", content: utf8ToB64(JSON.stringify(newPromo, null, 2)), branch: GH.branch };
                     if(sha) body.sha = sha;
-                    const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                    if(!r2.ok) throw new Error("API 에러");
-
-                    PROMOTIONS = newPromo;
-                    sessionStorage.removeItem(CACHE_KEY); 
-                    rebuildIndex(); render();
-                    window.renderPromoAdmin();
-                    alert("기획전 데이터가 성공적으로 반영되었습니다!");
+                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    PROMOTIONS = newPromo; sessionStorage.removeItem(CACHE_KEY); 
+                    rebuildIndex(); render(); window.renderPromoAdmin(); alert("기획전 데이터가 성공적으로 반영되었습니다!");
                 } catch(err) { alert("업로드 실패: " + err.message); }
                 $("#promoFile").value = "";
             };
@@ -1363,7 +1384,6 @@ window.renderPromoAdmin = () => {
 window.renderSalesAdmin = () => {
     const box = $("#salesAdminBox");
     if(!box) return;
-    
     box.innerHTML = `
         <div class="flex justify-between items-center mb-2">
             <div class="font-black text-indigo-800">🧠 AI 세일즈 가이드 DB</div>
@@ -1375,7 +1395,6 @@ window.renderSalesAdmin = () => {
         </div>
         <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
     `;
-    
     $("#salesUploadTrigger").onclick = () => $("#salesFile").click();
     $("#salesFile").onchange = async (e) => {
         const f = e.target.files[0]; if(!f) return;
@@ -1384,36 +1403,26 @@ window.renderSalesAdmin = () => {
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
             const sheet = wb.Sheets[wb.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(sheet, {defval: ""}); 
-
             let newGuides = {};
             rows.forEach(r => {
                 const code = String(r["품번"] || r["상품코드"] || "").trim();
                 if(!code) return;
-                
                 const rawKw = String(r["키워드"] || r["핵심키워드"] || "");
                 const keywords = rawKw ? rawKw.split(',').map(k=>k.trim()).filter(Boolean) : [];
-                
                 newGuides[code] = {
-                    keywords: keywords,
-                    features: String(r["특징"] || r["제품특징"] || ""),
-                    target: String(r["추천고객"] || r["타겟고객"] || ""),
-                    pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
+                    keywords: keywords, features: String(r["특징"] || r["제품특징"] || ""),
+                    target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
                 };
             });
-
             try {
                 const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
                 let sha = null;
                 try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
                 const body = { message:"update sales guide", content: utf8ToB64(JSON.stringify(newGuides, null, 2)), branch: GH.branch };
                 if(sha) body.sha = sha;
-                const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                if(!r2.ok) throw new Error("API 에러");
-
-                SALES_GUIDES = newGuides;
-                sessionStorage.removeItem(CACHE_KEY); 
-                rebuildIndex(); render();
-                window.renderSalesAdmin();
+                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY); 
+                rebuildIndex(); render(); window.renderSalesAdmin();
                 alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
             } catch(err) { alert("업로드 실패: " + err.message); }
             $("#salesFile").value = "";
@@ -1440,36 +1449,28 @@ window.addEventListener('DOMContentLoaded', () => {
         busanOnlyBtn.dataset.active = "0";
         busanOnlyBtn.innerHTML = "🌊 부산점 ONLY";
         stockBtn.parentNode.insertBefore(busanOnlyBtn, stockBtn.nextSibling);
-        
         busanOnlyBtn.addEventListener("click", () => {
             busanOnlyBtn.dataset.active = busanOnlyBtn.dataset.active === "1" ? "0" : "1";
-            if(busanOnlyBtn.dataset.active === "1") {
-                busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
-            } else {
-                busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
-            }
+            if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
+            else busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
             visibleCount=60; render();
         });
     }
     
-    // 🔥 관리자 패널 동적 추가 구역 🔥
     if ($("#uploadPanel") && !$("#salesHistoryAdminBox")) {
-        const shBox = document.createElement("div");
-        shBox.id = "salesHistoryAdminBox";
+        const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
         shBox.className = "mt-4 p-4 border-2 border-orange-200 bg-orange-50 rounded-xl";
         $("#uploadPanel").appendChild(shBox);
     }
 
     if ($("#uploadPanel") && !$("#promoAdminBox")) {
-        const promoBox = document.createElement("div");
-        promoBox.id = "promoAdminBox";
+        const promoBox = document.createElement("div"); promoBox.id = "promoAdminBox";
         promoBox.className = "mt-4 p-4 border-2 border-purple-200 bg-purple-50 rounded-xl";
         $("#uploadPanel").appendChild(promoBox);
     }
     
     if ($("#uploadPanel") && !$("#salesAdminBox")) {
-        const sgBox = document.createElement("div");
-        sgBox.id = "salesAdminBox";
+        const sgBox = document.createElement("div"); sgBox.id = "salesAdminBox";
         sgBox.className = "mt-4 p-4 border-2 border-indigo-200 bg-indigo-50 rounded-xl";
         $("#uploadPanel").appendChild(sgBox);
     }
