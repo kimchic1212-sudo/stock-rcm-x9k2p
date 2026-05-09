@@ -1,0 +1,1534 @@
+{
+  "meta": {
+    "name": "RUN TOGETHER WEEK",
+    "period": "5.8(금) - 5.29(금)"
+  },
+  "items": {
+    "HV8150-003": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 167200,
+      "weeklyRate": 0.2,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "IO9571-400": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 223300,
+      "weeklyRate": 0.3,
+      "finalPrice": 319000,
+      "finalRate": 0
+    },
+    "S21055-172": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "IO9567-400": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 167300,
+      "weeklyRate": 0.3,
+      "finalPrice": 239000,
+      "finalRate": 0
+    },
+    "HQ3048-500": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 159200,
+      "weeklyRate": 0.2,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "S21059-103": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "S21007-172": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 175200,
+      "weeklyRate": 0.2,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "IH0869-605": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 223300,
+      "weeklyRate": 0.3,
+      "finalPrice": 319000,
+      "finalRate": 0
+    },
+    "S21070-172": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 151200,
+      "weeklyRate": 0.2,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "S11055-131": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "JS4939": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "JQ1668": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "S11058-121": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "JQ9667": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "JP8680": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 127200,
+      "weeklyRate": 0.2,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "JS4949": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 143200,
+      "weeklyRate": 0.2,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "S20996-97": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 153300,
+      "weeklyRate": 0.3,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "S20996-130": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 153300,
+      "weeklyRate": 0.3,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "1104202E020": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 139300,
+      "weeklyRate": 0.3,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "JR1613": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 127200,
+      "weeklyRate": 0.2,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "1147790-SNTF": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 148000,
+      "weeklyRate": 0.2,
+      "finalPrice": 166500,
+      "finalRate": 0
+    },
+    "1104372E423": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 151200,
+      "weeklyRate": 0.2,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "JR7372": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 127200,
+      "weeklyRate": 0.2,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "KI4454": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 167200,
+      "weeklyRate": 0.2,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "S10996-97": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 153300,
+      "weeklyRate": 0.3,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "1147790-CLRSS": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 148000,
+      "weeklyRate": 0.2,
+      "finalPrice": 166500,
+      "finalRate": 0
+    },
+    "1168690-TYS": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 159200,
+      "weeklyRate": 0.2,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "1203811D020": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 132300,
+      "weeklyRate": 0.3,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "1104321D441": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 132300,
+      "weeklyRate": 0.3,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "S11070-124": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 151200,
+      "weeklyRate": 0.2,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "KI4450": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 167200,
+      "weeklyRate": 0.2,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "1104341D408": {
+      "targetCat": "FOOTWEAR",
+      "weeklyPrice": 153300,
+      "weeklyRate": 0.3,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "JZ2478": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 52000,
+      "weeklyRate": 0.2,
+      "finalPrice": 65000,
+      "finalRate": 0
+    },
+    "FN2505-010": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 66500,
+      "weeklyRate": 0.3,
+      "finalPrice": 95000,
+      "finalRate": 0
+    },
+    "JY8624": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 55200,
+      "weeklyRate": 0.2,
+      "finalPrice": 69000,
+      "finalRate": 0
+    },
+    "JZ7694": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 39200,
+      "weeklyRate": 0.2,
+      "finalPrice": 49000,
+      "finalRate": 0
+    },
+    "DX6822-010": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 34300,
+      "weeklyRate": 0.3,
+      "finalPrice": 49000,
+      "finalRate": 0
+    },
+    "HV5204-377": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 55200,
+      "weeklyRate": 0.2,
+      "finalPrice": 69000,
+      "finalRate": 0
+    },
+    "IO9651-819": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 52500,
+      "weeklyRate": 0.3,
+      "finalPrice": 75000,
+      "finalRate": 0
+    },
+    "HJ3385-736": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 87500,
+      "weeklyRate": 0.3,
+      "finalPrice": 125000,
+      "finalRate": 0
+    },
+    "WP51141_BK": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 55930,
+      "weeklyRate": 0.3,
+      "finalPrice": 79900,
+      "finalRate": 0
+    },
+    "JN0298": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 71200,
+      "weeklyRate": 0.2,
+      "finalPrice": 89000,
+      "finalRate": 0
+    },
+    "KS0465": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 87200,
+      "weeklyRate": 0.2,
+      "finalPrice": 109000,
+      "finalRate": 0
+    },
+    "KS0470": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 47200,
+      "weeklyRate": 0.2,
+      "finalPrice": 59000,
+      "finalRate": 0
+    },
+    "KS0464": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 87200,
+      "weeklyRate": 0.2,
+      "finalPrice": 109000,
+      "finalRate": 0
+    },
+    "KS0466": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 47200,
+      "weeklyRate": 0.2,
+      "finalPrice": 59000,
+      "finalRate": 0
+    },
+    "KS0468": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 47200,
+      "weeklyRate": 0.2,
+      "finalPrice": 59000,
+      "finalRate": 0
+    },
+    "KS0469": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 47200,
+      "weeklyRate": 0.2,
+      "finalPrice": 59000,
+      "finalRate": 0
+    },
+    "KS0471": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 47200,
+      "weeklyRate": 0.2,
+      "finalPrice": 59000,
+      "finalRate": 0
+    },
+    "KS0472": {
+      "targetCat": "APPAREL",
+      "weeklyPrice": 47200,
+      "weeklyRate": 0.2,
+      "finalPrice": 59000,
+      "finalRate": 0
+    },
+    "IH8673-010": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 34300,
+      "weeklyRate": 0.3,
+      "finalPrice": 49000,
+      "finalRate": 0
+    },
+    "HV6919-100": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 17600,
+      "weeklyRate": 0.2,
+      "finalPrice": 22000,
+      "finalRate": 0
+    },
+    "DB5471-100": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 52000,
+      "weeklyRate": 0.2,
+      "finalPrice": 65000,
+      "finalRate": 0
+    },
+    "FB5682-010": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 27300,
+      "weeklyRate": 0.3,
+      "finalPrice": 39000,
+      "finalRate": 0
+    },
+    "DB5471-010": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 52000,
+      "weeklyRate": 0.2,
+      "finalPrice": 65000,
+      "finalRate": 0
+    },
+    "DV5465-101": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 23100,
+      "weeklyRate": 0.3,
+      "finalPrice": 33000,
+      "finalRate": 0
+    },
+    "HV6919-010": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 17600,
+      "weeklyRate": 0.2,
+      "finalPrice": 22000,
+      "finalRate": 0
+    },
+    "LC1928600": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 36000,
+      "weeklyRate": 0.2,
+      "finalPrice": 45000,
+      "finalRate": 0
+    },
+    "IO8269-010": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 44000,
+      "weeklyRate": 0.2,
+      "finalPrice": 55000,
+      "finalRate": 0
+    },
+    "IO8269-009": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 44000,
+      "weeklyRate": 0.2,
+      "finalPrice": 55000,
+      "finalRate": 0
+    },
+    "JD1160": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 31200,
+      "weeklyRate": 0.2,
+      "finalPrice": 39000,
+      "finalRate": 0
+    },
+    "LC2337700": {
+      "targetCat": "ACC/GEAR",
+      "weeklyPrice": 32000,
+      "weeklyRate": 0.2,
+      "finalPrice": 40000,
+      "finalRate": 0
+    },
+    "NBPFGS112T": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "HV8154-102": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HV8150-405": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HV8154-001": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HV8154-012": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFGB103T": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "JR4946": {
+      "targetCat": "",
+      "weeklyPrice": 299000,
+      "weeklyRate": 0,
+      "finalPrice": 299000,
+      "finalRate": 0
+    },
+    "S21064-140": {
+      "targetCat": "",
+      "weeklyPrice": 299000,
+      "weeklyRate": 0,
+      "finalPrice": 299000,
+      "finalRate": 0
+    },
+    "NBPFGS112J": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "NBPFGS113T": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "1105032E020": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "JP6624": {
+      "targetCat": "",
+      "weeklyPrice": 299000,
+      "weeklyRate": 0,
+      "finalPrice": 299000,
+      "finalRate": 0
+    },
+    "1104791D131": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "S21023-172": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "HV8150-102": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "KK3719": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "FV6040-001": {
+      "targetCat": "",
+      "weeklyPrice": 129000,
+      "weeklyRate": 0,
+      "finalPrice": 116100,
+      "finalRate": 0
+    },
+    "S21073-103": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "1162013-SCCG": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "S21008-142": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "1105031D092": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "IQ3439-211": {
+      "targetCat": "",
+      "weeklyPrice": 289000,
+      "weeklyRate": 0,
+      "finalPrice": 260100,
+      "finalRate": 0
+    },
+    "FZ1626-500": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "IQ3435-045": {
+      "targetCat": "",
+      "weeklyPrice": 269000,
+      "weeklyRate": 0,
+      "finalPrice": 242100,
+      "finalRate": 0
+    },
+    "HQ3049-502": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "IF9630-001": {
+      "targetCat": "",
+      "weeklyPrice": 289000,
+      "weeklyRate": 0,
+      "finalPrice": 260100,
+      "finalRate": 0
+    },
+    "1162013-CYLT": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "NBPFGS113M": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "1204681B110": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "1204921D133": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "KK2690": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "KI3381": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "1104791D392": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "HQ3049-500": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "NBPFGS112Y": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "HQ3048-003": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "S11073-104": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HQ2592-105": {
+      "targetCat": "",
+      "weeklyPrice": 279000,
+      "weeklyRate": 0,
+      "finalPrice": 251100,
+      "finalRate": 0
+    },
+    "1204681B131": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "JH6206": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFGS113Y": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "FQ5027-100": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "1162050-CRDS": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "IO9915-100": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "1104542E020": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "NBPFGS104L": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HJ1102-106": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "HQ2593-502": {
+      "targetCat": "",
+      "weeklyPrice": 279000,
+      "weeklyRate": 0,
+      "finalPrice": 251100,
+      "finalRate": 0
+    },
+    "1104542E189": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "HJ1101-105": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "HJ1101-500": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "IM6778-902": {
+      "targetCat": "",
+      "weeklyPrice": 289000,
+      "weeklyRate": 0,
+      "finalPrice": 260100,
+      "finalRate": 0
+    },
+    "JS4958": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "S11024-232": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "JP9251": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "1104791D091": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "S11007-172": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "HQ3048-501": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "HQ3048-001": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "NBPFFB756L": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "1162050-VCH": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "HQ3049-001": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "1204431B020": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "NBPFGB103W": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HJ1101-004": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "JH6208": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "1104541D020": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "NBPFGB103M": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HJ1101-607": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "HV8150-009": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "KI3946": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "1162032-STLLR": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "KI3383": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFFB101L": {
+      "targetCat": "",
+      "weeklyPrice": 259000,
+      "weeklyRate": 0,
+      "finalPrice": 233100,
+      "finalRate": 0
+    },
+    "1204431D020": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "HJ1102-300": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "HQ2592-004": {
+      "targetCat": "",
+      "weeklyPrice": 279000,
+      "weeklyRate": 0,
+      "finalPrice": 251100,
+      "finalRate": 0
+    },
+    "S20998-131": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "FB8502-402": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "1162013-BBLC": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "JP7149": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "FQ7262-103": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "HQ7001-300": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "S20936-200": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "JP7147": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HQ7002-300": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HQ7001-003": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFFB756R": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "1162032-FFF": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "HM6804-102": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "S11000-104": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "S21000-137": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "NBPFFB105I": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "S21000-164": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "S20937-115": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "FQ7262-004": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "1162390-BCQ": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "1162410-BCQ": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "NBPFEB741M": {
+      "targetCat": "",
+      "weeklyPrice": 249000,
+      "weeklyRate": 0,
+      "finalPrice": 224100,
+      "finalRate": 0
+    },
+    "FQ7262-002": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "DJ7884-007": {
+      "targetCat": "",
+      "weeklyPrice": 149000,
+      "weeklyRate": 0,
+      "finalPrice": 134100,
+      "finalRate": 0
+    },
+    "DR2660-008": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "DR2670-104": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "1162014-BBLC": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "IQ0307-094": {
+      "targetCat": "",
+      "weeklyPrice": 289000,
+      "weeklyRate": 0,
+      "finalPrice": 260100,
+      "finalRate": 0
+    },
+    "IQ0308-094": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "HQ3048-101": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "IO9913-100": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "1162014-SDSTS": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "HV8150-120": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "IF4456-001": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "IM3985-001": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "HQ2050-103": {
+      "targetCat": "",
+      "weeklyPrice": 289000,
+      "weeklyRate": 0,
+      "finalPrice": 260100,
+      "finalRate": 0
+    },
+    "1204431B128": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "IM6011-060": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "FN8454-003": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HV8150-300": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "IH3251-001": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "IM6776-060": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "IM7659-394": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "1162032-BBLC": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "HV8150-002": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFFB707B": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFFB707G": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFFB758I": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "HV8154-601": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HV8150-004": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "NBPFFB758F": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "NBPFFB758O": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "S20998-210": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "1162011-SNTF": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "1104422E020": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "1104422E112": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "1104452E020": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "1104462E020": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "HM6804-600": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "1162032-HSK": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "FD2722-113": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "S20933-140": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "HQ1720-600": {
+      "targetCat": "",
+      "weeklyPrice": 169000,
+      "weeklyRate": 0,
+      "finalPrice": 152100,
+      "finalRate": 0
+    },
+    "1104331D443": {
+      "targetCat": "",
+      "weeklyPrice": 189000,
+      "weeklyRate": 0,
+      "finalPrice": 170100,
+      "finalRate": 0
+    },
+    "1162011-WWH": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "NBPFFB102I": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "S20940-11": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "S20940-30": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "1162013-DNP": {
+      "targetCat": "",
+      "weeklyPrice": 229000,
+      "weeklyRate": 0,
+      "finalPrice": 206100,
+      "finalRate": 0
+    },
+    "1204361B208": {
+      "targetCat": "",
+      "weeklyPrice": 239000,
+      "weeklyRate": 0,
+      "finalPrice": 215100,
+      "finalRate": 0
+    },
+    "FD2722-006": {
+      "targetCat": "",
+      "weeklyPrice": 159000,
+      "weeklyRate": 0,
+      "finalPrice": 143100,
+      "finalRate": 0
+    },
+    "FQ7261-003": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "1147790-DDW": {
+      "targetCat": "",
+      "weeklyPrice": 185000,
+      "weeklyRate": 0,
+      "finalPrice": 166500,
+      "finalRate": 0
+    },
+    "NBPFEB717J": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    },
+    "1132210-FTG": {
+      "targetCat": "",
+      "weeklyPrice": 199000,
+      "weeklyRate": 0,
+      "finalPrice": 179100,
+      "finalRate": 0
+    },
+    "NBPFEB708W": {
+      "targetCat": "",
+      "weeklyPrice": 209000,
+      "weeklyRate": 0,
+      "finalPrice": 188100,
+      "finalRate": 0
+    },
+    "DJ7883-108": {
+      "targetCat": "",
+      "weeklyPrice": 149000,
+      "weeklyRate": 0,
+      "finalPrice": 134100,
+      "finalRate": 0
+    },
+    "FQ7262-001": {
+      "targetCat": "",
+      "weeklyPrice": 219000,
+      "weeklyRate": 0,
+      "finalPrice": 197100,
+      "finalRate": 0
+    },
+    "DR2665-010": {
+      "targetCat": "",
+      "weeklyPrice": 179000,
+      "weeklyRate": 0,
+      "finalPrice": 161100,
+      "finalRate": 0
+    }
+  }
+}
