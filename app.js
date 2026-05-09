@@ -188,7 +188,6 @@ function rebuildIndex(){
     
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    // 🔥 동적 기획전 & 날짜 매칭 로직 🔥
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
         const promo = PROMOTIONS.items[p.품번];
         if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
@@ -255,9 +254,9 @@ function rebuildIndex(){
               </select>
               <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
                   <option value="0">할인율 전체</option>
-                  <option value="10">🔥 10% 이상</option>
-                  <option value="20">🔥 20% 이상</option>
-                  <option value="30">🔥 30% 이상</option>
+                  <option value="10">🔥 10% 할인</option>
+                  <option value="20">🔥 20% 할인</option>
+                  <option value="30">🔥 30% 할인</option>
               </select>
           `;
           promoWrap.querySelector('button').onclick = function() {
@@ -420,23 +419,21 @@ function card(p){
       const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
 
       if (p.promoType === 'weekly') {
-          promoBadge = `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="flame" class="w-3 h-3"></i>위클리특가 (~${p.promoEndDate})</span>`;
+          promoBadge = `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="flame" class="w-3 h-3"></i>위클리특가 ${rateLabel} (~${p.promoEndDate})</span>`;
           priceDisplay = `
             <div class="flex flex-col items-end leading-tight mt-0.5">
                 <span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
                 <div class="flex items-center gap-1.5">
                     <span class="text-[16px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span>
-                    ${rateLabel ? `<span class="text-[11px] font-black text-red-600 bg-red-50 border border-red-100 px-1 rounded">${rateLabel}</span>` : ''}
                 </div>
             </div>`;
       } else {
-          promoBadge = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="ticket" class="w-3 h-3"></i>쿠폰적용가 (~${p.promoEndDate})</span>`;
+          promoBadge = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="ticket" class="w-3 h-3"></i>쿠폰적용가 ${rateLabel} (~${p.promoEndDate})</span>`;
           priceDisplay = `
             <div class="flex flex-col items-end leading-tight mt-0.5">
                 <span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
                 <div class="flex items-center gap-1.5">
                     <span class="text-[15px] font-black text-purple-700">🎟️${krw(p.currentPromoPrice)}</span>
-                    ${rateLabel ? `<span class="text-[11px] font-black text-purple-600 bg-purple-50 border border-purple-100 px-1 rounded">${rateLabel}</span>` : ''}
                 </div>
             </div>`;
       }
@@ -508,9 +505,10 @@ function getFilters(){
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
+    busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), // 🔥 부산점 ONLY 필터
     size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
     promoOnly: promoOnly,
-    promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", // 🔥 추가된 타입 필터
+    promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", 
     promoRate: promoOnly && $("#promoRateSel") ? Number($("#promoRateSel").value) : 0
   };
 }
@@ -535,12 +533,14 @@ function render(){
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
+
+    // 🔥 부산점 ONLY 로직 🔥
+    if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
     
-    // 🔥 세분화된 기획전 필터 적용 🔥
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
         if(f.promoType !== "ALL" && p.promoType !== f.promoType) return false;
-        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) < f.promoRate) return false; 
+        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false; // 🔥 정확히 해당 % 일치할때만
     }
 
     if(f.size !== "ALL") {
@@ -881,31 +881,44 @@ function openDetail(p){
       };
   }
 
+  // 🔥 4. 이동요청 스마트 폼으로 교체 (드롭다운 + 숫자) 🔥
   const trBox = document.createElement("div");
   trBox.className = "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg";
   trBox.innerHTML = `
-      <div class="font-bold text-blue-800 mb-2">🚚 상품 이동 요청</div>
+      <div class="font-bold text-blue-800 mb-2 flex items-center gap-1"><i data-lucide="truck" class="w-4 h-4"></i> 상품 이동 요청</div>
       <div class="flex gap-2 mb-2">
-          <select id="trSize" class="ipt flex-1 text-xs"><option value="">사이즈 선택</option>${p.sizes.map(s=>`<option value="${s.size}">${s.size}</option>`).join('')}</select>
-          <input type="number" id="trQty" class="ipt w-16 text-xs" placeholder="수량">
+          <select id="trSize" class="ipt flex-1 text-xs font-bold text-gray-700"><option value="">📏 사이즈 선택</option>${p.sizes.map(s=>`<option value="${s.size}">${s.size}</option>`).join('')}</select>
+          <input type="number" id="trQty" class="ipt w-20 text-xs font-bold text-center" placeholder="수량 (개)" min="1">
+      </div>
+      <div class="flex gap-2 mb-2 items-center bg-white p-1.5 rounded border border-blue-100">
+          <select id="trFrom" class="ipt flex-1 text-xs font-black text-gray-700 border-none bg-transparent"><option value="">🏠 출발지</option><option value="본사/물류">본사/물류</option><option value="부산점">부산점</option><option value="신사점">신사점</option></select>
+          <i data-lucide="arrow-right" class="w-4 h-4 text-blue-400 shrink-0"></i>
+          <select id="trTo" class="ipt flex-1 text-xs font-black text-blue-700 border-none bg-transparent"><option value="">🎯 도착지</option><option value="부산점">부산점</option><option value="신사점">신사점</option><option value="본사/물류">본사/물류</option></select>
       </div>
       <div class="flex gap-2">
-          <input type="text" id="trMemo" class="ipt flex-1 text-xs" placeholder="요청 내용 (예: 본사 -> 부산)">
-          <button id="addTransferBtn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-black shrink-0 transition-colors">전송</button>
+          <input type="text" id="trMemo" class="ipt flex-1 text-xs" placeholder="추가 메모 (선택사항)">
+          <button id="addTransferBtn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-black shrink-0 transition-colors shadow-sm">요청 전송</button>
       </div>
-      <div id="trMsg" class="text-[11px] font-bold mt-1"></div>
+      <div id="trMsg" class="text-[11px] font-bold mt-1 text-center"></div>
   `;
   $("#detailBody").appendChild(trBox);
 
   trBox.querySelector("#addTransferBtn").onclick = async () => {
       const size = trBox.querySelector("#trSize").value;
       const qty = trBox.querySelector("#trQty").value;
-      const memo = trBox.querySelector("#trMemo").value.trim();
+      const from = trBox.querySelector("#trFrom").value;
+      const to = trBox.querySelector("#trTo").value;
+      const memoInput = trBox.querySelector("#trMemo").value.trim();
       const msg = trBox.querySelector("#trMsg");
 
       if(!size) { msg.style.color="red"; msg.textContent="사이즈를 선택하세요."; return; }
       if(!qty || qty <= 0) { msg.style.color="red"; msg.textContent="수량을 정확히 입력하세요."; return; }
-      if(!memo) { msg.style.color="red"; msg.textContent="요청 내용을 입력하세요."; return; }
+      if(!from) { msg.style.color="red"; msg.textContent="출발지를 선택하세요."; return; }
+      if(!to) { msg.style.color="red"; msg.textContent="도착지를 선택하세요."; return; }
+      if(from === to) { msg.style.color="red"; msg.textContent="출발지와 도착지가 같습니다."; return; }
+      
+      const finalMemo = `[${from} -> ${to}] ${memoInput}`.trim();
+
       msg.style.color="black"; msg.textContent="이동 요청 전송 중...";
 
       try {
@@ -919,7 +932,7 @@ function openDetail(p){
           const d = new Date();
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
           
-          oldData.push({ id: "tr_" + Date.now(), code: p.품번, product: p.품명, date: shortDate, size, qty, memo });
+          oldData.push({ id: "tr_" + Date.now(), code: p.품번, product: p.품명, date: shortDate, size, qty, memo: finalMemo });
           const body = { message:"add transfer request", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
           if(sha) body.sha = sha;
           
@@ -930,6 +943,8 @@ function openDetail(p){
           msg.style.color="green"; msg.textContent="✓ 요청 전송 완료!";
           trBox.querySelector("#trQty").value = "";
           trBox.querySelector("#trMemo").value = "";
+          trBox.querySelector("#trFrom").value = "";
+          trBox.querySelector("#trTo").value = "";
       } catch(e) { msg.style.color="red"; msg.textContent="요청 실패!"; }
   };
 
@@ -995,10 +1010,17 @@ $$('button[id^="close"]').forEach(btn => {
     });
 });
 
-$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.addEventListener("click",()=>{ 
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly]').forEach(b=>b.addEventListener("click",()=>{ 
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
+    
+    // 부산 ONLY 버튼 UI 갱신
+    if(b.dataset.busanonly) {
+        if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400');
+        else b.classList.remove('ring-2', 'ring-blue-400');
+    }
+
     visibleCount=60; render(); 
 }));
 
@@ -1020,6 +1042,12 @@ $("#resetAll").onclick=()=>{
             $("#promoRateSel").classList.add("hidden");
             $("#promoRateSel").value = "0";
         }
+    }
+
+    const busanOnlyBtn = $('button.chip[data-busanonly]');
+    if(busanOnlyBtn) {
+        busanOnlyBtn.dataset.active = "0";
+        busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
     }
 
     $("#sortSel").value="default";
@@ -1240,6 +1268,27 @@ window.addEventListener('DOMContentLoaded', () => {
         trBtn.innerHTML = `🚚 이동요청 목록`;
         trBtn.onclick = window.renderTransfers;
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
+    }
+    
+    // 부산 ONLY 버튼 동적 주입 (기존 재고있음 버튼 옆)
+    const stockBtn = $('button.chip[data-stock]');
+    if(stockBtn && !$('button.chip[data-busanonly]')) {
+        const busanOnlyBtn = document.createElement("button");
+        busanOnlyBtn.className = "chip !bg-blue-50 !text-blue-700 !border-blue-200 font-black";
+        busanOnlyBtn.dataset.busanonly = "1";
+        busanOnlyBtn.dataset.active = "0";
+        busanOnlyBtn.innerHTML = "🌊 부산점 ONLY";
+        stockBtn.parentNode.insertBefore(busanOnlyBtn, stockBtn.nextSibling);
+        
+        busanOnlyBtn.addEventListener("click", () => {
+            busanOnlyBtn.dataset.active = busanOnlyBtn.dataset.active === "1" ? "0" : "1";
+            if(busanOnlyBtn.dataset.active === "1") {
+                busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
+            } else {
+                busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
+            }
+            visibleCount=60; render();
+        });
     }
     
     if ($("#uploadPanel") && !$("#promoAdminBox")) {
