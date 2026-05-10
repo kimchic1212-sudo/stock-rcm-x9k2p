@@ -5,7 +5,9 @@ style.innerHTML = `
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     /* 상세창(detailModal)이 대시보드(z-105)보다 항상 위에 뜨도록 강제 승급 */
-    #detailModal { z-index: 9999 !important; }
+    #detailModal, #dashDetailModal { z-index: 9999 !important; }
+    /* 대시보드는 팝업들 아래에 깔리도록 설정 */
+    #analyticsDashboard { z-index: 105 !important; }
     /* 이미지 Lazy Loading 전환 효과 */
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
@@ -453,7 +455,17 @@ window.openAnalyticsReport = async () => {
             if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
                 for (let date in SALES_HISTORY.items[p.품번]) {
                     if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
-                        sales += SALES_HISTORY.items[p.품번][date];
+                        // ✅ 김종훈 필터 적용
+                        const dayData = SALES_HISTORY.items[p.품번][date];
+                        if (typeof dayData === 'object') {
+                            for (let size in dayData) {
+                                const qty = dayData[size]["김종훈"] || 0;
+                                sales += qty;
+                            }
+                        } else {
+                            // 하위호환 (이전 데이터 양식)
+                            sales += dayData;
+                        }
                     }
                 }
             }
@@ -480,14 +492,14 @@ window.openAnalyticsReport = async () => {
         modal.innerHTML = `
             <header class="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 shadow-sm">
                 <div>
-                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 판매 인사이트 리포트</h1>
+                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 판매 인사이트 리포트 (담당: 김종훈)</h1>
                     <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <select id="dashPeriodSel" class="ipt text-[12px] font-black bg-orange-50 border-orange-200 text-orange-700 rounded px-3 py-2 outline-none cursor-pointer">
                         <optgroup label="빠른 기간">
                             <option value="1">어제/오늘 (1일)</option>
-                            <option value="7">최근 7일</option>
+                            <option value="7" selected>최근 7일</option>
                             <option value="30">최근 1개월</option>
                             <option value="90">최근 3개월 (분기)</option>
                             <option value="180">최근 6개월 (반기)</option>
@@ -520,7 +532,7 @@ window.openAnalyticsReport = async () => {
                     </section>
                     <section class="lg:col-span-2 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                            <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-500"></i> 상세 판매 랭킹</h2>
+                            <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-500"></i> 판매 랭킹 (클릭 시 사이즈 상세분석)</h2>
                             <div id="activeFilterLabel" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors shadow-sm"></div>
                         </div>
                         <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-3 space-y-2"></div>
@@ -611,8 +623,12 @@ window.openAnalyticsReport = async () => {
                 ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
                 : `<div class="w-12 h-12 bg-gray-50 rounded border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
 
+            // 기간 파라미터 전달 구성
+            let pParam = currentPeriod;
+            if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
+
             return `
-            <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="openDetail(PRODUCTS.find(x=>x.품번==='${p.품번}'))">
+            <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
                 <div class="flex items-center gap-3 min-w-0 flex-1">
                     <div class="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-[13px] shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
                     ${imgHtml}
@@ -696,6 +712,103 @@ window.openAnalyticsReport = async () => {
     
     setTimeout(() => $("#analyticsDashboard").classList.remove("opacity-0"), 10);
     updateDashData();
+};
+
+// 🔥 사이즈별 상세 분석 팝업 기능
+window.openDashDetail = (code, periodParam) => {
+    const p = PRODUCTS.find(x => x.품번 === code);
+    if(!p) return;
+
+    let cutoffDate = "0000-00-00";
+    let endDate = "9999-99-99";
+
+    if (periodParam.startsWith("CUSTOM_")) {
+        const parts = periodParam.split("_");
+        cutoffDate = parts[1];
+        endDate = parts[2];
+    } else if (periodParam !== "ALL") {
+        const d = new Date(Date.now() - Number(periodParam) * 86400000);
+        cutoffDate = d.toISOString().split('T')[0];
+    }
+
+    // 사이즈별 판매량 다시 집계 (김종훈 기준)
+    let sizeSalesMap = {};
+    if (SALES_HISTORY.items && SALES_HISTORY.items[code]) {
+        const history = SALES_HISTORY.items[code];
+        for (let date in history) {
+            if (periodParam === "ALL" || (date >= cutoffDate && date <= endDate)) {
+                const dayData = history[date];
+                if (typeof dayData === 'object') {
+                    for (let size in dayData) {
+                        const qty = dayData[size]["김종훈"] || 0;
+                        if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
+                    }
+                } else {
+                    // 하위 호환 처리 - 사이즈 데이터가 없는 예전 데이터
+                    sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
+                }
+            }
+        }
+    }
+
+    let modal = $("#dashDetailModal");
+    if(!modal) {
+        modal = document.createElement("div"); modal.id = "dashDetailModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999]";
+        modal.innerHTML = `
+            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div class="modal-content relative bg-white w-[90%] max-w-lg flex flex-col rounded-3xl overflow-hidden shadow-2xl">
+                <div class="p-5 border-b flex justify-between items-start bg-gray-50">
+                    <div>
+                        <div id="ddBrand" class="text-xs font-black text-blue-600 mb-1"></div>
+                        <h2 id="ddTitle" class="font-black text-lg leading-tight"></h2>
+                    </div>
+                    <button class="p-1 hover:bg-gray-200 rounded-full" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div class="p-5 overflow-y-auto max-h-[60vh] dash-scroll">
+                    <div class="bg-blue-50 p-3 rounded-xl mb-4 border border-blue-100 flex items-start gap-3">
+                        <i data-lucide="truck" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                        <p class="text-[12px] font-bold text-blue-800 leading-snug">해당 기간 김종훈 매니저님의 사이즈별 판매량과 현재 재고를 비교하여, 신사점/물류에서 가져올 수 있는 적정 보충 수량을 제안합니다.</p>
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead class="text-gray-400 font-black border-b"><tr class="text-center"><th class="pb-2">사이즈</th><th class="pb-2">부산판매</th><th class="pb-2">부산재고</th><th class="pb-2">타지점</th><th class="pb-2 text-orange-600">보충제안</th></tr></thead>
+                        <tbody id="ddTableBody" class="text-center font-bold"></tbody>
+                    </table>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+    }
+
+    $("#ddBrand").textContent = p.브랜드;
+    $("#ddTitle").textContent = p.품명;
+    
+    // 사이즈 목록 정렬 (숫자순)
+    const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMap), ...p.sizes.map(s=>String(s.size))]))
+        .sort((a,b) => (parseFloat(a)||0) - (parseFloat(b)||0));
+
+    $("#ddTableBody").innerHTML = allUniqueSizes.map(size => {
+        const sold = sizeSalesMap[size] || 0;
+        const sObj = p.sizes.find(s => String(s.size) === String(size)) || { busan: 0, sinsa: 0, center: 0 };
+        const others = sObj.sinsa + sObj.center;
+        
+        // 제안 로직: 판매량보다 재고가 적으면 차이만큼 제안 (타지점 재고 한도 내)
+        let suggest = 0;
+        if (sold > sObj.busan) suggest = Math.min(others, sold - sObj.busan);
+
+        let rowClass = "border-b last:border-0";
+        if (size === "알수없음") rowClass += " hidden"; 
+
+        return `<tr class="${rowClass}">
+            <td class="py-3 bg-gray-50/50">${size}</td>
+            <td class="text-blue-600">${sold}</td>
+            <td class="${sObj.busan<=2?'text-red-500':''}">${sObj.busan}</td>
+            <td class="text-gray-400">${others}</td>
+            <td class="text-orange-600 font-black">${suggest > 0 ? `+${suggest}` : '-'}</td>
+        </tr>`;
+    }).join('');
+
+    modal.classList.remove("hidden");
+    if(window.lucide) lucide.createIcons();
 };
 
 window.openSalesGuide = (code) => {
@@ -923,7 +1036,14 @@ function render(){
       p.periodSales = 0;
       if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
           for (let date in SALES_HISTORY.items[p.품번]) {
-              p.periodSales += SALES_HISTORY.items[p.품번][date]; // 메인화면 정렬용 누적 판매량
+              const dayData = SALES_HISTORY.items[p.품번][date];
+              if (typeof dayData === 'object') {
+                  for (let size in dayData) {
+                      p.periodSales += (dayData[size]["김종훈"] || 0); // 메인화면 정렬용 누적 판매량
+                  }
+              } else {
+                  p.periodSales += dayData;
+              }
           }
       }
   });
@@ -1159,7 +1279,7 @@ window.renderTransfers = () => {
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
-$("#detailHead").innerHTML = `
+  $("#detailHead").innerHTML = `
     ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200" style="max-height: 200px; background:var(--surface);">` : ''}
     <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
@@ -1312,6 +1432,13 @@ document.addEventListener("keydown", (e) => {
         if(openModals.length > 0) {
             // 마지막에 열린(배열의 마지막) 모달만 하나 닫기
             openModals[openModals.length - 1].classList.add("hidden");
+        } else {
+            // 팝업이 없을 때만 대시보드 닫기
+            const dash = document.querySelector("#analyticsDashboard");
+            if(dash && !dash.classList.contains("hidden")) {
+                dash.classList.add("opacity-0");
+                setTimeout(() => dash.classList.add("hidden"), 300);
+            }
         }
     }
 });
