@@ -1159,8 +1159,8 @@ window.renderTransfers = () => {
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
-  $("#detailHead").innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')" style="max-height: 200px; background:var(--surface);">` : ''}
+$("#detailHead").innerHTML = `
+    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200" style="max-height: 200px; background:var(--surface);">` : ''}
     <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
