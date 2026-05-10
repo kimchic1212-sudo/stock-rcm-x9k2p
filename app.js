@@ -12,6 +12,18 @@ style.innerHTML = `
     #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
+
+    /* 🔥 UX/UI 개선: 칩 버튼 상태 명확화 및 시각적 일관성 */
+    .chip {
+        background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
+        transition: all 0.2s ease-in-out; cursor: pointer;
+    }
+    .chip:hover { background-color: #f8fafc; }
+    .chip[data-active="1"] {
+        background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important;
+    }
+    /* 브랜드 숨김 처리용 클래스 */
+    .brand-hidden { display: none !important; }
 `;
 document.head.appendChild(style);
 
@@ -93,15 +105,33 @@ async function copyText(text, btn){
   }catch(e){ alert("복사 실패"); }
 }
 
-// 🔥 직관적인 데이터 소스 원복 (이전 버전 스택 스타일)
+// 🔥 UX/UI 개선: 분산된 정보 위젯을 글로벌 헤더로 통합 및 시맨틱 컬러 정상화
 function applyMeta(meta){
     if(meta) {
-        const el = $("#statSrc");
-        if(el) {
-            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] text-orange-600 mt-0.5 font-bold">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
-            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<div class="text-[11px] text-purple-600 mt-0.5 font-bold">🎁 기획전 적용됨: ${escapeHtml(PROMOTIONS.meta.name)}</div>` : "";
-            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>${addInfo}${promoInfo}`;
+        let headerArea = $("#globalHeaderData");
+        if(!headerArea) {
+            const mainWrap = $("#q")?.closest('.max-w-md, .max-w-lg, .max-w-xl, .max-w-2xl, .container') || document.body;
+            headerArea = document.createElement("div");
+            headerArea.id = "globalHeaderData";
+            headerArea.className = "flex flex-col mb-4 w-full px-1";
+            mainWrap.insertBefore(headerArea, mainWrap.firstChild);
         }
+
+        let addInfo = SALES_HISTORY.meta?.name ? `<span class="text-[11px] text-orange-600 font-bold ml-2">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
+        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="text-[11px] text-purple-600 font-bold ml-2">🎁 기획전: ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
+
+        headerArea.innerHTML = `
+            <div class="flex justify-between items-end w-full border-b border-gray-200 pb-2">
+                <h1 class="text-xl font-black text-gray-900 tracking-tight">📦 통합 재고조회</h1>
+                <div class="text-right flex flex-col items-end">
+                    <span class="text-[11px] font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded shadow-sm">✓ 마지막 업데이트: ${meta.uploadedAt || ''}</span>
+                    <div class="mt-1 flex items-center">${addInfo}${promoInfo}</div>
+                </div>
+            </div>
+        `;
+
+        const statSrcEl = $("#statSrc");
+        if(statSrcEl) statSrcEl.innerHTML = "";
     }
 }
 
@@ -174,6 +204,9 @@ function rebuildIndex(){
   const allSizes = new Set(); 
   const activeWeeklyCat = getActiveWeeklyCategory(); 
   
+  if($("#statItems")) $("#statItems").className = ($("#statItems").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
+  if($("#statBusan")) $("#statBusan").className = ($("#statBusan").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
+
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
     if(r["규격"]) allSizes.add(String(r["규격"]).trim()); 
@@ -252,38 +285,65 @@ function rebuildIndex(){
       }
   } else if (promoWrap) { promoWrap.innerHTML = ""; }
 
-  const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
+  const brandCounts = {};
+  PRODUCTS.forEach(p => { if(p.브랜드) brandCounts[p.브랜드] = (brandCounts[p.브랜드]||0) + 1; });
+  const sortedBrands = Object.entries(brandCounts).sort((a,b) => b[1] - a[1]).map(x => x[0]);
+  const topBrands = sortedBrands.slice(0, 7);
+  const restBrands = sortedBrands.slice(7);
+
   const wrap = $("#brandChips"); 
-  wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체 브랜드</button>';
+  wrap.innerHTML = '<button class="chip px-3 py-1.5 rounded-full text-[12px] shrink-0" data-brand="ALL" data-active="1">전체</button>';
   
   wrap.querySelector('[data-brand="ALL"]').onclick = function() {
       $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0")); visibleCount=60; render();
   };
   
-  brands.forEach(b => {
-      const btn = document.createElement("button"); btn.className="chip"; btn.dataset.brand=b; btn.textContent=b;
+  topBrands.forEach(b => {
+      const btn = document.createElement("button"); btn.className="chip px-3 py-1.5 rounded-full text-[12px] shrink-0"; btn.dataset.brand=b; btn.textContent=b;
       btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
       wrap.appendChild(btn);
   });
+
+  if (restBrands.length > 0) {
+      const moreBtn = document.createElement("button");
+      moreBtn.className="chip px-3 py-1.5 rounded-full text-[11px] font-black shrink-0 bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100";
+      moreBtn.innerHTML = "브랜드 더보기 ▾";
+      moreBtn.onclick = (e) => {
+          const isHidden = !$$('.chip-extra')[0].classList.contains('brand-hidden');
+          if(!isHidden) {
+              $$('.chip-extra').forEach(c => c.classList.remove('brand-hidden'));
+              moreBtn.innerHTML = "접기 ▴";
+          } else {
+              $$('.chip-extra').forEach(c => c.classList.add('brand-hidden'));
+              moreBtn.innerHTML = "브랜드 더보기 ▾";
+          }
+      };
+      wrap.appendChild(moreBtn);
+
+      restBrands.forEach(b => {
+          const btn = document.createElement("button"); btn.className="chip chip-extra brand-hidden px-3 py-1.5 rounded-full text-[12px] shrink-0"; btn.dataset.brand=b; btn.textContent=b;
+          btn.onclick = ()=>{ $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
+          wrap.appendChild(btn);
+      });
+  }
   
-  $("#statItems").textContent = fmt(PRODUCTS.length);
-  $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
+  if($("#statItems")) $("#statItems").textContent = fmt(PRODUCTS.length);
+  if($("#statBusan")) $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 🔥 대형 듀얼버튼 세팅 (분석리포트 & 기획전)
 function setupQuickActionBar() {
     if($("#quickActionBar")) return;
-    const qContainer = $("#q").parentNode;
+    const qContainer = $("#q")?.parentNode;
     if(!qContainer) return;
 
     const actionHtml = `
-        <div id="quickActionBar" class="flex gap-2 mt-3 mb-1 w-full">
-            <button onclick="window.openAnalyticsReport()" class="flex-1 bg-gray-900 text-white py-2.5 rounded-xl font-black shadow-sm hover:bg-black transition-transform active:scale-95 flex items-center justify-center gap-1.5 text-[13px]">
-                <i data-lucide="bar-chart-2" class="w-4 h-4"></i> 분석 리포트
+        <div id="quickActionBar" class="flex gap-2 justify-end mt-2 mb-1 w-full">
+            <button onclick="window.openAnalyticsReport()" class="bg-gray-50 text-gray-700 py-1.5 px-3 border border-gray-200 rounded-lg font-bold shadow-sm hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5 text-[12px]">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 분석 리포트
             </button>
             ${(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) ? `
-            <button onclick="window.togglePromoView(this)" class="flex-1 bg-purple-600 text-white py-2.5 rounded-xl font-black shadow-sm hover:bg-purple-700 transition-transform active:scale-95 flex items-center justify-center gap-1.5 text-[13px]" data-active="0">
-                <i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기
+            <button onclick="window.togglePromoView(this)" class="bg-purple-50 text-purple-700 py-1.5 px-3 border border-purple-200 rounded-lg font-bold shadow-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5 text-[12px]" data-active="0">
+                <i data-lucide="gift" class="w-3.5 h-3.5"></i> 기획전 보기
             </button>` : ''}
         </div>
     `;
@@ -295,14 +355,16 @@ window.togglePromoView = (btn) => {
     const isActive = btn.dataset.active === "1";
     btn.dataset.active = isActive ? "0" : "1";
     if(!isActive) {
-        btn.classList.replace("bg-purple-600", "bg-purple-800");
-        btn.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4"></i> 기획전 필터 해제`;
+        btn.classList.replace("bg-purple-50", "bg-purple-600");
+        btn.classList.replace("text-purple-700", "text-white");
+        btn.innerHTML = `<i data-lucide="x-circle" class="w-3.5 h-3.5"></i> 기획전 필터 해제`;
         window.tempPromoFilter = true;
         $("#promoTypeSel")?.classList.remove("hidden");
         $("#promoRateSel")?.classList.remove("hidden");
     } else {
-        btn.classList.replace("bg-purple-800", "bg-purple-600");
-        btn.innerHTML = `<i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기`;
+        btn.classList.replace("bg-purple-600", "bg-purple-50");
+        btn.classList.replace("text-white", "text-purple-700");
+        btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i> 기획전 보기`;
         window.tempPromoFilter = false;
         $("#promoTypeSel")?.classList.add("hidden");
         $("#promoRateSel")?.classList.add("hidden");
@@ -311,7 +373,6 @@ window.togglePromoView = (btn) => {
     visibleCount=60; render();
 };
 
-// 🔥 검색어 자동완성 100% 복구 (중복 이벤트 방어 처리됨) 🔥
 function setupSearchAutocomplete() {
     const qEl = document.getElementById("q");
     if(!qEl || qEl.dataset.acSetup === "1") return;
@@ -422,7 +483,6 @@ async function loadChartJS() {
     });
 }
 
-// 🔥 원클릭 스마트 이동요청 (즉시전송 + 5초 실행취소 로직 적용) 🔥
 window.quickRT = async (code, size, fromStr, qty, btn) => {
     if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
@@ -434,12 +494,10 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const origClass = btn.className;
     const origOnclick = btn.onclick;
     
-    // 즉각적 UI 변경 (담김 처리)
     btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> 담김`;
     btn.className = "bg-green-600 text-white px-2 py-1.5 rounded-lg flex items-center justify-center flex-1 text-[11px] font-black cursor-default shadow-inner";
-    btn.onclick = null; // 중복 클릭 방지
+    btn.onclick = null; 
     
-    // 취소 버튼 생성 (5초간 유지)
     const undoBtn = document.createElement("button");
     undoBtn.className = "ml-1 text-[11px] text-red-500 font-bold underline whitespace-nowrap cursor-pointer hover:text-red-700 shrink-0";
     undoBtn.innerText = "취소";
@@ -451,7 +509,6 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
-    // 비동기로 데이터 즉시 깃허브로 Push
     TRANSFERS.push({ id: trId, code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
     
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
@@ -461,12 +518,10 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         }).catch(err => console.error(err));
 
-    // 5초 후 취소버튼 자동 삭제
     const hideUndoTimer = setTimeout(() => {
         if(undoBtn.parentNode) undoBtn.remove();
     }, 5000);
 
-    // 취소(Ctrl+Z) 로직
     undoBtn.onclick = async (e) => {
         e.stopPropagation();
         clearTimeout(hideUndoTimer);
@@ -474,7 +529,7 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
         btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
         
         TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        await apiPromise; // 앞선 통신이 끝나기를 대기
+        await apiPromise; 
         
         try {
             const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
@@ -483,7 +538,6 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         } catch(err) {}
         
-        // UI 원상복구
         btn.innerHTML = origHtml;
         btn.className = origClass;
         btn.onclick = origOnclick;
@@ -506,7 +560,6 @@ window.exportTransfersToExcel = () => {
 
 window.openAnalyticsReport = async () => {
     await loadChartJS();
-
     let dashFilter = { cat: null, brand: null, gender: null };
     let currentPeriod = "7"; 
     let currentCustomStart = "";
@@ -1175,9 +1228,9 @@ function card(p){
         <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
             ${busanOnlyBadge}
             ${promoBadge}
-            <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span>
-            <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span>
-            <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>
+            <span class="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
+            <span class="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
+            <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">${escapeHtml(p.성별||p.gender||"-")}</span>
             ${deltaHtml}
         </div>
         <button class="fav-btn p-1.5 -mt-1.5 -mr-1.5 text-gray-300 hover:text-yellow-500 outline-none shrink-0" data-active="${isFav?'1':'0'}">
@@ -1195,7 +1248,7 @@ function card(p){
           ${salesHtml}
        </div>
        
-       ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md border border-gray-100 bg-white">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
+       ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md border border-gray-100 bg-white shadow-sm">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
     </div>
     
     ${memoHtml}
@@ -1209,7 +1262,7 @@ function card(p){
       }).join("")}
     </div>
     <div class="loc-simple mt-auto">
-       <div class="flex gap-1 items-center"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
+       <div class="flex gap-1 items-center font-medium"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
        ${priceDisplay}
     </div>
   `;
@@ -1630,7 +1683,6 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
-// 🔥 스마트 ESC 및 방향키 로직 🔥
 document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") { 
         const openModals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
@@ -1723,7 +1775,6 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
-// 🔥 판매 데이터 엑셀 업로드 & DB 초기화 기능 🔥
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox");
     if(!box) return;
@@ -1743,7 +1794,6 @@ window.renderSalesHistoryAdmin = () => {
         <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
     `;
     
-    // DB 강제 초기화 버튼 로직
     $("#shClearBtn").onclick = async () => {
         if(!checkPat()) return;
         if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
@@ -1797,7 +1847,7 @@ window.renderSalesHistoryAdmin = () => {
                 const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
                 const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈"; 
 
-                let locationGroup = "본사물류"; // 기본값
+                let locationGroup = "본사물류"; 
                 
                 if(typeStr === "매장" || typeStr.includes("오프라인")) {
                     if(rawManager.includes("김종훈") || rawManager.includes("부산")) locationGroup = "부산(김종훈)";
