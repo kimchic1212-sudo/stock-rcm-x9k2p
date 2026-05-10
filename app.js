@@ -4,15 +4,24 @@ style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* 상세창(detailModal)이 대시보드(z-105)보다 항상 위에 뜨도록 강제 승급 */
     #detailModal, #dashDetailModal { z-index: 9999 !important; }
+    /* 대시보드는 팝업들 아래에 깔리도록 설정 */
     #analyticsDashboard { z-index: 105 !important; }
-    .dash-scroll::-webkit-scrollbar { width: 6px; }
-    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
+    /* 이미지 Lazy Loading 전환 효과 */
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
 `;
 document.head.appendChild(style);
+
+// 🔥 리포트 커스텀 스크롤바 디자인 추가 🔥
+const style2 = document.createElement('style');
+style2.innerHTML = `
+    .dash-scroll::-webkit-scrollbar { width: 6px; }
+    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
+`;
+document.head.appendChild(style2);
 
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
@@ -53,7 +62,10 @@ function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
 function checkPat() {
-    if(!getPat()) { alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요."); return false; }
+    if(!getPat()) {
+        alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요.");
+        return false;
+    }
     return true;
 }
 
@@ -76,7 +88,9 @@ function getChosung(str){
   return r;
 }
 
-function isAllChosung(str) { return /^[ㄱ-ㅎ]+$/.test(str); }
+function isAllChosung(str) {
+    return /^[ㄱ-ㅎ]+$/.test(str);
+}
 
 async function copyText(text, btn){
   try{
@@ -105,10 +119,21 @@ function applyMeta(meta){
 
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+  
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META); rebuildIndex(); render(); return;
+      RAW = cached.rows || []; 
+      CURRENT_META = cached.meta || null;
+      IMAGES = cached.images || {};
+      MEMOS = cached.memos || [];
+      TRANSFERS = cached.transfers || [];
+      PROMOTIONS = cached.promotions || {};
+      SALES_GUIDES = cached.salesGuides || {};
+      SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
+      applyMeta(CURRENT_META);
+      rebuildIndex(); render(); 
+      return;
   }
+  
   try {
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
@@ -119,16 +144,43 @@ async function loadData(force = false){
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
-      const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
+
+      if(!invRes.ok) throw new Error("재고 로드 실패");
+      const invData = await invRes.json();
+      RAW = invData.rows || []; 
+      CURRENT_META = invData.meta || null;
+
       if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
       if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
-      if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
-      if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
-      if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
+      
+      if(promoRes && promoRes.ok) {
+          const pData = await promoRes.json();
+          PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
+      } else { PROMOTIONS = {}; }
+      
+      if(sgRes && sgRes.ok) {
+          const sgData = await sgRes.json();
+          SALES_GUIDES = Object.keys(sgData).length > 0 ? sgData : {};
+      } else { SALES_GUIDES = {}; }
+
+      if(shRes && shRes.ok) {
+          const shData = await shRes.json();
+          SALES_HISTORY = shData.items ? shData : { meta: {}, items: {} };
+      } else { SALES_HISTORY = { meta: {}, items: {} }; }
+
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      applyMeta(CURRENT_META); rebuildIndex(); render();
-  } catch(e) { console.error("Data Load Error", e); }
+      
+      applyMeta(CURRENT_META);
+      rebuildIndex(); render();
+  } catch(e) { 
+      if(cached) { 
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || {meta:{},items:{}};
+          applyMeta(CURRENT_META); rebuildIndex(); render(); 
+      } else {
+          RAW=[]; render();
+      }
+  }
 }
 
 async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
@@ -140,6 +192,7 @@ function getActiveWeeklyCategory() {
     const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
     const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
     const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
+
     if (now >= t1 && now < t2) return "FOOTWEAR";
     if (now >= t2 && now < t3) return "APPAREL";
     if (now >= t3 && now <= t4) return "ACC/GEAR";
@@ -181,18 +234,27 @@ function rebuildIndex(){
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
         const promo = PROMOTIONS.items[p.품번];
         if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
-            p.currentPromoPrice = promo.weeklyPrice; p.promoType = 'weekly';
+            p.currentPromoPrice = promo.weeklyPrice;
+            p.promoType = 'weekly';
             p.promoRate = promo.weeklyRate || ((p.소비자가 - promo.weeklyPrice) / p.소비자가);
-            if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15'; else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22'; else p.promoEndDate = '5/29';
-        } else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
-            p.currentPromoPrice = promo.finalPrice; p.promoType = 'general';
-            p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가); p.promoEndDate = '5/29'; 
+            if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15';
+            else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22';
+            else if(promo.targetCat === 'ACC/GEAR') p.promoEndDate = '5/29';
+            else p.promoEndDate = '5/29';
+        } 
+        else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
+            p.currentPromoPrice = promo.finalPrice;
+            p.promoType = 'general';
+            p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가);
+            p.promoEndDate = '5/29'; 
         }
     }
+
     const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
     p._hay = rawHay.toLowerCase();
     p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
     p._chosung = getChosung(p._hayClean); 
+    
     return p;
   });
   
@@ -214,7 +276,7 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  // 리포트 버튼 생성
+  // 메인화면: 기간조회 필터를 없애고 리포트 버튼만 심플하게 배치
   if(!$("#openAnalyticsBtn") && $("#sortSel")) {
       const btnWrap = document.createElement("div");
       btnWrap.className = "flex items-center ml-2 shrink-0";
@@ -228,46 +290,67 @@ function rebuildIndex(){
   }
 
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
-      const opt = document.createElement("option"); opt.value = "salesDesc"; opt.innerHTML = "🔥 전체 판매량순";
+      const opt = document.createElement("option");
+      opt.value = "salesDesc";
+      opt.innerHTML = "🔥 전체 판매량순";
       $("#sortSel").appendChild(opt);
   }
 
   let promoWrap = $("#promoFilters");
   if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
-      promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
+      promoWrap = document.createElement("div");
+      promoWrap.id = "promoFilters";
       promoWrap.className = "flex gap-2 mb-3 items-center w-full overflow-x-auto no-scrollbar pb-1";
       $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
   }
   if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
       if(promoWrap) {
           promoWrap.innerHTML = `
-              <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</button>
-              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
-              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+              <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">
+                  🎁 ${escapeHtml(PROMOTIONS.meta.name)}
+              </button>
+              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
+                  <option value="ALL">기획전 전체보기</option>
+                  <option value="weekly">🔥 위클리특가만</option>
+                  <option value="general">🎟️ 쿠폰사용가능만</option>
+              </select>
+              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
+                  <option value="0">할인율 전체</option>
+                  <option value="10">🔥 10% 할인</option>
+                  <option value="20">🔥 20% 할인</option>
+                  <option value="30">🔥 30% 할인</option>
+              </select>
           `;
           promoWrap.querySelector('button').onclick = function() {
-              const isActive = this.dataset.active === "1"; this.dataset.active = isActive ? "0" : "1";
+              const isActive = this.dataset.active === "1";
+              this.dataset.active = isActive ? "0" : "1";
               if(!isActive) {
                   this.classList.add('ring-2', 'ring-purple-400', 'ring-offset-1');
-                  $("#promoTypeSel").classList.remove("hidden"); $("#promoRateSel").classList.remove("hidden");
+                  $("#promoTypeSel").classList.remove("hidden");
+                  $("#promoRateSel").classList.remove("hidden");
               } else {
                   this.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
-                  $("#promoTypeSel").classList.add("hidden"); $("#promoRateSel").classList.add("hidden");
-                  $("#promoTypeSel").value = "ALL"; $("#promoRateSel").value = "0";
+                  $("#promoTypeSel").classList.add("hidden");
+                  $("#promoRateSel").classList.add("hidden");
+                  $("#promoTypeSel").value = "ALL";
+                  $("#promoRateSel").value = "0";
               }
               visibleCount=60; render();
           };
           $("#promoTypeSel").onchange = () => { visibleCount=60; render(); };
           $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
       }
-  } else if (promoWrap) { promoWrap.innerHTML = ""; }
+  } else if (promoWrap) {
+      promoWrap.innerHTML = "";
+  }
 
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
   const wrap = $("#brandChips"); 
   wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체 브랜드</button>';
   
   wrap.querySelector('[data-brand="ALL"]').onclick = function() {
-      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0")); visibleCount=60; render();
+      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0"));
+      visibleCount=60; render();
   };
   
   brands.forEach(b => {
@@ -280,29 +363,32 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// Chart.js 로드
+// Chart.js 및 % 표시용 DataLabels 플러그인 동적 로드
 function loadChartJS() {
     return new Promise((resolve) => {
         if (window.Chart && window.ChartDataLabels) return resolve();
         if (!window.Chart) {
-            const script = document.createElement('script'); script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
             script.onload = () => {
                 if (!window.ChartDataLabels) {
-                    const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+                    const plugin = document.createElement('script');
+                    plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
                     plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
                     document.head.appendChild(plugin);
                 } else resolve();
             };
             document.head.appendChild(script);
         } else if (!window.ChartDataLabels) {
-            const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+            const plugin = document.createElement('script');
+            plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
             plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
             document.head.appendChild(plugin);
         }
     });
 }
 
-// 🔥 판매 분석 대시보드
+// 🔥 고도화된 반응형 인터랙티브 분석 대시보드
 window.openAnalyticsReport = async () => {
     await loadChartJS();
 
@@ -311,8 +397,12 @@ window.openAnalyticsReport = async () => {
     let currentCustomStart = "";
     let currentCustomEnd = "";
 
+    // 주간/월간 선택 옵션 동적 생성
     const generateDateOptions = () => {
-        const now = new Date(); let html = '';
+        const now = new Date();
+        let html = '';
+        
+        // 월간 계산 (최근 4개월)
         html += '<optgroup label="월간 조회">';
         for(let i=0; i<4; i++) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -321,19 +411,27 @@ window.openAnalyticsReport = async () => {
             const val = `EXACT_${y}-${m}-01_${y}-${m}-${lastDay}`;
             html += `<option value="${val}">${y}년 ${d.getMonth() + 1}월</option>`;
         }
-        html += '</optgroup><optgroup label="주간 조회">';
+        html += '</optgroup>';
+
+        // 주간 계산 (최근 5주차)
+        html += '<optgroup label="주간 조회">';
         const curr = new Date(now);
-        const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); 
+        const day = curr.getDay();
+        const diff = curr.getDate() - day + (day === 0 ? -6 : 1); // 월요일 시작 기준
         let monday = new Date(curr.setDate(diff));
 
         for(let i=0; i<5; i++) {
-            let sun = new Date(monday); sun.setDate(monday.getDate() + 6);
+            let sun = new Date(monday);
+            sun.setDate(monday.getDate() + 6);
+            
             const y1 = monday.getFullYear(); const m1 = String(monday.getMonth()+1).padStart(2,'0'); const d1 = String(monday.getDate()).padStart(2,'0');
             const y2 = sun.getFullYear(); const m2 = String(sun.getMonth()+1).padStart(2,'0'); const d2 = String(sun.getDate()).padStart(2,'0');
+            
             const weekNum = Math.ceil(monday.getDate() / 7);
             const val = `EXACT_${y1}-${m1}-${d1}_${y2}-${m2}-${d2}`;
             html += `<option value="${val}">${y1}년 ${monday.getMonth()+1}월 ${weekNum}주차 (${m1}/${d1}~${m2}/${d2})</option>`;
-            monday.setDate(monday.getDate() - 7); 
+            
+            monday.setDate(monday.getDate() - 7); // 이전 주차로 이동
         }
         html += '</optgroup>';
         return html;
@@ -341,10 +439,13 @@ window.openAnalyticsReport = async () => {
 
     const getPeriodItems = (period, start, end) => {
         let items = [];
-        let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
+        let cutoffDate = "0000-00-00";
+        let endDate = "9999-99-99";
         
-        if (period === "CUSTOM") { cutoffDate = start || "0000-00-00"; endDate = end || "9999-99-99"; } 
-        else if (period && period !== "ALL") {
+        if (period === "CUSTOM") {
+            cutoffDate = start || "0000-00-00";
+            endDate = end || "9999-99-99";
+        } else if (period && period !== "ALL") {
             const d = new Date(Date.now() - Number(period) * 86400000);
             cutoffDate = d.toISOString().split('T')[0];
         }
@@ -354,28 +455,38 @@ window.openAnalyticsReport = async () => {
             if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
                 for (let date in SALES_HISTORY.items[p.품번]) {
                     if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
+                        // ✅ 김종훈 필터 적용 (과거 숫자 데이터와 방어코드 포함)
                         const dayData = SALES_HISTORY.items[p.품번][date];
-                        if (typeof dayData === 'object') {
+                        if (typeof dayData === 'number') {
+                            sales += dayData;
+                        } else if (typeof dayData === 'object') {
                             for (let size in dayData) {
-                                if(typeof dayData[size] === 'object') sales += (dayData[size]["김종훈"] || 0);
-                                else sales += dayData[size]; // 하위 호환
+                                if (typeof dayData[size] === 'object') {
+                                    sales += (dayData[size]["김종훈"] || 0);
+                                } else {
+                                    sales += dayData[size];
+                                }
                             }
-                        } else sales += dayData;
+                        }
                     }
                 }
             }
-            if(sales > 0) items.push({ ...p, dashSales: sales, dashRev: sales * (p.currentPromoPrice || p.소비자가 || 0) });
+            if(sales > 0) {
+                items.push({ ...p, dashSales: sales, dashRev: sales * (p.currentPromoPrice || p.소비자가 || 0) });
+            }
         });
         return items.sort((a, b) => b.dashSales - a.dashSales);
     };
 
     let rawSoldItems = [];
-    let catChartInstance = null; let brandChartInstance = null;
+    let catChartInstance = null;
+    let brandChartInstance = null;
 
     const renderDashUI = () => {
         let modal = $("#analyticsDashboard");
         if (!modal) {
-            modal = document.createElement("div"); modal.id = "analyticsDashboard";
+            modal = document.createElement("div");
+            modal.id = "analyticsDashboard";
             modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-300 opacity-0";
             document.body.appendChild(modal);
         }
@@ -383,7 +494,7 @@ window.openAnalyticsReport = async () => {
         modal.innerHTML = `
             <header class="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 shadow-sm">
                 <div>
-                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 인사이트 (담당: 김종훈)</h1>
+                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 판매 인사이트 리포트 (담당: 김종훈)</h1>
                     <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
@@ -440,9 +551,15 @@ window.openAnalyticsReport = async () => {
                 $("#dashCustomDateWrap").classList.replace("hidden", "flex");
             } else {
                 $("#dashCustomDateWrap").classList.replace("flex", "hidden");
+                
                 if (val.startsWith("EXACT_")) {
-                    const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2];
-                } else currentPeriod = val;
+                    const parts = val.split('_');
+                    currentPeriod = "CUSTOM";
+                    currentCustomStart = parts[1];
+                    currentCustomEnd = parts[2];
+                } else {
+                    currentPeriod = val;
+                }
                 dashFilter = { cat: null, brand: null }; 
                 updateDashData();
             }
@@ -450,12 +567,16 @@ window.openAnalyticsReport = async () => {
         
         $("#dashApply").onclick = () => {
             if(!$("#dashStart").value || !$("#dashEnd").value) { alert("날짜를 모두 선택해주세요."); return; }
-            currentPeriod = "CUSTOM"; currentCustomStart = $("#dashStart").value; currentCustomEnd = $("#dashEnd").value;
-            dashFilter = { cat: null, brand: null }; updateDashData();
+            currentPeriod = "CUSTOM";
+            currentCustomStart = $("#dashStart").value;
+            currentCustomEnd = $("#dashEnd").value;
+            dashFilter = { cat: null, brand: null };
+            updateDashData();
         };
 
         $("#closeDashboardBtn").onclick = () => {
-            modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300);
+            modal.classList.add("opacity-0");
+            setTimeout(() => modal.classList.add("hidden"), 300);
         };
         if(window.lucide) lucide.createIcons();
     };
@@ -476,29 +597,35 @@ window.openAnalyticsReport = async () => {
         let catData = {}; let brandData = {};
 
         filteredItems.forEach(p => {
-            totalSales += p.dashSales; totalRev += p.dashRev;
-            catData[p.카테고리||"기타"] = (catData[p.카테고리||"기타"] || 0) + p.dashSales;
-            brandData[p.브랜드||"기타"] = (brandData[p.브랜드||"기타"] || 0) + p.dashSales;
+            totalSales += p.dashSales;
+            totalRev += p.dashRev;
+            const cat = p.카테고리 || "기타";
+            const b = p.브랜드 || "기타";
+            catData[cat] = (catData[cat] || 0) + p.dashSales;
+            brandData[b] = (brandData[b] || 0) + p.dashSales;
         });
 
         $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매`;
 
+        const listBody = $("#dashListBody");
         const filterLabel = $("#activeFilterLabel");
         let labelText = [];
         if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
         if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
 
         if (labelText.length > 0) {
-            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`; filterLabel.classList.remove("hidden");
+            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`;
+            filterLabel.classList.remove("hidden");
             filterLabel.onclick = () => { dashFilter = { cat: null, brand: null }; renderDashState(); };
-        } else filterLabel.classList.add("hidden");
+        } else { filterLabel.classList.add("hidden"); }
 
-        $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
+        listBody.innerHTML = filteredItems.map((p, idx) => {
             const imgSrc = IMAGES[p.shopNo] || null;
             const imgHtml = imgSrc 
                 ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
                 : `<div class="w-12 h-12 bg-gray-50 rounded border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
 
+            // 기간 파라미터 전달 구성
             let pParam = currentPeriod;
             if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
@@ -519,20 +646,41 @@ window.openAnalyticsReport = async () => {
             </div>
         `}).join('');
 
-        if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+        if (filteredItems.length === 0) {
+            listBody.innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+        }
 
         const renderPieChart = (ctxId, dataObj, filterKey) => {
             const ctx = document.getElementById(ctxId);
-            const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+            const labels = Object.keys(dataObj);
+            const dataVals = Object.values(dataObj);
+            const total = dataVals.reduce((a,b)=>a+b,0);
+
             return new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'], borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'],
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6
+                    }]
+                },
                 options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '55%',
+                    responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold', size: 11 } } },
-                        datalabels: { color: '#ffffff', font: { weight: '900', size: 12 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 4 ? pct + '%' : ''; } }
+                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 12, cornerRadius: 8, bodyFont: { weight: 'bold', size: 13 } },
+                        datalabels: {
+                            color: '#ffffff', font: { weight: '900', size: 12 },
+                            formatter: (value) => {
+                                if(total === 0) return '';
+                                const pct = Math.round((value / total) * 100);
+                                return pct > 4 ? pct + '%' : ''; 
+                            }
+                        }
                     },
+                    cutout: '55%',
                     onClick: (e, elements, chart) => {
                         if (elements[0]) {
                             const clickedLabel = chart.data.labels[elements[0].index];
@@ -545,17 +693,25 @@ window.openAnalyticsReport = async () => {
             });
         };
 
-        if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy();
+        if(catChartInstance) catChartInstance.destroy();
+        if(brandChartInstance) brandChartInstance.destroy();
+
         catChartInstance = renderPieChart('catChart', catData, 'cat');
         
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
         let topBrandData = {}; let otherSales = 0;
-        sortedBrands.forEach((b, i) => { if(i < 8) topBrandData[b[0]] = b[1]; else otherSales += b[1]; });
+        sortedBrands.forEach((b, i) => {
+            if(i < 8) topBrandData[b[0]] = b[1];
+            else otherSales += b[1];
+        });
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
+        
         brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand');
     };
 
-    if(!$("#analyticsDashboard")) renderDashUI(); else $("#analyticsDashboard").classList.remove("hidden");
+    if(!$("#analyticsDashboard")) renderDashUI();
+    else $("#analyticsDashboard").classList.remove("hidden");
+    
     setTimeout(() => $("#analyticsDashboard").classList.remove("opacity-0"), 10);
     updateDashData();
 };
@@ -565,30 +721,38 @@ window.openDashDetail = (code, periodParam) => {
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
 
-    let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
+    let cutoffDate = "0000-00-00";
+    let endDate = "9999-99-99";
+
     if (periodParam.startsWith("CUSTOM_")) {
-        const parts = periodParam.split("_"); cutoffDate = parts[1]; endDate = parts[2];
+        const parts = periodParam.split("_");
+        cutoffDate = parts[1];
+        endDate = parts[2];
     } else if (periodParam !== "ALL") {
-        const d = new Date(Date.now() - Number(periodParam) * 86400000); cutoffDate = d.toISOString().split('T')[0];
+        const d = new Date(Date.now() - Number(periodParam) * 86400000);
+        cutoffDate = d.toISOString().split('T')[0];
     }
 
+    // 사이즈별 판매량 다시 집계 (김종훈 기준 및 구데이터 호환)
     let sizeSalesMap = {};
     if (SALES_HISTORY.items && SALES_HISTORY.items[code]) {
         const history = SALES_HISTORY.items[code];
         for (let date in history) {
             if (periodParam === "ALL" || (date >= cutoffDate && date <= endDate)) {
                 const dayData = history[date];
-                if (typeof dayData === 'object') {
+                if (typeof dayData === 'number') {
+                    sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
+                } else if (typeof dayData === 'object') {
                     for (let size in dayData) {
                         if (typeof dayData[size] === 'object') {
                             const qty = dayData[size]["김종훈"] || 0;
                             if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
                         } else {
-                            const qty = dayData[size] || 0; // 구버전 데이터 호환
+                            const qty = dayData[size] || 0;
                             if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
                         }
                     }
-                } else sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
+                }
             }
         }
     }
@@ -597,11 +761,11 @@ window.openDashDetail = (code, periodParam) => {
     let modal = $("#dashDetailModal");
     if(!modal) {
         modal = document.createElement("div"); modal.id = "dashDetailModal";
-        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999]";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4";
         document.body.appendChild(modal);
     }
 
-    // 정렬 (숫자순)
+    // 사이즈 목록 정렬 (숫자순)
     const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMap), ...p.sizes.map(s=>String(s.size).trim())]))
         .sort((a,b) => (parseFloat(a)||0) - (parseFloat(b)||0));
 
@@ -628,6 +792,7 @@ window.openDashDetail = (code, periodParam) => {
         const sold = sizeSalesMap[size] || 0;
         const sObj = p.sizes.find(s => String(s.size).trim() === String(size)) || { busan: 0, sinsa: 0, center: 0 };
         
+        // 제안 로직: 판매량보다 재고가 적으면 차이만큼 제안 (1순위: 물류, 2순위: 신사)
         let suggestHtml = `<span class="text-gray-300">-</span>`;
         if (sold > sObj.busan) {
             let needed = sold - sObj.busan;
@@ -658,21 +823,21 @@ window.openDashDetail = (code, periodParam) => {
 
     modal.innerHTML = `
         <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="modal-content relative bg-white w-[95%] max-w-5xl flex flex-col rounded-3xl overflow-hidden shadow-2xl">
-            <div class="p-5 border-b flex justify-between items-start bg-white z-10 shadow-sm">
+        <div class="modal-content relative bg-white w-full max-w-5xl flex flex-col rounded-3xl overflow-hidden shadow-2xl">
+            <div class="p-5 border-b flex justify-between items-start bg-white z-10 shadow-sm shrink-0">
                 <div class="flex gap-4 items-center">
-                    ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+                    ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
                     <div>
                         <div class="text-xs font-black text-blue-600 mb-0.5">${p.브랜드}</div>
                         <h2 class="font-black text-xl leading-tight text-gray-900">${p.품명}</h2>
                         <div class="text-xs font-bold text-gray-400 mt-1">${p.품번}</div>
                     </div>
                 </div>
-                <button class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
-            <div class="flex flex-col lg:flex-row h-[65vh]">
-                <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-gray-50/50 flex flex-col">
+            <div class="flex flex-col lg:flex-row h-full lg:h-[65vh] overflow-y-auto lg:overflow-hidden">
+                <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-gray-50/50 flex flex-col shrink-0">
                     <h3 class="font-black text-sm text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-500"></i> 사이즈별 판매 추이</h3>
                     <div class="relative flex-1 w-full min-h-[200px]"><canvas id="ddSizeChart"></canvas></div>
                     ${insightHtml}
@@ -1211,7 +1376,7 @@ function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
   $("#detailHead").innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200 bg-white" style="max-height: 200px;">` : ''}
+    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200" style="max-height: 200px; background:var(--surface);">` : ''}
     <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
@@ -1453,7 +1618,7 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
-// 🔥 판매 데이터 업로드 시 '규격/사이즈' 및 '담당자' 파싱 로직 업데이트 🔥
+// 🔥 판매 데이터 업로드 시 '규격/사이즈' 및 '담당자' 파싱 + 방어코드 업데이트 🔥
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox");
     if(!box) return;
@@ -1504,7 +1669,7 @@ window.renderSalesHistoryAdmin = () => {
 
                 // 데이터 파싱: 값이 비어있으면 기본값 적용
                 const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
-                const manager = managerIdx > -1 ? String(r[managerIdx]||"").trim() : "김종훈"; // 담당자가 없으면 기본 김종훈 처리
+                const manager = managerIdx > -1 ? String(r[managerIdx]||"").trim() : "김종훈"; 
 
                 if(!sessionData[code]) sessionData[code] = {};
                 if(!sessionData[code][date]) sessionData[code][date] = {};
@@ -1513,11 +1678,19 @@ window.renderSalesHistoryAdmin = () => {
             }
             
             let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
-            // 데이터 병합
+            
+            // 데이터 병합 (레거시 방어코드 포함)
             for(let code in sessionData) {
                 if(!newItems[code]) newItems[code] = {};
                 for(let date in sessionData[code]) { 
+                    
+                    // 🔥 레거시 데이터 방어코드: 과거 숫자로 저장된 데이터를 객체로 변환
+                    if(typeof newItems[code][date] === 'number') {
+                        let oldQty = newItems[code][date];
+                        newItems[code][date] = { "알수없음": { "김종훈": oldQty } };
+                    }
                     if(!newItems[code][date]) newItems[code][date] = {};
+                    
                     for(let size in sessionData[code][date]) {
                         if(!newItems[code][date][size]) newItems[code][date][size] = {};
                         for(let manager in sessionData[code][date][size]) {
