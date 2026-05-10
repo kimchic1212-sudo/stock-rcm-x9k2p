@@ -59,7 +59,6 @@ function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH))
 function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
-// PAT 검증 유틸리티
 function checkPat() {
     if(!getPat()) {
         alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요.");
@@ -275,58 +274,23 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  if(!$("#salesPeriodWrap") && $("#sortSel")) {
-      const wrap = document.createElement("div");
-      wrap.className = "flex items-center gap-1.5 shrink-0";
-      wrap.id = "salesPeriodWrap";
-      
-      wrap.innerHTML = `
-          <select id="salesPeriodSel" class="ipt text-[13px] font-bold bg-orange-50 border-orange-200 text-orange-700 rounded px-2 py-1.5 outline-none">
-              <option value="">📊 판매분석 (끄기)</option>
-              <option value="7">최근 7일</option>
-              <option value="30">최근 30일</option>
-              <option value="90">최근 3개월</option>
-              <option value="CUSTOM">📅 직접 지정</option>
-              <option value="ALL">전체 누적실적</option>
-          </select>
-          <div id="customDateWrap" class="hidden items-center gap-1 bg-white p-1 border border-orange-200 rounded">
-              <input type="date" id="customStartDate" class="ipt text-[11px] px-1 py-1 w-[90px] border-none outline-none text-gray-600 font-bold"> ~ 
-              <input type="date" id="customEndDate" class="ipt text-[11px] px-1 py-1 w-[90px] border-none outline-none text-gray-600 font-bold">
-              <button id="customDateApply" class="px-2 py-1 bg-orange-500 text-white rounded text-[11px] font-bold shrink-0">적용</button>
-          </div>
-          <button id="openAnalyticsBtn" class="hidden px-2 py-1.5 bg-gray-800 text-white text-[12px] font-black rounded flex items-center gap-1 shadow-sm shrink-0 hover:bg-black transition-colors">
-              <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i> 리포트
+  // 메인화면: 기간조회 필터를 없애고 리포트 버튼만 심플하게 배치
+  if(!$("#openAnalyticsBtn") && $("#sortSel")) {
+      const btnWrap = document.createElement("div");
+      btnWrap.className = "flex items-center ml-2 shrink-0";
+      btnWrap.innerHTML = `
+          <button id="openAnalyticsBtn" class="px-3 py-1.5 bg-gray-800 text-white text-[12px] font-black rounded flex items-center gap-1 shadow-sm hover:bg-black transition-colors">
+              <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i> 분석 리포트
           </button>
       `;
-      $("#sortSel").parentNode.insertBefore(wrap, $("#sortSel").nextSibling);
-      
-      $("#salesPeriodSel").onchange = (e) => { 
-          if(e.target.value === "CUSTOM") {
-              $("#customDateWrap").classList.replace("hidden", "flex");
-              $("#openAnalyticsBtn").classList.add("hidden"); 
-          } else {
-              $("#customDateWrap").classList.replace("flex", "hidden");
-              if(e.target.value !== "") $("#openAnalyticsBtn").classList.remove("hidden");
-              else $("#openAnalyticsBtn").classList.add("hidden");
-              visibleCount=60; render(); 
-          }
-      };
-      
-      $("#customDateApply").onclick = () => {
-          if(!$("#customStartDate").value || !$("#customEndDate").value) {
-              alert("시작일과 종료일을 모두 선택해주세요."); return;
-          }
-          $("#openAnalyticsBtn").classList.remove("hidden");
-          visibleCount=60; render();
-      };
-      
-      $("#openAnalyticsBtn").onclick = () => window.openAnalyticsReport();
+      $("#sortSel").parentNode.insertBefore(btnWrap, $("#sortSel").nextSibling);
+      btnWrap.querySelector("#openAnalyticsBtn").onclick = () => window.openAnalyticsReport();
   }
 
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
       const opt = document.createElement("option");
       opt.value = "salesDesc";
-      opt.innerHTML = "🔥 판매량 높은순";
+      opt.innerHTML = "🔥 전체 판매량순";
       $("#sortSel").appendChild(opt);
   }
 
@@ -427,11 +391,50 @@ window.openAnalyticsReport = async () => {
     await loadChartJS();
 
     let dashFilter = { cat: null, brand: null };
-    let currentPeriod = $("#salesPeriodSel") ? $("#salesPeriodSel").value : "7"; 
-    let currentCustomStart = $("#customStartDate") ? $("#customStartDate").value : "";
-    let currentCustomEnd = $("#customEndDate") ? $("#customEndDate").value : "";
+    let currentPeriod = "7"; 
+    let currentCustomStart = "";
+    let currentCustomEnd = "";
 
-    // 내부에서 기간에 따른 데이터 실시간 필터링
+    // 주간/월간 선택 옵션 동적 생성
+    const generateDateOptions = () => {
+        const now = new Date();
+        let html = '';
+        
+        // 월간 계산 (최근 4개월)
+        html += '<optgroup label="월간 조회">';
+        for(let i=0; i<4; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2,'0');
+            const lastDay = new Date(y, d.getMonth() + 1, 0).getDate();
+            const val = `EXACT_${y}-${m}-01_${y}-${m}-${lastDay}`;
+            html += `<option value="${val}">${y}년 ${d.getMonth() + 1}월</option>`;
+        }
+        html += '</optgroup>';
+
+        // 주간 계산 (최근 5주차)
+        html += '<optgroup label="주간 조회">';
+        const curr = new Date(now);
+        const day = curr.getDay();
+        const diff = curr.getDate() - day + (day === 0 ? -6 : 1); // 월요일 시작 기준
+        let monday = new Date(curr.setDate(diff));
+
+        for(let i=0; i<5; i++) {
+            let sun = new Date(monday);
+            sun.setDate(monday.getDate() + 6);
+            
+            const y1 = monday.getFullYear(); const m1 = String(monday.getMonth()+1).padStart(2,'0'); const d1 = String(monday.getDate()).padStart(2,'0');
+            const y2 = sun.getFullYear(); const m2 = String(sun.getMonth()+1).padStart(2,'0'); const d2 = String(sun.getDate()).padStart(2,'0');
+            
+            const weekNum = Math.ceil(monday.getDate() / 7);
+            const val = `EXACT_${y1}-${m1}-${d1}_${y2}-${m2}-${d2}`;
+            html += `<option value="${val}">${y1}년 ${monday.getMonth()+1}월 ${weekNum}주차 (${m1}/${d1}~${m2}/${d2})</option>`;
+            
+            monday.setDate(monday.getDate() - 7); // 이전 주차로 이동
+        }
+        html += '</optgroup>';
+        return html;
+    };
+
     const getPeriodItems = (period, start, end) => {
         let items = [];
         let cutoffDate = "0000-00-00";
@@ -465,7 +468,6 @@ window.openAnalyticsReport = async () => {
     let catChartInstance = null;
     let brandChartInstance = null;
 
-    // 대시보드 UI 렌더링
     const renderDashUI = () => {
         let modal = $("#analyticsDashboard");
         if (!modal) {
@@ -483,13 +485,16 @@ window.openAnalyticsReport = async () => {
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <select id="dashPeriodSel" class="ipt text-[12px] font-black bg-orange-50 border-orange-200 text-orange-700 rounded px-3 py-2 outline-none cursor-pointer">
-                        <option value="1">어제/오늘 (1일)</option>
-                        <option value="7">최근 7일</option>
-                        <option value="30">최근 1개월</option>
-                        <option value="90">최근 3개월 (분기)</option>
-                        <option value="180">최근 6개월 (반기)</option>
-                        <option value="ALL">전체 누적실적</option>
-                        <option value="CUSTOM">📅 직접 지정</option>
+                        <optgroup label="빠른 기간">
+                            <option value="1">어제/오늘 (1일)</option>
+                            <option value="7">최근 7일</option>
+                            <option value="30">최근 1개월</option>
+                            <option value="90">최근 3개월 (분기)</option>
+                            <option value="180">최근 6개월 (반기)</option>
+                            <option value="ALL">전체 누적실적</option>
+                            <option value="CUSTOM_INPUT">📅 직접 지정</option>
+                        </optgroup>
+                        ${generateDateOptions()}
                     </select>
                     <div id="dashCustomDateWrap" class="hidden items-center gap-1 bg-white p-1.5 border border-orange-200 rounded">
                         <input type="date" id="dashStart" class="ipt text-[11px] px-1 py-1 w-[100px] border-none outline-none text-gray-600 font-bold cursor-pointer"> ~
@@ -524,20 +529,24 @@ window.openAnalyticsReport = async () => {
             </main>
         `;
 
-        $("#dashPeriodSel").value = currentPeriod === "" ? "7" : currentPeriod;
-        if(currentPeriod === "CUSTOM") {
-            $("#dashCustomDateWrap").classList.replace("hidden", "flex");
-            $("#dashStart").value = currentCustomStart;
-            $("#dashEnd").value = currentCustomEnd;
-        }
+        $("#dashPeriodSel").value = "7";
 
         $("#dashPeriodSel").onchange = (e) => {
-            if(e.target.value === "CUSTOM") {
+            const val = e.target.value;
+            if(val === "CUSTOM_INPUT") {
                 $("#dashCustomDateWrap").classList.replace("hidden", "flex");
             } else {
                 $("#dashCustomDateWrap").classList.replace("flex", "hidden");
-                currentPeriod = e.target.value;
-                dashFilter = { cat: null, brand: null }; // 기간 변경 시 필터 초기화
+                
+                if (val.startsWith("EXACT_")) {
+                    const parts = val.split('_');
+                    currentPeriod = "CUSTOM";
+                    currentCustomStart = parts[1];
+                    currentCustomEnd = parts[2];
+                } else {
+                    currentPeriod = val;
+                }
+                dashFilter = { cat: null, brand: null }; 
                 updateDashData();
             }
         };
@@ -558,13 +567,11 @@ window.openAnalyticsReport = async () => {
         if(window.lucide) lucide.createIcons();
     };
 
-    // 실시간 상태 업데이트 렌더러
     const updateDashData = () => {
         rawSoldItems = getPeriodItems(currentPeriod, currentCustomStart, currentCustomEnd);
         renderDashState();
     };
 
-    // 데이터 연산 및 차트/리스트 그리기
     const renderDashState = () => {
         let filteredItems = rawSoldItems.filter(p => {
             if (dashFilter.cat && p.카테고리 !== dashFilter.cat) return false;
@@ -584,10 +591,8 @@ window.openAnalyticsReport = async () => {
             brandData[b] = (brandData[b] || 0) + p.dashSales;
         });
 
-        // 1. 헤더 총 금액 업데이트
         $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매`;
 
-        // 2. 리스트 및 필터 라벨 업데이트
         const listBody = $("#dashListBody");
         const filterLabel = $("#activeFilterLabel");
         let labelText = [];
@@ -627,7 +632,6 @@ window.openAnalyticsReport = async () => {
             listBody.innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
         }
 
-        // 3. 차트 업데이트 함수 (% 퍼센트 표시 및 양방향 필터 기능 내장)
         const renderPieChart = (ctxId, dataObj, filterKey) => {
             const ctx = document.getElementById(ctxId);
             const labels = Object.keys(dataObj);
@@ -654,7 +658,7 @@ window.openAnalyticsReport = async () => {
                             formatter: (value) => {
                                 if(total === 0) return '';
                                 const pct = Math.round((value / total) * 100);
-                                return pct > 4 ? pct + '%' : ''; // 4% 초과일때만 글자표시 (디자인 안깨지게)
+                                return pct > 4 ? pct + '%' : ''; 
                             }
                         }
                     },
@@ -662,9 +666,9 @@ window.openAnalyticsReport = async () => {
                     onClick: (e, elements, chart) => {
                         if (elements[0]) {
                             const clickedLabel = chart.data.labels[elements[0].index];
-                            if(clickedLabel === '기타브랜드') return; // 기타는 필터 제외
+                            if(clickedLabel === '기타브랜드') return; 
                             dashFilter[filterKey] = (dashFilter[filterKey] === clickedLabel) ? null : clickedLabel;
-                            renderDashState(); // 클릭시 즉시 전체 뷰 재렌더링
+                            renderDashState(); 
                         }
                     }
                 }
@@ -674,10 +678,8 @@ window.openAnalyticsReport = async () => {
         if(catChartInstance) catChartInstance.destroy();
         if(brandChartInstance) brandChartInstance.destroy();
 
-        // 카테고리 차트
         catChartInstance = renderPieChart('catChart', catData, 'cat');
         
-        // 브랜드 차트 (너무 파편화되지 않게 상위 8개만 그리고 나머지는 기타 처리)
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
         let topBrandData = {}; let otherSales = 0;
         sortedBrands.forEach((b, i) => {
@@ -689,7 +691,6 @@ window.openAnalyticsReport = async () => {
         brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand');
     };
 
-    // 모달 띄우고 데이터 최초 렌더링
     if(!$("#analyticsDashboard")) renderDashUI();
     else $("#analyticsDashboard").classList.remove("hidden");
     
@@ -751,7 +752,6 @@ window.openSalesGuide = (code) => {
     if(window.lucide) lucide.createIcons();
 };
 
-// 🔥 2. Lazy Loading 반영된 개별 카드 생성 함수
 function card(p){
   const el = document.createElement("article");
   el.className = "card card-hover p-4 flex flex-col relative bg-white"; 
@@ -773,14 +773,6 @@ function card(p){
   let busanOnlyBadge = "";
   if (p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0) {
       busanOnlyBadge = `<span class="bg-blue-800 text-white px-1.5 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
-  }
-
-  let salesBadge = "";
-  const periodSel = $("#salesPeriodSel");
-  if (periodSel && periodSel.value !== "" && p.periodSales > 0) {
-      salesBadge += `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm">📈 ${p.periodSales}개 판매</span>`;
-      if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) salesBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
-      if (p.periodSales >= 10) salesBadge += `<span class="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-black shadow-sm">🏆 인기</span>`;
   }
 
   const productMemos = MEMOS.filter(m => m.code === p.품번);
@@ -838,13 +830,11 @@ function card(p){
       }
   }
 
-  // onload 이벤트로 로딩 완료 시 자연스럽게 나타나도록 처리 (loading="lazy" 적용)
   el.innerHTML = `
     <div class="flex justify-between items-start mb-2 z-10 relative">
         <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
             ${busanOnlyBadge}
             ${promoBadge}
-            ${salesBadge}
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span>
             <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>
@@ -908,16 +898,12 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), 
     size: $("#sizeSel") ? $("#sizeSel").value : "ALL",
-    salesPeriod: $("#salesPeriodSel") ? $("#salesPeriodSel").value : "",
-    customStart: $("#customStartDate") ? $("#customStartDate").value : "",
-    customEnd: $("#customEndDate") ? $("#customEndDate").value : "",
     promoOnly: promoOnly,
     promoType: promoOnly && $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", 
     promoRate: promoOnly && $("#promoRateSel") ? Number($("#promoRateSel").value) : 0
   };
 }
 
-// 🔥 3. 성능 최적화가 적용된 리스트 렌더링 함수 🔥
 function render(){
   const grid = $("#grid"); 
   
@@ -932,24 +918,12 @@ function render(){
   $("#results").classList.remove("hidden");
 
   const f = getFilters();
-  
-  let cutoffDate = "0000-00-00";
-  let endDate = "9999-99-99";
-  if (f.salesPeriod === "CUSTOM") {
-      cutoffDate = f.customStart || "0000-00-00";
-      endDate = f.customEnd || "9999-99-99";
-  } else if (f.salesPeriod && f.salesPeriod !== "ALL") {
-      const d = new Date(Date.now() - Number(f.salesPeriod) * 86400000);
-      cutoffDate = d.toISOString().split('T')[0];
-  }
 
   PRODUCTS.forEach(p => {
       p.periodSales = 0;
-      if (f.salesPeriod && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+      if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
           for (let date in SALES_HISTORY.items[p.품번]) {
-              if (f.salesPeriod === "ALL" || (date >= cutoffDate && date <= endDate)) {
-                  p.periodSales += SALES_HISTORY.items[p.품번][date];
-              }
+              p.periodSales += SALES_HISTORY.items[p.품번][date]; // 메인화면 정렬용 누적 판매량
           }
       }
   });
@@ -1025,7 +999,6 @@ function render(){
       $("#noMatch").classList.add("hidden");
       $("#grid").parentElement.classList.remove("hidden");
       
-      // ✅ 최적화: Fragment를 사용해 렌더링 병목 해소
       const fragment = document.createDocumentFragment();
       const slice = filteredList.slice(0, visibleCount);
       slice.forEach(p=>fragment.appendChild(card(p)));
@@ -1187,7 +1160,7 @@ function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
   $("#detailHead").innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-[color:var(--line)] mix-blend-multiply dark:mix-blend-normal" style="max-height: 200px; background:var(--surface);">` : ''}
+    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200 opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')" style="max-height: 200px; background:var(--surface);">` : ''}
     <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
@@ -1332,14 +1305,13 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
-// 🔥 ESC 키 누르면 대시보드도 꺼지도록 수정 🔥
+// 🔥 스마트 ESC 키 로직 (대시보드는 냅두고, 열려있는 팝업 중 가장 위의 것만 닫기) 🔥
 document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") { 
-        $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); 
-        const dash = $("#analyticsDashboard");
-        if(dash && !dash.classList.contains("hidden")) {
-            dash.classList.add("opacity-0");
-            setTimeout(() => dash.classList.add("hidden"), 300);
+        const openModals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
+        if(openModals.length > 0) {
+            // 마지막에 열린(배열의 마지막) 모달만 하나 닫기
+            openModals[openModals.length - 1].classList.add("hidden");
         }
     }
 });
@@ -1382,11 +1354,6 @@ $("#resetAll").onclick=()=>{
 
     $("#sortSel").value="default";
     if($("#sizeSel")) $("#sizeSel").value="ALL";
-    if($("#salesPeriodSel")) {
-        $("#salesPeriodSel").value="";
-        $("#customDateWrap").classList.replace("flex", "hidden");
-        $("#openAnalyticsBtn").classList.add("hidden");
-    }
     $("#q").value=""; visibleCount=60; render(); 
 };
 
@@ -1496,7 +1463,6 @@ window.renderSalesHistoryAdmin = () => {
     };
 };
 
-// 🔥 4. RUN TOGETHER WEEK 엑셀 완벽 대응 로직 🔥
 window.renderPromoAdmin = () => {
     const box = $("#promoAdminBox");
     if(!box) return;
@@ -1542,7 +1508,6 @@ window.renderPromoAdmin = () => {
                 
                 let promoName = "기획전";
                 let promoPeriod = "";
-                // 1행과 2행에서 기획전명과 기간 파싱
                 for(let i=0; i<5; i++) {
                     if(!rows[i]) continue;
                     const col0 = String(rows[i][0]||"");
@@ -1551,7 +1516,7 @@ window.renderPromoAdmin = () => {
                 }
 
                 let items = {};
-                let headerRowIdx = rows.findIndex(r => r.includes('품번')); // 보통 5번째 행
+                let headerRowIdx = rows.findIndex(r => r.includes('품번')); 
                 
                 if(headerRowIdx > -1) {
                     const headers = rows[headerRowIdx].map(h => String(h||"").trim());
@@ -1560,7 +1525,7 @@ window.renderPromoAdmin = () => {
                     const wpIdx = headers.indexOf('위클리특가');
                     const wrIdx = headers.indexOf('특가할인율');
                     const fpIdx = headers.indexOf('최종할인가');
-                    let frIdx = headers.indexOf('최종 할인율'); // 공백 trim()으로 자동 보정됨
+                    let frIdx = headers.indexOf('최종 할인율'); 
                     if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
 
                     for(let i=headerRowIdx+1; i<rows.length; i++) {
