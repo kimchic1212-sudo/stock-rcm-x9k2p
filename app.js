@@ -40,6 +40,7 @@ let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
 
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
+let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES') || '[]');
 
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -52,7 +53,10 @@ function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
 function checkPat() {
-    if(!getPat()) { alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요."); return false; }
+    if(!getPat()) {
+        alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요.");
+        return false;
+    }
     return true;
 }
 
@@ -77,7 +81,11 @@ function getChosung(str){
 
 async function copyText(text, btn){
   try{
-    await navigator.clipboard.writeText(text);
+    if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } 
+    else {
+      const ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    }
     if(btn){
       const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
       if(window.lucide) lucide.createIcons();
@@ -98,10 +106,21 @@ function applyMeta(meta){
 
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+  
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META); rebuildIndex(); render(); return;
+      RAW = cached.rows || []; 
+      CURRENT_META = cached.meta || null;
+      IMAGES = cached.images || {};
+      MEMOS = cached.memos || [];
+      TRANSFERS = cached.transfers || [];
+      PROMOTIONS = cached.promotions || {};
+      SALES_GUIDES = cached.salesGuides || {};
+      SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
+      applyMeta(CURRENT_META);
+      rebuildIndex(); render(); 
+      return;
   }
+  
   try {
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
@@ -112,19 +131,46 @@ async function loadData(force = false){
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
-      const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
+
+      if(!invRes.ok) throw new Error("재고 로드 실패");
+      const invData = await invRes.json();
+      RAW = invData.rows || []; 
+      CURRENT_META = invData.meta || null;
+
       if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
       if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
-      if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
-      if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
-      if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
       
+      if(promoRes && promoRes.ok) {
+          const pData = await promoRes.json();
+          PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
+      } else { PROMOTIONS = {}; }
+      
+      if(sgRes && sgRes.ok) {
+          const sgData = await sgRes.json();
+          SALES_GUIDES = Object.keys(sgData).length > 0 ? sgData : {};
+      } else { SALES_GUIDES = {}; }
+
+      if(shRes && shRes.ok) {
+          const shData = await shRes.json();
+          SALES_HISTORY = shData.items ? shData : { meta: {}, items: {} };
+      } else { SALES_HISTORY = { meta: {}, items: {} }; }
+
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      applyMeta(CURRENT_META); rebuildIndex(); render();
-  } catch(e) { console.error("Data Load Error", e); }
+      
+      applyMeta(CURRENT_META);
+      rebuildIndex(); render();
+  } catch(e) { 
+      if(cached) { 
+          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || {meta:{},items:{}};
+          applyMeta(CURRENT_META); rebuildIndex(); render(); 
+      } else {
+          RAW=[]; render();
+      }
+  }
 }
 
+async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
 function getActiveWeeklyCategory() {
@@ -133,6 +179,7 @@ function getActiveWeeklyCategory() {
     const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
     const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
     const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
+
     if (now >= t1 && now < t2) return "FOOTWEAR";
     if (now >= t2 && now < t3) return "APPAREL";
     if (now >= t3 && now <= t4) return "ACC/GEAR";
@@ -295,7 +342,7 @@ function loadChartJS() {
     });
 }
 
-// 🔥 고도화된 반응형 분석 대시보드
+// 🔥 고도화된 반응형 분석 대시보드 (성별 차트, 사이즈 필터링, 긴급보충 제안 추가) 🔥
 window.openAnalyticsReport = async () => {
     await loadChartJS();
 
@@ -303,6 +350,7 @@ window.openAnalyticsReport = async () => {
     let currentPeriod = "7"; 
     let currentCustomStart = "";
     let currentCustomEnd = "";
+    let currentSizeFilter = "ALL"; // 대시보드 전용 사이즈 필터
 
     const generateDateOptions = () => {
         const now = new Date(); let html = '';
@@ -332,6 +380,11 @@ window.openAnalyticsReport = async () => {
         return html;
     };
 
+    // 사이즈 목록 추출 (필터용)
+    const allUniqueSizes = Array.from(new Set(PRODUCTS.flatMap(p => p.sizes.map(s => String(s.size).trim()))))
+        .sort((a,b) => (parseFloat(a)||0) - (parseFloat(b)||0));
+    const sizeOptionsHtml = `<option value="ALL">📏 전체 사이즈</option>` + allUniqueSizes.map(s => `<option value="${s}">${s}</option>`).join('');
+
     const getPeriodItems = (period, start, end) => {
         let items = [];
         let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
@@ -343,31 +396,61 @@ window.openAnalyticsReport = async () => {
         }
 
         PRODUCTS.forEach(p => {
-            let sales = 0;
+            let busanSales = 0;
+            let sinsaSales = 0;
+            let sizeSalesMap = {};
+
             if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
                 for (let date in SALES_HISTORY.items[p.품번]) {
                     if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
                         const dayData = SALES_HISTORY.items[p.품번][date];
-                        if (typeof dayData === 'object') {
+                        if (typeof dayData === 'number') {
+                            busanSales += dayData;
+                            sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
+                        } else if (typeof dayData === 'object') {
                             for (let size in dayData) {
                                 if (typeof dayData[size] === 'object') {
-                                    // 🔥 부산점(김종훈) 데이터만 합산
                                     for(let mgr in dayData[size]) {
-                                        if(mgr.includes("김종훈")) sales += dayData[size][mgr];
+                                        const qty = dayData[size][mgr];
+                                        if(mgr.includes("김종훈")) {
+                                            busanSales += qty;
+                                            sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
+                                        }
+                                        if(mgr.includes("승호") || mgr.includes("신사")) {
+                                            sinsaSales += qty;
+                                        }
                                     }
+                                } else {
+                                    busanSales += dayData[size]; // 레거시
+                                    sizeSalesMap[size] = (sizeSalesMap[size] || 0) + dayData[size];
                                 }
                             }
                         }
                     }
                 }
             }
-            if(sales > 0) items.push({ ...p, dashSales: sales, dashRev: sales * (p.currentPromoPrice || p.소비자가 || 0) });
+
+            p.dashBusanSalesTotal = busanSales;
+            p.dashSinsaSalesTotal = sinsaSales;
+            p.dashSizeSalesMap = sizeSalesMap;
+
+            // 사이즈 필터 적용 로직
+            let finalSales = 0;
+            if (currentSizeFilter === "ALL") {
+                finalSales = busanSales;
+            } else {
+                finalSales = sizeSalesMap[currentSizeFilter] || 0;
+            }
+
+            if(finalSales > 0) {
+                items.push({ ...p, dashSales: finalSales, dashRev: finalSales * (p.currentPromoPrice || p.소비자가 || 0) });
+            }
         });
         return items.sort((a, b) => b.dashSales - a.dashSales);
     };
 
     let rawSoldItems = [];
-    let catChartInstance = null; let brandChartInstance = null;
+    let catChartInstance = null; let brandChartInstance = null; let genderChartInstance = null;
 
     const renderDashUI = () => {
         let modal = $("#analyticsDashboard");
@@ -384,6 +467,10 @@ window.openAnalyticsReport = async () => {
                     <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <select id="dashSizeSel" class="ipt text-[12px] font-black bg-white border-gray-300 text-gray-700 rounded px-3 py-2 outline-none cursor-pointer">
+                        ${sizeOptionsHtml}
+                    </select>
+
                     <select id="dashPeriodSel" class="ipt text-[12px] font-black bg-orange-50 border-orange-200 text-orange-700 rounded px-3 py-2 outline-none cursor-pointer">
                         <optgroup label="빠른 기간">
                             <option value="1">어제/오늘 (1일)</option>
@@ -407,23 +494,28 @@ window.openAnalyticsReport = async () => {
                 </div>
             </header>
             <main class="flex-1 overflow-hidden p-4 lg:p-6">
-                <div class="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto dash-scroll pr-2">
-                        <article class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                            <h2 class="text-sm font-black text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> 카테고리 비중</h2>
-                            <div class="relative h-[220px] w-full"><canvas id="catChart"></canvas></div>
+                <div class="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto dash-scroll pr-2 pb-10">
+                        <article class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+                            <h2 class="text-sm font-black text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> 카테고리 비중</h2>
+                            <div class="relative h-[180px] w-full"><canvas id="catChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                            <h2 class="text-sm font-black text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="award" class="w-4 h-4 text-emerald-500"></i> 브랜드 비중</h2>
-                            <div class="relative h-[220px] w-full"><canvas id="brandChart"></canvas></div>
+                        <article class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+                            <h2 class="text-sm font-black text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4 text-pink-500"></i> 성별 비중</h2>
+                            <div class="relative h-[180px] w-full"><canvas id="genderChart"></canvas></div>
+                        </article>
+                        <article class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100">
+                            <h2 class="text-sm font-black text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="award" class="w-4 h-4 text-emerald-500"></i> 브랜드 비중</h2>
+                            <div class="relative h-[180px] w-full"><canvas id="brandChart"></canvas></div>
                         </article>
                     </section>
-                    <section class="lg:col-span-2 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+
+                    <section class="lg:col-span-3 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-500"></i> 판매 랭킹 (클릭 시 사이즈 상세분석)</h2>
                             <div id="activeFilterLabel" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors shadow-sm"></div>
                         </div>
-                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-3 space-y-2"></div>
+                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-4 space-y-3"></div>
                     </section>
                 </div>
             </main>
@@ -432,20 +524,31 @@ window.openAnalyticsReport = async () => {
         $("#dashPeriodSel").value = "7";
         $("#dashPeriodSel").onchange = (e) => {
             const val = e.target.value;
-            if(val === "CUSTOM_INPUT") $("#dashCustomDateWrap").classList.replace("hidden", "flex");
-            else {
+            if(val === "CUSTOM_INPUT") {
+                $("#dashCustomDateWrap").classList.replace("hidden", "flex");
+            } else {
                 $("#dashCustomDateWrap").classList.replace("flex", "hidden");
                 if (val.startsWith("EXACT_")) {
                     const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2];
-                } else currentPeriod = val;
-                dashFilter = { cat: null, brand: null }; updateDashData();
+                } else {
+                    currentPeriod = val;
+                }
+                dashFilter = { cat: null, brand: null }; 
+                updateDashData();
             }
         };
+
+        $("#dashSizeSel").onchange = (e) => {
+            currentSizeFilter = e.target.value;
+            updateDashData();
+        };
+        
         $("#dashApply").onclick = () => {
             if(!$("#dashStart").value || !$("#dashEnd").value) { alert("날짜를 모두 선택해주세요."); return; }
             currentPeriod = "CUSTOM"; currentCustomStart = $("#dashStart").value; currentCustomEnd = $("#dashEnd").value;
             dashFilter = { cat: null, brand: null }; updateDashData();
         };
+
         $("#closeDashboardBtn").onclick = () => {
             modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300);
         };
@@ -465,15 +568,22 @@ window.openAnalyticsReport = async () => {
         });
 
         let totalSales = 0; let totalRev = 0;
-        let catData = {}; let brandData = {};
+        let catData = {}; let brandData = {}; let genderData = {};
 
         filteredItems.forEach(p => {
             totalSales += p.dashSales; totalRev += p.dashRev;
             catData[p.카테고리||"기타"] = (catData[p.카테고리||"기타"] || 0) + p.dashSales;
             brandData[p.브랜드||"기타"] = (brandData[p.브랜드||"기타"] || 0) + p.dashSales;
+            
+            let g = p.성별 || p.gender || "U";
+            if(g === "M" || g === "남성" || g === "남") g = "남성";
+            else if(g === "W" || g === "여성" || g === "여") g = "여성";
+            else g = "공용/기타";
+            genderData[g] = (genderData[g] || 0) + p.dashSales;
         });
 
-        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매`;
+        let sizeText = currentSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${currentSizeFilter} 사이즈]</span>`;
+        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매${sizeText}`;
 
         const filterLabel = $("#activeFilterLabel"); let labelText = [];
         if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
@@ -487,63 +597,105 @@ window.openAnalyticsReport = async () => {
         $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
             const imgSrc = IMAGES[p.shopNo] || null;
             const imgHtml = imgSrc 
-                ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
-                : `<div class="w-12 h-12 bg-gray-50 rounded border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
+                ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
+                : `<div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
 
             let pParam = currentPeriod;
             if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
+            // 🔥 스마트 보충 제안 알림 생성 (리스트 뷰 전용) 🔥
+            let insightHtml = "";
+            let isBusanLowStock = false;
+            if (currentSizeFilter !== "ALL") {
+                const sObj = p.sizes.find(s => String(s.size).trim() === currentSizeFilter);
+                if (sObj && sObj.busan <= 1) isBusanLowStock = true;
+            } else {
+                if (p.busanTotal <= 2) isBusanLowStock = true;
+            }
+            
+            let isCenterOrSinsaHasStock = (p.centerTotal + p.sinsaTotal) > 0;
+            let isBusanSellingWell = p.dashBusanSalesTotal >= 3; 
+            let isBusanDominating = p.dashBusanSalesTotal > p.dashSinsaSalesTotal;
+
+            if (isBusanLowStock && isCenterOrSinsaHasStock && isBusanSellingWell && isBusanDominating) {
+                insightHtml = `
+                    <div class="mt-2.5 bg-red-50 border border-red-100 p-2 rounded-lg flex items-start gap-2 shadow-sm w-full">
+                        <i data-lucide="zap" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+                        <div class="text-[11px] text-red-800 leading-tight">
+                            <b>🔥 긴급 확보 추천!</b> 부산점 판매량(${p.dashBusanSalesTotal}개)이 신사점(${p.dashSinsaSalesTotal}개)을 압도합니다. 
+                            부산 재고가 부족하니 타 지점 재고(${p.centerTotal + p.sinsaTotal}개)를 끌어오면 즉시 매출로 직결됩니다!
+                        </div>
+                    </div>
+                `;
+            }
+
             return `
-            <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <div class="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-[13px] shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
-                    ${imgHtml}
-                    <div class="min-w-0 pr-2">
-                        <div class="text-[11px] font-bold text-gray-400 truncate mb-0.5">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
-                        <div class="text-[14px] font-black text-gray-800 truncate leading-snug">${escapeHtml(p.품명)}</div>
+            <div class="flex flex-col bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-[13px] shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
+                        ${imgHtml}
+                        <div class="min-w-0 pr-2">
+                            <div class="flex items-center gap-1 mb-1">
+                                <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-black">${escapeHtml(p.성별||p.gender||"U")}</span>
+                                <div class="text-[11px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
+                            </div>
+                            <div class="text-[15px] font-black text-gray-800 truncate leading-snug">${escapeHtml(p.품명)}</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end shrink-0 ml-2">
+                        <span class="font-black text-gray-900 text-[16px]">${fmt(p.dashSales)}개</span>
+                        <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1 border border-blue-100">${krw(p.dashRev)}</span>
                     </div>
                 </div>
-                <div class="flex flex-col items-end shrink-0 ml-2">
-                    <span class="font-black text-gray-900 text-[15px]">${fmt(p.dashSales)}개</span>
-                    <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1">${krw(p.dashRev)}</span>
-                </div>
+                ${insightHtml}
             </div>
         `}).join('');
 
         if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
 
-        const renderPieChart = (ctxId, dataObj, filterKey) => {
+        const renderPieChart = (ctxId, dataObj, filterKey, colors) => {
             const ctx = document.getElementById(ctxId);
             const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
             return new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'], borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
+                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false, cutout: '55%',
                     plugins: {
-                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold', size: 11 } } },
-                        datalabels: { color: '#ffffff', font: { weight: '900', size: 12 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 4 ? pct + '%' : ''; } }
+                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold', size: 10 } } },
+                        datalabels: { color: '#ffffff', font: { weight: '900', size: 11 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 4 ? pct + '%' : ''; } }
                     },
                     onClick: (e, elements, chart) => {
                         if (elements[0]) {
                             const clickedLabel = chart.data.labels[elements[0].index];
                             if(clickedLabel === '기타브랜드') return; 
-                            dashFilter[filterKey] = (dashFilter[filterKey] === clickedLabel) ? null : clickedLabel;
-                            renderDashState(); 
+                            if(filterKey) {
+                                dashFilter[filterKey] = (dashFilter[filterKey] === clickedLabel) ? null : clickedLabel;
+                                renderDashState(); 
+                            }
                         }
                     }
                 }
             });
         };
 
-        if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy();
-        catChartInstance = renderPieChart('catChart', catData, 'cat');
+        if(catChartInstance) catChartInstance.destroy(); 
+        if(brandChartInstance) brandChartInstance.destroy();
+        if(genderChartInstance) genderChartInstance.destroy();
+
+        const defaultColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'];
+        
+        catChartInstance = renderPieChart('catChart', catData, 'cat', defaultColors);
         
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
         let topBrandData = {}; let otherSales = 0;
         sortedBrands.forEach((b, i) => { if(i < 8) topBrandData[b[0]] = b[1]; else otherSales += b[1]; });
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
-        brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand');
+        brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', defaultColors);
+
+        // 성별 차트는 파란색(남), 빨간색(여), 회색(공용) 느낌으로 배색
+        genderChartInstance = renderPieChart('genderChart', genderData, null, ['#3b82f6', '#ef4444', '#9ca3af']);
     };
 
     if(!$("#analyticsDashboard")) renderDashUI(); else $("#analyticsDashboard").classList.remove("hidden");
@@ -578,8 +730,14 @@ window.openDashDetail = (code, periodParam) => {
                                     if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
                                 }
                             }
+                        } else {
+                            // 레거시 호환
+                            const qty = dayData[size] || 0;
+                            if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
                         }
                     }
+                } else {
+                    sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
                 }
             }
         }
@@ -590,6 +748,9 @@ window.openDashDetail = (code, periodParam) => {
     if(!modal) {
         modal = document.createElement("div"); modal.id = "dashDetailModal";
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4";
+        // 🔥 빈 여백(backdrop) 누르면 꺼지게 onClick 추가 🔥
+        modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10"></div>`;
         document.body.appendChild(modal);
     }
 
@@ -647,56 +808,57 @@ window.openDashDetail = (code, periodParam) => {
         </tr>`;
     }).join('');
 
-    // 🔥 2단 레이아웃 (대규모 팝업)
-    modal.innerHTML = `
-        <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="modal-content relative bg-white w-full max-w-6xl flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10">
-            <div class="p-5 border-b flex justify-between items-start bg-white z-10 shadow-sm shrink-0">
-                <div class="flex gap-4 items-center">
-                    ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
-                    <div>
-                        <div class="text-xs font-black text-blue-600 mb-0.5">${p.브랜드}</div>
-                        <h2 class="font-black text-xl leading-tight text-gray-900">${p.품명}</h2>
-                        <div class="text-xs font-bold text-gray-400 mt-1">${p.품번}</div>
+    // 🔥 2단 레이아웃 주입
+    modal.querySelector("#ddContentWrap").innerHTML = `
+        <div class="p-5 border-b flex justify-between items-start bg-white z-10 shadow-sm shrink-0">
+            <div class="flex gap-4 items-center">
+                ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
+                <div>
+                    <div class="flex items-center gap-1.5 mb-0.5">
+                        <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-black">${escapeHtml(p.성별||p.gender||"U")}</span>
+                        <div class="text-xs font-black text-blue-600">${p.브랜드}</div>
                     </div>
+                    <h2 class="font-black text-xl leading-tight text-gray-900">${p.품명}</h2>
+                    <div class="text-xs font-bold text-gray-400 mt-1">${p.품번}</div>
                 </div>
-                <button class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <button class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        
+        <div class="flex flex-col lg:flex-row h-full lg:h-[70vh] overflow-y-auto lg:overflow-hidden">
+            <div class="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
+                <h3 class="font-black text-sm text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-500"></i> 사이즈별 판매 추이</h3>
+                <div class="relative flex-1 w-full min-h-[250px]"><canvas id="ddSizeChart"></canvas></div>
+                ${insightHtml}
             </div>
             
-            <div class="flex flex-col lg:flex-row h-full lg:h-[70vh] overflow-y-auto lg:overflow-hidden">
-                <div class="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
-                    <h3 class="font-black text-sm text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-500"></i> 사이즈별 판매 추이</h3>
-                    <div class="relative flex-1 w-full min-h-[250px]"><canvas id="ddSizeChart"></canvas></div>
-                    ${insightHtml}
-                </div>
-                
-                <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
-                    <div class="p-6 pb-2 sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-10">
-                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3 shadow-sm">
-                            <i data-lucide="truck" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
-                            <div class="text-[13px] font-bold text-blue-800 leading-relaxed">
-                                판매량 대비 부산점 재고가 부족할 경우, <b>1순위 물류센터, 2순위 신사점</b> 순으로 확보 가능한 보충 수량을 제안합니다.
-                            </div>
+            <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
+                <div class="p-6 pb-2 sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-10">
+                    <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3 shadow-sm">
+                        <i data-lucide="truck" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+                        <div class="text-[13px] font-bold text-blue-800 leading-relaxed">
+                            판매량 대비 부산점 재고가 부족할 경우, <b>1순위 물류센터, 2순위 신사점</b> 순으로 확보 가능한 보충 수량을 제안합니다.
                         </div>
                     </div>
-                    <div class="px-6 pb-6">
-                        <table class="w-full text-sm mt-2">
-                            <thead class="text-gray-500 font-black border-b-2 border-gray-200">
-                                <tr class="text-center">
-                                    <th class="py-3 w-[15%]">사이즈</th>
-                                    <th class="py-3 w-[15%] text-blue-600">판매량</th>
-                                    <th class="py-3 w-[15%]">부산재고</th>
-                                    <th class="py-3 w-[15%] text-gray-400">1순위 물류</th>
-                                    <th class="py-3 w-[15%] text-gray-400">2순위 신사</th>
-                                    <th class="py-3 w-[25%] text-orange-600">스마트 보충제안</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ddTableBody" class="text-center">${tableHtml}</tbody>
-                        </table>
-                    </div>
+                </div>
+                <div class="px-6 pb-6">
+                    <table class="w-full text-sm mt-2">
+                        <thead class="text-gray-500 font-black border-b-2 border-gray-200">
+                            <tr class="text-center">
+                                <th class="py-3 w-[15%]">사이즈</th>
+                                <th class="py-3 w-[15%] text-blue-600">판매량</th>
+                                <th class="py-3 w-[15%]">부산재고</th>
+                                <th class="py-3 w-[15%] text-gray-400">1순위 물류</th>
+                                <th class="py-3 w-[15%] text-gray-400">2순위 신사</th>
+                                <th class="py-3 w-[25%] text-orange-600">스마트 보충제안</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ddTableBody" class="text-center">${tableHtml}</tbody>
+                    </table>
                 </div>
             </div>
-        </div>`;
+        </div>
+    `;
 
     modal.classList.remove("hidden");
     if(window.lucide) lucide.createIcons();
@@ -728,7 +890,7 @@ window.openSalesGuide = (code) => {
         modal.id = "salesGuideModal";
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100]";
         modal.innerHTML = `
-            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
             <div class="modal-content relative bg-white w-[90%] max-w-md flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-indigo-100">
                 <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-start">
                     <div>
@@ -739,7 +901,7 @@ window.openSalesGuide = (code) => {
                     </div>
                     <button id="closeSalesGuide" class="p-1 -mr-2 text-indigo-400 hover:text-indigo-800 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
                 </div>
-                <div class="p-5 overflow-y-auto max-h-[70vh] space-y-5">
+                <div class="p-5 overflow-y-auto max-h-[70vh] space-y-5 dash-scroll">
                     <div><div id="sgKeywords" class="flex flex-wrap gap-1.5 mb-3"></div></div>
                     <div>
                         <h3 class="font-black text-xs text-indigo-400 flex items-center gap-1 mb-1.5"><i data-lucide="zap" class="w-4 h-4"></i> 핵심 특징</h3>
@@ -758,7 +920,6 @@ window.openSalesGuide = (code) => {
         `;
         document.body.appendChild(modal);
         $("#closeSalesGuide").onclick = () => modal.classList.add("hidden");
-        modal.querySelector(".modal-outer").onclick = () => modal.classList.add("hidden");
     }
 
     modal.querySelector("#sgTitle").textContent = p ? p.품명 : code;
@@ -947,7 +1108,7 @@ function render(){
                   for (let size in dayData) {
                       if (typeof dayData[size] === 'object') {
                           for(let mgr in dayData[size]) {
-                              if(mgr.includes("김종훈")) p.periodSales += dayData[size][mgr];
+                              if(mgr.includes("김종훈")) p.periodSales += dayData[size][mgr]; // 메인화면 정렬용 누적 판매량
                           }
                       }
                   }
@@ -1151,7 +1312,7 @@ window.renderTransfers = () => {
         modal.id = "transfersModal";
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99]"; 
         modal.innerHTML = `
-            <div class="modal-outer absolute inset-0 bg-black/50"></div>
+            <div class="modal-outer absolute inset-0 bg-black/50" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
             <div class="modal-content relative bg-[color:var(--bg)] w-[90%] max-w-md flex flex-col rounded-xl overflow-hidden shadow-2xl z-10">
                 <div class="p-4 border-b border-[color:var(--line)] flex justify-between items-center bg-[color:var(--surface)]">
                     <h2 class="font-black text-lg text-blue-800">🚚 상품 이동 요청 목록</h2>
@@ -1160,7 +1321,6 @@ window.renderTransfers = () => {
             </div>`;
         document.body.appendChild(modal);
         $("#closeTransfers").onclick = () => modal.classList.add("hidden");
-        modal.querySelector(".modal-outer").onclick = () => modal.classList.add("hidden");
         listEl = $("#transfersList");
     }
     $("#transfersModal").classList.remove("hidden");
@@ -1329,6 +1489,15 @@ function openDetail(p){
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
+  // 🔥 팝업 바깥 여백 누르면 꺼지게 onClick 이벤트 추가 🔥
+  let modalOuter = $("#detailModal .modal-outer");
+  if (!modalOuter) {
+      modalOuter = document.createElement("div");
+      modalOuter.className = "modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer z-0";
+      modalOuter.onclick = () => $("#detailModal").classList.add("hidden");
+      $("#detailModal").insertBefore(modalOuter, $("#detailModal").firstChild);
+  }
+
   $("#detailModal").classList.remove("hidden");
   if(window.lucide) lucide.createIcons();
 }
@@ -1338,8 +1507,10 @@ document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") { 
         const openModals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
         if(openModals.length > 0) {
+            // 마지막에 열린(배열의 마지막) 모달만 하나 닫기
             openModals[openModals.length - 1].classList.add("hidden");
         } else {
+            // 팝업이 없을 때만 대시보드 닫기
             const dash = document.querySelector("#analyticsDashboard");
             if(dash && !dash.classList.contains("hidden")) {
                 dash.classList.add("opacity-0");
@@ -1428,7 +1599,7 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
-// 🔥 판매 데이터 엑셀 업로드 & DB 초기화 기능 추가 🔥
+// 🔥 판매 데이터 엑셀 업로드 & DB 초기화 기능 🔥
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox");
     if(!box) return;
@@ -1537,6 +1708,7 @@ window.renderSalesHistoryAdmin = () => {
                 await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
                 SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY); 
                 rebuildIndex(); render(); window.renderSalesHistoryAdmin();
+                
                 alert(`✅ 데이터 업로드 성공! \n\n만약 팝업에서 사이즈가 0으로 보인다면, [DB 초기화] 버튼을 눌러 과거 숫자를 지우고 엑셀을 다시 한 번 올려주세요.`);
             } catch(err) { alert("업로드 실패: " + err.message); }
             $("#shFile").value = "";
