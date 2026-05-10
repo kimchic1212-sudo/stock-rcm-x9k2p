@@ -41,7 +41,7 @@ let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
 
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
-let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V3') || '[]');
+let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V4') || '[]');
 
 let windowDashItems = [];
 let windowCurrentDashIndex = 0;
@@ -61,6 +61,13 @@ function checkPat() {
     return true;
 }
 
+function detectGender(code, sex){
+  const g = String(sex||"").trim();
+  if(g==="남성"||g==="남"||g.toUpperCase()==="M") return "M";
+  if(g==="여성"||g==="여"||g.toUpperCase()==="W") return "W";
+  return "U";
+}
+
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 function getChosung(str){
@@ -73,6 +80,8 @@ function getChosung(str){
   return r;
 }
 
+function isAllChosung(str) { return /^[ㄱ-ㅎ]+$/.test(str); }
+
 async function copyText(text, btn){
   try{
     await navigator.clipboard.writeText(text);
@@ -84,21 +93,14 @@ async function copyText(text, btn){
   }catch(e){ alert("복사 실패"); }
 }
 
-// 🔥 미니멀리즘 데이터 소스 (UI/UX 개선)
+// 🔥 직관적인 데이터 소스 원복 (이전 버전 스택 스타일)
 function applyMeta(meta){
     if(meta) {
         const el = $("#statSrc");
         if(el) {
-            let addInfo = SALES_HISTORY.meta?.name ? `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">📊 ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
-            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
-            el.innerHTML = `
-                <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-black mt-0.5">
-                    <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded"><i data-lucide="check-circle" class="w-3 h-3 inline pb-0.5"></i> ${meta.uploadedAt || ''}</span>
-                    ${addInfo}
-                    ${promoInfo}
-                </div>
-            `;
-            if(window.lucide) lucide.createIcons();
+            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] text-orange-600 mt-0.5 font-bold">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
+            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<div class="text-[11px] text-purple-600 mt-0.5 font-bold">🎁 기획전 적용됨: ${escapeHtml(PROMOTIONS.meta.name)}</div>` : "";
+            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>${addInfo}${promoInfo}`;
         }
     }
 }
@@ -177,7 +179,7 @@ function rebuildIndex(){
     if(r["규격"]) allSizes.add(String(r["규격"]).trim()); 
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false, periodSales: 0 });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -233,6 +235,23 @@ function rebuildIndex(){
       $("#sortSel").appendChild(opt);
   }
 
+  let promoWrap = $("#promoFilters");
+  if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
+      promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
+      promoWrap.className = "flex gap-2 mb-3 items-center w-full overflow-x-auto no-scrollbar pb-1";
+      $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
+  }
+  if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
+      if(promoWrap) {
+          promoWrap.innerHTML = `
+              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
+              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+          `;
+          $("#promoTypeSel").onchange = () => { visibleCount=60; render(); };
+          $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
+      }
+  } else if (promoWrap) { promoWrap.innerHTML = ""; }
+
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
   const wrap = $("#brandChips"); 
   wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체 브랜드</button>';
@@ -251,7 +270,7 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 🔥 최상단 대형 듀얼버튼 세팅
+// 🔥 대형 듀얼버튼 세팅 (분석리포트 & 기획전)
 function setupQuickActionBar() {
     if($("#quickActionBar")) return;
     const qContainer = $("#q").parentNode;
@@ -279,19 +298,24 @@ window.togglePromoView = (btn) => {
         btn.classList.replace("bg-purple-600", "bg-purple-800");
         btn.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4"></i> 기획전 필터 해제`;
         window.tempPromoFilter = true;
+        $("#promoTypeSel")?.classList.remove("hidden");
+        $("#promoRateSel")?.classList.remove("hidden");
     } else {
         btn.classList.replace("bg-purple-800", "bg-purple-600");
         btn.innerHTML = `<i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기`;
         window.tempPromoFilter = false;
+        $("#promoTypeSel")?.classList.add("hidden");
+        $("#promoRateSel")?.classList.add("hidden");
     }
     if(window.lucide) lucide.createIcons();
     visibleCount=60; render();
 };
 
-// 🔥 검색어 자동완성 및 최근 검색어 로직 완벽 복구
+// 🔥 검색어 자동완성 100% 복구 (중복 이벤트 방어 처리됨) 🔥
 function setupSearchAutocomplete() {
     const qEl = document.getElementById("q");
-    if(!qEl) return;
+    if(!qEl || qEl.dataset.acSetup === "1") return;
+    qEl.dataset.acSetup = "1";
     
     let wrapper = qEl.parentNode;
     if(!wrapper.classList.contains("relative")) {
@@ -312,7 +336,7 @@ function setupSearchAutocomplete() {
                 <span class="cursor-pointer hover:text-red-500 bg-white px-2 py-0.5 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
             </div>
             ${RECENT_SEARCHES.map(t => `
-                <div class="p-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t)}')">
+                <div class="p-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
                     <div class="font-bold text-gray-800 text-[13px]">${escapeHtml(t)}</div>
                     <i data-lucide="search" class="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500"></i>
                 </div>
@@ -324,7 +348,12 @@ function setupSearchAutocomplete() {
 
     qEl.addEventListener("focus", () => { if(!qEl.value.trim()) showRecent(); });
     document.addEventListener("click", (e) => { if(!qEl.contains(e.target) && !suggBox.contains(e.target)) suggBox.classList.add("hidden"); });
-    qEl.addEventListener("keydown", (e) => { if(e.key === "Enter" && qEl.value.trim()) { suggBox.classList.add("hidden"); saveRecentSearch(qEl.value.trim()); } });
+    qEl.addEventListener("keydown", (e) => { 
+        if(e.key === "Enter" && qEl.value.trim()) { 
+            suggBox.classList.add("hidden"); 
+            saveRecentSearch(qEl.value.trim()); 
+        } 
+    });
 
     qEl.addEventListener("input", (e) => {
         const val = e.target.value.trim().toLowerCase();
@@ -362,13 +391,13 @@ window.saveRecentSearch = (term) => {
     RECENT_SEARCHES = RECENT_SEARCHES.filter(t => t !== term);
     RECENT_SEARCHES.unshift(term);
     if(RECENT_SEARCHES.length > 10) RECENT_SEARCHES.pop();
-    localStorage.setItem('RECENT_SEARCHES_V3', JSON.stringify(RECENT_SEARCHES));
+    localStorage.setItem('RECENT_SEARCHES_V4', JSON.stringify(RECENT_SEARCHES));
 };
 
 window.clearRecentSearches = (e) => {
     e.stopPropagation();
     RECENT_SEARCHES = [];
-    localStorage.removeItem('RECENT_SEARCHES_V3');
+    localStorage.removeItem('RECENT_SEARCHES_V4');
     document.getElementById("searchSuggestions").classList.add("hidden");
 };
 
@@ -393,7 +422,7 @@ async function loadChartJS() {
     });
 }
 
-// 🔥 원클릭 스마트 이동요청 (즉시전송 + 5초 실행취소 로직) 🔥
+// 🔥 원클릭 스마트 이동요청 (즉시전송 + 5초 실행취소 로직 적용) 🔥
 window.quickRT = async (code, size, fromStr, qty, btn) => {
     if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
@@ -405,13 +434,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const origClass = btn.className;
     const origOnclick = btn.onclick;
     
+    // 즉각적 UI 변경 (담김 처리)
     btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> 담김`;
-    btn.className = "bg-green-600 text-white py-1 px-2 rounded-lg flex items-center justify-center gap-1 text-[11px] font-black w-full shadow-inner";
+    btn.className = "bg-green-600 text-white px-2 py-1.5 rounded-lg flex items-center justify-center flex-1 text-[11px] font-black cursor-default shadow-inner";
     btn.onclick = null; // 중복 클릭 방지
     
-    // 취소 버튼 렌더링
+    // 취소 버튼 생성 (5초간 유지)
     const undoBtn = document.createElement("button");
-    undoBtn.className = "ml-1.5 text-[11px] text-red-500 font-bold underline whitespace-nowrap cursor-pointer";
+    undoBtn.className = "ml-1 text-[11px] text-red-500 font-bold underline whitespace-nowrap cursor-pointer hover:text-red-700 shrink-0";
     undoBtn.innerText = "취소";
     btn.parentNode.insertBefore(undoBtn, btn.nextSibling);
     if(window.lucide) lucide.createIcons();
@@ -419,9 +449,9 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const trId = "tr_" + Date.now();
     const d = new Date();
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트 RT요청`;
+    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
-    // 1. 즉시 로컬 배열 추가 & 깃허브 API 호출
+    // 비동기로 데이터 즉시 깃허브로 Push
     TRANSFERS.push({ id: trId, code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
     
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
@@ -431,14 +461,20 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         }).catch(err => console.error(err));
 
-    // 2. 취소 버튼 동작
+    // 5초 후 취소버튼 자동 삭제
+    const hideUndoTimer = setTimeout(() => {
+        if(undoBtn.parentNode) undoBtn.remove();
+    }, 5000);
+
+    // 취소(Ctrl+Z) 로직
     undoBtn.onclick = async (e) => {
         e.stopPropagation();
+        clearTimeout(hideUndoTimer);
         undoBtn.remove();
         btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
         
         TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        await apiPromise; // 충돌 방지를 위해 이전 요청 완료 대기
+        await apiPromise; // 앞선 통신이 끝나기를 대기
         
         try {
             const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
@@ -447,32 +483,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         } catch(err) {}
         
-        // 버튼 원상복구
+        // UI 원상복구
         btn.innerHTML = origHtml;
         btn.className = origClass;
         btn.onclick = origOnclick;
         if(window.lucide) lucide.createIcons();
     };
-
-    // 5초 후 취소버튼 숨김
-    setTimeout(() => {
-        if(undoBtn.parentNode) undoBtn.remove();
-    }, 5000);
 };
 
 window.exportTransfersToExcel = () => {
     if(TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return; }
     if(!window.XLSX || !window.XLSX.writeFile) {
         alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요.");
-        const s = document.createElement('script');
-        s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js';
-        document.head.appendChild(s);
-        return;
+        const s = document.createElement('script'); s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'; document.head.appendChild(s); return;
     }
     const wsData = TRANSFERS.map(t => ({ "요청일자": t.date, "품번": t.code, "품명": t.product, "사이즈": t.size, "수량": t.qty, "메모": t.memo }));
     const ws = XLSX.utils.json_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "이동요청목록");
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "이동요청목록");
     const d = new Date();
     XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
 };
@@ -576,7 +603,7 @@ window.openAnalyticsReport = async () => {
         modal.innerHTML = `
             <header class="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 shadow-sm">
                 <div>
-                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 집중 분석 리포트</h1>
+                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 (담당: 김종훈)</h1>
                     <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
@@ -1482,7 +1509,6 @@ window.renderTransfers = () => {
     if(window.lucide) lucide.createIcons();
 };
 
-// 🔥 기본 모바일 팝업 유지 (단순 메모용)
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
@@ -1512,8 +1538,24 @@ function openDetail(p){
 
   $("#detailBody").innerHTML = `
     <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
-      <tr class="text-[#888] border-b border-[color:var(--line)]"><th class="py-2 px-2 text-left">사이즈</th><th class="px-2 text-center">부산</th><th class="px-2 text-center">신사</th><th class="px-2 text-center">물류</th></tr>
-      ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
+      <tr class="text-gray-500 font-black border-b border-gray-200 bg-gray-50">
+          <th class="py-2.5 px-2 text-center w-[20%] border-r border-gray-200">사이즈</th>
+          <th class="px-2 text-center w-[20%] text-blue-700 bg-blue-50/50 border-r border-gray-200">부산</th>
+          <th class="px-2 text-center w-[30%] border-r border-gray-200">본사(물류) RT</th>
+          <th class="px-2 text-center w-[30%]">신사점 RT</th>
+      </tr>
+      ${p.sizes.map(s => {
+          return `<tr class="border-b border-gray-100">
+            <td class="py-2 px-2 font-bold text-center border-r border-gray-100">${s.size}</td>
+            <td class="text-center px-2 font-black border-r border-gray-100 bg-blue-50/20 ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
+            <td class="px-2 py-2 border-r border-gray-100 text-center">
+                ${s.center > 0 ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-100 hover:bg-gray-800 hover:text-white border border-gray-200 text-gray-700 px-2 py-1.5 rounded-lg text-[11px] font-black w-full transition-colors shadow-sm cursor-pointer">본사 ${s.center} (1개 RT)</button>` : `<span class="text-[10px] font-bold text-gray-400">-</span>`}
+            </td>
+            <td class="px-2 py-2 text-center">
+                ${s.sinsa > 0 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-50 hover:bg-orange-500 hover:text-white border border-orange-200 text-orange-700 px-2 py-1.5 rounded-lg text-[11px] font-black w-full transition-colors shadow-sm cursor-pointer">신사 ${s.sinsa} (1개 RT)</button>` : `<span class="text-[10px] font-bold text-gray-400">-</span>`}
+            </td>
+          </tr>`
+      }).join("")}
     </table>
   `;
   
@@ -1681,7 +1723,7 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
-// 🔥 판매 데이터 엑셀 업로드 및 지점/담당자 철저 분류 🔥
+// 🔥 판매 데이터 엑셀 업로드 & DB 초기화 기능 🔥
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox");
     if(!box) return;
@@ -1701,6 +1743,7 @@ window.renderSalesHistoryAdmin = () => {
         <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
     `;
     
+    // DB 강제 초기화 버튼 로직
     $("#shClearBtn").onclick = async () => {
         if(!checkPat()) return;
         if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
@@ -1752,9 +1795,8 @@ window.renderSalesHistoryAdmin = () => {
 
                 const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
                 const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
-                const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "";
+                const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈"; 
 
-                // 🔥 완벽 분류 로직 🔥
                 let locationGroup = "본사물류"; // 기본값
                 
                 if(typeStr === "매장" || typeStr.includes("오프라인")) {
