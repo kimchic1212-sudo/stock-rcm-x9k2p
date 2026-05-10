@@ -1,4 +1,4 @@
-// 🔥 1. 관리자 팝업창 스크롤, Z-index 및 최적화 CSS 🔥
+// 🔥 1. 관리자 팝업창 스크롤, Z-index 및 모바일 최적화 CSS 🔥
 const style = document.createElement('style');
 style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
@@ -13,17 +13,32 @@ style.innerHTML = `
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
 
-    /* 🔥 UX/UI 개선: 칩 버튼 상태 명확화 및 시각적 일관성 */
+    /* 🔥 UX/UI 개선 1: 칩 버튼 상태 명확화 */
     .chip {
         background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
         transition: all 0.2s ease-in-out; cursor: pointer;
     }
     .chip:hover { background-color: #f8fafc; }
-    .chip[data-active="1"] {
-        background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important;
-    }
-    /* 브랜드 숨김 처리용 클래스 */
+    .chip[data-active="1"] { background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important; }
     .brand-hidden { display: none !important; }
+
+    /* 🔥 UX/UI 개선 2: 제품 카드 즐겨찾기 오버레이 및 사이즈 칩 가로 스크롤 */
+    .card-img-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; border-radius: 8px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
+    .bookmark-overlay { position: absolute; top: 4px; right: 4px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 4px; backdrop-filter: blur(2px); transition: all 0.2s; }
+    .size-scroll-wrap { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 6px; margin-top: auto; margin-bottom: 12px; scroll-snap-type: x mandatory; }
+    .size-scroll-wrap::-webkit-scrollbar { height: 4px; }
+    .size-scroll-wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .size-scroll-wrap > div { scroll-snap-align: start; }
+    
+    /* 🔥 UX/UI 개선 3: 품절 사이즈 회색 음영 처리 (시각적 노이즈 감소) */
+    .size-cell.zero { opacity: 0.35; filter: grayscale(100%); text-decoration: line-through; border-color: #e2e8f0; background: #f8fafc; }
+
+    /* 🔥 UX/UI 개선 4: 토스트 알림 (스낵바 & Undo) */
+    #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
+    .toast { background: #1e293b; color: white; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto; }
+    @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .toast-undo { color: #facc15; cursor: pointer; padding-left: 12px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
+    .toast-undo:hover { color: #fef08a; }
 `;
 document.head.appendChild(style);
 
@@ -105,7 +120,45 @@ async function copyText(text, btn){
   }catch(e){ alert("복사 실패"); }
 }
 
-// 🔥 UX/UI 개선: 분산된 정보 위젯을 글로벌 헤더로 통합 및 시맨틱 컬러 정상화
+function showToast(message, onUndo) {
+    let container = document.getElementById('toast-container');
+    if(!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i> ${escapeHtml(message)}</span>`;
+    
+    let timer;
+    if(onUndo) {
+        const undoBtn = document.createElement('span');
+        undoBtn.className = 'toast-undo';
+        undoBtn.innerHTML = '실행 취소 ↺';
+        undoBtn.onclick = () => {
+            clearTimeout(timer);
+            onUndo();
+            toast.style.animation = 'none';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            toast.style.transition = 'all 0.2s';
+            setTimeout(() => toast.remove(), 200);
+        };
+        toast.appendChild(undoBtn);
+    }
+    container.appendChild(toast);
+    if(window.lucide) lucide.createIcons();
+    
+    timer = setTimeout(() => {
+        toast.style.animation = 'none';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
 function applyMeta(meta){
     if(meta) {
         let headerArea = $("#globalHeaderData");
@@ -124,7 +177,7 @@ function applyMeta(meta){
             <div class="flex justify-between items-end w-full border-b border-gray-200 pb-2">
                 <h1 class="text-xl font-black text-gray-900 tracking-tight">📦 통합 재고조회</h1>
                 <div class="text-right flex flex-col items-end">
-                    <span class="text-[11px] font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded shadow-sm">✓ 마지막 업데이트: ${meta.uploadedAt || ''}</span>
+                    <span class="text-[11px] font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded shadow-sm">✓ 최근 동기화: ${meta.uploadedAt || ''}</span>
                     <div class="mt-1 flex items-center">${addInfo}${promoInfo}</div>
                 </div>
             </div>
@@ -483,6 +536,7 @@ async function loadChartJS() {
     });
 }
 
+// 🔥 UX/UI 개선: RT 요청 시 토스트 알림을 통한 5초 대기 및 실행 취소 (Undo) 로직 반영
 window.quickRT = async (code, size, fromStr, qty, btn) => {
     if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
@@ -492,16 +546,11 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
     const origHtml = btn.innerHTML;
     const origClass = btn.className;
-    const origOnclick = btn.onclick;
     
-    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> 담김`;
-    btn.className = "bg-green-600 text-white px-2 py-1.5 rounded-lg flex items-center justify-center flex-1 text-[11px] font-black cursor-default shadow-inner";
-    btn.onclick = null; 
-    
-    const undoBtn = document.createElement("button");
-    undoBtn.className = "ml-1 text-[11px] text-red-500 font-bold underline whitespace-nowrap cursor-pointer hover:text-red-700 shrink-0";
-    undoBtn.innerText = "취소";
-    btn.parentNode.insertBefore(undoBtn, btn.nextSibling);
+    // 버튼의 UI를 즉각 '담김' 아이콘으로 변경하고 클릭을 잠금
+    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+|text-\w+)/g, '') + ' bg-green-500 text-white cursor-default';
+    btn.disabled = true;
     if(window.lucide) lucide.createIcons();
 
     const trId = "tr_" + Date.now();
@@ -509,8 +558,10 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
+    // 1. 상태 즉각 반영 (낙관적 업데이트)
     TRANSFERS.push({ id: trId, code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
     
+    // 2. 비동기로 깃허브에 푸시
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
         .then(r => r.json())
         .then(j => {
@@ -518,18 +569,13 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         }).catch(err => console.error(err));
 
-    const hideUndoTimer = setTimeout(() => {
-        if(undoBtn.parentNode) undoBtn.remove();
-    }, 5000);
-
-    undoBtn.onclick = async (e) => {
-        e.stopPropagation();
-        clearTimeout(hideUndoTimer);
-        undoBtn.remove();
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
+    // 3. 토스트 알림 및 실행취소 콜백 연결
+    showToast(`📦 ${fromStr}에서 ${size} 사이즈 ${qty}개 RT를 요청했습니다.`, async () => {
+        // 실행 취소(Undo) 로직
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
         
         TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        await apiPromise; 
+        await apiPromise; // 앞선 푸시가 끝날때까지 안전하게 대기
         
         try {
             const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
@@ -538,11 +584,12 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         } catch(err) {}
         
+        // 버튼을 원래 상태로 복원
         btn.innerHTML = origHtml;
         btn.className = origClass;
-        btn.onclick = origOnclick;
+        btn.disabled = false;
         if(window.lucide) lucide.createIcons();
-    };
+    });
 };
 
 window.exportTransfersToExcel = () => {
@@ -971,7 +1018,7 @@ window.openDashDetail = (code, periodParam) => {
                     <span class="text-[10px] font-bold text-gray-500 w-6 text-center">물류</span>
                     <input type="number" id="rt_c_${size}" value="${takeCenter}" min="1" max="${sObj.center}" class="w-8 text-center text-[11px] font-black bg-white border border-gray-300 rounded outline-none h-5">
                     <button onclick="quickRT('${p.품번}','${size}','본사/물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-800 hover:bg-black text-white px-1.5 py-0.5 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
-                        <i data-lucide="shopping-cart" class="w-3 h-3"></i> 담기
+                        <i data-lucide="arrow-left-right" class="w-3 h-3"></i>
                     </button>
                 </div>
             `);
@@ -980,7 +1027,7 @@ window.openDashDetail = (code, periodParam) => {
                     <span class="text-[10px] font-bold text-orange-600 w-6 text-center">신사</span>
                     <input type="number" id="rt_s_${size}" value="${takeSinsa}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-[11px] font-black bg-white border border-orange-200 rounded outline-none h-5 text-orange-700">
                     <button onclick="quickRT('${p.품번}','${size}','신사점', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
-                        <i data-lucide="shopping-cart" class="w-3 h-3"></i> 담기
+                        <i data-lucide="arrow-left-right" class="w-3 h-3"></i>
                     </button>
                 </div>
             `);
@@ -993,7 +1040,7 @@ window.openDashDetail = (code, periodParam) => {
         if (size === "알수없음") rowClass += " hidden"; 
 
         return `<tr class="${rowClass}">
-            <td class="py-2.5 text-gray-700 font-bold border-r border-gray-100">${size}</td>
+            <td class="py-2.5 px-2 text-gray-700 font-bold border-r border-gray-100">${size}</td>
             <td class="py-2.5 text-blue-600 font-black text-base bg-blue-50/20">${soldBusan > 0 ? soldBusan : '-'}</td>
             <td class="py-2.5 bg-blue-50/20 border-r border-gray-100 ${sObj.busan<=2?'text-red-500 font-black':'text-gray-700 font-medium'}">${sObj.busan}</td>
             <td class="py-2.5 text-orange-600 font-bold bg-orange-50/20">${soldSinsa > 0 ? soldSinsa : '-'}</td>
@@ -1145,9 +1192,10 @@ window.openSalesGuide = (code) => {
     if(window.lucide) lucide.createIcons();
 };
 
+// 🔥 UX/UI 개선: 카드 레이아웃 전면 개편
 function card(p){
   const el = document.createElement("article");
-  el.className = "card card-hover p-4 flex flex-col relative bg-white"; 
+  el.className = "card card-hover p-4 flex flex-col bg-white border border-gray-100 rounded-2xl shadow-sm"; 
   el.onclick = (e)=>{ 
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
@@ -1171,7 +1219,7 @@ function card(p){
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
-      memoHtml = `<div class="showroom-hide mt-2 mb-3 space-y-1">`;
+      memoHtml = `<div class="showroom-hide mt-1 mb-2 space-y-1">`;
       productMemos.forEach(m => {
           memoHtml += `
           <div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[11px] leading-snug">
@@ -1196,7 +1244,7 @@ function card(p){
   const isFav = FAVS.includes(p.품번);
 
   let promoBadge = "";
-  let priceDisplay = `<div class="price-clean">${krw(p.소비자가)}</div>`;
+  let priceDisplay = `<div class="text-[14px] font-black">${krw(p.소비자가)}</div>`;
 
   if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
       const rateInt = Math.round((p.promoRate || 0) * 100);
@@ -1205,65 +1253,70 @@ function card(p){
       if (p.promoType === 'weekly') {
           promoBadge = `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="flame" class="w-3 h-3"></i>위클리특가 ${rateLabel} (~${p.promoEndDate})</span>`;
           priceDisplay = `
-            <div class="flex flex-col items-end leading-tight mt-0.5">
+            <div class="flex flex-col items-end leading-tight">
                 <span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
-                <div class="flex items-center gap-1.5">
-                    <span class="text-[16px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span>
-                </div>
+                <span class="text-[16px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span>
             </div>`;
       } else {
           promoBadge = `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm"><i data-lucide="ticket" class="w-3 h-3"></i>쿠폰적용가 ${rateLabel} (~${p.promoEndDate})</span>`;
           priceDisplay = `
-            <div class="flex flex-col items-end leading-tight mt-0.5">
+            <div class="flex flex-col items-end leading-tight">
                 <span class="text-[10.5px] text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
-                <div class="flex items-center gap-1.5">
-                    <span class="text-[15px] font-black text-purple-700">🎟️${krw(p.currentPromoPrice)}</span>
-                </div>
+                <span class="text-[15px] font-black text-purple-700">🎟️${krw(p.currentPromoPrice)}</span>
             </div>`;
       }
   }
 
+  // 상단 불필요한 공백을 줄이고, 이미지를 썸네일 박스처럼 좌측/우측에 명확히 배치합니다. 
+  // 즐겨찾기를 오버레이로 이미지 내부에 삽입했습니다.
   el.innerHTML = `
-    <div class="flex justify-between items-start mb-2 z-10 relative">
-        <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
-            ${busanOnlyBadge}
-            ${promoBadge}
-            <span class="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
-            <span class="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
-            <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">${escapeHtml(p.성별||p.gender||"-")}</span>
-            ${deltaHtml}
-        </div>
-        <button class="fav-btn p-1.5 -mt-1.5 -mr-1.5 text-gray-300 hover:text-yellow-500 outline-none shrink-0" data-active="${isFav?'1':'0'}">
-            <i data-lucide="bookmark" class="w-6 h-6 ${isFav ? 'fill-yellow-400 text-yellow-400' : ''}"></i>
-        </button>
+    <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mb-2">
+        ${busanOnlyBadge}
+        ${promoBadge}
+        <span class="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
+        <span class="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
+        <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">${escapeHtml(p.성별||p.gender||"-")}</span>
+        ${deltaHtml}
     </div>
 
-    <div class="flex justify-between items-start w-full min-h-[120px] relative mb-2">
-       <div class="flex-1 min-w-0 pr-[130px]">
-          <div class="copyable font-extrabold text-[17px] leading-tight mb-1.5 text-left w-full hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+    <div class="flex justify-between items-start w-full relative mb-1 gap-3">
+       <div class="flex-1 min-w-0">
+          <div class="copyable font-extrabold text-[16px] leading-snug mb-1 text-left w-full hover:text-blue-600 text-gray-900" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
           
-          <div class="copyable text-[14px] font-bold text-[#555] mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
+          <div class="copyable text-[12px] font-bold text-gray-400 mb-2 text-left w-full hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">
               ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i>
           </div>
           ${salesHtml}
        </div>
        
-       ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md border border-gray-100 bg-white shadow-sm">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
+       <div class="card-img-wrap">
+           ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="w-full h-full bg-gray-50 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
+           <button class="fav-btn bookmark-overlay text-gray-400 hover:text-yellow-500 outline-none" data-active="${isFav?'1':'0'}">
+                <i data-lucide="bookmark" class="w-4 h-4 ${isFav ? 'fill-yellow-400 text-yellow-400' : ''}"></i>
+           </button>
+       </div>
     </div>
     
     ${memoHtml}
 
-    <div class="grid gap-1.5 mb-4 mt-auto" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">
+    <div class="size-scroll-wrap no-scrollbar">
       ${p.sizes.map(s=>{
           const q = s.busan||0; 
-          let cls = "size-cell tnum ";
+          let cls = "size-cell tnum shrink-0 ";
           if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
           return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span><span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
       }).join("")}
     </div>
-    <div class="loc-simple mt-auto">
-       <div class="flex gap-1 items-center font-medium"><b>부산 ${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</div>
-       ${priceDisplay}
+
+    <div class="flex flex-col gap-1.5 border-t border-gray-100 pt-3 mt-auto">
+        <div class="flex items-center justify-between text-[11px] font-bold text-gray-500">
+            <span>총 재고 요약</span>
+            <span>부산 <b class="text-blue-600">${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</span>
+        </div>
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-gray-800">소비자가</span>
+            ${priceDisplay}
+        </div>
     </div>
   `;
   
@@ -1562,25 +1615,30 @@ window.renderTransfers = () => {
     if(window.lucide) lucide.createIcons();
 };
 
+// 🔥 UX/UI 개선: 상세 모달 테이블 가독성 및 FAB 고정 설계
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
+  
+  // 모달 헤더
   $("#detailHead").innerHTML = `
     <div class="flex gap-4 items-center">
-        ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
-        <div>
-            <div class="text-xs text-gray-500 font-black mb-1">${escapeHtml(p.브랜드||"-")}</div>
-            <div class="text-[17px] sm:text-xl font-black text-gray-900 leading-tight">${escapeHtml(p.품명)}</div>
+        ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
+        <div class="min-w-0 flex-1">
+            <div class="text-xs text-gray-500 font-black mb-0.5">${escapeHtml(p.브랜드||"-")}</div>
+            <div class="text-[16px] sm:text-[18px] font-black text-gray-900 leading-tight truncate break-keep">${escapeHtml(p.품명)}</div>
             <div class="text-blue-600 font-bold text-sm mt-0.5">${escapeHtml(p.품번)}</div>
         </div>
     </div>
   `;
+  
+  // 메모 내역
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let detailMemoHtml = "";
   if(productMemos.length > 0) {
       productMemos.forEach(m => {
           detailMemoHtml += `
-          <div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[12px] mb-2 relative">
+          <div class="p-2.5 bg-yellow-50 rounded border border-yellow-200 text-[12px] mb-2 relative">
              <button onclick="deleteMemo('${m.id}')" class="absolute top-2 right-2 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
              <div class="flex items-center gap-2 mb-1"><span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span><span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span></div>
              <div class="text-yellow-900 pr-5">${escapeHtml(m.text)}</div>
@@ -1589,58 +1647,152 @@ function openDetail(p){
   }
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
+  // 🔥 테이블 레이아웃 재구성 및 아이콘 RT 버튼 도입
   $("#detailBody").innerHTML = `
-    <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
-      <tr class="text-gray-500 font-black border-b border-gray-200 bg-gray-50">
-          <th class="py-2.5 px-2 text-center w-[20%] border-r border-gray-200">사이즈</th>
-          <th class="px-2 text-center w-[20%] text-blue-700 bg-blue-50/50 border-r border-gray-200">부산</th>
-          <th class="px-2 text-center w-[30%] border-r border-gray-200">본사(물류) RT</th>
-          <th class="px-2 text-center w-[30%]">신사점 RT</th>
-      </tr>
+    <table class="w-full mt-4 text-[13px] bg-white rounded-lg border-hidden shadow-sm">
+      <thead class="bg-gray-50 text-gray-600 font-black border-b border-gray-200">
+        <tr>
+          <th class="py-2.5 px-1 text-center w-[16%] border-r border-white">사이즈</th>
+          <th class="py-2.5 px-1 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
+          <th class="py-2.5 px-1 text-center w-[15%]">본사재고</th>
+          <th class="py-2.5 px-1 text-center w-[20%] border-r border-gray-100">본사 RT</th>
+          <th class="py-2.5 px-1 text-center w-[15%]">신사재고</th>
+          <th class="py-2.5 px-1 text-center w-[20%]">신사 RT</th>
+        </tr>
+      </thead>
+      <tbody>
       ${p.sizes.map(s => {
-          return `<tr class="border-b border-gray-100">
-            <td class="py-2 px-2 font-bold text-center border-r border-gray-100">${s.size}</td>
-            <td class="text-center px-2 font-black border-r border-gray-100 bg-blue-50/20 ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
-            <td class="px-2 py-2 border-r border-gray-100 text-center">
-                ${s.center > 0 ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-100 hover:bg-gray-800 hover:text-white border border-gray-200 text-gray-700 px-2 py-1.5 rounded-lg text-[11px] font-black w-full transition-colors shadow-sm cursor-pointer">본사 ${s.center} (1개 RT)</button>` : `<span class="text-[10px] font-bold text-gray-400">-</span>`}
-            </td>
-            <td class="px-2 py-2 text-center">
-                ${s.sinsa > 0 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-50 hover:bg-orange-500 hover:text-white border border-orange-200 text-orange-700 px-2 py-1.5 rounded-lg text-[11px] font-black w-full transition-colors shadow-sm cursor-pointer">신사 ${s.sinsa} (1개 RT)</button>` : `<span class="text-[10px] font-bold text-gray-400">-</span>`}
-            </td>
-          </tr>`
+          let centerRtBtn = s.center > 0 
+            ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-800 hover:bg-black text-white p-1.5 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i></button>` 
+            : `<button disabled class="bg-gray-50 text-gray-300 p-1.5 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>`;
+         
+          let sinsaRtBtn = s.sinsa > 0 
+            ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i></button>` 
+            : `<button disabled class="bg-gray-50 text-gray-300 p-1.5 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>`;
+
+          return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+            <td class="py-2.5 px-1 font-black text-center border-r border-gray-50">${s.size}</td>
+            <td class="py-2.5 px-1 font-black text-center bg-blue-50/30 border-r border-gray-50 ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
+            <td class="py-2.5 px-1 font-bold text-center text-gray-600">${s.center}</td>
+            <td class="py-2.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
+            <td class="py-2.5 px-1 font-bold text-center text-gray-600">${s.sinsa}</td>
+            <td class="py-2.5 px-2 text-center">${sinsaRtBtn}</td>
+          </tr>`;
       }).join("")}
+      </tbody>
     </table>
   `;
   
+  // 모달 레이아웃 구조 변경: 메모 입력부 및 관리자 기능을 Sticky Bottom(FAB) 영역으로 이동
+  let stickyFooterHtml = `
+      <div class="flex gap-2">
+          <select id="memoStaff" class="ipt text-xs w-[80px] shrink-0 font-bold bg-white">
+              <option value="" disabled selected>작성자</option>
+              <option value="김종훈">김종훈</option>
+              <option value="직원A">직원A</option>
+          </select>
+          <select id="memoTag" class="ipt text-xs w-[80px] shrink-0 font-bold bg-white">
+              <option value="고객요청">고객요청</option>
+              <option value="예약">예약</option>
+              <option value="기타">기타</option>
+          </select>
+          <input type="text" id="memoText" class="ipt flex-1 text-xs" placeholder="메모 내용...">
+          <button id="addMemoBtn" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 px-3 py-2 rounded-lg text-xs font-black shrink-0 transition-colors shadow-sm">등록</button>
+      </div>
+      <div id="memoMsg" class="mt-1 text-[11px] font-bold h-4"></div>
+  `;
+
   if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
-      const adminImgBox = document.createElement("div");
-      adminImgBox.className = "mt-4 p-3 rounded-lg border-2 border-gray-800 bg-gray-50";
       const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
-      adminImgBox.innerHTML = `
-          <div class="text-xs font-bold text-gray-800 mb-2">🖼️ 제품 이미지 웹 등록 툴</div>
-          <a href="${targetUrl}" target="_blank" class="block w-full py-2 mb-2 text-center text-xs font-black bg-blue-600 text-white rounded no-underline">🌐 자사몰 열기 (우클릭 -> 이미지 주소 복사)</a>
-          <div class="flex gap-2">
-              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="복사한 주소 붙여넣기">
-              <button id="quickImgSave" class="px-3 py-1 text-xs font-black bg-black text-white rounded">저장</button>
-          </div><div id="quickImgMsg" class="mt-1 text-[11px] font-bold text-gray-600"></div>
+      stickyFooterHtml += `
+          <div class="mt-3 pt-3 border-t border-gray-200">
+              <div class="text-[11px] font-bold text-gray-800 mb-1.5 flex justify-between items-center">
+                  <span>🖼️ 이미지 등록 (관리자용)</span>
+                  <a href="${targetUrl}" target="_blank" class="text-blue-600 hover:underline">자사몰 열기</a>
+              </div>
+              <div class="flex gap-2">
+                  <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="이미지 주소 복사하여 붙여넣기">
+                  <button id="quickImgSave" class="px-3 py-2 text-xs font-black bg-gray-800 hover:bg-black text-white rounded-lg shadow-sm">저장</button>
+              </div>
+              <div id="quickImgMsg" class="mt-1 text-[11px] font-bold h-4"></div>
+          </div>
       `;
-      $("#detailBody").appendChild(adminImgBox);
-      adminImgBox.querySelector("#quickImgSave").onclick = async () => {
-          if(!checkPat()) return;
-          const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
-          const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
-          try {
-              IMAGES[p.shopNo] = url; 
-              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
-              let sha = null;
-              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
-              if(sha) body.sha = sha;
-              await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!"; render(); setTimeout(()=>{openDetail(p);}, 500);
-          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
-      };
   }
+
+  // 기존 상세 모달의 DOM 구조를 덮어씁니다 (스크롤과 고정 영역 분리)
+  let modalContentWrap = $("#detailModal .modal-content");
+  if(!modalContentWrap) {
+      modalContentWrap = document.createElement("div");
+      modalContentWrap.className = "modal-content relative bg-white w-full max-w-lg flex flex-col rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl z-10 mt-auto sm:mt-0 max-h-[90vh]";
+      $("#detailModal").innerHTML = `<div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>`;
+      $("#detailModal").appendChild(modalContentWrap);
+  }
+
+  modalContentWrap.innerHTML = `
+      <div class="p-4 border-b border-gray-100 flex justify-between items-start bg-white shrink-0 shadow-sm z-10">
+          <div id="detailHead" class="flex-1"></div>
+          <button id="closeDetail" class="p-1 -mr-1 -mt-1 text-gray-400 hover:text-gray-900 bg-gray-50 rounded-full shrink-0 transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 dash-scroll bg-gray-50/30">
+          <div id="detailBody"></div>
+          <div class="mt-4">
+              <div class="text-xs font-black text-gray-700 mb-2 flex items-center gap-1"><i data-lucide="message-square" class="w-3.5 h-3.5"></i> 직원 메모 기록</div>
+              <div id="detailMemosWrap"></div>
+          </div>
+      </div>
+      <div class="p-4 border-t border-gray-200 bg-gray-50 shrink-0 sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          ${stickyFooterHtml}
+      </div>
+  `;
+
+  // 이벤트 리스너 재연결
+  $("#detailHead").innerHTML = `
+    <div class="flex gap-3 sm:gap-4 items-center">
+        ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] sm:text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
+        <div class="min-w-0 flex-1">
+            <div class="text-[10px] sm:text-xs text-gray-500 font-black mb-0.5">${escapeHtml(p.브랜드||"-")}</div>
+            <div class="text-[15px] sm:text-[18px] font-black text-gray-900 leading-tight truncate break-keep">${escapeHtml(p.품명)}</div>
+            <div class="text-blue-600 font-bold text-[12px] sm:text-sm mt-0.5">${escapeHtml(p.품번)}</div>
+        </div>
+    </div>
+  `;
+  
+  $("#detailBody").innerHTML = `
+    <table class="w-full text-[12px] sm:text-[13px] bg-white rounded-lg border-hidden shadow-sm">
+      <thead class="bg-gray-50 text-gray-600 font-black border-b border-gray-200">
+        <tr>
+          <th class="py-2.5 px-1 text-center w-[16%] border-r border-white">사이즈</th>
+          <th class="py-2.5 px-1 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
+          <th class="py-2.5 px-1 text-center w-[15%]">본사재고</th>
+          <th class="py-2.5 px-1 text-center w-[20%] border-r border-gray-100">본사 RT</th>
+          <th class="py-2.5 px-1 text-center w-[15%]">신사재고</th>
+          <th class="py-2.5 px-1 text-center w-[20%]">신사 RT</th>
+        </tr>
+      </thead>
+      <tbody>
+      ${p.sizes.map(s => {
+          let centerRtBtn = s.center > 0 
+            ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-1.5 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i></button>` 
+            : `<button disabled class="bg-gray-50 text-gray-300 py-1.5 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>`;
+         
+          let sinsaRtBtn = s.sinsa > 0 
+            ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1.5 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i></button>` 
+            : `<button disabled class="bg-gray-50 text-gray-300 py-1.5 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>`;
+
+          return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+            <td class="py-2.5 px-1 font-black text-center border-r border-gray-50">${s.size}</td>
+            <td class="py-2.5 px-1 font-black text-center bg-blue-50/30 border-r border-gray-50 ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
+            <td class="py-2.5 px-1 font-bold text-center text-gray-600">${s.center}</td>
+            <td class="py-2 px-1 text-center border-r border-gray-100">${centerRtBtn}</td>
+            <td class="py-2.5 px-1 font-bold text-center text-gray-600">${s.sinsa}</td>
+            <td class="py-2 px-1 text-center">${sinsaRtBtn}</td>
+          </tr>`;
+      }).join("")}
+      </tbody>
+    </table>
+  `;
+
+  $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
   $("#addMemoBtn").onclick = async () => {
       if(!checkPat()) return;
@@ -1648,9 +1800,9 @@ function openDetail(p){
       const tag = $("#memoTag").value;
       const text = $("#memoText").value.trim();
       const msg = $("#memoMsg");
-      if(!staff) { msg.style.color="red"; msg.textContent="직원 이름을 선택해주세요."; return; }
+      if(!staff) { msg.style.color="red"; msg.textContent="작성자를 선택하세요."; return; }
       if(!text) { msg.style.color="red"; msg.textContent="내용을 입력하세요."; return; }
-      msg.style.color="black"; msg.textContent="메모 저장 중...";
+      msg.style.color="black"; msg.textContent="저장 중...";
 
       try {
           const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
@@ -1671,12 +1823,22 @@ function openDetail(p){
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
-  let modalOuter = $("#detailModal .modal-outer");
-  if (!modalOuter) {
-      modalOuter = document.createElement("div");
-      modalOuter.className = "modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer z-0";
-      modalOuter.onclick = () => $("#detailModal").classList.add("hidden");
-      $("#detailModal").insertBefore(modalOuter, $("#detailModal").firstChild);
+  if ($("#quickImgSave")) {
+      $("#quickImgSave").onclick = async () => {
+          if(!checkPat()) return;
+          const url = $("#quickImgUrl").value.trim(); if (!url) return;
+          const msg = $("#quickImgMsg"); msg.textContent = "저장 중...";
+          try {
+              IMAGES[p.shopNo] = url; 
+              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
+              let sha = null;
+              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
+              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
+              if(sha) body.sha = sha;
+              await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!"; render(); setTimeout(()=>{openDetail(p);}, 500);
+          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
+      };
   }
 
   $("#detailModal").classList.remove("hidden");
