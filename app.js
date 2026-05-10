@@ -13,7 +13,6 @@ style.innerHTML = `
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
 
-    /* 🔥 UX/UI 개선 1: 칩 버튼 상태 명확화 */
     .chip {
         background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
         transition: all 0.2s ease-in-out; cursor: pointer;
@@ -22,24 +21,20 @@ style.innerHTML = `
     .chip[data-active="1"] { background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important; }
     .brand-hidden { display: none !important; }
 
-    /* 🔥 UX/UI 개선 2: 제품 카드 즐겨찾기 오버레이 */
     .card-img-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; border-radius: 8px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
     .bookmark-overlay { position: absolute; top: 4px; right: 4px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 4px; backdrop-filter: blur(2px); transition: all 0.2s; }
+    .size-scroll-wrap { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 6px; margin-top: auto; margin-bottom: 12px; scroll-snap-type: x mandatory; }
+    .size-scroll-wrap::-webkit-scrollbar { height: 4px; }
+    .size-scroll-wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .size-scroll-wrap > div { scroll-snap-align: start; }
     
-    /* 🔥 UX/UI 개선 3: 품절 사이즈 회색 음영 처리 (시각적 노이즈 감소) */
     .size-cell.zero { opacity: 0.35; filter: grayscale(100%); text-decoration: line-through; border-color: #e2e8f0; background: #f8fafc; }
 
-    /* 🔥 UX/UI 개선 4: 토스트 알림 (스낵바 & Undo) */
     #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
     .toast { background: #1e293b; color: white; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto; }
     @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 12px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
     .toast-undo:hover { color: #fef08a; }
-
-    /* 🔥 UX/UI 개선 5: 모바일용 Undo 버튼 (FAB) */
-    #mobileUndoBtn { position: fixed; bottom: 24px; right: 24px; z-index: 990; background: #1e293b; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); transition: all 0.2s; opacity: 0; pointer-events: none; transform: scale(0.8); }
-    #mobileUndoBtn.show { opacity: 1; pointer-events: auto; transform: scale(1); }
-    #mobileUndoBtn:active { transform: scale(0.9); }
 `;
 document.head.appendChild(style);
 
@@ -74,7 +69,6 @@ let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V4') || '
 let windowDashItems = [];
 let windowCurrentDashIndex = 0;
 
-// 🔥 실행 취소 (Undo) 히스토리 스택 관리
 let filterHistory = [];
 let isUndoing = false;
 
@@ -82,6 +76,9 @@ const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 const fmt = n => (n??0).toLocaleString("ko-KR");
 const krw = n => "₩" + fmt(n);
+
+// 🔥 수정포인트: 120, 130 사이즈를 용품으로 예외 처리하는 헬퍼 함수 추가
+const isFwSize = s => /^\d{3}$/.test(s) && s !== "120" && s !== "130";
 
 function loadGhConfig(){ try{ const c=localStorage.getItem(GH_CONFIG_KEY); if(c) GH=Object.assign(GH, JSON.parse(c)); }catch(e){} }
 function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); }
@@ -164,7 +161,6 @@ function showToast(message, onUndo) {
     }, 5000);
 }
 
-// 🔥 Undo 로직 코어
 function getCurrentFilterState() {
     return {
         cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
@@ -187,14 +183,13 @@ function saveHistoryState() {
     if(isUndoing) return;
     const currentState = getCurrentFilterState();
     
-    // 마지막 상태와 동일하면 저장 안함
     if(filterHistory.length > 0) {
         const last = filterHistory[filterHistory.length - 1];
         if(JSON.stringify(last) === JSON.stringify(currentState)) return;
     }
     
     filterHistory.push(currentState);
-    if(filterHistory.length > 20) filterHistory.shift(); // 최대 20개까지만 기억
+    if(filterHistory.length > 20) filterHistory.shift(); 
     
     updateUndoBtnUI();
 }
@@ -204,7 +199,6 @@ function restoreHistoryState() {
     isUndoing = true;
     const state = filterHistory.pop();
     
-    // DOM에 State 적용
     $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === state.cat ? "1" : "0"));
     $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === state.gender ? "1" : "0"));
     $$('#brandChips .chip').forEach(b => b.dataset.active = (b.dataset.brand === state.brand ? "1" : "0"));
@@ -228,7 +222,7 @@ function restoreHistoryState() {
     const promoBtn = $('button[onclick^="window.togglePromoView"]');
     if(promoBtn) {
         promoBtn.dataset.active = state.promoOnly ? "0" : "1"; 
-        window.togglePromoView(promoBtn, true); // true = bypass render trigger
+        window.togglePromoView(promoBtn, true); 
     }
 
     updateUndoBtnUI();
@@ -238,28 +232,61 @@ function restoreHistoryState() {
     showToast("이전 상태로 되돌렸습니다.");
 }
 
+// 🔥 수정포인트: 모바일 되돌리기 버튼이 무조건 보이도록 강제 인라인 스타일 처리
 function updateUndoBtnUI() {
     let btn = $("#mobileUndoBtn");
     if(!btn) {
         btn = document.createElement("button");
         btn.id = "mobileUndoBtn";
         btn.innerHTML = `<i data-lucide="undo-2" class="w-6 h-6"></i>`;
+        btn.style.cssText = "position:fixed; bottom:24px; right:24px; z-index:9990; background:#1e293b; color:white; width:50px; height:50px; border-radius:50%; display:none; align-items:center; justify-content:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); cursor:pointer;";
         btn.onclick = restoreHistoryState;
         document.body.appendChild(btn);
         if(window.lucide) lucide.createIcons();
     }
-    if(filterHistory.length > 0) btn.classList.add("show");
-    else btn.classList.remove("show");
+    if(filterHistory.length > 0) {
+        btn.style.display = "flex";
+    } else {
+        btn.style.display = "none";
+    }
 }
 
+// 🔥 수정포인트: ESC키 창 닫힘 통합, PC Ctrl+Z 이벤트 처리 수정
 document.addEventListener("keydown", (e) => {
-    // Ctrl+Z (또는 Cmd+Z)
-    if((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    // 1. ESC 키로 모달 닫기
+    if(e.key === "Escape") {
+        const modals = $$('#detailModal, #dashDetailModal, #salesGuideModal, #transfersModal, #allMemosModal, .modal-backdrop');
+        let closedAny = false;
+        modals.forEach(m => {
+            if(m && !m.classList.contains("hidden")) {
+                m.classList.add("hidden");
+                closedAny = true;
+            }
+        });
+        if(!closedAny) {
+            const dash = document.querySelector("#analyticsDashboard");
+            if(dash && !dash.classList.contains("hidden")) {
+                dash.classList.add("opacity-0");
+                setTimeout(() => dash.classList.add("hidden"), 300);
+            }
+        }
+    }
+    
+    // 2. PC환경 Ctrl+Z 실행취소 로직 (대소문자 구별 제거)
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        // 검색창 등 인풋박스에 포커스 되어 있을 때는 텍스트 Undo가 작동하도록 예외처리
+        if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
         e.preventDefault();
         restoreHistoryState();
     }
-});
 
+    // 3. 모달 내 화살표 스크롤
+    const dashModal = document.querySelector("#dashDetailModal");
+    if(dashModal && !dashModal.classList.contains("hidden")) {
+        if(e.key === "ArrowLeft") $("#prevDashBtn")?.click();
+        if(e.key === "ArrowRight") $("#nextDashBtn")?.click();
+    }
+});
 
 function applyMeta(meta){
     if(meta) {
@@ -333,11 +360,12 @@ function getActiveWeeklyCategory() {
     return null;
 }
 
+// 🔥 수정포인트: 사이즈 드롭다운 정렬 조건식에 isFwSize(s) 반영
 function generateSizeOptionsHtml(sizesSet) {
     const arr = Array.from(sizesSet).map(s => String(s).trim()).filter(Boolean);
     const apOrder = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
     arr.sort((a,b) => {
-        if (/^\d{3}$/.test(a) && /^\d{3}$/.test(b)) return parseInt(a) - parseInt(b);
+        if (isFwSize(a) && isFwSize(b)) return parseInt(a) - parseInt(b);
         return (apOrder[a.toUpperCase()]||99) - (apOrder[b.toUpperCase()]||99);
     });
     return arr.map(s => `<option value="${s}">${s}</option>`).join('');
@@ -358,7 +386,8 @@ function rebuildIndex(){
     const code = r["품번"]; if(!code) continue;
     const size = String(r["규격"]||"").trim();
     if(size) {
-        if (/^\d{3}$/.test(size)) allSizesFw.add(size);
+        // 🔥 수정포인트: 120, 130 용품사이즈 분류 반영
+        if (isFwSize(size)) allSizesFw.add(size);
         else if (/^[SMLX]+$/i.test(size) || size.toUpperCase()==='FREE' || size.toUpperCase()==='OS' || size.toUpperCase()==='F') allSizesAp.add(size);
         else allSizesGear.add(size);
     }
@@ -402,7 +431,6 @@ function rebuildIndex(){
     return p;
   });
 
-  // 🔥 UX 개선: 사이즈 필터 3분할 생성
   if(!$("#sizeSelFw") && $("#sortSel")) {
       const container = document.createElement("div");
       container.className = "flex gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0 mt-2 sm:mt-0";
@@ -593,7 +621,7 @@ function setupSearchAutocomplete() {
     let debounceTimer;
     qEl.addEventListener("input", (e) => {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(saveHistoryState, 500); // 0.5초 뒤 입력상태 저장
+        debounceTimer = setTimeout(saveHistoryState, 500); 
         
         const val = e.target.value.trim().toLowerCase();
         const cleanVal = val.replace(/[\s\-_]/g, "");
@@ -672,7 +700,6 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const origHtml = btn.innerHTML;
     const origClass = btn.className;
     
-    // 즉각적인 버튼 UI 잠금 처리 (로딩 없이 바로 반영)
     btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
     btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+|text-\w+)/g, '') + ' bg-green-500 text-white cursor-default';
     btn.disabled = true;
@@ -683,10 +710,8 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
-    // 1. 낙관적 업데이트
     TRANSFERS.push({ id: trId, code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
     
-    // 2. 깃허브 API 호출 (비동기)
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
         .then(r => r.json())
         .then(j => {
@@ -694,7 +719,6 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         }).catch(err => console.error(err));
 
-    // 3. 토스트 및 Undo 콜백 제공
     showToast(`📦 ${fromStr}에서 ${size} 사이즈 ${qty}개 RT를 요청했습니다.`, async () => {
         btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
         
@@ -735,7 +759,6 @@ window.openAnalyticsReport = async () => {
     let currentCustomStart = "";
     let currentCustomEnd = "";
     
-    // 대시보드 사이즈 필터 상태 (3개 중 활성화된 1개 적용)
     let currentSizeFw = "ALL";
     let currentSizeAp = "ALL";
     let currentSizeGear = "ALL";
@@ -774,7 +797,7 @@ window.openAnalyticsReport = async () => {
     PRODUCTS.forEach(p => {
         p.sizes.forEach(s => {
             const size = String(s.size).trim();
-            if (/^\d{3}$/.test(size)) allSizesFwSet.add(size);
+            if (isFwSize(size)) allSizesFwSet.add(size);
             else if (/^[SMLX]+$/i.test(size) || size.toUpperCase()==='FREE' || size.toUpperCase()==='OS' || size.toUpperCase()==='F') allSizesApSet.add(size);
             else allSizesGearSet.add(size);
         });
@@ -1114,7 +1137,7 @@ window.openDashDetail = (code, periodParam) => {
         modal = document.createElement("div"); modal.id = "dashDetailModal";
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4";
         modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
+                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
         document.body.appendChild(modal);
         
         let touchstartX = 0; let touchendX = 0;
@@ -1129,8 +1152,7 @@ window.openDashDetail = (code, periodParam) => {
 
     const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMapBusan), ...p.sizes.map(s=>String(s.size).trim())]))
         .sort((a,b) => {
-            const isFw = /^\d{3}$/.test(a) && /^\d{3}$/.test(b);
-            if(isFw) return parseInt(a) - parseInt(b);
+            if(isFwSize(a) && isFwSize(b)) return parseInt(a) - parseInt(b);
             const order = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
             if(order[a.toUpperCase()] && order[b.toUpperCase()]) return order[a.toUpperCase()] - order[b.toUpperCase()];
             return a.localeCompare(b);
@@ -1307,7 +1329,7 @@ window.openSalesGuide = (code) => {
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100]";
         modal.innerHTML = `
             <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-            <div class="modal-content relative bg-white w-[90%] max-w-md flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-indigo-100">
+            <div class="modal-content relative bg-white w-[90%] max-w-md mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-indigo-100">
                 <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-start">
                     <div>
                         <div class="flex items-center gap-1.5 mb-1">
@@ -1348,7 +1370,6 @@ window.openSalesGuide = (code) => {
     if(window.lucide) lucide.createIcons();
 };
 
-// 🔥 UX/UI 개선: 즐겨찾기 오버레이, 사이즈 멀티라인, 가격 요약 하단 고정 설계
 function card(p){
   const el = document.createElement("article");
   el.className = "card card-hover p-4 flex flex-col bg-white border border-gray-100 rounded-2xl shadow-sm h-full"; 
@@ -1454,7 +1475,7 @@ function card(p){
         
         ${memoHtml}
 
-        <div class="flex flex-wrap gap-1.5 mb-4">
+        <div class="size-scroll-wrap no-scrollbar">
           ${p.sizes.map(s=>{
               const q = s.busan||0; 
               let cls = "size-cell tnum shrink-0 w-[42px] ";
@@ -1741,7 +1762,7 @@ window.renderTransfers = () => {
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99]"; 
         modal.innerHTML = `
             <div class="modal-outer absolute inset-0 bg-black/50" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-            <div class="modal-content relative bg-[color:var(--bg)] w-[95%] max-w-lg flex flex-col rounded-xl overflow-hidden shadow-2xl z-10">
+            <div class="modal-content relative bg-[color:var(--bg)] w-[95%] max-w-lg mx-auto my-auto flex flex-col rounded-xl overflow-hidden shadow-2xl z-10">
                 <div class="p-4 border-b border-[color:var(--line)] flex justify-between items-center bg-[color:var(--surface)]">
                     <h2 class="font-black text-lg text-blue-800">🚚 상품 RT(이동) 요청 목록</h2>
                     <div class="flex gap-2">
@@ -1775,7 +1796,7 @@ window.renderTransfers = () => {
     if(window.lucide) lucide.createIcons();
 };
 
-// 🔥 UX/UI 개선: 상세 모달 테이블 가독성 및 반응형 스크롤 설계
+// 🔥 수정포인트: 모달 중앙 정렬, 메모 창 와이드화
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
@@ -1805,7 +1826,6 @@ function openDetail(p){
   }
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
-  // 테이블 반응형(Overflow-x) 처리
   $("#detailBody").innerHTML = `
     <div class="overflow-x-auto w-full no-scrollbar pb-2">
         <table class="w-full min-w-[450px] text-[12px] sm:text-[13px] bg-white rounded-lg border-hidden shadow-sm">
@@ -1843,24 +1863,28 @@ function openDetail(p){
     </div>
   `;
   
-  // 🔥 직원 명단 갱신 및 Sticky Footer
+  // 🔥 수정포인트: 메모 입력창 직원 업데이트 및 넓은 레이아웃 적용
   let stickyFooterHtml = `
-      <div class="flex gap-2">
-          <select id="memoStaff" class="ipt text-xs w-[80px] shrink-0 font-bold bg-white">
-              <option value="" disabled selected>작성자</option>
-              <option value="김종훈">김종훈</option>
-              <option value="김기태">김기태</option>
-              <option value="김민정">김민정</option>
-              <option value="임경준">임경준</option>
-              <option value="박서영">박서영</option>
-          </select>
-          <select id="memoTag" class="ipt text-xs w-[80px] shrink-0 font-bold bg-white">
-              <option value="고객요청">고객요청</option>
-              <option value="예약">예약</option>
-              <option value="기타">기타</option>
-          </select>
-          <input type="text" id="memoText" class="ipt flex-1 text-xs" placeholder="메모 내용...">
-          <button id="addMemoBtn" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 px-3 py-2 rounded-lg text-xs font-black shrink-0 transition-colors shadow-sm">등록</button>
+      <div class="flex flex-col gap-2">
+          <div class="flex gap-2">
+              <select id="memoStaff" class="ipt text-[13px] flex-1 font-bold bg-white px-2 py-1.5 rounded border border-gray-200">
+                  <option value="" disabled selected>작성자 선택</option>
+                  <option value="김종훈">김종훈</option>
+                  <option value="김기태">김기태</option>
+                  <option value="김민정">김민정</option>
+                  <option value="임경준">임경준</option>
+                  <option value="박서영">박서영</option>
+              </select>
+              <select id="memoTag" class="ipt text-[13px] flex-1 font-bold bg-white px-2 py-1.5 rounded border border-gray-200">
+                  <option value="고객요청">고객요청</option>
+                  <option value="예약">예약</option>
+                  <option value="기타">기타</option>
+              </select>
+          </div>
+          <div class="flex gap-2">
+              <input type="text" id="memoText" class="ipt flex-1 text-[13px] px-3 py-2 rounded border border-gray-200" placeholder="메모 내용 입력 (길게 작성 가능)">
+              <button id="addMemoBtn" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 px-4 py-2 rounded-lg text-[13px] font-black shrink-0 transition-colors shadow-sm">등록</button>
+          </div>
       </div>
       <div id="memoMsg" class="mt-1 text-[11px] font-bold h-4"></div>
   `;
@@ -1874,8 +1898,8 @@ function openDetail(p){
                   <a href="${targetUrl}" target="_blank" class="text-blue-600 hover:underline">자사몰 열기</a>
               </div>
               <div class="flex gap-2">
-                  <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs mono" placeholder="이미지 주소 복사하여 붙여넣기">
-                  <button id="quickImgSave" class="px-3 py-2 text-xs font-black bg-gray-800 hover:bg-black text-white rounded-lg shadow-sm">저장</button>
+                  <input type="text" id="quickImgUrl" class="ipt flex-1 text-[13px] px-3 py-2 rounded border border-gray-200 mono" placeholder="이미지 주소 붙여넣기">
+                  <button id="quickImgSave" class="px-4 py-2 text-[13px] font-black bg-gray-800 hover:bg-black text-white rounded-lg shadow-sm">저장</button>
               </div>
               <div id="quickImgMsg" class="mt-1 text-[11px] font-bold h-4"></div>
           </div>
@@ -1885,8 +1909,10 @@ function openDetail(p){
   let modalContentWrap = $("#detailModal .modal-content");
   if(!modalContentWrap) {
       modalContentWrap = document.createElement("div");
-      modalContentWrap.className = "modal-content relative bg-white w-[95%] max-w-[600px] flex flex-col rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl z-10 mt-auto sm:mt-0 max-h-[90vh]";
-      $("#detailModal").innerHTML = `<div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>`;
+      // 🔥 수정포인트: mx-auto my-auto 클래스 주입으로 정중앙 배치 강제
+      modalContentWrap.className = "modal-content relative bg-white w-[95%] max-w-[600px] mx-auto my-auto flex flex-col rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl z-10 max-h-[90vh]";
+      $("#detailModal").className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4 bg-black/50";
+      $("#detailModal").innerHTML = `<div class="modal-outer absolute inset-0 cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>`;
       $("#detailModal").appendChild(modalContentWrap);
   }
 
@@ -1955,6 +1981,7 @@ function openDetail(p){
         </table>
     </div>
   `;
+
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
   $("#addMemoBtn").onclick = async () => {
@@ -2008,11 +2035,11 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
-$$('.modal-backdrop').forEach(modal => {
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal || e.target.classList.contains("modal-outer")) modal.classList.add("hidden");
-    });
+// 모달 백그라운드 클릭 닫기
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("modal-outer")) e.target.closest('.modal-backdrop').classList.add("hidden");
 });
+
 $$('button[id^="close"]').forEach(btn => {
     btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
 });
@@ -2047,6 +2074,8 @@ $("#resetAll").onclick=()=>{
 };
 
 $("#sortSel").onchange=()=> { saveHistoryState(); visibleCount=60; render(); };
+let qTimer;
+$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
 $("#clearQ").onclick=()=>{ saveHistoryState(); $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 $("#refreshBtn").onclick=()=>loadData(true);
 $("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
