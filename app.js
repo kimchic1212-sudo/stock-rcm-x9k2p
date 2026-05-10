@@ -4,24 +4,15 @@ style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* 상세창(detailModal)이 대시보드(z-105)보다 항상 위에 뜨도록 강제 승급 */
     #detailModal, #dashDetailModal { z-index: 9999 !important; }
-    /* 대시보드는 팝업들 아래에 깔리도록 설정 */
     #analyticsDashboard { z-index: 105 !important; }
-    /* 이미지 Lazy Loading 전환 효과 */
+    .dash-scroll::-webkit-scrollbar { width: 6px; }
+    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
 `;
 document.head.appendChild(style);
-
-// 🔥 리포트 커스텀 스크롤바 디자인 추가 🔥
-const style2 = document.createElement('style');
-style2.innerHTML = `
-    .dash-scroll::-webkit-scrollbar { width: 6px; }
-    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
-`;
-document.head.appendChild(style2);
 
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
@@ -49,7 +40,6 @@ let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
 
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
-let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES') || '[]');
 
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -62,10 +52,7 @@ function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
 function checkPat() {
-    if(!getPat()) {
-        alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요.");
-        return false;
-    }
+    if(!getPat()) { alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요."); return false; }
     return true;
 }
 
@@ -88,17 +75,9 @@ function getChosung(str){
   return r;
 }
 
-function isAllChosung(str) {
-    return /^[ㄱ-ㅎ]+$/.test(str);
-}
-
 async function copyText(text, btn){
   try{
-    if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } 
-    else {
-      const ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
-      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
-    }
+    await navigator.clipboard.writeText(text);
     if(btn){
       const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
       if(window.lucide) lucide.createIcons();
@@ -119,21 +98,10 @@ function applyMeta(meta){
 
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
-  
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; 
-      CURRENT_META = cached.meta || null;
-      IMAGES = cached.images || {};
-      MEMOS = cached.memos || [];
-      TRANSFERS = cached.transfers || [];
-      PROMOTIONS = cached.promotions || {};
-      SALES_GUIDES = cached.salesGuides || {};
-      SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META);
-      rebuildIndex(); render(); 
-      return;
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
+      applyMeta(CURRENT_META); rebuildIndex(); render(); return;
   }
-  
   try {
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
@@ -144,46 +112,19 @@ async function loadData(force = false){
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
-
-      if(!invRes.ok) throw new Error("재고 로드 실패");
-      const invData = await invRes.json();
-      RAW = invData.rows || []; 
-      CURRENT_META = invData.meta || null;
-
+      const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
       if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
       if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+      if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
+      if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
+      if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
       
-      if(promoRes && promoRes.ok) {
-          const pData = await promoRes.json();
-          PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
-      } else { PROMOTIONS = {}; }
-      
-      if(sgRes && sgRes.ok) {
-          const sgData = await sgRes.json();
-          SALES_GUIDES = Object.keys(sgData).length > 0 ? sgData : {};
-      } else { SALES_GUIDES = {}; }
-
-      if(shRes && shRes.ok) {
-          const shData = await shRes.json();
-          SALES_HISTORY = shData.items ? shData : { meta: {}, items: {} };
-      } else { SALES_HISTORY = { meta: {}, items: {} }; }
-
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      
-      applyMeta(CURRENT_META);
-      rebuildIndex(); render();
-  } catch(e) { 
-      if(cached) { 
-          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || {meta:{},items:{}};
-          applyMeta(CURRENT_META); rebuildIndex(); render(); 
-      } else {
-          RAW=[]; render();
-      }
-  }
+      applyMeta(CURRENT_META); rebuildIndex(); render();
+  } catch(e) { console.error("Data Load Error", e); }
 }
 
-async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
 function getActiveWeeklyCategory() {
@@ -192,7 +133,6 @@ function getActiveWeeklyCategory() {
     const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
     const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
     const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
-
     if (now >= t1 && now < t2) return "FOOTWEAR";
     if (now >= t2 && now < t3) return "APPAREL";
     if (now >= t3 && now <= t4) return "ACC/GEAR";
@@ -234,27 +174,18 @@ function rebuildIndex(){
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
         const promo = PROMOTIONS.items[p.품번];
         if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
-            p.currentPromoPrice = promo.weeklyPrice;
-            p.promoType = 'weekly';
+            p.currentPromoPrice = promo.weeklyPrice; p.promoType = 'weekly';
             p.promoRate = promo.weeklyRate || ((p.소비자가 - promo.weeklyPrice) / p.소비자가);
-            if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15';
-            else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22';
-            else if(promo.targetCat === 'ACC/GEAR') p.promoEndDate = '5/29';
-            else p.promoEndDate = '5/29';
-        } 
-        else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
-            p.currentPromoPrice = promo.finalPrice;
-            p.promoType = 'general';
-            p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가);
-            p.promoEndDate = '5/29'; 
+            if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15'; else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22'; else p.promoEndDate = '5/29';
+        } else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
+            p.currentPromoPrice = promo.finalPrice; p.promoType = 'general';
+            p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가); p.promoEndDate = '5/29'; 
         }
     }
-
     const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
     p._hay = rawHay.toLowerCase();
     p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
     p._chosung = getChosung(p._hayClean); 
-    
     return p;
   });
   
@@ -290,67 +221,46 @@ function rebuildIndex(){
   }
 
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
-      const opt = document.createElement("option");
-      opt.value = "salesDesc";
-      opt.innerHTML = "🔥 전체 판매량순";
+      const opt = document.createElement("option"); opt.value = "salesDesc"; opt.innerHTML = "🔥 전체 판매량순";
       $("#sortSel").appendChild(opt);
   }
 
   let promoWrap = $("#promoFilters");
   if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
-      promoWrap = document.createElement("div");
-      promoWrap.id = "promoFilters";
+      promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
       promoWrap.className = "flex gap-2 mb-3 items-center w-full overflow-x-auto no-scrollbar pb-1";
       $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
   }
   if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
       if(promoWrap) {
           promoWrap.innerHTML = `
-              <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">
-                  🎁 ${escapeHtml(PROMOTIONS.meta.name)}
-              </button>
-              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
-                  <option value="ALL">기획전 전체보기</option>
-                  <option value="weekly">🔥 위클리특가만</option>
-                  <option value="general">🎟️ 쿠폰사용가능만</option>
-              </select>
-              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
-                  <option value="0">할인율 전체</option>
-                  <option value="10">🔥 10% 할인</option>
-                  <option value="20">🔥 20% 할인</option>
-                  <option value="30">🔥 30% 할인</option>
-              </select>
+              <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</button>
+              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
+              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
           `;
           promoWrap.querySelector('button').onclick = function() {
-              const isActive = this.dataset.active === "1";
-              this.dataset.active = isActive ? "0" : "1";
+              const isActive = this.dataset.active === "1"; this.dataset.active = isActive ? "0" : "1";
               if(!isActive) {
                   this.classList.add('ring-2', 'ring-purple-400', 'ring-offset-1');
-                  $("#promoTypeSel").classList.remove("hidden");
-                  $("#promoRateSel").classList.remove("hidden");
+                  $("#promoTypeSel").classList.remove("hidden"); $("#promoRateSel").classList.remove("hidden");
               } else {
                   this.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1');
-                  $("#promoTypeSel").classList.add("hidden");
-                  $("#promoRateSel").classList.add("hidden");
-                  $("#promoTypeSel").value = "ALL";
-                  $("#promoRateSel").value = "0";
+                  $("#promoTypeSel").classList.add("hidden"); $("#promoRateSel").classList.add("hidden");
+                  $("#promoTypeSel").value = "ALL"; $("#promoRateSel").value = "0";
               }
               visibleCount=60; render();
           };
           $("#promoTypeSel").onchange = () => { visibleCount=60; render(); };
           $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
       }
-  } else if (promoWrap) {
-      promoWrap.innerHTML = "";
-  }
+  } else if (promoWrap) { promoWrap.innerHTML = ""; }
 
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
   const wrap = $("#brandChips"); 
   wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">전체 브랜드</button>';
   
   wrap.querySelector('[data-brand="ALL"]').onclick = function() {
-      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0"));
-      visibleCount=60; render();
+      $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===this?"1":"0")); visibleCount=60; render();
   };
   
   brands.forEach(b => {
@@ -363,32 +273,29 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// Chart.js 및 % 표시용 DataLabels 플러그인 동적 로드
+// Chart.js 로드
 function loadChartJS() {
     return new Promise((resolve) => {
         if (window.Chart && window.ChartDataLabels) return resolve();
         if (!window.Chart) {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            const script = document.createElement('script'); script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
             script.onload = () => {
                 if (!window.ChartDataLabels) {
-                    const plugin = document.createElement('script');
-                    plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+                    const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
                     plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
                     document.head.appendChild(plugin);
                 } else resolve();
             };
             document.head.appendChild(script);
         } else if (!window.ChartDataLabels) {
-            const plugin = document.createElement('script');
-            plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+            const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
             plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
             document.head.appendChild(plugin);
         }
     });
 }
 
-// 🔥 고도화된 반응형 인터랙티브 분석 대시보드
+// 🔥 고도화된 반응형 분석 대시보드
 window.openAnalyticsReport = async () => {
     await loadChartJS();
 
@@ -397,12 +304,8 @@ window.openAnalyticsReport = async () => {
     let currentCustomStart = "";
     let currentCustomEnd = "";
 
-    // 주간/월간 선택 옵션 동적 생성
     const generateDateOptions = () => {
-        const now = new Date();
-        let html = '';
-        
-        // 월간 계산 (최근 4개월)
+        const now = new Date(); let html = '';
         html += '<optgroup label="월간 조회">';
         for(let i=0; i<4; i++) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -411,27 +314,19 @@ window.openAnalyticsReport = async () => {
             const val = `EXACT_${y}-${m}-01_${y}-${m}-${lastDay}`;
             html += `<option value="${val}">${y}년 ${d.getMonth() + 1}월</option>`;
         }
-        html += '</optgroup>';
-
-        // 주간 계산 (최근 5주차)
-        html += '<optgroup label="주간 조회">';
+        html += '</optgroup><optgroup label="주간 조회">';
         const curr = new Date(now);
-        const day = curr.getDay();
-        const diff = curr.getDate() - day + (day === 0 ? -6 : 1); // 월요일 시작 기준
+        const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); 
         let monday = new Date(curr.setDate(diff));
 
         for(let i=0; i<5; i++) {
-            let sun = new Date(monday);
-            sun.setDate(monday.getDate() + 6);
-            
+            let sun = new Date(monday); sun.setDate(monday.getDate() + 6);
             const y1 = monday.getFullYear(); const m1 = String(monday.getMonth()+1).padStart(2,'0'); const d1 = String(monday.getDate()).padStart(2,'0');
             const y2 = sun.getFullYear(); const m2 = String(sun.getMonth()+1).padStart(2,'0'); const d2 = String(sun.getDate()).padStart(2,'0');
-            
             const weekNum = Math.ceil(monday.getDate() / 7);
             const val = `EXACT_${y1}-${m1}-${d1}_${y2}-${m2}-${d2}`;
             html += `<option value="${val}">${y1}년 ${monday.getMonth()+1}월 ${weekNum}주차 (${m1}/${d1}~${m2}/${d2})</option>`;
-            
-            monday.setDate(monday.getDate() - 7); // 이전 주차로 이동
+            monday.setDate(monday.getDate() - 7); 
         }
         html += '</optgroup>';
         return html;
@@ -439,13 +334,10 @@ window.openAnalyticsReport = async () => {
 
     const getPeriodItems = (period, start, end) => {
         let items = [];
-        let cutoffDate = "0000-00-00";
-        let endDate = "9999-99-99";
+        let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
         
-        if (period === "CUSTOM") {
-            cutoffDate = start || "0000-00-00";
-            endDate = end || "9999-99-99";
-        } else if (period && period !== "ALL") {
+        if (period === "CUSTOM") { cutoffDate = start || "0000-00-00"; endDate = end || "9999-99-99"; } 
+        else if (period && period !== "ALL") {
             const d = new Date(Date.now() - Number(period) * 86400000);
             cutoffDate = d.toISOString().split('T')[0];
         }
@@ -455,38 +347,32 @@ window.openAnalyticsReport = async () => {
             if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
                 for (let date in SALES_HISTORY.items[p.품번]) {
                     if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
-                        // ✅ 김종훈 필터 적용 (과거 숫자 데이터와 방어코드 포함)
                         const dayData = SALES_HISTORY.items[p.품번][date];
-                        if (typeof dayData === 'number') {
-                            sales += dayData;
-                        } else if (typeof dayData === 'object') {
+                        if (typeof dayData === 'object') {
                             for (let size in dayData) {
                                 if (typeof dayData[size] === 'object') {
-                                    sales += (dayData[size]["김종훈"] || 0);
-                                } else {
-                                    sales += dayData[size];
+                                    // 🔥 부산점(김종훈) 데이터만 합산
+                                    for(let mgr in dayData[size]) {
+                                        if(mgr.includes("김종훈")) sales += dayData[size][mgr];
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-            if(sales > 0) {
-                items.push({ ...p, dashSales: sales, dashRev: sales * (p.currentPromoPrice || p.소비자가 || 0) });
-            }
+            if(sales > 0) items.push({ ...p, dashSales: sales, dashRev: sales * (p.currentPromoPrice || p.소비자가 || 0) });
         });
         return items.sort((a, b) => b.dashSales - a.dashSales);
     };
 
     let rawSoldItems = [];
-    let catChartInstance = null;
-    let brandChartInstance = null;
+    let catChartInstance = null; let brandChartInstance = null;
 
     const renderDashUI = () => {
         let modal = $("#analyticsDashboard");
         if (!modal) {
-            modal = document.createElement("div");
-            modal.id = "analyticsDashboard";
+            modal = document.createElement("div"); modal.id = "analyticsDashboard";
             modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-300 opacity-0";
             document.body.appendChild(modal);
         }
@@ -494,7 +380,7 @@ window.openAnalyticsReport = async () => {
         modal.innerHTML = `
             <header class="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 shadow-sm">
                 <div>
-                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 판매 인사이트 리포트 (담당: 김종훈)</h1>
+                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 (담당: 김종훈)</h1>
                     <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
@@ -544,39 +430,24 @@ window.openAnalyticsReport = async () => {
         `;
 
         $("#dashPeriodSel").value = "7";
-
         $("#dashPeriodSel").onchange = (e) => {
             const val = e.target.value;
-            if(val === "CUSTOM_INPUT") {
-                $("#dashCustomDateWrap").classList.replace("hidden", "flex");
-            } else {
+            if(val === "CUSTOM_INPUT") $("#dashCustomDateWrap").classList.replace("hidden", "flex");
+            else {
                 $("#dashCustomDateWrap").classList.replace("flex", "hidden");
-                
                 if (val.startsWith("EXACT_")) {
-                    const parts = val.split('_');
-                    currentPeriod = "CUSTOM";
-                    currentCustomStart = parts[1];
-                    currentCustomEnd = parts[2];
-                } else {
-                    currentPeriod = val;
-                }
-                dashFilter = { cat: null, brand: null }; 
-                updateDashData();
+                    const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2];
+                } else currentPeriod = val;
+                dashFilter = { cat: null, brand: null }; updateDashData();
             }
         };
-        
         $("#dashApply").onclick = () => {
             if(!$("#dashStart").value || !$("#dashEnd").value) { alert("날짜를 모두 선택해주세요."); return; }
-            currentPeriod = "CUSTOM";
-            currentCustomStart = $("#dashStart").value;
-            currentCustomEnd = $("#dashEnd").value;
-            dashFilter = { cat: null, brand: null };
-            updateDashData();
+            currentPeriod = "CUSTOM"; currentCustomStart = $("#dashStart").value; currentCustomEnd = $("#dashEnd").value;
+            dashFilter = { cat: null, brand: null }; updateDashData();
         };
-
         $("#closeDashboardBtn").onclick = () => {
-            modal.classList.add("opacity-0");
-            setTimeout(() => modal.classList.add("hidden"), 300);
+            modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300);
         };
         if(window.lucide) lucide.createIcons();
     };
@@ -597,35 +468,28 @@ window.openAnalyticsReport = async () => {
         let catData = {}; let brandData = {};
 
         filteredItems.forEach(p => {
-            totalSales += p.dashSales;
-            totalRev += p.dashRev;
-            const cat = p.카테고리 || "기타";
-            const b = p.브랜드 || "기타";
-            catData[cat] = (catData[cat] || 0) + p.dashSales;
-            brandData[b] = (brandData[b] || 0) + p.dashSales;
+            totalSales += p.dashSales; totalRev += p.dashRev;
+            catData[p.카테고리||"기타"] = (catData[p.카테고리||"기타"] || 0) + p.dashSales;
+            brandData[p.브랜드||"기타"] = (brandData[p.브랜드||"기타"] || 0) + p.dashSales;
         });
 
         $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매`;
 
-        const listBody = $("#dashListBody");
-        const filterLabel = $("#activeFilterLabel");
-        let labelText = [];
+        const filterLabel = $("#activeFilterLabel"); let labelText = [];
         if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
         if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
 
         if (labelText.length > 0) {
-            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`;
-            filterLabel.classList.remove("hidden");
+            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`; filterLabel.classList.remove("hidden");
             filterLabel.onclick = () => { dashFilter = { cat: null, brand: null }; renderDashState(); };
-        } else { filterLabel.classList.add("hidden"); }
+        } else filterLabel.classList.add("hidden");
 
-        listBody.innerHTML = filteredItems.map((p, idx) => {
+        $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
             const imgSrc = IMAGES[p.shopNo] || null;
             const imgHtml = imgSrc 
                 ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
                 : `<div class="w-12 h-12 bg-gray-50 rounded border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
 
-            // 기간 파라미터 전달 구성
             let pParam = currentPeriod;
             if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
@@ -646,41 +510,20 @@ window.openAnalyticsReport = async () => {
             </div>
         `}).join('');
 
-        if (filteredItems.length === 0) {
-            listBody.innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
-        }
+        if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
 
         const renderPieChart = (ctxId, dataObj, filterKey) => {
             const ctx = document.getElementById(ctxId);
-            const labels = Object.keys(dataObj);
-            const dataVals = Object.values(dataObj);
-            const total = dataVals.reduce((a,b)=>a+b,0);
-
+            const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
             return new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: dataVals,
-                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'],
-                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6
-                    }]
-                },
+                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'], borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false, cutout: '55%',
                     plugins: {
                         legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold', size: 11 } } },
-                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 12, cornerRadius: 8, bodyFont: { weight: 'bold', size: 13 } },
-                        datalabels: {
-                            color: '#ffffff', font: { weight: '900', size: 12 },
-                            formatter: (value) => {
-                                if(total === 0) return '';
-                                const pct = Math.round((value / total) * 100);
-                                return pct > 4 ? pct + '%' : ''; 
-                            }
-                        }
+                        datalabels: { color: '#ffffff', font: { weight: '900', size: 12 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 4 ? pct + '%' : ''; } }
                     },
-                    cutout: '55%',
                     onClick: (e, elements, chart) => {
                         if (elements[0]) {
                             const clickedLabel = chart.data.labels[elements[0].index];
@@ -693,25 +536,17 @@ window.openAnalyticsReport = async () => {
             });
         };
 
-        if(catChartInstance) catChartInstance.destroy();
-        if(brandChartInstance) brandChartInstance.destroy();
-
+        if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy();
         catChartInstance = renderPieChart('catChart', catData, 'cat');
         
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
         let topBrandData = {}; let otherSales = 0;
-        sortedBrands.forEach((b, i) => {
-            if(i < 8) topBrandData[b[0]] = b[1];
-            else otherSales += b[1];
-        });
+        sortedBrands.forEach((b, i) => { if(i < 8) topBrandData[b[0]] = b[1]; else otherSales += b[1]; });
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
-        
         brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand');
     };
 
-    if(!$("#analyticsDashboard")) renderDashUI();
-    else $("#analyticsDashboard").classList.remove("hidden");
-    
+    if(!$("#analyticsDashboard")) renderDashUI(); else $("#analyticsDashboard").classList.remove("hidden");
     setTimeout(() => $("#analyticsDashboard").classList.remove("opacity-0"), 10);
     updateDashData();
 };
@@ -721,35 +556,28 @@ window.openDashDetail = (code, periodParam) => {
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
 
-    let cutoffDate = "0000-00-00";
-    let endDate = "9999-99-99";
-
+    let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
     if (periodParam.startsWith("CUSTOM_")) {
-        const parts = periodParam.split("_");
-        cutoffDate = parts[1];
-        endDate = parts[2];
+        const parts = periodParam.split("_"); cutoffDate = parts[1]; endDate = parts[2];
     } else if (periodParam !== "ALL") {
-        const d = new Date(Date.now() - Number(periodParam) * 86400000);
-        cutoffDate = d.toISOString().split('T')[0];
+        const d = new Date(Date.now() - Number(periodParam) * 86400000); cutoffDate = d.toISOString().split('T')[0];
     }
 
-    // 사이즈별 판매량 다시 집계 (김종훈 기준 및 구데이터 호환)
     let sizeSalesMap = {};
     if (SALES_HISTORY.items && SALES_HISTORY.items[code]) {
         const history = SALES_HISTORY.items[code];
         for (let date in history) {
             if (periodParam === "ALL" || (date >= cutoffDate && date <= endDate)) {
                 const dayData = history[date];
-                if (typeof dayData === 'number') {
-                    sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
-                } else if (typeof dayData === 'object') {
+                if (typeof dayData === 'object') {
                     for (let size in dayData) {
                         if (typeof dayData[size] === 'object') {
-                            const qty = dayData[size]["김종훈"] || 0;
-                            if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
-                        } else {
-                            const qty = dayData[size] || 0;
-                            if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
+                            for (let mgr in dayData[size]) {
+                                if (mgr.includes("김종훈")) {
+                                    const qty = dayData[size][mgr] || 0;
+                                    if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
+                                }
+                            }
                         }
                     }
                 }
@@ -765,11 +593,9 @@ window.openDashDetail = (code, periodParam) => {
         document.body.appendChild(modal);
     }
 
-    // 사이즈 목록 정렬 (숫자순)
     const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMap), ...p.sizes.map(s=>String(s.size).trim())]))
         .sort((a,b) => (parseFloat(a)||0) - (parseFloat(b)||0));
 
-    // 차트용 데이터 및 비주류(대형) 사이즈 감지 로직
     const chartLabels = allUniqueSizes.filter(s => s !== "알수없음");
     const chartData = chartLabels.map(s => sizeSalesMap[s] || 0);
     
@@ -785,14 +611,13 @@ window.openDashDetail = (code, periodParam) => {
 
     let insightHtml = "";
     if (largeSizeSales > 0) {
-        insightHtml = `<div class="mt-4 bg-purple-50 text-purple-700 p-3 rounded-xl text-xs font-black border border-purple-100 flex items-center gap-2 shadow-sm"><i data-lucide="trending-up" class="w-5 h-5"></i> 비주류/빅사이즈 (290+, 250+, XL 등) 에서 ${largeSizeSales}개의 틈새 판매량 포착!</div>`;
+        insightHtml = `<div class="mt-4 bg-purple-50 text-purple-700 p-3 rounded-xl text-[13px] font-black border border-purple-100 flex items-center gap-2 shadow-sm"><i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i> 비주류/빅사이즈 (290+, 250+, XL 등) 에서 ${largeSizeSales}개의 틈새 판매량 포착!</div>`;
     }
 
     const tableHtml = allUniqueSizes.map(size => {
         const sold = sizeSalesMap[size] || 0;
         const sObj = p.sizes.find(s => String(s.size).trim() === String(size)) || { busan: 0, sinsa: 0, center: 0 };
         
-        // 제안 로직: 판매량보다 재고가 적으면 차이만큼 제안 (1순위: 물류, 2순위: 신사)
         let suggestHtml = `<span class="text-gray-300">-</span>`;
         if (sold > sObj.busan) {
             let needed = sold - sObj.busan;
@@ -801,11 +626,12 @@ window.openDashDetail = (code, periodParam) => {
             let takeSinsa = Math.min(sObj.sinsa, needed);
             
             let badges = [];
-            if(takeCenter > 0) badges.push(`<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-[11px] font-black">물류 ${takeCenter}</span>`);
-            if(takeSinsa > 0) badges.push(`<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-[11px] font-black">신사 ${takeSinsa}</span>`);
+            // 🔥 1순위 물류, 2순위 신사 로직
+            if(takeCenter > 0) badges.push(`<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm">1️⃣물류 ${takeCenter}</span>`);
+            if(takeSinsa > 0) badges.push(`<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm">2️⃣신사 ${takeSinsa}</span>`);
             
-            if(badges.length > 0) suggestHtml = `<div class="flex justify-center gap-1">${badges.join("")}</div>`;
-            else suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-1 rounded-md text-[11px] font-black">전사품절</span>`;
+            if(badges.length > 0) suggestHtml = `<div class="flex flex-col gap-1 items-center justify-center">${badges.join("")}</div>`;
+            else suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-1 rounded-md text-[11px] font-black">🚨 전사품절</span>`;
         }
 
         let rowClass = "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors";
@@ -821,9 +647,10 @@ window.openDashDetail = (code, periodParam) => {
         </tr>`;
     }).join('');
 
+    // 🔥 2단 레이아웃 (대규모 팝업)
     modal.innerHTML = `
         <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="modal-content relative bg-white w-full max-w-5xl flex flex-col rounded-3xl overflow-hidden shadow-2xl">
+        <div class="modal-content relative bg-white w-full max-w-6xl flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10">
             <div class="p-5 border-b flex justify-between items-start bg-white z-10 shadow-sm shrink-0">
                 <div class="flex gap-4 items-center">
                     ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
@@ -836,31 +663,31 @@ window.openDashDetail = (code, periodParam) => {
                 <button class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
-            <div class="flex flex-col lg:flex-row h-full lg:h-[65vh] overflow-y-auto lg:overflow-hidden">
-                <div class="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-100 p-5 bg-gray-50/50 flex flex-col shrink-0">
-                    <h3 class="font-black text-sm text-gray-800 mb-3 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-4 h-4 text-blue-500"></i> 사이즈별 판매 추이</h3>
-                    <div class="relative flex-1 w-full min-h-[200px]"><canvas id="ddSizeChart"></canvas></div>
+            <div class="flex flex-col lg:flex-row h-full lg:h-[70vh] overflow-y-auto lg:overflow-hidden">
+                <div class="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
+                    <h3 class="font-black text-sm text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-500"></i> 사이즈별 판매 추이</h3>
+                    <div class="relative flex-1 w-full min-h-[250px]"><canvas id="ddSizeChart"></canvas></div>
                     ${insightHtml}
                 </div>
                 
-                <div class="w-full lg:w-2/3 p-0 overflow-y-auto dash-scroll bg-white relative">
-                    <div class="p-5 pb-2 sticky top-0 bg-white/90 backdrop-blur-md border-b border-gray-100 z-10">
+                <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
+                    <div class="p-6 pb-2 sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-10">
                         <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3 shadow-sm">
                             <i data-lucide="truck" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
-                            <div class="text-[12px] font-bold text-blue-800 leading-relaxed">
+                            <div class="text-[13px] font-bold text-blue-800 leading-relaxed">
                                 판매량 대비 부산점 재고가 부족할 경우, <b>1순위 물류센터, 2순위 신사점</b> 순으로 확보 가능한 보충 수량을 제안합니다.
                             </div>
                         </div>
                     </div>
-                    <div class="px-5 pb-5">
-                        <table class="w-full text-sm">
+                    <div class="px-6 pb-6">
+                        <table class="w-full text-sm mt-2">
                             <thead class="text-gray-500 font-black border-b-2 border-gray-200">
                                 <tr class="text-center">
                                     <th class="py-3 w-[15%]">사이즈</th>
                                     <th class="py-3 w-[15%] text-blue-600">판매량</th>
                                     <th class="py-3 w-[15%]">부산재고</th>
-                                    <th class="py-3 w-[15%] text-gray-400">물류(본사)</th>
-                                    <th class="py-3 w-[15%] text-gray-400">신사</th>
+                                    <th class="py-3 w-[15%] text-gray-400">1순위 물류</th>
+                                    <th class="py-3 w-[15%] text-gray-400">2순위 신사</th>
                                     <th class="py-3 w-[25%] text-orange-600">스마트 보충제안</th>
                                 </tr>
                             </thead>
@@ -874,32 +701,16 @@ window.openDashDetail = (code, periodParam) => {
     modal.classList.remove("hidden");
     if(window.lucide) lucide.createIcons();
 
-    // 차트 렌더링
     setTimeout(() => {
         const ctx = document.getElementById('ddSizeChart');
         if(ctx) {
             new Chart(ctx, {
                 type: 'bar',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: '판매량',
-                        data: chartData,
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 6,
-                        barPercentage: 0.6
-                    }]
-                },
+                data: { labels: chartLabels, datasets: [{ label: '판매량', data: chartData, backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: { color: '#3b82f6', font: { weight: '900', size: 11 }, anchor: 'end', align: 'top', formatter: (v) => v > 0 ? v : '' }
-                    },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#6b7280' } },
-                        y: { display: false, beginAtZero: true, suggestedMax: Math.max(...chartData, 5) * 1.2 }
-                    }
+                    plugins: { legend: { display: false }, datalabels: { color: '#3b82f6', font: { weight: '900', size: 12 }, anchor: 'end', align: 'top', formatter: (v) => v > 0 ? v : '' } },
+                    scales: { x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' }, color: '#6b7280' } }, y: { display: false, beginAtZero: true, suggestedMax: Math.max(...chartData, 5) * 1.2 } }
                 }
             });
         }
@@ -1134,11 +945,12 @@ function render(){
               const dayData = SALES_HISTORY.items[p.품번][date];
               if (typeof dayData === 'object') {
                   for (let size in dayData) {
-                      if (typeof dayData[size] === 'object') p.periodSales += (dayData[size]["김종훈"] || 0); // 메인화면 정렬용 누적 판매량
-                      else p.periodSales += dayData[size]; // 하위 호환
+                      if (typeof dayData[size] === 'object') {
+                          for(let mgr in dayData[size]) {
+                              if(mgr.includes("김종훈")) p.periodSales += dayData[size][mgr];
+                          }
+                      }
                   }
-              } else {
-                  p.periodSales += dayData;
               }
           }
       }
@@ -1376,7 +1188,7 @@ function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
   $("#detailHead").innerHTML = `
-    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200" style="max-height: 200px; background:var(--surface);">` : ''}
+    ${imgSrc ? `<img src="${imgSrc}" class="w-full h-auto rounded-lg mb-3 object-contain border border-gray-200 bg-white" style="max-height: 200px;">` : ''}
     <div class="text-xs text-gray-500 font-bold mb-1">${escapeHtml(p.브랜드||"-")}</div>
     <div class="text-xl font-bold">${escapeHtml(p.품명)}</div><div class="text-[#666] text-sm">${escapeHtml(p.품번)}</div>
   `;
@@ -1526,10 +1338,8 @@ document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") { 
         const openModals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
         if(openModals.length > 0) {
-            // 마지막에 열린(배열의 마지막) 모달만 하나 닫기
             openModals[openModals.length - 1].classList.add("hidden");
         } else {
-            // 팝업이 없을 때만 대시보드 닫기
             const dash = document.querySelector("#analyticsDashboard");
             if(dash && !dash.classList.contains("hidden")) {
                 dash.classList.add("opacity-0");
@@ -1618,7 +1428,7 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
-// 🔥 판매 데이터 업로드 시 '규격/사이즈' 및 '담당자' 파싱 + 방어코드 업데이트 🔥
+// 🔥 판매 데이터 엑셀 업로드 & DB 초기화 기능 추가 🔥
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox");
     if(!box) return;
@@ -1626,7 +1436,10 @@ window.renderSalesHistoryAdmin = () => {
     box.innerHTML = `
         <div class="flex justify-between items-center mb-2">
             <div class="font-black text-orange-800">📊 POS 판매 실적 DB</div>
-            <span class="text-[10px] font-bold text-orange-500 bg-white px-2 py-0.5 rounded">품목 ${count}개 누적됨</span>
+            <div class="flex gap-1 items-center">
+                <span class="text-[10px] font-bold text-orange-500 bg-white px-2 py-0.5 rounded">품목 ${count}개 누적됨</span>
+                <button id="shClearBtn" class="text-[10px] font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white border border-red-200 px-2 py-0.5 rounded transition-colors shadow-sm">DB 초기화</button>
+            </div>
         </div>
         <div class="text-center cursor-pointer group mt-3 bg-white border border-orange-100 rounded-lg p-3 hover:bg-orange-500 transition-colors" id="shUploadTrigger">
             <div class="font-black text-orange-600 text-sm mb-1 group-hover:text-white">판매 엑셀 누적 업데이트</div>
@@ -1635,6 +1448,24 @@ window.renderSalesHistoryAdmin = () => {
         <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
     `;
     
+    // DB 강제 초기화 버튼 로직
+    $("#shClearBtn").onclick = async () => {
+        if(!checkPat()) return;
+        if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
+        try {
+            const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
+            let sha = null;
+            try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+            const emptyData = { meta: { name: "초기화됨", lastUpdated: new Date().toISOString() }, items: {} };
+            const body = { message:"clear sales history DB", content: utf8ToB64(JSON.stringify(emptyData, null, 2)), branch: GH.branch };
+            if(sha) body.sha = sha;
+            await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+            SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY); 
+            rebuildIndex(); render(); window.renderSalesHistoryAdmin();
+            alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
+        } catch(err) { alert("초기화 실패: " + err.message); }
+    };
+
     $("#shUploadTrigger").onclick = () => $("#shFile").click();
     $("#shFile").onchange = async (e) => {
         if(!checkPat()) { e.target.value = ""; return; }
@@ -1646,17 +1477,17 @@ window.renderSalesHistoryAdmin = () => {
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
             const sheet = wb.Sheets[wb.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
-            let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && r.includes('거래명세서일'));
-            if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', '거래명세서일' 열을 찾을 수 없습니다."); return; }
+            let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && (r.includes('거래명세서일') || r.includes('일자') || r.includes('판매일')));
+            if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
             
             const headers = rows[headerRowIdx].map(h => String(h||"").trim());
-            const codeIdx = headers.indexOf('품번');
-            const qtyIdx = headers.indexOf('수량');
-            const dateIdx = headers.indexOf('거래명세서일');
             
-            // 🔥 규격(사이즈) 및 담당자 인덱스 추가 확인
-            let sizeIdx = headers.findIndex(h => h.includes('규격') || h.includes('사이즈'));
-            let managerIdx = headers.indexOf('담당자');
+            // 향상된 헤더 파싱
+            let codeIdx = headers.findIndex(h => h === '품번' || h.includes('상품코드') || h.includes('바코드'));
+            let qtyIdx = headers.findIndex(h => h === '수량' || h.includes('판매수량'));
+            let dateIdx = headers.findIndex(h => h.includes('거래명세서일') || h.includes('일자') || h.includes('판매일'));
+            let sizeIdx = headers.findIndex(h => h.includes('규격') || h.includes('사이즈') || h.includes('옵션'));
+            let managerIdx = headers.findIndex(h => h.includes('담당자') || h.includes('판매원') || h.includes('사원') || h.includes('작업자'));
 
             let sessionData = {};
             for(let i=headerRowIdx+1; i<rows.length; i++) {
@@ -1667,9 +1498,8 @@ window.renderSalesHistoryAdmin = () => {
                 
                 if(!code || !date) continue;
 
-                // 데이터 파싱: 값이 비어있으면 기본값 적용
                 const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
-                const manager = managerIdx > -1 ? String(r[managerIdx]||"").trim() : "김종훈"; 
+                const manager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈"; 
 
                 if(!sessionData[code]) sessionData[code] = {};
                 if(!sessionData[code][date]) sessionData[code][date] = {};
@@ -1679,12 +1509,9 @@ window.renderSalesHistoryAdmin = () => {
             
             let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
             
-            // 데이터 병합 (레거시 방어코드 포함)
             for(let code in sessionData) {
                 if(!newItems[code]) newItems[code] = {};
                 for(let date in sessionData[code]) { 
-                    
-                    // 🔥 레거시 데이터 방어코드: 과거 숫자로 저장된 데이터를 객체로 변환
                     if(typeof newItems[code][date] === 'number') {
                         let oldQty = newItems[code][date];
                         newItems[code][date] = { "알수없음": { "김종훈": oldQty } };
@@ -1710,8 +1537,7 @@ window.renderSalesHistoryAdmin = () => {
                 await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
                 SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY); 
                 rebuildIndex(); render(); window.renderSalesHistoryAdmin();
-                
-                alert(`✅ 사이즈별 판매량 업데이트 성공!\n\n(이전 데이터에서 사이즈가 누락되었다면, 전체 판매 엑셀을 이 창에서 한 번 더 덮어씌워 업로드해주세요.)`);
+                alert(`✅ 데이터 업로드 성공! \n\n만약 팝업에서 사이즈가 0으로 보인다면, [DB 초기화] 버튼을 눌러 과거 숫자를 지우고 엑셀을 다시 한 번 올려주세요.`);
             } catch(err) { alert("업로드 실패: " + err.message); }
             $("#shFile").value = "";
         };
