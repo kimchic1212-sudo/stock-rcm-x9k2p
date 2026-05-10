@@ -1,9 +1,11 @@
-// 🔥 1. 관리자 팝업창 등 스크롤 문제 해결을 위한 전역 CSS 자동 주입 🔥
+// 🔥 1. 관리자 팝업창 스크롤 및 상세창 Z-index 문제 완벽 해결 🔥
 const style = document.createElement('style');
 style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* 상세창(detailModal)이 대시보드(z-105)보다 항상 위에 뜨도록 강제 승급 */
+    #detailModal { z-index: 9999 !important; }
 `;
 document.head.appendChild(style);
 
@@ -252,7 +254,6 @@ function rebuildIndex(){
       $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
   }
 
-  // 🔥 2. 판매분석 드롭다운 UI (직접지정 기능 추가) 🔥
   if(!$("#salesPeriodWrap") && $("#sortSel")) {
       const wrap = document.createElement("div");
       wrap.className = "flex items-center gap-1.5 shrink-0";
@@ -281,7 +282,7 @@ function rebuildIndex(){
       $("#salesPeriodSel").onchange = (e) => { 
           if(e.target.value === "CUSTOM") {
               $("#customDateWrap").classList.replace("hidden", "flex");
-              $("#openAnalyticsBtn").classList.add("hidden"); // 적용하기 전엔 감춤
+              $("#openAnalyticsBtn").classList.add("hidden"); 
           } else {
               $("#customDateWrap").classList.replace("flex", "hidden");
               if(e.target.value !== "") $("#openAnalyticsBtn").classList.remove("hidden");
@@ -375,7 +376,7 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 🔥 3. 종합 판매 분석 리포트 대시보드 팝업 생성 함수 🔥
+// 🔥 2. 판매 분석 리포트 대시보드 (내부 필터링 기능 강화) 🔥
 window.openAnalyticsReport = () => {
     let f = getFilters();
     let titleDate = "전체 누적 기간";
@@ -383,57 +384,6 @@ window.openAnalyticsReport = () => {
     else if(f.salesPeriod === "30") titleDate = "최근 30일간";
     else if(f.salesPeriod === "90") titleDate = "최근 3개월간";
     else if(f.salesPeriod === "CUSTOM") titleDate = `${f.customStart} ~ ${f.customEnd}`;
-
-    // 현재 렌더링된 filteredList를 기준으로 통계 추출 (필터가 걸려있으면 걸린것만, 아니면 전체 제품중 판매된것)
-    // 좀 더 정확한 전체 통계를 위해 PRODUCTS에서 직접 기간 내 판매량을 계산
-    let totalSales = 0;
-    let catData = { "신발":0, "의류":0, "용품":0 };
-    let genderData = { "M":0, "W":0, "U":0 };
-    let brandData = {};
-
-    let soldItems = [];
-
-    PRODUCTS.forEach(p => {
-        if(p.periodSales > 0) {
-            totalSales += p.periodSales;
-            
-            const cat = p.카테고리 || "기타";
-            catData[cat] = (catData[cat] || 0) + p.periodSales;
-            
-            const g = p.gender || "U";
-            genderData[g] = (genderData[g] || 0) + p.periodSales;
-            
-            const b = p.브랜드 || "기타";
-            brandData[b] = (brandData[b] || 0) + p.periodSales;
-
-            soldItems.push(p);
-        }
-    });
-
-    soldItems.sort((a,b) => b.periodSales - a.periodSales);
-    const top5 = soldItems.slice(0, 5);
-
-    // 바 차트 렌더링 헬퍼 함수
-    const buildBar = (label, value, max, color) => {
-        const pct = totalSales > 0 ? Math.round((value/totalSales)*100) : 0;
-        const widthPct = max > 0 ? (value/max)*100 : 0;
-        return `
-        <div class="mb-2">
-            <div class="flex justify-between text-[11px] font-bold mb-1">
-                <span class="text-gray-700">${escapeHtml(label)}</span>
-                <span class="text-gray-900">${fmt(value)}개 <span class="text-gray-400">(${pct}%)</span></span>
-            </div>
-            <div class="w-full bg-gray-100 rounded-full h-2">
-                <div class="bg-${color}-500 h-2 rounded-full" style="width: ${widthPct}%"></div>
-            </div>
-        </div>`;
-    };
-
-    const maxCat = Math.max(...Object.values(catData), 1);
-    const maxGen = Math.max(...Object.values(genderData), 1);
-    const maxBrand = Math.max(...Object.values(brandData), 1);
-
-    const sortedBrands = Object.entries(brandData).sort((a,b)=>b[1]-a[1]).slice(0,5); // 탑 5 브랜드만
 
     let modal = $("#analyticsModal");
     if(!modal) {
@@ -443,69 +393,164 @@ window.openAnalyticsReport = () => {
         document.body.appendChild(modal);
     }
     
+    // 이 기간 동안 판매가 일어난 브랜드 목록만 추출
+    let availableBrands = [...new Set(PRODUCTS.filter(p=>p.periodSales>0).map(p=>p.브랜드))].filter(Boolean).sort();
+
     modal.innerHTML = `
         <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.parentNode.classList.add('hidden')"></div>
         <div class="modal-content relative bg-[#f8fafc] w-[90%] max-w-md flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-gray-200">
             <div class="p-4 bg-gray-900 border-b border-gray-800 flex justify-between items-center sticky top-0 z-20">
-                <h2 class="font-black text-lg text-white flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-orange-400"></i> 판매 분석 리포트</h2>
+                <h2 class="font-black text-lg text-white flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-orange-400"></i> 심층 분석 리포트</h2>
                 <button onclick="this.closest('#analyticsModal').classList.add('hidden')" class="p-1 -mr-2 text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div class="p-5 overflow-y-auto space-y-5">
-                
-                <div class="text-center pb-4 border-b border-gray-200">
-                    <div class="text-xs font-bold text-gray-500 mb-1">${titleDate}</div>
-                    <div class="text-3xl font-black text-gray-900">${fmt(totalSales)}<span class="text-lg text-gray-500 ml-1">개 판매됨</span></div>
-                </div>
-
-                <div>
-                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="layers" class="w-4 h-4 text-blue-500"></i> 카테고리별 비중</h3>
-                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                        ${buildBar('신발', catData['신발']||0, maxCat, 'blue')}
-                        ${buildBar('의류', catData['의류']||0, maxCat, 'blue')}
-                        ${buildBar('용품(기타)', catData['용품']||0, maxCat, 'blue')}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="users" class="w-4 h-4 text-pink-500"></i> 성별 비중</h3>
-                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                        ${buildBar('남성 (M)', genderData['M']||0, maxGen, 'pink')}
-                        ${buildBar('여성 (W)', genderData['W']||0, maxGen, 'pink')}
-                        ${buildBar('공용/기타 (U)', genderData['U']||0, maxGen, 'pink')}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="tag" class="w-4 h-4 text-emerald-500"></i> TOP 브랜드</h3>
-                    <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                        ${sortedBrands.map(b => buildBar(b[0], b[1], maxBrand, 'emerald')).join('')}
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="award" class="w-4 h-4 text-orange-500"></i> 🔥 제품 판매 TOP 5</h3>
-                    <div class="space-y-2">
-                        ${top5.map((p, idx) => `
-                            <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-orange-100 shadow-sm cursor-pointer hover:border-orange-300" onclick="openDetail(PRODUCTS.find(x=>x.품번==='${p.품번}'))">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <span class="font-black text-orange-600 text-sm w-4 text-center shrink-0">${idx+1}</span>
-                                    <div class="min-w-0">
-                                        <div class="text-[11px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
-                                        <div class="text-[13px] font-black text-gray-800 truncate">${escapeHtml(p.품명)}</div>
-                                    </div>
-                                </div>
-                                <div class="font-black text-orange-600 shrink-0 ml-2 bg-orange-50 px-2 py-1 rounded text-xs">${fmt(p.periodSales)}개</div>
-                            </div>
-                        `).join('')}
-                        ${top5.length === 0 ? '<div class="text-center text-xs font-bold text-gray-400 py-4">판매 데이터가 없습니다.</div>' : ''}
-                    </div>
-                </div>
-
+            
+            <div class="p-3 bg-white border-b border-gray-200 flex gap-2 z-10 shadow-sm">
+                <select id="dashCatSel" class="ipt flex-1 text-xs font-bold bg-gray-50 border-gray-200 rounded text-gray-700">
+                    <option value="ALL">📦 전체 카테고리</option>
+                    <option value="신발">👟 신발만 분석</option>
+                    <option value="의류">👕 의류만 분석</option>
+                    <option value="용품">🎒 용품만 분석</option>
+                </select>
+                <select id="dashBrandSel" class="ipt flex-1 text-xs font-bold bg-gray-50 border-gray-200 rounded text-gray-700">
+                    <option value="ALL">🏷️ 전체 브랜드</option>
+                    ${availableBrands.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}
+                </select>
             </div>
+
+            <div id="dashBody" class="p-5 overflow-y-auto space-y-5">
+                </div>
         </div>
     `;
+
+    const renderDashBody = () => {
+        const catF = $("#dashCatSel").value;
+        const brandF = $("#dashBrandSel").value;
+
+        let totalSales = 0;
+        let catData = { "신발":0, "의류":0, "용품":0 };
+        let genderData = { "M":0, "W":0, "U":0 };
+        let brandData = {};
+        let soldItems = [];
+
+        PRODUCTS.forEach(p => {
+            if(p.periodSales > 0) {
+                if(catF !== "ALL" && p.카테고리 !== catF) return;
+                if(brandF !== "ALL" && p.브랜드 !== brandF) return;
+
+                totalSales += p.periodSales;
+                
+                const cat = p.카테고리 || "기타";
+                catData[cat] = (catData[cat] || 0) + p.periodSales;
+                
+                const g = p.gender || "U";
+                genderData[g] = (genderData[g] || 0) + p.periodSales;
+                
+                const b = p.브랜드 || "기타";
+                brandData[b] = (brandData[b] || 0) + p.periodSales;
+
+                soldItems.push(p);
+            }
+        });
+
+        soldItems.sort((a,b) => b.periodSales - a.periodSales);
+        const top5 = soldItems.slice(0, 5);
+
+        const buildBar = (label, value, max, color) => {
+            if(value === 0) return '';
+            const pct = totalSales > 0 ? Math.round((value/totalSales)*100) : 0;
+            const widthPct = max > 0 ? (value/max)*100 : 0;
+            return `
+            <div class="mb-2.5 last:mb-0">
+                <div class="flex justify-between text-[11px] font-bold mb-1">
+                    <span class="text-gray-700">${escapeHtml(label)}</span>
+                    <span class="text-gray-900">${fmt(value)}개 <span class="text-gray-400">(${pct}%)</span></span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="bg-${color}-500 h-2 rounded-full" style="width: ${widthPct}%"></div>
+                </div>
+            </div>`;
+        };
+
+        const maxCat = Math.max(...Object.values(catData), 1);
+        const maxGen = Math.max(...Object.values(genderData), 1);
+        const maxBrand = Math.max(...Object.values(brandData), 1);
+        const sortedBrands = Object.entries(brandData).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+        let html = `
+            <div class="text-center pb-4 border-b border-gray-200">
+                <div class="text-xs font-bold text-gray-500 mb-1">${titleDate}</div>
+                <div class="text-3xl font-black text-gray-900">${fmt(totalSales)}<span class="text-lg text-gray-500 ml-1">개 판매됨</span></div>
+            </div>
+        `;
+
+        if(catF === 'ALL' && totalSales > 0) {
+            html += `
+            <div>
+                <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="layers" class="w-4 h-4 text-blue-500"></i> 카테고리별 비중</h3>
+                <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    ${buildBar('신발', catData['신발']||0, maxCat, 'blue')}
+                    ${buildBar('의류', catData['의류']||0, maxCat, 'blue')}
+                    ${buildBar('용품(기타)', catData['용품']||0, maxCat, 'blue')}
+                </div>
+            </div>`;
+        }
+
+        if(totalSales > 0) {
+            html += `
+            <div>
+                <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="users" class="w-4 h-4 text-pink-500"></i> 성별 비중</h3>
+                <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    ${buildBar('남성 (M)', genderData['M']||0, maxGen, 'pink')}
+                    ${buildBar('여성 (W)', genderData['W']||0, maxGen, 'pink')}
+                    ${buildBar('공용/기타 (U)', genderData['U']||0, maxGen, 'pink')}
+                </div>
+            </div>`;
+        }
+
+        if(brandF === 'ALL' && totalSales > 0) {
+            html += `
+            <div>
+                <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="tag" class="w-4 h-4 text-emerald-500"></i> 브랜드 랭킹 (TOP 5)</h3>
+                <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    ${sortedBrands.map(b => buildBar(b[0], b[1], maxBrand, 'emerald')).join('')}
+                </div>
+            </div>`;
+        }
+
+        let filterTitle = "";
+        if(catF !== "ALL") filterTitle += `[${catF}] `;
+        if(brandF !== "ALL") filterTitle += `[${brandF}] `;
+
+        html += `
+            <div>
+                <h3 class="font-black text-sm text-gray-800 flex items-center gap-1.5 mb-3"><i data-lucide="award" class="w-4 h-4 text-orange-500"></i> 🔥 ${filterTitle}판매 TOP 5</h3>
+                <div class="space-y-2">
+                    ${top5.map((p, idx) => `
+                        <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-orange-100 shadow-sm cursor-pointer hover:border-orange-300" onclick="openDetail(PRODUCTS.find(x=>x.품번==='${p.품번}'))">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="font-black text-orange-600 text-sm w-4 text-center shrink-0">${idx+1}</span>
+                                <div class="min-w-0">
+                                    <div class="text-[11px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
+                                    <div class="text-[13px] font-black text-gray-800 truncate">${escapeHtml(p.품명)}</div>
+                                </div>
+                            </div>
+                            <div class="font-black text-orange-600 shrink-0 ml-2 bg-orange-50 px-2 py-1 rounded text-xs">${fmt(p.periodSales)}개</div>
+                        </div>
+                    `).join('')}
+                    ${top5.length === 0 ? '<div class="text-center text-xs font-bold text-gray-400 py-4">판매 데이터가 없습니다.</div>' : ''}
+                </div>
+            </div>
+        `;
+
+        $("#dashBody").innerHTML = html;
+        if(window.lucide) lucide.createIcons();
+    };
+
+    $("#dashCatSel").onchange = renderDashBody;
+    $("#dashBrandSel").onchange = renderDashBody;
+
+    renderDashBody();
     modal.classList.remove("hidden");
-    if(window.lucide) lucide.createIcons();
 };
 
 window.openSalesGuide = (code) => {
@@ -748,7 +793,6 @@ function render(){
 
   const f = getFilters();
   
-  // 🔥 동적 기간 필터링 로직 (직접 지정 포함) 🔥
   let cutoffDate = "0000-00-00";
   let endDate = "9999-99-99";
   if (f.salesPeriod === "CUSTOM") {
