@@ -4,7 +4,7 @@ style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    #detailModal, #dashDetailModal { z-index: 9999 !important; }
+    #detailModal, #dashDetailModal, #salesGuideModal, #allMemosModal, #transfersModal { z-index: 9999 !important; }
     #analyticsDashboard { z-index: 105 !important; }
     .dash-scroll::-webkit-scrollbar { width: 6px; }
     .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -42,6 +42,10 @@ let CURRENT_PRODUCT = null;
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
 let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES') || '[]');
 
+// 대시보드 상태 관리
+let windowDashItems = [];
+let windowCurrentDashIndex = 0;
+
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 const fmt = n => (n??0).toLocaleString("ko-KR");
@@ -53,10 +57,7 @@ function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
 function checkPat() {
-    if(!getPat()) {
-        alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요.");
-        return false;
-    }
+    if(!getPat()) { alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요."); return false; }
     return true;
 }
 
@@ -81,11 +82,7 @@ function getChosung(str){
 
 async function copyText(text, btn){
   try{
-    if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } 
-    else {
-      const ta = document.createElement("textarea"); ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
-      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
-    }
+    await navigator.clipboard.writeText(text);
     if(btn){
       const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
       if(window.lucide) lucide.createIcons();
@@ -106,21 +103,10 @@ function applyMeta(meta){
 
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
-  
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; 
-      CURRENT_META = cached.meta || null;
-      IMAGES = cached.images || {};
-      MEMOS = cached.memos || [];
-      TRANSFERS = cached.transfers || [];
-      PROMOTIONS = cached.promotions || {};
-      SALES_GUIDES = cached.salesGuides || {};
-      SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META);
-      rebuildIndex(); render(); 
-      return;
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
+      applyMeta(CURRENT_META); rebuildIndex(); render(); return;
   }
-  
   try {
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
@@ -131,46 +117,19 @@ async function loadData(force = false){
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
-
-      if(!invRes.ok) throw new Error("재고 로드 실패");
-      const invData = await invRes.json();
-      RAW = invData.rows || []; 
-      CURRENT_META = invData.meta || null;
-
+      const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
       if(imgRes && imgRes.ok) IMAGES = await imgRes.json(); else IMAGES = {};
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
       if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+      if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
+      if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
+      if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
       
-      if(promoRes && promoRes.ok) {
-          const pData = await promoRes.json();
-          PROMOTIONS = Object.keys(pData).length > 0 ? pData : {};
-      } else { PROMOTIONS = {}; }
-      
-      if(sgRes && sgRes.ok) {
-          const sgData = await sgRes.json();
-          SALES_GUIDES = Object.keys(sgData).length > 0 ? sgData : {};
-      } else { SALES_GUIDES = {}; }
-
-      if(shRes && shRes.ok) {
-          const shData = await shRes.json();
-          SALES_HISTORY = shData.items ? shData : { meta: {}, items: {} };
-      } else { SALES_HISTORY = { meta: {}, items: {} }; }
-
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      
-      applyMeta(CURRENT_META);
-      rebuildIndex(); render();
-  } catch(e) { 
-      if(cached) { 
-          RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || {meta:{},items:{}};
-          applyMeta(CURRENT_META); rebuildIndex(); render(); 
-      } else {
-          RAW=[]; render();
-      }
-  }
+      applyMeta(CURRENT_META); rebuildIndex(); render();
+  } catch(e) { console.error("Data Load Error", e); }
 }
 
-async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) }); }
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
 function getActiveWeeklyCategory() {
@@ -179,11 +138,31 @@ function getActiveWeeklyCategory() {
     const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
     const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
     const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
-
     if (now >= t1 && now < t2) return "FOOTWEAR";
     if (now >= t2 && now < t3) return "APPAREL";
     if (now >= t3 && now <= t4) return "ACC/GEAR";
     return null;
+}
+
+// 🔥 사이즈 필터 옵션을 신발/의류/용품 그룹으로 예쁘게 묶어주는 함수
+function generateGroupedSizeOptions(sizesSet) {
+    const arr = Array.from(sizesSet).map(s => String(s).trim()).filter(Boolean);
+    const fw = [], ap = [], gear = [];
+    arr.forEach(s => {
+        if (/^\d{3}$/.test(s)) fw.push(s);
+        else if (/^[SMLX]+$/i.test(s) || s.toUpperCase()==='FREE' || s.toUpperCase()==='OS' || s.toUpperCase()==='F') ap.push(s);
+        else gear.push(s);
+    });
+    fw.sort((a,b) => parseInt(a) - parseInt(b));
+    const apOrder = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
+    ap.sort((a,b) => (apOrder[a.toUpperCase()]||99) - (apOrder[b.toUpperCase()]||99));
+    gear.sort();
+
+    let html = `<option value="ALL">📏 전체 사이즈</option>`;
+    if(fw.length) html += `<optgroup label="👟 신발">${fw.map(s => `<option value="${s}">${s}</option>`).join('')}</optgroup>`;
+    if(ap.length) html += `<optgroup label="👕 의류">${ap.map(s => `<option value="${s}">${s}</option>`).join('')}</optgroup>`;
+    if(gear.length) html += `<optgroup label="🎒 용품/기타">${gear.map(s => `<option value="${s}">${s}</option>`).join('')}</optgroup>`;
+    return html;
 }
 
 function rebuildIndex(){
@@ -213,9 +192,6 @@ function rebuildIndex(){
     p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
-    
-    const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
-    p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
     if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
@@ -230,31 +206,24 @@ function rebuildIndex(){
         }
     }
     const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
-    p._hay = rawHay.toLowerCase();
-    p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
-    p._chosung = getChosung(p._hayClean); 
+    p._hay = rawHay.toLowerCase(); p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); p._chosung = getChosung(p._hayClean); 
     return p;
   });
-  
-  const sortedSizes = Array.from(allSizes).sort((a,b) => {
-      const numA = parseInt(a), numB = parseInt(b);
-      if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
-      return a.localeCompare(b);
-  });
 
+  // 메인 화면 사이즈 필터 생성 (그룹화 적용)
   if(!$("#sizeSel") && $("#sortSel")) {
       const sel = document.createElement("select");
       sel.id = "sizeSel";
-      sel.className = "ipt text-[13px] font-bold ml-2 bg-white border-gray-300 rounded shrink-0 px-2 py-1.5";
+      sel.className = "ipt text-[13px] font-bold ml-2 bg-white border-gray-300 rounded shrink-0 px-2 py-1.5 outline-none";
       $("#sortSel").parentNode.insertBefore(sel, $("#sortSel"));
       sel.onchange = () => { visibleCount=60; render(); };
   }
   if($("#sizeSel")) {
       const currentSize = $("#sizeSel").value || "ALL";
-      $("#sizeSel").innerHTML = `<option value="ALL">📏 전체 사이즈</option>` + sortedSizes.map(s => `<option value="${escapeHtml(s)}" ${s===currentSize?'selected':''}>${escapeHtml(s)}</option>`).join("");
+      $("#sizeSel").innerHTML = generateGroupedSizeOptions(allSizes);
+      $("#sizeSel").value = currentSize;
   }
 
-  // 메인화면: 기간조회 필터를 없애고 리포트 버튼만 심플하게 배치
   if(!$("#openAnalyticsBtn") && $("#sortSel")) {
       const btnWrap = document.createElement("div");
       btnWrap.className = "flex items-center ml-2 shrink-0";
@@ -320,8 +289,7 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// Chart.js 로드
-function loadChartJS() {
+async function loadChartJS() {
     return new Promise((resolve) => {
         if (window.Chart && window.ChartDataLabels) return resolve();
         if (!window.Chart) {
@@ -342,15 +310,15 @@ function loadChartJS() {
     });
 }
 
-// 🔥 고도화된 반응형 분석 대시보드 (성별 차트, 사이즈 필터링, 긴급보충 제안 추가) 🔥
+// 🔥 고도화된 반응형 분석 대시보드
 window.openAnalyticsReport = async () => {
     await loadChartJS();
 
-    let dashFilter = { cat: null, brand: null };
+    let dashFilter = { cat: null, brand: null, gender: null };
     let currentPeriod = "7"; 
     let currentCustomStart = "";
     let currentCustomEnd = "";
-    let currentSizeFilter = "ALL"; // 대시보드 전용 사이즈 필터
+    let currentSizeFilter = "ALL";
 
     const generateDateOptions = () => {
         const now = new Date(); let html = '';
@@ -380,24 +348,19 @@ window.openAnalyticsReport = async () => {
         return html;
     };
 
-    // 사이즈 목록 추출 (필터용)
-    const allUniqueSizes = Array.from(new Set(PRODUCTS.flatMap(p => p.sizes.map(s => String(s.size).trim()))))
-        .sort((a,b) => (parseFloat(a)||0) - (parseFloat(b)||0));
-    const sizeOptionsHtml = `<option value="ALL">📏 전체 사이즈</option>` + allUniqueSizes.map(s => `<option value="${s}">${s}</option>`).join('');
+    const allUniqueSizesSet = new Set(PRODUCTS.flatMap(p => p.sizes.map(s => String(s.size).trim())));
+    const sizeOptionsHtml = generateGroupedSizeOptions(allUniqueSizesSet);
 
     const getPeriodItems = (period, start, end) => {
         let items = [];
         let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
-        
         if (period === "CUSTOM") { cutoffDate = start || "0000-00-00"; endDate = end || "9999-99-99"; } 
         else if (period && period !== "ALL") {
-            const d = new Date(Date.now() - Number(period) * 86400000);
-            cutoffDate = d.toISOString().split('T')[0];
+            const d = new Date(Date.now() - Number(period) * 86400000); cutoffDate = d.toISOString().split('T')[0];
         }
 
         PRODUCTS.forEach(p => {
-            let busanSales = 0;
-            let sinsaSales = 0;
+            let busanSales = 0; let sinsaSales = 0; let centerSales = 0;
             let sizeSalesMap = {};
 
             if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
@@ -405,24 +368,18 @@ window.openAnalyticsReport = async () => {
                     if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
                         const dayData = SALES_HISTORY.items[p.품번][date];
                         if (typeof dayData === 'number') {
-                            busanSales += dayData;
-                            sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
+                            busanSales += dayData; sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
                         } else if (typeof dayData === 'object') {
                             for (let size in dayData) {
                                 if (typeof dayData[size] === 'object') {
                                     for(let mgr in dayData[size]) {
                                         const qty = dayData[size][mgr];
-                                        if(mgr.includes("김종훈")) {
-                                            busanSales += qty;
-                                            sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
-                                        }
-                                        if(mgr.includes("승호") || mgr.includes("신사")) {
-                                            sinsaSales += qty;
-                                        }
+                                        if(mgr.includes("김종훈") || mgr.includes("부산")) { busanSales += qty; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty; }
+                                        if(mgr.includes("승호") || mgr.includes("신사")) { sinsaSales += qty; }
+                                        if(mgr.includes("물류") || mgr.includes("본사")) { centerSales += qty; }
                                     }
                                 } else {
-                                    busanSales += dayData[size]; // 레거시
-                                    sizeSalesMap[size] = (sizeSalesMap[size] || 0) + dayData[size];
+                                    busanSales += dayData[size]; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + dayData[size];
                                 }
                             }
                         }
@@ -430,21 +387,11 @@ window.openAnalyticsReport = async () => {
                 }
             }
 
-            p.dashBusanSalesTotal = busanSales;
-            p.dashSinsaSalesTotal = sinsaSales;
+            p.dashBusanSalesTotal = busanSales; p.dashSinsaSalesTotal = sinsaSales; p.dashCenterSalesTotal = centerSales;
             p.dashSizeSalesMap = sizeSalesMap;
 
-            // 사이즈 필터 적용 로직
-            let finalSales = 0;
-            if (currentSizeFilter === "ALL") {
-                finalSales = busanSales;
-            } else {
-                finalSales = sizeSalesMap[currentSizeFilter] || 0;
-            }
-
-            if(finalSales > 0) {
-                items.push({ ...p, dashSales: finalSales, dashRev: finalSales * (p.currentPromoPrice || p.소비자가 || 0) });
-            }
+            let finalSales = currentSizeFilter === "ALL" ? busanSales : (sizeSalesMap[currentSizeFilter] || 0);
+            if(finalSales > 0) items.push({ ...p, dashSales: finalSales, dashRev: finalSales * (p.currentPromoPrice || p.소비자가 || 0) });
         });
         return items.sort((a, b) => b.dashSales - a.dashSales);
     };
@@ -467,18 +414,11 @@ window.openAnalyticsReport = async () => {
                     <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <select id="dashSizeSel" class="ipt text-[12px] font-black bg-white border-gray-300 text-gray-700 rounded px-3 py-2 outline-none cursor-pointer">
-                        ${sizeOptionsHtml}
-                    </select>
-
+                    <select id="dashSizeSel" class="ipt text-[12px] font-black bg-white border-gray-300 text-gray-700 rounded px-3 py-2 outline-none cursor-pointer">${sizeOptionsHtml}</select>
                     <select id="dashPeriodSel" class="ipt text-[12px] font-black bg-orange-50 border-orange-200 text-orange-700 rounded px-3 py-2 outline-none cursor-pointer">
                         <optgroup label="빠른 기간">
-                            <option value="1">어제/오늘 (1일)</option>
-                            <option value="7" selected>최근 7일</option>
-                            <option value="30">최근 1개월</option>
-                            <option value="90">최근 3개월 (분기)</option>
-                            <option value="180">최근 6개월 (반기)</option>
-                            <option value="ALL">전체 누적실적</option>
+                            <option value="1">어제/오늘 (1일)</option><option value="7" selected>최근 7일</option><option value="30">최근 1개월</option>
+                            <option value="90">최근 3개월 (분기)</option><option value="180">최근 6개월 (반기)</option><option value="ALL">전체 누적실적</option>
                             <option value="CUSTOM_INPUT">📅 직접 지정</option>
                         </optgroup>
                         ${generateDateOptions()}
@@ -488,9 +428,7 @@ window.openAnalyticsReport = async () => {
                         <input type="date" id="dashEnd" class="ipt text-[11px] px-1 py-1 w-[100px] border-none outline-none text-gray-600 font-bold cursor-pointer">
                         <button id="dashApply" class="px-3 py-1 bg-orange-500 text-white rounded text-[11px] font-black shrink-0 hover:bg-orange-600">적용</button>
                     </div>
-                    <button id="closeDashboardBtn" class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-auto md:ml-2">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
+                    <button id="closeDashboardBtn" class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-auto md:ml-2"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
             </header>
             <main class="flex-1 overflow-hidden p-4 lg:p-6">
@@ -509,7 +447,6 @@ window.openAnalyticsReport = async () => {
                             <div class="relative h-[180px] w-full"><canvas id="brandChart"></canvas></div>
                         </article>
                     </section>
-
                     <section class="lg:col-span-3 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                             <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-500"></i> 판매 랭킹 (클릭 시 사이즈 상세분석)</h2>
@@ -524,34 +461,22 @@ window.openAnalyticsReport = async () => {
         $("#dashPeriodSel").value = "7";
         $("#dashPeriodSel").onchange = (e) => {
             const val = e.target.value;
-            if(val === "CUSTOM_INPUT") {
-                $("#dashCustomDateWrap").classList.replace("hidden", "flex");
-            } else {
+            if(val === "CUSTOM_INPUT") $("#dashCustomDateWrap").classList.replace("hidden", "flex");
+            else {
                 $("#dashCustomDateWrap").classList.replace("flex", "hidden");
-                if (val.startsWith("EXACT_")) {
-                    const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2];
-                } else {
-                    currentPeriod = val;
-                }
-                dashFilter = { cat: null, brand: null }; 
-                updateDashData();
+                if (val.startsWith("EXACT_")) { const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2]; } 
+                else currentPeriod = val;
+                dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
             }
         };
 
-        $("#dashSizeSel").onchange = (e) => {
-            currentSizeFilter = e.target.value;
-            updateDashData();
-        };
-        
+        $("#dashSizeSel").onchange = (e) => { currentSizeFilter = e.target.value; updateDashData(); };
         $("#dashApply").onclick = () => {
             if(!$("#dashStart").value || !$("#dashEnd").value) { alert("날짜를 모두 선택해주세요."); return; }
             currentPeriod = "CUSTOM"; currentCustomStart = $("#dashStart").value; currentCustomEnd = $("#dashEnd").value;
-            dashFilter = { cat: null, brand: null }; updateDashData();
+            dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
         };
-
-        $("#closeDashboardBtn").onclick = () => {
-            modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300);
-        };
+        $("#closeDashboardBtn").onclick = () => { modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300); };
         if(window.lucide) lucide.createIcons();
     };
 
@@ -564,8 +489,14 @@ window.openAnalyticsReport = async () => {
         let filteredItems = rawSoldItems.filter(p => {
             if (dashFilter.cat && p.카테고리 !== dashFilter.cat) return false;
             if (dashFilter.brand && p.브랜드 !== dashFilter.brand) return false;
+            let g = p.성별 || p.gender || "U";
+            if(g === "M" || g === "남성" || g === "남") g = "남성"; else if(g === "W" || g === "여성" || g === "여") g = "여성"; else g = "공용/기타";
+            if (dashFilter.gender && g !== dashFilter.gender) return false;
             return true;
         });
+
+        // 상태 공유 (좌우 네비게이션 용)
+        windowDashItems = filteredItems;
 
         let totalSales = 0; let totalRev = 0;
         let catData = {}; let brandData = {}; let genderData = {};
@@ -574,47 +505,39 @@ window.openAnalyticsReport = async () => {
             totalSales += p.dashSales; totalRev += p.dashRev;
             catData[p.카테고리||"기타"] = (catData[p.카테고리||"기타"] || 0) + p.dashSales;
             brandData[p.브랜드||"기타"] = (brandData[p.브랜드||"기타"] || 0) + p.dashSales;
-            
             let g = p.성별 || p.gender || "U";
-            if(g === "M" || g === "남성" || g === "남") g = "남성";
-            else if(g === "W" || g === "여성" || g === "여") g = "여성";
-            else g = "공용/기타";
+            if(g === "M" || g === "남성" || g === "남") g = "남성"; else if(g === "W" || g === "여성" || g === "여") g = "여성"; else g = "공용/기타";
             genderData[g] = (genderData[g] || 0) + p.dashSales;
         });
 
-        let sizeText = currentSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${currentSizeFilter} 사이즈]</span>`;
+        let sizeText = currentSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${currentSizeFilter} 사이즈 필터됨]</span>`;
         $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매${sizeText}`;
 
         const filterLabel = $("#activeFilterLabel"); let labelText = [];
         if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
         if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
+        if (dashFilter.gender) labelText.push(`[${dashFilter.gender}]`);
 
         if (labelText.length > 0) {
             filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`; filterLabel.classList.remove("hidden");
-            filterLabel.onclick = () => { dashFilter = { cat: null, brand: null }; renderDashState(); };
+            filterLabel.onclick = () => { dashFilter = { cat: null, brand: null, gender: null }; renderDashState(); };
         } else filterLabel.classList.add("hidden");
 
         $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
             const imgSrc = IMAGES[p.shopNo] || null;
-            const imgHtml = imgSrc 
-                ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
-                : `<div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
+            const imgHtml = imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0 mix-blend-multiply">` : `<div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
 
-            let pParam = currentPeriod;
-            if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
+            let pParam = currentPeriod; if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
             // 🔥 스마트 보충 제안 알림 생성 (리스트 뷰 전용) 🔥
-            let insightHtml = "";
-            let isBusanLowStock = false;
+            let insightHtml = ""; let isBusanLowStock = false;
             if (currentSizeFilter !== "ALL") {
                 const sObj = p.sizes.find(s => String(s.size).trim() === currentSizeFilter);
-                if (sObj && sObj.busan <= 1) isBusanLowStock = true;
-            } else {
-                if (p.busanTotal <= 2) isBusanLowStock = true;
-            }
+                if (sObj && sObj.busan <= 2) isBusanLowStock = true;
+            } else { if (p.busanTotal <= 3) isBusanLowStock = true; } // 전체 기준이면 조금 여유있게 3
             
             let isCenterOrSinsaHasStock = (p.centerTotal + p.sinsaTotal) > 0;
-            let isBusanSellingWell = p.dashBusanSalesTotal >= 3; 
+            let isBusanSellingWell = p.dashBusanSalesTotal >= 2; 
             let isBusanDominating = p.dashBusanSalesTotal > p.dashSinsaSalesTotal;
 
             if (isBusanLowStock && isCenterOrSinsaHasStock && isBusanSellingWell && isBusanDominating) {
@@ -622,12 +545,14 @@ window.openAnalyticsReport = async () => {
                     <div class="mt-2.5 bg-red-50 border border-red-100 p-2 rounded-lg flex items-start gap-2 shadow-sm w-full">
                         <i data-lucide="zap" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
                         <div class="text-[11px] text-red-800 leading-tight">
-                            <b>🔥 긴급 확보 추천!</b> 부산점 판매량(${p.dashBusanSalesTotal}개)이 신사점(${p.dashSinsaSalesTotal}개)을 압도합니다. 
-                            부산 재고가 부족하니 타 지점 재고(${p.centerTotal + p.sinsaTotal}개)를 끌어오면 즉시 매출로 직결됩니다!
+                            <b>🔥 매출 보증! 긴급 확보 추천!</b><br>부산점 판매량(${p.dashBusanSalesTotal}개)이 신사점(${p.dashSinsaSalesTotal}개)을 압도하지만 부산 재고가 바닥입니다. 타 지점 재고(${p.centerTotal + p.sinsaTotal}개)를 뺏어오면 무조건 팔립니다!
                         </div>
                     </div>
                 `;
             }
+
+            let gLabel = p.성별 || p.gender || "U";
+            if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
 
             return `
             <div class="flex flex-col bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
@@ -637,7 +562,7 @@ window.openAnalyticsReport = async () => {
                         ${imgHtml}
                         <div class="min-w-0 pr-2">
                             <div class="flex items-center gap-1 mb-1">
-                                <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-black">${escapeHtml(p.성별||p.gender||"U")}</span>
+                                <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-black">${escapeHtml(gLabel)}</span>
                                 <div class="text-[11px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
                             </div>
                             <div class="text-[15px] font-black text-gray-800 truncate leading-snug">${escapeHtml(p.품명)}</div>
@@ -680,12 +605,9 @@ window.openAnalyticsReport = async () => {
             });
         };
 
-        if(catChartInstance) catChartInstance.destroy(); 
-        if(brandChartInstance) brandChartInstance.destroy();
-        if(genderChartInstance) genderChartInstance.destroy();
+        if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy(); if(genderChartInstance) genderChartInstance.destroy();
 
         const defaultColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'];
-        
         catChartInstance = renderPieChart('catChart', catData, 'cat', defaultColors);
         
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
@@ -694,8 +616,11 @@ window.openAnalyticsReport = async () => {
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
         brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', defaultColors);
 
-        // 성별 차트는 파란색(남), 빨간색(여), 회색(공용) 느낌으로 배색
-        genderChartInstance = renderPieChart('genderChart', genderData, null, ['#3b82f6', '#ef4444', '#9ca3af']);
+        // 성별 차트 (남:파랑, 여:빨강, 공용/기타:회색)
+        const genderColors = Object.keys(genderData).map(k => {
+            if(k==='남성') return '#3b82f6'; if(k==='여성') return '#ef4444'; return '#9ca3af';
+        });
+        genderChartInstance = renderPieChart('genderChart', genderData, 'gender', genderColors);
     };
 
     if(!$("#analyticsDashboard")) renderDashUI(); else $("#analyticsDashboard").classList.remove("hidden");
@@ -703,9 +628,50 @@ window.openAnalyticsReport = async () => {
     updateDashData();
 };
 
-// 🔥 사이즈별 상세 분석 및 스마트 보충 팝업 (대규모 UI 개편)
-window.openDashDetail = (code, periodParam) => {
+// 🔥 장바구니 빠른 추가 로직 🔥
+window.quickTransfer = async (code, size, qty, fromStr, btn) => {
+    if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
+    if(!p) return;
+    if(!confirm(`[스마트 보충 제안]\n${p.품명}\n${size} 사이즈 ${qty}개를 ${fromStr}에서 부산점으로 이동 요청할까요?`)) return;
+    
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> 요청중...`;
+    if(window.lucide) lucide.createIcons();
+
+    try {
+        const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+        let sha = null; let oldData = [];
+        try { 
+            const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+            if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
+        }catch(e){}
+        
+        const d = new Date();
+        const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const finalMemo = `[${fromStr} -> 부산점] 스마트보충 자동요청`;
+        
+        oldData.push({ id: "tr_" + Date.now(), code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
+        
+        const body = { message:"add smart transfer request", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
+        if(sha) body.sha = sha;
+        await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        
+        TRANSFERS = oldData; 
+        btn.className = "bg-gray-100 text-gray-400 px-2 py-1 rounded-md text-[11px] font-black cursor-not-allowed";
+        btn.innerHTML = `✅ 요청완료`;
+        btn.onclick = null;
+    } catch(e) {
+        alert("이동 요청 실패!");
+        btn.innerHTML = origHtml;
+    }
+};
+
+// 🔥 사이즈별 상세 분석 및 스마트 보충 팝업 (대규모 UI 개편 & 좌우이동/스와이프 추가) 🔥
+window.openDashDetail = (code, periodParam) => {
+    // 네비게이션 인덱스 동기화
+    windowCurrentDashIndex = windowDashItems.findIndex(x => x.품번 === code);
+    const p = windowDashItems[windowCurrentDashIndex];
     if(!p) return;
 
     let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
@@ -715,29 +681,27 @@ window.openDashDetail = (code, periodParam) => {
         const d = new Date(Date.now() - Number(periodParam) * 86400000); cutoffDate = d.toISOString().split('T')[0];
     }
 
-    let sizeSalesMap = {};
+    // 팝업 내부 차트용 전체 지점 데이터 파싱 (신사점, 물류센터 포함)
+    let sizeSalesMapBusan = {}; let sizeSalesMapSinsa = {}; let sizeSalesMapCenter = {};
     if (SALES_HISTORY.items && SALES_HISTORY.items[code]) {
         const history = SALES_HISTORY.items[code];
         for (let date in history) {
             if (periodParam === "ALL" || (date >= cutoffDate && date <= endDate)) {
                 const dayData = history[date];
-                if (typeof dayData === 'object') {
+                if (typeof dayData === 'number') { sizeSalesMapBusan["알수없음"] = (sizeSalesMapBusan["알수없음"] || 0) + dayData; } 
+                else if (typeof dayData === 'object') {
                     for (let size in dayData) {
                         if (typeof dayData[size] === 'object') {
                             for (let mgr in dayData[size]) {
-                                if (mgr.includes("김종훈")) {
-                                    const qty = dayData[size][mgr] || 0;
-                                    if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
-                                }
+                                const qty = dayData[size][mgr];
+                                if (mgr.includes("김종훈")||mgr.includes("부산")) sizeSalesMapBusan[size] = (sizeSalesMapBusan[size]||0) + qty;
+                                if (mgr.includes("승호")||mgr.includes("신사")) sizeSalesMapSinsa[size] = (sizeSalesMapSinsa[size]||0) + qty;
+                                if (mgr.includes("물류")||mgr.includes("본사")) sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
                             }
                         } else {
-                            // 레거시 호환
-                            const qty = dayData[size] || 0;
-                            if (qty > 0) sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty;
+                            sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + dayData[size];
                         }
                     }
-                } else {
-                    sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
                 }
             }
         }
@@ -748,24 +712,46 @@ window.openDashDetail = (code, periodParam) => {
     if(!modal) {
         modal = document.createElement("div"); modal.id = "dashDetailModal";
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4";
-        // 🔥 빈 여백(backdrop) 누르면 꺼지게 onClick 추가 🔥
-        modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10"></div>`;
+        // 여백 클릭시 닫힘 처리
+        modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
         document.body.appendChild(modal);
+        
+        // 스와이프 이벤트 설정
+        let touchstartX = 0; let touchendX = 0;
+        const contentWrap = modal.querySelector('#ddContentWrap');
+        contentWrap.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive:true});
+        contentWrap.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            handleGesture();
+        }, {passive:true});
+        
+        function handleGesture() {
+            if (touchendX < touchstartX - 60) $("#nextDashBtn")?.click(); // Swipe Left -> Next
+            if (touchendX > touchstartX + 60) $("#prevDashBtn")?.click(); // Swipe Right -> Prev
+        }
     }
 
-    const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMap), ...p.sizes.map(s=>String(s.size).trim())]))
-        .sort((a,b) => (parseFloat(a)||0) - (parseFloat(b)||0));
+    const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMapBusan), ...p.sizes.map(s=>String(s.size).trim())]))
+        .sort((a,b) => {
+            const isFw = /^\d{3}$/.test(a) && /^\d{3}$/.test(b);
+            if(isFw) return parseInt(a) - parseInt(b);
+            const order = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
+            if(order[a.toUpperCase()] && order[b.toUpperCase()]) return order[a.toUpperCase()] - order[b.toUpperCase()];
+            return a.localeCompare(b);
+        });
 
     const chartLabels = allUniqueSizes.filter(s => s !== "알수없음");
-    const chartData = chartLabels.map(s => sizeSalesMap[s] || 0);
+    const chartDataBusan = chartLabels.map(s => sizeSalesMapBusan[s] || 0);
+    const chartDataSinsa = chartLabels.map(s => sizeSalesMapSinsa[s] || 0);
+    const chartDataCenter = chartLabels.map(s => sizeSalesMapCenter[s] || 0);
     
     let largeSizeSales = 0;
     chartLabels.forEach(s => {
-        const qty = sizeSalesMap[s] || 0;
+        const qty = sizeSalesMapBusan[s] || 0;
         if(qty > 0) {
-            if(p.gender === 'M' && parseInt(s) >= 290) largeSizeSales += qty;
-            if(p.gender === 'W' && parseInt(s) >= 250) largeSizeSales += qty;
+            if((p.성별==='M'||p.gender==='M') && parseInt(s) >= 290) largeSizeSales += qty;
+            if((p.성별==='W'||p.gender==='W') && parseInt(s) >= 250) largeSizeSales += qty;
             if(['XL', 'XXL', '2XL', '3XL'].includes(s.toUpperCase())) largeSizeSales += qty;
         }
     });
@@ -776,22 +762,24 @@ window.openDashDetail = (code, periodParam) => {
     }
 
     const tableHtml = allUniqueSizes.map(size => {
-        const sold = sizeSalesMap[size] || 0;
+        const soldBusan = sizeSalesMapBusan[size] || 0;
+        const soldSinsa = sizeSalesMapSinsa[size] || 0;
+        const soldCenter = sizeSalesMapCenter[size] || 0;
+        
         const sObj = p.sizes.find(s => String(s.size).trim() === String(size)) || { busan: 0, sinsa: 0, center: 0 };
         
         let suggestHtml = `<span class="text-gray-300">-</span>`;
-        if (sold > sObj.busan) {
-            let needed = sold - sObj.busan;
-            let takeCenter = Math.min(sObj.center, needed);
-            needed -= takeCenter;
+        if (soldBusan > sObj.busan) {
+            let needed = soldBusan - sObj.busan;
+            let takeCenter = Math.min(sObj.center, needed); needed -= takeCenter;
             let takeSinsa = Math.min(sObj.sinsa, needed);
             
             let badges = [];
-            // 🔥 1순위 물류, 2순위 신사 로직
-            if(takeCenter > 0) badges.push(`<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm">1️⃣물류 ${takeCenter}</span>`);
-            if(takeSinsa > 0) badges.push(`<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm">2️⃣신사 ${takeSinsa}</span>`);
+            // 🔥 자동 이동요청 버튼 연결
+            if(takeCenter > 0) badges.push(`<button onclick="quickTransfer('${p.품번}','${size}',${takeCenter},'본사/물류', this)" class="bg-blue-100 hover:bg-blue-500 hover:text-white text-blue-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm transition-colors cursor-pointer flex items-center gap-1">1️⃣물류 ${takeCenter}</button>`);
+            if(takeSinsa > 0) badges.push(`<button onclick="quickTransfer('${p.품번}','${size}',${takeSinsa},'신사점', this)" class="bg-orange-100 hover:bg-orange-500 hover:text-white text-orange-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm transition-colors cursor-pointer flex items-center gap-1">2️⃣신사 ${takeSinsa}</button>`);
             
-            if(badges.length > 0) suggestHtml = `<div class="flex flex-col gap-1 items-center justify-center">${badges.join("")}</div>`;
+            if(badges.length > 0) suggestHtml = `<div class="flex flex-col gap-1.5 items-center justify-center">${badges.join("")}</div>`;
             else suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-1 rounded-md text-[11px] font-black">🚨 전사품절</span>`;
         }
 
@@ -800,56 +788,72 @@ window.openDashDetail = (code, periodParam) => {
 
         return `<tr class="${rowClass}">
             <td class="py-3 text-gray-700 font-bold">${size}</td>
-            <td class="py-3 text-blue-600 font-black text-base">${sold > 0 ? sold : '-'}</td>
+            <td class="py-3 text-blue-600 font-black text-[15px] bg-blue-50/30">${soldBusan > 0 ? soldBusan : '-'}</td>
             <td class="py-3 ${sObj.busan<=2?'text-red-500 font-black':''}">${sObj.busan}</td>
-            <td class="py-3 text-gray-500">${sObj.center}</td>
-            <td class="py-3 text-gray-500">${sObj.sinsa}</td>
+            <td class="py-3 text-gray-500">
+                <div class="text-[10px] text-gray-400 mb-0.5">판:${soldCenter} / 재:${sObj.center}</div>
+            </td>
+            <td class="py-3 text-gray-500">
+                <div class="text-[10px] text-gray-400 mb-0.5">판:${soldSinsa} / 재:${sObj.sinsa}</div>
+            </td>
             <td class="py-3">${suggestHtml}</td>
         </tr>`;
     }).join('');
 
-    // 🔥 2단 레이아웃 주입
+    let gLabel = p.성별 || p.gender || "U";
+    if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
+
+    // 좌우 네비게이션 버튼 (첫번째/마지막 아이템 처리)
+    const prevDisabled = windowCurrentDashIndex === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
+    const nextDisabled = windowCurrentDashIndex === windowDashItems.length - 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
+
     modal.querySelector("#ddContentWrap").innerHTML = `
-        <div class="p-5 border-b flex justify-between items-start bg-white z-10 shadow-sm shrink-0">
-            <div class="flex gap-4 items-center">
-                ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
-                <div>
-                    <div class="flex items-center gap-1.5 mb-0.5">
-                        <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-black">${escapeHtml(p.성별||p.gender||"U")}</span>
-                        <div class="text-xs font-black text-blue-600">${p.브랜드}</div>
+        <div class="p-4 border-b flex justify-between items-center bg-white z-10 shadow-sm shrink-0">
+            <div class="flex items-center gap-2">
+                <button id="prevDashBtn" class="p-2 bg-gray-100 rounded-full transition-colors ${prevDisabled}" ${windowCurrentDashIndex === 0 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex-1].품번}', '${periodParam}')"`}><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                <div class="flex gap-3 items-center ml-2">
+                    ${imgSrc ? `<img src="${imgSrc}" class="w-14 h-14 object-contain rounded border border-gray-200 bg-white shrink-0">` : `<div class="w-14 h-14 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
+                    <div>
+                        <div class="flex items-center gap-1.5 mb-0.5">
+                            <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded text-[10px] font-black">${escapeHtml(gLabel)}</span>
+                            <div class="text-xs font-black text-blue-600">${p.브랜드}</div>
+                        </div>
+                        <h2 class="font-black text-[17px] leading-tight text-gray-900 truncate max-w-[300px] sm:max-w-md">${p.품명}</h2>
+                        <div class="text-[11px] font-bold text-gray-400 mt-0.5">${p.품번}</div>
                     </div>
-                    <h2 class="font-black text-xl leading-tight text-gray-900">${p.품명}</h2>
-                    <div class="text-xs font-bold text-gray-400 mt-1">${p.품번}</div>
                 </div>
             </div>
-            <button class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="flex items-center gap-2">
+                <button id="nextDashBtn" class="p-2 bg-gray-100 rounded-full transition-colors ${nextDisabled}" ${windowCurrentDashIndex === windowDashItems.length - 1 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex+1].품번}', '${periodParam}')"`}><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                <button class="p-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-colors shrink-0 ml-2" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
         </div>
         
         <div class="flex flex-col lg:flex-row h-full lg:h-[70vh] overflow-y-auto lg:overflow-hidden">
-            <div class="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
-                <h3 class="font-black text-sm text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-500"></i> 사이즈별 판매 추이</h3>
+            <div class="w-full lg:w-[45%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
+                <h3 class="font-black text-sm text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-500"></i> 지점별 사이즈 판매 추이</h3>
                 <div class="relative flex-1 w-full min-h-[250px]"><canvas id="ddSizeChart"></canvas></div>
                 ${insightHtml}
             </div>
             
-            <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
-                <div class="p-6 pb-2 sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-10">
+            <div class="w-full lg:w-[55%] p-0 overflow-y-auto dash-scroll bg-white relative">
+                <div class="p-5 pb-2 sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-10">
                     <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-3 shadow-sm">
                         <i data-lucide="truck" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
-                        <div class="text-[13px] font-bold text-blue-800 leading-relaxed">
-                            판매량 대비 부산점 재고가 부족할 경우, <b>1순위 물류센터, 2순위 신사점</b> 순으로 확보 가능한 보충 수량을 제안합니다.
+                        <div class="text-[12px] font-bold text-blue-800 leading-relaxed">
+                            판매량 대비 부산점 재고가 부족할 경우, <b>1순위 물류센터, 2순위 신사점</b> 순으로 확보 가능한 보충 수량을 제안합니다. <br>버튼을 클릭하면 자동으로 이동요청 목록에 추가됩니다.
                         </div>
                     </div>
                 </div>
-                <div class="px-6 pb-6">
-                    <table class="w-full text-sm mt-2">
+                <div class="px-5 pb-6">
+                    <table class="w-full text-[13px] mt-2">
                         <thead class="text-gray-500 font-black border-b-2 border-gray-200">
                             <tr class="text-center">
                                 <th class="py-3 w-[15%]">사이즈</th>
-                                <th class="py-3 w-[15%] text-blue-600">판매량</th>
+                                <th class="py-3 w-[15%] text-blue-600 bg-blue-50/50">부산판매</th>
                                 <th class="py-3 w-[15%]">부산재고</th>
-                                <th class="py-3 w-[15%] text-gray-400">1순위 물류</th>
-                                <th class="py-3 w-[15%] text-gray-400">2순위 신사</th>
+                                <th class="py-3 w-[15%] text-gray-400">물류(판/재)</th>
+                                <th class="py-3 w-[15%] text-gray-400">신사(판/재)</th>
                                 <th class="py-3 w-[25%] text-orange-600">스마트 보충제안</th>
                             </tr>
                         </thead>
@@ -868,11 +872,24 @@ window.openDashDetail = (code, periodParam) => {
         if(ctx) {
             new Chart(ctx, {
                 type: 'bar',
-                data: { labels: chartLabels, datasets: [{ label: '판매량', data: chartData, backgroundColor: '#3b82f6', borderRadius: 6, barPercentage: 0.6 }] },
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [
+                        { label: '부산점', data: chartDataBusan, backgroundColor: '#3b82f6', borderRadius: 4 },
+                        { label: '신사점', data: chartDataSinsa, backgroundColor: '#f97316', borderRadius: 4 },
+                        { label: '물류(본사)', data: chartDataCenter, backgroundColor: '#9ca3af', borderRadius: 4 }
+                    ] 
+                },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, datalabels: { color: '#3b82f6', font: { weight: '900', size: 12 }, anchor: 'end', align: 'top', formatter: (v) => v > 0 ? v : '' } },
-                    scales: { x: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' }, color: '#6b7280' } }, y: { display: false, beginAtZero: true, suggestedMax: Math.max(...chartData, 5) * 1.2 } }
+                    plugins: { 
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { weight: 'bold', size: 10 } } }, 
+                        datalabels: { display: false } // 복잡해지므로 바 차트 라벨 숨김 (툴팁으로 확인)
+                    },
+                    scales: { 
+                        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#6b7280' }, stacked: false }, 
+                        y: { beginAtZero: true, ticks: { precision: 0 }, stacked: false } 
+                    }
                 }
             });
         }
@@ -1108,7 +1125,7 @@ function render(){
                   for (let size in dayData) {
                       if (typeof dayData[size] === 'object') {
                           for(let mgr in dayData[size]) {
-                              if(mgr.includes("김종훈")) p.periodSales += dayData[size][mgr]; // 메인화면 정렬용 누적 판매량
+                              if(mgr.includes("김종훈") || mgr.includes("부산")) p.periodSales += dayData[size][mgr]; // 메인화면 정렬용 누적 판매량
                           }
                       }
                   }
@@ -1489,7 +1506,7 @@ function openDetail(p){
       } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
   };
 
-  // 🔥 팝업 바깥 여백 누르면 꺼지게 onClick 이벤트 추가 🔥
+  // 🔥 메인 상세 팝업 바깥 여백 누르면 꺼지게 설정 🔥
   let modalOuter = $("#detailModal .modal-outer");
   if (!modalOuter) {
       modalOuter = document.createElement("div");
@@ -1502,21 +1519,26 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
-// 🔥 스마트 ESC 키 로직 (대시보드는 냅두고, 열려있는 팝업 중 가장 위의 것만 닫기) 🔥
+// 🔥 스마트 ESC 및 방향키 로직 (대시보드는 냅두고, 팝업만 조작) 🔥
 document.addEventListener("keydown", (e) => {
+    // ESC 누를 때 최상단 팝업 닫기
     if(e.key === "Escape") { 
         const openModals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
         if(openModals.length > 0) {
-            // 마지막에 열린(배열의 마지막) 모달만 하나 닫기
             openModals[openModals.length - 1].classList.add("hidden");
         } else {
-            // 팝업이 없을 때만 대시보드 닫기
             const dash = document.querySelector("#analyticsDashboard");
             if(dash && !dash.classList.contains("hidden")) {
                 dash.classList.add("opacity-0");
                 setTimeout(() => dash.classList.add("hidden"), 300);
             }
         }
+    }
+    // 대시보드 팝업 열려있을 때 좌우 방향키로 네비게이션
+    const dashModal = document.querySelector("#dashDetailModal");
+    if(dashModal && !dashModal.classList.contains("hidden")) {
+        if(e.key === "ArrowLeft") $("#prevDashBtn")?.click();
+        if(e.key === "ArrowRight") $("#nextDashBtn")?.click();
     }
 });
 
