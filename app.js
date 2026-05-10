@@ -1,4 +1,4 @@
-// 🔥 1. 관리자 팝업창 스크롤 및 상세창 Z-index 문제 완벽 해결 🔥
+// 🔥 1. 관리자 팝업창 스크롤, Z-index 및 최적화 CSS 🔥
 const style = document.createElement('style');
 style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
@@ -6,6 +6,9 @@ style.innerHTML = `
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     /* 상세창(detailModal)이 대시보드(z-105)보다 항상 위에 뜨도록 강제 승급 */
     #detailModal { z-index: 9999 !important; }
+    /* 이미지 Lazy Loading 전환 효과 */
+    .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
+    .card img.loaded { opacity: 1 !important; }
 `;
 document.head.appendChild(style);
 
@@ -46,6 +49,15 @@ function loadGhConfig(){ try{ const c=localStorage.getItem(GH_CONFIG_KEY); if(c)
 function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); }
 function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
+
+// PAT 검증 유틸리티
+function checkPat() {
+    if(!getPat()) {
+        alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요.");
+        return false;
+    }
+    return true;
+}
 
 function detectGender(code, sex){
   const g = String(sex||"").trim();
@@ -376,7 +388,7 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 🔥 2. 판매 분석 리포트 대시보드 (내부 필터링 기능 강화) 🔥
+// 판매 분석 리포트 대시보드
 window.openAnalyticsReport = () => {
     let f = getFilters();
     let titleDate = "전체 누적 기간";
@@ -393,7 +405,6 @@ window.openAnalyticsReport = () => {
         document.body.appendChild(modal);
     }
     
-    // 이 기간 동안 판매가 일어난 브랜드 목록만 추출
     let availableBrands = [...new Set(PRODUCTS.filter(p=>p.periodSales>0).map(p=>p.브랜드))].filter(Boolean).sort();
 
     modal.innerHTML = `
@@ -413,12 +424,11 @@ window.openAnalyticsReport = () => {
                 </select>
                 <select id="dashBrandSel" class="ipt flex-1 text-xs font-bold bg-gray-50 border-gray-200 rounded text-gray-700">
                     <option value="ALL">🏷️ 전체 브랜드</option>
+                    <option value="ALL">🏷️ 전체 브랜드</option>
                     ${availableBrands.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('')}
                 </select>
             </div>
-
-            <div id="dashBody" class="p-5 overflow-y-auto space-y-5">
-                </div>
+            <div id="dashBody" class="p-5 overflow-y-auto space-y-5"></div>
         </div>
     `;
 
@@ -576,9 +586,7 @@ window.openSalesGuide = (code) => {
                     <button id="closeSalesGuide" class="p-1 -mr-2 text-indigo-400 hover:text-indigo-800 transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
                 </div>
                 <div class="p-5 overflow-y-auto max-h-[70vh] space-y-5">
-                    <div>
-                        <div id="sgKeywords" class="flex flex-wrap gap-1.5 mb-3"></div>
-                    </div>
+                    <div><div id="sgKeywords" class="flex flex-wrap gap-1.5 mb-3"></div></div>
                     <div>
                         <h3 class="font-black text-xs text-indigo-400 flex items-center gap-1 mb-1.5"><i data-lucide="zap" class="w-4 h-4"></i> 핵심 특징</h3>
                         <div id="sgFeatures" class="text-sm text-gray-800 font-medium leading-relaxed bg-gray-50 p-3 rounded-lg"></div>
@@ -609,6 +617,7 @@ window.openSalesGuide = (code) => {
     if(window.lucide) lucide.createIcons();
 };
 
+// 🔥 2. Lazy Loading 반영된 개별 카드 생성 함수
 function card(p){
   const el = document.createElement("article");
   el.className = "card card-hover p-4 flex flex-col relative bg-white"; 
@@ -616,9 +625,7 @@ function card(p){
     const copyBtn = e.target.closest('[data-copy]');
     if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
     if(e.target.closest('.btn-sales')) {
-        e.stopPropagation();
-        window.openSalesGuide(p.품번);
-        return;
+        e.stopPropagation(); window.openSalesGuide(p.품번); return;
     }
     if(!e.target.closest('button')) openDetail(p); 
   };
@@ -638,12 +645,8 @@ function card(p){
   const periodSel = $("#salesPeriodSel");
   if (periodSel && periodSel.value !== "" && p.periodSales > 0) {
       salesBadge += `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm">📈 ${p.periodSales}개 판매</span>`;
-      if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) {
-          salesBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
-      }
-      if (p.periodSales >= 10) {
-          salesBadge += `<span class="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-black shadow-sm">🏆 인기</span>`;
-      }
+      if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) salesBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
+      if (p.periodSales >= 10) salesBadge += `<span class="bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded font-black shadow-sm">🏆 인기</span>`;
   }
 
   const productMemos = MEMOS.filter(m => m.code === p.품번);
@@ -701,6 +704,7 @@ function card(p){
       }
   }
 
+  // onload 이벤트로 로딩 완료 시 자연스럽게 나타나도록 처리 (loading="lazy" 적용)
   el.innerHTML = `
     <div class="flex justify-between items-start mb-2 z-10 relative">
         <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">
@@ -727,7 +731,7 @@ function card(p){
           ${salesHtml}
        </div>
        
-       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
+       ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
     </div>
     
     ${memoHtml}
@@ -779,10 +783,12 @@ function getFilters(){
   };
 }
 
+// 🔥 3. 성능 최적화가 적용된 리스트 렌더링 함수 🔥
 function render(){
-  const grid = $("#grid"); grid.innerHTML = "";
+  const grid = $("#grid"); 
   
   if(!RAW.length) { 
+      grid.innerHTML = "";
       $("#emptyState").classList.remove("hidden"); 
       $("#results").classList.add("hidden"); 
       return; 
@@ -876,6 +882,7 @@ function render(){
     return String(a.품명).localeCompare(String(b.품명),"ko");
   });
 
+  grid.innerHTML = "";
   if(filteredList.length === 0){
       $("#noMatch").classList.remove("hidden");
       $("#grid").parentElement.classList.remove("hidden");
@@ -884,8 +891,11 @@ function render(){
       $("#noMatch").classList.add("hidden");
       $("#grid").parentElement.classList.remove("hidden");
       
+      // ✅ 최적화: Fragment를 사용해 렌더링 병목 해소
+      const fragment = document.createDocumentFragment();
       const slice = filteredList.slice(0, visibleCount);
-      slice.forEach(p=>grid.appendChild(card(p)));
+      slice.forEach(p=>fragment.appendChild(card(p)));
+      grid.appendChild(fragment);
       
       if(filteredList.length > visibleCount) {
           $("#moreWrap").classList.remove("hidden");
@@ -943,6 +953,7 @@ function renderAllMemos() {
     if(window.lucide) lucide.createIcons();
     $("#memoDateSelect").onchange = (e) => { currentMemoDate = e.target.value; renderAllMemos(); };
     $("#bulkDeleteMemosBtn").onclick = async () => {
+        if(!checkPat()) return;
         const targetText = currentMemoDate === 'ALL' ? '전체' : `${currentMemoDate} 일자`;
         if(!confirm(`⚠️ 정말 [${targetText}] 메모를 일괄 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
         try {
@@ -964,6 +975,7 @@ function renderAllMemos() {
 
 $("#allMemosBtn").onclick = () => { currentMemoDate = ""; renderAllMemos(); $("#allMemosModal").classList.remove("hidden"); };
 window.deleteMemo = async (memoId) => {
+    if(!checkPat()) return;
     if(!confirm("이 메모를 삭제하시겠습니까?")) return;
     try {
         const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
@@ -981,6 +993,7 @@ window.deleteMemo = async (memoId) => {
 };
 
 window.deleteTransfer = async (trId) => {
+    if(!checkPat()) return;
     if(!confirm("이 이동 요청을 삭제/취소하시겠습니까?")) return;
     try {
         const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
@@ -1079,6 +1092,7 @@ function openDetail(p){
       `;
       $("#detailBody").appendChild(adminImgBox);
       adminImgBox.querySelector("#quickImgSave").onclick = async () => {
+          if(!checkPat()) return;
           const url = adminImgBox.querySelector("#quickImgUrl").value.trim(); if (!url) return;
           const msg = adminImgBox.querySelector("#quickImgMsg"); msg.textContent = "저장 중...";
           try {
@@ -1116,6 +1130,7 @@ function openDetail(p){
   $("#detailBody").appendChild(trBox);
 
   trBox.querySelector("#addTransferBtn").onclick = async () => {
+      if(!checkPat()) return;
       const size = trBox.querySelector("#trSize").value;
       const qty = trBox.querySelector("#trQty").value;
       const from = trBox.querySelector("#trFrom").value;
@@ -1151,6 +1166,7 @@ function openDetail(p){
   };
 
   $("#addMemoBtn").onclick = async () => {
+      if(!checkPat()) return;
       const staff = $("#memoStaff").value; 
       const tag = $("#memoTag").value;
       const text = $("#memoText").value.trim();
@@ -1241,6 +1257,7 @@ $("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-
 $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
 
 $("#file").onchange = async (e) => { 
+    if(!checkPat()) { e.target.value = ""; return; }
     const f = e.target.files[0]; if(!f) return;
     const d = new Date();
     const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -1287,6 +1304,7 @@ window.renderSalesHistoryAdmin = () => {
     
     $("#shUploadTrigger").onclick = () => $("#shFile").click();
     $("#shFile").onchange = async (e) => {
+        if(!checkPat()) { e.target.value = ""; return; }
         const f = e.target.files[0]; if(!f) return;
         const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 부산점 실적", f.name);
         if(!periodName) { $("#shFile").value = ""; return; }
@@ -1336,19 +1354,20 @@ window.renderSalesHistoryAdmin = () => {
     };
 };
 
+// 🔥 4. RUN TOGETHER WEEK 엑셀 완벽 대응 로직 🔥
 window.renderPromoAdmin = () => {
     const box = $("#promoAdminBox");
     if(!box) return;
     if(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
         box.innerHTML = `
             <div class="flex justify-between items-center mb-2">
-                <div class="font-black text-purple-800">🎁 진행 중인 기획전</div>
+                <div class="font-black text-purple-800">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</div>
                 <button id="endPromoBtn" class="px-2 py-1 bg-red-100 text-red-600 text-[10px] font-black rounded hover:bg-red-500 hover:text-white transition-colors">기획전 종료</button>
             </div>
-            <div class="text-xs font-black text-purple-600 mb-1">${escapeHtml(PROMOTIONS.meta.name)}</div>
             <div class="text-[11px] font-bold text-purple-500 bg-white p-2 rounded">${escapeHtml(PROMOTIONS.meta.period)}</div>
         `;
         $("#endPromoBtn").onclick = async () => {
+            if(!checkPat()) return;
             if(!confirm("진행 중인 기획전을 완전히 종료하고 모든 상품을 정가로 복구하시겠습니까?")) return;
             try {
                 const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
@@ -1364,24 +1383,34 @@ window.renderPromoAdmin = () => {
     } else {
         box.innerHTML = `
             <div class="text-center cursor-pointer group" id="promoUploadTrigger">
-                <div class="font-black text-purple-800 text-sm mb-1 group-hover:text-purple-600">🎁 위클리 특가 엑셀 등록</div>
-                <div class="text-[11px] text-purple-500 font-bold">MD가 공유한 프로모션 시트를 그대로 올리세요</div>
+                <div class="font-black text-purple-800 text-sm mb-1 group-hover:text-purple-600">🎁 프로모션 엑셀 등록</div>
+                <div class="text-[11px] text-purple-500 font-bold">MD가 공유한 특가 시트를 업로드하세요</div>
             </div>
             <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
         `;
         $("#promoUploadTrigger").onclick = () => $("#promoFile").click();
         $("#promoFile").onchange = async (e) => {
+            if(!checkPat()) { e.target.value = ""; return; }
             const f = e.target.files[0]; if(!f) return;
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
                 const sheet = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
-                const promoName = String(rows[0][0]||"").replace("기획전명 :", "").trim() || "기획전";
-                const promoPeriod = String(rows[1][0]||"").replace("기간 :", "").trim() || "";
+                
+                let promoName = "기획전";
+                let promoPeriod = "";
+                // 1행과 2행에서 기획전명과 기간 파싱
+                for(let i=0; i<5; i++) {
+                    if(!rows[i]) continue;
+                    const col0 = String(rows[i][0]||"");
+                    if(col0.includes("기획전명")) promoName = col0.replace("기획전명 :", "").replace("기획전명:", "").trim();
+                    if(col0.includes("기간")) promoPeriod = col0.replace("기간 :", "").replace("기간:", "").trim();
+                }
 
                 let items = {};
-                let headerRowIdx = rows.findIndex(r => r.includes('품번'));
+                let headerRowIdx = rows.findIndex(r => r.includes('품번')); // 보통 5번째 행
+                
                 if(headerRowIdx > -1) {
                     const headers = rows[headerRowIdx].map(h => String(h||"").trim());
                     const codeIdx = headers.indexOf('품번');
@@ -1389,7 +1418,7 @@ window.renderPromoAdmin = () => {
                     const wpIdx = headers.indexOf('위클리특가');
                     const wrIdx = headers.indexOf('특가할인율');
                     const fpIdx = headers.indexOf('최종할인가');
-                    let frIdx = headers.indexOf('최종 할인율');
+                    let frIdx = headers.indexOf('최종 할인율'); // 공백 trim()으로 자동 보정됨
                     if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
 
                     for(let i=headerRowIdx+1; i<rows.length; i++) {
@@ -1441,6 +1470,7 @@ window.renderSalesAdmin = () => {
     `;
     $("#salesUploadTrigger").onclick = () => $("#salesFile").click();
     $("#salesFile").onchange = async (e) => {
+        if(!checkPat()) { e.target.value = ""; return; }
         const f = e.target.files[0]; if(!f) return;
         const reader = new FileReader();
         reader.onload = async (ev) => {
