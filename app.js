@@ -1,20 +1,21 @@
-// 🔥 1. 전역 스타일 강제 주입: 팝업 스크롤 및 레이어 우선순위 해결 🔥
+// 🔥 1. 전역 스타일 주입 (팝업 스크롤, 레이어, 레이아웃 깨짐 방지) 🔥
 const style = document.createElement('style');
 style.innerHTML = `
-    .modal-backdrop { display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop { z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 15px; }
     .modal-content { 
-        max-height: 90vh !important; 
+        max-height: 92vh !important; 
         overflow-y: auto !important; 
-        display: flex; 
-        flex-content: column; 
-        position: relative;
         -webkit-overflow-scrolling: touch;
+        position: relative;
     }
-    #detailModal { z-index: 9999 !important; } /* 상세창이 무조건 1순위 */
-    #analyticsModal { z-index: 9000 !important; }
-    #salesGuideModal { z-index: 8000 !important; }
+    /* 우선순위 강제 설정: 상세창(9000) > 분석(8000) > 나머지(7000) */
+    #detailModal { z-index: 9000 !important; }
+    #analyticsModal { z-index: 8000 !important; }
+    #salesGuideModal { z-index: 8500 !important; }
     #allMemosModal, #transfersModal, #adminModal { z-index: 7000 !important; }
+    
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    select.ipt, input.ipt { border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; }
 `;
 document.head.appendChild(style);
 
@@ -88,42 +89,45 @@ function applyMeta(meta){
     if(meta) {
         const el = $("#statSrc");
         if(el) {
-            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] text-orange-600 mt-0.5 font-bold">📊 ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
+            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] text-orange-600 mt-0.5 font-bold">📊 분석데이터: ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
             el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>${addInfo}`;
         }
     }
 }
 
+// 🔥 데이터 로딩 로직 강화 (404 대응) 🔥
+async function safeFetchJson(path) {
+    try {
+        const res = await fetch("./" + path + "?t=" + Date.now());
+        if(!res.ok) return null;
+        return await res.json();
+    } catch(e) { return null; }
+}
+
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; CURRENT_META = cached.meta || null; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta:{}, items:{} };
       applyMeta(CURRENT_META); rebuildIndex(); render(); return;
   }
   try {
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
-          fetch("./" + DATA_PATH + "?t=" + Date.now()),
-          fetch("./images.json?t=" + Date.now()).catch(()=>null),
-          fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
-      ]);
-      if(!invRes.ok) throw new Error("재고 로드 실패");
+      const invRes = await fetch("./" + DATA_PATH + "?t=" + Date.now());
+      if(!invRes.ok) throw new Error("재고 파일 로드 실패");
       const invData = await invRes.json();
       RAW = invData.rows || []; CURRENT_META = invData.meta || null;
-      if(imgRes && imgRes.ok) IMAGES = await imgRes.json();
-      if(memoRes && memoRes.ok) MEMOS = await memoRes.json();
-      if(trRes && trRes.ok) TRANSFERS = await trRes.json();
-      if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json();
-      if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json();
-      if(shRes && shRes.ok) SALES_HISTORY = await shRes.json();
+
+      IMAGES = await safeFetchJson("images.json") || {};
+      MEMOS = await safeFetchJson(REQUESTS_PATH) || [];
+      TRANSFERS = await safeFetchJson(TRANSFERS_PATH) || [];
+      PROMOTIONS = await safeFetchJson(PROMOTIONS_PATH) || {};
+      SALES_GUIDES = await safeFetchJson(SALES_GUIDE_PATH) || {};
+      SALES_HISTORY = await safeFetchJson(SALES_HISTORY_PATH) || { meta:{}, items:{} };
 
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
       applyMeta(CURRENT_META); rebuildIndex(); render();
   } catch(e) { 
       if(cached) { RAW = cached.rows; CURRENT_META = cached.meta; IMAGES = cached.images; MEMOS = cached.memos; TRANSFERS = cached.transfers; PROMOTIONS = cached.promotions; SALES_GUIDES = cached.salesGuides; SALES_HISTORY = cached.salesHistory; applyMeta(CURRENT_META); rebuildIndex(); render(); }
+      else { RAW = []; render(); }
   }
 }
 
@@ -131,7 +135,6 @@ async function ghPut(url, body){ return fetch(url, { method:"PUT", headers:{ Aut
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
 async function commitInventoryToGitHub(rows, meta){
-  loadGhConfig(); // 최신 설정 로드 확인
   const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DATA_PATH}`;
   let sha = null;
   try{ const r = await fetch(apiBase + "?t=" + Date.now(), { headers:{ Authorization:"Bearer "+getPat() } }); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
@@ -195,8 +198,7 @@ function rebuildIndex(){
         }
     }
     const rawHay = [p.품번||"", p.품명||"", p.브랜드||""].join(" ");
-    p._hay = rawHay.toLowerCase();
-    p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
+    p._hay = rawHay.toLowerCase(); p._hayClean = rawHay.replace(/[\s\-_]/g, "").toLowerCase(); 
     p._chosung = getChosung(p._hayClean); 
     return p;
   });
@@ -243,31 +245,29 @@ function rebuildIndex(){
       const opt = document.createElement("option"); opt.value = "salesDesc"; opt.innerHTML = "🔥 판매량 높은순"; $("#sortSel").appendChild(opt);
   }
 
-  let promoWrap = $("#promoFilters");
-  if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
-      promoWrap = document.createElement("div"); promoWrap.id = "promoFilters"; promoWrap.className = "flex gap-2 mb-3 items-center w-full overflow-x-auto no-scrollbar pb-1";
-      $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
+  let pWrap = $("#promoFilters");
+  if (!pWrap && PROMOTIONS && PROMOTIONS.meta) {
+      pWrap = document.createElement("div"); pWrap.id = "promoFilters"; pWrap.className = "flex gap-2 mb-3 items-center w-full overflow-x-auto no-scrollbar pb-1";
+      $("#brandChips").parentNode.insertBefore(pWrap, $("#brandChips"));
   }
-  if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
-      if(promoWrap) {
-          promoWrap.innerHTML = `
-              <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</button>
-              <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
-                  <option value="ALL">기획전 전체</option><option value="weekly">🔥 위클리특가</option><option value="general">🎟️ 쿠폰사용가능</option>
-              </select>
-              <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
-                  <option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option>
-              </select>
-          `;
-          promoWrap.querySelector('button').onclick = function() {
-              const isActive = this.dataset.active === "1"; this.dataset.active = isActive ? "0" : "1";
-              if(!isActive) { this.classList.add('ring-2', 'ring-purple-400', 'ring-offset-1'); $("#promoTypeSel").classList.remove("hidden"); $("#promoRateSel").classList.remove("hidden"); }
-              else { this.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1'); $("#promoTypeSel").classList.add("hidden"); $("#promoRateSel").classList.add("hidden"); $("#promoTypeSel").value = "ALL"; $("#promoRateSel").value = "0"; }
-              visibleCount=60; render();
-          };
-          $("#promoTypeSel").onchange = () => { visibleCount=60; render(); };
-          $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
-      }
+  if (PROMOTIONS && PROMOTIONS.meta && pWrap) {
+      pWrap.innerHTML = `
+          <button class="chip !bg-purple-600 !text-white border-none shadow-sm shrink-0 font-black" data-promo="1" data-active="0">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</button>
+          <select id="promoTypeSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
+              <option value="ALL">기획전 전체</option><option value="weekly">🔥 위클리특가</option><option value="general">🎟️ 쿠폰사용가능</option>
+          </select>
+          <select id="promoRateSel" class="ipt text-[12px] font-bold bg-white border-purple-200 text-purple-700 rounded px-2 py-1 hidden shrink-0 outline-none">
+              <option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option>
+          </select>
+      `;
+      pWrap.querySelector('button').onclick = function() {
+          const isActive = this.dataset.active === "1"; this.dataset.active = isActive ? "0" : "1";
+          if(!isActive) { this.classList.add('ring-2', 'ring-purple-400', 'ring-offset-1'); $("#promoTypeSel").classList.remove("hidden"); $("#promoRateSel").classList.remove("hidden"); }
+          else { this.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1'); $("#promoTypeSel").classList.add("hidden"); $("#promoRateSel").classList.add("hidden"); $("#promoTypeSel").value = "ALL"; $("#promoRateSel").value = "0"; }
+          visibleCount=60; render();
+      };
+      $("#promoTypeSel").onchange = () => { visibleCount=60; render(); };
+      $("#promoRateSel").onchange = () => { visibleCount=60; render(); };
   }
 
   const brands = Array.from(new Set(PRODUCTS.map(p=>p.브랜드).filter(Boolean))).sort();
@@ -281,7 +281,7 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 🔥 2. 판매 분석 리포트 대시보드 함수 🔥
+// 🔥 2. 판매 분석 리포트 대시보드 (내부 필터링 강화) 🔥
 window.openAnalyticsReport = () => {
     let f = getFilters();
     let titleDate = f.salesPeriod === "CUSTOM" ? `${f.customStart} ~ ${f.customEnd}` : (f.salesPeriod === "ALL" ? "전체 기간" : `최근 ${f.salesPeriod}일`);
@@ -338,10 +338,10 @@ function card(p){
   const imgSrc = IMAGES[p.shopNo] || null;
   let deltaHtml = p.delta > 0 ? `<span class="text-emerald-600 font-black">▲+${p.delta}</span>` : (p.delta < 0 ? `<span class="text-red-600 font-black">▼${p.delta}</span>` : "");
   let busanOnlyBadge = (p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0) ? `<span class="bg-blue-800 text-white px-1.5 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>` : "";
-  let salesBadge = ""; const periodSel = $("#salesPeriodSel");
-  if (periodSel && periodSel.value !== "" && p.periodSales > 0) {
-      salesBadge += `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm">📈 ${p.periodSales}개</span>`;
-      if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) salesBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
+  let sBadge = ""; const pSel = $("#salesPeriodSel");
+  if (pSel && pSel.value !== "" && p.periodSales > 0) {
+      sBadge += `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-black flex items-center gap-0.5 shadow-sm">📈 ${p.periodSales}개</span>`;
+      if (p.periodSales >= 3 && p.busanTotal <= 1 && (p.sinsaTotal > 0 || p.centerTotal > 0)) sBadge += `<span class="bg-red-600 text-white px-1.5 py-0.5 rounded font-black shadow-sm animate-pulse">🚨 보충요망</span>`;
   }
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = productMemos.length > 0 ? `<div class="showroom-hide mt-2 mb-3 space-y-1">` + productMemos.map(m => `<div class="p-2 bg-yellow-50 rounded border border-yellow-200 text-[11px] leading-snug"><div class="flex items-center justify-between mb-0.5"><span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span><span class="text-[10px] text-yellow-600">${escapeHtml(m.date)}</span></div><div class="text-yellow-900">${escapeHtml(m.text)}</div></div>`).join("") + `</div>` : "";
@@ -361,12 +361,12 @@ function card(p){
   }
   el.innerHTML = `
     <div class="flex justify-between items-start mb-2 z-10 relative">
-        <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">${busanOnlyBadge}${promoBadge}${salesBadge}<span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span><span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span><span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>${deltaHtml}</div>
-        <button class="fav-btn p-1.5 -mt-1.5 -mr-1.5 text-gray-300 hover:text-yellow-500 outline-none shrink-0" data-active="${isFav?'1':'0'}"><i data-lucide="bookmark" class="w-6 h-6 ${isFav ? 'fill-yellow-400 text-yellow-400' : ''}"></i></button>
+        <div class="flex flex-wrap gap-1 text-[11px] font-bold text-gray-500 mt-0.5">${busanOnlyBadge}${promoBadge}${sBadge}<span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.카테고리||"-")}</span><span class="bg-gray-100 px-1.5 py-0.5 rounded">${escapeHtml(p.브랜드||"-")}</span><span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">${escapeHtml(p.성별||p.gender||"-")}</span>${deltaHtml}</div>
+        <button class="fav-btn p-1.5 -mt-1.5 -mr-1.5 text-gray-300 hover:text-yellow-500 shrink-0" data-active="${isFav?'1':'0'}"><i data-lucide="bookmark" class="w-6 h-6 ${isFav ? 'fill-yellow-400 text-yellow-400' : ''}"></i></button>
     </div>
     <div class="flex justify-between items-start w-full min-h-[120px] relative mb-2">
        <div class="flex-1 min-w-0 pr-[130px]"><div class="copyable font-extrabold text-[17px] leading-tight mb-1.5 hover:text-blue-600" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div><div class="copyable text-[14px] font-bold text-[#555] mb-2 hover:text-blue-600 flex items-center gap-1" data-copy="${escapeHtml(p.품번)}">${escapeHtml(p.품번)} <i data-lucide="copy" class="w-3.5 h-3.5 opacity-60"></i></div>${salesHtml}</div>
-       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain mix-blend-multiply dark:mix-blend-normal rounded-md">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
+       ${imgSrc ? `<img src="${imgSrc}" class="absolute top-0 right-0 w-[120px] h-[120px] object-contain rounded-md">` : '<div class="absolute top-0 right-0 w-[120px] h-[120px] bg-gray-50 rounded-lg border flex items-center justify-center text-[10px] text-gray-400 font-bold">NO IMG</div>'}
     </div>
     ${memoHtml}
     <div class="grid gap-1.5 mb-4 mt-auto" style="grid-template-columns:repeat(auto-fill, minmax(44px, 1fr))">${p.sizes.map(s=>{ const q = s.busan||0; let cls = "size-cell tnum "; if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn"; return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span><span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`; }).join("")}</div>
@@ -377,7 +377,7 @@ function card(p){
 }
 
 function getFilters(){
-  const promoBtn = $('button[data-promo]');
+  const pB = $('button[data-promo]');
   return {
     cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
     gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
@@ -391,7 +391,7 @@ function getFilters(){
     salesPeriod: $("#salesPeriodSel") ? $("#salesPeriodSel").value : "",
     customStart: $("#customStartDate") ? $("#customStartDate").value : "",
     customEnd: $("#customEndDate") ? $("#customEndDate").value : "",
-    promoOnly: promoBtn ? promoBtn.dataset.active === "1" : false,
+    promoOnly: pB ? pB.dataset.active === "1" : false,
     promoType: $("#promoTypeSel") ? $("#promoTypeSel").value : "ALL", 
     promoRate: $("#promoRateSel") ? Number($("#promoRateSel").value) : 0
   };
@@ -413,7 +413,7 @@ function render(){
       }
   });
 
-  let filteredList = PRODUCTS.filter(p=>{
+  let fL = PRODUCTS.filter(p=>{
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
     if(f.gender!=="ALL" && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
@@ -428,7 +428,7 @@ function render(){
   });
 
   const sM = $("#sortSel").value;
-  filteredList.sort((a,b) => {
+  fL.sort((a,b) => {
     if(sM === "salesDesc") return (b.periodSales||0) - (a.periodSales||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sM === "default") { const ca = CAT_ORDER[a.카테고리] ?? 9, cb = CAT_ORDER[b.카테고리] ?? 9; if(ca!==cb) return ca-cb; const sa=a.busanTotal>0?0:1, sb=b.busanTotal>0?0:1; if(sa!==sb) return sa-sb; return String(a.품명).localeCompare(String(b.품명),"ko"); }
     if(sM === "stock") return b.busanTotal - a.busanTotal || String(a.품명).localeCompare(String(b.품명),"ko");
@@ -437,46 +437,31 @@ function render(){
     return sM === "priceAsc" ? pA - pB : (sM === "priceDesc" ? pB - pA : 0);
   });
 
-  const slice = filteredList.slice(0, visibleCount);
-  slice.forEach(p=>grid.appendChild(card(p)));
-  if(filteredList.length > visibleCount) { $("#moreWrap").classList.remove("hidden"); $("#moreBtn").textContent = `더 보기 (+${Math.min(60, filteredList.length - visibleCount)})`; }
+  const slice = fL.slice(0, visibleCount); slice.forEach(p=>grid.appendChild(card(p)));
+  if(fL.length > visibleCount) { $("#moreWrap").classList.remove("hidden"); $("#moreBtn").textContent = `더 보기 (+${Math.min(60, fL.length - visibleCount)})`; }
   else { $("#moreWrap").classList.add("hidden"); }
-  if(filteredList.length === 0) $("#noMatch").classList.remove("hidden"); else $("#noMatch").classList.add("hidden");
+  if(fL.length === 0) $("#noMatch").classList.remove("hidden"); else $("#noMatch").classList.add("hidden");
   if(window.lucide) lucide.createIcons();
 }
 
-$("#moreBtn").onclick = () => { visibleCount+=60; render(); };
-
-// 🔥 3. ESC 키 스마트 닫기 시스템: 최상단 팝업 하나만 닫기 🔥
+// 🔥 ESC 키 스마트 클로징 시스템 (Z-index 기준) 🔥
 document.addEventListener("keydown", (e) => {
     if(e.key === "Escape") {
         const modals = Array.from(document.querySelectorAll('.modal-backdrop:not(.hidden)'));
         if(modals.length > 0) {
-            // Z-index가 가장 높은 순서대로 찾아서 하나만 닫기
-            modals.sort((a,b) => {
-                const zA = parseInt(window.getComputedStyle(a).zIndex) || 0;
-                const zB = parseInt(window.getComputedStyle(b).zIndex) || 0;
-                return zB - zA;
-            });
+            modals.sort((a,b) => (parseInt(window.getComputedStyle(b).zIndex) || 0) - (parseInt(window.getComputedStyle(a).zIndex) || 0));
             modals[0].classList.add("hidden");
         }
     }
 });
 
-// 🔥 4. 설정 관리 저장 시 피드백 추가 🔥
-$("#ghSave").onclick=()=>{ 
-    GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" };
-    saveGhConfig(); setPat($("#ghPat").value.trim()); 
-    alert("✅ 깃허브 설정이 안전하게 저장되었습니다."); 
-};
-
-// 나머지 클릭 이벤트들
+$("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("✅ 설정이 안전하게 저장되었습니다."); loadGhConfig(); };
 $$('.modal-backdrop').forEach(modal => { modal.addEventListener("click", (e) => { if (e.target === modal || e.target.classList.contains("modal-outer")) modal.classList.add("hidden"); }); });
 $$('button[id^="close"]').forEach(btn => { btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); }); });
 $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly]').forEach(b=>b.addEventListener("click",()=>{ if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); } else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); } else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; } if(b.dataset.busanonly) { if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400'); else b.classList.remove('ring-2', 'ring-blue-400'); } visibleCount=60; render(); }));
 $("#resetAll").onclick=()=>{ $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0")); $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0")); $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0"); $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); const pB = $('button[data-promo]'); if(pB) { pB.dataset.active = "0"; pB.classList.remove('ring-2', 'ring-purple-400', 'ring-offset-1'); if($("#promoTypeSel")) $("#promoTypeSel").classList.add("hidden"); if($("#promoRateSel")) $("#promoRateSel").classList.add("hidden"); } const bO = $('button.chip[data-busanonly]'); if(bO) { bO.dataset.active = "0"; bO.classList.remove('ring-2', 'ring-blue-400'); } $("#sortSel").value="default"; if($("#sizeSel")) $("#sizeSel").value="ALL"; if($("#salesPeriodSel")) { $("#salesPeriodSel").value=""; $("#customDateWrap").classList.replace("flex", "hidden"); $("#openAnalyticsBtn").classList.add("hidden"); } $("#q").value=""; visibleCount=60; render(); };
 $("#sortSel").onchange=()=> { visibleCount=60; render(); };
-let qT; $("#q").oninput=()=>{ clearTimeout(qT); qT=setTimeout(()=>{ visibleCount=60; render(); },120); };
+$("#q").oninput=()=>{ clearTimeout(qT); qT=setTimeout(()=>{ visibleCount=60; render(); },120); };
 $("#clearQ").onclick=()=>{ $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 $("#refreshBtn").onclick=()=>loadData(true);
 $("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
@@ -484,14 +469,15 @@ $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode");
 $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
 $("#drop").onclick=()=>$("#file").click(); $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; $("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
 window.renderSalesHistoryAdmin = () => {
     const box = $("#salesHistoryAdminBox"); if(!box) return;
-    box.innerHTML = `<div class="flex justify-between items-center mb-2"><div class="font-black text-orange-800">📊 POS 판매 실적 DB</div><span class="text-[10px] font-bold text-orange-500 bg-white px-2 py-0.5 rounded">${Object.keys(SALES_HISTORY.items || {}).length}개 품목</span></div><div class="text-center cursor-pointer group mt-3 bg-white border border-orange-100 rounded-lg p-3 hover:bg-orange-500 transition-colors" id="shUploadTrigger"><div class="font-black text-orange-600 text-sm group-hover:text-white">판매 엑셀 누적 업데이트</div></div><input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">`;
+    box.innerHTML = `<div class="flex justify-between items-center mb-2"><div class="font-black text-orange-800">📊 판매 실적 DB</div><span class="text-[10px] font-bold text-orange-500 bg-white px-2 py-0.5 rounded">${Object.keys(SALES_HISTORY.items || {}).length}개 품목</span></div><div class="text-center cursor-pointer group mt-3 bg-white border border-orange-100 rounded-lg p-3 hover:bg-orange-500 transition-colors" id="shUploadTrigger"><div class="font-black text-orange-600 text-sm group-hover:text-white">판매 엑셀 누적 업데이트</div></div><input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">`;
     $("#shUploadTrigger").onclick = () => $("#shFile").click();
     $("#shFile").onchange = async (e) => {
         const f = e.target.files[0]; if(!f) return;
-        const pN = prompt("기간 이름을 적어주세요.\n예) 4/17~5/9 부산점 실적", f.name); if(!pN) { $("#shFile").value = ""; return; }
+        const pN = prompt("데이터 이름을 적어주세요 (예: 5/10 실적)", f.name); if(!pN) return;
         const reader = new FileReader();
         reader.onload = async (ev) => {
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"}); const sheet = wb.Sheets[wb.SheetNames[0]]; const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
@@ -509,17 +495,37 @@ window.renderSalesHistoryAdmin = () => {
             try {
                 const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
                 let sha = null; try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify({ message:"update", content: utf8ToB64(JSON.stringify(nH, null, 2)), branch: GH.branch, sha }) });
-                SALES_HISTORY = nH; sessionStorage.removeItem(CACHE_KEY); rebuildIndex(); render(); window.renderSalesHistoryAdmin(); alert("업데이트 완료!");
-            } catch(err) { alert("업로드 실패"); }
+                const r2 = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify({ message:"update", content: utf8ToB64(JSON.stringify(nH, null, 2)), branch: GH.branch, sha }) });
+                if(r2.ok) { SALES_HISTORY = nH; sessionStorage.removeItem(CACHE_KEY); rebuildIndex(); render(); window.renderSalesHistoryAdmin(); alert("업데이트 완료!"); } else throw new Error();
+            } catch(err) { alert("업로드 실패! 권한을 확인하세요."); }
             $("#shFile").value = "";
         };
         reader.readAsArrayBuffer(f);
     };
 };
 
-// 🔥 초기 로드 및 UI 주입 🔥
+$("#file").onchange = async (e) => { 
+    const f = e.target.files[0]; if(!f) return;
+    const d = new Date(); const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+        const meta = { fileName:f.name, uploadedAt: dateStr };
+        try { 
+            await commitInventoryToGitHub(rows, meta); 
+            RAW = rows; CURRENT_META = meta; 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, _timestamp: Date.now()})); 
+            applyMeta(CURRENT_META); rebuildIndex(); render(); $("#adminModal").classList.add("hidden"); alert("업로드 성공!");
+        } catch(err) { alert("업로드 실패! 권한을 확인하세요."); }
+        $("#file").value = ""; 
+    };
+    reader.readAsArrayBuffer(f);
+};
+
 window.addEventListener('DOMContentLoaded', () => {
+    loadGhConfig(); loadData();
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
         const trBtn = document.createElement("button"); trBtn.id = "allTransfersBtn"; trBtn.className = $("#allMemosBtn").className.replace(/yellow/g, 'blue');
         trBtn.innerHTML = `🚚 이동요청 목록`; trBtn.onclick = window.renderTransfers; $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
@@ -537,4 +543,4 @@ window.addEventListener('DOMContentLoaded', () => {
     window.renderSalesHistoryAdmin(); window.renderPromoAdmin(); if(window.renderSalesAdmin) window.renderSalesAdmin();
 });
 
-loadGhConfig(); loadData();
+let qT;
