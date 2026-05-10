@@ -9,8 +9,9 @@ style.innerHTML = `
     .dash-scroll::-webkit-scrollbar { width: 6px; }
     .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .dash-scroll::-webkit-scrollbar-track { background: transparent; }
-    /* 자동완성 팝업 스타일 */
-    #searchSuggestions { z-index: 999; max-height: 300px; overflow-y: auto; }
+    #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
+    .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
+    .card img.loaded { opacity: 1 !important; }
 `;
 document.head.appendChild(style);
 
@@ -40,7 +41,7 @@ let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
 
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
-let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V2') || '[]');
+let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V3') || '[]');
 
 let windowDashItems = [];
 let windowCurrentDashIndex = 0;
@@ -60,13 +61,6 @@ function checkPat() {
     return true;
 }
 
-function detectGender(code, sex){
-  const g = String(sex||"").trim();
-  if(g==="남성"||g==="남"||g.toUpperCase()==="M") return "M";
-  if(g==="여성"||g==="여"||g.toUpperCase()==="W") return "W";
-  return "U";
-}
-
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 function getChosung(str){
@@ -79,8 +73,6 @@ function getChosung(str){
   return r;
 }
 
-function isAllChosung(str) { return /^[ㄱ-ㅎ]+$/.test(str); }
-
 async function copyText(text, btn){
   try{
     await navigator.clipboard.writeText(text);
@@ -92,13 +84,21 @@ async function copyText(text, btn){
   }catch(e){ alert("복사 실패"); }
 }
 
+// 🔥 미니멀리즘 데이터 소스 (UI/UX 개선)
 function applyMeta(meta){
     if(meta) {
         const el = $("#statSrc");
         if(el) {
-            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] text-orange-600 mt-0.5 font-bold">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
-            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<div class="text-[11px] text-purple-600 mt-0.5 font-bold">🎁 기획전 적용됨: ${escapeHtml(PROMOTIONS.meta.name)}</div>` : "";
-            el.innerHTML = `<div class="text-[13px] font-black text-[color:var(--accent)] mb-0.5">✓ ${meta.uploadedAt || ''} 업데이트됨</div><div class="truncate text-xs text-gray-500">${meta.fileName || ''}</div>${addInfo}${promoInfo}`;
+            let addInfo = SALES_HISTORY.meta?.name ? `<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">📊 ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
+            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
+            el.innerHTML = `
+                <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-black mt-0.5">
+                    <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded"><i data-lucide="check-circle" class="w-3 h-3 inline pb-0.5"></i> ${meta.uploadedAt || ''}</span>
+                    ${addInfo}
+                    ${promoInfo}
+                </div>
+            `;
+            if(window.lucide) lucide.createIcons();
         }
     }
 }
@@ -177,7 +177,7 @@ function rebuildIndex(){
     if(r["규격"]) allSizes.add(String(r["규격"]).trim()); 
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false, periodSales: 0 });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -209,7 +209,6 @@ function rebuildIndex(){
             p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가); p.promoEndDate = '5/29'; 
         }
     }
-    // 🔥 검색 최적화: 품번, 품명, 브랜드, 카테고리를 하나로 합쳐서 검색 문자열 생성
     p._hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||""].join(" ").toLowerCase();
     p._hayClean = p._hay.replace(/[\s\-_]/g, ""); 
     p._chosung = getChosung(p._hayClean); 
@@ -252,20 +251,20 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 🔥 신규: 대형 액션 버튼 바 및 자동완성 세팅 🔥
+// 🔥 최상단 대형 듀얼버튼 세팅
 function setupQuickActionBar() {
     if($("#quickActionBar")) return;
-    const qContainer = $("#q").closest('.flex'); 
+    const qContainer = $("#q").parentNode;
     if(!qContainer) return;
 
     const actionHtml = `
-        <div id="quickActionBar" class="flex flex-col sm:flex-row gap-3 mt-4 mb-2 w-full">
-            <button onclick="window.openAnalyticsReport()" class="flex-1 bg-gray-900 text-white py-3 rounded-2xl font-black shadow-md hover:bg-black transition-transform active:scale-95 flex items-center justify-center gap-2 text-sm">
-                <i data-lucide="bar-chart-2" class="w-5 h-5"></i> 부산점 판매분석 & 보충제안
+        <div id="quickActionBar" class="flex gap-2 mt-3 mb-1 w-full">
+            <button onclick="window.openAnalyticsReport()" class="flex-1 bg-gray-900 text-white py-2.5 rounded-xl font-black shadow-sm hover:bg-black transition-transform active:scale-95 flex items-center justify-center gap-1.5 text-[13px]">
+                <i data-lucide="bar-chart-2" class="w-4 h-4"></i> 분석 리포트
             </button>
             ${(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) ? `
-            <button onclick="window.togglePromoView(this)" class="flex-1 bg-purple-600 text-white py-3 rounded-2xl font-black shadow-md hover:bg-purple-700 transition-transform active:scale-95 flex items-center justify-center gap-2 text-sm" data-active="0">
-                <i data-lucide="gift" class="w-5 h-5"></i> 기획전 [${escapeHtml(PROMOTIONS.meta.name)}] 보기
+            <button onclick="window.togglePromoView(this)" class="flex-1 bg-purple-600 text-white py-2.5 rounded-xl font-black shadow-sm hover:bg-purple-700 transition-transform active:scale-95 flex items-center justify-center gap-1.5 text-[13px]" data-active="0">
+                <i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기
             </button>` : ''}
         </div>
     `;
@@ -278,17 +277,18 @@ window.togglePromoView = (btn) => {
     btn.dataset.active = isActive ? "0" : "1";
     if(!isActive) {
         btn.classList.replace("bg-purple-600", "bg-purple-800");
-        btn.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5"></i> 기획전 필터 해제`;
+        btn.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4"></i> 기획전 필터 해제`;
         window.tempPromoFilter = true;
     } else {
         btn.classList.replace("bg-purple-800", "bg-purple-600");
-        btn.innerHTML = `<i data-lucide="gift" class="w-5 h-5"></i> 기획전 [${escapeHtml(PROMOTIONS.meta.name)}] 보기`;
+        btn.innerHTML = `<i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기`;
         window.tempPromoFilter = false;
     }
     if(window.lucide) lucide.createIcons();
     visibleCount=60; render();
 };
 
+// 🔥 검색어 자동완성 및 최근 검색어 로직 완벽 복구
 function setupSearchAutocomplete() {
     const qEl = document.getElementById("q");
     if(!qEl) return;
@@ -298,7 +298,7 @@ function setupSearchAutocomplete() {
         wrapper.classList.add("relative");
         const sugg = document.createElement("div");
         sugg.id = "searchSuggestions";
-        sugg.className = "absolute w-full bg-white border border-gray-200 rounded-xl shadow-2xl hidden top-full mt-2 left-0 flex flex-col z-[999]";
+        sugg.className = "absolute w-full bg-white border border-gray-200 rounded-xl shadow-2xl hidden top-full mt-2 left-0 flex flex-col z-[999] overflow-hidden";
         wrapper.appendChild(sugg);
     }
 
@@ -307,14 +307,14 @@ function setupSearchAutocomplete() {
     const showRecent = () => {
         if(RECENT_SEARCHES.length === 0) { suggBox.classList.add("hidden"); return; }
         suggBox.innerHTML = `
-            <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b flex justify-between">
-                <span>최근 검색어</span>
-                <span class="cursor-pointer hover:text-red-500" onclick="clearRecentSearches(event)">전체삭제</span>
+            <div class="p-2.5 bg-gray-50 text-[11px] font-bold text-gray-500 border-b flex justify-between items-center">
+                <span>🕒 최근 검색어</span>
+                <span class="cursor-pointer hover:text-red-500 bg-white px-2 py-0.5 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
             </div>
             ${RECENT_SEARCHES.map(t => `
                 <div class="p-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t)}')">
-                    <div class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-gray-400"></i><span class="font-bold text-gray-800">${escapeHtml(t)}</span></div>
-                    <i data-lucide="arrow-up-left" class="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100"></i>
+                    <div class="font-bold text-gray-800 text-[13px]">${escapeHtml(t)}</div>
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500"></i>
                 </div>
             `).join('')}
         `;
@@ -322,36 +322,25 @@ function setupSearchAutocomplete() {
         if(window.lucide) lucide.createIcons();
     };
 
-    qEl.addEventListener("focus", () => {
-        if(!qEl.value.trim()) showRecent();
-    });
-
-    document.addEventListener("click", (e) => {
-        if(!qEl.contains(e.target) && !suggBox.contains(e.target)) suggBox.classList.add("hidden");
-    });
-
-    qEl.addEventListener("keydown", (e) => {
-        if(e.key === "Enter" && qEl.value.trim()) {
-            suggBox.classList.add("hidden");
-            saveRecentSearch(qEl.value.trim());
-        }
-    });
+    qEl.addEventListener("focus", () => { if(!qEl.value.trim()) showRecent(); });
+    document.addEventListener("click", (e) => { if(!qEl.contains(e.target) && !suggBox.contains(e.target)) suggBox.classList.add("hidden"); });
+    qEl.addEventListener("keydown", (e) => { if(e.key === "Enter" && qEl.value.trim()) { suggBox.classList.add("hidden"); saveRecentSearch(qEl.value.trim()); } });
 
     qEl.addEventListener("input", (e) => {
         const val = e.target.value.trim().toLowerCase();
         const cleanVal = val.replace(/[\s\-_]/g, "");
         if(!cleanVal) { showRecent(); return; }
 
-        let matches = PRODUCTS.filter(p => p._hayClean.includes(cleanVal) || p._chosung.includes(cleanVal)).slice(0, 8);
+        let matches = PRODUCTS.filter(p => p._hayClean.includes(cleanVal) || p._chosung.includes(cleanVal)).slice(0, 5);
         if(matches.length === 0) { suggBox.classList.add("hidden"); return; }
 
         suggBox.innerHTML = `
-            <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b">상품 자동완성</div>
+            <div class="p-2.5 bg-gray-50 text-[11px] font-bold text-gray-500 border-b">✨ 상품 자동완성</div>
             ${matches.map(p => `
             <div class="p-3 border-b border-gray-50 hover:bg-blue-50 cursor-pointer flex gap-3 items-center" onclick="applySearch('${p.품번}')">
                 ${IMAGES[p.shopNo] ? `<img src="${IMAGES[p.shopNo]}" class="w-10 h-10 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-10 h-10 bg-gray-100 rounded flex items-center justify-center text-[8px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
                 <div class="flex flex-col min-w-0">
-                    <span class="text-[10px] font-bold text-gray-500 truncate">${p.브랜드} | ${p.품번}</span>
+                    <span class="text-[10px] font-bold text-gray-400 truncate">${p.브랜드} | ${p.품번}</span>
                     <span class="text-[13px] font-black text-gray-900 truncate">${p.품명}</span>
                 </div>
             </div>`).join('')}
@@ -373,18 +362,17 @@ window.saveRecentSearch = (term) => {
     RECENT_SEARCHES = RECENT_SEARCHES.filter(t => t !== term);
     RECENT_SEARCHES.unshift(term);
     if(RECENT_SEARCHES.length > 10) RECENT_SEARCHES.pop();
-    localStorage.setItem('RECENT_SEARCHES_V2', JSON.stringify(RECENT_SEARCHES));
+    localStorage.setItem('RECENT_SEARCHES_V3', JSON.stringify(RECENT_SEARCHES));
 };
 
 window.clearRecentSearches = (e) => {
     e.stopPropagation();
     RECENT_SEARCHES = [];
-    localStorage.removeItem('RECENT_SEARCHES_V2');
+    localStorage.removeItem('RECENT_SEARCHES_V3');
     document.getElementById("searchSuggestions").classList.add("hidden");
 };
 
-// Chart.js 로드
-function loadChartJS() {
+async function loadChartJS() {
     return new Promise((resolve) => {
         if (window.Chart && window.ChartDataLabels) return resolve();
         if (!window.Chart) {
@@ -405,101 +393,83 @@ function loadChartJS() {
     });
 }
 
-// 🔥 원클릭 스마트 이동요청 (RT) 함수 🔥
-window.quickRT = (code, size, fromStr, qty, btn) => {
+// 🔥 원클릭 스마트 이동요청 (즉시전송 + 5초 실행취소 로직) 🔥
+window.quickRT = async (code, size, fromStr, qty, btn) => {
     if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
-    
-    // 상태 백업 (취소 처리용)
+    qty = Number(qty);
+    if(qty <= 0) return;
+
     const origHtml = btn.innerHTML;
     const origClass = btn.className;
+    const origOnclick = btn.onclick;
     
-    let timeLeft = 3;
-    btn.innerHTML = `⏳ 취소 (${timeLeft}s)`;
-    btn.className = "bg-gray-800 text-white px-2 py-1.5 rounded-lg text-[12px] font-black w-full text-center transition-all cursor-pointer shadow-md";
+    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> 담김`;
+    btn.className = "bg-green-600 text-white py-1 px-2 rounded-lg flex items-center justify-center gap-1 text-[11px] font-black w-full shadow-inner";
+    btn.onclick = null; // 중복 클릭 방지
     
-    let canceled = false;
+    // 취소 버튼 렌더링
+    const undoBtn = document.createElement("button");
+    undoBtn.className = "ml-1.5 text-[11px] text-red-500 font-bold underline whitespace-nowrap cursor-pointer";
+    undoBtn.innerText = "취소";
+    btn.parentNode.insertBefore(undoBtn, btn.nextSibling);
+    if(window.lucide) lucide.createIcons();
+
+    const trId = "tr_" + Date.now();
+    const d = new Date();
+    const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트 RT요청`;
+
+    // 1. 즉시 로컬 배열 추가 & 깃허브 API 호출
+    TRANSFERS.push({ id: trId, code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
     
-    const timer = setInterval(() => {
-        timeLeft--;
-        if(timeLeft > 0 && !canceled) {
-            btn.innerHTML = `⏳ 취소 (${timeLeft}s)`;
-        } else {
-            clearInterval(timer);
-        }
-    }, 1000);
-    
-    // 버튼 다시 누르면 취소됨
-    btn.onclick = (e) => {
+    let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
+        .then(r => r.json())
+        .then(j => {
+            const body = { message:"add smart transfer", content: utf8ToB64(JSON.stringify(TRANSFERS, null, 2)), branch: GH.branch, sha: j.sha };
+            return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        }).catch(err => console.error(err));
+
+    // 2. 취소 버튼 동작
+    undoBtn.onclick = async (e) => {
         e.stopPropagation();
-        canceled = true;
-        clearInterval(timer);
-        btn.innerHTML = origHtml;
-        btn.className = origClass;
-        // 복구 시 원본 함수 재바인딩
-        btn.onclick = (ev) => { ev.stopPropagation(); window.quickRT(code, size, fromStr, qty, btn); };
-    };
-    
-    // 3초 후 실제 API 호출
-    setTimeout(async () => {
-        if(canceled) return;
-        btn.onclick = null;
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin mx-auto"></i>`;
-        if(window.lucide) lucide.createIcons();
+        undoBtn.remove();
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
+        
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+        await apiPromise; // 충돌 방지를 위해 이전 요청 완료 대기
         
         try {
-            const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
-            let sha = null; let oldData = [];
-            try { 
-                const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
-                if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
-            }catch(e){}
-            
-            const d = new Date();
-            const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-            const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
-            
-            oldData.push({ id: "tr_" + Date.now(), code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
-            
-            const body = { message:"add smart transfer request", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
-            if(sha) body.sha = sha;
-            await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-            
-            TRANSFERS = oldData; 
-            btn.className = "bg-green-100 text-green-700 px-2 py-1.5 rounded-lg text-[12px] font-black w-full text-center cursor-not-allowed shadow-inner";
-            btn.innerHTML = `✅ RT 완료`;
-        } catch(e) { 
-            alert("이동 요청 실패! 네트워크를 확인하세요."); 
-            btn.innerHTML = origHtml; 
-            btn.className = origClass;
-            btn.onclick = (ev) => { ev.stopPropagation(); window.quickRT(code, size, fromStr, qty, btn); };
-        }
-    }, 3000);
+            const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+            const j = await r.json();
+            const body = { message:"undo smart transfer", content: utf8ToB64(JSON.stringify(TRANSFERS, null, 2)), branch: GH.branch, sha: j.sha };
+            await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        } catch(err) {}
+        
+        // 버튼 원상복구
+        btn.innerHTML = origHtml;
+        btn.className = origClass;
+        btn.onclick = origOnclick;
+        if(window.lucide) lucide.createIcons();
+    };
+
+    // 5초 후 취소버튼 숨김
+    setTimeout(() => {
+        if(undoBtn.parentNode) undoBtn.remove();
+    }, 5000);
 };
 
-// 🔥 이동요청 엑셀 다운로드 함수 🔥
 window.exportTransfersToExcel = () => {
     if(TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return; }
-    
-    // Load SheetJS dynamically if not available
     if(!window.XLSX || !window.XLSX.writeFile) {
-        alert("엑셀 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+        alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요.");
         const s = document.createElement('script');
         s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js';
         document.head.appendChild(s);
         return;
     }
-    
-    const wsData = TRANSFERS.map(t => ({
-        "요청일자": t.date,
-        "품번": t.code,
-        "품명": t.product,
-        "사이즈": t.size,
-        "수량": t.qty,
-        "메모": t.memo
-    }));
-    
+    const wsData = TRANSFERS.map(t => ({ "요청일자": t.date, "품번": t.code, "품명": t.product, "사이즈": t.size, "수량": t.qty, "메모": t.memo }));
     const ws = XLSX.utils.json_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "이동요청목록");
@@ -507,7 +477,6 @@ window.exportTransfersToExcel = () => {
     XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
 };
 
-// 🔥 고도화된 반응형 분석 대시보드
 window.openAnalyticsReport = async () => {
     await loadChartJS();
 
@@ -658,11 +627,12 @@ window.openAnalyticsReport = async () => {
         $("#dashPeriodSel").value = "7";
         $("#dashPeriodSel").onchange = (e) => {
             const val = e.target.value;
-            if(val === "CUSTOM_INPUT") $("#dashCustomDateWrap").classList.replace("hidden", "flex");
-            else {
+            if(val === "CUSTOM_INPUT") {
+                $("#dashCustomDateWrap").classList.replace("hidden", "flex");
+            } else {
                 $("#dashCustomDateWrap").classList.replace("flex", "hidden");
                 if (val.startsWith("EXACT_")) { const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2]; } 
-                else currentPeriod = val;
+                else { currentPeriod = val; }
                 dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
             }
         };
@@ -725,7 +695,6 @@ window.openAnalyticsReport = async () => {
             const imgHtml = imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0 mix-blend-multiply">` : `<div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
             let pParam = currentPeriod; if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
-            // 🔥 스마트 보충 제안 알림 생성 (리스트 뷰 전용) 🔥
             let insightHtml = ""; let isBusanLowStock = false;
             if (currentSizeFilter !== "ALL") {
                 const sObj = p.sizes.find(s => String(s.size).trim() === currentSizeFilter);
@@ -821,7 +790,6 @@ window.openAnalyticsReport = async () => {
     updateDashData();
 };
 
-// 🔥 사이즈별 상세 분석 팝업 (가로형 테이블, 음영 컬러 추가) 🔥
 window.openDashDetail = (code, periodParam) => {
     windowCurrentDashIndex = windowDashItems.findIndex(x => x.품번 === code);
     const p = windowDashItems[windowCurrentDashIndex];
@@ -905,7 +873,6 @@ window.openDashDetail = (code, periodParam) => {
         insightHtml = `<div class="mt-4 bg-purple-50 text-purple-700 p-3 rounded-xl text-[13px] font-black border border-purple-100 flex items-center gap-2 shadow-sm"><i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i> 비주류/빅사이즈 (290+, 250+, XL 등) 에서 ${largeSizeSales}개의 틈새 판매량 포착!</div>`;
     }
 
-    // 🔥 테이블 렌더링: 가로 분할 및 컬러 음영 적용 🔥
     const tableHtml = allUniqueSizes.map(size => {
         const soldBusan = sizeSalesMapBusan[size] || 0;
         const soldSinsa = sizeSalesMapSinsa[size] || 0;
@@ -919,10 +886,26 @@ window.openDashDetail = (code, periodParam) => {
             let takeSinsa = Math.min(sObj.sinsa, needed);
             
             let badges = [];
-            if(takeCenter > 0) badges.push(`<button onclick="quickRT('${p.품번}','${size}','본사/물류',${takeCenter}, this)" class="bg-gray-100 border border-gray-200 hover:bg-gray-800 hover:text-white text-gray-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm transition-colors cursor-pointer flex items-center gap-1 w-full justify-center">1️⃣ 물류 ${takeCenter} 가져오기</button>`);
-            if(takeSinsa > 0) badges.push(`<button onclick="quickRT('${p.품번}','${size}','신사점',${takeSinsa}, this)" class="bg-orange-100 border border-orange-200 hover:bg-orange-600 hover:text-white text-orange-700 px-2 py-1 rounded-md text-[11px] font-black shadow-sm transition-colors cursor-pointer flex items-center gap-1 w-full justify-center">2️⃣ 신사 ${takeSinsa} 가져오기</button>`);
+            if(takeCenter > 0) badges.push(`
+                <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 p-1 rounded-lg w-full max-w-[140px]">
+                    <span class="text-[10px] font-bold text-gray-500 w-6 text-center">물류</span>
+                    <input type="number" id="rt_c_${size}" value="${takeCenter}" min="1" max="${sObj.center}" class="w-8 text-center text-[11px] font-black bg-white border border-gray-300 rounded outline-none h-5">
+                    <button onclick="quickRT('${p.품번}','${size}','본사/물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-800 hover:bg-black text-white px-1.5 py-0.5 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
+                        <i data-lucide="shopping-cart" class="w-3 h-3"></i> 담기
+                    </button>
+                </div>
+            `);
+            if(takeSinsa > 0) badges.push(`
+                <div class="flex items-center gap-1 bg-orange-50 border border-orange-100 p-1 rounded-lg w-full max-w-[140px]">
+                    <span class="text-[10px] font-bold text-orange-600 w-6 text-center">신사</span>
+                    <input type="number" id="rt_s_${size}" value="${takeSinsa}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-[11px] font-black bg-white border border-orange-200 rounded outline-none h-5 text-orange-700">
+                    <button onclick="quickRT('${p.품번}','${size}','신사점', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
+                        <i data-lucide="shopping-cart" class="w-3 h-3"></i> 담기
+                    </button>
+                </div>
+            `);
             
-            if(badges.length > 0) suggestHtml = `<div class="flex flex-col gap-1.5 items-center justify-center w-full max-w-[120px] mx-auto">${badges.join("")}</div>`;
+            if(badges.length > 0) suggestHtml = `<div class="flex flex-col gap-1.5 items-center justify-center w-full">${badges.join("")}</div>`;
             else suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-1 rounded-md text-[11px] font-black w-full block text-center max-w-[80px] mx-auto">🚨 전사품절</span>`;
         }
 
@@ -931,16 +914,12 @@ window.openDashDetail = (code, periodParam) => {
 
         return `<tr class="${rowClass}">
             <td class="py-2.5 text-gray-700 font-bold border-r border-gray-100">${size}</td>
-            
             <td class="py-2.5 text-blue-600 font-black text-base bg-blue-50/20">${soldBusan > 0 ? soldBusan : '-'}</td>
             <td class="py-2.5 bg-blue-50/20 border-r border-gray-100 ${sObj.busan<=2?'text-red-500 font-black':'text-gray-700 font-medium'}">${sObj.busan}</td>
-            
             <td class="py-2.5 text-orange-600 font-bold bg-orange-50/20">${soldSinsa > 0 ? soldSinsa : '-'}</td>
             <td class="py-2.5 text-gray-600 bg-orange-50/20 border-r border-gray-100">${sObj.sinsa}</td>
-
             <td class="py-2.5 text-gray-600 font-bold bg-gray-50/40">${soldCenter > 0 ? soldCenter : '-'}</td>
             <td class="py-2.5 text-gray-600 bg-gray-50/40 border-r border-gray-100">${sObj.center}</td>
-            
             <td class="py-2.5 align-middle px-2">${suggestHtml}</td>
         </tr>`;
     }).join('');
@@ -1503,6 +1482,7 @@ window.renderTransfers = () => {
     if(window.lucide) lucide.createIcons();
 };
 
+// 🔥 기본 모바일 팝업 유지 (단순 메모용)
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
@@ -1530,27 +1510,10 @@ function openDetail(p){
   }
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
-  // 🔥 상세 모달에서도 스마트 RT 버튼 바로 렌더링 🔥
   $("#detailBody").innerHTML = `
     <table class="w-full mt-4 text-sm bg-[color:var(--surface)] rounded-lg">
-      <tr class="text-gray-500 font-black border-b border-gray-200 bg-gray-50">
-          <th class="py-2.5 px-2 text-center w-[20%] border-r border-gray-200">사이즈</th>
-          <th class="px-2 text-center w-[20%] text-blue-700 bg-blue-50/50 border-r border-gray-200">부산</th>
-          <th class="px-2 text-center w-[30%] border-r border-gray-200">본사(물류) RT</th>
-          <th class="px-2 text-center w-[30%]">신사점 RT</th>
-      </tr>
-      ${p.sizes.map(s => {
-          return `<tr class="border-b border-gray-100">
-            <td class="py-2 px-2 font-bold text-center border-r border-gray-100">${s.size}</td>
-            <td class="text-center px-2 font-black border-r border-gray-100 bg-blue-50/20 ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
-            <td class="px-2 py-2 border-r border-gray-100 text-center">
-                ${s.center > 0 ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-100 hover:bg-gray-800 hover:text-white border border-gray-200 text-gray-700 px-2 py-1.5 rounded-lg text-[11px] font-black w-full transition-colors shadow-sm cursor-pointer">본사 ${s.center} (1개 RT)</button>` : `<span class="text-[10px] font-bold text-gray-400">-</span>`}
-            </td>
-            <td class="px-2 py-2 text-center">
-                ${s.sinsa > 0 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-50 hover:bg-orange-500 hover:text-white border border-orange-200 text-orange-700 px-2 py-1.5 rounded-lg text-[11px] font-black w-full transition-colors shadow-sm cursor-pointer">신사 ${s.sinsa} (1개 RT)</button>` : `<span class="text-[10px] font-bold text-gray-400">-</span>`}
-            </td>
-          </tr>`
-      }).join("")}
+      <tr class="text-[#888] border-b border-[color:var(--line)]"><th class="py-2 px-2 text-left">사이즈</th><th class="px-2 text-center">부산</th><th class="px-2 text-center">신사</th><th class="px-2 text-center">물류</th></tr>
+      ${p.sizes.map(s=>`<tr class="border-b border-[color:var(--line)]"><td class="py-2 px-2 font-bold">${s.size}</td><td class="text-center px-2 font-bold ${s.busan>0?'text-green-600':''}"><span class="real-qty">${s.busan}</span><span class="showroom-qty hidden ${s.busan>0?'text-green-600 font-black':'text-red-500'}">${s.busan>0?'O':'X'}</span></td><td class="text-center px-2">${s.sinsa}</td><td class="text-center px-2">${s.center}</td></tr>`).join("")}
     </table>
   `;
   
@@ -1583,8 +1546,6 @@ function openDetail(p){
           } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
       };
   }
-
-  // 기존 구차한 수동이동요청 박스는 완전히 제거함.
 
   $("#addMemoBtn").onclick = async () => {
       if(!checkPat()) return;
@@ -1794,15 +1755,12 @@ window.renderSalesHistoryAdmin = () => {
                 const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "";
 
                 // 🔥 완벽 분류 로직 🔥
-                // 1. 수주구분이 "매장"인 경우 -> 담당자에 따라 분기
-                // 2. 수주구분이 "온라인" 또는 기타인 경우 -> 무조건 물류(본사)
                 let locationGroup = "본사물류"; // 기본값
                 
                 if(typeStr === "매장" || typeStr.includes("오프라인")) {
                     if(rawManager.includes("김종훈") || rawManager.includes("부산")) locationGroup = "부산(김종훈)";
                     else if(rawManager.includes("승호") || rawManager.includes("강") || rawManager.includes("신사")) locationGroup = "신사(승호강)";
                 } else if(rawManager.includes("김종훈")) {
-                    // 예외: 온라인이라도 담당자가 명확히 김종훈이면 부산으로 잡아줌
                     locationGroup = "부산(김종훈)";
                 }
 
