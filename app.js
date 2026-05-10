@@ -12,6 +12,15 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
+// 🔥 리포트 커스텀 스크롤바 디자인 추가 🔥
+const style2 = document.createElement('style');
+style2.innerHTML = `
+    .dash-scroll::-webkit-scrollbar { width: 6px; }
+    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
+`;
+document.head.appendChild(style2);
+
 const ADMIN_PWD = "1212";
 const SESSION_FLAG = "racement_admin_session";
 const GH_CONFIG_KEY = "racement_gh_config_v1";
@@ -388,241 +397,304 @@ function rebuildIndex(){
   $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
 }
 
-// 판매 분석 리포트 대시보드
-// Chart.js 동적 로드 (기존 환경에 없을 경우를 대비)
+// Chart.js 및 % 표시용 DataLabels 플러그인 동적 로드
 function loadChartJS() {
     return new Promise((resolve) => {
-        if (window.Chart) return resolve();
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-        script.onload = resolve;
-        document.head.appendChild(script);
+        if (window.Chart && window.ChartDataLabels) return resolve();
+        if (!window.Chart) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = () => {
+                if (!window.ChartDataLabels) {
+                    const plugin = document.createElement('script');
+                    plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+                    plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
+                    document.head.appendChild(plugin);
+                } else resolve();
+            };
+            document.head.appendChild(script);
+        } else if (!window.ChartDataLabels) {
+            const plugin = document.createElement('script');
+            plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+            plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
+            document.head.appendChild(plugin);
+        }
     });
 }
 
 // 🔥 고도화된 반응형 인터랙티브 분석 대시보드
 window.openAnalyticsReport = async () => {
-    await loadChartJS(); // Chart.js 로딩 대기
+    await loadChartJS();
 
-    let f = getFilters();
-    let titleDate = "전체 누적 기간";
-    if (f.salesPeriod === "7") titleDate = "최근 7일간";
-    else if (f.salesPeriod === "30") titleDate = "최근 30일간";
-    else if (f.salesPeriod === "90") titleDate = "최근 3개월간";
-    else if (f.salesPeriod === "CUSTOM") titleDate = `${f.customStart} ~ ${f.customEnd}`;
+    let dashFilter = { cat: null, brand: null };
+    let currentPeriod = $("#salesPeriodSel") ? $("#salesPeriodSel").value : "7"; 
+    let currentCustomStart = $("#customStartDate") ? $("#customStartDate").value : "";
+    let currentCustomEnd = $("#customEndDate") ? $("#customEndDate").value : "";
 
-    // 판매 데이터 집계
-    let totalSales = 0;
-    let catData = { "신발": 0, "의류": 0, "용품": 0 };
-    let genderData = { "M": 0, "W": 0, "U": 0 };
-    let brandData = {};
-    let soldItems = [];
-
-    PRODUCTS.forEach(p => {
-        if (p.periodSales > 0) {
-            totalSales += p.periodSales;
-            const cat = p.카테고리 || "기타";
-            catData[cat] = (catData[cat] || 0) + p.periodSales;
-            const g = p.gender || "U";
-            genderData[g] = (genderData[g] || 0) + p.periodSales;
-            const b = p.브랜드 || "기타";
-            brandData[b] = (brandData[b] || 0) + p.periodSales;
-            soldItems.push(p);
+    // 내부에서 기간에 따른 데이터 실시간 필터링
+    const getPeriodItems = (period, start, end) => {
+        let items = [];
+        let cutoffDate = "0000-00-00";
+        let endDate = "9999-99-99";
+        
+        if (period === "CUSTOM") {
+            cutoffDate = start || "0000-00-00";
+            endDate = end || "9999-99-99";
+        } else if (period && period !== "ALL") {
+            const d = new Date(Date.now() - Number(period) * 86400000);
+            cutoffDate = d.toISOString().split('T')[0];
         }
-    });
 
-    soldItems.sort((a, b) => b.periodSales - a.periodSales);
-
-    let modal = $("#analyticsDashboard");
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "analyticsDashboard";
-        // 모달 대신 전체 화면을 덮는 SaaS 형태의 레이아웃
-        modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-300 opacity-0";
-        document.body.appendChild(modal);
-    }
-
-    modal.innerHTML = `
-        <header class="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center shrink-0">
-            <div>
-                <h1 class="text-xl font-black text-gray-900 tracking-tight">인사이트 리포트</h1>
-                <p class="text-xs font-bold text-gray-500 mt-1">${titleDate} 기준 • 총 <span class="text-blue-600">${fmt(totalSales)}개</span> 판매됨</p>
-            </div>
-            <button id="closeDashboardBtn" class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </header>
-
-        <main class="flex-1 overflow-hidden p-4 lg:p-6">
-            <div class="h-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto no-scrollbar pr-1">
-                    
-                    <article class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                        <h2 class="text-sm font-black text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> 카테고리 비중</h2>
-                        <div class="relative h-48 w-full">
-                            <canvas id="catChart"></canvas>
-                        </div>
-                        <p class="text-[10px] text-center text-gray-400 mt-2 font-bold">차트 조각을 클릭하면 리스트가 필터링됩니다.</p>
-                    </article>
-
-                    <article class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                        <h2 class="text-sm font-black text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-500"></i> 탑 브랜드</h2>
-                        <div class="relative h-48 w-full">
-                            <canvas id="brandChart"></canvas>
-                        </div>
-                    </article>
-
-                </section>
-
-                <section class="md:col-span-1 lg:col-span-2 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                        <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="award" class="w-4 h-4 text-orange-500"></i> 상세 판매 내역</h2>
-                        <div id="activeFilterLabel" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hidden"></div>
-                    </div>
-                    <div id="dashListBody" class="flex-1 overflow-y-auto p-3 space-y-2 no-scrollbar">
-                        </div>
-                </section>
-            </div>
-        </main>
-    `;
-
-    // 닫기 이벤트 및 Transition 적용
-    setTimeout(() => modal.classList.remove("opacity-0"), 10);
-    $("#closeDashboardBtn").onclick = () => {
-        modal.classList.add("opacity-0");
-        setTimeout(() => modal.classList.add("hidden"), 300);
+        PRODUCTS.forEach(p => {
+            let sales = 0;
+            if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+                for (let date in SALES_HISTORY.items[p.품번]) {
+                    if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
+                        sales += SALES_HISTORY.items[p.품번][date];
+                    }
+                }
+            }
+            if(sales > 0) {
+                items.push({ ...p, dashSales: sales, dashRev: sales * (p.currentPromoPrice || p.소비자가 || 0) });
+            }
+        });
+        return items.sort((a, b) => b.dashSales - a.dashSales);
     };
 
-    // 대시보드 내 제품 리스트 렌더링 함수
-    const renderDashList = (filterCat = null, filterBrand = null) => {
+    let rawSoldItems = [];
+    let catChartInstance = null;
+    let brandChartInstance = null;
+
+    // 대시보드 UI 렌더링
+    const renderDashUI = () => {
+        let modal = $("#analyticsDashboard");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.id = "analyticsDashboard";
+            modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-300 opacity-0";
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+            <header class="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 shadow-sm">
+                <div>
+                    <h1 class="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 판매 인사이트 리포트</h1>
+                    <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-1"></p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <select id="dashPeriodSel" class="ipt text-[12px] font-black bg-orange-50 border-orange-200 text-orange-700 rounded px-3 py-2 outline-none cursor-pointer">
+                        <option value="1">어제/오늘 (1일)</option>
+                        <option value="7">최근 7일</option>
+                        <option value="30">최근 1개월</option>
+                        <option value="90">최근 3개월 (분기)</option>
+                        <option value="180">최근 6개월 (반기)</option>
+                        <option value="ALL">전체 누적실적</option>
+                        <option value="CUSTOM">📅 직접 지정</option>
+                    </select>
+                    <div id="dashCustomDateWrap" class="hidden items-center gap-1 bg-white p-1.5 border border-orange-200 rounded">
+                        <input type="date" id="dashStart" class="ipt text-[11px] px-1 py-1 w-[100px] border-none outline-none text-gray-600 font-bold cursor-pointer"> ~
+                        <input type="date" id="dashEnd" class="ipt text-[11px] px-1 py-1 w-[100px] border-none outline-none text-gray-600 font-bold cursor-pointer">
+                        <button id="dashApply" class="px-3 py-1 bg-orange-500 text-white rounded text-[11px] font-black shrink-0 hover:bg-orange-600">적용</button>
+                    </div>
+                    <button id="closeDashboardBtn" class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-auto md:ml-2">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+            <main class="flex-1 overflow-hidden p-4 lg:p-6">
+                <div class="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto dash-scroll pr-2">
+                        <article class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                            <h2 class="text-sm font-black text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> 카테고리 비중</h2>
+                            <div class="relative h-[220px] w-full"><canvas id="catChart"></canvas></div>
+                        </article>
+                        <article class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                            <h2 class="text-sm font-black text-gray-800 mb-4 flex items-center gap-1.5"><i data-lucide="award" class="w-4 h-4 text-emerald-500"></i> 브랜드 비중</h2>
+                            <div class="relative h-[220px] w-full"><canvas id="brandChart"></canvas></div>
+                        </article>
+                    </section>
+                    <section class="lg:col-span-2 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                            <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-500"></i> 상세 판매 랭킹</h2>
+                            <div id="activeFilterLabel" class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors shadow-sm"></div>
+                        </div>
+                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-3 space-y-2"></div>
+                    </section>
+                </div>
+            </main>
+        `;
+
+        $("#dashPeriodSel").value = currentPeriod === "" ? "7" : currentPeriod;
+        if(currentPeriod === "CUSTOM") {
+            $("#dashCustomDateWrap").classList.replace("hidden", "flex");
+            $("#dashStart").value = currentCustomStart;
+            $("#dashEnd").value = currentCustomEnd;
+        }
+
+        $("#dashPeriodSel").onchange = (e) => {
+            if(e.target.value === "CUSTOM") {
+                $("#dashCustomDateWrap").classList.replace("hidden", "flex");
+            } else {
+                $("#dashCustomDateWrap").classList.replace("flex", "hidden");
+                currentPeriod = e.target.value;
+                dashFilter = { cat: null, brand: null }; // 기간 변경 시 필터 초기화
+                updateDashData();
+            }
+        };
+        
+        $("#dashApply").onclick = () => {
+            if(!$("#dashStart").value || !$("#dashEnd").value) { alert("날짜를 모두 선택해주세요."); return; }
+            currentPeriod = "CUSTOM";
+            currentCustomStart = $("#dashStart").value;
+            currentCustomEnd = $("#dashEnd").value;
+            dashFilter = { cat: null, brand: null };
+            updateDashData();
+        };
+
+        $("#closeDashboardBtn").onclick = () => {
+            modal.classList.add("opacity-0");
+            setTimeout(() => modal.classList.add("hidden"), 300);
+        };
+        if(window.lucide) lucide.createIcons();
+    };
+
+    // 실시간 상태 업데이트 렌더러
+    const updateDashData = () => {
+        rawSoldItems = getPeriodItems(currentPeriod, currentCustomStart, currentCustomEnd);
+        renderDashState();
+    };
+
+    // 데이터 연산 및 차트/리스트 그리기
+    const renderDashState = () => {
+        let filteredItems = rawSoldItems.filter(p => {
+            if (dashFilter.cat && p.카테고리 !== dashFilter.cat) return false;
+            if (dashFilter.brand && p.브랜드 !== dashFilter.brand) return false;
+            return true;
+        });
+
+        let totalSales = 0; let totalRev = 0;
+        let catData = {}; let brandData = {};
+
+        filteredItems.forEach(p => {
+            totalSales += p.dashSales;
+            totalRev += p.dashRev;
+            const cat = p.카테고리 || "기타";
+            const b = p.브랜드 || "기타";
+            catData[cat] = (catData[cat] || 0) + p.dashSales;
+            brandData[b] = (brandData[b] || 0) + p.dashSales;
+        });
+
+        // 1. 헤더 총 금액 업데이트
+        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black">${krw(totalRev)}</span> 판매`;
+
+        // 2. 리스트 및 필터 라벨 업데이트
         const listBody = $("#dashListBody");
         const filterLabel = $("#activeFilterLabel");
-        
-        let filteredItems = soldItems;
         let labelText = [];
-
-        if (filterCat) {
-            filteredItems = filteredItems.filter(p => p.카테고리 === filterCat);
-            labelText.push(filterCat);
-        }
-        if (filterBrand) {
-            filteredItems = filteredItems.filter(p => p.브랜드 === filterBrand);
-            labelText.push(filterBrand);
-        }
+        if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
+        if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
 
         if (labelText.length > 0) {
-            filterLabel.textContent = `필터 적용: ${labelText.join(', ')} (클릭 해제)`;
+            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`;
             filterLabel.classList.remove("hidden");
-            filterLabel.onclick = () => {
-                // 필터 초기화 후 재렌더링
-                renderDashList();
-                $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === "ALL" ? "1" : "0"));
-                $$('#brandChips .chip').forEach(b => b.dataset.active = (b.dataset.brand === "ALL" ? "1" : "0"));
-                visibleCount = 60; render(); // 메인 화면 동기화
-            };
-        } else {
-            filterLabel.classList.add("hidden");
-        }
+            filterLabel.onclick = () => { dashFilter = { cat: null, brand: null }; renderDashState(); };
+        } else { filterLabel.classList.add("hidden"); }
 
-        listBody.innerHTML = filteredItems.map((p, idx) => `
-            <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group" onclick="openDetail(PRODUCTS.find(x=>x.품번==='${p.품번}'))">
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-xs shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
-                    <div class="min-w-0">
+        listBody.innerHTML = filteredItems.map((p, idx) => {
+            const imgSrc = IMAGES[p.shopNo] || null;
+            const imgHtml = imgSrc 
+                ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded border border-gray-200 bg-white shrink-0 mix-blend-multiply">` 
+                : `<div class="w-12 h-12 bg-gray-50 rounded border border-gray-200 flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
+
+            return `
+            <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="openDetail(PRODUCTS.find(x=>x.품번==='${p.품번}'))">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <div class="w-7 h-7 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-[13px] shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
+                    ${imgHtml}
+                    <div class="min-w-0 pr-2">
                         <div class="text-[11px] font-bold text-gray-400 truncate mb-0.5">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
-                        <div class="text-[13px] font-black text-gray-800 truncate">${escapeHtml(p.품명)}</div>
+                        <div class="text-[14px] font-black text-gray-800 truncate leading-snug">${escapeHtml(p.품명)}</div>
                     </div>
                 </div>
-                <div class="flex flex-col items-end shrink-0 ml-3">
-                    <span class="font-black text-gray-900 text-sm">${fmt(p.periodSales)}개</span>
-                    <span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5">${krw(p.periodSales * (p.currentPromoPrice || p.소비자가 || 0))}</span>
+                <div class="flex flex-col items-end shrink-0 ml-2">
+                    <span class="font-black text-gray-900 text-[15px]">${fmt(p.dashSales)}개</span>
+                    <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-1">${krw(p.dashRev)}</span>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
 
         if (filteredItems.length === 0) {
-            listBody.innerHTML = '<div class="h-full flex items-center justify-center text-xs font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+            listBody.innerHTML = '<div class="h-full flex items-center justify-center text-sm font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
         }
+
+        // 3. 차트 업데이트 함수 (% 퍼센트 표시 및 양방향 필터 기능 내장)
+        const renderPieChart = (ctxId, dataObj, filterKey) => {
+            const ctx = document.getElementById(ctxId);
+            const labels = Object.keys(dataObj);
+            const dataVals = Object.values(dataObj);
+            const total = dataVals.reduce((a,b)=>a+b,0);
+
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'],
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold', size: 11 } } },
+                        tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 12, cornerRadius: 8, bodyFont: { weight: 'bold', size: 13 } },
+                        datalabels: {
+                            color: '#ffffff', font: { weight: '900', size: 12 },
+                            formatter: (value) => {
+                                if(total === 0) return '';
+                                const pct = Math.round((value / total) * 100);
+                                return pct > 4 ? pct + '%' : ''; // 4% 초과일때만 글자표시 (디자인 안깨지게)
+                            }
+                        }
+                    },
+                    cutout: '55%',
+                    onClick: (e, elements, chart) => {
+                        if (elements[0]) {
+                            const clickedLabel = chart.data.labels[elements[0].index];
+                            if(clickedLabel === '기타브랜드') return; // 기타는 필터 제외
+                            dashFilter[filterKey] = (dashFilter[filterKey] === clickedLabel) ? null : clickedLabel;
+                            renderDashState(); // 클릭시 즉시 전체 뷰 재렌더링
+                        }
+                    }
+                }
+            });
+        };
+
+        if(catChartInstance) catChartInstance.destroy();
+        if(brandChartInstance) brandChartInstance.destroy();
+
+        // 카테고리 차트
+        catChartInstance = renderPieChart('catChart', catData, 'cat');
+        
+        // 브랜드 차트 (너무 파편화되지 않게 상위 8개만 그리고 나머지는 기타 처리)
+        let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
+        let topBrandData = {}; let otherSales = 0;
+        sortedBrands.forEach((b, i) => {
+            if(i < 8) topBrandData[b[0]] = b[1];
+            else otherSales += b[1];
+        });
+        if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
+        
+        brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand');
     };
 
-    // 초기 리스트 렌더링
-    renderDashList();
-
-    // Chart.js 공통 옵션 (SaaS 스타일 미니멀리즘)
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold' } } },
-            tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', padding: 12, cornerRadius: 12, titleFont: { size: 12 }, bodyFont: { size: 14, weight: 'bold' }, displayColors: false }
-        }
-    };
-
-    // 1. 카테고리 도넛 차트
-    new Chart($("#catChart"), {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(catData),
-            datasets: [{
-                data: Object.values(catData),
-                backgroundColor: ['#3b82f6', '#8b5cf6', '#f97316', '#e5e7eb'],
-                borderWidth: 0,
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            ...commonOptions,
-            cutout: '75%',
-            onClick: (e, elements, chart) => {
-                if (elements[0]) {
-                    const label = chart.data.labels[elements[0].index];
-                    // 메인 UI 칩 상태 동기화 및 렌더링
-                    $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === label ? "1" : "0"));
-                    visibleCount = 60; render();
-                    // 대시보드 리스트 연동
-                    renderDashList(label, null);
-                }
-            }
-        }
-    });
-
-    // 2. 탑 브랜드 막대 차트 (가로형)
-    const sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    new Chart($("#brandChart"), {
-        type: 'bar',
-        data: {
-            labels: sortedBrands.map(b => b[0]),
-            datasets: [{
-                data: sortedBrands.map(b => b[1]),
-                backgroundColor: '#10b981',
-                borderRadius: 8,
-                barPercentage: 0.6
-            }]
-        },
-        options: {
-            ...commonOptions,
-            indexAxis: 'y', // 가로 막대
-            plugins: { ...commonOptions.plugins, legend: { display: false } },
-            scales: {
-                x: { display: false },
-                y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold' } } }
-            },
-            onClick: (e, elements, chart) => {
-                if (elements[0]) {
-                    const label = chart.data.labels[elements[0].index];
-                    // 메인 UI 칩 상태 동기화 및 렌더링
-                    $$('#brandChips .chip').forEach(b => b.dataset.active = (b.dataset.brand === label ? "1" : "0"));
-                    visibleCount = 60; render();
-                    // 대시보드 리스트 연동
-                    renderDashList(null, label);
-                }
-            }
-        }
-    });
-
-    modal.classList.remove("hidden");
-    if (window.lucide) lucide.createIcons();
+    // 모달 띄우고 데이터 최초 렌더링
+    if(!$("#analyticsDashboard")) renderDashUI();
+    else $("#analyticsDashboard").classList.remove("hidden");
+    
+    setTimeout(() => $("#analyticsDashboard").classList.remove("opacity-0"), 10);
+    updateDashData();
 };
 
 window.openSalesGuide = (code) => {
@@ -1260,8 +1332,16 @@ function openDetail(p){
   if(window.lucide) lucide.createIcons();
 }
 
+// 🔥 ESC 키 누르면 대시보드도 꺼지도록 수정 🔥
 document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") { $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); }
+    if(e.key === "Escape") { 
+        $$('.modal-backdrop').forEach(m => m.classList.add("hidden")); 
+        const dash = $("#analyticsDashboard");
+        if(dash && !dash.classList.contains("hidden")) {
+            dash.classList.add("opacity-0");
+            setTimeout(() => dash.classList.add("hidden"), 300);
+        }
+    }
 });
 
 $$('.modal-backdrop').forEach(modal => {
