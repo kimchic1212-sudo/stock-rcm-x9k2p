@@ -337,34 +337,42 @@ document.addEventListener("keydown", (e) => {
 
 function applyMeta(meta){
     if(meta) {
+        // 1. 하단에 넓게 차지하던 기존 영역(dataSourceBar, globalHeaderData) 완전히 제거
+        const oldSourceBar = document.getElementById("dataSourceBar");
+        if(oldSourceBar) oldSourceBar.remove();
+        
         const globalHeader = document.getElementById("globalHeaderData");
         if(globalHeader) globalHeader.remove();
 
-        let sourceArea = document.getElementById("dataSourceBar");
-        if(!sourceArea) {
-            const mainWrap = $("#grid")?.parentNode; 
-            if(!mainWrap) return;
-            sourceArea = document.createElement("div");
-            sourceArea.id = "dataSourceBar";
-            sourceArea.className = "flex flex-wrap gap-2 items-center w-full bg-gray-50/80 p-3 rounded-xl border border-gray-200 mb-5 text-[13px] shadow-sm";
-            mainWrap.insertBefore(sourceArea, mainWrap.firstChild);
-        }
+        // 2. 상단 4번째 'DATA SOURCE' 카드 영역(statSrc)에 컴팩트하게 밀어넣기
+        const statSrcEl = document.getElementById("statSrc");
+        if(!statSrcEl) return;
 
-        let addInfo = SALES_HISTORY.meta?.name ? `<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-md font-black border border-orange-200 shadow-sm">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
-        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-md font-black border border-purple-200 shadow-sm">🎁 기획전: ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
+        // 판매 DB 라벨
+        let addInfo = SALES_HISTORY.meta?.name 
+            ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded text-[11px] sm:text-xs font-bold border border-orange-100 flex items-center gap-1 w-fit max-w-full">
+                  <span class="truncate">📊 ${escapeHtml(SALES_HISTORY.meta.name)}</span>
+               </div>` 
+            : "";
+        
+        // 기획전 라벨
+        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) 
+            ? `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded text-[11px] sm:text-xs font-bold border border-purple-100 flex items-center gap-1 w-fit max-w-full">
+                  <span class="truncate">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</span>
+               </div>` 
+            : "";
 
-        sourceArea.innerHTML = `
-            <div class="flex items-center gap-1.5 font-black text-gray-800 mr-2 shrink-0">
-                <i data-lucide="database" class="w-4 h-4 text-blue-500"></i> 데이터 소스 현황
+        // 세로로 깔끔하게 쌓이도록 flex-col 적용 (텍스트가 너무 길면 말줄임표 처리 truncate)
+        statSrcEl.innerHTML = `
+            <div class="flex flex-col gap-1.5 w-full mt-1">
+                <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-[11px] sm:text-xs font-bold border border-blue-100 flex items-center gap-1 w-fit max-w-full">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> <span class="truncate">재고: ${meta.uploadedAt || ''}</span>
+                </div>
+                ${addInfo}
+                ${promoInfo}
             </div>
-            <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold border border-blue-100 shadow-sm">재고 업데이트: ${meta.uploadedAt || ''}</span>
-            ${addInfo}
-            ${promoInfo}
         `;
         if(window.lucide) lucide.createIcons();
-
-        const statSrcEl = $("#statSrc");
-        if(statSrcEl) statSrcEl.innerHTML = "";
     }
 }
 
