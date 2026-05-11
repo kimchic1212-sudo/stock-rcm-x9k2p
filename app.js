@@ -1,43 +1,53 @@
-// 🔥 RACEMENT 부산점 통합 재고/판매 시스템 V2 (완성본) 🔥
+// 🔥 RACEMENT 부산점 통합 재고/판매 시스템 V2 (Minimal Brutalism PC 최적화) 🔥
 const style = document.createElement('style');
 style.innerHTML = `
-    #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
+    /* Minimal Brutalism / High Density UI Base */
+    #uploadPanel, #settingsPanel, .modal-content { max-height: 90vh !important; overflow-y: auto !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     #detailModal, #dashDetailModal, #salesGuideModal, #allMemosModal, #transfersModal { z-index: 9999 !important; }
     #analyticsDashboard { z-index: 105 !important; }
-    .dash-scroll::-webkit-scrollbar { width: 8px; }
-    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
-    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
-    #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
+    
+    /* Scrollbar Styling */
+    .dash-scroll::-webkit-scrollbar { width: 6px; }
+    .dash-scroll::-webkit-scrollbar-thumb { background: #111; border-radius: 0; }
+    .dash-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+    
+    #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; border: 2px solid #000; border-radius: 0; }
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
 
+    /* Brutalist Chips */
     .chip {
-        background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
-        transition: all 0.2s ease-in-out; cursor: pointer;
+        background-color: #ffffff; border: 1px solid #000; color: #000; border-radius: 2px;
+        transition: all 0.1s ease-in-out; cursor: pointer; font-family: monospace; letter-spacing: -0.5px;
+        font-size: 11px !important; padding: 4px 10px !important; font-weight: 800 !important;
     }
-    .chip:hover { background-color: #f8fafc; }
-    .chip[data-active="1"] { background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important; }
+    .chip:hover { background-color: #f1f5f9; box-shadow: 2px 2px 0px #000; }
+    .chip[data-active="1"] { background-color: #000 !important; color: #ffffff !important; box-shadow: 2px 2px 0px #000; }
     .brand-hidden { display: none !important; }
 
-    .card-img-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; border-radius: 12px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
-    .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
+    /* Card & Image */
+    .card-img-wrap { position: relative; width: 100px; height: 100px; flex-shrink: 0; border-radius: 0; border: 1px solid #000; background: #fff; overflow: hidden; }
+    .bookmark-overlay { position: absolute; top: 4px; right: 4px; z-index: 20; background: #fff; border: 1px solid #000; border-radius: 0; padding: 4px; transition: all 0.2s; }
     
-    /* 사이즈 두 줄 이상 자동 줄바꿈 적용 */
-    .size-grid-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; margin-bottom: 12px; padding-bottom: 4px; }
-    .size-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 38px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; }
-    .size-cell .sz { font-size: 10px; font-weight: 700; color: #64748b; }
-    .size-cell .qty { font-size: 13px; font-weight: 900; color: #0f172a; }
-    .size-cell.zero { opacity: 0.35; filter: grayscale(100%); text-decoration: line-through; background: #f8fafc; }
-    .size-cell.danger { border-color: #fca5a5; background: #fef2f2; }
+    /* High Density Size Grid (Auto Line-break) */
+    .size-grid-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; margin-bottom: 8px; }
+    .size-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 34px; height: 30px; border-radius: 0; border: 1px solid #000; background: #fff; }
+    .size-cell .sz { font-size: 9px; font-weight: 800; color: #475569; letter-spacing: -0.5px; }
+    .size-cell .qty { font-size: 12px; font-weight: 900; color: #000; }
+    .size-cell.zero { opacity: 0.4; filter: grayscale(100%); text-decoration: line-through; background: #f8fafc; border-color: #cbd5e1; }
+    .size-cell.danger { border-color: #ef4444; background: #fef2f2; }
     .size-cell.danger .qty { color: #ef4444; }
 
-    #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none; }
-    .toast { background: #1e293b; color: white; padding: 14px 18px; border-radius: 12px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto; }
-    @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .toast-undo { color: #facc15; cursor: pointer; padding-left: 12px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
-    .toast-undo:hover { color: #fef08a; }
+    /* Modals & Dashboard */
+    .modal-content { border-radius: 0 !important; border: 2px solid #000; box-shadow: 6px 6px 0px rgba(0,0,0,1); }
+    #analyticsDashboard main section article { border-radius: 0 !important; border: 1px solid #000; box-shadow: 3px 3px 0px rgba(0,0,0,1); }
+    
+    /* Toast */
+    #toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 350px; pointer-events: none; }
+    .toast { background: #000; color: #fff; padding: 12px 16px; border-radius: 0; border: 1px solid #333; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); pointer-events: auto; }
+    .toast-undo { color: #facc15; cursor: pointer; padding-left: 10px; border-left: 1px solid #333; margin-left: auto; flex-shrink: 0; font-weight: 900; font-family: monospace; }
 `;
 document.head.appendChild(style);
 
@@ -115,7 +125,7 @@ async function copyText(text, btn){
   try{
     await navigator.clipboard.writeText(text);
     if(btn){
-      const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> 복사됨';
+      const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
       if(window.lucide) lucide.createIcons();
       setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); if(window.lucide) lucide.createIcons(); }, 1200);
     }
@@ -131,20 +141,17 @@ function showToast(message, onUndo) {
     }
     const toast = document.createElement('div');
     toast.className = 'toast';
-    toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i> ${escapeHtml(message)}</span>`;
+    toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="check-square" class="w-4 h-4 text-green-400"></i> ${escapeHtml(message)}</span>`;
     
     let timer;
     if(onUndo) {
         const undoBtn = document.createElement('span');
         undoBtn.className = 'toast-undo';
-        undoBtn.innerHTML = '실행 취소 ↺';
+        undoBtn.innerHTML = 'UNDO ↺';
         undoBtn.onclick = () => {
             clearTimeout(timer);
             onUndo();
-            toast.style.animation = 'none';
             toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            toast.style.transition = 'all 0.2s';
             setTimeout(() => toast.remove(), 200);
         };
         toast.appendChild(undoBtn);
@@ -153,12 +160,10 @@ function showToast(message, onUndo) {
     if(window.lucide) lucide.createIcons();
     
     timer = setTimeout(() => {
-        toast.style.animation = 'none';
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(20px)';
         toast.style.transition = 'all 0.3s';
         setTimeout(() => toast.remove(), 300);
-    }, 5000);
+    }, 4000);
 }
 
 function getCurrentFilterState() {
@@ -205,8 +210,6 @@ function restoreHistoryState() {
     if($('button.chip[data-memo]')) $('button.chip[data-memo]').dataset.active = state.memoOnly ? "1" : "0";
     if($('button.chip[data-busanonly]')) {
         $('button.chip[data-busanonly]').dataset.active = state.busanOnly ? "1" : "0";
-        if(state.busanOnly) $('button.chip[data-busanonly]').classList.add('ring-2', 'ring-blue-400');
-        else $('button.chip[data-busanonly]').classList.remove('ring-2', 'ring-blue-400');
     }
 
     $("#q").value = state.q;
@@ -226,7 +229,7 @@ function restoreHistoryState() {
     visibleCount = 60;
     render();
     isUndoing = false;
-    showToast("이전 상태로 되돌렸습니다.");
+    showToast("필터 실행 취소");
 }
 
 function updateUndoBtnUI() {
@@ -234,8 +237,8 @@ function updateUndoBtnUI() {
     if(!btn) {
         btn = document.createElement("button");
         btn.id = "mobileUndoBtn";
-        btn.innerHTML = `<i data-lucide="undo-2" class="w-6 h-6"></i>`;
-        btn.style.cssText = "position:fixed; bottom:24px; right:24px; z-index:9990; background:#1e293b; color:white; width:56px; height:56px; border-radius:50%; display:none; align-items:center; justify-content:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); cursor:pointer;";
+        btn.innerHTML = `<i data-lucide="undo-2" class="w-5 h-5"></i>`;
+        btn.style.cssText = "position:fixed; bottom:20px; right:20px; z-index:9990; background:#000; color:#fff; width:44px; height:44px; border:2px solid #333; display:none; align-items:center; justify-content:center; box-shadow:3px 3px 0px rgba(0,0,0,1); cursor:pointer;";
         btn.onclick = restoreHistoryState;
         document.body.appendChild(btn);
         if(window.lucide) lucide.createIcons();
@@ -245,7 +248,6 @@ function updateUndoBtnUI() {
 }
 
 document.addEventListener("keydown", (e) => {
-    // 1번 피드백: Ctrl+Z 오작동 방지를 위해 삭제 완료
     if(e.key === "Escape") {
         const modals = $$('#detailModal, #dashDetailModal, #salesGuideModal, #transfersModal, #allMemosModal, .modal-backdrop');
         let closedAny = false;
@@ -269,30 +271,19 @@ document.addEventListener("keydown", (e) => {
 
 function applyMeta(meta){
     if(meta) {
+        // 기존 최상단 헤더바는 제거합니다.
         let headerArea = $("#globalHeaderData");
-        if(!headerArea) {
-            const mainWrap = $("#q")?.closest('.max-w-md, .max-w-lg, .max-w-xl, .max-w-2xl, .container') || document.body;
-            headerArea = document.createElement("div");
-            headerArea.id = "globalHeaderData";
-            headerArea.className = "flex flex-col mb-4 w-full px-1";
-            mainWrap.insertBefore(headerArea, mainWrap.firstChild);
-        }
+        if(headerArea) headerArea.remove();
 
-        // 1번 피드백: 상단에는 텍스트 없이 깔끔하게 동기화 시간만 (데이터소스는 #statSrc로 이동)
-        headerArea.innerHTML = `
-            <div class="flex justify-between items-end w-full border-b border-gray-200 pb-3">
-                <h1 class="text-2xl font-black text-gray-900 tracking-tight">📦 통합 재고조회</h1>
-                <div class="text-right flex flex-col items-end">
-                    <span class="text-xs font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-1 rounded shadow-sm">✓ 최근 동기화: ${meta.uploadedAt || ''}</span>
-                </div>
-            </div>
-        `;
-
+        // 우측의 statSrc (데이터 소스 표시 영역)에 정보 밀집
         const statSrcEl = $("#statSrc");
         if(statSrcEl) {
-            let addInfo = SALES_HISTORY.meta?.name ? `<span class="text-xs text-orange-600 font-bold bg-orange-50 px-2 py-0.5 rounded">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
-            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="text-xs text-purple-600 font-bold bg-purple-50 px-2 py-0.5 rounded mt-1">🎁 기획전: ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
-            statSrcEl.innerHTML = `<div class="flex flex-col items-start gap-1">${addInfo}${promoInfo}</div>`;
+            let addInfo = SALES_HISTORY.meta?.name ? `<div class="text-[11px] font-bold text-gray-700 bg-gray-100 border border-gray-300 px-2 py-0.5 whitespace-nowrap">DB: ${escapeHtml(SALES_HISTORY.meta.name)}</div>` : "";
+            let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<div class="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 whitespace-nowrap">PROMO: ${escapeHtml(PROMOTIONS.meta.name)}</div>` : "";
+            let syncInfo = `<div class="text-[11px] font-bold text-gray-500 border border-gray-200 px-2 py-0.5 whitespace-nowrap">SYNC: ${meta.uploadedAt || ''}</div>`;
+            
+            statSrcEl.className = "flex gap-2 overflow-x-auto no-scrollbar items-center shrink-0 w-full md:w-auto";
+            statSrcEl.innerHTML = `${addInfo}${promoInfo}${syncInfo}`;
         }
     }
 }
@@ -358,9 +349,6 @@ function rebuildIndex(){
   const allSizesGear = new Set(); 
   const activeWeeklyCat = getActiveWeeklyCategory(); 
   
-  if($("#statItems")) $("#statItems").className = ($("#statItems").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
-  if($("#statBusan")) $("#statBusan").className = ($("#statBusan").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
-
   for(const r of RAW){
     const code = r["품번"]; if(!code) continue;
     const size = String(r["규격"]||"").trim();
@@ -411,18 +399,18 @@ function rebuildIndex(){
 
   if(!$("#sizeSelFw") && $("#sortSel")) {
       const container = document.createElement("div");
-      container.className = "flex gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0 mt-3 sm:mt-0";
+      container.className = "flex gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto shrink-0 mt-2 sm:mt-0";
       
       const createSel = (id, label, optionsHtml) => {
-          return `<select id="${id}" class="ipt text-sm font-bold bg-white border-gray-300 rounded px-3 py-2 outline-none flex-1 sm:flex-none">
-                     <option value="ALL">📏 ${label}</option>${optionsHtml}
+          return `<select id="${id}" class="ipt text-xs font-bold bg-white border border-gray-400 rounded-sm px-2 py-1.5 outline-none flex-1 sm:flex-none">
+                     <option value="ALL">${label}</option>${optionsHtml}
                   </select>`;
       };
 
       container.innerHTML = 
-          createSel("sizeSelFw", "신발", generateSizeOptionsHtml(allSizesFw)) +
-          createSel("sizeSelAp", "의류", generateSizeOptionsHtml(allSizesAp)) +
-          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear));
+          createSel("sizeSelFw", "신발 사이즈", generateSizeOptionsHtml(allSizesFw)) +
+          createSel("sizeSelAp", "의류 사이즈", generateSizeOptionsHtml(allSizesAp)) +
+          createSel("sizeSelGear", "용품 사이즈", generateSizeOptionsHtml(allSizesGear));
 
       $("#sortSel").parentNode.insertBefore(container, $("#sortSel"));
 
@@ -442,19 +430,20 @@ function rebuildIndex(){
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
       const opt = document.createElement("option"); opt.value = "salesDesc"; opt.innerHTML = "🔥 전체 판매량순";
       $("#sortSel").appendChild(opt);
+      $("#sortSel").className = "ipt text-xs font-bold bg-white border border-black rounded-sm px-2 py-1.5 outline-none";
   }
 
   let promoWrap = $("#promoFilters");
   if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
       promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
-      promoWrap.className = "flex gap-2 mb-4 items-center w-full overflow-x-auto no-scrollbar pb-1";
+      promoWrap.className = "flex gap-2 items-center w-full overflow-x-auto no-scrollbar pb-1";
       $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
   }
   if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
       if(promoWrap) {
           promoWrap.innerHTML = `
-              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
-              <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+              <select id="promoTypeSel" class="ipt text-xs font-bold bg-purple-50 border border-purple-300 text-purple-800 rounded-sm px-2 py-1.5 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
+              <select id="promoRateSel" class="ipt text-xs font-bold bg-purple-50 border border-purple-300 text-purple-800 rounded-sm px-2 py-1.5 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
           `;
           $("#promoTypeSel").onchange = () => { saveHistoryState(); visibleCount=60; render(); };
           $("#promoRateSel").onchange = () => { saveHistoryState(); visibleCount=60; render(); };
@@ -464,11 +453,11 @@ function rebuildIndex(){
   const brandCounts = {};
   PRODUCTS.forEach(p => { if(p.브랜드) brandCounts[p.브랜드] = (brandCounts[p.브랜드]||0) + 1; });
   const sortedBrands = Object.entries(brandCounts).sort((a,b) => b[1] - a[1]).map(x => x[0]);
-  const topBrands = sortedBrands.slice(0, 7);
-  const restBrands = sortedBrands.slice(7);
+  const topBrands = sortedBrands.slice(0, 10);
+  const restBrands = sortedBrands.slice(10);
 
   const wrap = $("#brandChips"); 
-  wrap.innerHTML = '<button class="chip px-4 py-2 rounded-full text-sm font-bold shrink-0" data-brand="ALL" data-active="1">전체</button>';
+  wrap.innerHTML = '<button class="chip" data-brand="ALL" data-active="1">ALL</button>';
   
   wrap.querySelector('[data-brand="ALL"]').onclick = function() {
       saveHistoryState();
@@ -476,29 +465,29 @@ function rebuildIndex(){
   };
   
   topBrands.forEach(b => {
-      const btn = document.createElement("button"); btn.className="chip px-4 py-2 rounded-full text-sm font-bold shrink-0"; btn.dataset.brand=b; btn.textContent=b;
+      const btn = document.createElement("button"); btn.className="chip"; btn.dataset.brand=b; btn.textContent=b.toUpperCase();
       btn.onclick = ()=>{ saveHistoryState(); $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
       wrap.appendChild(btn);
   });
 
   if (restBrands.length > 0) {
       const moreBtn = document.createElement("button");
-      moreBtn.className="chip px-4 py-2 rounded-full text-sm font-black shrink-0 bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100";
-      moreBtn.innerHTML = "브랜드 더보기 ▾";
+      moreBtn.className="chip bg-gray-100 text-gray-500 border-gray-300";
+      moreBtn.innerHTML = "MORE ▾";
       moreBtn.onclick = (e) => {
           const isHidden = !$$('.chip-extra')[0].classList.contains('brand-hidden');
           if(!isHidden) {
               $$('.chip-extra').forEach(c => c.classList.remove('brand-hidden'));
-              moreBtn.innerHTML = "접기 ▴";
+              moreBtn.innerHTML = "FOLD ▴";
           } else {
               $$('.chip-extra').forEach(c => c.classList.add('brand-hidden'));
-              moreBtn.innerHTML = "브랜드 더보기 ▾";
+              moreBtn.innerHTML = "MORE ▾";
           }
       };
       wrap.appendChild(moreBtn);
 
       restBrands.forEach(b => {
-          const btn = document.createElement("button"); btn.className="chip chip-extra brand-hidden px-4 py-2 rounded-full text-sm font-bold shrink-0"; btn.dataset.brand=b; btn.textContent=b;
+          const btn = document.createElement("button"); btn.className="chip chip-extra brand-hidden"; btn.dataset.brand=b; btn.textContent=b.toUpperCase();
           btn.onclick = ()=>{ saveHistoryState(); $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0")); visibleCount=60; render(); };
           wrap.appendChild(btn);
       });
@@ -514,13 +503,13 @@ function setupQuickActionBar() {
     if(!qContainer) return;
 
     const actionHtml = `
-        <div id="quickActionBar" class="flex gap-3 justify-end mt-3 mb-2 w-full">
-            <button onclick="window.openAnalyticsReport()" class="bg-gray-50 text-gray-700 py-2 px-4 border border-gray-200 rounded-lg font-bold shadow-sm hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 text-sm">
-                <i data-lucide="bar-chart-2" class="w-4 h-4"></i> 분석 리포트
+        <div id="quickActionBar" class="flex gap-2 justify-end mt-2 mb-2 w-full">
+            <button onclick="window.openAnalyticsReport()" class="bg-white text-black py-1.5 px-3 border border-black rounded-sm font-bold shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5 text-[11px] mono">
+                <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> REPORT
             </button>
             ${(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) ? `
-            <button onclick="window.togglePromoView(this)" class="bg-purple-50 text-purple-700 py-2 px-4 border border-purple-200 rounded-lg font-bold shadow-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 text-sm" data-active="0">
-                <i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기
+            <button onclick="window.togglePromoView(this)" class="bg-purple-50 text-purple-800 py-1.5 px-3 border border-purple-800 rounded-sm font-bold shadow-[2px_2px_0px_rgba(107,33,168,1)] hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5 text-[11px] mono" data-active="0">
+                <i data-lucide="gift" class="w-3.5 h-3.5"></i> PROMO
             </button>` : ''}
         </div>
     `;
@@ -533,16 +522,16 @@ window.togglePromoView = (btn, bypassRender = false) => {
     const isActive = btn.dataset.active === "1";
     btn.dataset.active = isActive ? "0" : "1";
     if(!isActive) {
-        btn.classList.replace("bg-purple-50", "bg-purple-600");
-        btn.classList.replace("text-purple-700", "text-white");
-        btn.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4"></i> 기획전 필터 해제`;
+        btn.classList.replace("bg-purple-50", "bg-purple-800");
+        btn.classList.replace("text-purple-800", "text-white");
+        btn.innerHTML = `<i data-lucide="x-circle" class="w-3.5 h-3.5"></i> PROMO OFF`;
         window.tempPromoFilter = true;
         $("#promoTypeSel")?.classList.remove("hidden");
         $("#promoRateSel")?.classList.remove("hidden");
     } else {
-        btn.classList.replace("bg-purple-600", "bg-purple-50");
-        btn.classList.replace("text-white", "text-purple-700");
-        btn.innerHTML = `<i data-lucide="gift" class="w-4 h-4"></i> 기획전 보기`;
+        btn.classList.replace("bg-purple-800", "bg-purple-50");
+        btn.classList.replace("text-white", "text-purple-800");
+        btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i> PROMO ON`;
         window.tempPromoFilter = false;
         $("#promoTypeSel")?.classList.add("hidden");
         $("#promoRateSel")?.classList.add("hidden");
@@ -555,13 +544,14 @@ function setupSearchAutocomplete() {
     const qEl = document.getElementById("q");
     if(!qEl || qEl.dataset.acSetup === "1") return;
     qEl.dataset.acSetup = "1";
+    qEl.className = "ipt w-full text-[13px] px-3 py-2 border-2 border-black rounded-sm outline-none font-bold";
     
     let wrapper = qEl.parentNode;
     if(!wrapper.classList.contains("relative")) {
         wrapper.classList.add("relative");
         const sugg = document.createElement("div");
         sugg.id = "searchSuggestions";
-        sugg.className = "absolute w-full bg-white border border-gray-200 rounded-xl shadow-2xl hidden top-full mt-2 left-0 flex flex-col z-[999] overflow-hidden";
+        sugg.className = "absolute w-full bg-white border-2 border-black hidden top-full mt-1 left-0 flex flex-col z-[999] shadow-[4px_4px_0px_rgba(0,0,0,1)]";
         wrapper.appendChild(sugg);
     }
 
@@ -570,14 +560,14 @@ function setupSearchAutocomplete() {
     const showRecent = () => {
         if(RECENT_SEARCHES.length === 0) { suggBox.classList.add("hidden"); return; }
         suggBox.innerHTML = `
-            <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b flex justify-between items-center">
-                <span>🕒 최근 검색어</span>
-                <span class="cursor-pointer hover:text-red-500 bg-white px-2 py-1 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
+            <div class="p-2 bg-gray-100 text-[10px] font-mono text-gray-600 border-b border-black flex justify-between items-center">
+                <span>RECENT</span>
+                <span class="cursor-pointer hover:text-red-500 font-bold" onclick="clearRecentSearches(event)">CLEAR</span>
             </div>
             ${RECENT_SEARCHES.map(t => `
-                <div class="p-3.5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
-                    <div class="font-bold text-gray-800 text-sm">${escapeHtml(t)}</div>
-                    <i data-lucide="search" class="w-4 h-4 text-gray-300 group-hover:text-blue-500"></i>
+                <div class="p-2.5 border-b border-gray-200 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
+                    <div class="font-bold text-gray-800 text-[12px]">${escapeHtml(t)}</div>
+                    <i data-lucide="search" class="w-3 h-3 text-gray-400 group-hover:text-black"></i>
                 </div>
             `).join('')}
         `;
@@ -609,13 +599,13 @@ function setupSearchAutocomplete() {
         if(matches.length === 0) { suggBox.classList.add("hidden"); return; }
 
         suggBox.innerHTML = `
-            <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b">✨ 상품 자동완성</div>
+            <div class="p-2 bg-gray-100 text-[10px] font-mono text-gray-600 border-b border-black">AUTOCOMPLETE</div>
             ${matches.map(p => `
-            <div class="p-3 border-b border-gray-50 hover:bg-blue-50 cursor-pointer flex gap-3 items-center" onclick="applySearch('${p.품번}')">
-                ${IMAGES[p.shopNo] ? `<img src="${IMAGES[p.shopNo]}" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+            <div class="p-2 border-b border-gray-200 hover:bg-blue-50 cursor-pointer flex gap-2 items-center" onclick="applySearch('${p.품번}')">
+                ${IMAGES[p.shopNo] ? `<img src="${IMAGES[p.shopNo]}" class="w-10 h-10 object-contain bg-white border border-gray-300 mix-blend-multiply">` : `<div class="w-10 h-10 bg-gray-100 flex items-center justify-center text-[9px] text-gray-400 font-bold border border-gray-300">N/A</div>`}
                 <div class="flex flex-col min-w-0">
-                    <span class="text-xs font-bold text-gray-400 truncate">${p.브랜드} | ${p.품번}</span>
-                    <span class="text-[15px] font-black text-gray-900 truncate">${p.품명}</span>
+                    <span class="text-[10px] font-bold text-gray-500 truncate">${p.브랜드} | ${p.품번}</span>
+                    <span class="text-[13px] font-black text-black truncate">${p.품명}</span>
                 </div>
             </div>`).join('')}
         `;
@@ -636,7 +626,7 @@ window.saveRecentSearch = (term) => {
     if(!term) return;
     RECENT_SEARCHES = RECENT_SEARCHES.filter(t => t !== term);
     RECENT_SEARCHES.unshift(term);
-    if(RECENT_SEARCHES.length > 10) RECENT_SEARCHES.pop();
+    if(RECENT_SEARCHES.length > 8) RECENT_SEARCHES.pop();
     localStorage.setItem('RECENT_SEARCHES_V4', JSON.stringify(RECENT_SEARCHES));
 };
 
@@ -678,8 +668,8 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const origHtml = btn.innerHTML;
     const origClass = btn.className;
     
-    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+|text-\w+)/g, '') + ' bg-green-500 text-white cursor-default';
+    btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i>`;
+    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+|text-\w+)/g, '') + ' bg-black text-white cursor-default';
     btn.disabled = true;
     if(window.lucide) lucide.createIcons();
 
@@ -697,8 +687,8 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         }).catch(err => console.error(err));
 
-    showToast(`📦 ${fromStr}에서 ${size} 사이즈 ${qty}개 RT를 요청했습니다.`, async () => {
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+    showToast(`📦 ${fromStr} > ${size} ${qty}개 RT 요청완료`, async () => {
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i>`;
         TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
         await apiPromise; 
         try {
@@ -833,68 +823,68 @@ window.openAnalyticsReport = async () => {
         let modal = $("#analyticsDashboard");
         if (!modal) {
             modal = document.createElement("div"); modal.id = "analyticsDashboard";
-            modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-300 opacity-0";
+            modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-200 opacity-0";
             document.body.appendChild(modal);
         }
 
         modal.innerHTML = `
-            <header class="bg-white border-b border-gray-100 px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-4 shadow-sm">
+            <header class="bg-white border-b-2 border-black px-4 py-3 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 shadow-[0_2px_0_0_#000] z-10">
                 <div>
-                    <h1 class="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 (담당: 김종훈)</h1>
-                    <p id="dashTotalLabel" class="text-sm font-bold text-gray-500 mt-1.5"></p>
+                    <h1 class="text-[16px] font-black text-black tracking-tight flex items-center gap-2">📈 판매 리포트 (부산점)</h1>
+                    <p id="dashTotalLabel" class="text-[11px] font-mono text-gray-500 mt-0.5"></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-                    <select id="dashBrandSel" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-28 text-gray-700">
-                        <option value="ALL">브랜드 필터</option>
+                    <select id="dashBrandSel" class="ipt text-[11px] font-bold bg-white border border-black rounded-sm px-2 py-1.5 outline-none w-24 text-black">
+                        <option value="ALL">BRANDS</option>
                     </select>
-                    <select id="dashSizeFw" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-24 text-gray-700"><option value="ALL">신발</option>${generateSizeOptionsHtml(allSizesFwSet)}</select>
-                    <select id="dashSizeAp" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-24 text-gray-700"><option value="ALL">의류</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
-                    <select id="dashSizeGear" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-24 text-gray-700"><option value="ALL">용품</option>${generateSizeOptionsHtml(allSizesGearSet)}</select>
-                    <div class="w-px h-6 bg-gray-200 mx-1"></div>
-                    <select id="dashPeriodSel" class="ipt text-xs font-black bg-orange-50 border-orange-200 text-orange-800 rounded px-3 py-2.5 outline-none cursor-pointer">
+                    <select id="dashSizeFw" class="ipt text-[11px] font-bold bg-white border border-black rounded-sm px-2 py-1.5 outline-none w-20 text-black"><option value="ALL">신발SZ</option>${generateSizeOptionsHtml(allSizesFwSet)}</select>
+                    <select id="dashSizeAp" class="ipt text-[11px] font-bold bg-white border border-black rounded-sm px-2 py-1.5 outline-none w-20 text-black"><option value="ALL">의류SZ</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
+                    <select id="dashSizeGear" class="ipt text-[11px] font-bold bg-white border border-black rounded-sm px-2 py-1.5 outline-none w-20 text-black"><option value="ALL">용품SZ</option>${generateSizeOptionsHtml(allSizesGearSet)}</select>
+                    <div class="w-px h-5 bg-gray-300 mx-1"></div>
+                    <select id="dashPeriodSel" class="ipt text-[11px] font-bold bg-orange-50 border border-orange-400 text-orange-900 rounded-sm px-2 py-1.5 outline-none cursor-pointer">
                         <optgroup label="빠른 기간">
-                            <option value="1">어제/오늘 (1일)</option><option value="7" selected>최근 7일</option><option value="30">최근 1개월</option>
-                            <option value="90">최근 3개월 (분기)</option><option value="180">최근 6개월 (반기)</option><option value="ALL">전체 누적실적</option>
+                            <option value="1">어제/오늘(1일)</option><option value="7" selected>최근 7일</option><option value="30">최근 1개월</option>
+                            <option value="90">최근 3개월</option><option value="180">최근 6개월</option><option value="ALL">전체 누적</option>
                             <option value="CUSTOM_INPUT">📅 직접 지정</option>
                         </optgroup>
                         ${generateDateOptions()}
                     </select>
-                    <div id="dashCustomDateWrap" class="hidden items-center gap-1.5 bg-white p-1.5 border border-orange-200 rounded">
-                        <input type="date" id="dashStart" class="ipt text-xs px-2 py-1.5 w-[110px] border-none outline-none text-gray-600 font-bold cursor-pointer"> ~
-                        <input type="date" id="dashEnd" class="ipt text-xs px-2 py-1.5 w-[110px] border-none outline-none text-gray-600 font-bold cursor-pointer">
-                        <button id="dashApply" class="px-4 py-1.5 bg-orange-500 text-white rounded text-xs font-black shrink-0 hover:bg-orange-600">적용</button>
+                    <div id="dashCustomDateWrap" class="hidden items-center gap-1 bg-white border border-black rounded-sm">
+                        <input type="date" id="dashStart" class="ipt text-[11px] px-1 py-1 w-[90px] border-none outline-none font-bold"> -
+                        <input type="date" id="dashEnd" class="ipt text-[11px] px-1 py-1 w-[90px] border-none outline-none font-bold">
+                        <button id="dashApply" class="px-2 py-1 bg-black text-white text-[11px] font-bold">OK</button>
                     </div>
-                    <button id="closeDashboardBtn" class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-auto md:ml-2"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <button id="closeDashboardBtn" class="p-1.5 bg-gray-200 text-black rounded-sm hover:bg-black hover:text-white transition-colors ml-auto border border-black"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
             </header>
-            <main class="flex-1 overflow-hidden p-4 lg:p-6">
-                <div class="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto dash-scroll pr-2 pb-10">
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-                            <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="pie-chart" class="w-5 h-5 text-blue-500"></i> 카테고리 비중</h2>
-                            <div class="chart-container"><canvas id="catChart"></canvas></div>
+            <main class="flex-1 overflow-hidden p-3 lg:p-4 bg-gray-100">
+                <div class="h-full w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-4">
+                    <section class="w-full lg:w-[320px] flex flex-col gap-3 overflow-y-auto dash-scroll shrink-0">
+                        <article class="bg-white p-3 border border-black shadow-[3px_3px_0_0_#000] flex flex-col">
+                            <h2 class="text-[12px] font-black text-black mb-1 flex items-center gap-1.5"><i data-lucide="pie-chart" class="w-4 h-4"></i> 카테고리</h2>
+                            <div class="chart-container h-[140px] relative w-full"><canvas id="catChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-                            <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="users" class="w-5 h-5 text-pink-500"></i> 성별 비중</h2>
-                            <div class="chart-container"><canvas id="genderChart"></canvas></div>
+                        <article class="bg-white p-3 border border-black shadow-[3px_3px_0_0_#000] flex flex-col">
+                            <h2 class="text-[12px] font-black text-black mb-1 flex items-center gap-1.5"><i data-lucide="users" class="w-4 h-4"></i> 성별</h2>
+                            <div class="chart-container h-[140px] relative w-full"><canvas id="genderChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center">
-                            <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="award" class="w-5 h-5 text-emerald-500"></i> 브랜드 비중</h2>
-                            <div class="chart-container"><canvas id="brandChart"></canvas></div>
+                        <article class="bg-white p-3 border border-black shadow-[3px_3px_0_0_#000] flex flex-col">
+                            <h2 class="text-[12px] font-black text-black mb-1 flex items-center gap-1.5"><i data-lucide="award" class="w-4 h-4"></i> 브랜드</h2>
+                            <div class="chart-container h-[140px] relative w-full"><canvas id="brandChart"></canvas></div>
                         </article>
                     </section>
-                    <section class="lg:col-span-3 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                            <h2 class="text-base font-black text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-5 h-5 text-orange-500"></i> 판매 랭킹 (클릭 시 사이즈 상세분석 및 RT요청)</h2>
-                            <div class="flex items-center gap-3">
-                                <select id="dashSortSel" class="ipt text-sm font-bold bg-white border border-gray-200 text-gray-700 rounded px-3 py-1.5 outline-none cursor-pointer">
-                                    <option value="qty">수량순 정렬</option>
-                                    <option value="rev">금액순 정렬</option>
+                    <section class="flex-1 flex flex-col bg-white border border-black shadow-[3px_3px_0_0_#000] overflow-hidden">
+                        <div class="p-3 border-b border-black flex justify-between items-center bg-gray-50">
+                            <h2 class="text-[13px] font-black text-black flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-600"></i> 판매 랭킹</h2>
+                            <div class="flex items-center gap-2">
+                                <select id="dashSortSel" class="ipt text-[11px] font-bold bg-white border border-black text-black rounded-sm px-2 py-1 outline-none">
+                                    <option value="qty">수량순</option>
+                                    <option value="rev">금액순</option>
                                 </select>
-                                <div id="activeFilterLabel" class="text-sm font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors shadow-sm"></div>
+                                <div id="activeFilterLabel" class="text-[10px] font-bold text-white bg-black px-2 py-1 hidden cursor-pointer"></div>
                             </div>
                         </div>
-                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-5 space-y-3"></div>
+                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-3 space-y-2"></div>
                     </section>
                 </div>
             </main>
@@ -928,23 +918,15 @@ window.openAnalyticsReport = async () => {
         $("#dashSizeAp").onchange = handleDashSizeChange;
         $("#dashSizeGear").onchange = handleDashSizeChange;
 
-        $("#dashBrandSel").onchange = (e) => {
-            currentDashBrand = e.target.value;
-            renderDashState();
-        };
-
-        $("#dashSortSel").onchange = (e) => {
-            currentDashSort = e.target.value;
-            renderDashState();
-        };
-
+        $("#dashBrandSel").onchange = (e) => { currentDashBrand = e.target.value; renderDashState(); };
+        $("#dashSortSel").onchange = (e) => { currentDashSort = e.target.value; renderDashState(); };
         $("#dashApply").onclick = () => {
             if(!$("#dashStart").value || !$("#dashEnd").value) { alert("날짜를 모두 선택해주세요."); return; }
             currentPeriod = "CUSTOM"; currentCustomStart = $("#dashStart").value; currentCustomEnd = $("#dashEnd").value;
             dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
         };
 
-        $("#closeDashboardBtn").onclick = () => { modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300); };
+        $("#closeDashboardBtn").onclick = () => { modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 200); };
         if(window.lucide) lucide.createIcons();
     };
 
@@ -954,7 +936,7 @@ window.openAnalyticsReport = async () => {
         const brandSet = new Set();
         rawSoldItems.forEach(p => { if(p.브랜드) brandSet.add(p.브랜드); });
         const brandOptions = Array.from(brandSet).sort().map(b => `<option value="${b}" ${b===currentDashBrand?'selected':''}>${b}</option>`).join('');
-        $("#dashBrandSel").innerHTML = `<option value="ALL">브랜드 필터</option>${brandOptions}`;
+        $("#dashBrandSel").innerHTML = `<option value="ALL">BRANDS</option>${brandOptions}`;
         
         renderDashState();
     };
@@ -991,22 +973,22 @@ window.openAnalyticsReport = async () => {
         });
 
         const activeSizeFilter = [currentSizeFw, currentSizeAp, currentSizeGear].find(s => s !== "ALL") || "ALL";
-        let sizeText = activeSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${activeSizeFilter} 사이즈 필터됨]</span>`;
-        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black text-base">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black text-base">${krw(totalRev)}</span> 판매${sizeText}`;
+        let sizeText = activeSizeFilter === "ALL" ? "" : ` [SZ:${activeSizeFilter}]`;
+        $("#dashTotalLabel").innerHTML = `TOTAL <span class="font-bold text-black">${fmt(totalSales)}</span>EA / <span class="font-bold text-black">${krw(totalRev)}</span>${sizeText}`;
 
         const filterLabel = $("#activeFilterLabel"); let labelText = [];
-        if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
-        if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
-        if (dashFilter.gender) labelText.push(`[${dashFilter.gender}]`);
+        if (dashFilter.cat) labelText.push(dashFilter.cat);
+        if (dashFilter.brand) labelText.push(dashFilter.brand);
+        if (dashFilter.gender) labelText.push(dashFilter.gender);
 
         if (labelText.length > 0) {
-            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`; filterLabel.classList.remove("hidden");
+            filterLabel.innerHTML = `${labelText.join('+')} ✖`; filterLabel.classList.remove("hidden");
             filterLabel.onclick = () => { dashFilter = { cat: null, brand: null, gender: null }; renderDashState(); };
         } else filterLabel.classList.add("hidden");
 
         $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
             const imgSrc = IMAGES[p.shopNo] || null;
-            const imgHtml = imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl border border-gray-200 bg-white shrink-0 mix-blend-multiply">` : `<div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
+            const imgHtml = imgSrc ? `<img src="${imgSrc}" class="w-12 h-12 sm:w-16 sm:h-16 object-contain border border-black bg-white shrink-0 mix-blend-multiply">` : `<div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 border border-black flex items-center justify-center text-[9px] text-gray-500 font-bold shrink-0">N/A</div>`;
             let pParam = currentPeriod; if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
             let insightHtml = ""; let isBusanLowStock = false;
@@ -1021,60 +1003,55 @@ window.openAnalyticsReport = async () => {
 
             if (isBusanLowStock && isCenterOrSinsaHasStock && isBusanSellingWell && isBusanDominating) {
                 insightHtml = `
-                    <div class="mt-3 bg-red-50 border border-red-100 p-3 rounded-xl flex items-start gap-2 shadow-sm w-full">
-                        <i data-lucide="zap" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
-                        <div class="text-[13px] sm:text-sm text-red-800 leading-snug">
-                            <b>🔥 매출 보증! 긴급 확보 추천!</b><br>부산점 판매량(${p.dashBusanSalesTotal}개)이 압도적이나 재고가 부족합니다. 타 지점 재고(${p.centerTotal + p.sinsaTotal}개)를 뺏어오면 무조건 팔립니다!
+                    <div class="mt-2 bg-black text-white p-2 flex items-start gap-1.5 w-full">
+                        <i data-lucide="zap" class="w-4 h-4 shrink-0 mt-0.5 text-yellow-400"></i>
+                        <div class="text-[11px] leading-tight font-bold">
+                            <b>RT RECOMMENDED</b><br>부산 판매 우세(${p.dashBusanSalesTotal}개). 타 지점 재고(${p.centerTotal + p.sinsaTotal}개) 확보 요망.
                         </div>
                     </div>
                 `;
             }
 
             let gLabel = p.성별 || p.gender || "U";
-            if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
-
-            let gColorClass = "bg-purple-50 text-purple-600 border-purple-100";
-            if(gLabel === "남성") gColorClass = "bg-blue-50 text-blue-600 border-blue-100";
-            if(gLabel === "여성") gColorClass = "bg-rose-50 text-rose-600 border-rose-100";
+            if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "M"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "W"; else gLabel = "U";
 
             return `
-            <div class="flex flex-col bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
+            <div class="flex flex-col bg-white p-3 border border-gray-300 hover:border-black hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
                 <div class="flex items-center justify-between w-full gap-2">
-                    <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-[14px] shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="w-6 h-6 bg-black text-white flex items-center justify-center font-bold text-[11px] shrink-0 mono">${idx + 1}</div>
                         ${imgHtml}
-                        <div class="min-w-0 pr-2">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="${gColorClass} px-2 py-0.5 rounded text-[11px] sm:text-xs font-black border">${escapeHtml(gLabel)}</span>
-                                <div class="text-[12px] sm:text-[13px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
+                        <div class="min-w-0 pr-1">
+                            <div class="flex items-center gap-1.5 mb-0.5">
+                                <span class="bg-gray-200 text-black px-1.5 py-0.5 text-[9px] font-bold border border-black">${gLabel}</span>
+                                <div class="text-[10px] font-bold text-gray-500 truncate mono">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
                             </div>
-                            <div class="text-[16px] sm:text-[18px] font-black text-gray-900 truncate leading-snug">${escapeHtml(p.품명)}</div>
+                            <div class="text-[13px] sm:text-[14px] font-black text-black truncate leading-snug">${escapeHtml(p.품명)}</div>
                         </div>
                     </div>
-                    <div class="flex flex-col items-end justify-center shrink-0 ml-2">
-                        <span class="font-black text-gray-900 text-[18px] sm:text-[20px]">${fmt(p.dashSales)}개</span>
-                        <span class="text-[12px] sm:text-sm font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg mt-1 border border-blue-100">${krw(p.dashRev)}</span>
+                    <div class="flex flex-col items-end justify-center shrink-0 ml-1">
+                        <span class="font-black text-black text-[16px]">${fmt(p.dashSales)}EA</span>
+                        <span class="text-[10px] font-bold text-gray-500 mt-0.5 mono">${krw(p.dashRev)}</span>
                     </div>
                 </div>
                 ${insightHtml}
             </div>
         `}).join('');
 
-        if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+        if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-[12px] font-bold text-gray-400">데이터 없음</div>';
 
-        // 6번 피드백: 차트 겹침 및 크기 고정 해결 (위치 right 고정, maintainAspectRatio 해제)
         const renderPieChart = (ctxId, dataObj, filterKey, colors) => {
             const ctx = document.getElementById(ctxId);
             const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
             return new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
+                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
                 options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '60%',
-                    layout: { padding: 10 },
+                    responsive: true, maintainAspectRatio: false, cutout: '55%',
+                    layout: { padding: 0 },
                     plugins: {
-                        legend: { position: 'right', labels: { usePointStyle: true, padding: 12, boxWidth: 10, font: { weight: 'bold', size: 11 } } },
-                        datalabels: { color: '#ffffff', font: { weight: '900', size: 12 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 4 ? pct + '%' : ''; } }
+                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 6, padding: 8, font: { weight: 'bold', size: 10, family: 'monospace' } } },
+                        datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 5 ? pct + '%' : ''; } }
                     },
                     onClick: (e, elements, chart) => {
                         if (elements[0]) {
@@ -1092,16 +1069,18 @@ window.openAnalyticsReport = async () => {
 
         if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy(); if(genderChartInstance) genderChartInstance.destroy();
 
-        const defaultColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'];
-        catChartInstance = renderPieChart('catChart', catData, 'cat', defaultColors);
+        const defaultColors = ['#000000', '#475569', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#f1f5f9']; // Monochromatic brutalist colors
+        const brandColors = ['#dc2626', '#ea580c', '#d97706', '#65a30d', '#16a34a', '#0d9488', '#0284c7', '#4f46e5', '#9333ea'];
+        
+        catChartInstance = renderPieChart('catChart', catData, 'cat', ['#2563eb', '#16a34a', '#d97706', '#dc2626']);
         
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
         let topBrandData = {}; let otherSales = 0;
-        sortedBrands.forEach((b, i) => { if(i < 8) topBrandData[b[0]] = b[1]; else otherSales += b[1]; });
+        sortedBrands.forEach((b, i) => { if(i < 6) topBrandData[b[0]] = b[1]; else otherSales += b[1]; });
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
-        brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', defaultColors);
+        brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', brandColors);
 
-        const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#3b82f6'; if(k==='여성') return '#f43f5e'; return '#a855f7'; });
+        const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#2563eb'; if(k==='여성') return '#e11d48'; return '#6b7280'; });
         genderChartInstance = renderPieChart('genderChart', genderData, 'gender', genderColors);
     };
 
@@ -1150,8 +1129,8 @@ window.openDashDetail = (code, periodParam) => {
     if(!modal) {
         modal = document.createElement("div"); modal.id = "dashDetailModal";
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4";
-        modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
+        modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-white/80 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-5xl mx-auto my-auto flex flex-col overflow-hidden z-10 transition-transform duration-200"></div>`;
         document.body.appendChild(modal);
         
         let touchstartX = 0; let touchendX = 0;
@@ -1189,7 +1168,7 @@ window.openDashDetail = (code, periodParam) => {
 
     let insightHtml = "";
     if (largeSizeSales > 0) {
-        insightHtml = `<div class="mt-4 bg-purple-50 text-purple-700 p-4 rounded-xl text-sm font-black border border-purple-100 flex items-center gap-3 shadow-sm"><i data-lucide="trending-up" class="w-6 h-6 shrink-0"></i> 비주류/빅사이즈 (290+, 250+, XL 등) 에서 ${largeSizeSales}개의 틈새 판매량 포착!</div>`;
+        insightHtml = `<div class="mt-3 bg-black text-white p-3 text-[11px] font-bold border border-black flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 shrink-0"></i> 빅사이즈 틈새 판매량 ${largeSizeSales}개 포착!</div>`;
     }
 
     const tableHtml = allUniqueSizes.map(size => {
@@ -1207,104 +1186,98 @@ window.openDashDetail = (code, periodParam) => {
         if(sObj.center > 0) {
             let defaultVal = takeCenter > 0 ? takeCenter : 1;
             badges.push(`
-                <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-200 p-1.5 rounded-lg w-full max-w-[160px]">
-                    <span class="text-xs font-bold text-gray-500 w-8 text-center shrink-0">물류</span>
-                    <input type="number" id="rt_c_${size}" value="${defaultVal}" min="1" max="${sObj.center}" class="w-10 text-center text-sm font-black bg-white border border-gray-300 rounded outline-none h-7">
-                    <button onclick="quickRT('${p.품번}','${size}','본사/물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-800 hover:bg-black text-white px-2 py-1 rounded shadow-sm transition-colors flex items-center justify-center flex-1"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>
+                <div class="flex items-center gap-1 border border-black p-1 bg-white max-w-[120px]">
+                    <span class="text-[10px] font-bold text-gray-700 w-6 text-center">물류</span>
+                    <input type="number" id="rt_c_${size}" value="${defaultVal}" min="1" max="${sObj.center}" class="w-8 text-center text-[11px] font-bold border-l border-r border-gray-300 outline-none h-5 mono">
+                    <button onclick="quickRT('${p.품번}','${size}','본사/물류', document.getElementById('rt_c_${size}').value, this)" class="bg-black hover:bg-gray-800 text-white px-1.5 py-0.5 transition-colors"><i data-lucide="arrow-left-right" class="w-3 h-3"></i></button>
                 </div>
             `);
         }
         if(sObj.sinsa > 0) {
             let defaultVal = takeSinsa > 0 ? takeSinsa : 1;
             badges.push(`
-                <div class="flex items-center gap-1.5 bg-orange-50 border border-orange-100 p-1.5 rounded-lg w-full max-w-[160px]">
-                    <span class="text-xs font-bold text-orange-600 w-8 text-center shrink-0">신사</span>
-                    <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-10 text-center text-sm font-black bg-white border border-orange-200 rounded outline-none h-7 text-orange-700">
-                    <button onclick="quickRT('${p.품번}','${size}','신사점', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded shadow-sm transition-colors flex items-center justify-center flex-1"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>
+                <div class="flex items-center gap-1 border border-orange-500 p-1 bg-white max-w-[120px]">
+                    <span class="text-[10px] font-bold text-orange-600 w-6 text-center">신사</span>
+                    <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-[11px] font-bold border-l border-r border-orange-200 outline-none h-5 mono">
+                    <button onclick="quickRT('${p.품번}','${size}','신사점', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 transition-colors"><i data-lucide="arrow-left-right" class="w-3 h-3"></i></button>
                 </div>
             `);
         }
         
-        if(badges.length > 0 && needed > 0) suggestHtml = `<div class="flex flex-col gap-2 items-center justify-center w-full">${badges.join("")}</div>`;
-        else if (badges.length > 0 && needed <= 0) suggestHtml = `<div class="flex flex-col gap-2 items-center justify-center w-full opacity-40 hover:opacity-100 transition-opacity">${badges.join("")}</div>`;
-        else if (needed > 0) suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-md text-xs font-black w-full block text-center max-w-[90px] mx-auto">🚨 전사품절</span>`;
+        if(badges.length > 0 && needed > 0) suggestHtml = `<div class="flex flex-col gap-1 items-center w-full">${badges.join("")}</div>`;
+        else if (badges.length > 0 && needed <= 0) suggestHtml = `<div class="flex flex-col gap-1 items-center w-full opacity-40 hover:opacity-100 transition-opacity">${badges.join("")}</div>`;
+        else if (needed > 0) suggestHtml = `<span class="bg-black text-white px-2 py-1 text-[10px] font-bold mono">품절</span>`;
 
-        let rowClass = "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors";
+        let rowClass = "border-b border-gray-200 hover:bg-gray-50";
         if (size === "알수없음") rowClass += " hidden"; 
 
         return `<tr class="${rowClass}">
-            <td class="py-3 px-2 text-gray-700 font-bold border-r border-gray-100 text-[15px]">${size}</td>
-            <td class="py-3 text-blue-600 font-black text-lg bg-blue-50/20">${soldBusan > 0 ? soldBusan : '-'}</td>
-            <td class="py-3 bg-blue-50/20 border-r border-gray-100 text-base ${sObj.busan<=2?'text-red-500 font-black':'text-gray-700 font-bold'}">${sObj.busan}</td>
-            <td class="py-3 text-orange-600 font-bold text-base bg-orange-50/20">${soldSinsa > 0 ? soldSinsa : '-'}</td>
-            <td class="py-3 text-gray-600 font-bold text-base bg-orange-50/20 border-r border-gray-100">${sObj.sinsa}</td>
-            <td class="py-3 text-gray-600 font-bold text-base bg-gray-50/40">${soldCenter > 0 ? soldCenter : '-'}</td>
-            <td class="py-3 text-gray-600 font-bold text-base bg-gray-50/40 border-r border-gray-100">${sObj.center}</td>
-            <td class="py-3 align-middle px-3">${suggestHtml}</td>
+            <td class="py-2 text-[12px] font-black border-r border-gray-200 mono bg-gray-100">${size}</td>
+            <td class="py-2 text-blue-600 font-bold text-[13px] mono">${soldBusan > 0 ? soldBusan : '-'}</td>
+            <td class="py-2 border-r border-gray-200 text-[13px] mono ${sObj.busan<=2?'text-red-600 font-black':'text-gray-900'}">${sObj.busan}</td>
+            <td class="py-2 text-orange-600 font-bold text-[13px] mono">${soldSinsa > 0 ? soldSinsa : '-'}</td>
+            <td class="py-2 border-r border-gray-200 text-[13px] mono text-gray-900">${sObj.sinsa}</td>
+            <td class="py-2 text-gray-500 font-bold text-[13px] mono">${soldCenter > 0 ? soldCenter : '-'}</td>
+            <td class="py-2 border-r border-gray-200 text-[13px] mono text-gray-900">${sObj.center}</td>
+            <td class="py-2 align-middle px-1">${suggestHtml}</td>
         </tr>`;
     }).join('');
 
     let gLabel = p.성별 || p.gender || "U";
-    if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
-    let gColorClass = "bg-purple-50 text-purple-600 border-purple-100";
-    if(gLabel === "남성") gColorClass = "bg-blue-50 text-blue-600 border-blue-100";
-    if(gLabel === "여성") gColorClass = "bg-rose-50 text-rose-600 border-rose-100";
+    if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "M"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "W"; else gLabel = "U";
 
     const prevDisabled = windowCurrentDashIndex === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
     const nextDisabled = windowCurrentDashIndex === windowDashItems.length - 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
 
     modal.querySelector("#ddContentWrap").innerHTML = `
-        <div class="p-5 border-b flex justify-between items-center bg-white z-10 shadow-sm shrink-0">
-            <div class="flex items-center gap-3">
-                <button id="prevDashBtn" class="p-2.5 bg-gray-100 rounded-full transition-colors ${prevDisabled}" ${windowCurrentDashIndex === 0 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex-1].품번}', '${periodParam}')"`}><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
-                <div class="flex gap-4 items-center ml-2">
-                    ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="${gColorClass} px-2 py-0.5 rounded text-[11px] font-black border">${escapeHtml(gLabel)}</span>
-                            <div class="text-[13px] font-black text-gray-500">${p.브랜드}</div>
+        <div class="p-4 border-b-2 border-black flex justify-between items-center bg-white shrink-0">
+            <div class="flex items-center gap-3 min-w-0">
+                <button id="prevDashBtn" class="p-1.5 border border-black bg-white transition-colors ${prevDisabled}" ${windowCurrentDashIndex === 0 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex-1].품번}', '${periodParam}')"`}><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                <div class="flex gap-3 items-center ml-1 min-w-0">
+                    ${imgSrc ? `<img src="${imgSrc}" class="w-12 h-12 object-contain border border-black bg-white shrink-0">` : `<div class="w-12 h-12 bg-gray-100 flex items-center justify-center text-[9px] text-gray-400 font-bold border border-black shrink-0">N/A</div>`}
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 mb-0.5">
+                            <span class="bg-black text-white px-1.5 py-0.5 text-[9px] font-bold">${gLabel}</span>
+                            <div class="text-[10px] font-bold text-gray-500 mono">${p.브랜드} | ${p.품번}</div>
                         </div>
-                        <h2 class="font-black text-[20px] leading-tight text-gray-900 truncate max-w-[300px] sm:max-w-lg">${p.품명}</h2>
-                        <div class="text-sm font-bold text-gray-400 mt-0.5">${p.품번}</div>
+                        <h2 class="font-black text-[14px] sm:text-[16px] text-black truncate">${p.품명}</h2>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button id="nextDashBtn" class="p-2.5 bg-gray-100 rounded-full transition-colors ${nextDisabled}" ${windowCurrentDashIndex === windowDashItems.length - 1 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex+1].품번}', '${periodParam}')"`}><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
-                <button class="p-2.5 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <div class="flex items-center gap-3 shrink-0">
+                <button id="nextDashBtn" class="p-1.5 border border-black bg-white transition-colors ${nextDisabled}" ${windowCurrentDashIndex === windowDashItems.length - 1 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex+1].품번}', '${periodParam}')"`}><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                <button class="p-1.5 bg-black text-white hover:bg-gray-800 transition-colors shrink-0 ml-2" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
         </div>
         
-        <div class="flex flex-col lg:flex-row h-full lg:h-[75vh] overflow-y-auto lg:overflow-hidden">
-            <div class="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
-                <h3 class="font-black text-base text-gray-800 mb-5 flex items-center gap-2"><i data-lucide="line-chart" class="w-6 h-6 text-blue-500"></i> 지점별 사이즈 판매 추이</h3>
-                <div class="relative flex-1 w-full min-h-[300px]"><canvas id="ddSizeChart"></canvas></div>
+        <div class="flex flex-col lg:flex-row h-[75vh] overflow-hidden">
+            <div class="w-full lg:w-[35%] border-r-2 border-black p-4 bg-gray-50 flex flex-col shrink-0 overflow-y-auto dash-scroll">
+                <h3 class="font-black text-[12px] text-black mb-3 border-b border-gray-300 pb-2">지점별 사이즈 판매 추이</h3>
+                <div class="relative w-full h-[250px] shrink-0"><canvas id="ddSizeChart"></canvas></div>
                 ${insightHtml}
             </div>
             
-            <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
-                <div class="p-5 sm:p-6 pb-8 overflow-x-auto">
-                    <table class="w-full min-w-[550px] text-sm border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                        <thead class="text-gray-600 font-black">
-                            <tr class="text-center bg-gray-50">
-                                <th class="py-3 w-[12%] border-r border-gray-200 align-middle" rowspan="2">사이즈</th>
-                                <th class="py-2 border-b border-r border-gray-200 bg-blue-100 text-blue-800" colspan="2">부산 (김종훈)</th>
-                                <th class="py-2 border-b border-r border-gray-200 bg-orange-100 text-orange-800" colspan="2">신사 (승호/강)</th>
-                                <th class="py-2 border-b border-r border-gray-200 bg-gray-200 text-gray-800" colspan="2">온라인 (본사물류)</th>
-                                <th class="py-3 w-[26%] align-middle" rowspan="2">스마트 보충제안</th>
-                            </tr>
-                            <tr class="text-center text-xs bg-white border-b-2 border-gray-200">
-                                <th class="py-2 bg-blue-50/50 text-blue-700 border-r border-gray-100">판매</th>
-                                <th class="py-2 bg-blue-50/50 text-gray-600 border-r border-gray-200">재고</th>
-                                <th class="py-2 bg-orange-50/50 text-orange-700 border-r border-gray-100">판매</th>
-                                <th class="py-2 bg-orange-50/50 text-gray-600 border-r border-gray-200">재고</th>
-                                <th class="py-2 bg-gray-50 text-gray-700 border-r border-gray-100">판매</th>
-                                <th class="py-2 bg-gray-50 text-gray-600 border-r border-gray-200">재고</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ddTableBody" class="text-center">${tableHtml}</tbody>
-                    </table>
-                </div>
+            <div class="w-full lg:w-[65%] p-0 overflow-y-auto dash-scroll bg-white">
+                <table class="w-full min-w-[500px] text-center">
+                    <thead class="text-[11px] font-black border-b-2 border-black sticky top-0 z-10 bg-white">
+                        <tr>
+                            <th class="py-2 border-r border-gray-300 w-[12%]" rowspan="2">사이즈</th>
+                            <th class="py-1.5 border-b border-r border-gray-300 bg-blue-50 text-blue-800" colspan="2">부산</th>
+                            <th class="py-1.5 border-b border-r border-gray-300 bg-orange-50 text-orange-800" colspan="2">신사</th>
+                            <th class="py-1.5 border-b border-r border-gray-300 bg-gray-100 text-gray-800" colspan="2">물류</th>
+                            <th class="py-2 w-[28%]" rowspan="2">스마트 RT</th>
+                        </tr>
+                        <tr class="text-[10px]">
+                            <th class="py-1.5 bg-white text-blue-600 border-r border-gray-200">판매</th>
+                            <th class="py-1.5 bg-white text-gray-800 border-r border-gray-300">재고</th>
+                            <th class="py-1.5 bg-white text-orange-600 border-r border-gray-200">판매</th>
+                            <th class="py-1.5 bg-white text-gray-800 border-r border-gray-300">재고</th>
+                            <th class="py-1.5 bg-white text-gray-500 border-r border-gray-200">판매</th>
+                            <th class="py-1.5 bg-white text-gray-800 border-r border-gray-300">재고</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ddTableBody">${tableHtml}</tbody>
+                </table>
             </div>
         </div>
     `;
@@ -1320,20 +1293,20 @@ window.openDashDetail = (code, periodParam) => {
                 data: { 
                     labels: chartLabels, 
                     datasets: [
-                        { label: '부산점', data: chartDataBusan, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 },
-                        { label: '신사점', data: chartDataSinsa, borderColor: '#f97316', backgroundColor: '#f97316', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 },
-                        { label: '물류(본사)', data: chartDataCenter, borderColor: '#9ca3af', backgroundColor: '#9ca3af', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 }
+                        { label: '부산', data: chartDataBusan, borderColor: '#2563eb', backgroundColor: '#2563eb', tension: 0, borderWidth: 2, pointRadius: 3 },
+                        { label: '신사', data: chartDataSinsa, borderColor: '#f97316', backgroundColor: '#f97316', tension: 0, borderWidth: 2, pointRadius: 3 },
+                        { label: '물류', data: chartDataCenter, borderColor: '#6b7280', backgroundColor: '#6b7280', tension: 0, borderWidth: 2, pointRadius: 3 }
                     ] 
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { weight: 'bold', size: 12 } } }, datalabels: { display: false } },
-                    scales: { x: { grid: { display: true, color: '#f3f4f6' }, ticks: { font: { size: 11, weight: 'bold' }, color: '#6b7280' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11, weight: 'bold' } } } }
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { weight: 'bold', size: 10 } } }, datalabels: { display: false } },
+                    scales: { x: { grid: { display: false }, ticks: { font: { size: 9, weight: 'bold' } } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10, weight: 'bold' } } } }
                 }
             });
         }
-    }, 150);
+    }, 50);
 };
 
 window.openSalesGuide = (code) => {
@@ -1345,32 +1318,30 @@ window.openSalesGuide = (code) => {
     if(!modal) {
         modal = document.createElement("div");
         modal.id = "salesGuideModal";
-        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-4";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-4 bg-white/80";
         modal.innerHTML = `
-            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-            <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 border border-indigo-100">
-                <div class="p-5 bg-indigo-50 border-b border-indigo-100 flex justify-between items-start">
+            <div class="modal-outer absolute inset-0 cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+            <div class="modal-content relative bg-white w-full max-w-md mx-auto my-auto flex flex-col overflow-hidden z-10 border-2 border-black">
+                <div class="p-4 border-b-2 border-black bg-black text-white flex justify-between items-start">
                     <div>
-                        <div class="flex items-center gap-2 mb-1.5">
-                            <span class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded font-black tracking-wider">AI SALES GUIDE</span>
-                        </div>
-                        <h2 id="sgTitle" class="font-black text-xl text-indigo-950 leading-tight"></h2>
+                        <div class="text-[10px] font-black tracking-widest mb-1 mono">AI SALES GUIDE</div>
+                        <h2 id="sgTitle" class="font-black text-lg leading-tight"></h2>
                     </div>
-                    <button id="closeSalesGuide" class="p-1.5 -mr-2 text-indigo-400 hover:text-indigo-800 transition-colors bg-white/50 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <button id="closeSalesGuide" class="p-1 text-white hover:text-gray-300 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
-                <div class="p-6 overflow-y-auto max-h-[70vh] space-y-6 dash-scroll">
-                    <div><div id="sgKeywords" class="flex flex-wrap gap-2 mb-2"></div></div>
+                <div class="p-5 overflow-y-auto max-h-[70vh] space-y-5 dash-scroll bg-white">
+                    <div><div id="sgKeywords" class="flex flex-wrap gap-1.5 mb-2"></div></div>
                     <div>
-                        <h3 class="font-black text-sm text-indigo-400 flex items-center gap-1.5 mb-2"><i data-lucide="zap" class="w-5 h-5"></i> 핵심 특징</h3>
-                        <div id="sgFeatures" class="text-[15px] text-gray-800 font-medium leading-relaxed bg-gray-50 p-4 rounded-xl"></div>
+                        <h3 class="font-black text-[11px] text-gray-500 mb-1.5 mono">FEATURES</h3>
+                        <div id="sgFeatures" class="text-[13px] text-black font-bold leading-relaxed border-l-2 border-black pl-3"></div>
                     </div>
                     <div>
-                        <h3 class="font-black text-sm text-indigo-400 flex items-center gap-1.5 mb-2"><i data-lucide="target" class="w-5 h-5"></i> 추천 고객</h3>
-                        <div id="sgTarget" class="text-[15px] text-gray-800 font-medium leading-relaxed bg-gray-50 p-4 rounded-xl"></div>
+                        <h3 class="font-black text-[11px] text-gray-500 mb-1.5 mono">TARGET</h3>
+                        <div id="sgTarget" class="text-[13px] text-black font-bold leading-relaxed border-l-2 border-black pl-3"></div>
                     </div>
                     <div>
-                        <h3 class="font-black text-sm text-indigo-400 flex items-center gap-1.5 mb-2"><i data-lucide="message-circle" class="w-5 h-5"></i> 실전 응대 멘트</h3>
-                        <div id="sgPitch" class="text-[16px] text-indigo-900 font-bold leading-relaxed bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl"></div>
+                        <h3 class="font-black text-[11px] text-gray-500 mb-1.5 mono">PITCH</h3>
+                        <div id="sgPitch" class="text-[14px] text-black font-black leading-relaxed bg-gray-100 p-3 border border-black"></div>
                     </div>
                 </div>
             </div>
@@ -1380,7 +1351,7 @@ window.openSalesGuide = (code) => {
     }
 
     modal.querySelector("#sgTitle").textContent = p ? p.품명 : code;
-    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw => `<span class="bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full text-xs font-black border border-indigo-200 shadow-sm">#${escapeHtml(kw)}</span>`).join('');
+    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw => `<span class="bg-white text-black px-2 py-0.5 text-[10px] font-bold border border-black">#${escapeHtml(kw)}</span>`).join('');
     modal.querySelector("#sgFeatures").textContent = guide.features || "내용 없음";
     modal.querySelector("#sgTarget").textContent = guide.target || "내용 없음";
     modal.querySelector("#sgPitch").textContent = guide.pitch || "내용 없음";
@@ -1393,107 +1364,52 @@ function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo] || null;
   
-  $("#detailHead").innerHTML = `
-    <div class="flex gap-4 items-center">
-        ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
-        <div class="min-w-0 flex-1">
-            <div class="text-xs sm:text-[13px] text-gray-500 font-black mb-1">${escapeHtml(p.브랜드||"-")}</div>
-            <div class="text-[18px] sm:text-[22px] font-black text-gray-900 leading-tight truncate break-keep">${escapeHtml(p.품명)}</div>
-            <div class="text-blue-600 font-bold text-sm sm:text-base mt-1">${escapeHtml(p.품번)}</div>
-        </div>
-    </div>
-  `;
-  
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let detailMemoHtml = "";
   if(productMemos.length > 0) {
       productMemos.forEach(m => {
           detailMemoHtml += `
-          <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-sm mb-3 relative">
-             <button onclick="deleteMemo('${m.id}')" class="absolute top-2.5 right-2.5 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-             <div class="flex items-center gap-2 mb-1.5"><span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span><span class="text-xs text-yellow-600">${escapeHtml(m.date)}</span></div>
-             <div class="text-yellow-900 pr-6">${escapeHtml(m.text)}</div>
+          <div class="p-2 border border-black bg-yellow-50 text-[11px] mb-2 relative">
+             <button onclick="deleteMemo('${m.id}')" class="absolute top-1 right-1 text-black hover:text-red-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+             <div class="font-bold text-black mb-1">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)} <span class="text-gray-500 mono">${escapeHtml(m.date)}</span></div>
+             <div class="text-black pr-5">${escapeHtml(m.text)}</div>
           </div>`;
       });
   }
-  $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
-  $("#detailBody").innerHTML = `
-    <div class="overflow-x-auto w-full no-scrollbar pb-3">
-        <table class="w-full min-w-[500px] text-sm sm:text-base bg-white rounded-xl border-hidden shadow-sm">
-        <thead class="bg-gray-50 text-gray-600 font-black border-b border-gray-200">
-            <tr>
-            <th class="py-3 px-2 text-center w-[16%] border-r border-white">사이즈</th>
-            <th class="py-3 px-2 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
-            <th class="py-3 px-2 text-center w-[15%]">본사재고</th>
-            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">본사 RT</th>
-            <th class="py-3 px-2 text-center w-[15%]">신사재고</th>
-            <th class="py-3 px-2 text-center w-[20%]">신사 RT</th>
-            </tr>
-        </thead>
-        <tbody>
-        ${p.sizes.map(s => {
-            let centerRtBtn = s.center > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
-            
-            let sinsaRtBtn = s.sinsa > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
-
-            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
-                <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}</td>
-                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
-                <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.center}</td>
-                <td class="py-2.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
-                <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.sinsa}</td>
-                <td class="py-2.5 px-2 text-center">${sinsaRtBtn}</td>
-            </tr>`;
-        }).join("")}
-        </tbody>
-        </table>
-    </div>
-  `;
-  
   let stickyFooterHtml = `
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-2">
           <div class="flex gap-2">
-              <select id="memoStaff" class="ipt text-sm flex-1 font-bold bg-white px-3 py-2 rounded-lg border border-gray-200">
+              <select id="memoStaff" class="ipt text-[11px] flex-1 font-bold bg-white px-2 py-1.5 border border-black">
                   <option value="" disabled selected>작성자 선택</option>
-                  <option value="김종훈">김종훈</option>
-                  <option value="김기태">김기태</option>
-                  <option value="김민정">김민정</option>
-                  <option value="임경준">임경준</option>
-                  <option value="박서영">박서영</option>
+                  <option value="김종훈">김종훈</option><option value="김기태">김기태</option><option value="김민정">김민정</option><option value="임경준">임경준</option><option value="박서영">박서영</option>
               </select>
-              <select id="memoTag" class="ipt text-sm flex-1 font-bold bg-white px-3 py-2 rounded-lg border border-gray-200">
-                  <option value="고객요청">고객요청</option>
-                  <option value="예약">예약</option>
-                  <option value="기타">기타</option>
+              <select id="memoTag" class="ipt text-[11px] flex-1 font-bold bg-white px-2 py-1.5 border border-black">
+                  <option value="고객요청">고객요청</option><option value="예약">예약</option><option value="기타">기타</option>
               </select>
           </div>
           <div class="flex gap-2">
-              <input type="text" id="memoText" class="ipt flex-1 text-sm px-4 py-2.5 rounded-lg border border-gray-200" placeholder="메모 내용 입력 (길게 작성 가능)">
-              <button id="addMemoBtn" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 px-5 py-2.5 rounded-lg text-sm font-black shrink-0 transition-colors shadow-sm">등록</button>
+              <input type="text" id="memoText" class="ipt flex-1 text-[11px] px-2 py-1.5 border border-black" placeholder="메모 내용 입력">
+              <button id="addMemoBtn" class="bg-black text-white px-3 py-1.5 text-[11px] font-bold shrink-0">등록</button>
           </div>
       </div>
-      <div id="memoMsg" class="mt-1.5 text-xs font-bold h-4"></div>
+      <div id="memoMsg" class="mt-1 text-[10px] font-bold h-3"></div>
   `;
 
-  // 3번 피드백 반영: 관리자일 경우 조건 없이 이미지 등록 팝업 띄우기 (p.shopNo 조건 제거)
+  // 3번 피드백 반영: 관리자일 경우 조건 없이 이미지 등록 팝업 띄우기
   if (sessionStorage.getItem(SESSION_FLAG) === "1") {
       const targetUrl = p.shopNo ? `https://racement.co.kr/product-detail?productNo=${p.shopNo}` : `https://racement.co.kr`;
       stickyFooterHtml += `
-          <div class="mt-4 pt-4 border-t border-gray-200">
-              <div class="text-xs font-bold text-gray-800 mb-2 flex justify-between items-center">
-                  <span>🖼️ 이미지 등록 (관리자용)</span>
+          <div class="mt-3 pt-3 border-t-2 border-black">
+              <div class="text-[10px] font-bold text-black mb-1.5 flex justify-between items-center mono">
+                  <span>🖼️ IMAGE UPLOAD (ADMIN)</span>
                   <a href="${targetUrl}" target="_blank" class="text-blue-600 hover:underline">자사몰 열기</a>
               </div>
               <div class="flex gap-2">
-                  <input type="text" id="quickImgUrl" class="ipt flex-1 text-sm px-4 py-2.5 rounded-lg border border-gray-200 mono" placeholder="이미지 주소 붙여넣기">
-                  <button id="quickImgSave" class="px-5 py-2.5 text-sm font-black bg-gray-800 hover:bg-black text-white rounded-lg shadow-sm">저장</button>
+                  <input type="text" id="quickImgUrl" class="ipt flex-1 text-[11px] px-2 py-1.5 border border-black mono" placeholder="이미지 주소 붙여넣기">
+                  <button id="quickImgSave" class="px-3 py-1.5 text-[11px] font-bold bg-black text-white">저장</button>
               </div>
-              <div id="quickImgMsg" class="mt-1.5 text-xs font-bold h-4"></div>
+              <div id="quickImgMsg" class="mt-1 text-[10px] font-bold h-3"></div>
           </div>
       `;
   }
@@ -1501,79 +1417,71 @@ function openDetail(p){
   let modalContentWrap = $("#detailModal .modal-content");
   if(!modalContentWrap) {
       modalContentWrap = document.createElement("div");
-      modalContentWrap.className = "modal-content relative bg-white w-[95%] max-w-[650px] mx-auto my-auto flex flex-col rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl z-10 max-h-[90vh]";
-      $("#detailModal").className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4 bg-black/60";
+      modalContentWrap.className = "modal-content relative bg-white w-[95%] max-w-[600px] mx-auto my-auto flex flex-col overflow-hidden z-10 max-h-[90vh]";
+      $("#detailModal").className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4 bg-white/80";
       $("#detailModal").innerHTML = `<div class="modal-outer absolute inset-0 cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>`;
       $("#detailModal").appendChild(modalContentWrap);
   }
 
   modalContentWrap.innerHTML = `
-      <div class="p-5 border-b border-gray-100 flex justify-between items-start bg-white shrink-0 shadow-sm z-10">
-          <div id="detailHead" class="flex-1 min-w-0"></div>
-          <button id="closeDetail" class="p-2 -mr-2 -mt-2 text-gray-400 hover:text-gray-900 bg-gray-50 rounded-full shrink-0 transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-6 h-6"></i></button>
+      <div class="p-4 border-b-2 border-black flex justify-between items-start bg-white shrink-0 z-10">
+          <div id="detailHead" class="flex-1 min-w-0">
+             <div class="flex gap-3 items-center">
+                ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain border border-black bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 flex items-center justify-center text-[10px] text-gray-500 font-bold border border-black shrink-0">N/A</div>`}
+                <div class="min-w-0 flex-1">
+                    <div class="text-[10px] text-gray-500 font-bold mb-0.5 mono">${escapeHtml(p.브랜드||"-")}</div>
+                    <div class="text-[15px] font-black text-black leading-tight truncate">${escapeHtml(p.품명)}</div>
+                    <div class="text-blue-600 font-bold text-[12px] mt-0.5 mono">${escapeHtml(p.품번)}</div>
+                </div>
+            </div>
+          </div>
+          <button id="closeDetail" class="p-1 -mr-1 -mt-1 text-black transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <div class="flex-1 overflow-y-auto p-5 dash-scroll bg-gray-50/30">
-          <div id="detailBody"></div>
-          <div class="mt-5">
-              <div class="text-sm font-black text-gray-700 mb-3 flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4"></i> 직원 메모 기록</div>
-              <div id="detailMemosWrap"></div>
+      <div class="flex-1 overflow-y-auto p-4 dash-scroll bg-gray-50">
+          <div id="detailBody">
+             <table class="w-full text-center border-collapse">
+                <thead class="text-[11px] font-black border-b-2 border-black bg-white">
+                    <tr>
+                        <th class="py-2 border-r border-gray-300 w-[16%]">SZ</th>
+                        <th class="py-2 border-r border-gray-300 w-[14%] text-blue-600">부산</th>
+                        <th class="py-2 w-[15%] text-gray-500">본사</th>
+                        <th class="py-2 border-r border-gray-300 w-[20%]">RT</th>
+                        <th class="py-2 w-[15%] text-gray-500">신사</th>
+                        <th class="py-2 w-[20%]">RT</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                ${p.sizes.map(s => {
+                    let centerRtBtn = s.center > 0 
+                        ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-black hover:bg-gray-800 text-white w-full h-6 flex items-center justify-center transition-colors"><i data-lucide="arrow-left-right" class="w-3 h-3"></i></button>` 
+                        : `<button disabled class="bg-gray-100 text-gray-300 w-full h-6 flex items-center justify-center cursor-not-allowed border border-gray-200"><i data-lucide="minus" class="w-3 h-3"></i></button>`;
+                    
+                    let sinsaRtBtn = s.sinsa > 0 
+                        ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white w-full h-6 flex items-center justify-center transition-colors"><i data-lucide="arrow-left-right" class="w-3 h-3"></i></button>` 
+                        : `<button disabled class="bg-gray-100 text-gray-300 w-full h-6 flex items-center justify-center cursor-not-allowed border border-gray-200"><i data-lucide="minus" class="w-3 h-3"></i></button>`;
+
+                    return `<tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="py-1.5 font-black border-r border-gray-200 text-[12px] mono bg-gray-50">${s.size}</td>
+                        <td class="py-1.5 font-black border-r border-gray-200 text-[13px] mono ${s.busan>0?'text-blue-600':'text-red-600'}">${s.busan}</td>
+                        <td class="py-1.5 font-bold text-gray-500 text-[13px] mono">${s.center}</td>
+                        <td class="py-1 px-1 border-r border-gray-200">${centerRtBtn}</td>
+                        <td class="py-1.5 font-bold text-gray-500 text-[13px] mono">${s.sinsa}</td>
+                        <td class="py-1 px-1">${sinsaRtBtn}</td>
+                    </tr>`;
+                }).join("")}
+                </tbody>
+             </table>
+          </div>
+          <div class="mt-4">
+              <div class="text-[11px] font-black text-black mb-2 mono">MEMO RECORD</div>
+              <div id="detailMemosWrap">${detailMemoHtml}</div>
           </div>
       </div>
-      <div class="p-5 border-t border-gray-200 bg-gray-50 shrink-0 sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      <div class="p-4 border-t-2 border-black bg-gray-100 shrink-0 sticky bottom-0 z-20">
           ${stickyFooterHtml}
       </div>
   `;
   
-  $("#detailHead").innerHTML = `
-    <div class="flex gap-4 items-center">
-        ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
-        <div class="min-w-0 flex-1">
-            <div class="text-xs sm:text-[13px] text-gray-500 font-black mb-1">${escapeHtml(p.브랜드||"-")}</div>
-            <div class="text-[18px] sm:text-[22px] font-black text-gray-900 leading-tight truncate break-keep">${escapeHtml(p.품명)}</div>
-            <div class="text-blue-600 font-bold text-sm sm:text-base mt-1">${escapeHtml(p.품번)}</div>
-        </div>
-    </div>
-  `;
-  
-  $("#detailBody").innerHTML = `
-    <div class="overflow-x-auto w-full no-scrollbar pb-3">
-        <table class="w-full min-w-[500px] text-sm sm:text-base bg-white rounded-xl border-hidden shadow-sm">
-        <thead class="bg-gray-50 text-gray-600 font-black border-b border-gray-200">
-            <tr>
-            <th class="py-3 px-2 text-center w-[16%] border-r border-white">사이즈</th>
-            <th class="py-3 px-2 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
-            <th class="py-3 px-2 text-center w-[15%]">본사재고</th>
-            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">본사 RT</th>
-            <th class="py-3 px-2 text-center w-[15%]">신사재고</th>
-            <th class="py-3 px-2 text-center w-[20%]">신사 RT</th>
-            </tr>
-        </thead>
-        <tbody>
-        ${p.sizes.map(s => {
-            let centerRtBtn = s.center > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
-            
-            let sinsaRtBtn = s.sinsa > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
-
-            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
-                <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}</td>
-                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
-                <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.center}</td>
-                <td class="py-2.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
-                <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.sinsa}</td>
-                <td class="py-2.5 px-2 text-center">${sinsaRtBtn}</td>
-            </tr>`;
-        }).join("")}
-        </tbody>
-        </table>
-    </div>
-  `;
-
-  $("#detailMemosWrap").innerHTML = detailMemoHtml;
-
   $("#addMemoBtn").onclick = async () => {
       if(!checkPat()) return;
       const staff = $("#memoStaff").value; 
@@ -1639,10 +1547,6 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
-    if(b.dataset.busanonly) {
-        if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400');
-        else b.classList.remove('ring-2', 'ring-blue-400');
-    }
     visibleCount=60; render(); 
 }));
 
@@ -1654,7 +1558,7 @@ $("#resetAll").onclick=()=>{
     $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0")); 
     
     const busanOnlyBtn = $('button.chip[data-busanonly]');
-    if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400'); }
+    if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; }
 
     $("#sortSel").value="default";
     if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
@@ -1707,15 +1611,14 @@ window.renderSalesHistoryAdmin = () => {
     const count = Object.keys(SALES_HISTORY.items || {}).length;
     box.innerHTML = `
         <div class="flex justify-between items-center mb-2">
-            <div class="font-black text-orange-800 text-sm">📊 POS 판매 실적 DB</div>
+            <div class="font-black text-black text-[12px] mono">📊 POS SALES DB</div>
             <div class="flex gap-2 items-center">
-                <span class="text-xs font-bold text-orange-500 bg-white px-2 py-1 rounded">품목 ${count}개 누적됨</span>
-                <button id="shClearBtn" class="text-xs font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white border border-red-200 px-3 py-1 rounded transition-colors shadow-sm">DB 초기화</button>
+                <span class="text-[10px] font-bold text-black border border-black bg-white px-2 py-0.5 mono">ITEMS: ${count}</span>
+                <button id="shClearBtn" class="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 border border-black shadow-[2px_2px_0_0_#000]">DB CLEAR</button>
             </div>
         </div>
-        <div class="text-center cursor-pointer group mt-3 bg-white border border-orange-100 rounded-xl p-4 hover:bg-orange-500 transition-colors" id="shUploadTrigger">
-            <div class="font-black text-orange-600 text-sm mb-1.5 group-hover:text-white">판매 엑셀 누적 업데이트</div>
-            <div class="text-xs text-orange-400 font-bold group-hover:text-orange-100">POS에서 받은 기간별 판매데이터 그대로 업로드</div>
+        <div class="text-center cursor-pointer bg-white border-2 border-black p-3 hover:bg-black hover:text-white transition-colors" id="shUploadTrigger">
+            <div class="font-black text-[12px] mb-1">엑셀 누적 업데이트</div>
         </div>
         <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
     `;
@@ -1833,10 +1736,10 @@ window.renderPromoAdmin = () => {
     if(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
         box.innerHTML = `
             <div class="flex justify-between items-center mb-2">
-                <div class="font-black text-purple-800 text-sm">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</div>
-                <button id="endPromoBtn" class="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-black rounded-lg hover:bg-red-500 hover:text-white transition-colors">기획전 종료</button>
+                <div class="font-black text-black text-[12px] mono">🎁 PROMO: ${escapeHtml(PROMOTIONS.meta.name)}</div>
+                <button id="endPromoBtn" class="px-2 py-0.5 border border-black bg-white text-black text-[10px] font-black shadow-[2px_2px_0_0_#000] hover:bg-black hover:text-white transition-colors">종료</button>
             </div>
-            <div class="text-xs font-bold text-purple-500 bg-white p-2.5 rounded-lg">${escapeHtml(PROMOTIONS.meta.period)}</div>
+            <div class="text-[11px] font-bold text-gray-600">${escapeHtml(PROMOTIONS.meta.period)}</div>
         `;
         $("#endPromoBtn").onclick = async () => {
             if(!checkPat()) return;
@@ -1854,9 +1757,8 @@ window.renderPromoAdmin = () => {
         }
     } else {
         box.innerHTML = `
-            <div class="text-center cursor-pointer group" id="promoUploadTrigger">
-                <div class="font-black text-purple-800 text-sm mb-1.5 group-hover:text-purple-600">🎁 프로모션 엑셀 등록</div>
-                <div class="text-xs text-purple-500 font-bold">MD가 공유한 특가 시트를 업로드하세요</div>
+            <div class="text-center cursor-pointer bg-white border-2 border-black p-3 hover:bg-black hover:text-white transition-colors" id="promoUploadTrigger">
+                <div class="font-black text-[12px] mb-1">🎁 프로모션 엑셀 등록</div>
             </div>
             <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
         `;
@@ -1930,12 +1832,11 @@ window.renderSalesAdmin = () => {
     if(!box) return;
     box.innerHTML = `
         <div class="flex justify-between items-center mb-2">
-            <div class="font-black text-indigo-800 text-sm">🧠 AI 세일즈 가이드 DB</div>
-            <span class="text-xs font-bold text-indigo-500 bg-white px-2.5 py-1 rounded-lg">현재 ${Object.keys(SALES_GUIDES).length}개 등록됨</span>
+            <div class="font-black text-black text-[12px] mono">🧠 AI SALES DB</div>
+            <span class="text-[10px] font-bold text-black border border-black px-2 py-0.5 bg-white mono">ITEMS: ${Object.keys(SALES_GUIDES).length}</span>
         </div>
-        <div class="text-center cursor-pointer group mt-3 bg-white border border-indigo-100 rounded-xl p-4 hover:bg-indigo-600 transition-colors" id="salesUploadTrigger">
-            <div class="font-black text-indigo-600 text-sm mb-1.5 group-hover:text-white">엑셀 등록 / 업데이트</div>
-            <div class="text-xs text-indigo-400 font-bold group-hover:text-indigo-200">(품번, 키워드, 특징, 추천고객, 응대멘트 포함)</div>
+        <div class="text-center cursor-pointer bg-white border-2 border-black p-3 hover:bg-black hover:text-white transition-colors" id="salesUploadTrigger">
+            <div class="font-black text-[12px] mb-1">가이드 엑셀 등록</div>
         </div>
         <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
     `;
@@ -1980,8 +1881,8 @@ window.addEventListener('DOMContentLoaded', () => {
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
         const trBtn = document.createElement("button");
         trBtn.id = "allTransfersBtn";
-        trBtn.className = $("#allMemosBtn").className.replace(/yellow/g, 'blue');
-        trBtn.innerHTML = `🚚 이동요청 목록`;
+        trBtn.className = $("#allMemosBtn").className.replace(/yellow/g, 'gray').replace(/text-gray-800/, 'text-black border-black border-2 shadow-[2px_2px_0_0_#000]');
+        trBtn.innerHTML = `🚚 RT요청`;
         trBtn.onclick = window.renderTransfers;
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
     }
@@ -1989,35 +1890,35 @@ window.addEventListener('DOMContentLoaded', () => {
     const stockBtn = $('button.chip[data-stock]');
     if(stockBtn && !$('button.chip[data-busanonly]')) {
         const busanOnlyBtn = document.createElement("button");
-        busanOnlyBtn.className = "chip !bg-blue-50 !text-blue-700 !border-blue-200 font-black";
+        busanOnlyBtn.className = "chip !bg-blue-600 !text-white !border-black font-black";
         busanOnlyBtn.dataset.busanonly = "1";
         busanOnlyBtn.dataset.active = "0";
-        busanOnlyBtn.innerHTML = "🌊 부산점 ONLY";
+        busanOnlyBtn.innerHTML = "BUSAN ONLY";
         stockBtn.parentNode.insertBefore(busanOnlyBtn, stockBtn.nextSibling);
         busanOnlyBtn.addEventListener("click", () => {
             saveHistoryState();
             busanOnlyBtn.dataset.active = busanOnlyBtn.dataset.active === "1" ? "0" : "1";
-            if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
-            else busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
+            if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.style.boxShadow = "2px 2px 0px #000";
+            else busanOnlyBtn.style.boxShadow = "none";
             visibleCount=60; render();
         });
     }
     
     if ($("#uploadPanel") && !$("#salesHistoryAdminBox")) {
         const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
-        shBox.className = "mt-5 p-5 border-2 border-orange-200 bg-orange-50 rounded-2xl";
+        shBox.className = "mt-4 p-4 border-2 border-black bg-gray-50";
         $("#uploadPanel").appendChild(shBox);
     }
 
     if ($("#uploadPanel") && !$("#promoAdminBox")) {
         const promoBox = document.createElement("div"); promoBox.id = "promoAdminBox";
-        promoBox.className = "mt-5 p-5 border-2 border-purple-200 bg-purple-50 rounded-2xl";
+        promoBox.className = "mt-4 p-4 border-2 border-black bg-gray-50";
         $("#uploadPanel").appendChild(promoBox);
     }
     
     if ($("#uploadPanel") && !$("#salesAdminBox")) {
         const sgBox = document.createElement("div"); sgBox.id = "salesAdminBox";
-        sgBox.className = "mt-5 p-5 border-2 border-indigo-200 bg-indigo-50 rounded-2xl";
+        sgBox.className = "mt-4 p-4 border-2 border-black bg-gray-50";
         $("#uploadPanel").appendChild(sgBox);
     }
 
