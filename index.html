@@ -127,49 +127,78 @@
 </section>
 
 <section class="mx-auto max-w-7xl px-4 sm:px-6 mt-4">
-  <div class="card p-3 sm:p-4">
-    <div class="relative">
-      <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[color:var(--muted)]"></i>
-      <input id="q" type="search" placeholder="품명, 품번 검색 (초성 지원)" class="ipt w-full pl-11 pr-12 font-bold" />
-      <button id="clearQ" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[color:var(--muted)]"><i data-lucide="x" class="w-4 h-4"></i></button>
+  <div id="activeFilterBar" class="hidden bg-gray-50 border border-gray-100 rounded-t-xl px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
+    <span class="text-[10px] font-black text-gray-400 shrink-0">ACTIVE:</span>
+    <div id="activeFilterList" class="flex gap-1.5"></div>
+  </div>
+
+  <div class="card p-3 sm:p-4 !rounded-t-none">
+    <div class="flex items-center gap-2 mb-4">
+      <div class="relative flex-1">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input id="q" type="search" placeholder="품명, 품번 검색 (초성 지원)" class="ipt w-full pl-10 pr-10 py-2 text-sm font-bold border-gray-200" />
+        <button id="resetAll" class="absolute right-3 top-1/2 -translate-y-1/2 text-rose-500 hover:rotate-180 transition-all" title="전체 초기화">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <button onclick="window.openAnalyticsReport()" class="chip !py-2 !px-3 bg-gray-50 text-xs hover:bg-gray-100 border-gray-200 shrink-0">
+        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 분석
+      </button>
+      <button id="promoBtn" onclick="window.togglePromoView(this)" class="chip !py-2 !px-3 bg-purple-50 text-purple-700 text-xs border-purple-100 shrink-0" data-active="0">
+        <i data-lucide="gift" class="w-3.5 h-3.5"></i> 기획전
+      </button>
     </div>
-    <div id="recentSearches" class="hidden flex gap-1.5 mt-2 overflow-x-auto pb-1 items-center"></div>
-    <div id="filterDetails" class="mt-3 flex flex-col gap-2">
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">카테고리</span>
-        <button class="chip" data-cat="ALL" data-active="1">전체</button>
-        <button class="chip" data-cat="신발">신발</button>
-        <button class="chip" data-cat="의류">의류</button>
-        <button class="chip" data-cat="용품">용품</button>
+
+    <div class="flex flex-col gap-3">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-black text-gray-400 w-8">분류</span>
+          <div class="flex gap-1">
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-cat="ALL" data-active="1">전체</button>
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-cat="신발">신발</button>
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-cat="의류">의류</button>
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-cat="용품">용품</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 border-l pl-6 border-gray-100">
+          <span class="text-[11px] font-black text-gray-400 w-8">성별</span>
+          <div class="flex gap-1">
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-gender="ALL" data-active="1">전체</button>
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-gender="M">남성</button>
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-gender="W">여성</button>
+            <button class="chip !py-1 !px-2.5 !text-[11px]" data-gender="U">공용</button>
+          </div>
+        </div>
       </div>
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">성별</span>
-        <button class="chip" data-gender="ALL" data-active="1">전체</button>
-        <button class="chip" data-gender="M">남성</button>
-        <button class="chip" data-gender="W">여성</button>
-        <button class="chip" data-gender="U">공용</button>
+
+      <div class="bg-gray-50/50 rounded-xl p-3 border border-gray-100/50">
+        <div class="flex border-b border-gray-200 mb-2.5 gap-4">
+          <button class="size-tab active text-[12px] font-black pb-1.5 border-b-2 border-blue-600 text-blue-600" data-tab="fw">👟 신발</button>
+          <button class="size-tab text-[12px] font-bold pb-1.5 text-gray-400" data-tab="ap">👕 의류</button>
+          <button class="size-tab text-[12px] font-bold pb-1.5 text-gray-400" data-tab="gear">🎒 용품</button>
+        </div>
+        <div id="sizeChipGrid" class="flex flex-wrap gap-1.5 min-h-[32px]">
+          </div>
       </div>
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">필터</span>
-        <button class="chip" data-fav="1">🔖 즐겨찾기</button>
-        <button class="chip" data-stock="1">재고있음</button>
-        <button class="chip" data-memo="1">📝 메모있음</button>
-      </div>
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">정렬기준</span>
-        <select id="sortSel" class="ipt py-1.5 text-xs">
-          <option value="default">기본 정렬 (분류 · 재고순)</option>
-          <option value="brand">브랜드 · 품명 가나다순</option>
-          <option value="name">품명 가나다순</option>
-          <option value="stock">부산재고 많은 순</option>
-          <option value="priceAsc">가격 낮은 순</option>
-          <option value="priceDesc">가격 높은 순</option>
-        </select>
-        <button id="resetAll" class="chip ml-auto" style="color:var(--accent); border-color:var(--accent)">전체 초기화</button>
-      </div>
-      <div class="flex flex-wrap gap-1.5 items-center mt-1">
-        <span class="text-[11px] font-bold text-[color:var(--muted)] w-12 shrink-0">브랜드</span>
-        <div id="brandChips" class="flex flex-wrap gap-1.5 flex-1"><button class="chip" data-brand="ALL" data-active="1">전체</button></div>
+
+      <div class="space-y-2">
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-3">
+            <span class="text-[11px] font-black text-gray-400">브랜드</span>
+            <input id="brandSearch" type="text" placeholder="브랜드명 검색..." class="text-xs font-bold bg-transparent border-b border-gray-200 outline-none w-32 focus:border-blue-500 pb-0.5">
+          </div>
+          <div class="flex bg-gray-100 rounded-lg p-0.5 border border-gray-200 scale-90 origin-right">
+            <button id="sortPop" class="px-2.5 py-1 bg-white rounded-md shadow-sm text-[10px] font-black">인기순</button>
+            <button id="sortAbc" class="px-2.5 py-1 text-gray-400 text-[10px] font-bold">가나다순</button>
+          </div>
+        </div>
+        <div id="recentBrands" class="flex items-center gap-2 px-1 overflow-x-auto no-scrollbar hidden">
+          <span class="text-[9px] font-black text-gray-400 shrink-0">최근 검색:</span>
+          <div id="recentBrandList" class="flex gap-1"></div>
+        </div>
+        <div id="brandChips" class="brand-scroll-area flex flex-wrap gap-1.5 max-h-[100px] overflow-y-auto pt-1 custom-scrollbar">
+          <button class="chip !py-1 !px-2.5 !text-[11px]" data-brand="ALL" data-active="1">전체</button>
+        </div>
       </div>
     </div>
   </div>
