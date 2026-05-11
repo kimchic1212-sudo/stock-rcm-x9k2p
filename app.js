@@ -303,8 +303,9 @@ function updateUndoBtnUI() {
 }
 
 document.addEventListener("keydown", (e) => {
+    // 💡 수정됨: #adminModal 을 선택자에 추가하여 ESC로 닫히게 복구
     if(e.key === "Escape") {
-        const modals = $$('#detailModal, #dashDetailModal, #salesGuideModal, #transfersModal, #allMemosModal, .modal-backdrop');
+        const modals = $$('#adminModal, #detailModal, #dashDetailModal, #salesGuideModal, #transfersModal, #allMemosModal, .modal-backdrop');
         let closedAny = false;
         modals.forEach(m => {
             if(m && !m.classList.contains("hidden")) {
@@ -2472,6 +2473,7 @@ window.renderSalesAdmin = () => {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
+    // 🚚 상단 이동요청 버튼 복구
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
         const trBtn = document.createElement("button");
         trBtn.id = "allTransfersBtn";
@@ -2498,68 +2500,202 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 🔥 Glassmorphism 가로형(Landscape) 2단 어드민 모달 구조 적용
+    // 🔥 Admin Modal : 기능(비밀번호, 설정, 업로드) + 디자인(Glassmorphism) 완벽 결합 🔥
     const adminModal = document.getElementById("adminModal");
     if(adminModal) {
         adminModal.className = "hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm transition-opacity";
+        
+        // 설정 패널 렌더링을 위해 현재 GH 값 로드
+        const ghOwner = GH.owner || "";
+        const ghRepo = GH.repo || "";
+        const ghBranch = GH.branch || "main";
+        const ghPat = getPat();
+
         adminModal.innerHTML = `
-            <div class="absolute inset-0 cursor-pointer" onclick="document.getElementById('adminModal').classList.add('hidden')"></div>
+            <div class="absolute inset-0 cursor-pointer modal-outer" onclick="document.getElementById('adminModal').classList.add('hidden')"></div>
             
-            <div class="glass-modal flex flex-col md:flex-row overflow-hidden" style="max-width: 800px; padding: 24px; gap: 24px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); z-index: 10;">
+            <div class="glass-modal relative flex flex-col w-full max-w-[800px] bg-white/50 border border-white/60 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
                 
-                <button class="absolute top-4 right-5 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform z-20" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
+                <button class="absolute top-4 right-5 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform z-50" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
                 
-                <div class="flex-1 flex flex-col">
-                    <div class="text-center mb-6 w-full">
-                        <h2 class="m-0 text-[22px] font-extrabold tracking-wide text-gray-900 leading-tight">RACEMENT<br>ADMIN PANEL</h2>
-                    </div>
-                    <div id="mainUploadTrigger" class="upload-section h-full flex-1">
-                        <div class="upload-icon">☁️</div>
-                        <h3 style="margin: 0 0 8px 0; color: #111; font-size: 16px;">엑셀 파일 클릭 또는 드래그</h3>
-                        <p style="margin: 0; color: #666; font-size: 14px; font-weight: bold;">업로드 시 재고 변동량 자동 계산</p>
+                <div id="authPanel" class="flex flex-col items-center justify-center p-10 sm:p-20 transition-all duration-300">
+                    <h2 class="text-2xl font-black text-gray-900 mb-6">RACEMENT ADMIN</h2>
+                    <div class="flex gap-2 w-full max-w-sm">
+                        <input type="password" id="pwd" placeholder="관리자 비밀번호 (1212)" class="ipt flex-1 px-4 py-3 rounded-xl border border-gray-300 font-bold outline-none focus:border-blue-500 shadow-sm">
+                        <button id="pwdGo" class="px-6 py-3 bg-gray-900 hover:bg-black text-white rounded-xl font-black transition-colors shadow-sm">접속</button>
                     </div>
                 </div>
 
-                <div class="flex-1 flex flex-col gap-3">
-                    <div id="shAdminWrapper" class="setting-card card-orange">
-                        <div id="shUploadTrigger" class="flex-1">
-                            <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px;">POS 판매 실적 DB</h4>
-                            <span style="font-size: 11px; color: #666;">판매 엑셀 누적 업데이트</span>
+                <div id="uploadPanel" class="hidden flex-col md:flex-row w-full p-6 sm:p-8 gap-6 transition-all duration-300">
+                    <div class="flex-1 flex flex-col">
+                        <div class="text-center mb-6 w-full">
+                            <h2 class="m-0 text-[22px] font-extrabold tracking-wide text-gray-900 leading-tight">RACEMENT<br>ADMIN PANEL</h2>
                         </div>
-                        <div class="flex flex-col items-end gap-1.5 ml-2">
-                            <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 4px; z-index:10;">DB 초기화</span>
-                            <span id="shCount" style="font-size: 11px; font-weight: bold; color: #888;"></span>
+                        <div id="mainUploadTrigger" class="upload-section flex-1 bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 shadow-sm">
+                            <div class="text-5xl mb-4">☁️</div>
+                            <h3 class="m-0 mb-2 text-gray-900 font-bold text-[16px]">메인 재고 파일 클릭/드래그</h3>
+                            <p class="m-0 text-gray-500 text-[13px] font-bold">업로드 시 창고/매장 재고 자동 갱신</p>
                         </div>
-                        <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
                     </div>
 
-                    <div id="promoUploadTrigger" class="setting-card card-pink">
+                    <div class="flex-1 flex flex-col gap-3">
+                        <div id="shAdminWrapper" class="setting-card card-orange">
+                            <div id="shUploadTrigger" class="flex-1">
+                                <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">POS 판매 실적 DB</h4>
+                                <span style="font-size: 11px; color: #666; font-weight: bold;">판매 엑셀 누적 업데이트</span>
+                            </div>
+                            <div class="flex flex-col items-end gap-1.5 ml-2">
+                                <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 4px; cursor: pointer; z-index: 10;">DB 초기화</span>
+                                <span id="shCount" style="font-size: 11px; font-weight: bold; color: #888;"></span>
+                            </div>
+                            <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
                         </div>
 
-                    <div class="setting-card card-blue">
-                        <div id="salesUploadTrigger" class="flex-1">
-                            <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px;">AI 세일즈 가이드 DB</h4>
-                            <span style="font-size: 11px; color: #666;">품번, 특징, 추천고객 업데이트</span>
+                        <div id="promoUploadTrigger" class="setting-card card-pink">
+                            </div>
+
+                        <div class="setting-card card-blue">
+                            <div id="salesUploadTrigger" class="flex-1">
+                                <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">AI 세일즈 가이드 DB</h4>
+                                <span style="font-size: 11px; color: #666; font-weight: bold;">특징 및 추천고객 업데이트</span>
+                            </div>
+                            <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 4px; white-space: nowrap;"></span>
+                            <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
                         </div>
-                        <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 4px; white-space: nowrap;"></span>
-                        <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
+                        
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-200/40">
+                            <button id="openSettings" class="px-3 py-2 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold hover:bg-gray-200 transition-colors flex items-center gap-1.5"><i data-lucide="settings" class="w-3.5 h-3.5"></i> API 설정</button>
+                            <button class="px-6 py-2.5 rounded-xl bg-gray-900 text-white border-none text-[13px] font-bold cursor-pointer hover:bg-gray-800 transition-all shadow-sm" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
+                        </div>
                     </div>
-                    
+                </div>
+
+                <div id="settingsPanel" class="hidden flex-col w-full p-6 sm:p-8 transition-all duration-300">
+                    <h2 class="text-xl font-black text-gray-900 mb-5 flex items-center gap-2"><i data-lucide="github" class="w-5 h-5"></i> GitHub API 연동 설정</h2>
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">GitHub 저장소 소유자 (Owner)</label>
+                            <input type="text" id="ghOwner" value="${ghOwner}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">저장소 이름 (Repo)</label>
+                            <input type="text" id="ghRepo" value="${ghRepo}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">브랜치 (Branch)</label>
+                            <input type="text" id="ghBranch" value="${ghBranch}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Personal Access Token (PAT)</label>
+                            <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                        </div>
+                    </div>
                     <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
-                        <button class="px-6 py-2.5 rounded-lg bg-white/50 text-gray-700 border border-gray-200 text-[13px] font-bold cursor-pointer hover:bg-white/90 transition-all" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
+                        <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-[13px] font-bold hover:bg-gray-200 transition-colors shadow-sm">돌아가기</button>
+                        <button id="ghSave" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors shadow-sm">설정 저장</button>
                     </div>
                 </div>
+
+                <input type="file" id="file" accept=".xlsx, .xls, .csv" class="hidden">
             </div>
         `;
+        
+        // 아이콘 리렌더링
+        if(window.lucide) lucide.createIcons();
 
+        // ==========================================
+        // 🛠️ 삭제되었던 핵심 이벤트 리스너들 재연결 🛠️
+        // ==========================================
+
+        // 1. 비밀번호 인증
+        const pwdInput = document.getElementById("pwd");
+        const pwdGo = document.getElementById("pwdGo");
+        
+        const checkPwd = () => {
+            if(pwdInput.value === ADMIN_PWD) { 
+                sessionStorage.setItem(SESSION_FLAG,"1"); 
+                document.getElementById("authPanel").classList.add("hidden"); 
+                document.getElementById("uploadPanel").classList.remove("hidden");
+                document.getElementById("uploadPanel").classList.add("flex");
+            } else {
+                alert("비밀번호 오류");
+            }
+        };
+        pwdGo.onclick = checkPwd;
+        pwdInput.onkeydown = (e) => { if(e.key === "Enter") checkPwd(); };
+
+        // 세션 유지 시 자동 패스
+        if (sessionStorage.getItem(SESSION_FLAG) === "1") {
+            document.getElementById("authPanel").classList.add("hidden");
+            document.getElementById("uploadPanel").classList.remove("hidden");
+            document.getElementById("uploadPanel").classList.add("flex");
+        }
+
+        // 2. 패널 이동 버튼 (설정 창 <-> 업로드 창)
+        document.getElementById("openSettings").onclick = () => { 
+            document.getElementById("uploadPanel").classList.add("hidden");
+            document.getElementById("uploadPanel").classList.remove("flex");
+            document.getElementById("settingsPanel").classList.remove("hidden");
+            document.getElementById("settingsPanel").classList.add("flex");
+        };
+        document.getElementById("backToUpload").onclick = () => { 
+            document.getElementById("settingsPanel").classList.add("hidden");
+            document.getElementById("settingsPanel").classList.remove("flex");
+            document.getElementById("uploadPanel").classList.remove("hidden"); 
+            document.getElementById("uploadPanel").classList.add("flex");
+        };
+
+        // 3. API 환경설정 저장
+        document.getElementById("ghSave").onclick = () => { 
+            GH = { 
+                owner: document.getElementById("ghOwner").value.trim(), 
+                repo: document.getElementById("ghRepo").value.trim(), 
+                branch: document.getElementById("ghBranch").value.trim() || "main" 
+            }; 
+            saveGhConfig(); 
+            setPat(document.getElementById("ghPat").value.trim()); 
+            alert("API 설정이 저장되었습니다."); 
+            document.getElementById("backToUpload").click();
+        };
+
+        // 4. 메인 재고 엑셀 업로드 연결
         document.getElementById('mainUploadTrigger').onclick = () => {
             const mainFileInput = document.getElementById('file');
             if(mainFileInput) mainFileInput.click();
         };
+        
+        // 💡 작동 안 하던 기존 파일 변경 감지 이벤트 복구
+        document.getElementById("file").onchange = async (e) => { 
+            if(!checkPat()) { e.target.value = ""; return; }
+            const f = e.target.files[0]; if(!f) return;
+            const d = new Date();
+            const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                // XLSX 라이브러리가 로드되어 있어야 함 (기존 글로벌 window.XLSX 사용)
+                if(!window.XLSX) { alert("엑셀 파서 로딩 중입니다. 잠시 후 시도해주세요."); return; }
+                const wb = window.XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                let rows = window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+                const meta = { fileName:f.name, uploadedAt: dateStr };
+                try { 
+                    // 기존에 정의하신 commitInventoryToGitHub 함수 실행
+                    await window.commitInventoryToGitHub(rows, meta); 
+                    RAW = rows; CURRENT_META = meta; 
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, _timestamp: Date.now()})); 
+                    applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); 
+                    document.getElementById("adminModal").classList.add("hidden");
+                    alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+                } catch(err) { alert("업로드 실패! 깃허브 API 권한 및 세팅을 확인하세요."); }
+                document.getElementById("file").value = ""; 
+            };
+            reader.readAsArrayBuffer(f);
+        };
     }
 
+    // 각각의 상세 어드민 렌더링 호출
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
-    window.renderPromoAdmin();
+    if(window.renderPromoAdmin) window.renderPromoAdmin();
     if(window.renderSalesAdmin) window.renderSalesAdmin();
 });
 
