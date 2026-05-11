@@ -2197,143 +2197,133 @@ $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setIte
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
 window.renderSalesHistoryAdmin = () => {
-    const box = $("#salesHistoryAdminBox");
-    if(!box) return;
     const count = Object.keys(SALES_HISTORY.items || {}).length;
-    box.innerHTML = `
-        <div class="flex justify-between items-center mb-2">
-            <div class="font-black text-orange-800 text-sm">📊 POS 판매 실적 DB</div>
-            <div class="flex gap-2 items-center">
-                <span class="text-xs font-bold text-orange-500 bg-white px-2 py-1 rounded">품목 ${count}개 누적됨</span>
-                <button id="shClearBtn" class="text-xs font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white border border-red-200 px-3 py-1 rounded transition-colors shadow-sm">DB 초기화</button>
-            </div>
-        </div>
-        <div class="text-center cursor-pointer group mt-3 bg-white border border-orange-100 rounded-xl p-4 hover:bg-orange-500 transition-colors" id="shUploadTrigger">
-            <div class="font-black text-orange-600 text-sm mb-1.5 group-hover:text-white">판매 엑셀 누적 업데이트</div>
-            <div class="text-xs text-orange-400 font-bold group-hover:text-orange-100">POS에서 받은 기간별 판매데이터 그대로 업로드</div>
-        </div>
-        <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
-    `;
-    
-    $("#shClearBtn").onclick = async () => {
-        if(!checkPat()) return;
-        if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
-        try {
-            const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
-            let sha = null;
-            try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
-            const emptyData = { meta: { name: "초기화됨", lastUpdated: new Date().toISOString() }, items: {} };
-            const body = { message:"clear sales history DB", content: utf8ToB64(JSON.stringify(emptyData, null, 2)), branch: GH.branch };
-            if(sha) body.sha = sha;
-            await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-            SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY); 
-            rebuildIndex(); render(); window.renderSalesHistoryAdmin();
-            alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
-        } catch(err) { alert("초기화 실패: " + err.message); }
-    };
+    const countEl = document.getElementById("shCount");
+    if(countEl) countEl.innerText = `누적 ${count}개`;
 
-    $("#shUploadTrigger").onclick = () => $("#shFile").click();
-    $("#shFile").onchange = async (e) => {
-        if(!checkPat()) { e.target.value = ""; return; }
-        const f = e.target.files[0]; if(!f) return;
-        const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 전체점 실적", f.name);
-        if(!periodName) { $("#shFile").value = ""; return; }
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
-            let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && (r.includes('거래명세서일') || r.includes('일자') || r.includes('판매일')));
-            if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
-            
-            const headers = rows[headerRowIdx].map(h => String(h||"").trim());
-            
-            let codeIdx = headers.findIndex(h => h === '품번' || h.includes('상품코드') || h.includes('바코드'));
-            let qtyIdx = headers.findIndex(h => h === '수량' || h.includes('판매수량'));
-            let dateIdx = headers.findIndex(h => h.includes('거래명세서일') || h.includes('일자') || h.includes('판매일'));
-            let sizeIdx = headers.findIndex(h => h.includes('규격') || h.includes('사이즈') || h.includes('옵션'));
-            let managerIdx = headers.findIndex(h => h.includes('담당자') || h.includes('판매원') || h.includes('사원') || h.includes('작업자'));
-            let typeIdx = headers.findIndex(h => h.includes('수주구분') || h.includes('판매구분'));
-
-            let sessionData = {};
-            for(let i=headerRowIdx+1; i<rows.length; i++) {
-                const r = rows[i];
-                const code = String(r[codeIdx]||"").trim();
-                const date = String(r[dateIdx]||"").trim();
-                const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
-                
-                if(!code || !date) continue;
-
-                const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
-                const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
-                const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈"; 
-
-                let locationGroup = "본사물류"; 
-                
-                if(typeStr === "매장" || typeStr.includes("오프라인")) {
-                    if(rawManager.includes("김종훈") || rawManager.includes("부산")) locationGroup = "부산(김종훈)";
-                    else if(rawManager.includes("승호") || rawManager.includes("강") || rawManager.includes("신사")) locationGroup = "신사(승호강)";
-                } else if(rawManager.includes("김종훈")) {
-                    locationGroup = "부산(김종훈)";
-                }
-
-                if(!sessionData[code]) sessionData[code] = {};
-                if(!sessionData[code][date]) sessionData[code][date] = {};
-                if(!sessionData[code][date][size]) sessionData[code][date][size] = {};
-                sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
-            }
-            
-            let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
-            
-            for(let code in sessionData) {
-                if(!newItems[code]) newItems[code] = {};
-                for(let date in sessionData[code]) { 
-                    if(typeof newItems[code][date] === 'number') {
-                        let oldQty = newItems[code][date];
-                        newItems[code][date] = { "알수없음": { "부산(김종훈)": oldQty } };
-                    }
-                    if(!newItems[code][date]) newItems[code][date] = {};
-                    
-                    for(let size in sessionData[code][date]) {
-                        if(!newItems[code][date][size]) newItems[code][date][size] = {};
-                        for(let mgr in sessionData[code][date][size]) {
-                            newItems[code][date][size][mgr] = (newItems[code][date][size][mgr] || 0) + sessionData[code][date][size][mgr];
-                        }
-                    }
-                }
-            }
-            const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems };
-
+    const clearBtn = document.getElementById("shClearBtn");
+    if(clearBtn) {
+        clearBtn.onclick = async (e) => {
+            e.stopPropagation(); // 카드 클릭(업로드) 방지
+            if(!checkPat()) return;
+            if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
             try {
                 const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
                 let sha = null;
                 try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
-                const body = { message:"update sales history", content: utf8ToB64(JSON.stringify(newHistory, null, 2)), branch: GH.branch };
+                const emptyData = { meta: { name: "초기화됨", lastUpdated: new Date().toISOString() }, items: {} };
+                const body = { message:"clear sales history DB", content: utf8ToB64(JSON.stringify(emptyData, null, 2)), branch: GH.branch };
                 if(sha) body.sha = sha;
                 await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY); 
+                SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY); 
                 rebuildIndex(); render(); window.renderSalesHistoryAdmin();
-                
-                alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!`);
-            } catch(err) { alert("업로드 실패: " + err.message); }
-            $("#shFile").value = "";
+                alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
+            } catch(err) { alert("초기화 실패: " + err.message); }
         };
-        reader.readAsArrayBuffer(f);
-    };
+    }
+
+    const trigger = document.getElementById("shUploadTrigger");
+    const fileInput = document.getElementById("shFile");
+    if(trigger && fileInput) {
+        trigger.onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            if(!checkPat()) { e.target.value = ""; return; }
+            const f = e.target.files[0]; if(!f) return;
+            const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 전체점 실적", f.name);
+            if(!periodName) { fileInput.value = ""; return; }
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
+                let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && (r.includes('거래명세서일') || r.includes('일자') || r.includes('판매일')));
+                if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
+                
+                const headers = rows[headerRowIdx].map(h => String(h||"").trim());
+                let codeIdx = headers.findIndex(h => h === '품번' || h.includes('상품코드') || h.includes('바코드'));
+                let qtyIdx = headers.findIndex(h => h === '수량' || h.includes('판매수량'));
+                let dateIdx = headers.findIndex(h => h.includes('거래명세서일') || h.includes('일자') || h.includes('판매일'));
+                let sizeIdx = headers.findIndex(h => h.includes('규격') || h.includes('사이즈') || h.includes('옵션'));
+                let managerIdx = headers.findIndex(h => h.includes('담당자') || h.includes('판매원') || h.includes('사원') || h.includes('작업자'));
+                let typeIdx = headers.findIndex(h => h.includes('수주구분') || h.includes('판매구분'));
+
+                let sessionData = {};
+                for(let i=headerRowIdx+1; i<rows.length; i++) {
+                    const r = rows[i];
+                    const code = String(r[codeIdx]||"").trim();
+                    const date = String(r[dateIdx]||"").trim();
+                    const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
+                    
+                    if(!code || !date) continue;
+
+                    const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
+                    const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
+                    const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈"; 
+
+                    let locationGroup = "본사물류"; 
+                    if(typeStr === "매장" || typeStr.includes("오프라인")) {
+                        if(rawManager.includes("김종훈") || rawManager.includes("부산")) locationGroup = "부산(김종훈)";
+                        else if(rawManager.includes("승호") || rawManager.includes("강") || rawManager.includes("신사")) locationGroup = "신사(승호강)";
+                    } else if(rawManager.includes("김종훈")) { locationGroup = "부산(김종훈)"; }
+
+                    if(!sessionData[code]) sessionData[code] = {};
+                    if(!sessionData[code][date]) sessionData[code][date] = {};
+                    if(!sessionData[code][date][size]) sessionData[code][date][size] = {};
+                    sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
+                }
+                
+                let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
+                for(let code in sessionData) {
+                    if(!newItems[code]) newItems[code] = {};
+                    for(let date in sessionData[code]) { 
+                        if(typeof newItems[code][date] === 'number') {
+                            let oldQty = newItems[code][date];
+                            newItems[code][date] = { "알수없음": { "부산(김종훈)": oldQty } };
+                        }
+                        if(!newItems[code][date]) newItems[code][date] = {};
+                        for(let size in sessionData[code][date]) {
+                            if(!newItems[code][date][size]) newItems[code][date][size] = {};
+                            for(let mgr in sessionData[code][date][size]) {
+                                newItems[code][date][size][mgr] = (newItems[code][date][size][mgr] || 0) + sessionData[code][date][size][mgr];
+                            }
+                        }
+                    }
+                }
+                const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems };
+
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
+                    let sha = null;
+                    try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                    const body = { message:"update sales history", content: utf8ToB64(JSON.stringify(newHistory, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY); 
+                    rebuildIndex(); render(); window.renderSalesHistoryAdmin();
+                    alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!`);
+                } catch(err) { alert("업로드 실패: " + err.message); }
+                fileInput.value = "";
+            };
+            reader.readAsArrayBuffer(f);
+        };
+    }
 };
 
 window.renderPromoAdmin = () => {
-    const box = $("#promoAdminBox");
-    if(!box) return;
+    const card = $("#promoUploadTrigger");
+    if(!card) return;
+
     if(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
-        box.innerHTML = `
-            <div class="flex justify-between items-center mb-2">
-                <div class="font-black text-purple-800 text-sm">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</div>
-                <button id="endPromoBtn" class="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-black rounded-lg hover:bg-red-500 hover:text-white transition-colors">기획전 종료</button>
+        card.innerHTML = `
+            <div class="flex-1 cursor-default">
+                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[15px]">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</h4>
+                <span class="text-[12px] text-purple-600 font-bold">${escapeHtml(PROMOTIONS.meta.period)}</span>
             </div>
-            <div class="text-xs font-bold text-purple-500 bg-white p-2.5 rounded-lg">${escapeHtml(PROMOTIONS.meta.period)}</div>
+            <span id="endPromoBtn" class="text-[11px] font-bold text-[#b83280] bg-[#fecfef]/50 px-2.5 py-1 rounded cursor-pointer hover:bg-[#fecfef] transition-colors z-10 whitespace-nowrap ml-2">기획전 종료</span>
         `;
-        $("#endPromoBtn").onclick = async () => {
+        card.onclick = null; // 업로드 창 클릭 방지
+        document.getElementById("endPromoBtn").onclick = async (e) => {
+            e.stopPropagation();
             if(!checkPat()) return;
             if(!confirm("진행 중인 기획전을 완전히 종료하고 모든 상품을 정가로 복구하시겠습니까?")) return;
             try {
@@ -2348,15 +2338,15 @@ window.renderPromoAdmin = () => {
             } catch(e) { alert("종료 실패!"); }
         }
     } else {
-        box.innerHTML = `
-            <div class="text-center cursor-pointer group h-full" id="promoUploadTrigger">
-                <div class="font-black text-purple-800 text-sm mb-1.5 group-hover:text-purple-600">🎁 프로모션 엑셀 등록</div>
-                <div class="text-xs text-purple-500 font-bold">MD가 공유한 특가 시트를 업로드하세요</div>
+        card.innerHTML = `
+            <div class="flex-1">
+                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[15px]">프로모션 엑셀 등록</h4>
+                <span class="text-[12px] text-gray-600 font-bold">MD가 공유한 특가 시트 업로드</span>
             </div>
             <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
         `;
-        $("#promoUploadTrigger").onclick = () => $("#promoFile").click();
-        $("#promoFile").onchange = async (e) => {
+        card.onclick = () => document.getElementById("promoFile").click();
+        document.getElementById("promoFile").onchange = async (e) => {
             if(!checkPat()) { e.target.value = ""; return; }
             const f = e.target.files[0]; if(!f) return;
             const reader = new FileReader();
@@ -2413,7 +2403,7 @@ window.renderPromoAdmin = () => {
                     PROMOTIONS = newPromo; sessionStorage.removeItem(CACHE_KEY); 
                     rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin(); alert("기획전 데이터가 성공적으로 반영되었습니다!");
                 } catch(err) { alert("업로드 실패: " + err.message); }
-                $("#promoFile").value = "";
+                document.getElementById("promoFile").value = "";
             };
             reader.readAsArrayBuffer(f);
         };
@@ -2421,57 +2411,52 @@ window.renderPromoAdmin = () => {
 };
 
 window.renderSalesAdmin = () => {
-    const box = $("#salesAdminBox");
-    if(!box) return;
-    box.innerHTML = `
-        <div class="flex justify-between items-center mb-2">
-            <div class="font-black text-indigo-800 text-sm">🧠 AI 세일즈 가이드 DB</div>
-            <span class="text-xs font-bold text-indigo-500 bg-white px-2.5 py-1 rounded-lg">현재 ${Object.keys(SALES_GUIDES).length}개 등록됨</span>
-        </div>
-        <div class="text-center cursor-pointer group mt-3 bg-white border border-indigo-100 rounded-xl p-4 hover:bg-indigo-600 transition-colors h-full" id="salesUploadTrigger">
-            <div class="font-black text-indigo-600 text-sm mb-1.5 group-hover:text-white">엑셀 등록 / 업데이트</div>
-            <div class="text-xs text-indigo-400 font-bold group-hover:text-indigo-200">(품번, 키워드, 특징, 추천고객, 응대멘트 포함)</div>
-        </div>
-        <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
-    `;
-    $("#salesUploadTrigger").onclick = () => $("#salesFile").click();
-    $("#salesFile").onchange = async (e) => {
-        if(!checkPat()) { e.target.value = ""; return; }
-        const f = e.target.files[0]; if(!f) return;
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, {defval: ""}); 
-            let newGuides = {};
-            rows.forEach(r => {
-                const code = String(r["품번"] || r["상품코드"] || "").trim();
-                if(!code) return;
-                const rawKw = String(r["키워드"] || r["핵심키워드"] || "");
-                const keywords = rawKw ? rawKw.split(',').map(k=>k.trim()).filter(Boolean) : [];
-                newGuides[code] = {
-                    keywords: keywords, features: String(r["특징"] || r["제품특징"] || ""),
-                    target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
-                };
-            });
-            try {
-                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
-                let sha = null;
-                try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
-                const body = { message:"update sales guide", content: utf8ToB64(JSON.stringify(newGuides, null, 2)), branch: GH.branch };
-                if(sha) body.sha = sha;
-                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY); 
-                rebuildIndex(); render(); window.renderSalesAdmin();
-                alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
-            } catch(err) { alert("업로드 실패: " + err.message); }
-            $("#salesFile").value = "";
+    const countEl = document.getElementById("sgCount");
+    if(countEl) countEl.innerText = `현재 ${Object.keys(SALES_GUIDES).length}개`;
+
+    const trigger = document.getElementById("salesUploadTrigger");
+    const fileInput = document.getElementById("salesFile");
+    if(trigger && fileInput) {
+        trigger.onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            if(!checkPat()) { e.target.value = ""; return; }
+            const f = e.target.files[0]; if(!f) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {defval: ""}); 
+                let newGuides = {};
+                rows.forEach(r => {
+                    const code = String(r["품번"] || r["상품코드"] || "").trim();
+                    if(!code) return;
+                    const rawKw = String(r["키워드"] || r["핵심키워드"] || "");
+                    const keywords = rawKw ? rawKw.split(',').map(k=>k.trim()).filter(Boolean) : [];
+                    newGuides[code] = {
+                        keywords: keywords, features: String(r["특징"] || r["제품특징"] || ""),
+                        target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
+                    };
+                });
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+                    let sha = null;
+                    try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                    const body = { message:"update sales guide", content: utf8ToB64(JSON.stringify(newGuides, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY); 
+                    rebuildIndex(); render(); window.renderSalesAdmin();
+                    alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
+                } catch(err) { alert("업로드 실패: " + err.message); }
+                fileInput.value = "";
+            };
+            reader.readAsArrayBuffer(f);
         };
-        reader.readAsArrayBuffer(f);
-    };
+    }
 };
 
 window.addEventListener('DOMContentLoaded', () => {
+    // 🚚 상단 이동요청 및 부산점 버튼 복구
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
         const trBtn = document.createElement("button");
         trBtn.id = "allTransfersBtn";
@@ -2498,95 +2483,71 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    let adminGrid = $("#adminBoxesGrid");
-    if ($("#uploadPanel") && !adminGrid) {
-        adminGrid = document.createElement("div");
-        adminGrid.id = "adminBoxesGrid";
-        adminGrid.style.wordBreak = 'keep-all';
-        adminGrid.className = "mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 w-full";
-        $("#uploadPanel").appendChild(adminGrid);
-    }
+    // 🔥 Admin Modal 구조를 제시해주신 Glassmorphism HTML로 완벽히 덮어쓰기 🔥
+    const adminModal = document.getElementById("adminModal");
+    if(adminModal) {
+        // 기존 클래스 덮어쓰고 바탕 깔기
+        adminModal.className = "hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm transition-opacity";
+        adminModal.innerHTML = `
+            <div class="absolute inset-0 cursor-pointer" onclick="document.getElementById('adminModal').classList.add('hidden')"></div>
+            
+            <div class="relative w-full max-w-[800px] p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] bg-white/50 border border-white/60 box-border z-10" style="backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+                
+                <button class="absolute top-6 right-6 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
+                
+                <div class="text-center mb-6 sm:mb-8 mt-2">
+                    <h2 class="m-0 text-[20px] sm:text-[24px] font-extrabold tracking-wide text-gray-900">RACEMENT ADMIN PANEL</h2>
+                </div>
 
-    if (adminGrid && !$("#salesHistoryAdminBox")) {
-        const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
-        shBox.className = "p-5 flex flex-col justify-between";
-        adminGrid.appendChild(shBox);
-    }
-    if (adminGrid && !$("#promoAdminBox")) {
-        const promoBox = document.createElement("div"); promoBox.id = "promoAdminBox";
-        promoBox.className = "p-5 flex flex-col justify-between";
-        adminGrid.appendChild(promoBox);
-    }
-    if (adminGrid && !$("#salesAdminBox")) {
-        const sgBox = document.createElement("div"); sgBox.id = "salesAdminBox";
-        sgBox.className = "p-5 flex flex-col justify-between";
-        adminGrid.appendChild(sgBox);
-    }
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                    <div id="mainUploadTrigger" class="bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-8 sm:p-10 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 group">
+                        <div class="text-5xl mb-4 group-hover:-translate-y-1 transition-transform">☁️</div>
+                        <h3 class="m-0 mb-2 text-gray-900 font-bold text-[16px] sm:text-[18px]">엑셀 파일 클릭 또는 드래그</h3>
+                        <p class="m-0 text-gray-500 text-[13px] font-bold">업로드 시 재고 변동량 자동 계산</p>
+                    </div>
 
-    // 🔥 핵심: 기존 이벤트 리스너 파괴 없이 DOM만 가로 2단 레이아웃으로 감싸기 🔥
-    const adminModalContent = document.querySelector('#adminModal .modal-content') || document.querySelector('#adminModal > div.relative');
-    if (adminModalContent && !document.getElementById('adminLeftCol')) {
-        const children = Array.from(adminModalContent.children);
-        
-        // 오른쪽 콘텐츠 영역 생성
-        const rightCol = document.createElement('div');
-        rightCol.id = 'adminRightCol';
-        
-        // 기존 닫기 버튼 우측 상단 고정
-        let closeBtn = children.find(c => c.tagName === 'BUTTON' || (c.innerHTML && c.innerHTML.includes('x')) || c.classList.contains('absolute'));
-        if(closeBtn) {
-            closeBtn.style.position = 'absolute';
-            closeBtn.style.top = '16px';
-            closeBtn.style.right = '16px';
-            closeBtn.style.zIndex = '50';
-            rightCol.appendChild(closeBtn);
-        }
+                    <div class="flex flex-col gap-3">
+                        <div id="shAdminWrapper" class="bg-white/60 border border-white/80 rounded-xl p-4 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80 border-l-4 border-l-[#ff9a9e]">
+                            <div id="shUploadTrigger" class="flex-1 cursor-pointer">
+                                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px] sm:text-[15px]">POS 판매 실적 DB</h4>
+                                <span class="text-[11px] sm:text-[12px] text-gray-600 font-bold">판매 엑셀 누적 업데이트</span>
+                            </div>
+                            <div class="flex flex-col items-end gap-1.5 ml-2">
+                                <span id="shClearBtn" class="text-[11px] font-bold text-[#ff5252] bg-[#ff5252]/10 px-2.5 py-1 rounded cursor-pointer hover:bg-[#ff5252]/20 transition-colors z-10">DB 초기화</span>
+                                <span id="shCount" class="text-[11px] font-bold text-gray-500"></span>
+                            </div>
+                            <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
+                        </div>
 
-        // 기존 엑셀 패널 등 오른쪽으로 이동 (이벤트 리스너 100% 보존됨)
-        children.forEach(child => {
-            if(child !== closeBtn) rightCol.appendChild(child);
-        });
+                        <div id="promoUploadTrigger" class="bg-white/60 border border-white/80 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80 border-l-4 border-l-[#fecfef]">
+                            </div>
 
-        // 왼쪽 정보/메뉴 영역 생성
-        const leftCol = document.createElement('div');
-        leftCol.id = 'adminLeftCol';
-        leftCol.innerHTML = `
-            <div class="font-black text-3xl text-gray-900 mb-1 tracking-tighter mt-4">RACEMENT</div>
-            <div class="text-[13px] font-bold text-gray-500 mb-8 bg-white/60 px-3 py-1 rounded-full shadow-sm">ADMIN PANEL</div>
-            <div class="text-[13px] text-center text-gray-500 font-bold mb-4 leading-relaxed">데이터베이스 업데이트 및<br>시스템 설정을 관리합니다.</div>
-            <div class="mt-auto w-full space-y-3" id="leftMenuWrap"></div>
+                        <div class="bg-white/60 border border-white/80 rounded-xl p-4 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80 border-l-4 border-l-[#a1c4fd]">
+                            <div id="salesUploadTrigger" class="flex-1 cursor-pointer">
+                                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px] sm:text-[15px]">AI 세일즈 가이드 DB</h4>
+                                <span class="text-[11px] sm:text-[12px] text-gray-600 font-bold">품번, 특징, 추천고객 업데이트</span>
+                            </div>
+                            <span id="sgCount" class="text-[11px] font-bold text-[#4facfe] bg-[#4facfe]/10 px-2.5 py-1 rounded ml-2 whitespace-nowrap"></span>
+                            <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-2 pt-4 border-t border-gray-200/40">
+                    <button class="px-6 py-2.5 rounded-lg bg-white/40 text-gray-700 border border-gray-300 text-[14px] font-bold cursor-pointer hover:bg-white/80 transition-all" onclick="document.getElementById('adminModal').classList.add('hidden')">취소</button>
+                    <button class="px-6 py-2.5 rounded-lg bg-gray-900 text-white border-none text-[14px] font-bold cursor-pointer hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg transition-all" onclick="document.getElementById('adminModal').classList.add('hidden')">확인</button>
+                </div>
+            </div>
         `;
 
-        // 구조 재조립
-        adminModalContent.innerHTML = '';
-        adminModalContent.appendChild(leftCol);
-        adminModalContent.appendChild(rightCol);
-
-        // 기존 '깃허브 설정' 버튼 왼쪽 메뉴로 빼오기
-        const existingSettingsBtn = document.getElementById('openSettings');
-        if(existingSettingsBtn) {
-            existingSettingsBtn.className = "w-full py-3 bg-white/70 hover:bg-white text-gray-800 font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2";
-            document.getElementById('leftMenuWrap').appendChild(existingSettingsBtn);
-        }
-
-        // 공통 하단 버튼 (취소/확인) 추가
-        const footerBtns = document.createElement('div');
-        footerBtns.className = "mt-6 pt-4 border-t border-gray-200/50 flex justify-end gap-3";
-        footerBtns.innerHTML = `
-            <button id="adminCancelBtn" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white/50 border border-gray-300 text-gray-600 hover:bg-white transition-colors">취소</button>
-            <button id="adminConfirmBtn" class="px-5 py-2.5 rounded-xl text-sm font-black bg-gray-900 text-white shadow-md hover:bg-black transition-colors">확인</button>
-        `;
-        rightCol.appendChild(footerBtns);
-
-        document.getElementById('adminCancelBtn').onclick = () => {
-            if(closeBtn) closeBtn.click();
-            else document.getElementById("adminModal").classList.add("hidden");
-        };
-        document.getElementById('adminConfirmBtn').onclick = () => {
-            document.getElementById("adminModal").classList.add("hidden");
+        // 메인 엑셀 업로드 버튼 클릭 연결
+        document.getElementById('mainUploadTrigger').onclick = () => {
+            const mainFileInput = document.getElementById('file');
+            if(mainFileInput) mainFileInput.click();
         };
     }
 
+    // 렌더링 실행
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
     window.renderPromoAdmin();
     if(window.renderSalesAdmin) window.renderSalesAdmin();
