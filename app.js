@@ -18,7 +18,7 @@ style.innerHTML = `
     .brand-hidden { display: none !important; }
     .card-img-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; border-radius: 12px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
-    .size-scroll-wrap { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 8px; margin-top: auto; margin-bottom: 12px; scroll-snap-type: x mandatory; }
+    .size-scroll-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; margin-bottom: 12px; }
     .size-scroll-wrap::-webkit-scrollbar { height: 5px; }
     .size-scroll-wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .size-scroll-wrap > div { scroll-snap-align: start; }
@@ -1587,7 +1587,7 @@ function card(p){
         
         ${memoHtml}
 
-        <div class="size-scroll-wrap no-scrollbar">
+        <div class="size-scroll-wrap">
           ${p.sizes.map(s=>{
               const q = s.busan||0; 
               let cls = "size-cell tnum shrink-0 w-[46px] ";
