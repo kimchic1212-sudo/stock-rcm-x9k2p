@@ -3,7 +3,15 @@
 const style = document.createElement('style');
 style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
-    #adminModal .modal-content { max-width: 1000px !important; } /* 어드민 패널 가로 확장 */
+    
+    /* 🔥 어드민 패널 모달 강제 가로 확장 (어떤 클래스든 무조건 넓힘) 🔥 */
+    #adminModal > div.relative, 
+    #adminModal > div.bg-white, 
+    #adminModal .modal-content { max-width: 1000px !important; width: 95% !important; }
+    
+    /* 어드민 3단 박스 내부 높이/여백 보정 */
+    #adminBoxesGrid > div { min-height: 160px; display: flex; flex-direction: column; justify-content: space-between; }
+
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     #detailModal, #dashDetailModal, #salesGuideModal, #allMemosModal, #transfersModal { z-index: 9999 !important; }
@@ -2474,7 +2482,8 @@ window.addEventListener('DOMContentLoaded', () => {
     if ($("#uploadPanel") && !adminGrid) {
         adminGrid = document.createElement("div");
         adminGrid.id = "adminBoxesGrid";
-        adminGrid.className = "mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4 w-full";
+        // 간격을 넓히고(gap-5) 조금 더 작은 화면에서도 3단이 유지되도록 md:grid-cols-3 적용
+        adminGrid.className = "mt-6 grid grid-cols-1 md:grid-cols-3 gap-5 w-full";
         $("#uploadPanel").appendChild(adminGrid);
     }
 
