@@ -103,6 +103,11 @@ const PROMOTIONS_PATH = "promotions.json";
 const SALES_GUIDE_PATH = "sales_guide.json"; 
 const SALES_HISTORY_PATH = "sales_history.json"; 
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
+const SIZE_CONFIG = {
+    fw: ["225", "230", "235", "240", "245", "250", "255", "260", "265", "270", "275", "280", "285", "290", "295", "300"],
+    ap: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "FREE", "OS"],
+    gear: ["FREE", "OS", "S/M", "L/XL"]
+};
 
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
@@ -459,7 +464,25 @@ function rebuildIndex(){
     if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; }
     else p.sizes.push({ size:r["규격"], busan, sinsa, center });
   }
-  
+
+// 사이즈 버튼(칩)을 화면에 그려주는 함수입니다.
+function renderSizeChips(type) {
+    const grid = document.getElementById('sizeChipGrid');
+    if(!grid) return;
+    grid.innerHTML = SIZE_CONFIG[type].map(sz => 
+        `<button class="chip !py-1 !px-2.5 !text-[11px] !rounded-md" data-size="${sz}">${sz}</button>`
+    ).join('');
+    
+    // 버튼 클릭 시 필터링이 작동하도록 연결합니다.
+    $$('#sizeChipGrid .chip').forEach(b => {
+        b.onclick = () => {
+            saveHistoryState();
+            b.dataset.active = b.dataset.active === "1" ? "0" : "1";
+            visibleCount=60; render(); updateFilterSummary();
+        };
+    });
+}
+    
   PRODUCTS = Array.from(map.values()).map(p=>{
     p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
@@ -2505,6 +2528,28 @@ window.addEventListener('DOMContentLoaded', () => {
             visibleCount=60; render();
         });
     }
+
+    // 신발/의류/용품 탭을 누를 때마다 사이즈 목록을 바꿔줍니다.
+document.querySelectorAll('.size-tab').forEach(tab => {
+    tab.onclick = () => {
+        document.querySelectorAll('.size-tab').forEach(t => {
+            t.classList.remove('active', 'text-blue-600', 'border-blue-600', 'font-black');
+            t.classList.add('text-gray-400', 'font-bold');
+        });
+        tab.classList.add('active', 'text-blue-600', 'border-blue-600', 'font-black');
+        renderSizeChips(tab.dataset.tab); // 탭에 맞는 사이즈 목록 로드
+    };
+});
+renderSizeChips('fw'); // 처음 켰을 때는 '신발' 사이즈가 나오게 합니다.
+    // 브랜드 검색창에 글자를 치면 해당 브랜드만 남기고 가립니다.
+document.getElementById("brandSearch").oninput = (e) => {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('#brandChips .chip').forEach(c => {
+        if(c.dataset.brand === 'ALL') return;
+        const match = c.textContent.toLowerCase().includes(term);
+        c.style.display = match ? 'inline-flex' : 'none';
+    });
+};
     
     // 🔥 Admin Modal : 기능(비밀번호, 설정, 업로드) + 디자인(Glassmorphism) 완벽 결합 🔥
     const adminModal = document.getElementById("adminModal");
