@@ -3,6 +3,7 @@
 const style = document.createElement('style');
 style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
+    #adminModal .modal-content { max-width: 1000px !important; } /* 어드민 패널 가로 확장 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     #detailModal, #dashDetailModal, #salesGuideModal, #allMemosModal, #transfersModal { z-index: 9999 !important; }
@@ -14,6 +15,9 @@ style.innerHTML = `
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
 
+    /* 2~3줄 줄바꿈을 위한 유틸리티 클래스 */
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
+    
     .chip {
         background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
         transition: all 0.2s ease-in-out; cursor: pointer;
@@ -285,27 +289,33 @@ document.addEventListener("keydown", (e) => {
 
 function applyMeta(meta){
     if(meta) {
-        let headerArea = $("#globalHeaderData");
-        if(!headerArea) {
-            const mainWrap = $("#q")?.closest('.max-w-md, .max-w-lg, .max-w-xl, .max-w-2xl, .container') || document.body;
-            headerArea = document.createElement("div");
-            headerArea.id = "globalHeaderData";
-            headerArea.className = "flex flex-col mb-4 w-full px-1";
-            mainWrap.insertBefore(headerArea, mainWrap.firstChild);
+        // 기존 최상단바 삭제
+        const globalHeader = document.getElementById("globalHeaderData");
+        if(globalHeader) globalHeader.remove();
+
+        // 새로운 데이터 소스 섹션 생성 및 배치
+        let sourceArea = document.getElementById("dataSourceBar");
+        if(!sourceArea) {
+            const mainWrap = $("#grid")?.parentNode; 
+            if(!mainWrap) return;
+            sourceArea = document.createElement("div");
+            sourceArea.id = "dataSourceBar";
+            sourceArea.className = "flex flex-wrap gap-2 items-center w-full bg-gray-50/80 p-3 rounded-xl border border-gray-200 mb-5 text-[13px] shadow-sm";
+            mainWrap.insertBefore(sourceArea, mainWrap.firstChild);
         }
 
-        let addInfo = SALES_HISTORY.meta?.name ? `<span class="text-xs text-orange-600 font-bold ml-2">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
-        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="text-xs text-purple-600 font-bold ml-2">🎁 기획전: ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
+        let addInfo = SALES_HISTORY.meta?.name ? `<span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-md font-black border border-orange-200 shadow-sm">📊 판매DB: ${escapeHtml(SALES_HISTORY.meta.name)}</span>` : "";
+        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) ? `<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-md font-black border border-purple-200 shadow-sm">🎁 기획전: ${escapeHtml(PROMOTIONS.meta.name)}</span>` : "";
 
-        headerArea.innerHTML = `
-            <div class="flex justify-between items-end w-full border-b border-gray-200 pb-3">
-                <h1 class="text-2xl font-black text-gray-900 tracking-tight">📦 통합 재고조회</h1>
-                <div class="text-right flex flex-col items-end">
-                    <span class="text-xs font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-1 rounded shadow-sm">✓ 최근 동기화: ${meta.uploadedAt || ''}</span>
-                    <div class="mt-1.5 flex items-center">${addInfo}${promoInfo}</div>
-                </div>
+        sourceArea.innerHTML = `
+            <div class="flex items-center gap-1.5 font-black text-gray-800 mr-2 shrink-0">
+                <i data-lucide="database" class="w-4 h-4 text-blue-500"></i> 데이터 소스 현황
             </div>
+            <span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold border border-blue-100 shadow-sm">재고 업데이트: ${meta.uploadedAt || ''}</span>
+            ${addInfo}
+            ${promoInfo}
         `;
+        if(window.lucide) lucide.createIcons();
 
         const statSrcEl = $("#statSrc");
         if(statSrcEl) statSrcEl.innerHTML = "";
@@ -625,14 +635,16 @@ function setupSearchAutocomplete() {
 
         suggBox.innerHTML = `
             <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b">✨ 상품 자동완성</div>
-            ${matches.map(p => `
+            ${matches.map(p => {
+                const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+                return `
             <div class="p-3 border-b border-gray-50 hover:bg-blue-50 cursor-pointer flex gap-3 items-center" onclick="applySearch('${p.품번}')">
-                ${IMAGES[p.shopNo] ? `<img src="${IMAGES[p.shopNo]}" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+                ${imgSrc ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
                 <div class="flex flex-col min-w-0">
                     <span class="text-xs font-bold text-gray-400 truncate">${p.브랜드} | ${p.품번}</span>
                     <span class="text-[15px] font-black text-gray-900 truncate">${p.품명}</span>
                 </div>
-            </div>`).join('')}
+            </div>`}).join('')}
         `;
         suggBox.classList.remove("hidden");
     });
@@ -890,22 +902,22 @@ window.openAnalyticsReport = async () => {
             <main class="flex-1 overflow-hidden p-4 lg:p-6">
                 <div class="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto dash-scroll pr-2 pb-10">
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between min-h-[260px]">
+                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[280px]">
                             <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="pie-chart" class="w-5 h-5 text-blue-500"></i> 카테고리 비중</h2>
                             <div class="relative flex-1 w-full"><canvas id="catChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between min-h-[260px]">
+                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[280px]">
                             <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="users" class="w-5 h-5 text-pink-500"></i> 성별 비중</h2>
                             <div class="relative flex-1 w-full"><canvas id="genderChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between min-h-[260px]">
+                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[280px]">
                             <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="award" class="w-5 h-5 text-emerald-500"></i> 브랜드 비중</h2>
                             <div class="relative flex-1 w-full"><canvas id="brandChart"></canvas></div>
                         </article>
                     </section>
                     <section class="lg:col-span-3 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                            <h2 class="text-base font-black text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-5 h-5 text-orange-500"></i> 판매 랭킹 (클릭 시 사이즈 상세분석 및 RT요청)</h2>
+                            <h2 class="text-base font-black text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-5 h-5 text-orange-500"></i> 판매 랭킹</h2>
                             <div class="flex items-center gap-3">
                                 <select id="dashSortSel" class="ipt text-sm font-bold bg-white border border-gray-200 text-gray-700 rounded px-3 py-1.5 outline-none cursor-pointer">
                                     <option value="qty">수량순 정렬</option>
@@ -971,7 +983,6 @@ window.openAnalyticsReport = async () => {
     const updateDashData = () => {
         rawSoldItems = getPeriodItems(currentPeriod, currentCustomStart, currentCustomEnd);
         
-        // 브랜드 셀렉트 박스 업데이트
         const brandSet = new Set();
         rawSoldItems.forEach(p => { if(p.브랜드) brandSet.add(p.브랜드); });
         const brandOptions = Array.from(brandSet).sort().map(b => `<option value="${b}" ${b===currentDashBrand?'selected':''}>${b}</option>`).join('');
@@ -992,7 +1003,6 @@ window.openAnalyticsReport = async () => {
             return true;
         });
 
-        // 정렬 적용
         filteredItems.sort((a, b) => {
             if(currentDashSort === 'rev') return b.dashRev - a.dashRev;
             return b.dashSales - a.dashSales;
@@ -1027,7 +1037,7 @@ window.openAnalyticsReport = async () => {
         } else filterLabel.classList.add("hidden");
 
         $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
-            const imgSrc = IMAGES[p.shopNo] || null;
+            const imgSrc = IMAGES[p.shopNo || p.품번] || null;
             const imgHtml = imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl border border-gray-200 bg-white shrink-0 mix-blend-multiply">` : `<div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
             let pParam = currentPeriod; if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
@@ -1070,7 +1080,7 @@ window.openAnalyticsReport = async () => {
                                 <span class="${gColorClass} px-2 py-0.5 rounded text-[11px] sm:text-xs font-black border">${escapeHtml(gLabel)}</span>
                                 <div class="text-[12px] sm:text-[13px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
                             </div>
-                            <div class="text-[16px] sm:text-[18px] font-black text-gray-900 truncate leading-snug">${escapeHtml(p.품명)}</div>
+                            <div class="text-[16px] sm:text-[18px] font-black text-gray-900 line-clamp-2 leading-snug">${escapeHtml(p.품명)}</div>
                         </div>
                     </div>
                     <div class="flex flex-col items-end justify-center shrink-0 ml-2">
@@ -1122,7 +1132,6 @@ window.openAnalyticsReport = async () => {
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
         brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', defaultColors);
 
-        // 성별 색상 매핑 직관적으로 변경
         const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#3b82f6'; if(k==='여성') return '#f43f5e'; return '#a855f7'; });
         genderChartInstance = renderPieChart('genderChart', genderData, 'gender', genderColors);
     };
@@ -1167,7 +1176,7 @@ window.openDashDetail = (code, periodParam) => {
         }
     }
 
-    const imgSrc = IMAGES[p.shopNo] || null;
+    const imgSrc = IMAGES[p.shopNo || p.품번] || null;
     let modal = $("#dashDetailModal");
     if(!modal) {
         modal = document.createElement("div"); modal.id = "dashDetailModal";
@@ -1221,8 +1230,6 @@ window.openDashDetail = (code, periodParam) => {
         const sObj = p.sizes.find(s => String(s.size).trim() === String(size)) || { busan: 0, sinsa: 0, center: 0 };
         
         let suggestHtml = `<span class="text-gray-300">-</span>`;
-        
-        // RT 보충 제안 수정: 필요 수량에 상관 없이 재고가 있는 지점은 모두 표시 (수정 가능하게)
         let needed = Math.max(0, soldBusan - sObj.busan);
         let takeCenter = Math.min(sObj.center, needed);
         let takeSinsa = Math.min(sObj.sinsa, Math.max(0, needed - takeCenter));
@@ -1234,7 +1241,7 @@ window.openDashDetail = (code, periodParam) => {
                 <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-200 p-1.5 rounded-lg w-full max-w-[160px]">
                     <span class="text-xs font-bold text-gray-500 w-8 text-center shrink-0">물류</span>
                     <input type="number" id="rt_c_${size}" value="${defaultVal}" min="1" max="${sObj.center}" class="w-10 text-center text-sm font-black bg-white border border-gray-300 rounded outline-none h-7">
-                    <button onclick="quickRT('${p.품번}','${size}','본사/물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-800 hover:bg-black text-white px-2 py-1 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
+                    <button onclick="quickRT('${p.품번}','${size}','물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-800 hover:bg-black text-white px-2 py-1 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
                         <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -1246,7 +1253,7 @@ window.openDashDetail = (code, periodParam) => {
                 <div class="flex items-center gap-1.5 bg-orange-50 border border-orange-100 p-1.5 rounded-lg w-full max-w-[160px]">
                     <span class="text-xs font-bold text-orange-600 w-8 text-center shrink-0">신사</span>
                     <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-10 text-center text-sm font-black bg-white border border-orange-200 rounded outline-none h-7 text-orange-700">
-                    <button onclick="quickRT('${p.품번}','${size}','신사점', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
+                    <button onclick="quickRT('${p.품번}','${size}','신사', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded shadow-sm transition-colors flex items-center justify-center flex-1">
                         <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -1292,7 +1299,7 @@ window.openDashDetail = (code, periodParam) => {
                             <span class="${gColorClass} px-2 py-0.5 rounded text-[11px] font-black border">${escapeHtml(gLabel)}</span>
                             <div class="text-[13px] font-black text-gray-500">${p.브랜드}</div>
                         </div>
-                        <h2 class="font-black text-[20px] leading-tight text-gray-900 truncate max-w-[300px] sm:max-w-lg">${p.품명}</h2>
+                        <h2 class="font-black text-[20px] leading-tight text-gray-900 line-clamp-2 max-w-[300px] sm:max-w-lg">${p.품명}</h2>
                         <div class="text-sm font-bold text-gray-400 mt-0.5">${p.품번}</div>
                     </div>
                 </div>
@@ -1316,9 +1323,9 @@ window.openDashDetail = (code, periodParam) => {
                         <thead class="text-gray-600 font-black">
                             <tr class="text-center bg-gray-50">
                                 <th class="py-3 w-[12%] border-r border-gray-200 align-middle" rowspan="2">사이즈</th>
-                                <th class="py-2 border-b border-r border-gray-200 bg-blue-100 text-blue-800" colspan="2">부산 (김종훈)</th>
-                                <th class="py-2 border-b border-r border-gray-200 bg-orange-100 text-orange-800" colspan="2">신사 (승호/강)</th>
-                                <th class="py-2 border-b border-r border-gray-200 bg-gray-200 text-gray-800" colspan="2">온라인 (본사물류)</th>
+                                <th class="py-2 border-b border-r border-gray-200 bg-blue-100 text-blue-800" colspan="2">부산</th>
+                                <th class="py-2 border-b border-r border-gray-200 bg-orange-100 text-orange-800" colspan="2">신사</th>
+                                <th class="py-2 border-b border-r border-gray-200 bg-gray-200 text-gray-800" colspan="2">물류</th>
                                 <th class="py-3 w-[26%] align-middle" rowspan="2">스마트 보충제안</th>
                             </tr>
                             <tr class="text-center text-xs bg-white border-b-2 border-gray-200">
@@ -1344,7 +1351,7 @@ window.openDashDetail = (code, periodParam) => {
         const ctx = document.getElementById('ddSizeChart');
         if(ctx) {
             new Chart(ctx, {
-                type: 'line', // 가독성 개선을 위해 선형(Line) 차트로 변경
+                type: 'line', 
                 data: { 
                     labels: chartLabels, 
                     datasets: [
@@ -1382,7 +1389,7 @@ window.openSalesGuide = (code) => {
                         <div class="flex items-center gap-2 mb-1.5">
                             <span class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded font-black tracking-wider">AI SALES GUIDE</span>
                         </div>
-                        <h2 id="sgTitle" class="font-black text-xl text-indigo-950 leading-tight"></h2>
+                        <h2 id="sgTitle" class="font-black text-xl text-indigo-950 line-clamp-2 leading-tight"></h2>
                     </div>
                     <button id="closeSalesGuide" class="p-1.5 -mr-2 text-indigo-400 hover:text-indigo-800 transition-colors bg-white/50 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
                 </div>
@@ -1429,7 +1436,7 @@ function card(p){
     if(!e.target.closest('button')) openDetail(p); 
   };
   
-  const imgSrc = IMAGES[p.shopNo] || null;
+  const imgSrc = IMAGES[p.shopNo || p.품번] || null;
   
   let deltaHtml = "";
   if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
@@ -1451,7 +1458,7 @@ function card(p){
                  <span class="font-black text-yellow-800">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
                  <span class="text-[11px] text-yellow-600">${escapeHtml(m.date)}</span>
              </div>
-             <div class="text-yellow-900">${escapeHtml(m.text)}</div>
+             <div class="text-yellow-900 line-clamp-2">${escapeHtml(m.text)}</div>
           </div>`;
       });
       memoHtml += `</div>`;
@@ -1491,7 +1498,6 @@ function card(p){
       }
   }
 
-  // 성별 색상 분리 적용
   let gLabel = p.성별 || p.gender || "U";
   if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
   let gColorClass = "bg-purple-50 text-purple-600 border-purple-100";
@@ -1511,9 +1517,9 @@ function card(p){
 
         <div class="flex justify-between items-start w-full relative mb-2 gap-4">
            <div class="flex-1 min-w-0 mt-1">
-              <div class="copyable font-extrabold text-[17px] sm:text-[18px] leading-snug mb-1.5 text-left w-full hover:text-blue-600 text-gray-900" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+              <div class="copyable font-extrabold text-[15px] sm:text-[16px] leading-snug mb-1.5 text-left w-full hover:text-blue-600 text-gray-900 line-clamp-2" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
               
-              <div class="copyable text-[13px] font-bold text-gray-400 mb-2.5 text-left w-full hover:text-blue-600 flex items-center gap-1.5" data-copy="${escapeHtml(p.품번)}">
+              <div class="copyable text-[12px] font-bold text-gray-400 mb-2.5 text-left w-full hover:text-blue-600 flex items-center gap-1.5 line-clamp-1" data-copy="${escapeHtml(p.품번)}">
                   ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-4 h-4 opacity-60"></i>
               </div>
               ${salesHtml}
@@ -1742,7 +1748,7 @@ function renderAllMemos() {
                     <span class="font-black text-yellow-700">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
                     <span class="text-xs text-gray-400">${escapeHtml(m.date)}</span>
                 </div>
-                <div class="font-bold text-gray-800 mb-2">${escapeHtml(m.product)}</div>
+                <div class="font-bold text-gray-800 mb-2 line-clamp-2">${escapeHtml(m.product)}</div>
                 <div class="text-gray-600">${escapeHtml(m.text)}</div>
             </div>`;
         });
@@ -1839,7 +1845,7 @@ window.renderTransfers = () => {
             <div class="flex justify-between items-center mb-1.5 pr-8">
                 <span class="font-black text-blue-700 text-base">${escapeHtml(t.code)}</span><span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
             </div>
-            <div class="font-bold text-gray-800 mb-3 text-[15px]">${escapeHtml(t.product)}</div>
+            <div class="font-bold text-gray-800 mb-3 text-[15px] line-clamp-2">${escapeHtml(t.product)}</div>
             <div class="flex gap-2 text-xs font-bold text-gray-600 mb-3">
                 <span class="bg-gray-100 px-2.5 py-1 rounded">사이즈: ${escapeHtml(t.size)}</span><span class="bg-gray-100 px-2.5 py-1 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
             </div>
@@ -1852,14 +1858,14 @@ window.renderTransfers = () => {
 
 function openDetail(p){
   CURRENT_PRODUCT = p;
-  const imgSrc = IMAGES[p.shopNo] || null;
+  const imgSrc = IMAGES[p.shopNo || p.품번] || null;
   
   $("#detailHead").innerHTML = `
     <div class="flex gap-3 sm:gap-4 items-center">
         ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
         <div class="min-w-0 flex-1">
             <div class="text-xs sm:text-[13px] text-gray-500 font-black mb-1">${escapeHtml(p.브랜드||"-")}</div>
-            <div class="text-[17px] sm:text-[20px] font-black text-gray-900 leading-tight truncate break-keep">${escapeHtml(p.품명)}</div>
+            <div class="text-[17px] sm:text-[20px] font-black text-gray-900 leading-tight line-clamp-2 break-keep">${escapeHtml(p.품명)}</div>
             <div class="text-blue-600 font-bold text-sm sm:text-base mt-1">${escapeHtml(p.품번)}</div>
         </div>
     </div>
@@ -1886,20 +1892,20 @@ function openDetail(p){
             <tr>
             <th class="py-3 px-2 text-center w-[16%] border-r border-white">사이즈</th>
             <th class="py-3 px-2 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
-            <th class="py-3 px-2 text-center w-[15%]">본사재고</th>
-            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">본사 RT</th>
-            <th class="py-3 px-2 text-center w-[15%]">신사재고</th>
+            <th class="py-3 px-2 text-center w-[15%]">물류</th>
+            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">물류 RT</th>
+            <th class="py-3 px-2 text-center w-[15%]">신사</th>
             <th class="py-3 px-2 text-center w-[20%]">신사 RT</th>
             </tr>
         </thead>
         <tbody>
         ${p.sizes.map(s => {
             let centerRtBtn = s.center > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
             
             let sinsaRtBtn = s.sinsa > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
@@ -1941,13 +1947,14 @@ function openDetail(p){
       <div id="memoMsg" class="mt-1.5 text-xs font-bold h-4"></div>
   `;
 
-  if (sessionStorage.getItem(SESSION_FLAG) === "1" && p.shopNo) {
-      const targetUrl = `https://racement.co.kr/product-detail?productNo=${p.shopNo}`;
+  if (sessionStorage.getItem(SESSION_FLAG) === "1") {
+      const targetUrl = p.shopNo ? `https://racement.co.kr/product-detail?productNo=${p.shopNo}` : "#";
+      const linkHtml = p.shopNo ? `<a href="${targetUrl}" target="_blank" class="text-blue-600 hover:underline">자사몰 열기</a>` : `<span class="text-gray-400">쇼핑몰 링크 없음</span>`;
       stickyFooterHtml += `
           <div class="mt-4 pt-4 border-t border-gray-200">
               <div class="text-xs font-bold text-gray-800 mb-2 flex justify-between items-center">
                   <span>🖼️ 이미지 등록 (관리자용)</span>
-                  <a href="${targetUrl}" target="_blank" class="text-blue-600 hover:underline">자사몰 열기</a>
+                  ${linkHtml}
               </div>
               <div class="flex gap-2">
                   <input type="text" id="quickImgUrl" class="ipt flex-1 text-sm px-4 py-2.5 rounded-lg border border-gray-200 mono" placeholder="이미지 주소 붙여넣기">
@@ -1990,7 +1997,7 @@ function openDetail(p){
         ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
         <div class="min-w-0 flex-1">
             <div class="text-xs sm:text-[13px] text-gray-500 font-black mb-1">${escapeHtml(p.브랜드||"-")}</div>
-            <div class="text-[18px] sm:text-[22px] font-black text-gray-900 leading-tight truncate break-keep">${escapeHtml(p.품명)}</div>
+            <div class="text-[18px] sm:text-[22px] font-black text-gray-900 line-clamp-2 leading-tight break-keep">${escapeHtml(p.품명)}</div>
             <div class="text-blue-600 font-bold text-sm sm:text-base mt-1">${escapeHtml(p.품번)}</div>
         </div>
     </div>
@@ -2003,20 +2010,20 @@ function openDetail(p){
             <tr>
             <th class="py-3 px-2 text-center w-[16%] border-r border-white">사이즈</th>
             <th class="py-3 px-2 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
-            <th class="py-3 px-2 text-center w-[15%]">본사재고</th>
-            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">본사 RT</th>
-            <th class="py-3 px-2 text-center w-[15%]">신사재고</th>
+            <th class="py-3 px-2 text-center w-[15%]">물류</th>
+            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">물류 RT</th>
+            <th class="py-3 px-2 text-center w-[15%]">신사</th>
             <th class="py-3 px-2 text-center w-[20%]">신사 RT</th>
             </tr>
         </thead>
         <tbody>
         ${p.sizes.map(s => {
             let centerRtBtn = s.center > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','본사/물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
             
             let sinsaRtBtn = s.sinsa > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사점',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
@@ -2070,7 +2077,7 @@ function openDetail(p){
           const url = $("#quickImgUrl").value.trim(); if (!url) return;
           const msg = $("#quickImgMsg"); msg.textContent = "저장 중...";
           try {
-              IMAGES[p.shopNo] = url; 
+              IMAGES[p.shopNo || p.품번] = url; 
               const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
               let sha = null;
               try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
@@ -2314,7 +2321,7 @@ window.renderPromoAdmin = () => {
         }
     } else {
         box.innerHTML = `
-            <div class="text-center cursor-pointer group" id="promoUploadTrigger">
+            <div class="text-center cursor-pointer group h-full" id="promoUploadTrigger">
                 <div class="font-black text-purple-800 text-sm mb-1.5 group-hover:text-purple-600">🎁 프로모션 엑셀 등록</div>
                 <div class="text-xs text-purple-500 font-bold">MD가 공유한 특가 시트를 업로드하세요</div>
             </div>
@@ -2393,7 +2400,7 @@ window.renderSalesAdmin = () => {
             <div class="font-black text-indigo-800 text-sm">🧠 AI 세일즈 가이드 DB</div>
             <span class="text-xs font-bold text-indigo-500 bg-white px-2.5 py-1 rounded-lg">현재 ${Object.keys(SALES_GUIDES).length}개 등록됨</span>
         </div>
-        <div class="text-center cursor-pointer group mt-3 bg-white border border-indigo-100 rounded-xl p-4 hover:bg-indigo-600 transition-colors" id="salesUploadTrigger">
+        <div class="text-center cursor-pointer group mt-3 bg-white border border-indigo-100 rounded-xl p-4 hover:bg-indigo-600 transition-colors h-full" id="salesUploadTrigger">
             <div class="font-black text-indigo-600 text-sm mb-1.5 group-hover:text-white">엑셀 등록 / 업데이트</div>
             <div class="text-xs text-indigo-400 font-bold group-hover:text-indigo-200">(품번, 키워드, 특징, 추천고객, 응대멘트 포함)</div>
         </div>
@@ -2463,22 +2470,30 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    if ($("#uploadPanel") && !$("#salesHistoryAdminBox")) {
-        const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
-        shBox.className = "mt-5 p-5 border-2 border-orange-200 bg-orange-50 rounded-2xl";
-        $("#uploadPanel").appendChild(shBox);
+    let adminGrid = $("#adminBoxesGrid");
+    if ($("#uploadPanel") && !adminGrid) {
+        adminGrid = document.createElement("div");
+        adminGrid.id = "adminBoxesGrid";
+        adminGrid.className = "mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4 w-full";
+        $("#uploadPanel").appendChild(adminGrid);
     }
 
-    if ($("#uploadPanel") && !$("#promoAdminBox")) {
+    if (adminGrid && !$("#salesHistoryAdminBox")) {
+        const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
+        shBox.className = "p-5 border-2 border-orange-200 bg-orange-50 rounded-2xl h-full";
+        adminGrid.appendChild(shBox);
+    }
+
+    if (adminGrid && !$("#promoAdminBox")) {
         const promoBox = document.createElement("div"); promoBox.id = "promoAdminBox";
-        promoBox.className = "mt-5 p-5 border-2 border-purple-200 bg-purple-50 rounded-2xl";
-        $("#uploadPanel").appendChild(promoBox);
+        promoBox.className = "p-5 border-2 border-purple-200 bg-purple-50 rounded-2xl h-full";
+        adminGrid.appendChild(promoBox);
     }
     
-    if ($("#uploadPanel") && !$("#salesAdminBox")) {
+    if (adminGrid && !$("#salesAdminBox")) {
         const sgBox = document.createElement("div"); sgBox.id = "salesAdminBox";
-        sgBox.className = "mt-5 p-5 border-2 border-indigo-200 bg-indigo-50 rounded-2xl";
-        $("#uploadPanel").appendChild(sgBox);
+        sgBox.className = "p-5 border-2 border-indigo-200 bg-indigo-50 rounded-2xl h-full";
+        adminGrid.appendChild(sgBox);
     }
 
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
