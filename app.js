@@ -29,45 +29,65 @@ style.innerHTML = `
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
     .toast-undo:hover { color: #fef08a; }
 
-    /* 🔥 Admin Panel Glassmorphism & Landscape 2-Column Layout 🔥 */
-    #adminModal > div.relative, 
-    #adminModal .modal-content {
-        max-width: 800px !important;
-        width: 95% !important;
-        background: rgba(255, 255, 255, 0.6) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.8) !important;
-        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1) !important;
-        border-radius: 24px !important;
-        padding: 0 !important; 
-        display: flex !important;
-        flex-direction: row !important;
-        overflow: hidden !important;
+    /* 🔥 Glassmorphism 모달 컨테이너 🔥 */
+    .glass-modal {
+        width: 100%; max-width: 800px; padding: 24px;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        position: relative; box-sizing: border-box;
     }
-    @media (max-width: 768px) {
-        #adminModal > div.relative, #adminModal .modal-content { flex-direction: column !important; overflow-y: auto !important; max-height: 90vh !important; }
-        #adminLeftCol { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.4); padding: 24px !important; }
-        #adminRightCol { padding: 24px !important; }
+    .close-btn {
+        position: absolute; top: 24px; right: 24px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333; transition: transform 0.2s ease;
     }
-    #adminLeftCol { width: 260px; background: rgba(255, 255, 255, 0.3); border-right: 1px solid rgba(255, 255, 255, 0.5); padding: 32px 24px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-    #adminRightCol { flex: 1; padding: 32px 24px; position: relative; min-width: 0; display: flex; flex-direction: column; }
+    .close-btn:hover { transform: scale(1.1); }
+    .modal-header { margin-bottom: 24px; text-align: center; }
+    .modal-header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px; color: #1a1a1a; }
     
-    /* 3단 박스 Glass 느낌 살리기 */
-    #adminBoxesGrid > div {
-        background: rgba(255, 255, 255, 0.5) !important;
-        border: 1px solid rgba(255, 255, 255, 0.8) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    /* 가로형 2단 그리드 */
+    .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    @media (max-width: 768px) { .modal-body { grid-template-columns: 1fr; } }
+    
+    .upload-section {
+        background: rgba(255, 255, 255, 0.4); border: 2px dashed rgba(0, 0, 0, 0.15); border-radius: 16px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; transition: background 0.3s ease, border-color 0.3s ease; cursor: pointer;
     }
-    #adminBoxesGrid > div:hover {
-        transform: translateY(-4px) !important;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+    .upload-section:hover { background: rgba(255, 255, 255, 0.6); border-color: rgba(0, 0, 0, 0.3); }
+    .upload-icon { font-size: 48px; margin-bottom: 16px; }
+    
+    .settings-section { display: flex; flex-direction: column; gap: 12px; }
+    .setting-card {
+        background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px;
+        padding: 16px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; cursor: pointer;
     }
-    /* 업로드 패널 점선 스타일업 */
-    #uploadPanel > div:first-child { border: 2px dashed rgba(0,0,0,0.1) !important; transition: all 0.2s !important; border-radius: 16px !important; }
-    #uploadPanel > div:first-child:hover { border-color: rgba(0,0,0,0.3) !important; background: rgba(255,255,255,0.6) !important; }
+    .setting-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); background: rgba(255, 255, 255, 0.7); }
+    .card-orange { border-left: 4px solid #ff9a9e; }
+    .card-pink { border-left: 4px solid #fecfef; }
+    .card-blue { border-left: 4px solid #a1c4fd; }
+
+    /* 대시보드 리스트 스타일 */
+    .list-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid #f0f0f0; transition: background-color 0.2s ease; cursor: pointer; }
+    .list-item:last-child { border-bottom: none; }
+    .list-item:hover { background-color: #fafafa; border-radius: 8px; padding-left: 8px; padding-right: 8px; margin-left: -8px; margin-right: -8px;}
+    .rank { width: 30px; font-weight: 700; color: #888; font-size: 15px; }
+    .thumbnail { width: 64px; height: 64px; background-color: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 20px; overflow: hidden; border: 1px solid #eee; flex-shrink: 0; }
+    .thumbnail img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+    .info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .meta { display: flex; align-items: center; gap: 8px; }
+    
+    .ui-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: -0.5px; }
+    .ui-badge.women { background: #ffe4e6; color: #e11d48; }
+    .ui-badge.unisex { background: #f3e8ff; color: #9333ea; }
+    .ui-badge.men { background: #e0f2fe; color: #0284c7; }
+    
+    .brand-code { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-name { font-size: 16px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .stats { text-align: right; display: flex; flex-direction: column; gap: 4px; margin-left: 12px; flex-shrink: 0; }
+    .quantity { font-size: 20px; font-weight: 800; color: #111; }
+    .price { font-size: 13px; font-weight: 500; color: #888; }
 `;
 document.head.appendChild(style);
 
@@ -110,7 +130,6 @@ const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 const fmt = n => (n??0).toLocaleString("ko-KR");
 const krw = n => "₩" + fmt(n);
 
-// 120, 130 사이즈를 용품으로 예외 처리하는 헬퍼 함수 추가
 const isFwSize = s => /^\d{3}$/.test(s) && s !== "120" && s !== "130";
 
 function loadGhConfig(){ try{ const c=localStorage.getItem(GH_CONFIG_KEY); if(c) GH=Object.assign(GH, JSON.parse(c)); }catch(e){} }
@@ -317,11 +336,9 @@ document.addEventListener("keydown", (e) => {
 
 function applyMeta(meta){
     if(meta) {
-        // 기존 최상단바 삭제
         const globalHeader = document.getElementById("globalHeaderData");
         if(globalHeader) globalHeader.remove();
 
-        // 새로운 데이터 소스 섹션 생성 및 배치
         let sourceArea = document.getElementById("dataSourceBar");
         if(!sourceArea) {
             const mainWrap = $("#grid")?.parentNode; 
@@ -903,14 +920,14 @@ window.openAnalyticsReport = async () => {
                     <h1 class="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 (담당: 김종훈)</h1>
                     <p id="dashTotalLabel" class="text-sm font-bold text-gray-500 mt-1.5"></p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <div class="flex flex-wrap items-center gap-2 bg-gray-100 p-2 rounded-xl w-full md:w-auto">
                     <select id="dashBrandSel" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-28 text-gray-700">
                         <option value="ALL">브랜드 필터</option>
                     </select>
                     <select id="dashSizeFw" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-24 text-gray-700"><option value="ALL">신발</option>${generateSizeOptionsHtml(allSizesFwSet)}</select>
                     <select id="dashSizeAp" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-24 text-gray-700"><option value="ALL">의류</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
                     <select id="dashSizeGear" class="ipt text-xs font-black bg-white border-gray-300 rounded px-2.5 py-2.5 outline-none w-24 text-gray-700"><option value="ALL">용품</option>${generateSizeOptionsHtml(allSizesGearSet)}</select>
-                    <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                    <div class="w-px h-6 bg-gray-300 mx-1"></div>
                     <select id="dashPeriodSel" class="ipt text-xs font-black bg-orange-50 border-orange-200 text-orange-800 rounded px-3 py-2.5 outline-none cursor-pointer">
                         <optgroup label="빠른 기간">
                             <option value="1">어제/오늘 (1일)</option><option value="7" selected>최근 7일</option><option value="30">최근 1개월</option>
@@ -924,27 +941,27 @@ window.openAnalyticsReport = async () => {
                         <input type="date" id="dashEnd" class="ipt text-xs px-2 py-1.5 w-[110px] border-none outline-none text-gray-600 font-bold cursor-pointer">
                         <button id="dashApply" class="px-4 py-1.5 bg-orange-500 text-white rounded text-xs font-black shrink-0 hover:bg-orange-600">적용</button>
                     </div>
-                    <button id="closeDashboardBtn" class="p-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-auto md:ml-2"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <button id="closeDashboardBtn" class="p-2 bg-white text-gray-600 rounded-full shadow-sm hover:bg-gray-200 transition-colors ml-auto md:ml-2"><i data-lucide="x" class="w-6 h-6"></i></button>
                 </div>
             </header>
             <main class="flex-1 overflow-hidden p-4 lg:p-6">
-                <div class="h-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <section class="lg:col-span-1 flex flex-col gap-4 overflow-y-auto dash-scroll pr-2 pb-10">
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[280px]">
-                            <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="pie-chart" class="w-5 h-5 text-blue-500"></i> 카테고리 비중</h2>
-                            <div class="relative flex-1 w-full"><canvas id="catChart"></canvas></div>
+                <div class="h-full max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
+                    <section class="lg:col-span-1 flex flex-col gap-6 overflow-y-auto dash-scroll pr-2 pb-10">
+                        <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                            <h2 class="w-full text-left text-base font-bold text-gray-800 mb-5 flex items-center gap-2"><i data-lucide="pie-chart" class="w-5 h-5 text-blue-500"></i> 카테고리 비중</h2>
+                            <div class="relative w-[180px] h-[180px] mb-5"><canvas id="catChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[280px]">
-                            <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="users" class="w-5 h-5 text-pink-500"></i> 성별 비중</h2>
-                            <div class="relative flex-1 w-full"><canvas id="genderChart"></canvas></div>
+                        <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                            <h2 class="w-full text-left text-base font-bold text-gray-800 mb-5 flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-pink-500"></i> 성별 비중</h2>
+                            <div class="relative w-[180px] h-[180px] mb-5"><canvas id="genderChart"></canvas></div>
                         </article>
-                        <article class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-[280px]">
-                            <h2 class="text-base font-black text-gray-800 mb-2 flex items-center gap-2 shrink-0"><i data-lucide="award" class="w-5 h-5 text-emerald-500"></i> 브랜드 비중</h2>
-                            <div class="relative flex-1 w-full"><canvas id="brandChart"></canvas></div>
+                        <article class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center">
+                            <h2 class="w-full text-left text-base font-bold text-gray-800 mb-5 flex items-center gap-2"><i data-lucide="award" class="w-5 h-5 text-emerald-500"></i> 브랜드 비중</h2>
+                            <div class="relative w-[180px] h-[180px] mb-5"><canvas id="brandChart"></canvas></div>
                         </article>
                     </section>
-                    <section class="lg:col-span-3 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                    <section class="lg:col-span-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                             <h2 class="text-base font-black text-gray-800 flex items-center gap-2"><i data-lucide="list" class="w-5 h-5 text-orange-500"></i> 판매 랭킹</h2>
                             <div class="flex items-center gap-3">
                                 <select id="dashSortSel" class="ipt text-sm font-bold bg-white border border-gray-200 text-gray-700 rounded px-3 py-1.5 outline-none cursor-pointer">
@@ -954,7 +971,7 @@ window.openAnalyticsReport = async () => {
                                 <div id="activeFilterLabel" class="text-sm font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors shadow-sm"></div>
                             </div>
                         </div>
-                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-5 space-y-3"></div>
+                        <div id="dashListBody" class="flex-1 overflow-y-auto dash-scroll p-4 space-y-2"></div>
                     </section>
                 </div>
             </main>
@@ -1052,7 +1069,7 @@ window.openAnalyticsReport = async () => {
 
         const activeSizeFilter = [currentSizeFw, currentSizeAp, currentSizeGear].find(s => s !== "ALL") || "ALL";
         let sizeText = activeSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${activeSizeFilter} 사이즈 필터됨]</span>`;
-        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-blue-600 font-black text-base">${fmt(totalSales)}개</span> / <span class="text-orange-600 font-black text-base">${krw(totalRev)}</span> 판매${sizeText}`;
+        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-gray-900 font-black text-base">${fmt(totalSales)}개</span> / <span class="text-gray-800 font-black text-base">${krw(totalRev)}</span> 판매${sizeText}`;
 
         const filterLabel = $("#activeFilterLabel"); let labelText = [];
         if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
@@ -1066,7 +1083,6 @@ window.openAnalyticsReport = async () => {
 
         $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
             const imgSrc = IMAGES[p.shopNo || p.품번] || null;
-            const imgHtml = imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-xl border border-gray-200 bg-white shrink-0 mix-blend-multiply">` : `<div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`;
             let pParam = currentPeriod; if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
 
             let insightHtml = ""; let isBusanLowStock = false;
@@ -1081,7 +1097,7 @@ window.openAnalyticsReport = async () => {
 
             if (isBusanLowStock && isCenterOrSinsaHasStock && isBusanSellingWell && isBusanDominating) {
                 insightHtml = `
-                    <div class="mt-3 bg-red-50 border border-red-100 p-3 rounded-xl flex items-start gap-2 shadow-sm w-full">
+                    <div class="mt-3 bg-red-50 border border-red-100 p-3 rounded-xl flex items-start gap-2 shadow-sm w-full ml-[114px]">
                         <i data-lucide="zap" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
                         <div class="text-[13px] sm:text-sm text-red-800 leading-snug">
                             <b>🔥 매출 보증! 긴급 확보 추천!</b><br>부산점 판매량(${p.dashBusanSalesTotal}개)이 압도적이나 재고가 부족합니다. 타 지점 재고(${p.centerTotal + p.sinsaTotal}개)를 뺏어오면 무조건 팔립니다!
@@ -1093,32 +1109,32 @@ window.openAnalyticsReport = async () => {
             let gLabel = p.성별 || p.gender || "U";
             if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
 
-            let gColorClass = "bg-purple-50 text-purple-600 border-purple-100";
-            if(gLabel === "남성") gColorClass = "bg-blue-50 text-blue-600 border-blue-100";
-            if(gLabel === "여성") gColorClass = "bg-rose-50 text-rose-600 border-rose-100";
+            let gColorClass = "ui-badge unisex";
+            if(gLabel === "남성") gColorClass = "ui-badge men";
+            if(gLabel === "여성") gColorClass = "ui-badge women";
 
             return `
-            <div class="flex flex-col bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
-                <div class="flex items-center justify-between w-full gap-2">
-                    <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center font-black text-gray-500 text-[14px] shrink-0 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">${idx + 1}</div>
-                        ${imgHtml}
-                        <div class="min-w-0 pr-2">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="${gColorClass} px-2 py-0.5 rounded text-[11px] sm:text-xs font-black border">${escapeHtml(gLabel)}</span>
-                                <div class="text-[12px] sm:text-[13px] font-bold text-gray-400 truncate">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</div>
-                            </div>
-                            <div class="text-[16px] sm:text-[18px] font-black text-gray-900 line-clamp-2 leading-snug">${escapeHtml(p.품명)}</div>
-                        </div>
+            <div class="list-item flex-col items-start w-full group" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
+                <div class="flex items-center w-full">
+                    <div class="rank text-center">${idx + 1}</div>
+                    <div class="thumbnail shrink-0">
+                        ${imgSrc ? `<img src="${imgSrc}" loading="lazy">` : `<span class="text-xs text-gray-400 font-bold">NO IMG</span>`}
                     </div>
-                    <div class="flex flex-col items-end justify-center shrink-0 ml-2">
-                        <span class="font-black text-gray-900 text-[18px] sm:text-[20px]">${fmt(p.dashSales)}개</span>
-                        <span class="text-[12px] sm:text-sm font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg mt-1 border border-blue-100">${krw(p.dashRev)}</span>
+                    <div class="info">
+                        <div class="meta">
+                            <span class="${gColorClass}">${escapeHtml(gLabel)}</span>
+                            <span class="brand-code">${escapeHtml(p.브랜드)} | ${escapeHtml(p.품번)}</span>
+                        </div>
+                        <div class="product-name">${escapeHtml(p.품명)}</div>
+                    </div>
+                    <div class="stats">
+                        <div class="quantity">${fmt(p.dashSales)}개</div>
+                        <div class="price">${krw(p.dashRev)}</div>
                     </div>
                 </div>
                 ${insightHtml}
             </div>
-        `}).join('');
+            `}).join('');
 
         if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
 
@@ -1129,10 +1145,10 @@ window.openAnalyticsReport = async () => {
                 type: 'doughnut',
                 data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }] },
                 options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '60%',
-                    layout: { padding: { bottom: 15 } },
+                    responsive: true, maintainAspectRatio: true, aspectRatio: 1, cutout: '60%',
+                    layout: { padding: { bottom: 0 } },
                     plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, boxWidth: 10, font: { weight: 'bold', size: 12 } } },
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, boxWidth: 10, font: { weight: 'bold', size: 13, family: 'Pretendard' } } },
                         datalabels: { color: '#ffffff', font: { weight: '900', size: 13 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 4 ? pct + '%' : ''; } }
                     },
                     onClick: (e, elements, chart) => {
@@ -1151,7 +1167,7 @@ window.openAnalyticsReport = async () => {
 
         if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy(); if(genderChartInstance) genderChartInstance.destroy();
 
-        const defaultColors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6b7280', '#f97316'];
+        const defaultColors = ['#5c6bc0', '#42a5f5', '#66bb6a', '#ffa726', '#ef5350', '#ab47bc', '#ec407a', '#29b6f6', '#f97316'];
         catChartInstance = renderPieChart('catChart', catData, 'cat', defaultColors);
         
         let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
@@ -1160,7 +1176,7 @@ window.openAnalyticsReport = async () => {
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
         brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', defaultColors);
 
-        const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#3b82f6'; if(k==='여성') return '#f43f5e'; return '#a855f7'; });
+        const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#0284c7'; if(k==='여성') return '#e11d48'; return '#9333ea'; });
         genderChartInstance = renderPieChart('genderChart', genderData, 'gender', genderColors);
     };
 
@@ -1309,9 +1325,9 @@ window.openDashDetail = (code, periodParam) => {
 
     let gLabel = p.성별 || p.gender || "U";
     if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
-    let gColorClass = "bg-purple-50 text-purple-600 border-purple-100";
-    if(gLabel === "남성") gColorClass = "bg-blue-50 text-blue-600 border-blue-100";
-    if(gLabel === "여성") gColorClass = "bg-rose-50 text-rose-600 border-rose-100";
+    let gColorClass = "ui-badge unisex";
+    if(gLabel === "남성") gColorClass = "ui-badge men";
+    if(gLabel === "여성") gColorClass = "ui-badge women";
 
     const prevDisabled = windowCurrentDashIndex === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
     const nextDisabled = windowCurrentDashIndex === windowDashItems.length - 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
@@ -1324,7 +1340,7 @@ window.openDashDetail = (code, periodParam) => {
                     ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="${gColorClass} px-2 py-0.5 rounded text-[11px] font-black border">${escapeHtml(gLabel)}</span>
+                            <span class="${gColorClass}">${escapeHtml(gLabel)}</span>
                             <div class="text-[13px] font-black text-gray-500">${p.브랜드}</div>
                         </div>
                         <h2 class="font-black text-[20px] leading-tight text-gray-900 line-clamp-2 max-w-[300px] sm:max-w-lg">${p.품명}</h2>
@@ -1528,18 +1544,19 @@ function card(p){
 
   let gLabel = p.성별 || p.gender || "U";
   if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
-  let gColorClass = "bg-purple-50 text-purple-600 border-purple-100";
-  if(gLabel === "남성") gColorClass = "bg-blue-50 text-blue-600 border-blue-100";
-  if(gLabel === "여성") gColorClass = "bg-rose-50 text-rose-600 border-rose-100";
+  
+  let gBadgeClass = "ui-badge unisex";
+  if(gLabel === "남성") gBadgeClass = "ui-badge men";
+  if(gLabel === "여성") gBadgeClass = "ui-badge women";
 
   el.innerHTML = `
     <div class="flex flex-col flex-1">
-        <div class="flex flex-wrap gap-1.5 text-xs font-bold text-gray-500 mb-2.5">
+        <div class="flex flex-wrap gap-1.5 text-xs font-bold text-gray-500 mb-2.5 items-center">
             ${busanOnlyBadge}
             ${promoBadge}
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
-            <span class="${gColorClass} px-2 py-0.5 rounded border">${escapeHtml(gLabel)}</span>
+            <span class="${gBadgeClass}">${escapeHtml(gLabel)}</span>
             ${deltaHtml}
         </div>
 
@@ -2019,7 +2036,6 @@ function openDetail(p){
       </div>
   `;
   
-  // HTML 교체 후 내용 다시 채우기
   $("#detailHead").innerHTML = `
     <div class="flex gap-4 items-center">
         ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
@@ -2204,7 +2220,7 @@ window.renderSalesHistoryAdmin = () => {
     const clearBtn = document.getElementById("shClearBtn");
     if(clearBtn) {
         clearBtn.onclick = async (e) => {
-            e.stopPropagation(); // 카드 클릭(업로드) 방지
+            e.stopPropagation(); 
             if(!checkPat()) return;
             if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
             try {
@@ -2316,12 +2332,12 @@ window.renderPromoAdmin = () => {
     if(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
         card.innerHTML = `
             <div class="flex-1 cursor-default">
-                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[15px]">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</h4>
-                <span class="text-[12px] text-purple-600 font-bold">${escapeHtml(PROMOTIONS.meta.period)}</span>
+                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px]">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</h4>
+                <span class="text-[11px] text-purple-600 font-bold">${escapeHtml(PROMOTIONS.meta.period)}</span>
             </div>
             <span id="endPromoBtn" class="text-[11px] font-bold text-[#b83280] bg-[#fecfef]/50 px-2.5 py-1 rounded cursor-pointer hover:bg-[#fecfef] transition-colors z-10 whitespace-nowrap ml-2">기획전 종료</span>
         `;
-        card.onclick = null; // 업로드 창 클릭 방지
+        card.onclick = null;
         document.getElementById("endPromoBtn").onclick = async (e) => {
             e.stopPropagation();
             if(!checkPat()) return;
@@ -2340,8 +2356,8 @@ window.renderPromoAdmin = () => {
     } else {
         card.innerHTML = `
             <div class="flex-1">
-                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[15px]">프로모션 엑셀 등록</h4>
-                <span class="text-[12px] text-gray-600 font-bold">MD가 공유한 특가 시트 업로드</span>
+                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px]">프로모션 엑셀 등록</h4>
+                <span class="text-[11px] text-gray-600 font-bold">MD가 공유한 특가 시트 업로드</span>
             </div>
             <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
         `;
@@ -2456,7 +2472,6 @@ window.renderSalesAdmin = () => {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-    // 🚚 상단 이동요청 및 부산점 버튼 복구
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
         const trBtn = document.createElement("button");
         trBtn.id = "allTransfersBtn";
@@ -2483,71 +2498,66 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 🔥 Admin Modal 구조를 제시해주신 Glassmorphism HTML로 완벽히 덮어쓰기 🔥
+    // 🔥 Glassmorphism 가로형(Landscape) 2단 어드민 모달 구조 적용
     const adminModal = document.getElementById("adminModal");
     if(adminModal) {
-        // 기존 클래스 덮어쓰고 바탕 깔기
         adminModal.className = "hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm transition-opacity";
         adminModal.innerHTML = `
             <div class="absolute inset-0 cursor-pointer" onclick="document.getElementById('adminModal').classList.add('hidden')"></div>
             
-            <div class="relative w-full max-w-[800px] p-6 sm:p-8 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] bg-white/50 border border-white/60 box-border z-10" style="backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+            <div class="glass-modal flex flex-col md:flex-row overflow-hidden" style="max-width: 800px; padding: 24px; gap: 24px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); z-index: 10;">
                 
-                <button class="absolute top-6 right-6 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
+                <button class="absolute top-4 right-5 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform z-20" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
                 
-                <div class="text-center mb-6 sm:mb-8 mt-2">
-                    <h2 class="m-0 text-[20px] sm:text-[24px] font-extrabold tracking-wide text-gray-900">RACEMENT ADMIN PANEL</h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-                    <div id="mainUploadTrigger" class="bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-8 sm:p-10 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 group">
-                        <div class="text-5xl mb-4 group-hover:-translate-y-1 transition-transform">☁️</div>
-                        <h3 class="m-0 mb-2 text-gray-900 font-bold text-[16px] sm:text-[18px]">엑셀 파일 클릭 또는 드래그</h3>
-                        <p class="m-0 text-gray-500 text-[13px] font-bold">업로드 시 재고 변동량 자동 계산</p>
+                <div class="flex-1 flex flex-col">
+                    <div class="text-center mb-6 w-full">
+                        <h2 class="m-0 text-[22px] font-extrabold tracking-wide text-gray-900 leading-tight">RACEMENT<br>ADMIN PANEL</h2>
                     </div>
-
-                    <div class="flex flex-col gap-3">
-                        <div id="shAdminWrapper" class="bg-white/60 border border-white/80 rounded-xl p-4 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80 border-l-4 border-l-[#ff9a9e]">
-                            <div id="shUploadTrigger" class="flex-1 cursor-pointer">
-                                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px] sm:text-[15px]">POS 판매 실적 DB</h4>
-                                <span class="text-[11px] sm:text-[12px] text-gray-600 font-bold">판매 엑셀 누적 업데이트</span>
-                            </div>
-                            <div class="flex flex-col items-end gap-1.5 ml-2">
-                                <span id="shClearBtn" class="text-[11px] font-bold text-[#ff5252] bg-[#ff5252]/10 px-2.5 py-1 rounded cursor-pointer hover:bg-[#ff5252]/20 transition-colors z-10">DB 초기화</span>
-                                <span id="shCount" class="text-[11px] font-bold text-gray-500"></span>
-                            </div>
-                            <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
-                        </div>
-
-                        <div id="promoUploadTrigger" class="bg-white/60 border border-white/80 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80 border-l-4 border-l-[#fecfef]">
-                            </div>
-
-                        <div class="bg-white/60 border border-white/80 rounded-xl p-4 flex items-center justify-between transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80 border-l-4 border-l-[#a1c4fd]">
-                            <div id="salesUploadTrigger" class="flex-1 cursor-pointer">
-                                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px] sm:text-[15px]">AI 세일즈 가이드 DB</h4>
-                                <span class="text-[11px] sm:text-[12px] text-gray-600 font-bold">품번, 특징, 추천고객 업데이트</span>
-                            </div>
-                            <span id="sgCount" class="text-[11px] font-bold text-[#4facfe] bg-[#4facfe]/10 px-2.5 py-1 rounded ml-2 whitespace-nowrap"></span>
-                            <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
-                        </div>
+                    <div id="mainUploadTrigger" class="upload-section h-full flex-1">
+                        <div class="upload-icon">☁️</div>
+                        <h3 style="margin: 0 0 8px 0; color: #111; font-size: 16px;">엑셀 파일 클릭 또는 드래그</h3>
+                        <p style="margin: 0; color: #666; font-size: 14px; font-weight: bold;">업로드 시 재고 변동량 자동 계산</p>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 mt-2 pt-4 border-t border-gray-200/40">
-                    <button class="px-6 py-2.5 rounded-lg bg-white/40 text-gray-700 border border-gray-300 text-[14px] font-bold cursor-pointer hover:bg-white/80 transition-all" onclick="document.getElementById('adminModal').classList.add('hidden')">취소</button>
-                    <button class="px-6 py-2.5 rounded-lg bg-gray-900 text-white border-none text-[14px] font-bold cursor-pointer hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg transition-all" onclick="document.getElementById('adminModal').classList.add('hidden')">확인</button>
+                <div class="flex-1 flex flex-col gap-3">
+                    <div id="shAdminWrapper" class="setting-card card-orange">
+                        <div id="shUploadTrigger" class="flex-1">
+                            <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px;">POS 판매 실적 DB</h4>
+                            <span style="font-size: 11px; color: #666;">판매 엑셀 누적 업데이트</span>
+                        </div>
+                        <div class="flex flex-col items-end gap-1.5 ml-2">
+                            <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 4px; z-index:10;">DB 초기화</span>
+                            <span id="shCount" style="font-size: 11px; font-weight: bold; color: #888;"></span>
+                        </div>
+                        <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
+                    </div>
+
+                    <div id="promoUploadTrigger" class="setting-card card-pink">
+                        </div>
+
+                    <div class="setting-card card-blue">
+                        <div id="salesUploadTrigger" class="flex-1">
+                            <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px;">AI 세일즈 가이드 DB</h4>
+                            <span style="font-size: 11px; color: #666;">품번, 특징, 추천고객 업데이트</span>
+                        </div>
+                        <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 4px; white-space: nowrap;"></span>
+                        <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
+                    </div>
+                    
+                    <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
+                        <button class="px-6 py-2.5 rounded-lg bg-white/50 text-gray-700 border border-gray-200 text-[13px] font-bold cursor-pointer hover:bg-white/90 transition-all" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
+                    </div>
                 </div>
             </div>
         `;
 
-        // 메인 엑셀 업로드 버튼 클릭 연결
         document.getElementById('mainUploadTrigger').onclick = () => {
             const mainFileInput = document.getElementById('file');
             if(mainFileInput) mainFileInput.click();
         };
     }
 
-    // 렌더링 실행
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
     window.renderPromoAdmin();
     if(window.renderSalesAdmin) window.renderSalesAdmin();
