@@ -1,17 +1,7 @@
 // 🔥 1. 관리자 팝업창 스크롤, Z-index 및 모바일 최적화 CSS 🔥
-// UI 스케일업을 위해 전체적인 폰트 기본값 및 여백이 상향 조정되었습니다.
 const style = document.createElement('style');
 style.innerHTML = `
     #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
-    
-    /* 🔥 어드민 패널 모달 강제 가로 확장 (어떤 클래스든 무조건 넓힘) 🔥 */
-    #adminModal > div.relative, 
-    #adminModal > div.bg-white, 
-    #adminModal .modal-content { max-width: 1000px !important; width: 95% !important; }
-    
-    /* 어드민 3단 박스 내부 높이/여백 보정 */
-    #adminBoxesGrid > div { min-height: 160px; display: flex; flex-direction: column; justify-content: space-between; }
-
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     #detailModal, #dashDetailModal, #salesGuideModal, #allMemosModal, #transfersModal { z-index: 9999 !important; }
@@ -22,32 +12,62 @@ style.innerHTML = `
     #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
     .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
     .card img.loaded { opacity: 1 !important; }
-
-    /* 2~3줄 줄바꿈을 위한 유틸리티 클래스 */
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
-    
-    .chip {
-        background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b;
-        transition: all 0.2s ease-in-out; cursor: pointer;
-    }
+    .chip { background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; transition: all 0.2s ease-in-out; cursor: pointer; }
     .chip:hover { background-color: #f8fafc; }
     .chip[data-active="1"] { background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important; }
     .brand-hidden { display: none !important; }
-
     .card-img-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; border-radius: 12px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
     .size-scroll-wrap { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 8px; margin-top: auto; margin-bottom: 12px; scroll-snap-type: x mandatory; }
     .size-scroll-wrap::-webkit-scrollbar { height: 5px; }
     .size-scroll-wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .size-scroll-wrap > div { scroll-snap-align: start; }
-    
     .size-cell.zero { opacity: 0.35; filter: grayscale(100%); text-decoration: line-through; border-color: #e2e8f0; background: #f8fafc; }
-
     #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 12px; width: 90%; max-width: 420px; pointer-events: none; }
     .toast { background: #1e293b; color: white; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto; }
     @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
     .toast-undo:hover { color: #fef08a; }
+
+    /* 🔥 Admin Panel Glassmorphism & Landscape 2-Column Layout 🔥 */
+    #adminModal > div.relative, 
+    #adminModal .modal-content {
+        max-width: 800px !important;
+        width: 95% !important;
+        background: rgba(255, 255, 255, 0.6) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1) !important;
+        border-radius: 24px !important;
+        padding: 0 !important; 
+        display: flex !important;
+        flex-direction: row !important;
+        overflow: hidden !important;
+    }
+    @media (max-width: 768px) {
+        #adminModal > div.relative, #adminModal .modal-content { flex-direction: column !important; overflow-y: auto !important; max-height: 90vh !important; }
+        #adminLeftCol { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.4); padding: 24px !important; }
+        #adminRightCol { padding: 24px !important; }
+    }
+    #adminLeftCol { width: 260px; background: rgba(255, 255, 255, 0.3); border-right: 1px solid rgba(255, 255, 255, 0.5); padding: 32px 24px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+    #adminRightCol { flex: 1; padding: 32px 24px; position: relative; min-width: 0; display: flex; flex-direction: column; }
+    
+    /* 3단 박스 Glass 느낌 살리기 */
+    #adminBoxesGrid > div {
+        background: rgba(255, 255, 255, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    #adminBoxesGrid > div:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+    }
+    /* 업로드 패널 점선 스타일업 */
+    #uploadPanel > div:first-child { border: 2px dashed rgba(0,0,0,0.1) !important; transition: all 0.2s !important; border-radius: 16px !important; }
+    #uploadPanel > div:first-child:hover { border-color: rgba(0,0,0,0.3) !important; background: rgba(255,255,255,0.6) !important; }
 `;
 document.head.appendChild(style);
 
@@ -2482,35 +2502,89 @@ window.addEventListener('DOMContentLoaded', () => {
     if ($("#uploadPanel") && !adminGrid) {
         adminGrid = document.createElement("div");
         adminGrid.id = "adminBoxesGrid";
-        // 🔥 단어가 중간에 끊기지 않게 방지하고 간격을 여유롭게 조정
         adminGrid.style.wordBreak = 'keep-all';
-        adminGrid.className = "mt-6 grid grid-cols-1 md:grid-cols-3 gap-5 w-full";
+        adminGrid.className = "mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 w-full";
         $("#uploadPanel").appendChild(adminGrid);
     }
 
     if (adminGrid && !$("#salesHistoryAdminBox")) {
         const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
-        shBox.className = "p-5 border-2 border-orange-200 bg-orange-50 rounded-2xl h-full flex flex-col justify-between";
+        shBox.className = "p-5 flex flex-col justify-between";
         adminGrid.appendChild(shBox);
     }
-
     if (adminGrid && !$("#promoAdminBox")) {
         const promoBox = document.createElement("div"); promoBox.id = "promoAdminBox";
-        promoBox.className = "p-5 border-2 border-purple-200 bg-purple-50 rounded-2xl h-full flex flex-col justify-between";
+        promoBox.className = "p-5 flex flex-col justify-between";
         adminGrid.appendChild(promoBox);
     }
-    
     if (adminGrid && !$("#salesAdminBox")) {
         const sgBox = document.createElement("div"); sgBox.id = "salesAdminBox";
-        sgBox.className = "p-5 border-2 border-indigo-200 bg-indigo-50 rounded-2xl h-full flex flex-col justify-between";
+        sgBox.className = "p-5 flex flex-col justify-between";
         adminGrid.appendChild(sgBox);
     }
 
-    // 🔥 HTML에 고정된 좁은 모달창 크기를 강제로 1000px로 확장하는 핵심 코드 🔥
-    const adminModalBox = document.querySelector('#adminModal div[class*="max-w-"]') || document.querySelector('#adminModal > div.relative') || document.querySelector('#adminModal > div:not(.absolute)');
-    if(adminModalBox) {
-        adminModalBox.style.setProperty('max-width', '1000px', 'important');
-        adminModalBox.style.setProperty('width', '95%', 'important');
+    // 🔥 핵심: 기존 이벤트 리스너 파괴 없이 DOM만 가로 2단 레이아웃으로 감싸기 🔥
+    const adminModalContent = document.querySelector('#adminModal .modal-content') || document.querySelector('#adminModal > div.relative');
+    if (adminModalContent && !document.getElementById('adminLeftCol')) {
+        const children = Array.from(adminModalContent.children);
+        
+        // 오른쪽 콘텐츠 영역 생성
+        const rightCol = document.createElement('div');
+        rightCol.id = 'adminRightCol';
+        
+        // 기존 닫기 버튼 우측 상단 고정
+        let closeBtn = children.find(c => c.tagName === 'BUTTON' || (c.innerHTML && c.innerHTML.includes('x')) || c.classList.contains('absolute'));
+        if(closeBtn) {
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.top = '16px';
+            closeBtn.style.right = '16px';
+            closeBtn.style.zIndex = '50';
+            rightCol.appendChild(closeBtn);
+        }
+
+        // 기존 엑셀 패널 등 오른쪽으로 이동 (이벤트 리스너 100% 보존됨)
+        children.forEach(child => {
+            if(child !== closeBtn) rightCol.appendChild(child);
+        });
+
+        // 왼쪽 정보/메뉴 영역 생성
+        const leftCol = document.createElement('div');
+        leftCol.id = 'adminLeftCol';
+        leftCol.innerHTML = `
+            <div class="font-black text-3xl text-gray-900 mb-1 tracking-tighter mt-4">RACEMENT</div>
+            <div class="text-[13px] font-bold text-gray-500 mb-8 bg-white/60 px-3 py-1 rounded-full shadow-sm">ADMIN PANEL</div>
+            <div class="text-[13px] text-center text-gray-500 font-bold mb-4 leading-relaxed">데이터베이스 업데이트 및<br>시스템 설정을 관리합니다.</div>
+            <div class="mt-auto w-full space-y-3" id="leftMenuWrap"></div>
+        `;
+
+        // 구조 재조립
+        adminModalContent.innerHTML = '';
+        adminModalContent.appendChild(leftCol);
+        adminModalContent.appendChild(rightCol);
+
+        // 기존 '깃허브 설정' 버튼 왼쪽 메뉴로 빼오기
+        const existingSettingsBtn = document.getElementById('openSettings');
+        if(existingSettingsBtn) {
+            existingSettingsBtn.className = "w-full py-3 bg-white/70 hover:bg-white text-gray-800 font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2";
+            document.getElementById('leftMenuWrap').appendChild(existingSettingsBtn);
+        }
+
+        // 공통 하단 버튼 (취소/확인) 추가
+        const footerBtns = document.createElement('div');
+        footerBtns.className = "mt-6 pt-4 border-t border-gray-200/50 flex justify-end gap-3";
+        footerBtns.innerHTML = `
+            <button id="adminCancelBtn" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white/50 border border-gray-300 text-gray-600 hover:bg-white transition-colors">취소</button>
+            <button id="adminConfirmBtn" class="px-5 py-2.5 rounded-xl text-sm font-black bg-gray-900 text-white shadow-md hover:bg-black transition-colors">확인</button>
+        `;
+        rightCol.appendChild(footerBtns);
+
+        document.getElementById('adminCancelBtn').onclick = () => {
+            if(closeBtn) closeBtn.click();
+            else document.getElementById("adminModal").classList.add("hidden");
+        };
+        document.getElementById('adminConfirmBtn').onclick = () => {
+            document.getElementById("adminModal").classList.add("hidden");
+        };
     }
 
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
