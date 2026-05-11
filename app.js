@@ -2482,27 +2482,35 @@ window.addEventListener('DOMContentLoaded', () => {
     if ($("#uploadPanel") && !adminGrid) {
         adminGrid = document.createElement("div");
         adminGrid.id = "adminBoxesGrid";
-        // 간격을 넓히고(gap-5) 조금 더 작은 화면에서도 3단이 유지되도록 md:grid-cols-3 적용
+        // 🔥 단어가 중간에 끊기지 않게 방지하고 간격을 여유롭게 조정
+        adminGrid.style.wordBreak = 'keep-all';
         adminGrid.className = "mt-6 grid grid-cols-1 md:grid-cols-3 gap-5 w-full";
         $("#uploadPanel").appendChild(adminGrid);
     }
 
     if (adminGrid && !$("#salesHistoryAdminBox")) {
         const shBox = document.createElement("div"); shBox.id = "salesHistoryAdminBox";
-        shBox.className = "p-5 border-2 border-orange-200 bg-orange-50 rounded-2xl h-full";
+        shBox.className = "p-5 border-2 border-orange-200 bg-orange-50 rounded-2xl h-full flex flex-col justify-between";
         adminGrid.appendChild(shBox);
     }
 
     if (adminGrid && !$("#promoAdminBox")) {
         const promoBox = document.createElement("div"); promoBox.id = "promoAdminBox";
-        promoBox.className = "p-5 border-2 border-purple-200 bg-purple-50 rounded-2xl h-full";
+        promoBox.className = "p-5 border-2 border-purple-200 bg-purple-50 rounded-2xl h-full flex flex-col justify-between";
         adminGrid.appendChild(promoBox);
     }
     
     if (adminGrid && !$("#salesAdminBox")) {
         const sgBox = document.createElement("div"); sgBox.id = "salesAdminBox";
-        sgBox.className = "p-5 border-2 border-indigo-200 bg-indigo-50 rounded-2xl h-full";
+        sgBox.className = "p-5 border-2 border-indigo-200 bg-indigo-50 rounded-2xl h-full flex flex-col justify-between";
         adminGrid.appendChild(sgBox);
+    }
+
+    // 🔥 HTML에 고정된 좁은 모달창 크기를 강제로 1000px로 확장하는 핵심 코드 🔥
+    const adminModalBox = document.querySelector('#adminModal div[class*="max-w-"]') || document.querySelector('#adminModal > div.relative') || document.querySelector('#adminModal > div:not(.absolute)');
+    if(adminModalBox) {
+        adminModalBox.style.setProperty('max-width', '1000px', 'important');
+        adminModalBox.style.setProperty('width', '95%', 'important');
     }
 
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
