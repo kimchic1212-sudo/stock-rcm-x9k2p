@@ -2514,15 +2514,21 @@ window.addEventListener('DOMContentLoaded', () => {
         adminModal.innerHTML = `
             <div class="absolute inset-0 cursor-pointer modal-outer" onclick="document.getElementById('adminModal').classList.add('hidden')"></div>
             
-            <div class="glass-modal relative flex flex-col w-full max-w-[800px] bg-white/50 border border-white/60 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+            <div class="glass-modal relative flex flex-col w-full max-w-[800px] bg-white/50 border border-white/60 rounded-3xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
                 
-                <button class="absolute top-4 right-5 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform z-50" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
+                <button class="absolute top-5 right-6 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform z-50" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
                 
-                <div id="authPanel" class="flex flex-col items-center justify-center p-10 sm:p-20 transition-all duration-300">
-                    <h2 class="text-2xl font-black text-gray-900 mb-6">RACEMENT ADMIN</h2>
-                    <div class="flex gap-2 w-full max-w-sm">
-                        <input type="password" id="pwd" placeholder="관리자 비밀번호 (1212)" class="ipt flex-1 px-4 py-3 rounded-xl border border-gray-300 font-bold outline-none focus:border-blue-500 shadow-sm">
-                        <button id="pwdGo" class="px-6 py-3 bg-gray-900 hover:bg-black text-white rounded-xl font-black transition-colors shadow-sm">접속</button>
+                <div id="authPanel" class="flex flex-col items-center justify-center p-10 sm:p-20 w-full min-h-[400px] transition-all duration-300">
+                    <div class="w-20 h-20 bg-white/60 rounded-full flex items-center justify-center mb-5 shadow-sm border border-white/80">
+                        <i data-lucide="lock" class="w-9 h-9 text-gray-800"></i>
+                    </div>
+                    <div class="text-center mb-8">
+                        <h2 class="text-[28px] font-black tracking-tight text-gray-900 leading-tight mb-2">RACEMENT<br>ADMIN</h2>
+                        <p class="text-[13px] font-bold text-gray-500">안전한 관리를 위해 비밀번호를 입력해주세요</p>
+                    </div>
+                    <div class="flex gap-2 w-full max-w-[340px]">
+                        <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition-all placeholder:text-gray-400">
+                        <button id="pwdGo" class="px-7 py-3.5 bg-gray-900 hover:bg-black text-white rounded-2xl text-[15px] font-black transition-transform hover:-translate-y-0.5 shadow-md shrink-0">입장</button>
                     </div>
                 </div>
 
@@ -2531,7 +2537,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         <div class="text-center mb-6 w-full">
                             <h2 class="m-0 text-[22px] font-extrabold tracking-wide text-gray-900 leading-tight">RACEMENT<br>ADMIN PANEL</h2>
                         </div>
-                        <div id="mainUploadTrigger" class="upload-section flex-1 bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 shadow-sm">
+                        <div id="mainUploadTrigger" class="upload-section flex-1 bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 shadow-sm min-h-[200px]">
                             <div class="text-5xl mb-4">☁️</div>
                             <h3 class="m-0 mb-2 text-gray-900 font-bold text-[16px]">메인 재고 파일 클릭/드래그</h3>
                             <p class="m-0 text-gray-500 text-[13px] font-bold">업로드 시 창고/매장 재고 자동 갱신</p>
@@ -2545,7 +2551,7 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <span style="font-size: 11px; color: #666; font-weight: bold;">판매 엑셀 누적 업데이트</span>
                             </div>
                             <div class="flex flex-col items-end gap-1.5 ml-2">
-                                <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 4px; cursor: pointer; z-index: 10;">DB 초기화</span>
+                                <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 6px; cursor: pointer; z-index: 10;">DB 초기화</span>
                                 <span id="shCount" style="font-size: 11px; font-weight: bold; color: #888;"></span>
                             </div>
                             <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
@@ -2559,12 +2565,12 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">AI 세일즈 가이드 DB</h4>
                                 <span style="font-size: 11px; color: #666; font-weight: bold;">특징 및 추천고객 업데이트</span>
                             </div>
-                            <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 4px; white-space: nowrap;"></span>
+                            <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;"></span>
                             <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
                         </div>
                         
                         <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-200/40">
-                            <button id="openSettings" class="px-3 py-2 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold hover:bg-gray-200 transition-colors flex items-center gap-1.5"><i data-lucide="settings" class="w-3.5 h-3.5"></i> API 설정</button>
+                            <button id="openSettings" class="px-3 py-2 rounded-lg bg-gray-100/50 text-gray-600 text-xs font-bold hover:bg-white transition-colors flex items-center gap-1.5 border border-white/60"><i data-lucide="settings" class="w-3.5 h-3.5"></i> API 설정</button>
                             <button class="px-6 py-2.5 rounded-xl bg-gray-900 text-white border-none text-[13px] font-bold cursor-pointer hover:bg-gray-800 transition-all shadow-sm" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
                         </div>
                     </div>
@@ -2575,24 +2581,24 @@ window.addEventListener('DOMContentLoaded', () => {
                     <div class="space-y-4 mb-6">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">GitHub 저장소 소유자 (Owner)</label>
-                            <input type="text" id="ghOwner" value="${ghOwner}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                            <input type="text" id="ghOwner" value="${ghOwner}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">저장소 이름 (Repo)</label>
-                            <input type="text" id="ghRepo" value="${ghRepo}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                            <input type="text" id="ghRepo" value="${ghRepo}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">브랜치 (Branch)</label>
-                            <input type="text" id="ghBranch" value="${ghBranch}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                            <input type="text" id="ghBranch" value="${ghBranch}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">Personal Access Token (PAT)</label>
-                            <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                            <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
-                        <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-[13px] font-bold hover:bg-gray-200 transition-colors shadow-sm">돌아가기</button>
-                        <button id="ghSave" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-[13px] font-bold hover:bg-blue-700 transition-colors shadow-sm">설정 저장</button>
+                        <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-white/60 border border-white text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">돌아가기</button>
+                        <button id="ghSave" class="px-5 py-2.5 rounded-xl bg-gray-900 text-white text-[13px] font-bold hover:bg-black transition-colors shadow-sm">설정 저장</button>
                     </div>
                 </div>
 
