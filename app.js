@@ -337,36 +337,34 @@ document.addEventListener("keydown", (e) => {
 
 function applyMeta(meta){
     if(meta) {
-        // 1. 하단에 넓게 차지하던 기존 영역(dataSourceBar, globalHeaderData) 완전히 제거
+        // 하단에 렌더링되던 불필요한 구역 삭제
         const oldSourceBar = document.getElementById("dataSourceBar");
         if(oldSourceBar) oldSourceBar.remove();
-        
         const globalHeader = document.getElementById("globalHeaderData");
         if(globalHeader) globalHeader.remove();
 
-        // 2. 상단 4번째 'DATA SOURCE' 카드 영역(statSrc)에 컴팩트하게 밀어넣기
         const statSrcEl = document.getElementById("statSrc");
         if(!statSrcEl) return;
 
         // 판매 DB 라벨
         let addInfo = SALES_HISTORY.meta?.name 
-            ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded text-[11px] sm:text-xs font-bold border border-orange-100 flex items-center gap-1 w-fit max-w-full">
-                  <span class="truncate">📊 ${escapeHtml(SALES_HISTORY.meta.name)}</span>
+            ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-100 flex items-center gap-1 shrink-0">
+                  📊 ${escapeHtml(SALES_HISTORY.meta.name)}
                </div>` 
             : "";
         
         // 기획전 라벨
         let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) 
-            ? `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded text-[11px] sm:text-xs font-bold border border-purple-100 flex items-center gap-1 w-fit max-w-full">
-                  <span class="truncate">🎁 ${escapeHtml(PROMOTIONS.meta.name)}</span>
+            ? `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0">
+                  🎁 ${escapeHtml(PROMOTIONS.meta.name)}
                </div>` 
             : "";
 
-        // 세로로 깔끔하게 쌓이도록 flex-col 적용 (텍스트가 너무 길면 말줄임표 처리 truncate)
+        // flex-row 와 flex-wrap을 적용해 가로로 나란히, 넘치면 다음 줄로
         statSrcEl.innerHTML = `
-            <div class="flex flex-col gap-1.5 w-full mt-1">
-                <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-[11px] sm:text-xs font-bold border border-blue-100 flex items-center gap-1 w-fit max-w-full">
-                    <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> <span class="truncate">재고: ${meta.uploadedAt || ''}</span>
+            <div class="flex flex-row flex-wrap gap-2 w-full items-center">
+                <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-[11px] font-black border border-blue-100 flex items-center gap-1 shrink-0">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> 재고: ${meta.uploadedAt || ''}
                 </div>
                 ${addInfo}
                 ${promoInfo}
