@@ -52,20 +52,9 @@ async function loadImages(){
   }catch(e){ console.warn("images.json load failed:", e); }
 }
 
-// 호환성: app.js의 runImageSync()이 호출할 때 에러가 나지 않도록 구조를 맞춤
-async function syncImages(products, callback){
-  // 수동 등록 모드이므로 자동 동기화는 건너뛰고 완료 보고만 수행
-  if(typeof callback === "function") {
-    callback({ phase: "skip", total: Object.keys(IMAGES).length });
-  }
-  return { fetched: 0, total: Object.keys(IMAGES).length };
-}
-
-// 이미지 추가/삭제 시 화면을 즉시 갱신하는 보조 함수
-function triggerRender() {
-  if(typeof render === "function") {
-    render();
-  }
+// 호환성: app.js의 runImageSync()이 호출하지만 자동 동기화 없음
+async function syncImages(){
+  return { fetched:0, total:Object.keys(IMAGES).length };
 }
 
 // === UI helpers ===
