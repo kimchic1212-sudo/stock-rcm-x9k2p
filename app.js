@@ -707,100 +707,99 @@ function setupBarcodeScanner() {
 
     const modal = document.createElement("div");
     modal.id = "barcodeScanModal";
-    modal.className = "fixed inset-0 z-[99999] bg-black/95 flex flex-col items-center justify-center";
+    modal.className = "fixed inset-0 z-[99999] bg-black flex flex-col";
     modal.style.display = "none";
     modal.innerHTML = `
-        <div class="w-full max-w-sm px-4 flex flex-col items-center gap-4">
-            <div class="text-center">
-                <div class="text-white font-black text-lg">📦 바코드 스캔</div>
-                <div id="scanStatus" class="text-orange-300 text-sm font-bold mt-1">카메라 연결 중...</div>
-            </div>
-            <div id="barcodeRegion" class="w-full rounded-2xl overflow-hidden" style="min-height:240px;background:#111"></div>
-            <div id="scanResult" class="hidden bg-green-500 text-white font-black px-6 py-3 rounded-xl text-lg w-full text-center"></div>
-            <button id="closeScanBtn" class="px-10 py-3 bg-white text-gray-900 font-black rounded-full text-sm hover:bg-gray-100 transition-colors">닫기</button>
+        <div id="barcodeRegion" class="flex-1 relative overflow-hidden"></div>
+        <div id="scanLaserLine" style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(to right,transparent 2%,#f97316 30%,#f97316 70%,transparent 98%);box-shadow:0 0 10px 3px rgba(249,115,22,0.8);pointer-events:none;z-index:30;animation:laser-move 1.8s ease-in-out infinite"></div>
+        <div class="bg-black/80 px-5 py-4 flex flex-col gap-2 items-center" style="z-index:20">
+            <div id="scanStatus" class="text-orange-300 text-sm font-bold">바코드를 화면에 보여주세요</div>
+            <div id="scanResult" class="hidden bg-green-500 text-white font-black px-6 py-2 rounded-xl text-base w-full text-center"></div>
+            <button id="closeScanBtn" class="px-10 py-2.5 bg-white text-gray-900 font-black rounded-full text-sm">닫기</button>
         </div>
     `;
     document.body.appendChild(modal);
 
-    let scanner = null;
+    let quaggaRunning = false;
+    let detectedHandler = null;
 
-    const stopScan = () => {
-        if(scanner) {
-            scanner.stop().catch(()=>{});
-            scanner = null;
-        }
-        modal.style.display = "none";
-        const resultEl = document.getElementById("scanResult");
-        if(resultEl) { resultEl.classList.add("hidden"); resultEl.textContent = ""; }
-        const region = document.getElementById("barcodeRegion");
-        if(region) region.innerHTML = "";
-    };
-
-    const startScan = async () => {
+    const onCode = (code) => {
         const statusEl = document.getElementById("scanStatus");
         const resultEl = document.getElementById("scanResult");
-        const region = document.getElementById("barcodeRegion");
-        resultEl.classList.add("hidden");
-        region.innerHTML = "";
-        modal.style.display = "flex";
+        if(!statusEl) return;
+        resultEl.textContent = "✓ " + code;
+        resultEl.classList.remove("hidden");
+        statusEl.textContent = "인식 완료!";
+        if(navigator.vibrate) navigator.vibrate(100);
+        setTimeout(() => {
+            stopScan();
+            const qEl = document.getElementById("q");
+            if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
+            visibleCount = 60; render();
+            const matched = typeof PRODUCTS !== "undefined"
+                ? PRODUCTS.filter(p => p._hay && p._hay.includes(code.toLowerCase())).length : 0;
+            if(matched === 0) showToast("바코드 인식됨 (" + code + ") — 엑셀에 해당 바코드 없음");
+        }, 700);
+    };
 
-        if(typeof Html5Qrcode === "undefined") {
-            statusEl.textContent = "❌ 라이브러리 로드 실패 (새로고침 후 재시도)";
+    const stopScan = () => {
+        if(detectedHandler) { try { Quagga.offDetected(detectedHandler); } catch(e){} detectedHandler = null; }
+        if(quaggaRunning) { try { Quagga.stop(); } catch(e){} quaggaRunning = false; }
+        modal.style.display = "none";
+        const region = document.getElementById("barcodeRegion");
+        if(region) region.innerHTML = "";
+        const resultEl = document.getElementById("scanResult");
+        if(resultEl) { resultEl.classList.add("hidden"); resultEl.textContent = ""; }
+    };
+
+    const startScan = () => {
+        const statusEl = document.getElementById("scanStatus");
+        modal.style.display = "flex";
+        modal.style.flexDirection = "column";
+
+        if(typeof Quagga === "undefined") {
+            statusEl.textContent = "❌ 라이브러리 로드 실패 (새로고침)";
             return;
         }
 
+        // 레이저 라인 위치를 화면 중앙으로
+        const laser = document.getElementById("scanLaserLine");
+        if(laser) laser.style.top = "45%";
+
         statusEl.textContent = "카메라 연결 중...";
-        try {
-            scanner = new Html5Qrcode("barcodeRegion", { verbose: false });
-            await scanner.start(
-                { facingMode: "environment" },
-                {
-                    fps: 15,
-                    qrbox: (w, h) => ({ width: Math.floor(w * 0.9), height: Math.floor(h * 0.38) }),
-                    formatsToSupport: [
-                        Html5QrcodeSupportedFormats.EAN_13,
-                        Html5QrcodeSupportedFormats.EAN_8,
-                        Html5QrcodeSupportedFormats.CODE_128,
-                        Html5QrcodeSupportedFormats.CODE_39,
-                        Html5QrcodeSupportedFormats.UPC_A,
-                        Html5QrcodeSupportedFormats.UPC_E,
-                        Html5QrcodeSupportedFormats.ITF,
-                        Html5QrcodeSupportedFormats.CODABAR
-                    ]
-                },
-                (code) => {
-                    resultEl.textContent = "✓ " + code;
-                    resultEl.classList.remove("hidden");
-                    statusEl.textContent = "인식 완료!";
-                    if(navigator.vibrate) navigator.vibrate(100);
-                    setTimeout(() => {
-                        stopScan();
-                        const qEl = document.getElementById("q");
-                        if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
-                        visibleCount = 60; render();
-                        const matched = typeof PRODUCTS !== "undefined"
-                            ? PRODUCTS.filter(p => p._hay && p._hay.includes(code.toLowerCase())).length
-                            : 0;
-                        if(matched === 0) {
-                            showToast("바코드 인식됨 (" + code + ") — 엑셀에 해당 바코드 없음. POS바코드번호 컬럼 확인 필요");
-                        }
-                    }, 800);
-                },
-                () => {}
-            );
-            // 레이저 라인 오버레이 주입
-            setTimeout(() => {
-                const scanRegion = document.getElementById("barcodeRegion__scan_region");
-                if(scanRegion && !document.getElementById("scanLaserLine")) {
-                    const laser = document.createElement("div");
-                    laser.id = "scanLaserLine";
-                    scanRegion.appendChild(laser);
-                }
-            }, 500);
-            statusEl.textContent = "바코드를 화면 중앙에 맞춰주세요";
-        } catch(e) {
-            statusEl.textContent = "❌ 카메라 오류: " + (e.message || e);
-        }
+        const region = document.getElementById("barcodeRegion");
+        region.innerHTML = "";
+
+        Quagga.init({
+            inputStream: {
+                type: "LiveStream",
+                target: region,
+                constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+            },
+            decoder: {
+                readers: ["ean_reader","ean_8_reader","code_128_reader","code_39_reader","upc_reader","upc_e_reader"],
+                multiple: false
+            },
+            locate: true,
+            numOfWorkers: 2,
+            frequency: 15
+        }, (err) => {
+            if(err) { statusEl.textContent = "❌ 카메라 오류: " + (err.message || err); return; }
+            Quagga.start();
+            quaggaRunning = true;
+            statusEl.textContent = "바코드를 화면에 보여주세요";
+
+            let lastCode = "", sameCount = 0;
+            detectedHandler = (data) => {
+                const code = data.codeResult.code;
+                if(!code) return;
+                if(code === lastCode) {
+                    sameCount++;
+                    if(sameCount >= 2) { Quagga.offDetected(detectedHandler); detectedHandler = null; onCode(code); }
+                } else { lastCode = code; sameCount = 1; }
+            };
+            Quagga.onDetected(detectedHandler);
+        });
     };
 
     document.getElementById("scanBtn").onclick = startScan;
