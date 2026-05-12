@@ -112,7 +112,8 @@ const REQUESTS_PATH = "requests.json";
 const TRANSFERS_PATH = "transfers.json"; 
 const PROMOTIONS_PATH = "promotions.json"; 
 const SALES_GUIDE_PATH = "sales_guide.json"; 
-const SALES_HISTORY_PATH = "sales_history.json"; 
+const SALES_HISTORY_PATH = "sales_history.json";
+const SALES_DEDUCT_PATH = "sales.json";
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 let GH = { owner:"", repo:"", branch:"main" };
@@ -122,7 +123,8 @@ let MEMOS = [];
 let TRANSFERS = []; 
 let PROMOTIONS = {}; 
 let SALES_GUIDES = {}; 
-let SALES_HISTORY = { meta: {}, items: {} }; 
+let SALES_HISTORY = { meta: {}, items: {} };
+let SALES_DEDUCTIONS = null;
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -389,17 +391,18 @@ async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
       RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); return;
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar(); return;
   }
   try {
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
           fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
       const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
@@ -408,13 +411,71 @@ async function loadData(force = false){
       if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
       if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
       if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
-      
+      if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
+
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
   } catch(e) { console.error("Data Load Error", e); }
 }
 
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+function applyErpDeductions() {
+    if(!SALES_DEDUCTIONS) return;
+    const d = new Date();
+    const today = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+    if(SALES_DEDUCTIONS.date !== today) { SALES_DEDUCTIONS = null; return; }
+    const bu = SALES_DEDUCTIONS.busan || {}, si = SALES_DEDUCTIONS.sinsa || {};
+    for(const p of PRODUCTS) {
+        for(const s of p.sizes) {
+            const key = p.품번 + '|' + String(s.size).trim();
+            if(bu[key]) s.busan = Math.max(0, s.busan - bu[key]);
+            if(si[key]) s.sinsa = Math.max(0, s.sinsa - si[key]);
+        }
+        p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan, 0);
+        p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa, 0);
+    }
+    window._erpDeductApplied = true;
+    window._erpDeductTime = SALES_DEDUCTIONS.updatedAt || '';
+}
+
+window.showErpSyncModal = function() {
+    // Bookmarklet: PAT is stored in ERP domain localStorage on first run (never hardcoded here)
+    const BM = `javascript:(async function(){const K='_rcm';let cfg=null;try{cfg=JSON.parse(localStorage.getItem(K)||'null');}catch(e){}if(!cfg||!cfg.pat){const pat=prompt('GitHub PAT (최초 1회 입력):');if(!pat)return;cfg={pat,ow:'kimchic1212-sudo',re:'stock-rcm-x9k2p',br:'main'};localStorage.setItem(K,JSON.stringify(cfg));alert('설정 저장! 다시 클릭하세요.');return;}const{pat,ow,re,br}=cfg,SP='sales.json';const d=new Date(),today=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');const t=document.createElement('div');t.style.cssText='position:fixed;top:20px;right:20px;z-index:99999;background:#1e293b;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-family:sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.3)';t.textContent='ERP 동기화 중...';document.body.appendChild(t);try{const p={Debug:false,Seq:null,PageToken:null,Action:228002,ActionType:0,PgmMethodName:'Query',ServiceSeq:111220021,MethodSeq:1,Param:'',SPName:null,SPAlias:null,DBType:null,WFType:null,IsCombo:0,IsSetCombo:0,IsRunPgmMethod:0,IsExcelQuery:false,IsCommonLuaService:false,IsAuthService:false,IsRunService:false,ServiceType:0,JSonData:{Tables:[{TableName:'DataBlock1',Columns:['orderNo','orderYmdt','productName','productManagementCd','productNo','Spec','Price','Qty','CurAmt','CurVAT','CurAmtTotal','lastProductCouponDiscountAmt','firstProductCouponDiscountAmt','diffProductCouponDiscountAmtSum','lastCartCouponDiscountAmt','firstCartCouponDiscountAmt','diffCartCouponDiscountAmtSum','lastSubPayAmt','firstSubPayAmt','diffSubPayAmtSum','lastMainPayAmt','UMMemberKindName','ordererName','ordererContact1','receiverContact1','orderStatusType','payType','UMReceiptKind','receiverName','ordererEmail','memberId','MemberNo','GubunName','GubunSeq','WHSeq','WHName','IsReturnOrder','IsOrderProc','ItemNick','lastTotalDiscountAmt','TotAmt2','TotAmt4','TotAmt3','deliveryAmt','additionalDiscountAmt','UMOrderKind','CustSeq','EmpSeq','DeptSeq','UMMemberKindSeq','ItemClassMSeq','ItemClassMName','Category','UMSilSeq','UMSilName','UMStoreName','SumTotAmt1','SumTotAmt2','SumTotAmt3','SumTotAmt4','SumTotAmt5','SumTotAmt6','SumlastTotalDiscountAmt'],ColumnsType:[0,0,0,1,0,0,5,1,5,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,5,5,5,5,1,1,1,1,1,1,1,1,0,0,1,0,0,1,5,5,5,5,1,5],Rows:[]}],IsSendXml:true,DataBlock1:'DataBlock1'},callback:null,ToolBarInfo:null,JumpData:null,Option:{PgmSeq:null,PgmId:null,WorkingTag:null,XmlFlags:null,Timeout:3600,LoginPgmSeq:0,ExecuteSeq:'0',ServiceLayer:null,PgmMethodSeq:0,ToDsn:null,IsDebug:null,PgmEventSeq:0,DebugMode:null,JumpPgmSeq:0,MenuSeq:0,IsAsyncService:false,IsUseSendMessage:false,SendDateKey:null},ExeMsg:{ErrorSeq:0,Message:'',ErrStatus:'',Method:'',IsSystemError:false,InnerMessage:''},LoginOptionMsg:null,LoginDateOptionMsg:{LoginDate:'',LoginDateYear:'',LoginDateMonth:'',LoginDateDay:''},AuthOption:{Type:0,Data:''}};const r=await fetch(location.origin+'/WebApi',{method:'POST',headers:{'Content-Type':'application/json;charset=UTF-8','X-Requested-With':'XMLHttpRequest'},credentials:'include',body:JSON.stringify(p)});if(!r.ok)throw new Error('ERP '+r.status);const data=await r.json();const tb=data&&data.JSonData&&data.JSonData.Tables&&data.JSonData.Tables[0];if(!tb||!tb.Rows||!tb.Rows.length){t.textContent='오늘 판매 없음';setTimeout(function(){t.remove()},3000);return;}const cols=tb.Columns,rows=tb.Rows,iNo=cols.indexOf('productNo'),iSp=cols.indexOf('Spec'),iQty=cols.indexOf('Qty'),iSt=cols.indexOf('orderStatusType'),iDt=cols.indexOf('orderYmdt'),iWH=cols.indexOf('WHName');const bu={},si={};for(const row of rows){if(String(row[iDt])!==today)continue;if(!String(row[iSt]).includes('(POS)'))continue;const pno=String(row[iNo]||'').trim(),spec=String(row[iSp]||'').trim(),qty=parseInt(row[iQty])||0,wh=String(row[iWH]||'');if(!pno||!spec)continue;const key=pno+'|'+spec;if(wh.includes('부산'))bu[key]=(bu[key]||0)+qty;if(wh.includes('신사'))si[key]=(si[key]||0)+qty;}const sd={date:today,updatedAt:new Date().toLocaleString('ko-KR',{hour12:false}),busan:bu,sinsa:si};const api='https://api.github.com/repos/'+ow+'/'+re+'/contents/'+SP;let sha=null;try{const sr=await fetch(api+'?ref='+br+'&t='+Date.now(),{headers:{Authorization:'Bearer '+pat}});if(sr.ok){const sj=await sr.json();sha=sj.sha;}}catch(e){}const pb={message:'sync: ERP '+today,content:btoa(unescape(encodeURIComponent(JSON.stringify(sd)))),branch:br};if(sha)pb.sha=sha;const pr=await fetch(api,{method:'PUT',headers:{Authorization:'Bearer '+pat,'Content-Type':'application/json'},body:JSON.stringify(pb)});if(!pr.ok)throw new Error('GitHub '+pr.status);const total=new Set([].concat(Object.keys(bu),Object.keys(si))).size;t.style.background='#16a34a';t.textContent='✓ 동기화 완료 — '+total+'개 품목 반영';setTimeout(function(){t.remove()},5000);}catch(e){t.style.background='#dc2626';t.textContent='오류: '+e.message;setTimeout(function(){t.remove()},5000);console.error(e);}})();`;
+
+    const existing = document.getElementById('erpSyncModal');
+    if(existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'erpSyncModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:20px;padding:28px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.25);font-family:sans-serif;">
+        <h3 style="margin:0 0 4px;font-size:18px;font-weight:800;color:#0f172a;">ERP 판매 연동</h3>
+        <p style="margin:0 0 20px;font-size:12px;color:#94a3b8;">오늘 POS 판매분을 재고에서 자동 차감합니다</p>
+
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:18px;margin-bottom:14px;">
+          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#15803d;">① 북마크릿 설치 (최초 1회만)</p>
+          <p style="margin:0 0 12px;font-size:12px;color:#166534;">아래 버튼을 북마크 바로 <b>드래그</b>해서 추가하세요</p>
+          <a href="${BM}" style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:white;padding:10px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;cursor:grab;user-select:none;" onclick="return false;">
+            📎 ERP 동기화
+          </a>
+          <p style="margin:10px 0 0;font-size:11px;color:#6b7280;">드래그가 안 되면: 주소창에 북마크 저장 후 북마크 바로 이동</p>
+        </div>
+
+        <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:14px;padding:18px;margin-bottom:20px;">
+          <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#1d4ed8;">② 매일 사용 방법</p>
+          <ol style="margin:0;padding-left:20px;font-size:12px;color:#1e40af;line-height:2;">
+            <li>ERP 주문내역조회 탭 열기 (로그인 상태)</li>
+            <li>북마크바의 <b>[ERP 동기화]</b> 클릭</li>
+            <li>초록 완료 메시지 확인 후 재고앱 새로고침</li>
+          </ol>
+        </div>
+
+        <button onclick="document.getElementById('erpSyncModal').remove()" style="width:100%;padding:12px;background:#0f172a;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
+      </div>`;
+    modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+    document.body.appendChild(modal);
+};
 
 async function commitInventoryToGitHub(rows, meta) {
     if(!GH.owner || !GH.repo) throw new Error("저장소 설정 없음 (ADMIN > API 설정 확인)");
@@ -686,8 +747,8 @@ function setupQuickActionBar() {
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
         </button>
-        <button id="erpSyncBtn" onclick="window.syncErpSales()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold ${erpApplied ? 'bg-green-500 text-white border-green-600' : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700'} border rounded-lg transition-colors whitespace-nowrap">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>${erpApplied ? '판매차감중' : 'ERP 연동'}</span>
+        <button id="erpSyncBtn" onclick="window.showErpSyncModal()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold ${erpApplied ? 'bg-green-500 text-white border-green-600' : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700'} border rounded-lg transition-colors whitespace-nowrap" title="${erpApplied ? '마지막 동기화: ' + (window._erpDeductTime||'') : 'ERP 판매 연동'}">
+            <i data-lucide="${erpApplied ? 'check-circle' : 'refresh-cw'}" class="w-3.5 h-3.5"></i><span>${erpApplied ? '판매차감중' : 'ERP 연동'}</span>
         </button>
         ${hasPromo ? `
         <button id="promoViewBtn" onclick="window.togglePromoView(this)" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-purple-700 transition-colors whitespace-nowrap" data-active="0">
