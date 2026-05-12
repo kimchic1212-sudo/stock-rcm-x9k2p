@@ -28,11 +28,6 @@ style.innerHTML = `
     @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
     .toast-undo:hover { color: #fef08a; }
-    @keyframes laser-move { 0%,100% { top:15%; } 50% { top:82%; } }
-    #scanLaserLine { position:absolute; left:0; right:0; height:2px; background:linear-gradient(to right,transparent 5%,#f97316 40%,#f97316 60%,transparent 95%); box-shadow:0 0 8px 3px rgba(249,115,22,0.7); pointer-events:none; z-index:20; animation:laser-move 1.8s ease-in-out infinite; }
-    #barcodeRegion video { border-radius:12px; }
-    #barcodeRegion__scan_region { position:relative !important; }
-    #barcodeRegion__dashboard { display:none !important; }
 
     /* 🔥 Glassmorphism 모달 컨테이너 🔥 */
     .glass-modal {
@@ -687,10 +682,7 @@ function setupQuickActionBar() {
 
     const hasPromo = PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0;
     wrap.innerHTML = `
-        <button id="scanBtn" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-orange-600 transition-colors" title="바코드 스캔">
-            <i data-lucide="scan-line" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">스캔</span>
-        </button>
-        <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
+<button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
         </button>
         ${hasPromo ? `
@@ -699,118 +691,6 @@ function setupQuickActionBar() {
         </button>` : ''}
     `;
     if(window.lucide) lucide.createIcons();
-    setupBarcodeScanner();
-}
-
-function setupBarcodeScanner() {
-    if($("#barcodeScanModal")) return;
-
-    const modal = document.createElement("div");
-    modal.id = "barcodeScanModal";
-    modal.className = "fixed inset-0 z-[99999] bg-black flex flex-col";
-    modal.style.display = "none";
-    modal.innerHTML = `
-        <div id="barcodeRegion" class="flex-1 relative overflow-hidden"></div>
-        <div id="scanLaserLine" style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(to right,transparent 2%,#f97316 30%,#f97316 70%,transparent 98%);box-shadow:0 0 10px 3px rgba(249,115,22,0.8);pointer-events:none;z-index:30;animation:laser-move 1.8s ease-in-out infinite"></div>
-        <div class="bg-black/80 px-5 py-4 flex flex-col gap-2 items-center" style="z-index:20">
-            <div id="scanStatus" class="text-orange-300 text-sm font-bold">바코드를 화면에 보여주세요</div>
-            <div id="scanResult" class="hidden bg-green-500 text-white font-black px-6 py-2 rounded-xl text-base w-full text-center"></div>
-            <button id="closeScanBtn" class="px-10 py-2.5 bg-white text-gray-900 font-black rounded-full text-sm">닫기</button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    let quaggaRunning = false;
-    let detectedHandler = null;
-
-    const onCode = (code) => {
-        const statusEl = document.getElementById("scanStatus");
-        const resultEl = document.getElementById("scanResult");
-        if(!statusEl) return;
-        resultEl.textContent = "✓ " + code;
-        resultEl.classList.remove("hidden");
-        statusEl.textContent = "인식 완료!";
-        if(navigator.vibrate) navigator.vibrate(100);
-        setTimeout(() => {
-            stopScan();
-            const qEl = document.getElementById("q");
-            if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
-            visibleCount = 60; render();
-            const cleanCode = code.replace(/[\s\-]/g,"").toLowerCase();
-            const matched = typeof PRODUCTS !== "undefined"
-                ? PRODUCTS.filter(p => p.barcode && p.barcode.replace(/[\s\-]/g,"").toLowerCase() === cleanCode).length : 0;
-            if(matched === 0) {
-                const withBarcode = typeof PRODUCTS !== "undefined"
-                    ? PRODUCTS.filter(p => p.barcode && p.barcode.length > 3) : [];
-                const sample = withBarcode.slice(0,2).map(p=>p.barcode).join(" / ");
-                showToast("스캔:[" + code + "] 엑셀샘플:[" + sample + "]");
-            }
-        }, 700);
-    };
-
-    const stopScan = () => {
-        if(detectedHandler) { try { Quagga.offDetected(detectedHandler); } catch(e){} detectedHandler = null; }
-        if(quaggaRunning) { try { Quagga.stop(); } catch(e){} quaggaRunning = false; }
-        modal.style.display = "none";
-        const region = document.getElementById("barcodeRegion");
-        if(region) region.innerHTML = "";
-        const resultEl = document.getElementById("scanResult");
-        if(resultEl) { resultEl.classList.add("hidden"); resultEl.textContent = ""; }
-    };
-
-    const startScan = () => {
-        const statusEl = document.getElementById("scanStatus");
-        modal.style.display = "flex";
-        modal.style.flexDirection = "column";
-
-        if(typeof Quagga === "undefined") {
-            statusEl.textContent = "❌ 라이브러리 로드 실패 (새로고침)";
-            return;
-        }
-
-        // 레이저 라인 위치를 화면 중앙으로
-        const laser = document.getElementById("scanLaserLine");
-        if(laser) laser.style.top = "45%";
-
-        statusEl.textContent = "카메라 연결 중...";
-        const region = document.getElementById("barcodeRegion");
-        region.innerHTML = "";
-
-        Quagga.init({
-            inputStream: {
-                type: "LiveStream",
-                target: region,
-                constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-            },
-            decoder: {
-                readers: ["ean_reader","ean_8_reader","code_128_reader","code_39_reader","upc_reader","upc_e_reader"],
-                multiple: false
-            },
-            locate: true,
-            numOfWorkers: 2,
-            frequency: 15
-        }, (err) => {
-            if(err) { statusEl.textContent = "❌ 카메라 오류: " + (err.message || err); return; }
-            Quagga.start();
-            quaggaRunning = true;
-            statusEl.textContent = "바코드를 화면에 보여주세요";
-
-            let lastCode = "", sameCount = 0;
-            detectedHandler = (data) => {
-                const code = data.codeResult.code;
-                if(!code) return;
-                if(code === lastCode) {
-                    sameCount++;
-                    if(sameCount >= 2) { Quagga.offDetected(detectedHandler); detectedHandler = null; onCode(code); }
-                } else { lastCode = code; sameCount = 1; }
-            };
-            Quagga.onDetected(detectedHandler);
-        });
-    };
-
-    document.getElementById("scanBtn").onclick = startScan;
-    document.getElementById("closeScanBtn").onclick = stopScan;
-    modal.addEventListener("click", (e) => { if(e.target === modal) stopScan(); });
 }
 
 window.togglePromoView = (btn, bypassRender = false) => {
