@@ -742,12 +742,10 @@ function setupBarcodeScanner() {
         requestAnimationFrame(animateLine);
     };
 
-    let scanStream = null;
-    let scanRaf = null;
+    let zxingControls = null;
 
     const stopScan = () => {
-        if(scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
-        if(scanRaf) { cancelAnimationFrame(scanRaf); scanRaf = null; }
+        if(zxingControls) { try { zxingControls.stop(); } catch(e){} zxingControls = null; }
         modal.style.display = "none";
         const resultEl = document.getElementById("scanResult");
         if(resultEl) { resultEl.classList.add("hidden"); resultEl.textContent = ""; }
@@ -761,48 +759,29 @@ function setupBarcodeScanner() {
         modal.style.display = "flex";
         requestAnimationFrame(animateLine);
 
-        // BarcodeDetector API 지원 여부 확인
-        if(!("BarcodeDetector" in window)) {
-            statusEl.textContent = "❌ 이 브라우저는 지원 안 됨 (Chrome/Safari 최신 버전 필요)";
+        if(typeof ZXingBrowser === "undefined") {
+            statusEl.textContent = "❌ 스캔 라이브러리 로드 실패 (새로고침 후 재시도)";
             return;
         }
 
         statusEl.textContent = "카메라 연결 중...";
         try {
-            scanStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+            const codeReader = new ZXingBrowser.BrowserMultiFormatReader();
+            zxingControls = await codeReader.decodeFromVideoDevice(undefined, videoEl, (result, err) => {
+                if(!result) return;
+                const code = result.getText();
+                resultEl.textContent = "✓ " + code;
+                resultEl.classList.remove("hidden");
+                statusEl.textContent = "인식 완료!";
+                if(navigator.vibrate) navigator.vibrate(100);
+                setTimeout(() => {
+                    stopScan();
+                    const qEl = document.getElementById("q");
+                    if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
+                    visibleCount = 60; render();
+                }, 600);
             });
-            videoEl.srcObject = scanStream;
-            await videoEl.play();
             statusEl.textContent = "바코드를 가이드 안에 맞춰주세요";
-
-            const detector = new BarcodeDetector({ formats: ["ean_13","ean_8","code_128","code_39","upc_a","upc_e","itf","codabar"] });
-
-            const detect = async () => {
-                if(!scanStream) return;
-                try {
-                    const barcodes = await detector.detect(videoEl);
-                    if(barcodes.length > 0) {
-                        const code = barcodes[0].rawValue;
-                        // 성공 피드백
-                        resultEl.textContent = "✓ " + code;
-                        resultEl.classList.remove("hidden");
-                        statusEl.textContent = "인식 완료!";
-                        // 진동 (모바일)
-                        if(navigator.vibrate) navigator.vibrate(100);
-                        // 검색창 채우고 필터링
-                        setTimeout(() => {
-                            stopScan();
-                            const qEl = document.getElementById("q");
-                            if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
-                            visibleCount = 60; render();
-                        }, 600);
-                        return;
-                    }
-                } catch(e) {}
-                scanRaf = requestAnimationFrame(detect);
-            };
-            scanRaf = requestAnimationFrame(detect);
         } catch(e) {
             statusEl.textContent = "❌ 카메라 오류: " + (e.message || e);
         }
