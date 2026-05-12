@@ -487,7 +487,7 @@ function rebuildIndex(){
     }
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), barcode:String(r["POS바코드번호"]||r["POS연동바코드"]||r["바코드번호"]||r["바코드"]||""), sizes:[], hasMemo: false, periodSales: 0 });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), barcode:String(r["POS바코드번호"]||r["POS연동바코드"]||r["바코드번호"]||r["바코드"]||r["EAN"]||r["ean"]||"").replace(/[\s\-]/g,""), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -736,9 +736,18 @@ function setupBarcodeScanner() {
             const qEl = document.getElementById("q");
             if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
             visibleCount = 60; render();
+            const cleanCode = code.replace(/[\s\-]/g,"").toLowerCase();
             const matched = typeof PRODUCTS !== "undefined"
-                ? PRODUCTS.filter(p => p._hay && p._hay.includes(code.toLowerCase())).length : 0;
-            if(matched === 0) showToast("바코드 인식됨 (" + code + ") — 엑셀에 해당 바코드 없음");
+                ? PRODUCTS.filter(p => p.barcode && p.barcode.replace(/[\s\-]/g,"") === cleanCode).length : 0;
+            if(matched === 0) {
+                const withBarcode = typeof PRODUCTS !== "undefined"
+                    ? PRODUCTS.filter(p => p.barcode && p.barcode.length > 3).length : 0;
+                if(withBarcode === 0) {
+                    showToast("인식: " + code + " — 엑셀에 바코드 데이터 없음 (POS연동바코드 컬럼 확인)");
+                } else {
+                    showToast("인식: " + code + " — " + withBarcode + "개 중 일치 없음 (바코드 누락 제품)");
+                }
+            }
         }, 700);
     };
 
