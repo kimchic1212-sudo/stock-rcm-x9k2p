@@ -738,15 +738,12 @@ function setupBarcodeScanner() {
             visibleCount = 60; render();
             const cleanCode = code.replace(/[\s\-]/g,"").toLowerCase();
             const matched = typeof PRODUCTS !== "undefined"
-                ? PRODUCTS.filter(p => p.barcode && p.barcode.replace(/[\s\-]/g,"") === cleanCode).length : 0;
+                ? PRODUCTS.filter(p => p.barcode && p.barcode.replace(/[\s\-]/g,"").toLowerCase() === cleanCode).length : 0;
             if(matched === 0) {
                 const withBarcode = typeof PRODUCTS !== "undefined"
-                    ? PRODUCTS.filter(p => p.barcode && p.barcode.length > 3).length : 0;
-                if(withBarcode === 0) {
-                    showToast("인식: " + code + " — 엑셀에 바코드 데이터 없음 (POS연동바코드 컬럼 확인)");
-                } else {
-                    showToast("인식: " + code + " — " + withBarcode + "개 중 일치 없음 (바코드 누락 제품)");
-                }
+                    ? PRODUCTS.filter(p => p.barcode && p.barcode.length > 3) : [];
+                const sample = withBarcode.slice(0,2).map(p=>p.barcode).join(" / ");
+                showToast("스캔:[" + code + "] 엑셀샘플:[" + sample + "]");
             }
         }, 700);
     };
