@@ -482,7 +482,7 @@ function rebuildIndex(){
     }
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), sizes:[], hasMemo: false, periodSales: 0 });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), barcode:String(r["POS바코드번호"]||r["바코드번호"]||r["바코드"]||""), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -514,7 +514,7 @@ function rebuildIndex(){
             p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가); p.promoEndDate = '5/29'; 
         }
     }
-    p._hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||""].join(" ").toLowerCase();
+    p._hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||"", p.barcode||""].join(" ").toLowerCase();
     p._hayClean = p._hay.replace(/[\s\-_]/g, ""); 
     p._chosung = getChosung(p._hayClean); 
     return p;
@@ -682,6 +682,9 @@ function setupQuickActionBar() {
 
     const hasPromo = PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0;
     wrap.innerHTML = `
+        <button id="scanBtn" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-orange-600 transition-colors" title="바코드 스캔">
+            <i data-lucide="scan-line" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">스캔</span>
+        </button>
         <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
         </button>
@@ -691,6 +694,123 @@ function setupQuickActionBar() {
         </button>` : ''}
     `;
     if(window.lucide) lucide.createIcons();
+    setupBarcodeScanner();
+}
+
+function setupBarcodeScanner() {
+    if($("#barcodeScanModal")) return;
+
+    // 스캐너 모달 생성
+    const modal = document.createElement("div");
+    modal.id = "barcodeScanModal";
+    modal.className = "fixed inset-0 z-[99999] bg-black/95 flex flex-col items-center justify-center";
+    modal.style.display = "none";
+    modal.innerHTML = `
+        <div class="w-full max-w-sm px-4 flex flex-col items-center gap-4">
+            <div class="text-center">
+                <div class="text-white font-black text-lg">📦 바코드 스캔</div>
+                <div id="scanStatus" class="text-orange-300 text-sm font-bold mt-1">카메라를 바코드에 맞춰주세요</div>
+            </div>
+            <div class="relative w-full bg-black rounded-2xl overflow-hidden" style="aspect-ratio:4/3">
+                <video id="scanVideo" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                <!-- 스캔 가이드 -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="relative" style="width:80%;height:30%">
+                        <div class="absolute inset-0 border-2 border-orange-400 rounded-lg"></div>
+                        <div class="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-orange-500 rounded-tl-lg -translate-x-0.5 -translate-y-0.5"></div>
+                        <div class="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-orange-500 rounded-tr-lg translate-x-0.5 -translate-y-0.5"></div>
+                        <div class="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-orange-500 rounded-bl-lg -translate-x-0.5 translate-y-0.5"></div>
+                        <div class="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-orange-500 rounded-br-lg translate-x-0.5 translate-y-0.5"></div>
+                        <div id="scanLine" class="absolute left-0 right-0 h-0.5 bg-orange-400 opacity-80" style="top:50%;box-shadow:0 0 6px 1px #f97316"></div>
+                    </div>
+                </div>
+                <!-- 어둡게 처리 상하 -->
+                <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.5) 100%)"></div>
+            </div>
+            <div id="scanResult" class="hidden bg-green-500 text-white font-black px-6 py-3 rounded-xl text-lg w-full text-center"></div>
+            <button id="closeScanBtn" class="px-10 py-3 bg-white text-gray-900 font-black rounded-full text-sm hover:bg-gray-100 transition-colors">닫기</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // 스캔 라인 애니메이션
+    let lineDir = 1, linePos = 20;
+    const animateLine = () => {
+        if(modal.style.display === "none") return;
+        const line = document.getElementById("scanLine");
+        if(line) { linePos += lineDir * 1.5; if(linePos > 80 || linePos < 20) lineDir *= -1; line.style.top = linePos + "%"; }
+        requestAnimationFrame(animateLine);
+    };
+
+    let scanStream = null;
+    let scanRaf = null;
+
+    const stopScan = () => {
+        if(scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+        if(scanRaf) { cancelAnimationFrame(scanRaf); scanRaf = null; }
+        modal.style.display = "none";
+        const resultEl = document.getElementById("scanResult");
+        if(resultEl) { resultEl.classList.add("hidden"); resultEl.textContent = ""; }
+    };
+
+    const startScan = async () => {
+        const statusEl = document.getElementById("scanStatus");
+        const videoEl = document.getElementById("scanVideo");
+        const resultEl = document.getElementById("scanResult");
+        resultEl.classList.add("hidden");
+        modal.style.display = "flex";
+        requestAnimationFrame(animateLine);
+
+        // BarcodeDetector API 지원 여부 확인
+        if(!("BarcodeDetector" in window)) {
+            statusEl.textContent = "❌ 이 브라우저는 지원 안 됨 (Chrome/Safari 최신 버전 필요)";
+            return;
+        }
+
+        statusEl.textContent = "카메라 연결 중...";
+        try {
+            scanStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+            });
+            videoEl.srcObject = scanStream;
+            await videoEl.play();
+            statusEl.textContent = "바코드를 가이드 안에 맞춰주세요";
+
+            const detector = new BarcodeDetector({ formats: ["ean_13","ean_8","code_128","code_39","upc_a","upc_e","itf","codabar"] });
+
+            const detect = async () => {
+                if(!scanStream) return;
+                try {
+                    const barcodes = await detector.detect(videoEl);
+                    if(barcodes.length > 0) {
+                        const code = barcodes[0].rawValue;
+                        // 성공 피드백
+                        resultEl.textContent = "✓ " + code;
+                        resultEl.classList.remove("hidden");
+                        statusEl.textContent = "인식 완료!";
+                        // 진동 (모바일)
+                        if(navigator.vibrate) navigator.vibrate(100);
+                        // 검색창 채우고 필터링
+                        setTimeout(() => {
+                            stopScan();
+                            const qEl = document.getElementById("q");
+                            if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
+                            visibleCount = 60; render();
+                        }, 600);
+                        return;
+                    }
+                } catch(e) {}
+                scanRaf = requestAnimationFrame(detect);
+            };
+            scanRaf = requestAnimationFrame(detect);
+        } catch(e) {
+            statusEl.textContent = "❌ 카메라 오류: " + (e.message || e);
+        }
+    };
+
+    document.getElementById("scanBtn").onclick = startScan;
+    document.getElementById("closeScanBtn").onclick = stopScan;
+    modal.addEventListener("click", (e) => { if(e.target === modal) stopScan(); });
 }
 
 window.togglePromoView = (btn, bypassRender = false) => {
