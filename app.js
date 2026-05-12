@@ -28,6 +28,11 @@ style.innerHTML = `
     @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
     .toast-undo:hover { color: #fef08a; }
+    @keyframes laser-move { 0%,100% { top:15%; } 50% { top:82%; } }
+    #scanLaserLine { position:absolute; left:0; right:0; height:2px; background:linear-gradient(to right,transparent 5%,#f97316 40%,#f97316 60%,transparent 95%); box-shadow:0 0 8px 3px rgba(249,115,22,0.7); pointer-events:none; z-index:20; animation:laser-move 1.8s ease-in-out infinite; }
+    #barcodeRegion video { border-radius:12px; }
+    #barcodeRegion__scan_region { position:relative !important; }
+    #barcodeRegion__dashboard { display:none !important; }
 
     /* 🔥 Glassmorphism 모달 컨테이너 🔥 */
     .glass-modal {
@@ -746,12 +751,12 @@ function setupBarcodeScanner() {
 
         statusEl.textContent = "카메라 연결 중...";
         try {
-            scanner = new Html5Qrcode("barcodeRegion");
+            scanner = new Html5Qrcode("barcodeRegion", { verbose: false });
             await scanner.start(
                 { facingMode: "environment" },
                 {
                     fps: 15,
-                    qrbox: { width: 280, height: 110 },
+                    qrbox: (w, h) => ({ width: Math.floor(w * 0.9), height: Math.floor(h * 0.38) }),
                     formatsToSupport: [
                         Html5QrcodeSupportedFormats.EAN_13,
                         Html5QrcodeSupportedFormats.EAN_8,
@@ -773,11 +778,26 @@ function setupBarcodeScanner() {
                         const qEl = document.getElementById("q");
                         if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
                         visibleCount = 60; render();
+                        const matched = typeof PRODUCTS !== "undefined"
+                            ? PRODUCTS.filter(p => p._hay && p._hay.includes(code.toLowerCase())).length
+                            : 0;
+                        if(matched === 0) {
+                            showToast("바코드 인식됨 (" + code + ") — 엑셀에 해당 바코드 없음. POS바코드번호 컬럼 확인 필요");
+                        }
                     }, 800);
                 },
                 () => {}
             );
-            statusEl.textContent = "바코드를 가이드 안에 맞춰주세요";
+            // 레이저 라인 오버레이 주입
+            setTimeout(() => {
+                const scanRegion = document.getElementById("barcodeRegion__scan_region");
+                if(scanRegion && !document.getElementById("scanLaserLine")) {
+                    const laser = document.createElement("div");
+                    laser.id = "scanLaserLine";
+                    scanRegion.appendChild(laser);
+                }
+            }, 500);
+            statusEl.textContent = "바코드를 화면 중앙에 맞춰주세요";
         } catch(e) {
             statusEl.textContent = "❌ 카메라 오류: " + (e.message || e);
         }
