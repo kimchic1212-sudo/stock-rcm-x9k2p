@@ -681,9 +681,13 @@ function setupQuickActionBar() {
     wrap.dataset.setup = "1";
 
     const hasPromo = PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0;
+    const erpApplied = !!window._erpDeductApplied;
     wrap.innerHTML = `
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
+        </button>
+        <button id="erpSyncBtn" onclick="window.syncErpSales()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold ${erpApplied ? 'bg-green-500 text-white border-green-600' : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700'} border rounded-lg transition-colors whitespace-nowrap">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>${erpApplied ? '판매차감중' : 'ERP 연동'}</span>
         </button>
         ${hasPromo ? `
         <button id="promoViewBtn" onclick="window.togglePromoView(this)" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-purple-700 transition-colors whitespace-nowrap" data-active="0">
@@ -692,6 +696,107 @@ function setupQuickActionBar() {
     `;
     if(window.lucide) lucide.createIcons();
 }
+
+window.syncErpSales = async function() {
+    const ERP_URL = localStorage.getItem('rcm_erp_url') || 'http://121.156.75.226';
+    const d = new Date();
+    const today = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+
+    const btn = document.getElementById('erpSyncBtn');
+    if(btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>동기화중...</span>'; if(window.lucide) lucide.createIcons(); }
+
+    const payload = {
+        Debug: false, Seq: null, PageToken: null,
+        Action: 228002, ActionType: 0,
+        PgmMethodName: "Query", ServiceSeq: 111220021, MethodSeq: 1,
+        Param: "", SPName: null, SPAlias: null, DBType: null, WFType: null,
+        IsCombo: 0, IsSetCombo: 0, IsRunPgmMethod: 0,
+        IsExcelQuery: false, IsCommonLuaService: false, IsAuthService: false, IsRunService: false,
+        ServiceType: 0,
+        JSonData: {
+            Tables: [{
+                TableName: "DataBlock1",
+                Columns: ["orderNo","orderYmdt","productName","productManagementCd","productNo","Spec","Price","Qty","CurAmt","CurVAT","CurAmtTotal","lastProductCouponDiscountAmt","firstProductCouponDiscountAmt","diffProductCouponDiscountAmtSum","lastCartCouponDiscountAmt","firstCartCouponDiscountAmt","diffCartCouponDiscountAmtSum","lastSubPayAmt","firstSubPayAmt","diffSubPayAmtSum","lastMainPayAmt","UMMemberKindName","ordererName","ordererContact1","receiverContact1","orderStatusType","payType","UMReceiptKind","receiverName","ordererEmail","memberId","MemberNo","GubunName","GubunSeq","WHSeq","WHName","IsReturnOrder","IsOrderProc","ItemNick","lastTotalDiscountAmt","TotAmt2","TotAmt4","TotAmt3","deliveryAmt","additionalDiscountAmt","UMOrderKind","CustSeq","EmpSeq","DeptSeq","UMMemberKindSeq","ItemClassMSeq","ItemClassMName","Category","UMSilSeq","UMSilName","UMStoreName","SumTotAmt1","SumTotAmt2","SumTotAmt3","SumTotAmt4","SumTotAmt5","SumTotAmt6","SumlastTotalDiscountAmt"],
+                ColumnsType: [0,0,0,1,0,0,5,1,5,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,5,5,5,5,1,1,1,1,1,1,1,1,0,0,1,0,0,1,5,5,5,5,1,5],
+                Rows: []
+            }],
+            IsSendXml: true, DataBlock1: "DataBlock1"
+        },
+        callback: null, ToolBarInfo: null, JumpData: null,
+        Option: { PgmSeq: null, PgmId: null, WorkingTag: null, XmlFlags: null, Timeout: 3600, LoginPgmSeq: 0, ExecuteSeq: "0", ServiceLayer: null, PgmMethodSeq: 0, ToDsn: null, IsDebug: null, PgmEventSeq: 0, DebugMode: null, JumpPgmSeq: 0, MenuSeq: 0, IsAsyncService: false, IsUseSendMessage: false, SendDateKey: null },
+        ExeMsg: { ErrorSeq: 0, Message: "", ErrStatus: "", Method: "", IsSystemError: false, InnerMessage: "" },
+        LoginOptionMsg: null,
+        LoginDateOptionMsg: { LoginDate: "", LoginDateYear: "", LoginDateMonth: "", LoginDateDay: "" },
+        AuthOption: { Type: 0, Data: "" }
+    };
+
+    try {
+        const res = await fetch(ERP_URL + '/WebApi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json, text/javascript, */*; q=0.01' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        const table = data?.JSonData?.Tables?.[0];
+        if(!table?.Rows?.length) { showToast('오늘 ERP 판매 데이터 없음'); return; }
+
+        const cols = table.Columns;
+        const rows = table.Rows;
+        const iNo = cols.indexOf('productNo');
+        const iSpec = cols.indexOf('Spec');
+        const iQty = cols.indexOf('Qty');
+        const iStatus = cols.indexOf('orderStatusType');
+        const iDate = cols.indexOf('orderYmdt');
+        const iWH = cols.indexOf('WHName');
+
+        const busanDed = {}, sinsaDed = {};
+        for(const row of rows) {
+            if(String(row[iDate]) !== today) continue;
+            if(!String(row[iStatus]).includes('(POS)')) continue;
+            const pno = String(row[iNo] || '').trim();
+            const spec = String(row[iSpec] || '').trim();
+            const qty = parseInt(row[iQty]) || 0;
+            const wh = String(row[iWH] || '');
+            if(!pno || !spec) continue;
+            const key = pno + '|' + spec;
+            if(wh.includes('부산')) busanDed[key] = (busanDed[key] || 0) + qty;
+            if(wh.includes('신사')) sinsaDed[key] = (sinsaDed[key] || 0) + qty;
+        }
+
+        const allKeys = new Set([...Object.keys(busanDed), ...Object.keys(sinsaDed)]);
+        if(allKeys.size === 0) { showToast('오늘 POS 판매 내역 없음'); return; }
+
+        for(const p of PRODUCTS) {
+            for(const s of p.sizes) {
+                const key = p.품번 + '|' + String(s.size).trim();
+                if(busanDed[key]) s.busan = Math.max(0, s.busan - busanDed[key]);
+                if(sinsaDed[key]) s.sinsa = Math.max(0, s.sinsa - sinsaDed[key]);
+            }
+            p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan, 0);
+            p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa, 0);
+        }
+
+        window._erpDeductApplied = true;
+        window._erpDeductTime = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+        wrap.dataset.setup = "0";
+        setupQuickActionBar();
+        updateStats();
+        render();
+        showToast(`ERP 동기화 완료 — 오늘 판매 ${allKeys.size}건 재고 차감 (${window._erpDeductTime})`);
+
+    } catch(e) {
+        if(e.name === 'TypeError' || String(e.message).toLowerCase().includes('fetch') || String(e.message).includes('cors')) {
+            showToast('CORS 차단 — ERP 직접 연동 불가. 북마크릿 방식으로 전환 필요합니다.');
+        } else {
+            showToast('ERP 오류: ' + e.message);
+        }
+        console.error('ERP sync:', e);
+        if(btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>ERP 연동</span>'; if(window.lucide) lucide.createIcons(); }
+    }
+};
 
 window.togglePromoView = (btn, bypassRender = false) => {
     if(!bypassRender) saveHistoryState();
