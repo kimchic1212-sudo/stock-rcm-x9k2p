@@ -700,7 +700,6 @@ function setupQuickActionBar() {
 function setupBarcodeScanner() {
     if($("#barcodeScanModal")) return;
 
-    // 스캐너 모달 생성
     const modal = document.createElement("div");
     modal.id = "barcodeScanModal";
     modal.className = "fixed inset-0 z-[99999] bg-black/95 flex flex-col items-center justify-center";
@@ -709,78 +708,75 @@ function setupBarcodeScanner() {
         <div class="w-full max-w-sm px-4 flex flex-col items-center gap-4">
             <div class="text-center">
                 <div class="text-white font-black text-lg">📦 바코드 스캔</div>
-                <div id="scanStatus" class="text-orange-300 text-sm font-bold mt-1">카메라를 바코드에 맞춰주세요</div>
+                <div id="scanStatus" class="text-orange-300 text-sm font-bold mt-1">카메라 연결 중...</div>
             </div>
-            <div class="relative w-full bg-black rounded-2xl overflow-hidden" style="aspect-ratio:4/3">
-                <video id="scanVideo" class="w-full h-full object-cover" autoplay muted playsinline></video>
-                <!-- 스캔 가이드 -->
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div class="relative" style="width:80%;height:30%">
-                        <div class="absolute inset-0 border-2 border-orange-400 rounded-lg"></div>
-                        <div class="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-orange-500 rounded-tl-lg -translate-x-0.5 -translate-y-0.5"></div>
-                        <div class="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-orange-500 rounded-tr-lg translate-x-0.5 -translate-y-0.5"></div>
-                        <div class="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-orange-500 rounded-bl-lg -translate-x-0.5 translate-y-0.5"></div>
-                        <div class="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-orange-500 rounded-br-lg translate-x-0.5 translate-y-0.5"></div>
-                        <div id="scanLine" class="absolute left-0 right-0 h-0.5 bg-orange-400 opacity-80" style="top:50%;box-shadow:0 0 6px 1px #f97316"></div>
-                    </div>
-                </div>
-                <!-- 어둡게 처리 상하 -->
-                <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.5) 100%)"></div>
-            </div>
+            <div id="barcodeRegion" class="w-full rounded-2xl overflow-hidden" style="min-height:240px;background:#111"></div>
             <div id="scanResult" class="hidden bg-green-500 text-white font-black px-6 py-3 rounded-xl text-lg w-full text-center"></div>
             <button id="closeScanBtn" class="px-10 py-3 bg-white text-gray-900 font-black rounded-full text-sm hover:bg-gray-100 transition-colors">닫기</button>
         </div>
     `;
     document.body.appendChild(modal);
 
-    // 스캔 라인 애니메이션
-    let lineDir = 1, linePos = 20;
-    const animateLine = () => {
-        if(modal.style.display === "none") return;
-        const line = document.getElementById("scanLine");
-        if(line) { linePos += lineDir * 1.5; if(linePos > 80 || linePos < 20) lineDir *= -1; line.style.top = linePos + "%"; }
-        requestAnimationFrame(animateLine);
-    };
-
-    let zxingControls = null;
+    let scanner = null;
 
     const stopScan = () => {
-        if(zxingControls) { try { zxingControls.stop(); } catch(e){} zxingControls = null; }
+        if(scanner) {
+            scanner.stop().catch(()=>{});
+            scanner = null;
+        }
         modal.style.display = "none";
         const resultEl = document.getElementById("scanResult");
         if(resultEl) { resultEl.classList.add("hidden"); resultEl.textContent = ""; }
+        const region = document.getElementById("barcodeRegion");
+        if(region) region.innerHTML = "";
     };
 
     const startScan = async () => {
         const statusEl = document.getElementById("scanStatus");
-        const videoEl = document.getElementById("scanVideo");
         const resultEl = document.getElementById("scanResult");
+        const region = document.getElementById("barcodeRegion");
         resultEl.classList.add("hidden");
+        region.innerHTML = "";
         modal.style.display = "flex";
-        requestAnimationFrame(animateLine);
 
-        if(typeof ZXingBrowser === "undefined") {
-            statusEl.textContent = "❌ 스캔 라이브러리 로드 실패 (새로고침 후 재시도)";
+        if(typeof Html5Qrcode === "undefined") {
+            statusEl.textContent = "❌ 라이브러리 로드 실패 (새로고침 후 재시도)";
             return;
         }
 
         statusEl.textContent = "카메라 연결 중...";
         try {
-            const codeReader = new ZXingBrowser.BrowserMultiFormatReader();
-            zxingControls = await codeReader.decodeFromVideoDevice(undefined, videoEl, (result, err) => {
-                if(!result) return;
-                const code = result.getText();
-                resultEl.textContent = "✓ " + code;
-                resultEl.classList.remove("hidden");
-                statusEl.textContent = "인식 완료!";
-                if(navigator.vibrate) navigator.vibrate(100);
-                setTimeout(() => {
-                    stopScan();
-                    const qEl = document.getElementById("q");
-                    if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
-                    visibleCount = 60; render();
-                }, 600);
-            });
+            scanner = new Html5Qrcode("barcodeRegion");
+            await scanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 15,
+                    qrbox: { width: 280, height: 110 },
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E,
+                        Html5QrcodeSupportedFormats.ITF,
+                        Html5QrcodeSupportedFormats.CODABAR
+                    ]
+                },
+                (code) => {
+                    resultEl.textContent = "✓ " + code;
+                    resultEl.classList.remove("hidden");
+                    statusEl.textContent = "인식 완료!";
+                    if(navigator.vibrate) navigator.vibrate(100);
+                    setTimeout(() => {
+                        stopScan();
+                        const qEl = document.getElementById("q");
+                        if(qEl) { qEl.value = code; qEl.dispatchEvent(new Event("input", { bubbles: true })); }
+                        visibleCount = 60; render();
+                    }, 800);
+                },
+                () => {}
+            );
             statusEl.textContent = "바코드를 가이드 안에 맞춰주세요";
         } catch(e) {
             statusEl.textContent = "❌ 카메라 오류: " + (e.message || e);
