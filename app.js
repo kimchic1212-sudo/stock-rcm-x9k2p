@@ -149,6 +149,9 @@ function loadGhConfig(){ try{ const c=localStorage.getItem(GH_CONFIG_KEY); if(c)
 function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); }
 function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
+const ANTH_KEY = "racement_anth_key_v1";
+function getAnthKey(){ return localStorage.getItem(ANTH_KEY) || ""; }
+function setAnthKey(v){ if(v) localStorage.setItem(ANTH_KEY, v); else localStorage.removeItem(ANTH_KEY); }
 
 function checkPat() {
     if(!getPat()) { alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요."); return false; }
@@ -419,6 +422,71 @@ async function loadData(force = false){
 }
 
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+// ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
+const SALES_GUIDE_SYSTEM_PROMPT = `당신은 프리미엄 러닝 스페셜티 매장의 '시니어 세일즈 트레이너'이자 러닝 기어 전문 분석가입니다. 방대한 리뷰 데이터와 스펙을 매장 직원들이 고객 응대 시 즉각적으로 활용할 수 있는 '직관적이고 설득력 있는 세일즈 언어'로 변환하는 데 탁월한 능력을 갖추고 있습니다.
+
+# Constraints
+0. 입력이 영문일 경우 분석은 영문으로 하되 출력은 반드시 한국어로 작성하세요.
+1. 사용자가 입력한 텍스트 데이터에 기반하여 작성하며, 없는 수치나 정보를 임의로 지어내지 마세요.
+2. 해시태그: 신발의 핵심 정체성(#맥스쿠션, #카본레이싱, #안정화 등)을 보여주는 직관적인 태그 4~5개.
+3. 핵심 특징: 기술적 스펙을 러너에게 주는 '실제 이점(Benefit)'으로 변환하여 2~3문장 요약.
+4. 장/단점: 치명적인 장점 2가지 + 고려할 단점 1~2가지.
+5. 비교 포인트: 전작 대비 개선점 또는 경쟁 모델 대비 우위 1~2문장.
+6. 실전 응대 멘트: 1인칭 구어체, 구매 유도 화법.
+7. "이런 분은 비추" 항목 반드시 포함 (역설적으로 신뢰도를 높임).
+8. 반론 대응: 가격/무게/핏 등 자주 나오는 반론 대응 멘트 1~2가지.
+9. 출력 마지막에 반드시 아래 형식의 앱 등록용 데이터 블록을 포함하세요.
+
+# 출력 마지막에 반드시 포함할 블록 (파싱용 — 형식 절대 변경 금지)
+%%APP_DATA_START%%
+keywords: 태그1,태그2,태그3,태그4
+features: (핵심 특징 1~2문장 압축)
+target: (추천 고객 1줄 압축)
+pitch: (실전 응대 멘트 1~2문장 압축)
+%%APP_DATA_END%%`;
+
+async function callClaudeForGuide(brand, modelName, reviewText) {
+    const key = getAnthKey();
+    if (!key) throw new Error("Anthropic API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.");
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-allow-browser": "true",
+            "content-type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "claude-opus-4-5",
+            max_tokens: 2048,
+            system: SALES_GUIDE_SYSTEM_PROMPT,
+            messages: [{ role: "user", content: `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 데이터를 분석해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}` }]
+        })
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`Claude API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
+    }
+    const data = await res.json();
+    return data.content?.[0]?.text || "";
+}
+
+function parseGuideResponse(text) {
+    const result = { keywords: [], features: "", target: "", pitch: "" };
+    const blockMatch = text.match(/%%APP_DATA_START%%([\s\S]*?)%%APP_DATA_END%%/);
+    if (!blockMatch) return result;
+    const block = blockMatch[1];
+    const kwMatch   = block.match(/keywords:\s*(.+)/);
+    const ftMatch   = block.match(/features:\s*(.+)/);
+    const tgMatch   = block.match(/target:\s*(.+)/);
+    const ptMatch   = block.match(/pitch:\s*(.+)/);
+    if (kwMatch) result.keywords = kwMatch[1].split(",").map(k => k.trim()).filter(Boolean);
+    if (ftMatch) result.features = ftMatch[1].trim();
+    if (tgMatch) result.target   = tgMatch[1].trim();
+    if (ptMatch) result.pitch    = ptMatch[1].trim();
+    return result;
+}
 
 function applyErpDeductions() {
     if(!SALES_DEDUCTIONS) return;
@@ -2877,6 +2945,11 @@ window.addEventListener('DOMContentLoaded', () => {
                             <label class="block text-xs font-bold text-gray-500 mb-1">Personal Access Token (PAT)</label>
                             <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
+                        <div class="pt-3 border-t border-gray-200/40">
+                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Anthropic API Key (AI 세일즈 가이드 자동생성)</label>
+                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="sk-ant-api03-...">
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">미등록 탐지 패널에서 리뷰 텍스트 → AI 자동 가이드 생성에 사용됩니다.</p>
+                        </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
                         <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-white/60 border border-white text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">돌아가기</button>
@@ -2946,15 +3019,16 @@ window.addEventListener('DOMContentLoaded', () => {
         };
 
         // 3. API 환경설정 저장
-        document.getElementById("ghSave").onclick = () => { 
-            GH = { 
-                owner: document.getElementById("ghOwner").value.trim(), 
-                repo: document.getElementById("ghRepo").value.trim(), 
-                branch: document.getElementById("ghBranch").value.trim() || "main" 
-            }; 
-            saveGhConfig(); 
-            setPat(document.getElementById("ghPat").value.trim()); 
-            alert("API 설정이 저장되었습니다."); 
+        document.getElementById("ghSave").onclick = () => {
+            GH = {
+                owner: document.getElementById("ghOwner").value.trim(),
+                repo: document.getElementById("ghRepo").value.trim(),
+                branch: document.getElementById("ghBranch").value.trim() || "main"
+            };
+            saveGhConfig();
+            setPat(document.getElementById("ghPat").value.trim());
+            setAnthKey(document.getElementById("anthKeyInput").value.trim());
+            alert("API 설정이 저장되었습니다.");
             document.getElementById("backToUpload").click();
         };
 
@@ -2997,12 +3071,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 listEl.innerHTML = missing.map(p => `
                     <div class="bg-white/70 border border-gray-200 rounded-xl p-3 space-y-2">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400" data-code="${p.품번}">
-                            <span class="text-[11px] font-black text-gray-500">${escapeHtml(p.브랜드||'')} · ${escapeHtml(p.품번)}</span>
-                            <span class="text-[12px] font-black text-gray-800">${escapeHtml(p.품명||'')}</span>
-                        </label>
-                        <div class="grid grid-cols-2 gap-1.5 pl-6">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer min-w-0">
+                                <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400 shrink-0" data-code="${p.품번}">
+                                <span class="text-[11px] font-black text-gray-500 shrink-0">${escapeHtml(p.브랜드||'')} · ${escapeHtml(p.품번)}</span>
+                                <span class="text-[12px] font-black text-gray-800 truncate">${escapeHtml(p.품명||'')}</span>
+                            </label>
+                            <button class="ai-gen-toggle shrink-0 px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-code="${p.품번}">🤖 AI 생성</button>
+                        </div>
+                        <div class="ai-gen-box hidden space-y-1.5" data-code="${p.품번}">
+                            <textarea class="ai-review-text w-full px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="4" placeholder="RunRepeat 리뷰, 스펙 텍스트를 여기에 붙여넣으세요. 영문 OK." data-code="${p.품번}"></textarea>
+                            <button class="ai-gen-btn w-full py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ 가이드 자동 생성</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5 pl-1">
                             <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
                             <input type="text" placeholder="제품 특징" class="miss-ft ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
                             <input type="text" placeholder="추천 고객" class="miss-tg ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
@@ -3010,6 +3091,60 @@ window.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `).join('');
+
+                // AI 버튼 이벤트 위임
+                listEl.addEventListener('click', async (e) => {
+                    // 🤖 AI 생성 토글
+                    if (e.target.classList.contains('ai-gen-toggle')) {
+                        const code = e.target.dataset.code;
+                        const box = listEl.querySelector(`.ai-gen-box[data-code="${code}"]`);
+                        if (box) box.classList.toggle('hidden');
+                        return;
+                    }
+                    // ✨ 가이드 자동 생성
+                    if (e.target.classList.contains('ai-gen-btn')) {
+                        if (!getAnthKey()) {
+                            alert("⚠️ Admin > API 설정에서 Anthropic API Key를 먼저 등록해주세요.\n\nsk-ant-api03-... 형식의 키입니다.");
+                            return;
+                        }
+                        const code  = e.target.dataset.code;
+                        const brand = e.target.dataset.brand;
+                        const name  = e.target.dataset.name;
+                        const reviewText = listEl.querySelector(`.ai-review-text[data-code="${code}"]`)?.value || "";
+                        if (!reviewText.trim()) { alert("리뷰 텍스트나 스펙 데이터를 붙여넣어 주세요."); return; }
+
+                        const orig = e.target.textContent;
+                        e.target.textContent = "⏳ AI 분석 중...";
+                        e.target.disabled = true;
+
+                        try {
+                            const rawText = await callClaudeForGuide(brand, name, reviewText);
+                            const parsed  = parseGuideResponse(rawText);
+
+                            // 필드 자동 채우기
+                            const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
+                            const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
+                            const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
+                            const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
+                            if (kwEl) kwEl.value = parsed.keywords.join(", ");
+                            if (ftEl) ftEl.value = parsed.features;
+                            if (tgEl) tgEl.value = parsed.target;
+                            if (ptEl) ptEl.value = parsed.pitch;
+
+                            // 자동 체크 + AI 박스 닫기
+                            const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
+                            if (chk) chk.checked = true;
+                            listEl.querySelector(`.ai-gen-box[data-code="${code}"]`)?.classList.add('hidden');
+
+                            e.target.textContent = "✅ 생성 완료";
+                        } catch(err) {
+                            alert("AI 생성 실패: " + err.message);
+                            e.target.textContent = orig;
+                        } finally {
+                            e.target.disabled = false;
+                        }
+                    }
+                }, { once: false });
             };
         }
 
