@@ -449,6 +449,9 @@ pitch: (실전 응대 멘트 1~2문장 압축)
 async function callClaudeForGuide(brand, modelName, reviewText) {
     const key = getAnthKey();
     if (!key) throw new Error("Anthropic API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.");
+    const userContent = reviewText.trim()
+        ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
+        : `브랜드: ${brand}\n모델명: ${modelName}\n\n이 러닝화의 AI 세일즈 가이드를 작성해주세요.`;
     const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -458,10 +461,10 @@ async function callClaudeForGuide(brand, modelName, reviewText) {
             "content-type": "application/json"
         },
         body: JSON.stringify({
-            model: "claude-opus-4-5",
-            max_tokens: 2048,
+            model: "claude-3-5-haiku-20241022",
+            max_tokens: 900,
             system: SALES_GUIDE_SYSTEM_PROMPT,
-            messages: [{ role: "user", content: `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 데이터를 분석해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}` }]
+            messages: [{ role: "user", content: userContent }]
         })
     });
     if (!res.ok) {
@@ -3080,8 +3083,11 @@ window.addEventListener('DOMContentLoaded', () => {
                             <button class="ai-gen-toggle shrink-0 px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-code="${p.품번}">🤖 AI 생성</button>
                         </div>
                         <div class="ai-gen-box hidden space-y-1.5" data-code="${p.품번}">
-                            <textarea class="ai-review-text w-full px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="4" placeholder="RunRepeat 리뷰, 스펙 텍스트를 여기에 붙여넣으세요. 영문 OK." data-code="${p.품번}"></textarea>
-                            <button class="ai-gen-btn w-full py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ 가이드 자동 생성</button>
+                            <button class="ai-gen-btn w-full py-2 rounded-lg bg-purple-600 text-white text-[12px] font-black hover:bg-purple-700 transition-colors shadow-sm" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ ${escapeHtml(p.품명||'')} 가이드 자동 생성</button>
+                            <details class="text-[10px]">
+                                <summary class="text-gray-400 font-bold cursor-pointer hover:text-purple-500">+ 리뷰/스펙 데이터 추가 (선택사항 — 정확도 향상)</summary>
+                                <textarea class="ai-review-text w-full mt-1.5 px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="3" placeholder="RunRepeat 리뷰, 스펙 텍스트 붙여넣기. 영문 OK." data-code="${p.품번}"></textarea>
+                            </details>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5 pl-1">
                             <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
@@ -3111,7 +3117,6 @@ window.addEventListener('DOMContentLoaded', () => {
                         const brand = e.target.dataset.brand;
                         const name  = e.target.dataset.name;
                         const reviewText = listEl.querySelector(`.ai-review-text[data-code="${code}"]`)?.value || "";
-                        if (!reviewText.trim()) { alert("리뷰 텍스트나 스펙 데이터를 붙여넣어 주세요."); return; }
 
                         const orig = e.target.textContent;
                         e.target.textContent = "⏳ AI 분석 중...";
