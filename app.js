@@ -424,34 +424,35 @@ async function loadData(force = false){
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
 // ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
-const SALES_GUIDE_SYSTEM_PROMPT = `당신은 프리미엄 러닝 스페셜티 매장의 '시니어 세일즈 트레이너'이자 러닝 기어 전문 분석가입니다. 방대한 리뷰 데이터와 스펙을 매장 직원들이 고객 응대 시 즉각적으로 활용할 수 있는 '직관적이고 설득력 있는 세일즈 언어'로 변환하는 데 탁월한 능력을 갖추고 있습니다.
+const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 수석 러닝 슈즈 애널리스트입니다.
+요청받은 러닝화에 대해 RunRepeat·Believe in the Run·브랜드 공식 스펙·러닝 커뮤니티 데이터 등 보유한 모든 지식을 활용하여 아래 형식의 가이드를 생성하세요.
+수치를 정확히 모를 경우 "약 OOg" 형식으로 추정값을 제공하세요 (추정이라도 비워두지 말 것).
+출력은 반드시 한국어로 작성하세요.
 
-# Constraints
-0. 입력이 영문일 경우 분석은 영문으로 하되 출력은 반드시 한국어로 작성하세요.
-1. 사용자가 입력한 텍스트 데이터에 기반하여 작성하며, 없는 수치나 정보를 임의로 지어내지 마세요.
-2. 해시태그: 신발의 핵심 정체성(#맥스쿠션, #카본레이싱, #안정화 등)을 보여주는 직관적인 태그 4~5개.
-3. 핵심 특징: 기술적 스펙을 러너에게 주는 '실제 이점(Benefit)'으로 변환하여 2~3문장 요약.
-4. 장/단점: 치명적인 장점 2가지 + 고려할 단점 1~2가지.
-5. 비교 포인트: 전작 대비 개선점 또는 경쟁 모델 대비 우위 1~2문장.
-6. 실전 응대 멘트: 1인칭 구어체, 구매 유도 화법.
-7. "이런 분은 비추" 항목 반드시 포함 (역설적으로 신뢰도를 높임).
-8. 반론 대응: 가격/무게/핏 등 자주 나오는 반론 대응 멘트 1~2가지.
-9. 출력 마지막에 반드시 아래 형식의 앱 등록용 데이터 블록을 포함하세요.
-
-# 출력 마지막에 반드시 포함할 블록 (파싱용 — 형식 절대 변경 금지)
+# 출력 블록 (파싱용 — 키 이름·순서 절대 변경 금지)
 %%APP_DATA_START%%
-keywords: 태그1,태그2,태그3,태그4
-features: (핵심 특징 1~2문장 압축)
-target: (추천 고객 1줄 압축)
-pitch: (실전 응대 멘트 1~2문장 압축)
+keywords: 태그1,태그2,태그3,태그4,태그5
+features: (핵심 기술 특징 2문장. 폼/플레이트/소재 명시)
+target: (추천 대상. 페이스 구간·발형·거리 포함)
+pitch: (판매 멘트 1~2문장. 구어체)
+weight: (남성 기준 무게. 예: 238g)
+heel_stack: (힐 스택. 예: 40mm)
+fore_stack: (포어풋 스택. 예: 32mm)
+drop: (드롭. 예: 8mm)
+spec_analysis: (스펙 수치의 실전 의미 1~2문장. "OOg이라 OO할 때 OO" 형식)
+vs_prev: (전작 대비 핵심 개선점 1~2문장. 전작 없으면 "초대 모델" 표기)
+vs_others: (동급 경쟁 모델 1~2개 언급 후 본 모델 우위 1~2문장)
+why: (이 신발의 한 줄 정의. "카본 없이 카본 속도를 내는 슈퍼트레이너" 같은 임팩트 있는 문장)
+best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프~풀 준비 중립 발")
+closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 %%APP_DATA_END%%`;
 
 async function callClaudeForGuide(brand, modelName, reviewText) {
     const key = getAnthKey();
     if (!key) throw new Error("Anthropic API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.");
     const userContent = reviewText.trim()
-        ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
-        : `브랜드: ${brand}\n모델명: ${modelName}\n\n이 러닝화의 AI 세일즈 가이드를 작성해주세요.`;
+        ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
+        : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
     const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
         {
@@ -473,18 +474,28 @@ async function callClaudeForGuide(brand, modelName, reviewText) {
 }
 
 function parseGuideResponse(text) {
-    const result = { keywords: [], features: "", target: "", pitch: "" };
+    const result = { keywords: [], features: "", target: "", pitch: "",
+                     weight: "", heel_stack: "", fore_stack: "", drop: "",
+                     spec_analysis: "", vs_prev: "", vs_others: "",
+                     why: "", best_for: "", closing: "" };
     const blockMatch = text.match(/%%APP_DATA_START%%([\s\S]*?)%%APP_DATA_END%%/);
     if (!blockMatch) return result;
     const block = blockMatch[1];
-    const kwMatch   = block.match(/keywords:\s*(.+)/);
-    const ftMatch   = block.match(/features:\s*(.+)/);
-    const tgMatch   = block.match(/target:\s*(.+)/);
-    const ptMatch   = block.match(/pitch:\s*(.+)/);
-    if (kwMatch) result.keywords = kwMatch[1].split(",").map(k => k.trim()).filter(Boolean);
-    if (ftMatch) result.features = ftMatch[1].trim();
-    if (tgMatch) result.target   = tgMatch[1].trim();
-    if (ptMatch) result.pitch    = ptMatch[1].trim();
+    const field = (key) => { const m = block.match(new RegExp(key + ":\\s*(.+)")); return m ? m[1].trim() : ""; };
+    result.keywords     = field("keywords").split(",").map(k => k.trim()).filter(Boolean);
+    result.features     = field("features");
+    result.target       = field("target");
+    result.pitch        = field("pitch");
+    result.weight       = field("weight");
+    result.heel_stack   = field("heel_stack");
+    result.fore_stack   = field("fore_stack");
+    result.drop         = field("drop");
+    result.spec_analysis= field("spec_analysis");
+    result.vs_prev      = field("vs_prev");
+    result.vs_others    = field("vs_others");
+    result.why          = field("why");
+    result.best_for     = field("best_for");
+    result.closing      = field("closing");
     return result;
 }
 
@@ -1773,32 +1784,84 @@ window.openSalesGuide = (code) => {
     if(!modal) {
         modal = document.createElement("div");
         modal.id = "salesGuideModal";
-        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-4";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-3";
         modal.innerHTML = `
-            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-            <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 border border-indigo-100">
-                <div class="p-5 bg-indigo-50 border-b border-indigo-100 flex justify-between items-start">
-                    <div>
-                        <div class="flex items-center gap-2 mb-1.5">
-                            <span class="bg-indigo-600 text-white text-[11px] px-2 py-0.5 rounded font-black tracking-wider">AI SALES GUIDE</span>
+            <div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+            <div class="modal-content relative bg-gradient-to-br from-slate-50 to-slate-100 w-full max-w-5xl mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 border border-slate-200" style="max-height:92vh;">
+                <!-- 헤더 -->
+                <div class="px-6 pt-5 pb-4 bg-gradient-to-r from-indigo-900 to-indigo-700 flex justify-between items-start shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                            <span class="bg-white/20 text-white text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase">AI SALES GUIDE</span>
+                            <span id="sgBrand" class="text-indigo-200 text-[11px] font-bold"></span>
                         </div>
-                        <h2 id="sgTitle" class="font-black text-xl text-indigo-950 line-clamp-2 leading-tight"></h2>
+                        <h2 id="sgTitle" class="font-black text-2xl text-white leading-tight truncate"></h2>
+                        <div id="sgKeywords" class="flex flex-wrap gap-1.5 mt-2.5"></div>
                     </div>
-                    <button id="closeSalesGuide" class="p-1.5 -mr-2 text-indigo-400 hover:text-indigo-800 transition-colors bg-white/50 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <button id="closeSalesGuide" class="ml-4 p-1.5 text-white/60 hover:text-white transition-colors bg-white/10 rounded-full shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
-                <div class="p-6 overflow-y-auto max-h-[70vh] space-y-6 dash-scroll">
-                    <div><div id="sgKeywords" class="flex flex-wrap gap-2 mb-2"></div></div>
-                    <div>
-                        <h3 class="font-black text-sm text-indigo-400 flex items-center gap-1.5 mb-2"><i data-lucide="zap" class="w-5 h-5"></i> 핵심 특징</h3>
-                        <div id="sgFeatures" class="text-[15px] text-gray-800 font-medium leading-relaxed bg-gray-50 p-4 rounded-xl"></div>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-sm text-indigo-400 flex items-center gap-1.5 mb-2"><i data-lucide="target" class="w-5 h-5"></i> 추천 고객</h3>
-                        <div id="sgTarget" class="text-[15px] text-gray-800 font-medium leading-relaxed bg-gray-50 p-4 rounded-xl"></div>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-sm text-indigo-400 flex items-center gap-1.5 mb-2"><i data-lucide="message-circle" class="w-5 h-5"></i> 실전 응대 멘트</h3>
-                        <div id="sgPitch" class="text-[16px] text-indigo-900 font-bold leading-relaxed bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl"></div>
+                <!-- 대시보드 3컬럼 -->
+                <div id="sgDashboard" class="flex-1 overflow-y-auto dash-scroll p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 h-full">
+                        <!-- Col 1: 스펙 데이터 -->
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                            <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 핵심 스펙</h3>
+                            <div id="sgMetrics" class="space-y-2 flex-1">
+                                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
+                                    <span class="text-[11px] font-bold text-slate-400">무게 (Men's)</span>
+                                    <span id="sgWeight" class="text-sm font-black text-slate-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
+                                    <span class="text-[11px] font-bold text-slate-400">힐 스택</span>
+                                    <span id="sgHeel" class="text-sm font-black text-slate-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
+                                    <span class="text-[11px] font-bold text-slate-400">포어풋 스택</span>
+                                    <span id="sgFore" class="text-sm font-black text-slate-800"></span>
+                                </div>
+                                <div class="flex justify-between items-center py-1.5">
+                                    <span class="text-[11px] font-bold text-slate-400">드롭</span>
+                                    <span id="sgDrop" class="text-sm font-black text-slate-800"></span>
+                                </div>
+                            </div>
+                            <div id="sgSpecBox" class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-[12px] text-amber-800 font-medium leading-relaxed"></div>
+                            <div>
+                                <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">핵심 특징</h4>
+                                <div id="sgFeatures" class="text-[12px] text-slate-700 font-medium leading-relaxed"></div>
+                            </div>
+                        </div>
+                        <!-- Col 2: 비교 분석 -->
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                            <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="git-compare" class="w-3.5 h-3.5"></i> 비교 분석</h3>
+                            <div class="bg-slate-50 rounded-xl p-3 flex-1">
+                                <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-1.5">VS 전작</span>
+                                <div id="sgVsPrev" class="text-[13px] text-slate-700 font-medium leading-relaxed"></div>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-3 flex-1">
+                                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest block mb-1.5">VS 경쟁 모델</span>
+                                <div id="sgVsOthers" class="text-[13px] text-slate-700 font-medium leading-relaxed"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">한 줄 정의</h4>
+                                <div id="sgWhy" class="text-[13px] font-black text-indigo-700 italic leading-relaxed"></div>
+                            </div>
+                        </div>
+                        <!-- Col 3: 세일즈 전략 -->
+                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                            <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="target" class="w-3.5 h-3.5"></i> 세일즈 전략</h3>
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">추천 타겟</h4>
+                                <div id="sgTarget" class="text-[12px] text-slate-700 font-medium leading-relaxed bg-slate-50 rounded-xl p-3"></div>
+                            </div>
+                            <div>
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Best For</h4>
+                                <div id="sgBestFor" class="text-[12px] font-bold text-indigo-600 bg-indigo-50 rounded-xl p-3 leading-relaxed"></div>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">클로징 멘트</h4>
+                                <div id="sgPitch" class="text-[13px] font-bold text-indigo-900 leading-relaxed bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-r-xl italic flex-1"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1807,11 +1870,25 @@ window.openSalesGuide = (code) => {
         $("#closeSalesGuide").onclick = () => modal.classList.add("hidden");
     }
 
-    modal.querySelector("#sgTitle").textContent = p ? p.품명 : code;
-    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw => `<span class="bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full text-xs font-black border border-indigo-200 shadow-sm">#${escapeHtml(kw)}</span>`).join('');
-    modal.querySelector("#sgFeatures").textContent = guide.features || "내용 없음";
-    modal.querySelector("#sgTarget").textContent = guide.target || "내용 없음";
-    modal.querySelector("#sgPitch").textContent = guide.pitch || "내용 없음";
+    modal.querySelector("#sgTitle").textContent  = p ? p.품명 : code;
+    modal.querySelector("#sgBrand").textContent  = p ? p.브랜드 : "";
+    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw =>
+        `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">#${escapeHtml(kw)}</span>`).join('');
+    // 스펙 (V2 필드명 매핑)
+    modal.querySelector("#sgWeight").textContent   = guide.weight      || "—";
+    modal.querySelector("#sgHeel").textContent     = guide.heelStack   || guide.heel_stack  || "—";
+    modal.querySelector("#sgFore").textContent     = guide.foreStack   || guide.fore_stack  || "—";
+    modal.querySelector("#sgDrop").textContent     = guide.drop        || "—";
+    modal.querySelector("#sgSpecBox").textContent  = guide.specAdv     || guide.spec_analysis || guide.features || "—";
+    modal.querySelector("#sgFeatures").textContent = guide.features    || "—";
+    // 비교 (V2 필드명 매핑)
+    modal.querySelector("#sgVsPrev").textContent   = guide.verDiff     || guide.vs_prev  || guide.features || "—";
+    modal.querySelector("#sgVsOthers").textContent = guide.vsComp      || guide.vs_others || "—";
+    modal.querySelector("#sgWhy").textContent      = guide.whyThis     || guide.why      || guide.pitch    || "—";
+    // 전략 (V2 필드명 매핑)
+    modal.querySelector("#sgTarget").textContent   = guide.target      || "—";
+    modal.querySelector("#sgBestFor").textContent  = guide.bestFor     || guide.best_for || guide.target   || "—";
+    modal.querySelector("#sgPitch").textContent    = guide.closing     || guide.pitch    || "—";
 
     modal.classList.remove("hidden");
     if(window.lucide) lucide.createIcons();
@@ -3126,6 +3203,10 @@ window.addEventListener('DOMContentLoaded', () => {
                             const rawText = await callClaudeForGuide(brand, name, reviewText);
                             const parsed  = parseGuideResponse(rawText);
 
+                            // 전체 결과 저장
+                            window._missGuideData = window._missGuideData || {};
+                            window._missGuideData[code] = parsed;
+
                             // 필드 자동 채우기
                             const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
                             const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
@@ -3134,7 +3215,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             if (kwEl) kwEl.value = parsed.keywords.join(", ");
                             if (ftEl) ftEl.value = parsed.features;
                             if (tgEl) tgEl.value = parsed.target;
-                            if (ptEl) ptEl.value = parsed.pitch;
+                            if (ptEl) ptEl.value = parsed.closing || parsed.pitch;
 
                             // 자동 체크 + AI 박스 닫기
                             const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
@@ -3176,6 +3257,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     try {
                         const rawText = await callClaudeForGuide(brand, name, "");
                         const parsed  = parseGuideResponse(rawText);
+                        window._missGuideData = window._missGuideData || {};
+                        window._missGuideData[code] = parsed;
                         const listEl  = document.getElementById("missList");
                         if(listEl) {
                             const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
@@ -3185,7 +3268,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             if(kwEl) kwEl.value = parsed.keywords.join(", ");
                             if(ftEl) ftEl.value = parsed.features;
                             if(tgEl) tgEl.value = parsed.target;
-                            if(ptEl) ptEl.value = parsed.pitch;
+                            if(ptEl) ptEl.value = parsed.closing || parsed.pitch;
                             const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
                             if(chk) chk.checked = true;
                         }
@@ -3221,9 +3304,14 @@ window.addEventListener('DOMContentLoaded', () => {
                     const ft = document.querySelector(`.miss-ft[data-code="${code}"]`)?.value || "";
                     const tg = document.querySelector(`.miss-tg[data-code="${code}"]`)?.value || "";
                     const pt = document.querySelector(`.miss-pt[data-code="${code}"]`)?.value || "";
+                    const ai = window._missGuideData?.[code] || {};
                     newEntries[code] = {
-                        keywords: kw ? kw.split(",").map(k=>k.trim()).filter(Boolean) : [],
-                        features: ft, target: tg, pitch: pt
+                        keywords: kw ? kw.split(",").map(k=>k.trim()).filter(Boolean) : (ai.keywords||[]),
+                        features: ft||ai.features||"", target: tg||ai.target||"", pitch: pt||ai.closing||ai.pitch||"",
+                        weight: ai.weight||"", heel_stack: ai.heel_stack||"", fore_stack: ai.fore_stack||"",
+                        drop: ai.drop||"", spec_analysis: ai.spec_analysis||"",
+                        vs_prev: ai.vs_prev||"", vs_others: ai.vs_others||"",
+                        why: ai.why||"", best_for: ai.best_for||"", closing: ai.closing||pt||""
                     };
                 });
 
