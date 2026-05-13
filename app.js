@@ -453,7 +453,7 @@ async function callClaudeForGuide(brand, modelName, reviewText) {
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n이 러닝화의 AI 세일즈 가이드를 작성해주세요.`;
     const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -2961,6 +2961,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     <div class="flex items-center gap-3 px-6 pt-6 pb-3">
                         <h2 class="text-lg font-black text-gray-900 m-0 flex items-center gap-2">🔍 가이드 미등록 상품</h2>
                         <span id="missCount" class="px-2.5 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black"></span>
+                        <button id="bulkAiBtn" class="ml-auto px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors shadow-sm whitespace-nowrap">🤖 전체 AI 일괄생성</button>
                     </div>
                     <div id="missList" class="flex-1 overflow-y-auto px-6 pb-2 space-y-2" style="max-height:400px;"></div>
                     <div class="flex justify-between items-center px-6 pb-6 pt-3 border-t border-gray-200/40 mt-2 shrink-0">
@@ -3052,13 +3053,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 // 신발만, 유니크 품번 기준으로 가이드 없는 상품 추출
                 const seen = new Set();
-                const SHOE_BRANDS = new Set(["나이키","호카","브룩스","써코니","뉴발란스","아디다스","온러닝","살로몬","알트라","노말","노다","비브람파이브핑거스","스카르파","요넥스","우포스","새티스파이","나이키(Nike)","호카(HOKA)"]);
                 const missing = PRODUCTS.filter(p => {
                     if(!p.품번 || seen.has(p.품번)) return false;
                     seen.add(p.품번);
-                    const isShoeCat = (p.카테고리||"").includes("신발");
-                    const isShoeBrand = SHOE_BRANDS.has(p.브랜드||"");
-                    if(!isShoeCat && !isShoeBrand) return false;
+                    if(p.카테고리 !== "신발") return false;
                     return !SALES_GUIDES[p.품번];
                 });
 
@@ -3152,6 +3150,59 @@ window.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 }, { once: false });
+            };
+        }
+
+        // 일괄 AI 생성
+        const bulkAiBtn = document.getElementById("bulkAiBtn");
+        if(bulkAiBtn) {
+            bulkAiBtn.onclick = async () => {
+                if(!getAnthKey()) {
+                    alert("⚠️ Admin > API 설정에서 Gemini API Key를 먼저 등록해주세요.");
+                    return;
+                }
+                const items = document.querySelectorAll(".ai-gen-btn");
+                if(items.length === 0) { alert("미등록 신발이 없습니다."); return; }
+                if(!confirm(`신발 ${items.length}개에 AI 가이드를 자동 생성합니다.\n시간이 걸릴 수 있어요. 진행할까요?`)) return;
+
+                bulkAiBtn.disabled = true;
+                let done = 0, failed = 0;
+
+                for(const btn of items) {
+                    const code  = btn.dataset.code;
+                    const brand = btn.dataset.brand;
+                    const name  = btn.dataset.name;
+                    bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
+                    try {
+                        const rawText = await callClaudeForGuide(brand, name, "");
+                        const parsed  = parseGuideResponse(rawText);
+                        const listEl  = document.getElementById("missList");
+                        if(listEl) {
+                            const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
+                            const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
+                            const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
+                            const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
+                            if(kwEl) kwEl.value = parsed.keywords.join(", ");
+                            if(ftEl) ftEl.value = parsed.features;
+                            if(tgEl) tgEl.value = parsed.target;
+                            if(ptEl) ptEl.value = parsed.pitch;
+                            const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
+                            if(chk) chk.checked = true;
+                        }
+                        done++;
+                    } catch(err) {
+                        failed++;
+                        console.warn(`[AI 일괄생성] ${name} 실패:`, err.message);
+                    }
+                    // API 레이트리밋 방지 딜레이
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+
+                bulkAiBtn.textContent = `✅ ${done}개 완료${failed > 0 ? ` (${failed}개 실패)` : ""}`;
+                bulkAiBtn.disabled = false;
+                if(done > 0) {
+                    alert(`✅ AI 가이드 ${done}개 생성 완료!\n이제 "선택 항목 저장" 버튼을 눌러 GitHub에 저장하세요.`);
+                }
             };
         }
 
