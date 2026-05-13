@@ -2844,7 +2844,10 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">AI 세일즈 가이드 DB</h4>
                                 <span style="font-size: 11px; color: #666; font-weight: bold;">특징 및 추천고객 업데이트</span>
                             </div>
-                            <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;"></span>
+                            <div class="flex flex-col items-end gap-1.5 ml-2 shrink-0">
+                                <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;"></span>
+                                <span id="missDetectBtn" style="font-size: 11px; font-weight: bold; color: #ff9f43; background: rgba(255,159,67,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap; cursor: pointer;">🔍 미등록 탐지</span>
+                            </div>
                             <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
                         </div>
                         
@@ -2878,6 +2881,18 @@ window.addEventListener('DOMContentLoaded', () => {
                     <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
                         <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-white/60 border border-white text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">돌아가기</button>
                         <button id="ghSave" class="px-5 py-2.5 rounded-xl bg-gray-900 text-white text-[13px] font-bold hover:bg-black transition-colors shadow-sm">설정 저장</button>
+                    </div>
+                </div>
+
+                <div id="missPanel" class="hidden flex-col w-full transition-all duration-300" style="max-height:580px; overflow:hidden;">
+                    <div class="flex items-center gap-3 px-6 pt-6 pb-3">
+                        <h2 class="text-lg font-black text-gray-900 m-0 flex items-center gap-2">🔍 가이드 미등록 상품</h2>
+                        <span id="missCount" class="px-2.5 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black"></span>
+                    </div>
+                    <div id="missList" class="flex-1 overflow-y-auto px-6 pb-2 space-y-2" style="max-height:400px;"></div>
+                    <div class="flex justify-between items-center px-6 pb-6 pt-3 border-t border-gray-200/40 mt-2 shrink-0">
+                        <button id="backToUploadFromMiss" class="px-5 py-2.5 rounded-xl bg-white/60 border border-gray-200 text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">← 돌아가기</button>
+                        <button id="saveMissGuides" class="px-6 py-2.5 rounded-xl bg-green-700 text-white text-[13px] font-black hover:bg-green-800 transition-colors shadow-sm">✅ 선택 항목 저장</button>
                     </div>
                 </div>
 
@@ -2943,7 +2958,111 @@ window.addEventListener('DOMContentLoaded', () => {
             document.getElementById("backToUpload").click();
         };
 
-        // 4. 메인 재고 엑셀 업로드 연결
+        // 4. 미등록 탐지 패널
+        const missDetectBtn = document.getElementById("missDetectBtn");
+        const backFromMiss  = document.getElementById("backToUploadFromMiss");
+        const saveMissBtn   = document.getElementById("saveMissGuides");
+
+        const showPanel = (id) => {
+            ["uploadPanel","settingsPanel","missPanel"].forEach(pid => {
+                const el = document.getElementById(pid);
+                if(!el) return;
+                if(pid === id){ el.classList.remove("hidden"); el.classList.add("flex"); }
+                else { el.classList.add("hidden"); el.classList.remove("flex"); }
+            });
+        };
+
+        if(missDetectBtn) {
+            missDetectBtn.onclick = () => {
+                showPanel("missPanel");
+
+                // 유니크 품번 기준으로 가이드 없는 상품 추출
+                const seen = new Set();
+                const missing = PRODUCTS.filter(p => {
+                    if(!p.품번 || seen.has(p.품번)) return false;
+                    seen.add(p.품번);
+                    return !SALES_GUIDES[p.품번];
+                });
+
+                const countEl = document.getElementById("missCount");
+                if(countEl) countEl.textContent = missing.length + "개 미등록";
+
+                const listEl = document.getElementById("missList");
+                if(!listEl) return;
+
+                if(missing.length === 0){
+                    listEl.innerHTML = `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 모든 상품에 가이드가 등록되어 있습니다!</div>`;
+                    return;
+                }
+
+                listEl.innerHTML = missing.map(p => `
+                    <div class="bg-white/70 border border-gray-200 rounded-xl p-3 space-y-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400" data-code="${p.품번}">
+                            <span class="text-[11px] font-black text-gray-500">${escapeHtml(p.브랜드||'')} · ${escapeHtml(p.품번)}</span>
+                            <span class="text-[12px] font-black text-gray-800">${escapeHtml(p.품명||'')}</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-1.5 pl-6">
+                            <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+                            <input type="text" placeholder="제품 특징" class="miss-ft ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+                            <input type="text" placeholder="추천 고객" class="miss-tg ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+                            <input type="text" placeholder="판매 멘트" class="miss-pt ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+                        </div>
+                    </div>
+                `).join('');
+            };
+        }
+
+        if(backFromMiss) backFromMiss.onclick = () => showPanel("uploadPanel");
+
+        if(saveMissBtn) {
+            saveMissBtn.onclick = async () => {
+                if(!checkPat()) return;
+                const checked = document.querySelectorAll(".miss-chk:checked");
+                if(checked.length === 0){ alert("저장할 항목을 체크해주세요."); return; }
+
+                const newEntries = {};
+                checked.forEach(chk => {
+                    const code = chk.dataset.code;
+                    const kw = document.querySelector(`.miss-kw[data-code="${code}"]`)?.value || "";
+                    const ft = document.querySelector(`.miss-ft[data-code="${code}"]`)?.value || "";
+                    const tg = document.querySelector(`.miss-tg[data-code="${code}"]`)?.value || "";
+                    const pt = document.querySelector(`.miss-pt[data-code="${code}"]`)?.value || "";
+                    newEntries[code] = {
+                        keywords: kw ? kw.split(",").map(k=>k.trim()).filter(Boolean) : [],
+                        features: ft, target: tg, pitch: pt
+                    };
+                });
+
+                const merged = Object.assign({}, SALES_GUIDES, newEntries);
+                const origText = saveMissBtn.textContent;
+                saveMissBtn.textContent = "⏳ 저장 중...";
+                saveMissBtn.disabled = true;
+
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+                    let sha = null;
+                    try { const r = await fetch(apiBase+"?t="+Date.now(),{headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } } catch(e){}
+                    const body = { message:`update: sales guide +${Object.keys(newEntries).length}개 추가`, content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    const res = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    if(!res.ok) throw new Error("GitHub 저장 실패 ("+res.status+")");
+
+                    SALES_GUIDES = merged;
+                    sessionStorage.removeItem(CACHE_KEY);
+                    rebuildIndex(); render(); window.renderSalesAdmin();
+                    alert(`✅ ${Object.keys(newEntries).length}개 가이드가 성공적으로 등록되었습니다!`);
+                    showPanel("uploadPanel");
+                } catch(err) {
+                    alert("저장 실패: " + err.message);
+                } finally {
+                    saveMissBtn.textContent = origText;
+                    saveMissBtn.disabled = false;
+                }
+            };
+        }
+
+        // 5. 메인 재고 엑셀 업로드 연결
         document.getElementById('mainUploadTrigger').onclick = () => {
             const mainFileInput = document.getElementById('file');
             if(mainFileInput) mainFileInput.click();
