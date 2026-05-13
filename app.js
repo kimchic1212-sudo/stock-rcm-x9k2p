@@ -452,27 +452,24 @@ async function callClaudeForGuide(brand, modelName, reviewText) {
     const userContent = reviewText.trim()
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n이 러닝화의 AI 세일즈 가이드를 작성해주세요.`;
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-            "x-api-key": key,
-            "anthropic-version": "2023-06-01",
-            "anthropic-dangerous-allow-browser": "true",
-            "content-type": "application/json"
-        },
-        body: JSON.stringify({
-            model: "claude-3-5-haiku-20241022",
-            max_tokens: 900,
-            system: SALES_GUIDE_SYSTEM_PROMPT,
-            messages: [{ role: "user", content: userContent }]
-        })
-    });
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: userContent }] }],
+                systemInstruction: { parts: [{ text: SALES_GUIDE_SYSTEM_PROMPT }] },
+                generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+            })
+        }
+    );
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(`Claude API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
+        throw new Error(`Gemini API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
     }
     const data = await res.json();
-    return data.content?.[0]?.text || "";
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
 function parseGuideResponse(text) {
@@ -2949,9 +2946,9 @@ window.addEventListener('DOMContentLoaded', () => {
                             <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
                         <div class="pt-3 border-t border-gray-200/40">
-                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Anthropic API Key (AI 세일즈 가이드 자동생성)</label>
-                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="sk-ant-api03-...">
-                            <p class="text-[10px] text-gray-400 font-bold mt-1">미등록 탐지 패널에서 리뷰 텍스트 → AI 자동 가이드 생성에 사용됩니다.</p>
+                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Gemini API Key (AI 세일즈 가이드 자동생성)</label>
+                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="AIzaSy...">
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-purple-400 underline">aistudio.google.com</a> → 무료 / 미등록 탐지 → AI 자동생성에 사용</p>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
@@ -3053,11 +3050,15 @@ window.addEventListener('DOMContentLoaded', () => {
             missDetectBtn.onclick = () => {
                 showPanel("missPanel");
 
-                // 유니크 품번 기준으로 가이드 없는 상품 추출
+                // 신발만, 유니크 품번 기준으로 가이드 없는 상품 추출
                 const seen = new Set();
+                const SHOE_BRANDS = new Set(["나이키","호카","브룩스","써코니","뉴발란스","아디다스","온러닝","살로몬","알트라","노말","노다","비브람파이브핑거스","스카르파","요넥스","우포스","새티스파이","나이키(Nike)","호카(HOKA)"]);
                 const missing = PRODUCTS.filter(p => {
                     if(!p.품번 || seen.has(p.품번)) return false;
                     seen.add(p.품번);
+                    const isShoeCat = (p.카테고리||"").includes("신발");
+                    const isShoeBrand = SHOE_BRANDS.has(p.브랜드||"");
+                    if(!isShoeCat && !isShoeBrand) return false;
                     return !SALES_GUIDES[p.품번];
                 });
 
@@ -3085,8 +3086,9 @@ window.addEventListener('DOMContentLoaded', () => {
                         <div class="ai-gen-box hidden space-y-1.5" data-code="${p.품번}">
                             <button class="ai-gen-btn w-full py-2 rounded-lg bg-purple-600 text-white text-[12px] font-black hover:bg-purple-700 transition-colors shadow-sm" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ ${escapeHtml(p.품명||'')} 가이드 자동 생성</button>
                             <details class="text-[10px]">
-                                <summary class="text-gray-400 font-bold cursor-pointer hover:text-purple-500">+ 리뷰/스펙 데이터 추가 (선택사항 — 정확도 향상)</summary>
-                                <textarea class="ai-review-text w-full mt-1.5 px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="3" placeholder="RunRepeat 리뷰, 스펙 텍스트 붙여넣기. 영문 OK." data-code="${p.품번}"></textarea>
+                                <summary class="text-purple-400 font-bold cursor-pointer hover:text-purple-600 select-none">📋 RunRepeat 스펙 추가 (선택 — 정확도 향상)</summary>
+                                <p class="text-gray-400 font-bold mt-1 mb-1">RunRepeat에서 Specs 섹션 전체 복사 후 붙여넣기 (영문 그대로 OK)</p>
+                                <textarea class="ai-review-text w-full px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="4" placeholder="Terrain: Road&#10;Drop: 8mm&#10;Weight: 198g&#10;Features: Carbon plate | Cushioned&#10;..." data-code="${p.품번}"></textarea>
                             </details>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5 pl-1">
