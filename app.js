@@ -2470,53 +2470,6 @@ function openDetail(p){
     </div>
   `;
   
-  // ── 판매 현황 패널 ──────────────────────────────────────
-  const _sales = getSalesSummary(p.품번);
-  const _totalStock = p.sizes.reduce((s, sz) => s + (sz.busan||0) + (sz.center||0) + (sz.sinsa||0), 0);
-  const _daysLeft = _sales.avgDay > 0 ? Math.round(_totalStock / _sales.avgDay) : null;
-  const _hasData = _sales.all > 0;
-  const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 5 ? '🔥 핫셀러' : _sales.d7 >= 2 ? '📈 보통' : _sales.d7 > 0 ? '📦 저조' : '📦 저조';
-  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 5 ? 'text-red-500' : _sales.d7 >= 2 ? 'text-blue-500' : 'text-gray-400';
-  const _bar7 = _sales.d30 > 0 ? Math.min(100, Math.round((_sales.d7/_sales.d30)*100*4.3)) : 0;
-  const _bar30 = _sales.all > 0 ? Math.min(100, Math.round((_sales.d30/_sales.all)*100)) : 0;
-  const _daysColor = _daysLeft===null ? '' : _daysLeft <= 14 ? 'text-red-600' : _daysLeft <= 30 ? 'text-orange-500' : 'text-gray-600';
-
-  const salesPanelHtml = `
-    <div class="mx-3 mb-3 mt-1 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-slate-50 p-3">
-      <div class="flex justify-between items-center mb-2">
-        <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
-        <span class="text-[11px] font-black ${_heatColor}">${_heatLabel}</span>
-      </div>
-      ${!_hasData
-        ? `<div class="text-[11px] text-gray-400 font-bold text-center py-1.5">판매 이력 없음</div>`
-        : `<div class="space-y-1.5">
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">7일</span>
-              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                <div class="h-2 rounded-full bg-indigo-500" style="width:${_bar7}%"></div>
-              </div>
-              <span class="text-[12px] font-black text-indigo-700 w-9 text-right shrink-0">${_sales.d7}개</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">30일</span>
-              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                <div class="h-2 rounded-full bg-blue-400" style="width:${_bar30}%"></div>
-              </div>
-              <span class="text-[12px] font-black text-blue-700 w-9 text-right shrink-0">${_sales.d30}개</span>
-            </div>
-            <div class="flex justify-between items-center pt-1.5 border-t border-indigo-100 mt-0.5 flex-wrap gap-y-1">
-              <span class="text-[10px] text-gray-500 font-bold">일평균 <strong class="text-gray-800">${_sales.avgDay}개</strong></span>
-              <span class="text-[10px] text-gray-500 font-bold">누적 <strong class="text-gray-800">${_sales.all}개</strong></span>
-              ${_daysLeft !== null
-                ? `<span class="text-[10px] font-black ${_daysColor}">소진까지 약 <strong>${_daysLeft}일</strong></span>`
-                : ''}
-            </div>
-          </div>`
-      }
-    </div>`;
-
-  $("#detailBody").innerHTML += salesPanelHtml;
-
   let stickyFooterHtml = `
       <div class="flex gap-1.5 items-center">
           <select id="memoStaff" class="ipt text-xs font-bold bg-white px-2 py-1.5 rounded-lg border border-gray-200 shrink-0" style="width:5.5rem">
@@ -2627,6 +2580,52 @@ function openDetail(p){
         </table>
     </div>
   `;
+
+  // ── 판매 현황 패널 (detailBody 아래에 append) ──────────────
+  const _sales = getSalesSummary(p.품번);
+  const _totalStock = p.sizes.reduce((s, sz) => s + (sz.busan||0) + (sz.center||0) + (sz.sinsa||0), 0);
+  const _daysLeft = _sales.avgDay > 0 ? Math.round(_totalStock / _sales.avgDay) : null;
+  const _hasData = _sales.all > 0;
+  const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 5 ? '🔥 핫셀러' : _sales.d7 >= 2 ? '📈 보통' : '📦 저조';
+  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 5 ? 'text-red-500' : _sales.d7 >= 2 ? 'text-blue-500' : 'text-gray-400';
+  const _bar7 = _sales.d30 > 0 ? Math.min(100, Math.round((_sales.d7 / _sales.d30) * 100 * 4.3)) : 0;
+  const _bar30 = _sales.all > 0 ? Math.min(100, Math.round((_sales.d30 / _sales.all) * 100)) : 0;
+  const _daysColor = _daysLeft === null ? '' : _daysLeft <= 14 ? 'text-red-600' : _daysLeft <= 30 ? 'text-orange-500' : 'text-gray-500';
+
+  const _salesDiv = document.createElement("div");
+  _salesDiv.className = "px-3 pb-3";
+  _salesDiv.innerHTML = `
+    <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-slate-50 p-3">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
+        <span class="text-[11px] font-black ${_heatColor}">${_heatLabel}</span>
+      </div>
+      ${!_hasData
+        ? `<div class="text-[11px] text-gray-400 font-bold text-center py-1.5">판매 이력 없음</div>`
+        : `<div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">7일</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="h-2 rounded-full bg-indigo-500" style="width:${_bar7}%"></div>
+              </div>
+              <span class="text-[12px] font-black text-indigo-700 w-9 text-right shrink-0">${_sales.d7}개</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">30일</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="h-2 rounded-full bg-blue-400" style="width:${_bar30}%"></div>
+              </div>
+              <span class="text-[12px] font-black text-blue-700 w-9 text-right shrink-0">${_sales.d30}개</span>
+            </div>
+            <div class="flex justify-between items-center pt-1.5 border-t border-indigo-100 mt-0.5 flex-wrap gap-y-1">
+              <span class="text-[10px] text-gray-500 font-bold">일평균 <strong class="text-gray-800">${_sales.avgDay}개</strong></span>
+              <span class="text-[10px] text-gray-500 font-bold">누적 <strong class="text-gray-800">${_sales.all}개</strong></span>
+              ${_daysLeft !== null ? `<span class="text-[10px] font-black ${_daysColor}">소진까지 약 <strong>${_daysLeft}일</strong></span>` : ''}
+            </div>
+          </div>`
+      }
+    </div>`;
+  $("#detailBody").appendChild(_salesDiv);
 
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
