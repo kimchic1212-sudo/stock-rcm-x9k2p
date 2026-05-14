@@ -1808,7 +1808,7 @@ window.openSalesGuide = (code) => {
                             <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 핵심 스펙</h3>
                             <div id="sgMetrics" class="space-y-2 flex-1">
                                 <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
-                                    <span class="text-[11px] font-bold text-slate-400">무게 (Men's)</span>
+                                    <span class="text-[11px] font-bold text-slate-400">무게 (Men's US9 기준)</span>
                                     <span id="sgWeight" class="text-sm font-black text-slate-800"></span>
                                 </div>
                                 <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
