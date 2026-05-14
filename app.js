@@ -1977,8 +1977,7 @@ function card(p){
   // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
   let rtChanceBadge = "";
   if(_cardSales.d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0)) {
-    const _otherStock = (p.centerTotal||0) + (p.sinsaTotal||0);
-    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT추천 +${_otherStock}</span>`;
+    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT추천</span>`;
   }
 
   const productMemos = MEMOS.filter(m => m.code === p.품번);
@@ -2205,9 +2204,10 @@ function render(){
     return true;
   });
 
-  const sortMode = $("#sortSel").value;
+  // RT추천 필터 활성 시 30일 판매량 내림차순 자동 정렬
+  const sortMode = f.rtChance ? "salesDesc" : $("#sortSel").value;
   filteredList.sort((a,b) => {
-    if(sortMode === "salesDesc") return (b.periodSales||0) - (a.periodSales||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode === "salesDesc") return (getSalesSummary(b.품번).d30||0) - (getSalesSummary(a.품번).d30||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     
     if(sortMode === "default") {
         const ca = CAT_ORDER[a.카테고리] ?? 9; 
