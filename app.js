@@ -791,7 +791,57 @@ function rebuildIndex(){
   };
 
   _renderBrandChips();
-  _renderRecentBrands();
+
+  // 브랜드 중복체크 버튼
+  const dupCheckBtn = $("#brandDupCheckBtn");
+  if(dupCheckBtn && !dupCheckBtn.dataset.setup) {
+    dupCheckBtn.dataset.setup = "1";
+    dupCheckBtn.onclick = () => {
+      // 품번 기준 중복 집계
+      const counts = {};
+      PRODUCTS.forEach(p => {
+        if(!p.품번) return;
+        if(!counts[p.품번]) counts[p.품번] = { 품명: p.품명, 브랜드: p.브랜드, rows: [] };
+        counts[p.품번].rows.push(p);
+      });
+      const dups = Object.entries(counts).filter(([,v]) => v.rows.length > 1);
+
+      let existing = $("#brandDupModal");
+      if(existing) existing.remove();
+
+      const modal = document.createElement("div");
+      modal.id = "brandDupModal";
+      modal.className = "fixed inset-0 z-[200] flex items-center justify-center p-4";
+      modal.innerHTML = `
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('brandDupModal').remove()"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col z-10 overflow-hidden">
+          <div class="px-5 py-4 bg-orange-50 border-b border-orange-100 flex justify-between items-center shrink-0">
+            <div>
+              <h2 class="font-black text-base text-orange-700">🔍 품번 중복 체크</h2>
+              <p class="text-[11px] text-orange-500 mt-0.5">동일 품번이 여러 행에 등록된 항목 <span class="font-black">${dups.length}건</span></p>
+            </div>
+            <button onclick="document.getElementById('brandDupModal').remove()" class="p-1.5 text-orange-400 hover:text-orange-700 bg-orange-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+          <div class="overflow-y-auto flex-1 p-4">
+            ${dups.length === 0
+              ? `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 중복 품번 없음!</div>`
+              : dups.map(([code, v]) => `
+                <div class="mb-3 bg-orange-50 border border-orange-200 rounded-xl p-3">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="font-black text-[12px] text-orange-700">${escapeHtml(code)}</span>
+                    <span class="text-[10px] font-bold bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">${v.rows.length}회 중복</span>
+                  </div>
+                  <div class="text-[11px] text-gray-600 font-medium">${escapeHtml(v.브랜드)} · ${escapeHtml(v.품명)}</div>
+                  <div class="mt-1.5 space-y-1">
+                    ${v.rows.map((r,i) => `<div class="text-[10px] text-gray-500 bg-white rounded-lg px-2 py-1">#${i+1} 규격: ${escapeHtml(r.규격||'—')} / 부산: ${r.busanTotal||0}개 / 물류: ${r.물류센터||0}개</div>`).join('')}
+                  </div>
+                </div>`).join('')}
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      if(window.lucide) lucide.createIcons();
+    };
+  }
 
   // 브랜드 검색 이벤트
   const brandSearchEl = $("#brandSearch");
