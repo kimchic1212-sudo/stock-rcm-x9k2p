@@ -383,13 +383,25 @@ function applyMeta(meta){
         const lastSynced = SALES_HISTORY.meta?.lastSynced;
         if (lastSynced) {
             const d = new Date(lastSynced);
-            const mm = String(d.getMonth()+1);
-            const dd = String(d.getDate());
+            const now = new Date();
+            const isToday = d.getFullYear() === now.getFullYear()
+                         && d.getMonth()    === now.getMonth()
+                         && d.getDate()     === now.getDate();
             const hh = String(d.getHours()).padStart(2,'0');
             const min = String(d.getMinutes()).padStart(2,'0');
-            posSyncInfo = `<div class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0">
-                <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${mm}/${dd} ${hh}:${min}
-            </div>`;
+            if (isToday) {
+                // 오늘 데이터 → 초록 + 시간만
+                posSyncInfo = `<div class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${hh}:${min}
+                </div>`;
+            } else {
+                // 어제 이전 데이터 → 노란색 경고
+                const mm = String(d.getMonth()+1);
+                const dd = String(d.getDate());
+                posSyncInfo = `<div class="bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-[11px] font-black border border-yellow-300 flex items-center gap-1 shrink-0">
+                    <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${mm}/${dd} (미갱신)
+                </div>`;
+            }
         } else {
             posSyncInfo = `<div class="bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0">
                 <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: 미연동
