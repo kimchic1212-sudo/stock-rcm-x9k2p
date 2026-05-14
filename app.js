@@ -415,7 +415,7 @@ async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
       RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar(); return;
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar(); return;
   }
   try {
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes] = await Promise.all([
@@ -438,7 +438,7 @@ async function loadData(force = false){
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
 
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
   } catch(e) { console.error("Data Load Error", e); }
 }
 
@@ -457,9 +457,13 @@ async function loadSalesOnly() {
         newHistory.meta?.lastSynced === SALES_HISTORY.meta?.lastSynced) return;
     SALES_HISTORY = newHistory;
     clearSalesCache();
+    // ERP 원본 재고 복원 후 차감 순서대로 재계산
+    rebuildIndex();
+    applyErpDeductions();
+    applyPosSalesDeductions();
     render();
     _lastSalesSync = Date.now();
-    // DATA SOURCE의 POS판매 뱃지 갱신
+    // DATA SOURCE POS판매 뱃지 갱신
     applyMeta(CURRENT_META);
     console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
   } catch(e) {}
@@ -560,6 +564,35 @@ function applyErpDeductions() {
     }
     window._erpDeductApplied = true;
     window._erpDeductTime = SALES_DEDUCTIONS.updatedAt || '';
+}
+
+// ── POS 오늘 판매 차감 (5분마다 갱신) ─────────────────────────────────
+// 아침 ERP 재고 - 오늘 POS 판매 = 실시간 부산 잔여 재고
+function applyPosSalesDeductions() {
+    if (!SALES_HISTORY || !SALES_HISTORY.items) return;
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    for (const p of PRODUCTS) {
+        const todaySales = SALES_HISTORY.items[p.품번]?.[todayStr];
+        if (!todaySales) continue;
+
+        let changed = false;
+        for (const s of p.sizes) {
+            const sizeKey = String(s.size).trim();
+            const saleEntry = todaySales[sizeKey];
+            if (!saleEntry) continue;
+            // { '부산': qty } 형태
+            const sold = saleEntry['부산'] || 0;
+            if (sold > 0) {
+                s.busan = Math.max(0, s.busan - sold);
+                changed = true;
+            }
+        }
+        if (changed) {
+            p.busanTotal = p.sizes.reduce((a, b) => a + b.busan, 0);
+        }
+    }
 }
 
 window.showErpSyncModal = function() {
