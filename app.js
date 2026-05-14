@@ -425,6 +425,35 @@ async function loadData(force = false){
 
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
+// ── 판매 데이터 자동 갱신 (5분마다) ──────────────────────────────────
+let _lastSalesSync = 0;
+async function loadSalesOnly() {
+  try {
+    const res = await fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now());
+    if (!res.ok) return;
+    const newHistory = await res.json();
+    // 변경된 경우에만 갱신
+    const newStr = JSON.stringify(newHistory.meta);
+    if (newStr === JSON.stringify(SALES_HISTORY.meta) &&
+        newHistory.meta?.lastSynced === SALES_HISTORY.meta?.lastSynced) return;
+    SALES_HISTORY = newHistory;
+    clearSalesCache();
+    render();
+    _lastSalesSync = Date.now();
+    // 마지막 동기화 시간 표시
+    const el = document.getElementById('_syncBadge');
+    if (el) {
+      const t = new Date();
+      el.textContent = `🔄 ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} 동기화`;
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.opacity = '0.5'; }, 3000);
+    }
+    console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
+  } catch(e) {}
+}
+// 5분마다 자동 갱신
+setInterval(loadSalesOnly, 5 * 60 * 1000);
+
 // ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
 const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 수석 러닝 슈즈 애널리스트입니다.
 요청받은 러닝화에 대해 RunRepeat·Believe in the Run·브랜드 공식 스펙·러닝 커뮤니티 데이터 등 보유한 모든 지식을 활용하여 아래 형식의 가이드를 생성하세요.
