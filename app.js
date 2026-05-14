@@ -2382,6 +2382,8 @@ window.renderTransfers = () => {
 };
 
 const _salesCache = new Map();
+// SALES_HISTORY 로드 후 캐시 초기화용
+function clearSalesCache() { _salesCache.clear(); }
 function getSalesSummary(code) {
   if(_salesCache.has(code)) return _salesCache.get(code);
   if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code]) {
@@ -2398,8 +2400,12 @@ function getSalesSummary(code) {
     if(typeof dayData === 'number') { qty = dayData; }
     else if(typeof dayData === 'object') {
       for(let size in dayData) {
-        if(typeof dayData[size] === 'object') { for(let mgr in dayData[size]) qty += (dayData[size][mgr]||0); }
-        else { qty += (dayData[size]||0); }
+        if(typeof dayData[size] === 'object') {
+          for(let mgr in dayData[size]) {
+            // 부산점만 카운팅 (김종훈 or 부산 포함)
+            if(mgr.includes("김종훈") || mgr.includes("부산")) qty += (dayData[size][mgr]||0);
+          }
+        } else { qty += (dayData[size]||0); } // 담당자 구분 없는 구형 데이터는 그대로 포함
       }
     }
     all += qty;
@@ -2610,7 +2616,7 @@ function openDetail(p){
       <div class="flex justify-between items-center mb-2">
         <div class="flex items-center gap-1.5">
           <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
-          <span class="text-[9px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded">전체 매장 합산</span>
+          <span class="text-[9px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded">부산점 기준</span>
         </div>
         <span class="text-[11px] font-black ${_heatColor}">${_heatLabel}</span>
       </div>
