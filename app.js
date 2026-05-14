@@ -365,18 +365,36 @@ function applyMeta(meta){
         if(!statSrcEl) return;
 
         // 판매 DB 라벨
-        let addInfo = SALES_HISTORY.meta?.name 
+        let addInfo = SALES_HISTORY.meta?.name
             ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-100 flex items-center gap-1 shrink-0">
                   📊 ${escapeHtml(SALES_HISTORY.meta.name)}
-               </div>` 
+               </div>`
             : "";
-        
+
         // 기획전 라벨
-        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name) 
+        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name)
             ? `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0">
                   🎁 ${escapeHtml(PROMOTIONS.meta.name)}
-               </div>` 
+               </div>`
             : "";
+
+        // POS 판매 동기화 뱃지
+        let posSyncInfo = "";
+        const lastSynced = SALES_HISTORY.meta?.lastSynced;
+        if (lastSynced) {
+            const d = new Date(lastSynced);
+            const mm = String(d.getMonth()+1);
+            const dd = String(d.getDate());
+            const hh = String(d.getHours()).padStart(2,'0');
+            const min = String(d.getMinutes()).padStart(2,'0');
+            posSyncInfo = `<div class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0">
+                <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${mm}/${dd} ${hh}:${min}
+            </div>`;
+        } else {
+            posSyncInfo = `<div class="bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0">
+                <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: 미연동
+            </div>`;
+        }
 
         // flex-row 와 flex-wrap을 적용해 가로로 나란히, 넘치면 다음 줄로
         statSrcEl.innerHTML = `
@@ -384,6 +402,7 @@ function applyMeta(meta){
                 <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-[11px] font-black border border-blue-100 flex items-center gap-1 shrink-0">
                     <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> 재고: ${meta.uploadedAt || ''}
                 </div>
+                ${posSyncInfo}
                 ${addInfo}
                 ${promoInfo}
             </div>
@@ -440,14 +459,8 @@ async function loadSalesOnly() {
     clearSalesCache();
     render();
     _lastSalesSync = Date.now();
-    // 마지막 동기화 시간 표시
-    const el = document.getElementById('_syncBadge');
-    if (el) {
-      const t = new Date();
-      el.textContent = `🔄 ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} 동기화`;
-      el.style.opacity = '1';
-      setTimeout(() => { el.style.opacity = '0.5'; }, 3000);
-    }
+    // DATA SOURCE의 POS판매 뱃지 갱신
+    applyMeta(CURRENT_META);
     console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
   } catch(e) {}
 }
