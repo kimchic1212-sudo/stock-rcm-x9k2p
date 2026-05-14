@@ -1962,6 +1962,12 @@ function card(p){
       busanOnlyBadge = `<span class="bg-blue-800 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
   }
 
+  // 판매 속도 뱃지
+  const _cardSales = getSalesSummary(p.품번);
+  let salesSpeedBadge = "";
+  if(_cardSales.d7 >= 5)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
+  else if(_cardSales.d7 >= 2) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
+
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -2024,6 +2030,7 @@ function card(p){
     <div class="flex flex-col flex-1">
         <div class="flex flex-wrap gap-1.5 text-xs font-bold text-gray-500 mb-2.5 items-center">
             ${busanOnlyBadge}
+            ${salesSpeedBadge}
             ${promoBadge}
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
@@ -2372,6 +2379,31 @@ window.renderTransfers = () => {
     if(window.lucide) lucide.createIcons();
 };
 
+function getSalesSummary(code) {
+  if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code])
+    return { d7:0, d30:0, all:0, avgDay:0 };
+  const history = SALES_HISTORY.items[code];
+  const today = new Date(); today.setHours(0,0,0,0);
+  let d7=0, d30=0, all=0;
+  for(let date in history) {
+    const diffDays = Math.floor((today - new Date(date)) / 86400000);
+    const dayData = history[date];
+    let qty = 0;
+    if(typeof dayData === 'number') { qty = dayData; }
+    else if(typeof dayData === 'object') {
+      for(let size in dayData) {
+        if(typeof dayData[size] === 'object') { for(let mgr in dayData[size]) qty += (dayData[size][mgr]||0); }
+        else { qty += (dayData[size]||0); }
+      }
+    }
+    all += qty;
+    if(diffDays <= 30) d30 += qty;
+    if(diffDays <= 7) d7 += qty;
+  }
+  const avgDay = Math.round((d30/30)*10)/10;
+  return { d7, d30, all, avgDay };
+}
+
 function openDetail(p){
   CURRENT_PRODUCT = p;
   const imgSrc = IMAGES[p.shopNo || p.품번] || null;
@@ -2438,6 +2470,53 @@ function openDetail(p){
     </div>
   `;
   
+  // ── 판매 현황 패널 ──────────────────────────────────────
+  const _sales = getSalesSummary(p.품번);
+  const _totalStock = p.sizes.reduce((s, sz) => s + (sz.busan||0) + (sz.center||0) + (sz.sinsa||0), 0);
+  const _daysLeft = _sales.avgDay > 0 ? Math.round(_totalStock / _sales.avgDay) : null;
+  const _hasData = _sales.all > 0;
+  const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 5 ? '🔥 핫셀러' : _sales.d7 >= 2 ? '📈 보통' : _sales.d7 > 0 ? '📦 저조' : '📦 저조';
+  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 5 ? 'text-red-500' : _sales.d7 >= 2 ? 'text-blue-500' : 'text-gray-400';
+  const _bar7 = _sales.d30 > 0 ? Math.min(100, Math.round((_sales.d7/_sales.d30)*100*4.3)) : 0;
+  const _bar30 = _sales.all > 0 ? Math.min(100, Math.round((_sales.d30/_sales.all)*100)) : 0;
+  const _daysColor = _daysLeft===null ? '' : _daysLeft <= 14 ? 'text-red-600' : _daysLeft <= 30 ? 'text-orange-500' : 'text-gray-600';
+
+  const salesPanelHtml = `
+    <div class="mx-3 mb-3 mt-1 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-slate-50 p-3">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
+        <span class="text-[11px] font-black ${_heatColor}">${_heatLabel}</span>
+      </div>
+      ${!_hasData
+        ? `<div class="text-[11px] text-gray-400 font-bold text-center py-1.5">판매 이력 없음</div>`
+        : `<div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">7일</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="h-2 rounded-full bg-indigo-500" style="width:${_bar7}%"></div>
+              </div>
+              <span class="text-[12px] font-black text-indigo-700 w-9 text-right shrink-0">${_sales.d7}개</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">30일</span>
+              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="h-2 rounded-full bg-blue-400" style="width:${_bar30}%"></div>
+              </div>
+              <span class="text-[12px] font-black text-blue-700 w-9 text-right shrink-0">${_sales.d30}개</span>
+            </div>
+            <div class="flex justify-between items-center pt-1.5 border-t border-indigo-100 mt-0.5 flex-wrap gap-y-1">
+              <span class="text-[10px] text-gray-500 font-bold">일평균 <strong class="text-gray-800">${_sales.avgDay}개</strong></span>
+              <span class="text-[10px] text-gray-500 font-bold">누적 <strong class="text-gray-800">${_sales.all}개</strong></span>
+              ${_daysLeft !== null
+                ? `<span class="text-[10px] font-black ${_daysColor}">소진까지 약 <strong>${_daysLeft}일</strong></span>`
+                : ''}
+            </div>
+          </div>`
+      }
+    </div>`;
+
+  $("#detailBody").innerHTML += salesPanelHtml;
+
   let stickyFooterHtml = `
       <div class="flex gap-1.5 items-center">
           <select id="memoStaff" class="ipt text-xs font-bold bg-white px-2 py-1.5 rounded-lg border border-gray-200 shrink-0" style="width:5.5rem">
