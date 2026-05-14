@@ -1808,7 +1808,7 @@ window.openSalesGuide = (code) => {
                             <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 핵심 스펙</h3>
                             <div id="sgMetrics" class="space-y-2 flex-1">
                                 <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
-                                    <span class="text-[11px] font-bold text-slate-400">무게 (Men's US9 기준)</span>
+                                    <span id="sgWeightLabel" class="text-[11px] font-bold text-slate-400">무게</span>
                                     <span id="sgWeight" class="text-sm font-black text-slate-800"></span>
                                 </div>
                                 <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
@@ -1874,8 +1874,14 @@ window.openSalesGuide = (code) => {
     modal.querySelector("#sgBrand").textContent  = p ? p.브랜드 : "";
     modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw =>
         `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">#${escapeHtml(kw)}</span>`).join('');
+    // 무게 - 성별 기준 사이즈 표기
+    const _pName = p ? p.품명 : "";
+    const _isWomens = _pName.includes("여성") || /\bW\b/.test(_pName) || _pName.endsWith(" W");
+    const _sizeRef = _isWomens ? "(여 240mm)" : "(남 270mm)";
+    const _weightVal = guide.weight || "";
+    modal.querySelector("#sgWeight").textContent = _weightVal ? `${_weightVal} ${_sizeRef}` : "—";
+    modal.querySelector("#sgWeightLabel").textContent = `무게 (한쪽, ${_isWomens ? "여 US7" : "남 US9"} 기준)`;
     // 스펙 (V2 필드명 매핑)
-    modal.querySelector("#sgWeight").textContent   = guide.weight      || "—";
     modal.querySelector("#sgHeel").textContent     = guide.heelStack   || guide.heel_stack  || "—";
     modal.querySelector("#sgFore").textContent     = guide.foreStack   || guide.fore_stack  || "—";
     modal.querySelector("#sgDrop").textContent     = guide.drop        || "—";
