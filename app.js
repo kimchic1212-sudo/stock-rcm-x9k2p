@@ -391,19 +391,19 @@ function applyMeta(meta){
             const min = String(d.getMinutes()).padStart(2,'0');
             if (isToday) {
                 // 오늘 데이터 → 초록 + 시간만
-                posSyncInfo = `<div class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0">
+                posSyncInfo = `<div onclick="showPosSyncGuide('ok')" class="cursor-pointer bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0 hover:bg-emerald-100 transition-colors">
                     <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${hh}:${min}
                 </div>`;
             } else {
                 // 어제 이전 데이터 → 노란색 경고
                 const mm = String(d.getMonth()+1);
                 const dd = String(d.getDate());
-                posSyncInfo = `<div class="bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-[11px] font-black border border-yellow-300 flex items-center gap-1 shrink-0">
+                posSyncInfo = `<div onclick="showPosSyncGuide('stale')" class="cursor-pointer bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-[11px] font-black border border-yellow-300 flex items-center gap-1 shrink-0 hover:bg-yellow-100 transition-colors">
                     <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${mm}/${dd} (미갱신)
                 </div>`;
             }
         } else {
-            posSyncInfo = `<div class="bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0">
+            posSyncInfo = `<div onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
                 <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: 미연동
             </div>`;
         }
@@ -421,6 +421,63 @@ function applyMeta(meta){
         `;
         if(window.lucide) lucide.createIcons();
     }
+}
+
+function showPosSyncGuide(status) {
+    const guides = {
+        ok: {
+            title: '✅ POS 연동 정상',
+            color: 'emerald',
+            body: `오늘 POS 판매 데이터가 정상 동기화 중입니다.<br><br>
+<b>현재 상태</b><br>
+• 5분마다 자동 갱신<br>
+• 오늘 판매분이 부산 재고에 실시간 반영 중<br><br>
+<span class="text-gray-500 text-xs">문제 발생 시 <b>run_sync.bat</b> 재실행</span>`
+        },
+        stale: {
+            title: '⚠️ POS 미갱신 — 조치 필요',
+            color: 'yellow',
+            body: `오늘 POS 데이터가 아직 동기화되지 않았습니다.<br><br>
+<b>조치 방법</b><br>
+1. <b>Downloads 폴더</b> 열기<br>
+2. <b>run_sync.bat</b> 더블클릭<br>
+3. 검은 창에서 <b>"완료"</b> 메시지 확인<br>
+4. 창을 닫지 말고 그대로 두기 (5분 자동 반복)<br><br>
+<b>창이 이미 열려있다면</b><br>
+• 창 내용 확인 → 에러 메시지 있으면 스크린샷<br>
+• 창 닫고 다시 실행`
+        },
+        none: {
+            title: '🔌 POS 미연동 — 설정 필요',
+            color: 'gray',
+            body: `POS 동기화가 한 번도 실행되지 않았습니다.<br><br>
+<b>최초 설정 방법</b><br>
+1. Node.js 설치 확인 (<code>node -v</code>)<br>
+2. Downloads 폴더에 <b>sync_pos_sales.js</b>, <b>run_sync.bat</b> 있는지 확인<br>
+3. PowerShell에서:<br>
+<code class="block bg-gray-100 rounded px-2 py-1 my-1 text-xs">cd Downloads<br>npm install playwright<br>npx playwright install chromium</code>
+4. <b>run_sync.bat</b> 더블클릭으로 실행`
+        }
+    };
+    const g = guides[status];
+    const colorMap = {
+        emerald: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+        yellow:  'bg-yellow-50 border-yellow-300 text-yellow-900',
+        gray:    'bg-gray-50 border-gray-200 text-gray-700'
+    };
+    const existing = document.getElementById('posSyncGuideModal');
+    if (existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'posSyncGuideModal';
+    modal.className = 'fixed inset-0 flex items-center justify-center z-[99999] p-4 bg-black/50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 relative">
+            <button onclick="document.getElementById('posSyncGuideModal').remove()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl font-black">✕</button>
+            <div class="${colorMap[g.color]} border rounded-xl px-4 py-3 mb-4 text-sm font-black">${g.title}</div>
+            <div class="text-sm text-gray-700 leading-relaxed">${g.body}</div>
+        </div>`;
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
 }
 
 async function loadData(force = false){
