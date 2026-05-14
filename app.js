@@ -2099,6 +2099,7 @@ function getFilters(){
     cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
     gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
     brand: (window._activeBrands && window._activeBrands.size > 0) ? [...window._activeBrands] : "ALL",
+    salesSpeed: ($$('button.chip[data-salesspeed]').find(b=>b.dataset.active==="1")||{}).dataset?.salesspeed || "ALL",
     q: $("#q").value.trim().toLowerCase(),
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
@@ -2153,6 +2154,7 @@ function render(){
     if(g === "M" || g === "남성" || g === "남") g = "남성"; else if(g === "W" || g === "여성" || g === "여") g = "여성"; else g = "공용";
     if(f.gender!=="ALL" && g!==f.gender && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
+    if(f.salesSpeed!=="ALL" && getSalesSummary(p.품번).speed !== f.salesSpeed) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
@@ -2379,9 +2381,13 @@ window.renderTransfers = () => {
     if(window.lucide) lucide.createIcons();
 };
 
+const _salesCache = new Map();
 function getSalesSummary(code) {
-  if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code])
-    return { d7:0, d30:0, all:0, avgDay:0 };
+  if(_salesCache.has(code)) return _salesCache.get(code);
+  if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code]) {
+    const empty = { d7:0, d30:0, all:0, avgDay:0, speed:'none' };
+    _salesCache.set(code, empty); return empty;
+  }
   const history = SALES_HISTORY.items[code];
   const today = new Date(); today.setHours(0,0,0,0);
   let d7=0, d30=0, all=0;
@@ -2401,7 +2407,10 @@ function getSalesSummary(code) {
     if(diffDays <= 7) d7 += qty;
   }
   const avgDay = Math.round((d30/30)*10)/10;
-  return { d7, d30, all, avgDay };
+  const speed = d7 >= 5 ? 'hot' : d7 >= 2 ? 'normal' : d7 > 0 ? 'slow' : 'none';
+  const result = { d7, d30, all, avgDay, speed };
+  _salesCache.set(code, result);
+  return result;
 }
 
 function openDetail(p){
@@ -2588,8 +2597,10 @@ function openDetail(p){
   const _hasData = _sales.all > 0;
   const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 5 ? '🔥 핫셀러' : _sales.d7 >= 2 ? '📈 보통' : '📦 저조';
   const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 5 ? 'text-red-500' : _sales.d7 >= 2 ? 'text-blue-500' : 'text-gray-400';
-  const _bar7 = _sales.d30 > 0 ? Math.min(100, Math.round((_sales.d7 / _sales.d30) * 100 * 4.3)) : 0;
-  const _bar30 = _sales.all > 0 ? Math.min(100, Math.round((_sales.d30 / _sales.all) * 100)) : 0;
+  // 같은 기준(누적 전체)으로 막대 비율 계산
+  const _maxSales = Math.max(_sales.all, 1);
+  const _bar7  = Math.min(100, Math.round((_sales.d7  / _maxSales) * 100));
+  const _bar30 = Math.min(100, Math.round((_sales.d30 / _maxSales) * 100));
   const _daysColor = _daysLeft === null ? '' : _daysLeft <= 14 ? 'text-red-600' : _daysLeft <= 30 ? 'text-orange-500' : 'text-gray-500';
 
   const _salesDiv = document.createElement("div");
@@ -2597,7 +2608,10 @@ function openDetail(p){
   _salesDiv.innerHTML = `
     <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-slate-50 p-3">
       <div class="flex justify-between items-center mb-2">
-        <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
+          <span class="text-[9px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded">전체 매장 합산</span>
+        </div>
         <span class="text-[11px] font-black ${_heatColor}">${_heatLabel}</span>
       </div>
       ${!_hasData
@@ -2688,23 +2702,29 @@ $$('button[id^="close"]').forEach(btn => {
     btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
 });
 
-$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly]').forEach(b=>b.addEventListener("click",()=>{ 
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly], button.chip[data-salesspeed]').forEach(b=>b.addEventListener("click",()=>{
     saveHistoryState();
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
+    else if(b.dataset.salesspeed) {
+        // 판매속도: 같은 버튼 다시 누르면 해제, 다른 버튼 누르면 단일 선택
+        const isActive = b.dataset.active === "1";
+        $$('button.chip[data-salesspeed]').forEach(x=>x.dataset.active="0");
+        if(!isActive) b.dataset.active = "1";
+    }
     else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
     if(b.dataset.busanonly) {
         if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400');
         else b.classList.remove('ring-2', 'ring-blue-400');
     }
-    visibleCount=60; render(); 
+    visibleCount=60; render();
 }));
 
 $("#resetAll").onclick=()=>{
     saveHistoryState();
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0");
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed]').forEach(b=>b.dataset.active="0");
     window._activeBrands = new Set();
     _renderBrandChips();
     if($("#brandSearch")) { $("#brandSearch").value = ""; }
