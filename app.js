@@ -233,7 +233,7 @@ function getCurrentFilterState() {
     return {
         cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
         gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
-        brand: ($$('#brandChips .chip').find(b=>b.dataset.active==="1")||{}).dataset?.brand || "ALL",
+        brand: (window._activeBrands && window._activeBrands.size > 0) ? [...window._activeBrands] : "ALL",
         q: $("#q").value,
         stock: ($('button.chip[data-stock]')?.dataset.active === "1"),
         favOnly: ($$('button.chip[data-fav]').find(b=>b.dataset.active==="1")? true : false),
@@ -269,7 +269,9 @@ function restoreHistoryState() {
     
     $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === state.cat ? "1" : "0"));
     $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === state.gender ? "1" : "0"));
-    $$('#brandChips .chip').forEach(b => b.dataset.active = (b.dataset.brand === state.brand ? "1" : "0"));
+    const _restoredBrands = Array.isArray(state.brand) ? state.brand : (state.brand && state.brand !== "ALL" ? [state.brand] : []);
+    window._activeBrands = new Set(_restoredBrands);
+    _renderBrandChips();
     
     if($('button.chip[data-stock]')) $('button.chip[data-stock]').dataset.active = state.stock ? "1" : "0";
     if($('button.chip[data-fav]')) $('button.chip[data-fav]').dataset.active = state.favOnly ? "1" : "0";
@@ -737,33 +739,44 @@ function rebuildIndex(){
       return entries.sort((a,b) => b[1]-a[1]).map(x=>x[0]);
   };
 
-  // 브랜드 칩 렌더링
+  // 멀티셀렉트 브랜드 Set 초기화
+  if(!window._activeBrands) window._activeBrands = new Set();
+
+  // 브랜드 칩 렌더링 (멀티셀렉트)
   const _renderBrandChips = (filterQ = "") => {
       const wrap = $("#brandChips");
       if(!wrap) return;
       const brands = _getSortedBrands();
-      const activeBrand = ($$('#brandChips .chip').find(c=>c.dataset.active==="1")||{}).dataset?.brand || "ALL";
       const q = filterQ.toLowerCase().trim();
 
       wrap.innerHTML = "";
-      // 전체 칩
+      // 전체 칩 (선택된 브랜드 없을 때 활성)
       const allBtn = document.createElement("button");
       allBtn.className = "chip shrink-0"; allBtn.dataset.brand = "ALL";
-      allBtn.dataset.active = activeBrand === "ALL" ? "1" : "0";
+      allBtn.dataset.active = window._activeBrands.size === 0 ? "1" : "0";
       allBtn.textContent = "전체";
-      allBtn.onclick = () => { saveHistoryState(); $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===allBtn?"1":"0")); visibleCount=60; render(); };
+      allBtn.onclick = () => {
+          saveHistoryState();
+          window._activeBrands.clear();
+          _renderBrandChips(filterQ);
+          visibleCount = 60; render();
+      };
       wrap.appendChild(allBtn);
 
       brands.filter(b => !q || b.toLowerCase().includes(q)).forEach(b => {
           const btn = document.createElement("button");
-          btn.className = "chip shrink-0"; btn.dataset.brand = b; btn.textContent = b;
-          btn.dataset.active = b === activeBrand ? "1" : "0";
+          btn.className = "chip shrink-0"; btn.dataset.brand = b;
+          btn.dataset.active = window._activeBrands.has(b) ? "1" : "0";
+          btn.textContent = b;
           btn.onclick = () => {
-              _addRecentBrand(b);
-              _renderRecentBrands();
               saveHistoryState();
-              $$('#brandChips .chip').forEach(c=>c.dataset.active=(c===btn?"1":"0"));
-              visibleCount=60; render();
+              if(window._activeBrands.has(b)) {
+                  window._activeBrands.delete(b);
+              } else {
+                  window._activeBrands.add(b);
+              }
+              _renderBrandChips(filterQ);
+              visibleCount = 60; render();
           };
           wrap.appendChild(btn);
       });
@@ -791,57 +804,6 @@ function rebuildIndex(){
   };
 
   _renderBrandChips();
-
-  // 브랜드 중복체크 버튼
-  const dupCheckBtn = $("#brandDupCheckBtn");
-  if(dupCheckBtn && !dupCheckBtn.dataset.setup) {
-    dupCheckBtn.dataset.setup = "1";
-    dupCheckBtn.onclick = () => {
-      // 품번 기준 중복 집계
-      const counts = {};
-      PRODUCTS.forEach(p => {
-        if(!p.품번) return;
-        if(!counts[p.품번]) counts[p.품번] = { 품명: p.품명, 브랜드: p.브랜드, rows: [] };
-        counts[p.품번].rows.push(p);
-      });
-      const dups = Object.entries(counts).filter(([,v]) => v.rows.length > 1);
-
-      let existing = $("#brandDupModal");
-      if(existing) existing.remove();
-
-      const modal = document.createElement("div");
-      modal.id = "brandDupModal";
-      modal.className = "fixed inset-0 z-[200] flex items-center justify-center p-4";
-      modal.innerHTML = `
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('brandDupModal').remove()"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col z-10 overflow-hidden">
-          <div class="px-5 py-4 bg-orange-50 border-b border-orange-100 flex justify-between items-center shrink-0">
-            <div>
-              <h2 class="font-black text-base text-orange-700">🔍 품번 중복 체크</h2>
-              <p class="text-[11px] text-orange-500 mt-0.5">동일 품번이 여러 행에 등록된 항목 <span class="font-black">${dups.length}건</span></p>
-            </div>
-            <button onclick="document.getElementById('brandDupModal').remove()" class="p-1.5 text-orange-400 hover:text-orange-700 bg-orange-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
-          </div>
-          <div class="overflow-y-auto flex-1 p-4">
-            ${dups.length === 0
-              ? `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 중복 품번 없음!</div>`
-              : dups.map(([code, v]) => `
-                <div class="mb-3 bg-orange-50 border border-orange-200 rounded-xl p-3">
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="font-black text-[12px] text-orange-700">${escapeHtml(code)}</span>
-                    <span class="text-[10px] font-bold bg-orange-200 text-orange-800 px-2 py-0.5 rounded-full">${v.rows.length}회 중복</span>
-                  </div>
-                  <div class="text-[11px] text-gray-600 font-medium">${escapeHtml(v.브랜드)} · ${escapeHtml(v.품명)}</div>
-                  <div class="mt-1.5 space-y-1">
-                    ${v.rows.map((r,i) => `<div class="text-[10px] text-gray-500 bg-white rounded-lg px-2 py-1">#${i+1} 규격: ${escapeHtml(r.규격||'—')} / 부산: ${r.busanTotal||0}개 / 물류: ${r.물류센터||0}개</div>`).join('')}
-                  </div>
-                </div>`).join('')}
-          </div>
-        </div>`;
-      document.body.appendChild(modal);
-      if(window.lucide) lucide.createIcons();
-    };
-  }
 
   // 브랜드 검색 이벤트
   const brandSearchEl = $("#brandSearch");
@@ -2129,7 +2091,7 @@ function getFilters(){
   return {
     cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
     gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
-    brand: ($$('#brandChips .chip').find(b=>b.dataset.active==="1")||{}).dataset?.brand || "ALL",
+    brand: (window._activeBrands && window._activeBrands.size > 0) ? [...window._activeBrands] : "ALL",
     q: $("#q").value.trim().toLowerCase(),
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
@@ -2183,7 +2145,7 @@ function render(){
     let g = p.성별 || p.gender || "U";
     if(g === "M" || g === "남성" || g === "남") g = "남성"; else if(g === "W" || g === "여성" || g === "여") g = "여성"; else g = "공용";
     if(f.gender!=="ALL" && g!==f.gender && p.gender!==f.gender) return false;
-    if(f.brand!=="ALL" && p.브랜드!==f.brand) return false;
+    if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
@@ -2665,7 +2627,8 @@ $("#resetAll").onclick=()=>{
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo]').forEach(b=>b.dataset.active="0");
-    $$('#brandChips .chip').forEach(b=>b.dataset.active=(b.dataset.brand==="ALL"?"1":"0"));
+    window._activeBrands = new Set();
+    _renderBrandChips();
     if($("#brandSearch")) { $("#brandSearch").value = ""; }
     if($("#sortSel")) { $("#sortSel").value = "default"; }
 
