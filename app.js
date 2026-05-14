@@ -2663,11 +2663,13 @@ function openDetail(p){
     </div>
   `;
 
-  // ── 사이즈별 30일 부산 판매량 계산 ──────────────────────────
+  // ── 사이즈별 30일 + 오늘 부산 판매량 계산 ───────────────────
   const _sizeSales30 = {};
+  const _sizeSalesToday = {};
   if (SALES_HISTORY && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
     const _sh = SALES_HISTORY.items[p.품번];
     const _today = new Date(); _today.setHours(0,0,0,0);
+    const _todayKey = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
     for (let date in _sh) {
       const diffDays = Math.floor((_today - new Date(date)) / 86400000);
       if (diffDays > 30) continue;
@@ -2677,7 +2679,11 @@ function openDetail(p){
           if (typeof dayData[size] === 'object') {
             for (let mgr in dayData[size]) {
               if (mgr.includes("김종훈") || mgr.includes("부산")) {
-                _sizeSales30[size] = (_sizeSales30[size] || 0) + (dayData[size][mgr] || 0);
+                const qty = dayData[size][mgr] || 0;
+                _sizeSales30[size] = (_sizeSales30[size] || 0) + qty;
+                if (date === _todayKey) {
+                  _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + qty;
+                }
               }
             }
           }
@@ -2715,7 +2721,12 @@ function openDetail(p){
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
                 <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}</td>
                 <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30>0?'text-indigo-600':'text-gray-300'}">${_s30>0?_s30:'-'}</td>
-                <td class="py-1.5 px-1 font-black text-center bg-blue-50/30 border-r border-gray-100 text-base ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
+                <td class="py-1 px-1 text-center bg-blue-50/30 border-r border-gray-100">
+                    <div class="flex flex-col items-center leading-none gap-0.5">
+                        <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</span>
+                        ${(_sizeSalesToday[s.size]||0)>0?`<span class="text-orange-500 text-[10px] font-bold leading-none">-${_sizeSalesToday[s.size]}↓</span>`:''}
+                    </div>
+                </td>
                 <td class="py-1.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
                 <td class="py-1.5 px-2 text-center">${sinsaRtBtn}</td>
             </tr>`;
