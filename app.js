@@ -1787,87 +1787,89 @@ window.openSalesGuide = (code) => {
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-3";
         modal.innerHTML = `
             <div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-            <div class="modal-content relative bg-gradient-to-br from-slate-50 to-slate-100 w-full max-w-5xl mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 border border-slate-200" style="max-height:92vh;">
+            <div class="modal-content relative bg-gradient-to-br from-slate-50 to-slate-100 w-full max-w-5xl mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-slate-200" style="max-height:95vh;height:95vh;">
                 <!-- 헤더 -->
-                <div class="px-6 pt-5 pb-4 bg-gradient-to-r from-indigo-900 to-indigo-700 flex justify-between items-start shrink-0">
+                <div class="px-5 pt-3 pb-2.5 bg-gradient-to-r from-indigo-900 to-indigo-700 flex justify-between items-center shrink-0">
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-2 flex-wrap">
-                            <span class="bg-white/20 text-white text-[10px] px-2.5 py-1 rounded-full font-black tracking-widest uppercase">AI SALES GUIDE</span>
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <span class="bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-widest uppercase">AI SALES GUIDE</span>
                             <span id="sgBrand" class="text-indigo-200 text-[11px] font-bold"></span>
                         </div>
-                        <h2 id="sgTitle" class="font-black text-2xl text-white leading-tight truncate"></h2>
-                        <div id="sgKeywords" class="flex flex-wrap gap-1.5 mt-2.5"></div>
+                        <div class="flex items-center gap-3">
+                            <h2 id="sgTitle" class="font-black text-xl text-white leading-tight truncate"></h2>
+                            <div id="sgKeywords" class="flex flex-wrap gap-1 shrink-0"></div>
+                        </div>
                     </div>
-                    <button id="closeSalesGuide" class="ml-4 p-1.5 text-white/60 hover:text-white transition-colors bg-white/10 rounded-full shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button id="closeSalesGuide" class="ml-3 p-1.5 text-white/60 hover:text-white transition-colors bg-white/10 rounded-full shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
                 <!-- 대시보드 3컬럼 -->
-                <div id="sgDashboard" class="flex-1 overflow-y-auto dash-scroll p-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 h-full">
-                        <!-- Col 1: 스펙 데이터 -->
-                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
-                            <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 핵심 스펙</h3>
-                            <div id="sgMetrics" class="space-y-2 flex-1">
-                                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
-                                    <span id="sgWeightLabel" class="text-[11px] font-bold text-slate-400">무게</span>
-                                    <span id="sgWeight" class="text-sm font-black text-slate-800"></span>
+                <div id="sgDashboard" class="flex-1 overflow-hidden p-3">
+                    <div class="grid grid-cols-3 gap-2.5 h-full">
+                        <!-- Col 1: 핵심 스펙 -->
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="bar-chart-2" class="w-3 h-3"></i> 핵심 스펙</h3>
+                            <div id="sgMetrics" class="shrink-0">
+                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+                                    <span id="sgWeightLabel" class="text-[10px] font-bold text-slate-400">무게</span>
+                                    <span id="sgWeight" class="text-[12px] font-black text-slate-800"></span>
                                 </div>
-                                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
-                                    <span class="text-[11px] font-bold text-slate-400">힐 스택</span>
-                                    <span id="sgHeel" class="text-sm font-black text-slate-800"></span>
+                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+                                    <span class="text-[10px] font-bold text-slate-400">힐 스택</span>
+                                    <span id="sgHeel" class="text-[12px] font-black text-slate-800"></span>
                                 </div>
-                                <div class="flex justify-between items-center py-1.5 border-b border-dashed border-slate-100">
-                                    <span class="text-[11px] font-bold text-slate-400">포어풋 스택</span>
-                                    <span id="sgFore" class="text-sm font-black text-slate-800"></span>
+                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+                                    <span class="text-[10px] font-bold text-slate-400">포어풋 스택</span>
+                                    <span id="sgFore" class="text-[12px] font-black text-slate-800"></span>
                                 </div>
-                                <div class="flex justify-between items-center py-1.5">
-                                    <span class="text-[11px] font-bold text-slate-400">드롭</span>
-                                    <span id="sgDrop" class="text-sm font-black text-slate-800"></span>
+                                <div class="flex justify-between items-center py-1">
+                                    <span class="text-[10px] font-bold text-slate-400">드롭</span>
+                                    <span id="sgDrop" class="text-[12px] font-black text-slate-800"></span>
                                 </div>
                             </div>
-                            <div id="sgSpecBox" class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-[12px] text-amber-800 font-medium leading-relaxed"></div>
-                            <div>
-                                <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">핵심 특징</h4>
-                                <div id="sgFeatures" class="text-[12px] text-slate-700 font-medium leading-relaxed"></div>
+                            <div id="sgSpecBox" class="bg-amber-50 border border-amber-100 rounded-lg p-2 text-[11px] text-amber-800 font-medium leading-snug shrink-0"></div>
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">핵심 특징</h4>
+                                <div id="sgFeatures" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
                             </div>
                         </div>
                         <!-- Col 2: 비교 분석 -->
-                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
-                            <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="git-compare" class="w-3.5 h-3.5"></i> 비교 분석</h3>
-                            <div class="bg-slate-50 rounded-xl p-3">
-                                <span class="text-[11px] font-black text-indigo-400 uppercase tracking-widest block mb-2">VS 전작 (수치)</span>
-                                <div id="sgVsPrev" class="text-[13px] text-slate-700 font-medium leading-loose"></div>
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="git-compare" class="w-3 h-3"></i> 비교 분석</h3>
+                            <div class="bg-slate-50 rounded-lg p-2 shrink-0">
+                                <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-1">VS 전작 (수치)</span>
+                                <div id="sgVsPrev" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
                             </div>
-                            <div class="bg-red-50 border border-red-100 rounded-xl p-3">
-                                <span class="text-[11px] font-black text-red-400 uppercase tracking-widest block mb-2">⚠ 알려진 이슈 / 단점</span>
-                                <div id="sgIssues" class="text-[13px] text-red-700 font-medium leading-loose"></div>
+                            <div class="bg-red-50 border border-red-100 rounded-lg p-2 shrink-0">
+                                <span class="text-[9px] font-black text-red-400 uppercase tracking-widest block mb-1">⚠ 알려진 이슈 / 단점</span>
+                                <div id="sgIssues" class="text-[11px] text-red-700 font-medium leading-snug"></div>
                             </div>
-                            <div class="bg-slate-50 rounded-xl p-3">
-                                <span class="text-[11px] font-black text-emerald-500 uppercase tracking-widest block mb-2">VS 경쟁 모델</span>
-                                <div id="sgVsOthers" class="text-[13px] text-slate-700 font-medium leading-loose"></div>
+                            <div class="bg-slate-50 rounded-lg p-2 shrink-0">
+                                <span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest block mb-1">VS 경쟁 모델</span>
+                                <div id="sgVsOthers" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
                             </div>
-                            <div>
-                                <h4 class="text-[11px] font-black text-indigo-400 uppercase tracking-widest mb-2">한 줄 정의</h4>
-                                <div id="sgWhy" class="text-[14px] font-black text-indigo-700 italic leading-relaxed"></div>
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">한 줄 정의</h4>
+                                <div id="sgWhy" class="text-[12px] font-black text-indigo-700 italic leading-snug"></div>
                             </div>
                         </div>
                         <!-- Col 3: 세일즈 전략 -->
-                        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
-                            <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="target" class="w-3.5 h-3.5"></i> 세일즈 전략</h3>
-                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-3">
-                                <h4 class="text-[11px] font-black text-amber-600 uppercase tracking-widest mb-2">🎯 브랜드 강조 포인트</h4>
-                                <div id="sgBrandFocus" class="text-[13px] text-amber-800 font-medium leading-loose"></div>
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="target" class="w-3 h-3"></i> 세일즈 전략</h3>
+                            <div class="bg-amber-50 border border-amber-100 rounded-lg p-2 shrink-0">
+                                <h4 class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">🎯 브랜드 강조 포인트</h4>
+                                <div id="sgBrandFocus" class="text-[11px] text-amber-800 font-medium leading-snug"></div>
                             </div>
-                            <div>
-                                <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">추천 타겟</h4>
-                                <div id="sgTarget" class="text-[13px] text-slate-700 font-medium leading-relaxed bg-slate-50 rounded-xl p-3"></div>
+                            <div class="shrink-0">
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">추천 타겟</h4>
+                                <div id="sgTarget" class="text-[11px] text-slate-700 font-medium leading-snug bg-slate-50 rounded-lg p-2"></div>
                             </div>
-                            <div>
-                                <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">Best For</h4>
-                                <div id="sgBestFor" class="text-[13px] font-bold text-indigo-600 bg-indigo-50 rounded-xl p-3 leading-relaxed"></div>
+                            <div class="shrink-0">
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Best For</h4>
+                                <div id="sgBestFor" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 rounded-lg p-2 leading-snug"></div>
                             </div>
-                            <div class="flex-1">
-                                <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2">클로징 멘트</h4>
-                                <div id="sgPitch" class="text-[14px] font-bold text-indigo-900 leading-relaxed bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded-r-xl italic flex-1"></div>
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">클로징 멘트</h4>
+                                <div id="sgPitch" class="text-[12px] font-bold text-indigo-900 leading-snug bg-indigo-50 border-l-4 border-indigo-500 p-2 rounded-r-lg italic"></div>
                             </div>
                         </div>
                     </div>
