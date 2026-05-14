@@ -1096,8 +1096,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
-    qty = Number(qty);
+    qty = Number(qty) || 1;
     if(qty <= 0) return;
+
+    // iPad/iOS Safari 대응: this가 제대로 바인딩 안 될 때 더미 버튼으로 대체
+    if(!btn || !btn.tagName) {
+        try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
+        catch(e) { btn = document.createElement('button'); }
+    }
 
     const origHtml = btn.innerHTML;
     const origClass = btn.className;
@@ -1968,6 +1974,13 @@ function card(p){
   if(_cardSales.d7 >= 5)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
   else if(_cardSales.d7 >= 2) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
 
+  // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
+  let rtChanceBadge = "";
+  if(_cardSales.d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0)) {
+    const _otherStock = (p.centerTotal||0) + (p.sinsaTotal||0);
+    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT추천 +${_otherStock}</span>`;
+  }
+
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -2031,6 +2044,7 @@ function card(p){
         <div class="flex flex-wrap gap-1.5 text-xs font-bold text-gray-500 mb-2.5 items-center">
             ${busanOnlyBadge}
             ${salesSpeedBadge}
+            ${rtChanceBadge}
             ${promoBadge}
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
@@ -2100,6 +2114,7 @@ function getFilters(){
     gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
     brand: (window._activeBrands && window._activeBrands.size > 0) ? [...window._activeBrands] : "ALL",
     salesSpeed: ($$('button.chip[data-salesspeed]').find(b=>b.dataset.active==="1")||{}).dataset?.salesspeed || "ALL",
+    rtChance: !!$$('button.chip[data-rtchance]').find(b=>b.dataset.active==="1"),
     q: $("#q").value.trim().toLowerCase(),
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
@@ -2155,6 +2170,7 @@ function render(){
     if(f.gender!=="ALL" && g!==f.gender && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
     if(f.salesSpeed!=="ALL" && getSalesSummary(p.품번).speed !== f.salesSpeed) return false;
+    if(f.rtChance && !(getSalesSummary(p.품번).d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0))) return false;
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
@@ -2734,7 +2750,7 @@ $$('button[id^="close"]').forEach(btn => {
     btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
 });
 
-$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly], button.chip[data-salesspeed]').forEach(b=>b.addEventListener("click",()=>{
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.addEventListener("click",()=>{
     saveHistoryState();
     if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
     else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
@@ -2756,7 +2772,7 @@ $("#resetAll").onclick=()=>{
     saveHistoryState();
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed]').forEach(b=>b.dataset.active="0");
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.dataset.active="0");
     window._activeBrands = new Set();
     _renderBrandChips();
     if($("#brandSearch")) { $("#brandSearch").value = ""; }
