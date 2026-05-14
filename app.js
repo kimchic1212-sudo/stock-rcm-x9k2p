@@ -1874,9 +1874,8 @@ window.openSalesGuide = (code) => {
     modal.querySelector("#sgBrand").textContent  = p ? p.브랜드 : "";
     modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw =>
         `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">#${escapeHtml(kw)}</span>`).join('');
-    // 무게 - 성별 기준 사이즈 표기
-    const _pName = p ? p.품명 : "";
-    const _isWomens = _pName.includes("여성") || /\bW\b/.test(_pName) || _pName.endsWith(" W");
+    // 무게 - 성별 기준 사이즈 표기 (p.gender: "M"/"W"/"U", detectGender()로 설정됨)
+    const _isWomens = p && (p.gender === "W" || p.성별 === "여성" || p.성별 === "여");
     const _sizeRef = _isWomens ? "(여 240mm)" : "(남 270mm)";
     const _weightVal = guide.weight || "";
     modal.querySelector("#sgWeight").textContent = _weightVal ? `${_weightVal} ${_sizeRef}` : "—";
