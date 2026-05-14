@@ -2560,6 +2560,29 @@ function openDetail(p){
     </div>
   `;
 
+  // ── 사이즈별 30일 부산 판매량 계산 ──────────────────────────
+  const _sizeSales30 = {};
+  if (SALES_HISTORY && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+    const _sh = SALES_HISTORY.items[p.품번];
+    const _today = new Date(); _today.setHours(0,0,0,0);
+    for (let date in _sh) {
+      const diffDays = Math.floor((_today - new Date(date)) / 86400000);
+      if (diffDays > 30) continue;
+      const dayData = _sh[date];
+      if (typeof dayData === 'object') {
+        for (let size in dayData) {
+          if (typeof dayData[size] === 'object') {
+            for (let mgr in dayData[size]) {
+              if (mgr.includes("김종훈") || mgr.includes("부산")) {
+                _sizeSales30[size] = (_sizeSales30[size] || 0) + (dayData[size][mgr] || 0);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   $("#detailBody").innerHTML = `
     <div class="mb-2 flex gap-4 text-xs font-bold text-gray-500 px-1">
         <span>부산 <b class="text-blue-600 text-sm">${p.busanTotal}</b></span>
@@ -2571,6 +2594,7 @@ function openDetail(p){
         <thead class="bg-gray-50 text-xs text-gray-500 font-black border-b border-gray-200">
             <tr>
             <th class="py-2 px-2 text-center w-[18%] border-r border-gray-100">사이즈</th>
+            <th class="py-2 px-1 text-center w-[14%] text-indigo-600 bg-indigo-50/60 border-r border-gray-100">📦 30일</th>
             <th class="py-2 px-1 text-center w-[14%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산</th>
             <th class="py-2 px-2 text-center border-r border-gray-100">물류 RT <span class="text-gray-400 font-normal">(${p.centerTotal})</span></th>
             <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-400 font-normal">(${p.sinsaTotal})</span></th>
@@ -2578,6 +2602,7 @@ function openDetail(p){
         </thead>
         <tbody>
         ${p.sizes.map(s => {
+            const _s30 = _sizeSales30[s.size] || 0;
             let centerRtBtn = s.center > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
                 : `<span class="text-gray-300 text-sm">-</span>`;
@@ -2586,6 +2611,7 @@ function openDetail(p){
                 : `<span class="text-gray-300 text-sm">-</span>`;
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
                 <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}</td>
+                <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30>0?'text-indigo-600':'text-gray-300'}">${_s30>0?_s30:'-'}</td>
                 <td class="py-1.5 px-1 font-black text-center bg-blue-50/30 border-r border-gray-100 text-base ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
                 <td class="py-1.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
                 <td class="py-1.5 px-2 text-center">${sinsaRtBtn}</td>
