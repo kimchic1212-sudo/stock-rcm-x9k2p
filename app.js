@@ -1833,13 +1833,17 @@ window.openSalesGuide = (code) => {
                         <!-- Col 2: 비교 분석 -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
                             <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="git-compare" class="w-3.5 h-3.5"></i> 비교 분석</h3>
-                            <div class="bg-slate-50 rounded-xl p-3 flex-1">
-                                <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-1.5">VS 전작</span>
-                                <div id="sgVsPrev" class="text-[13px] text-slate-700 font-medium leading-relaxed"></div>
+                            <div class="bg-slate-50 rounded-xl p-3">
+                                <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-1.5">VS 전작 (수치)</span>
+                                <div id="sgVsPrev" class="text-[12px] text-slate-700 font-medium leading-relaxed"></div>
                             </div>
-                            <div class="bg-slate-50 rounded-xl p-3 flex-1">
+                            <div class="bg-red-50 border border-red-100 rounded-xl p-3">
+                                <span class="text-[10px] font-black text-red-400 uppercase tracking-widest block mb-1.5">⚠ 알려진 이슈 / 단점</span>
+                                <div id="sgIssues" class="text-[12px] text-red-700 font-medium leading-relaxed"></div>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-3">
                                 <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest block mb-1.5">VS 경쟁 모델</span>
-                                <div id="sgVsOthers" class="text-[13px] text-slate-700 font-medium leading-relaxed"></div>
+                                <div id="sgVsOthers" class="text-[12px] text-slate-700 font-medium leading-relaxed"></div>
                             </div>
                             <div>
                                 <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">한 줄 정의</h4>
@@ -1849,6 +1853,10 @@ window.openSalesGuide = (code) => {
                         <!-- Col 3: 세일즈 전략 -->
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
                             <h3 class="font-black text-xs text-indigo-500 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="target" class="w-3.5 h-3.5"></i> 세일즈 전략</h3>
+                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                                <h4 class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1.5">🎯 브랜드 강조 포인트</h4>
+                                <div id="sgBrandFocus" class="text-[12px] text-amber-800 font-medium leading-relaxed"></div>
+                            </div>
                             <div>
                                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">추천 타겟</h4>
                                 <div id="sgTarget" class="text-[12px] text-slate-700 font-medium leading-relaxed bg-slate-50 rounded-xl p-3"></div>
@@ -1887,10 +1895,12 @@ window.openSalesGuide = (code) => {
     modal.querySelector("#sgSpecBox").textContent  = guide.specAdv     || guide.spec_analysis || guide.features || "—";
     modal.querySelector("#sgFeatures").textContent = guide.features    || "—";
     // 비교 (V2 필드명 매핑)
-    modal.querySelector("#sgVsPrev").textContent   = guide.verDiff     || guide.vs_prev  || guide.features || "—";
+    modal.querySelector("#sgVsPrev").textContent    = guide.verDiff     || guide.vs_prev  || guide.features || "—";
+    modal.querySelector("#sgIssues").textContent   = guide.issues      || "특별한 이슈 없음";
     modal.querySelector("#sgVsOthers").textContent = guide.vsComp      || guide.vs_others || "—";
     modal.querySelector("#sgWhy").textContent      = guide.whyThis     || guide.why      || guide.pitch    || "—";
     // 전략 (V2 필드명 매핑)
+    modal.querySelector("#sgBrandFocus").textContent = guide.brandFocus || "—";
     modal.querySelector("#sgTarget").textContent   = guide.target      || "—";
     modal.querySelector("#sgBestFor").textContent  = guide.bestFor     || guide.best_for || guide.target   || "—";
     modal.querySelector("#sgPitch").textContent    = guide.closing     || guide.pitch    || "—";
