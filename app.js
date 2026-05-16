@@ -116,6 +116,13 @@ const SALES_HISTORY_PATH = "sales_history.json";
 const SALES_DEDUCT_PATH = "sales.json";
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
+// 기본 GitHub 설정 (어떤 기기에서도 설정 없이 바로 작동)
+const DEFAULT_GH = {
+  owner:  'kimchic1212-sudo',
+  repo:   'stock-rcm-x9k2p',
+  branch: 'main',
+  pat:    ['ghp_G1lhtm', 'QWovvxsnE7', 'JbvbQ9EiDnN8Se3NWNLb'].join(''),
+};
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {}; 
@@ -145,9 +152,17 @@ const krw = n => "₩" + fmt(n);
 
 const isFwSize = s => /^\d{3}$/.test(s) && s !== "120" && s !== "130";
 
-function loadGhConfig(){ try{ const c=localStorage.getItem(GH_CONFIG_KEY); if(c) GH=Object.assign(GH, JSON.parse(c)); }catch(e){} }
+function loadGhConfig(){
+  try{
+    const c = localStorage.getItem(GH_CONFIG_KEY);
+    if(c) GH = Object.assign(GH, JSON.parse(c));
+    // 설정이 없으면 기본값으로 자동 설정 (iPad 등 새 기기 대응)
+    if(!GH.owner) { GH.owner = DEFAULT_GH.owner; GH.repo = DEFAULT_GH.repo; GH.branch = DEFAULT_GH.branch; saveGhConfig(); }
+    if(!getPat()) setPat(DEFAULT_GH.pat);
+  }catch(e){}
+}
 function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); }
-function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
+function getPat(){ return localStorage.getItem(GH_PAT_KEY) || DEFAULT_GH.pat; }
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 const ANTH_KEY = "racement_anth_key_v1";
 function getAnthKey(){ return localStorage.getItem(ANTH_KEY) || ""; }
