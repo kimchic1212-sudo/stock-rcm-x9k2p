@@ -2139,6 +2139,12 @@ function card(p){
     rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT추천</span>`;
   }
 
+  // 오늘 POS 판매 뱃지
+  let todaySoldBadge = "";
+  if ((p.todaySold || 0) > 0) {
+    todaySoldBadge = `<span class="bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded font-black text-[10px]">⚡ 오늘 -${p.todaySold}개</span>`;
+  }
+
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -2203,6 +2209,7 @@ function card(p){
             ${busanOnlyBadge}
             ${salesSpeedBadge}
             ${rtChanceBadge}
+            ${todaySoldBadge}
             ${promoBadge}
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
@@ -2232,10 +2239,12 @@ function card(p){
 
         <div class="size-scroll-wrap no-scrollbar">
           ${p.sizes.map(s=>{
-              const q = s.busan||0; 
+              const q = s.busan||0;
+              const soldToday = (p.todaySoldBySize || {})[String(s.size).trim()] || 0;
               let cls = "size-cell tnum shrink-0 w-[46px] ";
               if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
-              return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span><span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+              const todayTag = soldToday > 0 ? `<span class="text-orange-500 font-black leading-none" style="font-size:9px">-${soldToday}</span>` : '';
+              return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span>${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
           }).join("")}
         </div>
     </div>
@@ -2303,8 +2312,11 @@ function render(){
   const f = getFilters();
   const activeSizeFilter = [f.sizeFw, f.sizeAp, f.sizeGear].find(s => s !== "ALL") || "ALL";
 
+  const _todayKey = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
   PRODUCTS.forEach(p => {
       p.periodSales = 0;
+      p.todaySold = 0;
+      p.todaySoldBySize = {};
       if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
           for (let date in SALES_HISTORY.items[p.품번]) {
               const dayData = SALES_HISTORY.items[p.품번][date];
@@ -2312,7 +2324,15 @@ function render(){
                   for (let size in dayData) {
                       if (typeof dayData[size] === 'object') {
                           for(let mgr in dayData[size]) {
-                              if(mgr.includes("김종훈") || mgr.includes("부산")) p.periodSales += dayData[size][mgr]; 
+                              if(mgr.includes("김종훈") || mgr.includes("부산")) {
+                                  const qty = dayData[size][mgr] || 0;
+                                  p.periodSales += qty;
+                                  // 오늘 POS 판매 집계
+                                  if (date === _todayKey) {
+                                      p.todaySold += qty;
+                                      p.todaySoldBySize[size] = (p.todaySoldBySize[size] || 0) + qty;
+                                  }
+                              }
                           }
                       }
                   }
