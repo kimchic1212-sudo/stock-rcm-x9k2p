@@ -2142,7 +2142,7 @@ function card(p){
   // 오늘 POS 판매 뱃지
   let todaySoldBadge = "";
   if ((p.todaySold || 0) > 0) {
-    todaySoldBadge = `<span class="bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded font-black text-[10px]">⚡ 오늘 -${p.todaySold}개</span>`;
+    todaySoldBadge = `<span class="bg-orange-500 text-white px-2 py-0.5 rounded font-black text-[10px] shadow-sm">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
   }
 
   const productMemos = MEMOS.filter(m => m.code === p.품번);
@@ -2243,8 +2243,8 @@ function card(p){
               const soldToday = (p.todaySoldBySize || {})[String(s.size).trim()] || 0;
               let cls = "size-cell tnum shrink-0 w-[46px] ";
               if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
-              const todayTag = soldToday > 0 ? `<span class="text-orange-500 font-black leading-none" style="font-size:9px">-${soldToday}</span>` : '';
-              return `<div class="${cls}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span>${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+              const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:9px;margin-top:1px">↓${soldToday}판매</span>` : '';
+              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span>${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
           }).join("")}
         </div>
     </div>
@@ -2286,7 +2286,8 @@ function getFilters(){
     stock: !!$$('button.chip[data-stock]').find(b=>b.dataset.active==="1"),
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
-    busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"), 
+    busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"),
+    todaySoldOnly: !!$$('button.chip[data-todaysold]').find(b=>b.dataset.active==="1"),
     sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
     sizeGear: $("#sizeSelGear") ? $("#sizeSelGear").value : "ALL",
@@ -2352,6 +2353,7 @@ function render(){
     if(f.favOnly && !FAVS.includes(p.품번)) return false; 
     if(f.memoOnly && !p.hasMemo) return false;
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
+    if(f.todaySoldOnly && !(p.todaySold > 0)) return false;
     
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
@@ -2384,8 +2386,9 @@ function render(){
   });
 
   // RT추천 필터 활성 시 30일 판매량 내림차순 자동 정렬
-  const sortMode = f.rtChance ? "salesDesc" : $("#sortSel").value;
+  const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "salesDesc" : $("#sortSel").value;
   filteredList.sort((a,b) => {
+    if(sortMode === "todayDesc") return (b.todaySold||0) - (a.todaySold||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode === "salesDesc") return (getSalesSummary(b.품번).d30||0) - (getSalesSummary(a.품번).d30||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     
     if(sortMode === "default") {
@@ -2970,6 +2973,8 @@ $("#resetAll").onclick=()=>{
 
     const busanOnlyBtn = $('button.chip[data-busanonly]');
     if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400'); }
+    const todaySoldBtn = $('button.chip[data-todaysold]');
+    if(todaySoldBtn) { todaySoldBtn.dataset.active = "0"; todaySoldBtn.classList.remove('ring-2', 'ring-orange-400'); }
 
     $("#sortSel").value="default";
     if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
@@ -3302,6 +3307,22 @@ window.addEventListener('DOMContentLoaded', () => {
             busanOnlyBtn.dataset.active = busanOnlyBtn.dataset.active === "1" ? "0" : "1";
             if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
             else busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
+            visibleCount=60; render();
+        });
+    }
+    // 오늘 판매 필터 버튼
+    if(stockBtn && !$('button.chip[data-todaysold]')) {
+        const todayBtn = document.createElement("button");
+        todayBtn.className = "chip !bg-orange-50 !text-orange-600 !border-orange-300 font-black";
+        todayBtn.dataset.todaysold = "1";
+        todayBtn.dataset.active = "0";
+        todayBtn.innerHTML = "🛍️ 오늘 판매";
+        stockBtn.parentNode.insertBefore(todayBtn, stockBtn.nextSibling);
+        todayBtn.addEventListener("click", () => {
+            saveHistoryState();
+            todayBtn.dataset.active = todayBtn.dataset.active === "1" ? "0" : "1";
+            if(todayBtn.dataset.active === "1") todayBtn.classList.add('ring-2', 'ring-orange-400');
+            else todayBtn.classList.remove('ring-2', 'ring-orange-400');
             visibleCount=60; render();
         });
     }
