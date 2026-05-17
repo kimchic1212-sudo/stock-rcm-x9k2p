@@ -63,9 +63,13 @@ async function uploadSalesHistory(data, sha) {
 }
 
 async function fetchPOSSales() {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ locale: 'ko-KR', viewport: { width: 1920, height: 1080 } });
-  const page    = await context.newPage();
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const context = await browser.newContext({
+    locale: 'ko-KR',
+    viewport: { width: 1920, height: 1080 },
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  });
+  const page = await context.newPage();
 
   const todayItems = {};
   const pending    = [];
@@ -74,12 +78,16 @@ async function fetchPOSSales() {
 
   page.on('response', async response => {
     const url = response.url();
+    // 디버그: 주요 API 요청 로깅
+    if (url.includes('Pos') || url.includes('pos') || url.includes('Sale') || url.includes('sale')) {
+      log(`  [API] ${url.split('/').slice(-1)[0].substring(0,60)}`);
+    }
     if (url.includes('selTodaySalesList')) {
       try {
         const d = await response.json();
         tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
         log(`거래번호 ${tradeNos.length}건`);
-      } catch(e) {}
+      } catch(e) { log(`  selTodaySalesList 파싱 오류: ${e.message}`); }
     }
     if (url.includes('selItemSalesList')) {
       apiCallCount++;
@@ -135,7 +143,15 @@ async function fetchPOSSales() {
         }
       }
     });
-    await page.waitForTimeout(5000);
+    // selTodaySalesList 응답 명시적 대기 (최대 15초)
+    if(tradeNos.length === 0) {
+      log('selTodaySalesList 대기 중...');
+      await page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 15000 })
+        .then(async r => {
+          try { const d = await r.json(); tradeNos = (d.dlt_result||[]).map(t=>t.TRADE_NO); } catch(e){}
+        }).catch(() => log('  selTodaySalesList timeout - 0건으로 진행'));
+    }
+    await page.waitForTimeout(3000);
     log(`당일매출조회 완료 (${tradeNos.length}건)`);
 
     const tableInfo = await page.evaluate(() =>
