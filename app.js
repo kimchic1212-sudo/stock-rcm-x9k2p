@@ -515,7 +515,9 @@ async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
       RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
+      const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
+      setupQuickActionBar();
       if(window.renderPromoAdmin) window.renderPromoAdmin();
       if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
       if(window.renderSalesAdmin) window.renderSalesAdmin();
@@ -542,7 +544,9 @@ async function loadData(force = false){
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
 
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
+      const _bar2 = $("#actionBtnsWrap"); if(_bar2) _bar2.dataset.setup = "0";
+      setupQuickActionBar();
       if(window.renderPromoAdmin) window.renderPromoAdmin();
       if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
       if(window.renderSalesAdmin) window.renderSalesAdmin();
