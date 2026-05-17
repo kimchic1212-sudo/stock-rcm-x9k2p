@@ -693,8 +693,8 @@ function applyPosSalesDeductions() {
             const sizeKey = String(s.size).trim();
             const saleEntry = todaySales[sizeKey];
             if (!saleEntry) continue;
-            // { '부산': qty } 형태
-            const sold = saleEntry['부산'] || 0;
+            // 부산 판매 수량: '부산(김종훈)' 또는 '부산' 키 (중복 방지: 최대값)
+            const sold = Math.max(saleEntry['부산(김종훈)'] || 0, saleEntry['부산'] || 0);
             if (sold > 0) {
                 s.busan = Math.max(0, s.busan - sold);
                 changed = true;
@@ -1441,9 +1441,12 @@ window.openAnalyticsReport = async () => {
                         } else if (typeof dayData === 'object') {
                             for (let size in dayData) {
                                 if (typeof dayData[size] === 'object') {
-                                    for(let mgr in dayData[size]) {
-                                        const qty = dayData[size][mgr];
-                                        if(mgr.includes("김종훈") || mgr.includes("부산")) { busanSales += qty; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + qty; }
+                                    const sd = dayData[size];
+                                    // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+                                    const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                                    if (bq > 0) { busanSales += bq; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + bq; }
+                                    for(let mgr in sd) {
+                                        const qty = sd[mgr];
                                         if(mgr.includes("승호") || mgr.includes("강") || mgr.includes("신사")) { sinsaSales += qty; }
                                         if(mgr.includes("물류") || mgr.includes("본사") || mgr.includes("온라인")) { centerSales += qty; }
                                     }
@@ -1793,11 +1796,14 @@ window.openDashDetail = (code, periodParam) => {
                 else if (typeof dayData === 'object') {
                     for (let size in dayData) {
                         if (typeof dayData[size] === 'object') {
-                            for (let mgr in dayData[size]) {
-                                const qty = dayData[size][mgr];
-                                if (mgr.includes("김종훈")||mgr.includes("부산")) sizeSalesMapBusan[size] = (sizeSalesMapBusan[size]||0) + qty;
-                                else if (mgr.includes("승호")||mgr.includes("강")||mgr.includes("신사")) sizeSalesMapSinsa[size] = (sizeSalesMapSinsa[size]||0) + qty;
-                                else sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
+                            const sd = dayData[size];
+                            // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+                            const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                            if (bq > 0) sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + bq;
+                            for (let mgr in sd) {
+                                const qty = sd[mgr];
+                                if (mgr.includes("승호")||mgr.includes("강")||mgr.includes("신사")) sizeSalesMapSinsa[size] = (sizeSalesMapSinsa[size]||0) + qty;
+                                else if (!mgr.includes("김종훈") && !mgr.includes("부산")) sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
                             }
                         } else { sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + dayData[size]; }
                     }
@@ -2371,15 +2377,14 @@ function render(){
               if (typeof dayData === 'object') {
                   for (let size in dayData) {
                       if (typeof dayData[size] === 'object') {
-                          for(let mgr in dayData[size]) {
-                              if(mgr.includes("김종훈") || mgr.includes("부산")) {
-                                  const qty = dayData[size][mgr] || 0;
-                                  p.periodSales += qty;
-                                  // 오늘 POS 판매 집계
-                                  if (date === _todayKey) {
-                                      p.todaySold += qty;
-                                      p.todaySoldBySize[size] = (p.todaySoldBySize[size] || 0) + qty;
-                                  }
+                          const sd = dayData[size];
+                          // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만
+                          const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                          if (bq > 0) {
+                              p.periodSales += bq;
+                              if (date === _todayKey) {
+                                  p.todaySold += bq;
+                                  p.todaySoldBySize[size] = (p.todaySoldBySize[size] || 0) + bq;
                               }
                           }
                       }
@@ -2718,10 +2723,11 @@ function getSalesSummary(code) {
     else if(typeof dayData === 'object') {
       for(let size in dayData) {
         if(typeof dayData[size] === 'object') {
-          for(let mgr in dayData[size]) {
-            // 부산점만 카운팅 (김종훈 or 부산 포함)
-            if(mgr.includes("김종훈") || mgr.includes("부산")) qty += (dayData[size][mgr]||0);
-          }
+          // 부산점 카운팅: '부산(김종훈)'과 '부산' 키가 동시에 있으면 최대값만 (중복 방지)
+          const sd = dayData[size];
+          const busanKJ = sd['부산(김종훈)'] || 0;
+          const busanPOS = sd['부산'] || 0;
+          qty += Math.max(busanKJ, busanPOS);
         } else { qty += (dayData[size]||0); } // 담당자 구분 없는 구형 데이터는 그대로 포함
       }
     }
@@ -2892,15 +2898,18 @@ function openDetail(p){
       if (typeof dayData === 'object') {
         for (let size in dayData) {
           if (typeof dayData[size] === 'object') {
-            for (let mgr in dayData[size]) {
-              const qty = dayData[size][mgr] || 0;
-              if (mgr.includes("김종훈") || mgr.includes("부산")) {
-                // 부산 전용
-                _sizeSales30Busan[size] = (_sizeSales30Busan[size] || 0) + qty;
-                if (date === _todayKey) {
-                  _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + qty;
-                }
-              } else {
+            const sd = dayData[size];
+            // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+            const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+            if (bq > 0) {
+              _sizeSales30Busan[size] = (_sizeSales30Busan[size] || 0) + bq;
+              if (date === _todayKey) {
+                _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + bq;
+              }
+            }
+            for (let mgr in sd) {
+              const qty = sd[mgr] || 0;
+              if (!mgr.includes("김종훈") && !mgr.includes("부산")) {
                 // 부산 제외 (신사, 물류 등)
                 _sizeSales30Etc[size] = (_sizeSales30Etc[size] || 0) + qty;
               }
