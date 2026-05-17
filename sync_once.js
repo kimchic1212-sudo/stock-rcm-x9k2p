@@ -276,7 +276,7 @@ async function fetchPOSSales() {
       if (!history.items[code]) history.items[code] = {};
       history.items[code][dateKey] = {};
       for (const [size, qty] of Object.entries(sizes)) {
-        history.items[code][dateKey][size] = { '부산': qty };
+        history.items[code][dateKey][size] = { '부산(김종훈)': qty };
       }
     }
     history.meta = {
