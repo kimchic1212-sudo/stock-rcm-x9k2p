@@ -515,7 +515,11 @@ async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
       RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar(); return;
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+      if(window.renderPromoAdmin) window.renderPromoAdmin();
+      if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+      if(window.renderSalesAdmin) window.renderSalesAdmin();
+      return;
   }
   try {
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes] = await Promise.all([
@@ -539,6 +543,9 @@ async function loadData(force = false){
 
       sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+      if(window.renderPromoAdmin) window.renderPromoAdmin();
+      if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+      if(window.renderSalesAdmin) window.renderSalesAdmin();
   } catch(e) { console.error("Data Load Error", e); }
 }
 
