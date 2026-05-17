@@ -2535,51 +2535,122 @@ window.deleteTransfer = async (trId) => {
         oldData = oldData.filter(m => m.id !== trId);
         const body = { message:"delete transfer", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
         await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-        TRANSFERS = oldData; alert("이 이동 요청이 삭제되었습니다.");
-        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) window.renderTransfers();
+        TRANSFERS = oldData;
+        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) window.renderTransfersList();
+        else alert("이동 요청이 삭제되었습니다.");
     } catch(e) { alert("삭제 실패"); }
 };
+
+window._trFilter = window._trFilter || 'unconfirmed';
 
 window.renderTransfers = () => {
     let listEl = $("#transfersList");
     if(!listEl) {
         const modal = document.createElement("div");
         modal.id = "transfersModal";
-        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99] p-4"; 
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99] p-4";
         modal.innerHTML = `
             <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-            <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10">
-                <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-white">
-                    <h2 class="font-black text-xl text-blue-800">🚚 상품 RT(이동) 요청 목록</h2>
-                    <div class="flex gap-3">
-                        <button onclick="exportTransfersToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-black shadow-sm transition-colors flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> 엑셀저장</button>
-                        <button id="closeTransfers" class="p-2 hover:bg-gray-100 rounded-full transition-colors"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+            <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10" style="max-height:90vh">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
+                    <h2 class="font-black text-lg text-blue-800">🚚 RT 이동요청 목록</h2>
+                    <div class="flex gap-2 items-center">
+                        <button onclick="exportTransfersToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> 엑셀</button>
+                        <button onclick="deleteAllTransfers()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 전체삭제</button>
+                        <button id="closeTransfers" class="p-1.5 hover:bg-gray-100 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
                     </div>
-                </div><div id="transfersList" class="p-5 overflow-y-auto flex-1 bg-gray-50 space-y-3"></div>
+                </div>
+                <div class="px-4 py-2.5 border-b border-gray-100 flex gap-2 bg-white shrink-0" id="trFilterBar">
+                    <button onclick="window._trFilter='unconfirmed';window.renderTransfersList()" id="trFilterUnconfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">미확인목록</button>
+                    <button onclick="window._trFilter='confirmed';window.renderTransfersList()" id="trFilterConfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">확인목록</button>
+                    <button onclick="window._trFilter='all';window.renderTransfersList()" id="trFilterAll" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">전체</button>
+                </div>
+                <div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3"></div>
             </div>`;
         document.body.appendChild(modal);
         $("#closeTransfers").onclick = () => modal.classList.add("hidden");
         listEl = $("#transfersList");
     }
     $("#transfersModal").classList.remove("hidden");
-    if(TRANSFERS.length === 0) { listEl.innerHTML = "<div class='text-center py-10 text-gray-500 font-bold text-sm'>대기 중인 이동 요청이 없습니다.</div>"; return; }
+    window.renderTransfersList();
+};
+
+window.renderTransfersList = () => {
+    const listEl = $("#transfersList");
+    if(!listEl) return;
+    // 필터 버튼 스타일
+    [['trFilterUnconfirmed','unconfirmed'],['trFilterConfirmed','confirmed'],['trFilterAll','all']].forEach(([id, val]) => {
+        const btn = document.getElementById(id);
+        if(!btn) return;
+        btn.className = window._trFilter === val
+            ? "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-blue-700 text-white border-blue-700"
+            : "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
+    });
+    let filtered = TRANSFERS.slice().reverse();
+    if(window._trFilter === 'unconfirmed') filtered = filtered.filter(t => !t.confirmed);
+    else if(window._trFilter === 'confirmed') filtered = filtered.filter(t => !!t.confirmed);
+    if(filtered.length === 0) {
+        const msg = window._trFilter === 'unconfirmed' ? '미확인 이동 요청이 없습니다 ✅'
+                  : window._trFilter === 'confirmed' ? '확인된 이동 요청이 없습니다.'
+                  : '이동 요청이 없습니다.';
+        listEl.innerHTML = `<div class='text-center py-10 text-gray-400 font-bold text-sm'>${msg}</div>`;
+        return;
+    }
     let html = "";
-    TRANSFERS.slice().reverse().forEach(t => {
+    filtered.forEach(t => {
+        const confirmed = !!t.confirmed;
         html += `
-        <div class="p-4 bg-white rounded-xl border border-blue-100 text-sm shadow-sm relative">
-            <button onclick="deleteTransfer('${t.id}')" class="absolute top-4 right-4 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+        <div class="p-4 bg-white rounded-xl border ${confirmed ? 'border-gray-100 opacity-55' : 'border-blue-100'} text-sm shadow-sm relative">
+            <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             <div class="flex justify-between items-center mb-1.5 pr-8">
-                <span class="font-black text-blue-700 text-base">${escapeHtml(t.code)}</span><span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
+                <span class="font-black text-blue-700 text-base">${escapeHtml(t.code)}</span>
+                <span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
             </div>
-            <div class="font-bold text-gray-800 mb-3 text-[15px] line-clamp-2">${escapeHtml(t.product)}</div>
-            <div class="flex gap-2 text-xs font-bold text-gray-600 mb-3">
-                <span class="bg-gray-100 px-2.5 py-1 rounded">사이즈: ${escapeHtml(t.size)}</span><span class="bg-gray-100 px-2.5 py-1 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+            <div class="font-bold text-gray-800 mb-2.5 text-[15px] line-clamp-2">${escapeHtml(t.product)}</div>
+            <div class="flex flex-wrap gap-2 text-xs font-bold text-gray-600 mb-2.5">
+                <span class="bg-gray-100 px-2.5 py-1 rounded">사이즈: ${escapeHtml(t.size)}</span>
+                <span class="bg-gray-100 px-2.5 py-1 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+                ${confirmed ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded font-black">✅ 확인완료</span>' : ''}
             </div>
-            <div class="text-blue-900 bg-blue-50 p-3 rounded-lg font-medium text-[13px]">${escapeHtml(t.memo)}</div>
+            <div class="text-blue-900 bg-blue-50 p-2.5 rounded-lg font-medium text-[13px] mb-3">${escapeHtml(t.memo)}</div>
+            ${!confirmed ? `<button onclick="confirmTransfer('${t.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-black text-sm transition-colors">✅ 확인</button>` : ''}
         </div>`;
     });
     listEl.innerHTML = html;
     if(window.lucide) lucide.createIcons();
+};
+
+window.confirmTransfer = async (trId) => {
+    if(!checkPat()) return;
+    try {
+        const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+        const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+        const j = await r.json();
+        let data = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+        const idx = data.findIndex(m => m.id === trId);
+        if(idx >= 0) data[idx].confirmed = true;
+        const body = { message:"confirm transfer", content: utf8ToB64(JSON.stringify(data, null, 2)), branch: GH.branch, sha: j.sha };
+        await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+        TRANSFERS = data;
+        window.renderTransfersList();
+    } catch(e) { alert("처리 실패: " + e.message); }
+};
+
+window.deleteAllTransfers = async () => {
+    if(!checkPat()) return;
+    const unconfirmedCount = TRANSFERS.filter(t => !t.confirmed).length;
+    const confirmedCount = TRANSFERS.filter(t => !!t.confirmed).length;
+    const msg = `전체 삭제하시겠습니까?\n\n• 미확인: ${unconfirmedCount}건\n• 확인완료: ${confirmedCount}건\n\n총 ${TRANSFERS.length}건이 삭제됩니다.`;
+    if(!confirm(msg)) return;
+    try {
+        const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+        const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+        const j = await r.json();
+        const body = { message:"delete all transfers", content: utf8ToB64(JSON.stringify([], null, 2)), branch: GH.branch, sha: j.sha };
+        await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+        TRANSFERS = [];
+        window.renderTransfersList();
+    } catch(e) { alert("삭제 실패: " + e.message); }
 };
 
 const _salesCache = new Map();
