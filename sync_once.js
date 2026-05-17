@@ -127,31 +127,52 @@ async function fetchPOSSales() {
     await page.waitForTimeout(8000);
     log('로그인 완료');
 
-    await page.locator('text=영업').first().click({ force: true, timeout: 10000 }).catch(() => {});
-    await page.waitForTimeout(2000);
-    await page.locator('text=영업 속보').first().click({ force: true, timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(1500);
-    await page.evaluate(() => {
-      const el = document.getElementById('mf_wfm_side_gen_menu2_0_gen_menu3_2_btn_menu3');
-      if (el) {
-        let e = el;
-        while (e && e !== document.body) { e.style.display='block'; e.style.visibility='visible'; e.style.opacity='1'; e=e.parentElement; }
-        el.click();
-      } else {
-        for (const a of document.querySelectorAll('a')) {
-          if (a.textContent.trim() === '당일매출조회') { a.click(); break; }
-        }
-      }
-    });
-    // selTodaySalesList 응답 명시적 대기 (최대 15초)
-    if(tradeNos.length === 0) {
-      log('selTodaySalesList 대기 중...');
-      await page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 15000 })
-        .then(async r => {
-          try { const d = await r.json(); tradeNos = (d.dlt_result||[]).map(t=>t.TRADE_NO); } catch(e){}
-        }).catch(() => log('  selTodaySalesList timeout - 0건으로 진행'));
+    // 메뉴 클릭 — 메인 + 모든 iframe 시도
+    const frames = page.frames();
+    log(`  프레임 수: ${frames.length}`);
+    for(const frame of frames) {
+      try { await frame.locator('text=영업').first().click({ force: true, timeout: 3000 }); } catch(e) {}
     }
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
+    for(const frame of frames) {
+      try { await frame.locator('text=영업 속보').first().click({ force: true, timeout: 3000 }); } catch(e) {}
+    }
+    await page.waitForTimeout(1500);
+
+    // 당일매출조회 클릭 — 모든 프레임에서 시도
+    const clickDailySales = async () => {
+      for(const frame of page.frames()) {
+        const found = await frame.evaluate(() => {
+          const el = document.getElementById('mf_wfm_side_gen_menu2_0_gen_menu3_2_btn_menu3');
+          if(el) {
+            let e = el;
+            while(e && e !== document.body) { e.style.display='block'; e.style.visibility='visible'; e.style.opacity='1'; e=e.parentElement; }
+            el.click(); return '당일매출조회(ID)';
+          }
+          for(const a of document.querySelectorAll('a, span, div')) {
+            if(a.textContent.trim() === '당일매출조회') { a.click(); return '당일매출조회(text)'; }
+          }
+          return null;
+        }).catch(() => null);
+        if(found) { log(`  메뉴클릭: ${found} (frame: ${frame.url().split('/').pop().substring(0,40)})`); break; }
+      }
+    };
+    await clickDailySales();
+
+    // selTodaySalesList 응답 명시적 대기 (최대 20초, 못 잡으면 재시도)
+    log('selTodaySalesList 대기 중...');
+    await page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 20000 })
+      .then(async r => {
+        try { const d = await r.json(); tradeNos = (d.dlt_result||[]).map(t=>t.TRADE_NO); } catch(e){}
+      }).catch(async () => {
+        log('  1차 timeout — 재시도...');
+        await clickDailySales();
+        await page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 15000 })
+          .then(async r => {
+            try { const d = await r.json(); tradeNos = (d.dlt_result||[]).map(t=>t.TRADE_NO); } catch(e){}
+          }).catch(() => log('  2차 timeout - 0건으로 진행'));
+      });
+    await page.waitForTimeout(2000);
     log(`당일매출조회 완료 (${tradeNos.length}건)`);
 
     const tableInfo = await page.evaluate(() =>
