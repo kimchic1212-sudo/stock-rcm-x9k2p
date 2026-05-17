@@ -2877,8 +2877,9 @@ function openDetail(p){
     </div>
   `;
 
-  // ── 사이즈별 30일 + 오늘 부산 판매량 계산 ───────────────────
-  const _sizeSales30 = {};
+  // ── 사이즈별 30일 판매량 계산 (부산 / 전체 분리) ───────────────────
+  const _sizeSales30Busan = {};  // 부산 전용
+  const _sizeSales30All   = {};  // 전체 합계
   const _sizeSalesToday = {};
   if (SALES_HISTORY && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
     const _sh = SALES_HISTORY.items[p.품번];
@@ -2892,14 +2893,21 @@ function openDetail(p){
         for (let size in dayData) {
           if (typeof dayData[size] === 'object') {
             for (let mgr in dayData[size]) {
+              const qty = dayData[size][mgr] || 0;
+              // 전체 합계
+              _sizeSales30All[size] = (_sizeSales30All[size] || 0) + qty;
+              // 부산 전용
               if (mgr.includes("김종훈") || mgr.includes("부산")) {
-                const qty = dayData[size][mgr] || 0;
-                _sizeSales30[size] = (_sizeSales30[size] || 0) + qty;
+                _sizeSales30Busan[size] = (_sizeSales30Busan[size] || 0) + qty;
                 if (date === _todayKey) {
                   _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + qty;
                 }
               }
             }
+          } else {
+            // 담당자 구분 없는 구형 데이터 → 전체에만 포함
+            const qty = dayData[size] || 0;
+            _sizeSales30All[size] = (_sizeSales30All[size] || 0) + qty;
           }
         }
       }
@@ -2916,16 +2924,18 @@ function openDetail(p){
         <table class="w-full text-sm bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
         <thead class="bg-gray-50 text-xs text-gray-500 font-black border-b border-gray-200">
             <tr>
-            <th class="py-2 px-2 text-center w-[18%] border-r border-gray-100">사이즈</th>
-            <th class="py-2 px-1 text-center w-[14%] text-indigo-600 bg-indigo-50/60 border-r border-gray-100">📦 30일</th>
-            <th class="py-2 px-1 text-center w-[14%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산</th>
+            <th class="py-2 px-2 text-center w-[15%] border-r border-gray-100">사이즈</th>
+            <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">🏪 부산<br><span class="font-normal text-[10px] text-blue-400">30일</span></th>
+            <th class="py-2 px-1 text-center w-[12%] text-indigo-600 bg-indigo-50/60 border-r border-gray-100">📦 전체<br><span class="font-normal text-[10px] text-indigo-400">30일</span></th>
+            <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
             <th class="py-2 px-2 text-center border-r border-gray-100">물류 RT <span class="text-gray-400 font-normal">(${p.centerTotal})</span></th>
             <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-400 font-normal">(${p.sinsaTotal})</span></th>
             </tr>
         </thead>
         <tbody>
         ${p.sizes.map(s => {
-            const _s30 = _sizeSales30[s.size] || 0;
+            const _s30b = _sizeSales30Busan[s.size] || 0;
+            const _s30a = _sizeSales30All[s.size] || 0;
             let centerRtBtn = s.center > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
                 : `<span class="text-gray-300 text-sm">-</span>`;
@@ -2934,7 +2944,8 @@ function openDetail(p){
                 : `<span class="text-gray-300 text-sm">-</span>`;
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
                 <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}</td>
-                <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30>0?'text-indigo-600':'text-gray-300'}">${_s30>0?_s30:'-'}</td>
+                <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-300'}">${_s30b>0?_s30b:'-'}</td>
+                <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30a>0?'text-indigo-600':'text-gray-300'}">${_s30a>0?_s30a:'-'}</td>
                 <td class="py-1 px-1 text-center bg-blue-50/30 border-r border-gray-100">
                     <div class="flex flex-col items-center leading-none gap-0.5">
                         <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</span>
