@@ -1,7 +1,7 @@
-시작: 2026-05-17T09:15:15.570Z
+시작: 2026-05-17T11:40:52.663Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17790093273084276.953217834673
+[RES] 200 login.xml&postfix=17790180670307440.93008246929
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 42건
+selTodaySalesList: 45건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29276","ITEM_NM":"클라우드몬스터 3 [3MG10054747, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-메뉴 클릭 후 거래: 42건
+메뉴 클릭 후 거래: 45건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26780","ITEM_NM":"아디제로 EVO SL [JH6208, 250]","SALES_AMT":188100,"NET_SALES_AMT":17100
@@ -182,4 +182,16 @@ selTodaySalesList: 42건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"24352","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 3]","SALES_AMT":36450,"NET_SALES_AMT":33136,
   파싱 성공: 1건
-완료: 품번 45개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":33000,"ITEM_CD":"18071","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, L/XL]","SALES_AMT":29700,"NET_SALES_AMT":
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":198000,"ITEM_CD":"15356","ITEM_NM":"ADV 스킨 5 세트 [LC2464900, S]","SALES_AMT":178200,"NET_SALES_AMT":1620
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29235","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 275]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 48개
