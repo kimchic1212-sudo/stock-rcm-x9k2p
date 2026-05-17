@@ -1,6 +1,6 @@
 /**
  * RACEMENT POS Sync - GitHub Actions용
- * page.route()로 selTodaySalesList / selItemSalesList 직접 인터셉트
+ * 이중 캡처: page.route(fn) + page.on('response') 동시 사용
  */
 const { chromium } = require('playwright');
 const https = require('https');
@@ -66,11 +66,11 @@ async function uploadDebugFile(name, content) {
   const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
   const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
   const sha = cur.status === 200 ? cur.body.sha : undefined;
+  const txt = content && content.length > 0 ? content : '(empty)';
   await ghRequest('PUT', path, {
-    message: `debug: ${name}`,
-    content: Buffer.from(content || '(empty)').toString('base64'),
-    branch: CONFIG.ghBranch,
-    ...(sha && { sha })
+    message: `debug: ${name} ${new Date().toISOString()}`,
+    content: Buffer.from(txt).toString('base64'),
+    branch: CONFIG.ghBranch, ...(sha && { sha })
   }).catch(e => log(`debug 업로드 실패: ${e.message}`));
 }
 
@@ -90,52 +90,45 @@ async function fetchPOSSales() {
   let tradeNos = [];
   let apiCallCount = 0;
   const debugLog = [];
-  const itemPromises = [];
+  const allBodyPromises = [];
 
-  // ── page.route()로 직접 인터셉트 ──────────────────────────
-  await page.route('**/selTodaySalesList', async route => {
-    debugLog.push('=== selTodaySalesList 인터셉트 ===');
+  debugLog.push(`시작: ${new Date().toISOString()}`);
+
+  // ── 방법 1: page.route() - 함수 형태로 URL 매칭 ──
+  await page.route(url => url.includes('selTodaySalesList'), async route => {
+    debugLog.push(`[ROUTE] selTodaySalesList 인터셉트`);
     try {
-      const response = await route.fetch();
-      const body = await response.text();
-      debugLog.push(`status: ${response.status()}`);
-      debugLog.push(`raw(300자): ${body.substring(0, 300)}`);
+      const resp = await route.fetch();
+      const body = await resp.text();
+      debugLog.push(`[ROUTE] status=${resp.status()} len=${body.length}`);
+      debugLog.push(`[ROUTE] raw: ${body.substring(0, 200)}`);
       try {
         const d = JSON.parse(body);
         tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
-        debugLog.push(`keys: ${Object.keys(d).join(', ')}`);
-        debugLog.push(`거래수: ${tradeNos.length}`);
-        if (d.dlt_result && d.dlt_result[0]) {
-          debugLog.push(`첫거래: ${JSON.stringify(d.dlt_result[0])}`);
-        }
-        log(`selTodaySalesList: ${tradeNos.length}건`);
-      } catch(pe) {
-        debugLog.push(`JSON 파싱 실패: ${pe.message}`);
-      }
-      await route.fulfill({ response });
+        debugLog.push(`[ROUTE] 거래수: ${tradeNos.length}`);
+      } catch(pe) { debugLog.push(`[ROUTE] JSON 파싱 실패: ${pe.message}`); }
+      await route.fulfill({ response: resp });
     } catch(e) {
-      debugLog.push(`route 오류: ${e.message}`);
+      debugLog.push(`[ROUTE] 오류: ${e.message}`);
       await route.continue();
     }
   });
 
-  await page.route('**/selItemSalesList', async route => {
+  await page.route(url => url.includes('selItemSalesList'), async route => {
     apiCallCount++;
-    const callNum = apiCallCount;
-    debugLog.push(`=== selItemSalesList #${callNum} 인터셉트 ===`);
+    const n = apiCallCount;
+    debugLog.push(`[ROUTE] selItemSalesList #${n} 인터셉트`);
     const p = (async () => {
       try {
-        const response = await route.fetch();
-        const body = await response.text();
-        debugLog.push(`status: ${response.status()}`);
-        debugLog.push(`raw(300자): ${body.substring(0, 300)}`);
+        const resp = await route.fetch();
+        const body = await resp.text();
+        debugLog.push(`[ROUTE#${n}] status=${resp.status()} len=${body.length}`);
+        debugLog.push(`[ROUTE#${n}] raw: ${body.substring(0, 200)}`);
         try {
           const d = JSON.parse(body);
           const items = d.dlt_item || d.dltItem || d.items || d.list || [];
-          debugLog.push(`keys: ${Object.keys(d).join(', ')}`);
-          debugLog.push(`items: ${items.length}개`);
-          if (items[0]) debugLog.push(`첫아이템: ${JSON.stringify(items[0])}`);
-
+          debugLog.push(`[ROUTE#${n}] keys=${Object.keys(d).join(',')} items=${items.length}`);
+          if (items[0]) debugLog.push(`[ROUTE#${n}] 첫아이템: ${JSON.stringify(items[0])}`);
           for (const item of items) {
             if (item.NSALES_YN === 'Y') continue;
             const nm = item.ITEM_NM || item.itemNm || item.ITEM_NAME || '';
@@ -146,24 +139,49 @@ async function fetchPOSSales() {
             if (!todayItems[code]) todayItems[code] = {};
             if (!todayItems[code][size]) todayItems[code][size] = 0;
             todayItems[code][size] += qty;
-            debugLog.push(`  수집: ${code}/${size}/${qty}개`);
+            debugLog.push(`  수집: ${code}/${size}/${qty}`);
           }
-        } catch(pe) {
-          debugLog.push(`JSON 파싱 실패: ${pe.message}`);
-        }
-        await route.fulfill({ response });
+        } catch(pe) { debugLog.push(`[ROUTE#${n}] JSON 실패: ${pe.message}`); }
+        await route.fulfill({ response: resp });
       } catch(e) {
-        debugLog.push(`route 오류: ${e.message}`);
+        debugLog.push(`[ROUTE#${n}] 오류: ${e.message}`);
         await route.continue();
       }
     })();
-    itemPromises.push(p);
+    allBodyPromises.push(p);
+  });
+
+  // ── 방법 2: page.on('response') - 백업으로 동시 사용 ──
+  // route()가 안 잡히면 이쪽에서 잡힘
+  page.on('response', response => {
+    const url = response.url();
+    // 모든 POST 응답 로그
+    if (response.request().method() === 'POST') {
+      debugLog.push(`[RES-POST] ${response.status()} ${url.split('/').slice(-1)[0]}`);
+    }
+    if (url.includes('selTodaySalesList')) {
+      debugLog.push(`[RES] selTodaySalesList fired`);
+      const p = response.json()
+        .then(d => {
+          if (tradeNos.length === 0) { // route()가 이미 처리 안 한 경우만
+            tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
+            debugLog.push(`[RES] 거래: ${tradeNos.length}건`);
+          }
+        })
+        .catch(e => debugLog.push(`[RES] json 실패: ${e.message}`));
+      allBodyPromises.push(p);
+    }
+    if (url.includes('selItemSalesList')) {
+      debugLog.push(`[RES] selItemSalesList fired`);
+    }
   });
 
   try {
-    // ── 로그인 ──
     log('로그인 중...');
+    debugLog.push('goto 시작');
     await page.goto(CONFIG.posUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    debugLog.push('goto 완료');
+
     await page.locator('input[type="password"]').first().waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForTimeout(500);
 
@@ -174,16 +192,20 @@ async function fetchPOSSales() {
       } catch(e) {}
     }
     await page.locator('input[type="password"]').first().fill(CONFIG.posPw);
+    debugLog.push('로그인 Enter 전');
     await page.keyboard.press('Enter');
 
-    // ── selTodaySalesList 자동 로드 대기 (최대 30초) ──
-    log('selTodaySalesList 대기...');
-    await page.waitForURL(u => !u.includes('login'), { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(15000);  // sla003m 완전 로드 대기
+    // 페이지 자동 전환 + sla003m 로드 대기
+    log('자동 로드 대기 (20초)...');
+    await page.waitForTimeout(20000);
 
-    log(`로드 완료. 거래 ${tradeNos.length}건 / API ${apiCallCount}회`);
+    debugLog.push(`대기 완료: 거래=${tradeNos.length} apiCall=${apiCallCount}`);
+    log(`자동로드 완료: 거래 ${tradeNos.length}건 / API ${apiCallCount}회`);
 
-    // ── 나머지 행 클릭 ──
+    // 현재 URL 확인
+    debugLog.push(`현재 URL: ${page.url()}`);
+
+    // 나머지 행 클릭
     if (tradeNos.length > 1) {
       const tableInfo = await page.evaluate(() =>
         Array.from(document.querySelectorAll('table')).map((t, i) => ({
@@ -205,14 +227,19 @@ async function fetchPOSSales() {
         await page.keyboard.press('ArrowDown');
         await page.waitForTimeout(700);
       }
+      await page.waitForTimeout(2000);
     }
 
-    await Promise.all(itemPromises);
+    await Promise.all(allBodyPromises);
     log(`수집 완료: ${Object.keys(todayItems).length}개 품번`);
 
+  } catch(e) {
+    debugLog.push(`오류: ${e.message}`);
+    log(`오류: ${e.message}`);
   } finally {
+    debugLog.push(`종료: 총 ${debugLog.length}줄`);
     await uploadDebugFile('parse_debug.txt', debugLog.join('\n'));
-    log(`디버그 업로드 완료 (${debugLog.length}줄)`);
+    log(`디버그 업로드 (${debugLog.length}줄)`);
     await browser.close();
   }
   return todayItems;
@@ -248,7 +275,6 @@ async function fetchPOSSales() {
     process.exit(0);
   } catch(err) {
     log(`오류: ${err.message}`);
-    console.error(err);
     process.exit(1);
   }
 })();
