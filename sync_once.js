@@ -98,34 +98,41 @@ async function fetchPOSSales() {
     const url = response.url();
 
     if (url.includes('selTodaySalesList')) {
+      debugLog.push(`=== selTodaySalesList 응답 수신 (status: ${response.status()}) ===`);
       try {
-        const d = await response.json();
+        const text = await response.text();
+        debugLog.push(`raw(200자): ${text.substring(0, 200)}`);
+        const d = JSON.parse(text);
         tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
         log(`selTodaySalesList: 거래 ${tradeNos.length}건`);
-        debugLog.push(`=== selTodaySalesList (${tradeNos.length}건) ===`);
         debugLog.push(`keys: ${Object.keys(d).join(', ')}`);
+        debugLog.push(`거래수: ${tradeNos.length}`);
         if (d.dlt_result && d.dlt_result.length > 0) {
           debugLog.push(`첫번째 거래: ${JSON.stringify(d.dlt_result[0])}`);
         }
-      } catch(e) { log(`  selTodaySalesList 파싱 오류: ${e.message}`); }
+      } catch(e) {
+        debugLog.push(`파싱 오류: ${e.message}`);
+        log(`  selTodaySalesList 파싱 오류: ${e.message}`);
+      }
     }
 
     if (url.includes('selItemSalesList')) {
       apiCallCount++;
       const callNum = apiCallCount;
+      debugLog.push(`=== selItemSalesList #${callNum} 응답 수신 (status: ${response.status()}) ===`);
       const p = (async () => {
         try {
-          const d = await response.json();
+          const text = await response.text();
+          debugLog.push(`raw(200자): ${text.substring(0, 200)}`);
+          const d = JSON.parse(text);
           const items = d.dlt_item || d.dltItem || d.items || d.list || [];
-          debugLog.push(`=== selItemSalesList #${callNum} (keys: ${Object.keys(d).join(', ')}) ===`);
+          debugLog.push(`keys: ${Object.keys(d).join(', ')}`);
           debugLog.push(`items 배열 길이: ${items.length}`);
           if (items.length > 0) {
             debugLog.push(`첫번째 아이템: ${JSON.stringify(items[0])}`);
           }
           for (const item of items) {
-            // NSALES_YN 체크 (없으면 통과)
             if (item.NSALES_YN === 'Y') continue;
-            // 아이템명 필드 후보들
             const nm = item.ITEM_NM || item.itemNm || item.ITEM_NAME || item.itemName || '';
             debugLog.push(`  ITEM_NM: "${nm}" / NSALES_YN: ${item.NSALES_YN} / SALES_QTY: ${item.SALES_QTY}`);
             const m = nm.match(/\[([^\],]+),\s*([^\]]+)\]/);
@@ -138,7 +145,7 @@ async function fetchPOSSales() {
             debugLog.push(`    → 수집: ${code} / ${size} / ${qty}개`);
           }
         } catch(e) {
-          debugLog.push(`selItemSalesList #${callNum} 오류: ${e.message}`);
+          debugLog.push(`오류: ${e.message}`);
         }
       })();
       pending.push(p);
