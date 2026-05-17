@@ -892,7 +892,7 @@ function rebuildIndex(){
   }
 
   let promoWrap = $("#promoFilters");
-  if (!promoWrap && PROMOTIONS && PROMOTIONS.meta) {
+  if (!promoWrap && getPromoList().length > 0) {
       promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
       promoWrap.className = "flex gap-1.5 items-center overflow-x-auto no-scrollbar pl-[2.875rem]";
       $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
