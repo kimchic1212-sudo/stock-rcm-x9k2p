@@ -131,8 +131,22 @@ let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {}; 
 let MEMOS = []; 
 let TRANSFERS = []; 
-let PROMOTIONS = {}; 
-let SALES_GUIDES = {}; 
+let PROMOTIONS = {};
+let SALES_GUIDES = {};
+
+// 복수 기획전 헬퍼
+function getPromoList() {
+  if(!PROMOTIONS) return [];
+  if(Array.isArray(PROMOTIONS.promotions)) return PROMOTIONS.promotions;
+  if(PROMOTIONS.meta && PROMOTIONS.items && Object.keys(PROMOTIONS.items||{}).length > 0) return [PROMOTIONS];
+  return [];
+}
+function findPromoForCode(code) {
+  for(const pr of getPromoList()) {
+    if(pr.items && pr.items[code]) return { promo: pr, item: pr.items[code] };
+  }
+  return null;
+} 
 let SALES_HISTORY = { meta: {}, items: {} };
 let SALES_DEDUCTIONS = null;
 let visibleCount=60;
@@ -389,12 +403,11 @@ function applyMeta(meta){
                </div>`
             : "";
 
-        // 기획전 라벨
-        let promoInfo = (PROMOTIONS && PROMOTIONS.meta && PROMOTIONS.meta.name)
-            ? `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0">
-                  🎁 ${escapeHtml(PROMOTIONS.meta.name)}
-               </div>`
-            : "";
+        // 기획전 라벨 (복수 지원)
+        const _activePromos = getPromoList();
+        let promoInfo = _activePromos.map(pr =>
+            `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0">🎁 ${escapeHtml(pr.meta?.name||'기획전')}</div>`
+        ).join('');
 
         // POS 판매 동기화 뱃지
         let posSyncInfo = "";
@@ -807,15 +820,18 @@ function rebuildIndex(){
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     p.hasMemo = MEMOS.some(m => m.code === p.품번);
 
-    if (PROMOTIONS && PROMOTIONS.items && PROMOTIONS.items[p.품번]) {
-        const promo = PROMOTIONS.items[p.품번];
-        if (promo.targetCat === activeWeeklyCat && promo.weeklyPrice && promo.weeklyPrice < p.소비자가) {
-            p.currentPromoPrice = promo.weeklyPrice; p.promoType = 'weekly';
-            p.promoRate = promo.weeklyRate || ((p.소비자가 - promo.weeklyPrice) / p.소비자가);
-            if(promo.targetCat === 'FOOTWEAR') p.promoEndDate = '5/15'; else if(promo.targetCat === 'APPAREL') p.promoEndDate = '5/22'; else p.promoEndDate = '5/29';
-        } else if (promo.finalPrice && promo.finalPrice < p.소비자가) {
-            p.currentPromoPrice = promo.finalPrice; p.promoType = 'general';
-            p.promoRate = promo.finalRate || ((p.소비자가 - promo.finalPrice) / p.소비자가); p.promoEndDate = '5/29'; 
+    const _pm = findPromoForCode(p.품번);
+    if (_pm) {
+        const { promo: _pr, item: _pi } = _pm;
+        const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d+\/\d+)\s*$/); return m?m[1]:''; })(_pr.meta?.period||'');
+        if (_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
+            p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _pr.meta?.name||'';
+            p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
+            p.promoEndDate = _endDate || (_pi.targetCat==='FOOTWEAR'?'5/15':_pi.targetCat==='APPAREL'?'5/22':'5/29');
+        } else if (_pi.finalPrice && _pi.finalPrice < p.소비자가) {
+            p.currentPromoPrice = _pi.finalPrice; p.promoType = 'general'; p.promoName = _pr.meta?.name||'';
+            p.promoRate = _pi.finalRate || ((p.소비자가 - _pi.finalPrice) / p.소비자가);
+            p.promoEndDate = _endDate || '5/29';
         }
     }
     p._hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||"", p.barcode||""].join(" ").toLowerCase();
@@ -870,7 +886,7 @@ function rebuildIndex(){
       promoWrap.className = "flex gap-1.5 items-center overflow-x-auto no-scrollbar pl-[2.875rem]";
       $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
   }
-  if (PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
+  if (getPromoList().length > 0) {
       if(promoWrap) {
           promoWrap.innerHTML = `
               <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
@@ -994,7 +1010,7 @@ function setupQuickActionBar() {
     if(!wrap || wrap.dataset.setup === "1") return;
     wrap.dataset.setup = "1";
 
-    const hasPromo = PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0;
+    const hasPromo = getPromoList().length > 0;
     const erpApplied = !!window._erpDeductApplied;
     wrap.innerHTML = `
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
@@ -2182,15 +2198,16 @@ function card(p){
       const rateInt = Math.round((p.promoRate || 0) * 100);
       const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
 
+      const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${p.promoName}]</span> ` : '';
       if (p.promoType === 'weekly') {
-          promoBadge = `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>위클리특가 ${rateLabel} (~${p.promoEndDate})</span>`;
+          promoBadge = `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel} (~${p.promoEndDate})</span>`;
           priceDisplay = `
             <div class="flex flex-col items-end leading-tight">
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
                 <span class="text-lg sm:text-[20px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span>
             </div>`;
       } else {
-          promoBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>쿠폰적용가 ${rateLabel} (~${p.promoEndDate})</span>`;
+          promoBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}쿠폰적용가 ${rateLabel} (~${p.promoEndDate})</span>`;
           priceDisplay = `
             <div class="flex flex-col items-end leading-tight">
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
@@ -3212,101 +3229,120 @@ window.renderPromoAdmin = () => {
     const card = $("#promoUploadTrigger");
     if(!card) return;
 
-    if(PROMOTIONS && PROMOTIONS.meta && Object.keys(PROMOTIONS.items || {}).length > 0) {
-        card.innerHTML = `
-            <div class="flex-1 cursor-default">
-                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px]">🎁 진행 중: ${escapeHtml(PROMOTIONS.meta.name)}</h4>
-                <span class="text-[11px] text-purple-600 font-bold">${escapeHtml(PROMOTIONS.meta.period)}</span>
+    const _promoList = getPromoList();
+    card.onclick = null;
+
+    // 기획전 목록 렌더
+    let _listHtml = _promoList.length > 0 ? _promoList.map((pr, idx) =>
+        `<div class="flex items-center gap-2 py-1.5 border-b border-gray-100 last:border-0">
+            <div class="flex-1 min-w-0">
+                <span class="font-bold text-gray-900 text-[13px]">🎁 ${escapeHtml(pr.meta?.name||'기획전')}</span>
+                ${pr.meta?.period ? `<span class="text-[11px] text-purple-600 font-bold ml-1.5">${escapeHtml(pr.meta.period)}</span>` : ''}
+                <span class="text-[11px] text-gray-400 ml-1">(${Object.keys(pr.items||{}).length}품번)</span>
             </div>
-            <span id="endPromoBtn" class="text-[11px] font-bold text-[#b83280] bg-[#fecfef]/50 px-2.5 py-1 rounded cursor-pointer hover:bg-[#fecfef] transition-colors z-10 whitespace-nowrap ml-2">기획전 종료</span>
-        `;
-        card.onclick = null;
-        document.getElementById("endPromoBtn").onclick = async (e) => {
+            <span class="end-promo-btn shrink-0 text-[11px] font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded cursor-pointer hover:bg-pink-100 transition-colors" data-promoidx="${idx}">종료</span>
+        </div>`
+    ).join('') : `<div class="text-[12px] text-gray-400 py-1">진행 중인 기획전 없음</div>`;
+
+    card.innerHTML = `
+        <div class="flex-1 w-full cursor-default">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="m-0 text-gray-900 font-bold text-[14px]">🎁 기획전 관리</h4>
+                <label for="promoFile" class="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded cursor-pointer hover:bg-purple-100 transition-colors shrink-0">+ 기획전 추가</label>
+                <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
+            </div>
+            ${_listHtml}
+        </div>
+    `;
+
+    // 종료 버튼 이벤트
+    card.querySelectorAll('.end-promo-btn').forEach(btn => {
+        btn.onclick = async (e) => {
             e.stopPropagation();
             if(!checkPat()) return;
-            if(!confirm("진행 중인 기획전을 완전히 종료하고 모든 상품을 정가로 복구하시겠습니까?")) return;
+            const idx = parseInt(btn.dataset.promoidx);
+            const pName = _promoList[idx]?.meta?.name || '기획전';
+            if(!confirm(`"${pName}"을(를) 종료하시겠습니까?`)) return;
             try {
                 const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
-                let sha = null;
-                try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-                const body = { message:"end promotion", content: utf8ToB64(JSON.stringify({}, null, 2)), branch: GH.branch };
-                if(sha) body.sha = sha;
-                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                PROMOTIONS = {}; sessionStorage.removeItem(CACHE_KEY);
-                rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin(); alert("기획전이 성공적으로 종료되었습니다.");
-            } catch(e) { alert("종료 실패!"); }
-        }
-    } else {
-        card.innerHTML = `
-            <div class="flex-1">
-                <h4 class="m-0 mb-1 text-gray-900 font-bold text-[14px]">프로모션 엑셀 등록</h4>
-                <span class="text-[11px] text-gray-600 font-bold">MD가 공유한 특가 시트 업로드</span>
-            </div>
-            <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
-        `;
-        card.onclick = () => document.getElementById("promoFile").click();
-        document.getElementById("promoFile").onchange = async (e) => {
-            if(!checkPat()) { e.target.value = ""; return; }
-            const f = e.target.files[0]; if(!f) return;
-            const reader = new FileReader();
-            reader.onload = async (ev) => {
-                const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
-                const sheet = wb.Sheets[wb.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
-                
-                let promoName = "기획전";
-                let promoPeriod = "";
-                for(let i=0; i<5; i++) {
-                    if(!rows[i]) continue;
-                    const col0 = String(rows[i][0]||"");
-                    if(col0.includes("기획전명")) promoName = col0.replace("기획전명 :", "").replace("기획전명:", "").trim();
-                    if(col0.includes("기간")) promoPeriod = col0.replace("기간 :", "").replace("기간:", "").trim();
-                }
-
-                let items = {};
-                let headerRowIdx = rows.findIndex(r => r.includes('품번')); 
-                
-                if(headerRowIdx > -1) {
-                    const headers = rows[headerRowIdx].map(h => String(h||"").trim());
-                    const codeIdx = headers.indexOf('품번');
-                    const catIdx = headers.indexOf('특가 카테고리');
-                    const wpIdx = headers.indexOf('위클리특가');
-                    const wrIdx = headers.indexOf('특가할인율');
-                    const fpIdx = headers.indexOf('최종할인가');
-                    let frIdx = headers.indexOf('최종 할인율'); 
-                    if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
-
-                    for(let i=headerRowIdx+1; i<rows.length; i++) {
-                        const r = rows[i];
-                        const code = String(r[codeIdx]||"").trim();
-                        if(!code) continue;
-                        let wRate = parseFloat(r[wrIdx]) || 0; if(wRate > 1) wRate /= 100; 
-                        let fRate = parseFloat(r[frIdx]) || 0; if(fRate > 1) fRate /= 100;
-                        items[code] = {
-                            targetCat: String(r[catIdx]||"").trim().toUpperCase(),
-                            weeklyPrice: Number(String(r[wpIdx]||"").replace(/,/g,'')) || null,
-                            weeklyRate: wRate,
-                            finalPrice: Number(String(r[fpIdx]||"").replace(/,/g,'')) || null,
-                            finalRate: fRate
-                        };
-                    }
-                }
-                const newPromo = { meta: { name: promoName, period: promoPeriod }, items };
-                try {
-                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
-                    let sha = null;
-                    try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-                    const body = { message:"update promotion", content: utf8ToB64(JSON.stringify(newPromo, null, 2)), branch: GH.branch };
-                    if(sha) body.sha = sha;
-                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                    PROMOTIONS = newPromo; sessionStorage.removeItem(CACHE_KEY); 
-                    rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin(); alert("기획전 데이터가 성공적으로 반영되었습니다!");
-                } catch(err) { alert("업로드 실패: " + err.message); }
-                document.getElementById("promoFile").value = "";
-            };
-            reader.readAsArrayBuffer(f);
+                const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+                const j = await r.json();
+                let data = {}; try { data = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } catch(e){}
+                let list = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
+                list.splice(idx, 1);
+                const newData = list.length > 0 ? { promotions: list } : {};
+                const body = { message:`end promotion: ${pName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch, sha: j.sha };
+                await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
+                rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+                alert(`"${pName}" 기획전이 종료되었습니다.`);
+            } catch(e) { alert("종료 실패: " + e.message); }
         };
-    }
+    });
+
+    // 파일 업로드 (기존 기획전에 추가)
+    document.getElementById("promoFile").onchange = async (e) => {
+        if(!checkPat()) { e.target.value = ""; return; }
+        const f = e.target.files[0]; if(!f) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
+            let promoName = "기획전", promoPeriod = "";
+            for(let i=0; i<5; i++) {
+                if(!rows[i]) continue;
+                const col0 = String(rows[i][0]||"");
+                if(col0.includes("기획전명")) promoName = col0.replace("기획전명 :", "").replace("기획전명:", "").trim();
+                if(col0.includes("기간")) promoPeriod = col0.replace("기간 :", "").replace("기간:", "").trim();
+            }
+            let items = {};
+            let headerRowIdx = rows.findIndex(r => r.includes('품번'));
+            if(headerRowIdx > -1) {
+                const headers = rows[headerRowIdx].map(h => String(h||"").trim());
+                const codeIdx = headers.indexOf('품번'), catIdx = headers.indexOf('특가 카테고리');
+                const wpIdx = headers.indexOf('위클리특가'), wrIdx = headers.indexOf('특가할인율');
+                const fpIdx = headers.indexOf('최종할인가');
+                let frIdx = headers.indexOf('최종 할인율'); if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
+                for(let i=headerRowIdx+1; i<rows.length; i++) {
+                    const r = rows[i];
+                    const code = String(r[codeIdx]||"").trim(); if(!code) continue;
+                    let wRate = parseFloat(r[wrIdx])||0; if(wRate>1) wRate/=100;
+                    let fRate = parseFloat(r[frIdx])||0; if(fRate>1) fRate/=100;
+                    items[code] = {
+                        targetCat: String(r[catIdx]||"").trim().toUpperCase(),
+                        weeklyPrice: Number(String(r[wpIdx]||"").replace(/,/g,''))||null,
+                        weeklyRate: wRate,
+                        finalPrice: Number(String(r[fpIdx]||"").replace(/,/g,''))||null,
+                        finalRate: fRate
+                    };
+                }
+            }
+            const newPromo = { id: Date.now().toString(), meta: { name: promoName, period: promoPeriod }, items };
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
+                let sha = null, existingList = [];
+                try {
+                    const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+                    if(r.ok) {
+                        const j = await r.json(); sha = j.sha;
+                        const data = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+                        existingList = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
+                    }
+                } catch(e) {}
+                existingList.push(newPromo);
+                const newData = { promotions: existingList };
+                const body = { message:`add promotion: ${promoName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch };
+                if(sha) body.sha = sha;
+                await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
+                rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+                alert(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
+            } catch(err) { alert("업로드 실패: " + err.message); }
+            document.getElementById("promoFile").value = "";
+        };
+        reader.readAsArrayBuffer(f);
+    };
 };
 
 window.renderSalesAdmin = () => {
