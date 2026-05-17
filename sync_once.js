@@ -1,6 +1,6 @@
 /**
  * RACEMENT POS Sync - GitHub Actions용
- * page.waitForResponse 방식 - 가장 안정적
+ * 로그인 후 스크린샷 + 패시브 리스너 + 메뉴 폴백
  */
 const { chromium } = require('playwright');
 const https = require('https');
@@ -66,40 +66,62 @@ async function uploadDebugFile(name, content) {
   const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
   const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
   const sha = cur.status === 200 ? cur.body.sha : undefined;
-  const txt = (content && content.length > 0) ? content : `(empty at ${new Date().toISOString()})`;
+  const txt = (content && content.length > 0) ? content : `(empty ${new Date().toISOString()})`;
   await ghRequest('PUT', path, {
-    message: `debug: ${name} ${new Date().toISOString()}`,
-    content: Buffer.from(txt).toString('base64'),
+    message: `debug: ${name}`,
+    content: Buffer.from(typeof txt === 'string' ? txt : JSON.stringify(txt)).toString('base64'),
     branch: CONFIG.ghBranch, ...(sha && { sha })
   }).catch(e => log(`debug 업로드 실패: ${e.message}`));
+}
+
+async function uploadScreenshot(name, page) {
+  try {
+    const buf = await page.screenshot({ fullPage: false });
+    await uploadDebugFile(name, buf.toString('base64'));
+    // base64이므로 별도 처리 필요 없음 (uploadDebugFile이 다시 base64 encode함 → 이중 인코딩 방지)
+    const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
+    const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
+    const sha = cur.status === 200 ? cur.body.sha : undefined;
+    await ghRequest('PUT', path, {
+      message: `debug: ${name}`,
+      content: buf.toString('base64'),
+      branch: CONFIG.ghBranch, ...(sha && { sha })
+    }).catch(() => {});
+  } catch(e) { log(`스크린샷 실패: ${e.message}`); }
 }
 
 function parseItems(d, todayItems, debugLog) {
   const items = d.dlt_item || d.dltItem || d.items || d.list || [];
   debugLog.push(`  items: ${items.length}개 / keys: ${Object.keys(d).join(',')}`);
-  if (items[0]) debugLog.push(`  첫아이템: ${JSON.stringify(items[0]).substring(0, 200)}`);
+  if (items[0]) debugLog.push(`  첫아이템: ${JSON.stringify(items[0]).substring(0, 150)}`);
+  let cnt = 0;
   for (const item of items) {
     if (item.NSALES_YN === 'Y') continue;
     const nm = item.ITEM_NM || item.itemNm || item.ITEM_NAME || '';
     const m = nm.match(/\[([^\],]+),\s*([^\]]+)\]/);
-    if (!m) { if(nm) debugLog.push(`  불일치: "${nm}"`); continue; }
+    if (!m) continue;
     const code = m[1].trim(), size = m[2].trim();
     const qty = Math.abs(parseInt(item.SALES_QTY || item.salesQty) || 1);
     if (!todayItems[code]) todayItems[code] = {};
     if (!todayItems[code][size]) todayItems[code][size] = 0;
     todayItems[code][size] += qty;
-    debugLog.push(`  수집: ${code}/${size}/${qty}`);
+    cnt++;
   }
+  debugLog.push(`  파싱 성공: ${cnt}건`);
 }
 
 async function fetchPOSSales() {
   const debugLog = [`시작: ${new Date().toISOString()}`];
+  const todayItems = {};
+  let tradeNos = [];
+  let itemCallCount = 0;
+  const itemPromises = [];
 
   const browser = await chromium.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
   });
-  debugLog.push('브라우저 시작 OK');
+  debugLog.push('브라우저 OK');
 
   try {
     const context = await browser.newContext({
@@ -108,10 +130,31 @@ async function fetchPOSSales() {
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     });
     const page = await context.newPage();
-    debugLog.push('페이지 생성 OK');
 
-    const todayItems = {};
-    let tradeNos = [];
+    // ── 패시브 리스너 (body 없이 URL + 상태만 기록) ──
+    page.on('response', response => {
+      const url = response.url();
+      if (url.includes('selTodaySalesList') || url.includes('selItemSalesList') ||
+          url.includes('/main/login') || url.includes('/main/init')) {
+        debugLog.push(`[RES] ${response.status()} ${url.split('/').slice(-1)[0]}`);
+      }
+      // selTodaySalesList: Promise로 body 읽기
+      if (url.includes('selTodaySalesList')) {
+        const p = response.json().then(d => {
+          tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
+          debugLog.push(`selTodaySalesList: ${tradeNos.length}건`);
+          log(`selTodaySalesList: ${tradeNos.length}건`);
+        }).catch(e => debugLog.push(`selTodaySalesList json 실패: ${e.message}`));
+        itemPromises.push(p);
+      }
+      if (url.includes('selItemSalesList')) {
+        itemCallCount++;
+        const p = response.json().then(d => {
+          parseItems(d, todayItems, debugLog);
+        }).catch(e => debugLog.push(`selItemSalesList json 실패: ${e.message}`));
+        itemPromises.push(p);
+      }
+    });
 
     // ── 로그인 ──
     log('로그인 중...');
@@ -119,8 +162,9 @@ async function fetchPOSSales() {
     debugLog.push(`goto OK: ${page.url()}`);
 
     await page.locator('input[type="password"]').first().waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
+    // ID 입력
     for (const sel of ['input[type="text"]', 'input:not([type="hidden"]):not([type="password"])']) {
       try {
         const el = page.locator(sel).first();
@@ -128,103 +172,97 @@ async function fetchPOSSales() {
       } catch(e) {}
     }
     await page.locator('input[type="password"]').first().fill(CONFIG.posPw);
-
-    // Enter 전에 selTodaySalesList waitForResponse 등록 (자동 로드 대비)
-    const salesListPromise = page.waitForResponse(
-      resp => resp.url().includes('selTodaySalesList'),
-      { timeout: 35000 }
-    );
-    const firstItemPromise = page.waitForResponse(
-      resp => resp.url().includes('selItemSalesList'),
-      { timeout: 35000 }
-    );
-
-    debugLog.push('waitForResponse 등록 완료 → Enter');
+    debugLog.push('폼 입력 완료');
     await page.keyboard.press('Enter');
-    log('로그인 Enter 입력');
+    log('Enter 입력');
 
-    // selTodaySalesList 응답 대기
-    let salesResp;
-    try {
-      salesResp = await salesListPromise;
-      debugLog.push(`selTodaySalesList 응답: status=${salesResp.status()} url=${salesResp.url()}`);
-      const salesData = await salesResp.json();
-      tradeNos = (salesData.dlt_result || []).map(t => t.TRADE_NO);
-      debugLog.push(`거래수: ${tradeNos.length}`);
-      if (salesData.dlt_result && salesData.dlt_result[0]) {
-        debugLog.push(`첫거래: ${JSON.stringify(salesData.dlt_result[0])}`);
+    // ── 로그인 완료 대기 (최대 20초) ──
+    await Promise.race([
+      page.waitForResponse(r => r.url().includes('/main/init'), { timeout: 20000 }),
+      page.waitForTimeout(20000)
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
+
+    debugLog.push(`로그인 후 URL: ${page.url()}`);
+    log(`현재 URL: ${page.url()}`);
+
+    // 스크린샷 (로그인 직후)
+    await uploadScreenshot('after_login.png', page);
+    debugLog.push('스크린샷 업로드');
+
+    // ── selTodaySalesList가 안 왔으면 메뉴 직접 클릭 시도 ──
+    if (tradeNos.length === 0) {
+      debugLog.push('자동 로드 없음 → 메뉴 클릭 시도');
+      // 모든 프레임에서 시도
+      for (const frame of page.frames()) {
+        try { await frame.locator('text=영업').first().click({ force: true, timeout: 3000 }); debugLog.push('영업 클릭'); } catch(e) {}
       }
-      log(`selTodaySalesList: ${tradeNos.length}건`);
-    } catch(e) {
-      debugLog.push(`selTodaySalesList 실패: ${e.message}`);
-      log(`selTodaySalesList 실패: ${e.message}`);
+      await page.waitForTimeout(2000);
+      for (const frame of page.frames()) {
+        try { await frame.locator('text=영업 속보').first().click({ force: true, timeout: 3000 }); debugLog.push('영업속보 클릭'); } catch(e) {}
+      }
+      await page.waitForTimeout(2000);
+
+      // 당일매출조회 클릭
+      for (const frame of page.frames()) {
+        const res = await frame.evaluate(() => {
+          const el = document.getElementById('mf_wfm_side_gen_menu2_0_gen_menu3_2_btn_menu3');
+          if (el) {
+            let e = el;
+            while (e && e !== document.body) { e.style.display='block'; e.style.visibility='visible'; e.style.opacity='1'; e=e.parentElement; }
+            el.click(); return '클릭OK(ID)';
+          }
+          for (const a of document.querySelectorAll('a,span,td,button,li')) {
+            if (a.textContent.trim() === '당일매출조회') { a.click(); return `클릭OK(${a.tagName})`; }
+          }
+          return null;
+        }).catch(() => null);
+        if (res) debugLog.push(`[${frame.url().split('/').pop().slice(0,20)}] ${res}`);
+      }
+
+      // 추가 대기
+      await page.waitForTimeout(10000);
+      await uploadScreenshot('after_menu_click.png', page);
+      debugLog.push(`메뉴 클릭 후 거래: ${tradeNos.length}건`);
     }
 
-    // 첫 번째 selItemSalesList 응답 대기
-    try {
-      const firstItem = await firstItemPromise;
-      debugLog.push(`selItemSalesList #1 응답: status=${firstItem.status()}`);
-      const d = await firstItem.json();
-      parseItems(d, todayItems, debugLog);
-    } catch(e) {
-      debugLog.push(`selItemSalesList #1 실패: ${e.message}`);
-    }
+    log(`거래 ${tradeNos.length}건 / 품번 ${Object.keys(todayItems).length}개`);
 
-    log(`현재: 거래 ${tradeNos.length}건 / 품번 ${Object.keys(todayItems).length}개`);
-
-    // ── 나머지 행 클릭 (2번째 거래부터) ──
+    // ── 나머지 행 클릭 ──
     if (tradeNos.length > 1) {
-      debugLog.push(`행 클릭 시작 (${tradeNos.length - 1}회)`);
       const tableInfo = await page.evaluate(() =>
         Array.from(document.querySelectorAll('table')).map((t, i) => ({
           i, rows: t.querySelectorAll('tbody tr').length,
           ths: t.querySelectorAll('thead th,thead td').length
         }))
       );
-      debugLog.push(`tables: ${JSON.stringify(tableInfo)}`);
-
       const main = tableInfo.find(t => t.ths >= 4 && t.rows >= 1)
                  || tableInfo.reduce((b, t) => (!b || t.rows > b.rows) ? t : b, null);
       const mainIdx = main?.i ?? 0;
-      const rowsLoc = page.locator('table').nth(mainIdx).locator('tbody tr');
-      const bbox = await rowsLoc.nth(0).boundingBox().catch(() => null);
+      const bbox = await page.locator('table').nth(mainIdx).locator('tbody tr').nth(0).boundingBox().catch(() => null);
       if (bbox) {
         await page.mouse.click(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(800);
       }
-
       for (let i = 1; i < tradeNos.length; i++) {
-        const nextItemPromise = page.waitForResponse(
-          resp => resp.url().includes('selItemSalesList'),
-          { timeout: 4000 }
-        );
         await page.keyboard.press('ArrowDown');
-        try {
-          const resp = await nextItemPromise;
-          const d = await resp.json();
-          parseItems(d, todayItems, debugLog);
-        } catch(e) {
-          debugLog.push(`  행 ${i} 응답 실패: ${e.message}`);
-        }
+        await page.waitForTimeout(700);
       }
     }
 
+    await Promise.all(itemPromises);
     debugLog.push(`완료: 품번 ${Object.keys(todayItems).length}개`);
     log(`수집 완료: ${Object.keys(todayItems).length}개 품번`);
 
-    await uploadDebugFile('parse_debug.txt', debugLog.join('\n'));
-    log(`디버그 업로드 (${debugLog.length}줄)`);
-
-    return todayItems;
-
   } finally {
+    await uploadDebugFile('parse_debug.txt', debugLog.join('\n'));
     await browser.close();
   }
+  return todayItems;
 }
 
 (async () => {
   log('=== POS 동기화 시작 ===');
-  const debugLog = [];
   try {
     const todayItems = await fetchPOSSales();
     const codes = Object.keys(todayItems);
@@ -253,8 +291,6 @@ async function fetchPOSSales() {
     process.exit(0);
   } catch(err) {
     log(`오류: ${err.message}`);
-    console.error(err.stack || err);
-    // 에러 내용도 디버그 파일에 기록
     await uploadDebugFile('error_log.txt', `${new Date().toISOString()}\n${err.message}\n${err.stack||''}`);
     process.exit(1);
   }
