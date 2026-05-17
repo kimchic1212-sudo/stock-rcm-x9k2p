@@ -1,6 +1,6 @@
 /**
- * RACEMENT POS Sync - GitHub Actions용 (1회 실행 후 종료)
- * POS_ID, POS_PW, GITHUB_TOKEN 은 GitHub Secrets에서 주입
+ * RACEMENT POS Sync - GitHub Actions용
+ * 전략: 로그인 → 전체 요청 URL 캡처 → 직접 API 호출 시도
  */
 const { chromium } = require('playwright');
 const https = require('https');
@@ -62,8 +62,26 @@ async function uploadSalesHistory(data, sha) {
   if (res.status !== 200 && res.status !== 201) throw new Error(`GitHub 실패: ${res.status} / ${JSON.stringify(res.body)}`);
 }
 
+// GitHub에 디버그 스크린샷 업로드
+async function uploadDebugFile(name, content, isBase64 = false) {
+  const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
+  // 기존 sha 조회
+  const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
+  const sha = cur.status === 200 ? cur.body.sha : undefined;
+  await ghRequest('PUT', path, {
+    message: `debug: ${name}`,
+    content: isBase64 ? content : Buffer.from(content).toString('base64'),
+    branch: CONFIG.ghBranch,
+    ...(sha && { sha })
+  }).catch(e => log(`  debug 업로드 실패: ${e.message}`));
+}
+
 async function fetchPOSSales() {
-  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
+           '--disable-gpu', '--window-size=1920,1080']
+  });
   const context = await browser.newContext({
     locale: 'ko-KR',
     viewport: { width: 1920, height: 1080 },
@@ -76,17 +94,28 @@ async function fetchPOSSales() {
   let tradeNos     = [];
   let apiCallCount = 0;
 
+  // ── 모든 요청/응답 URL 캡처 (디버그용) ──
+  const capturedUrls = [];
+  let salesApiUrl = null;   // selTodaySalesList의 실제 URL
+  let salesApiBase = null;  // 기본 경로 (직접 호출용)
+
+  page.on('request', req => {
+    const u = req.url();
+    if (!u.startsWith('data:') && !u.includes('.png') && !u.includes('.jpg') && !u.includes('.gif') && !u.includes('.woff')) {
+      capturedUrls.push(`REQ ${req.method()} ${u}`);
+    }
+  });
+
   page.on('response', async response => {
     const url = response.url();
-    // 디버그: 주요 API 요청 로깅
-    if (url.includes('Pos') || url.includes('pos') || url.includes('Sale') || url.includes('sale')) {
-      log(`  [API] ${url.split('/').slice(-1)[0].substring(0,60)}`);
-    }
+    capturedUrls.push(`RES ${response.status()} ${url}`);
+
     if (url.includes('selTodaySalesList')) {
+      salesApiUrl = url;
       try {
         const d = await response.json();
         tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
-        log(`거래번호 ${tradeNos.length}건`);
+        log(`selTodaySalesList 캡처! 거래 ${tradeNos.length}건 / URL: ${url}`);
       } catch(e) { log(`  selTodaySalesList 파싱 오류: ${e.message}`); }
     }
     if (url.includes('selItemSalesList')) {
@@ -111,6 +140,7 @@ async function fetchPOSSales() {
   });
 
   try {
+    // ── 1단계: 로그인 ──
     log('로그인 중...');
     await page.goto(CONFIG.posUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('input[type="password"]').first().waitFor({ state: 'visible', timeout: 15000 });
@@ -124,96 +154,192 @@ async function fetchPOSSales() {
     }
     await page.locator('input[type="password"]').first().fill(CONFIG.posPw);
     await page.keyboard.press('Enter');
-    // 네비게이션 로드까지 대기
-    await page.waitForResponse(r => r.url().includes('index_left_nav'), { timeout: 20000 }).catch(() => {});
-    await page.waitForTimeout(5000);
+
+    // 로그인 완료 대기 (index_left_nav 또는 10초)
+    await Promise.race([
+      page.waitForResponse(r => r.url().includes('index_left_nav'), { timeout: 20000 }),
+      page.waitForTimeout(10000)
+    ]).catch(() => {});
+    await page.waitForTimeout(3000);
     log('로그인 완료');
 
-    // 디버그: 모든 프레임 URL 출력
-    for(const f of page.frames()) log(`  Frame: ${f.url().substring(0,100)}`);
+    // ── 로그인 직후 스크린샷 ──
+    const sc1 = await page.screenshot({ fullPage: false }).catch(() => null);
+    if (sc1) await uploadDebugFile('after_login.png', sc1.toString('base64'), true);
 
-    // 모든 프레임에서 링크 텍스트 스캔 (디버그)
-    for(const frame of page.frames()) {
-      const links = await frame.evaluate(() =>
-        Array.from(document.querySelectorAll('a,span,td,li')).map(e=>e.textContent.trim()).filter(t=>t.length>1&&t.length<20).slice(0,30)
-      ).catch(() => []);
-      if(links.length) log(`  [${frame.url().split('/').pop().substring(0,20)}] 텍스트: ${links.join('|')}`);
+    // ── 프레임 정보 로깅 ──
+    for (const f of page.frames()) {
+      const fu = f.url();
+      log(`  Frame: ${fu.substring(0, 120)}`);
     }
 
-    // 영업 메뉴 클릭 — 모든 프레임 시도
-    for(const frame of page.frames()) {
-      try { await frame.locator('text=영업').first().click({ force: true, timeout: 3000 }); log('  영업 클릭 OK'); } catch(e) {}
+    // ── 2단계: 쿠키 캡처 후 직접 API 호출 시도 ──
+    const cookies = await context.cookies();
+    const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+    log(`  쿠키 ${cookies.length}개 캡처`);
+
+    // ── 3단계: 메뉴 클릭 (기존 방식) ──
+    // 모든 프레임에서 영업 메뉴 시도
+    for (const frame of page.frames()) {
+      try { await frame.locator('text=영업').first().click({ force: true, timeout: 3000 }); log('  영업 클릭'); } catch(e) {}
     }
     await page.waitForTimeout(2000);
-    for(const frame of page.frames()) {
-      try { await frame.locator('text=영업 속보').first().click({ force: true, timeout: 3000 }); log('  영업속보 클릭 OK'); } catch(e) {}
+    for (const frame of page.frames()) {
+      try { await frame.locator('text=영업 속보').first().click({ force: true, timeout: 3000 }); log('  영업속보 클릭'); } catch(e) {}
     }
     await page.waitForTimeout(2000);
 
-    // 당일매출조회 클릭 — 모든 프레임에서 시도
+    // 당일매출조회 클릭 함수
     const clickDailySales = async () => {
-      for(const frame of page.frames()) {
-        const found = await frame.evaluate(() => {
-          // ID로 직접 찾기
+      for (const frame of page.frames()) {
+        const res = await frame.evaluate(() => {
           const el = document.getElementById('mf_wfm_side_gen_menu2_0_gen_menu3_2_btn_menu3');
-          if(el) {
+          if (el) {
             let e = el;
-            while(e && e !== document.body) { e.style.display='block'; e.style.visibility='visible'; e.style.opacity='1'; e=e.parentElement; }
-            el.click(); return '당일매출조회(ID)';
+            while (e && e !== document.body) {
+              e.style.display = 'block'; e.style.visibility = 'visible'; e.style.opacity = '1';
+              e = e.parentElement;
+            }
+            el.click(); return '클릭OK(ID)';
           }
-          // 텍스트로 찾기 (부분일치 포함)
-          for(const a of document.querySelectorAll('*')) {
-            const t = (a.childNodes.length===1&&a.childNodes[0].nodeType===3) ? a.textContent.trim() : '';
-            if(t === '당일매출조회') { a.click(); return `당일매출조회(text:${a.tagName})`; }
+          for (const a of document.querySelectorAll('a,span,td,button,li')) {
+            if (a.textContent.trim() === '당일매출조회') { a.click(); return `클릭OK(text:${a.tagName})`; }
           }
-          // 키워드 포함된 링크 전체 목록 반환 (디버그)
-          const found = Array.from(document.querySelectorAll('a,span,td')).filter(e=>e.textContent.includes('매출')).map(e=>e.textContent.trim().substring(0,20));
-          return found.length ? `매출관련요소: ${found.slice(0,5).join('/')}` : null;
+          // WebSquare 내부 함수 직접 호출 시도
+          if (typeof wfm !== 'undefined') {
+            try { wfm.getFrame('wfm_contents').loadURL('/PosMenuAction.do?method=selTodaySalesList'); return 'wfm시도'; } catch(e) {}
+          }
+          // 전체 텍스트 노드 스캔
+          const all = Array.from(document.querySelectorAll('*')).filter(e => {
+            const t = e.textContent.trim();
+            return t === '당일매출조회' && e.children.length === 0;
+          });
+          if (all.length) { all[0].click(); return `클릭OK(scan:${all[0].tagName})`; }
+          return null;
         }).catch(() => null);
-        if(found) { log(`  [${frame.url().split('/').pop().substring(0,30)}] ${found}`); }
+        if (res) log(`  [${frame.url().split('/').pop().substring(0,30)}] ${res}`);
       }
     };
+
     await clickDailySales();
 
-    // selTodaySalesList 응답 명시적 대기 (최대 20초, 못 잡으면 재시도)
-    log('selTodaySalesList 대기 중...');
-    await page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 20000 })
-      .then(async r => {
-        try { const d = await r.json(); tradeNos = (d.dlt_result||[]).map(t=>t.TRADE_NO); } catch(e){}
-      }).catch(async () => {
-        log('  1차 timeout — 재시도...');
-        await clickDailySales();
-        await page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 15000 })
-          .then(async r => {
-            try { const d = await r.json(); tradeNos = (d.dlt_result||[]).map(t=>t.TRADE_NO); } catch(e){}
-          }).catch(() => log('  2차 timeout - 0건으로 진행'));
-      });
+    // selTodaySalesList 최대 25초 대기
+    log('selTodaySalesList 대기...');
+    const gotSales = await page.waitForResponse(
+      r => r.url().includes('selTodaySalesList'), { timeout: 25000 }
+    ).then(async r => {
+      try { const d = await r.json(); tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO); return true; } catch(e) { return false; }
+    }).catch(() => false);
+
+    if (!gotSales) {
+      log('  1차 실패 — 재시도...');
+      await clickDailySales();
+      await page.waitForResponse(
+        r => r.url().includes('selTodaySalesList'), { timeout: 15000 }
+      ).then(async r => {
+        try { const d = await r.json(); tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO); } catch(e) {}
+      }).catch(() => {});
+    }
+
+    // ── 4단계: selTodaySalesList URL 캡처 실패시 page.evaluate로 직접 호출 ──
+    if (tradeNos.length === 0) {
+      log('  UI 방식 실패 — 직접 fetch 시도...');
+      const posOrigin = new URL(CONFIG.posUrl).origin;
+
+      // 캡처된 URL에서 API 패턴 추출
+      const anyApiUrl = capturedUrls
+        .filter(u => u.includes('REQ POST'))
+        .map(u => u.replace('REQ POST ', '').trim())
+        .find(u => u.includes(posOrigin) && !u.includes('.js') && !u.includes('.css'));
+
+      log(`  후보 API URL: ${anyApiUrl || '없음'}`);
+
+      // 공통 WebSquare URL 패턴 시도
+      const directResult = await page.evaluate(async (origin) => {
+        const candidates = [
+          { url: origin + '/WiRES.action', type: 'form' },
+          { url: origin + '/action.do', type: 'form' },
+          { url: origin + '/PosMenuAction.do', type: 'form' },
+          { url: origin + '/SalesReportAction.do', type: 'form' },
+          { url: origin + '/CommonBizAction.do', type: 'form' },
+        ];
+        const params = [
+          'SERVICE_ID=selTodaySalesList',
+          'method=selTodaySalesList',
+          'cmd=selTodaySalesList',
+          'action=selTodaySalesList',
+        ];
+        for (const cand of candidates) {
+          for (const p of params) {
+            try {
+              const r = await fetch(cand.url, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: p,
+              });
+              const txt = await r.text();
+              if (txt.includes('TRADE_NO') || txt.includes('dlt_result')) {
+                return { url: cand.url, param: p, data: txt.substring(0, 500) };
+              }
+            } catch(e) {}
+          }
+        }
+        return null;
+      }, posOrigin);
+
+      if (directResult) {
+        log(`  직접 호출 성공! URL: ${directResult.url} / param: ${directResult.param}`);
+        try {
+          const parsed = JSON.parse(directResult.data);
+          tradeNos = (parsed.dlt_result || []).map(t => t.TRADE_NO);
+          log(`  거래번호 ${tradeNos.length}건`);
+        } catch(e) { log('  파싱 실패: ' + e.message); }
+      } else {
+        log('  직접 호출도 실패');
+      }
+    }
+
+    // ── 5단계: 메뉴 클릭 후 스크린샷 ──
+    const sc2 = await page.screenshot({ fullPage: false }).catch(() => null);
+    if (sc2) await uploadDebugFile('after_menu_click.png', sc2.toString('base64'), true);
+
+    // ── 6단계: 수집된 URL 로그 업로드 ──
+    const urlLog = capturedUrls.slice(0, 200).join('\n');
+    await uploadDebugFile('captured_urls.txt', urlLog);
+    log(`캡처된 URL ${capturedUrls.length}개 → debug/captured_urls.txt 업로드`);
+
     await page.waitForTimeout(2000);
-    log(`당일매출조회 완료 (${tradeNos.length}건)`);
+    log(`당일매출조회: 거래 ${tradeNos.length}건`);
 
-    const tableInfo = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('table')).map((t, i) => ({
-        i, ths: t.querySelectorAll('thead th,thead td').length,
-        rows: t.querySelectorAll('tbody tr').length
-      }))
-    );
-    const main = tableInfo.find(t => t.ths >= 8 && t.rows >= 1)
-               || tableInfo.reduce((b, t) => (!b || t.ths > b.ths) ? t : b, null);
-    const mainIdx   = main?.i ?? 0;
-    const totalRows = tradeNos.length || (main?.rows || 0);
+    // ── 7단계: 행 순차 클릭 (거래별 상세 수집) ──
+    if (tradeNos.length > 0) {
+      const tableInfo = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('table')).map((t, i) => ({
+          i, ths: t.querySelectorAll('thead th,thead td').length,
+          rows: t.querySelectorAll('tbody tr').length
+        }))
+      );
+      const main = tableInfo.find(t => t.ths >= 8 && t.rows >= 1)
+                 || tableInfo.reduce((b, t) => (!b || t.ths > b.ths) ? t : b, null);
+      const mainIdx   = main?.i ?? 0;
+      const totalRows = tradeNos.length || (main?.rows || 0);
 
-    const rowsLoc = page.locator('table').nth(mainIdx).locator('tbody tr');
-    const bbox    = await rowsLoc.nth(0).boundingBox().catch(() => null);
-    if (bbox) {
-      await page.mouse.click(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
-      await page.waitForTimeout(1000);
+      const rowsLoc = page.locator('table').nth(mainIdx).locator('tbody tr');
+      const bbox    = await rowsLoc.nth(0).boundingBox().catch(() => null);
+      if (bbox) {
+        await page.mouse.click(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
+        await page.waitForTimeout(1000);
+      }
+      for (let i = 1; i < totalRows; i++) {
+        await page.keyboard.press('ArrowDown');
+        await page.waitForTimeout(800);
+      }
     }
-    for (let i = 1; i < totalRows; i++) {
-      await page.keyboard.press('ArrowDown');
-      await page.waitForTimeout(800);
-    }
+
     await Promise.all(pending);
     log(`수집 완료: API ${apiCallCount}회 / ${Object.keys(todayItems).length}개 품번`);
+
   } finally {
     await browser.close();
   }
