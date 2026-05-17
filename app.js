@@ -899,14 +899,29 @@ function rebuildIndex(){
   }
   if (getPromoList().length > 0) {
       if(promoWrap) {
-          promoWrap.innerHTML = `
+          const _promos = getPromoList();
+          const _activePN = window._activePromoName || "ALL";
+          const promoChips = _promos.length > 1
+              ? `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors hidden promo-name-chip ${_activePN==='ALL'?'bg-purple-600 text-white border-purple-700':'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'}" data-pname="ALL">🎁 전체</button>` +
+                _promos.map(pr => {
+                  const nm = pr.meta?.name || '기획전';
+                  return `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors hidden promo-name-chip ${_activePN===nm?'bg-purple-600 text-white border-purple-700':'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'}" data-pname="${escapeHtml(nm)}">🎪 ${escapeHtml(nm)}</button>`;
+                }).join('')
+              : '';
+          promoWrap.innerHTML = promoChips + `
               <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
               <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
           `;
+          promoWrap.querySelectorAll(".promo-name-chip").forEach(btn => {
+              btn.addEventListener("click", () => {
+                  window._activePromoName = btn.dataset.pname;
+                  saveHistoryState(); visibleCount = 60; render();
+              });
+          });
           $("#promoTypeSel").onchange = () => { saveHistoryState(); visibleCount=60; render(); };
           $("#promoRateSel").onchange = () => { saveHistoryState(); visibleCount=60; render(); };
       }
-  } else if (promoWrap) { promoWrap.innerHTML = ""; }
+  } else if (promoWrap) { promoWrap.innerHTML = ""; window._activePromoName = "ALL"; }
 
   // 브랜드 카운트 계산
   const brandCounts = {};
@@ -1026,9 +1041,6 @@ function setupQuickActionBar() {
     wrap.innerHTML = `
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
-        </button>
-        <button id="erpSyncBtn" onclick="window.showErpSyncModal()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold ${erpApplied ? 'bg-green-500 text-white border-green-600' : 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700'} border rounded-lg transition-colors whitespace-nowrap" title="${erpApplied ? '마지막 동기화: ' + (window._erpDeductTime||'') : 'ERP 판매 연동'}">
-            <i data-lucide="${erpApplied ? 'check-circle' : 'refresh-cw'}" class="w-3.5 h-3.5"></i><span>${erpApplied ? '판매차감중' : 'ERP 연동'}</span>
         </button>
         ${hasPromo ? `
         <button id="promoViewBtn" onclick="window.togglePromoView(this)" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-purple-700 transition-colors whitespace-nowrap" data-active="0">
@@ -1150,13 +1162,16 @@ window.togglePromoView = (btn, bypassRender = false) => {
         window.tempPromoFilter = true;
         $("#promoTypeSel")?.classList.remove("hidden");
         $("#promoRateSel")?.classList.remove("hidden");
+        document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.remove("hidden"));
     } else {
         btn.classList.replace("bg-purple-600", "bg-purple-50");
         btn.classList.replace("text-white", "text-purple-700");
         btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i><span>기획전</span>`;
         window.tempPromoFilter = false;
+        window._activePromoName = "ALL";
         $("#promoTypeSel")?.classList.add("hidden");
         $("#promoRateSel")?.classList.add("hidden");
+        document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.add("hidden"));
     }
     if(window.lucide) lucide.createIcons();
     if(!bypassRender) { visibleCount=60; render(); }
@@ -2323,8 +2338,9 @@ function getFilters(){
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
     sizeGear: $("#sizeSelGear") ? $("#sizeSelGear").value : "ALL",
     promoOnly: promoOnly,
-    promoType: promoOnly && $("#promoTypeSel") && $("#promoTypeSel").value !== "" ? $("#promoTypeSel").value : "ALL", 
-    promoRate: promoOnly && $("#promoRateSel") && $("#promoRateSel").value !== "" ? Number($("#promoRateSel").value) : 0
+    promoType: promoOnly && $("#promoTypeSel") && $("#promoTypeSel").value !== "" ? $("#promoTypeSel").value : "ALL",
+    promoRate: promoOnly && $("#promoRateSel") && $("#promoRateSel").value !== "" ? Number($("#promoRateSel").value) : 0,
+    promoName: promoOnly ? (window._activePromoName || "ALL") : "ALL"
   };
 }
 
@@ -2389,7 +2405,8 @@ function render(){
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
         if(f.promoType !== "ALL" && p.promoType !== f.promoType) return false;
-        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false; 
+        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false;
+        if(f.promoName && f.promoName !== "ALL" && p.promoName !== f.promoName) return false;
     }
 
     if(activeSizeFilter !== "ALL") {
