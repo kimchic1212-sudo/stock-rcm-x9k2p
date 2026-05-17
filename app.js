@@ -448,33 +448,33 @@ function showPosSyncGuide(status) {
             color: 'emerald',
             body: `오늘 POS 판매 데이터가 정상 동기화 중입니다.<br><br>
 <b>현재 상태</b><br>
-• 5분마다 자동 갱신<br>
-• 오늘 판매분이 부산 재고에 실시간 반영 중<br><br>
-<span class="text-gray-500 text-xs">문제 발생 시 <b>run_sync.bat</b> 재실행</span>`
+• GitHub Actions가 5분마다 자동 동기화 중<br>
+• 오늘 판매분이 부산 재고에 실시간 반영 중<br>
+• 노트북을 안 켜도 자동으로 작동합니다 ✅<br><br>
+<span class="text-gray-500 text-xs">문제 발생 시: <a href="https://github.com/kimchic1212-sudo/stock-rcm-x9k2p/actions" target="_blank" class="underline">GitHub Actions 확인</a></span>`
         },
         stale: {
             title: '⚠️ POS 미갱신 — 조치 필요',
             color: 'yellow',
             body: `오늘 POS 데이터가 아직 동기화되지 않았습니다.<br><br>
-<b>조치 방법</b><br>
-1. <b>Downloads 폴더</b> 열기<br>
-2. <b>run_sync.bat</b> 더블클릭<br>
-3. 검은 창에서 <b>"완료"</b> 메시지 확인<br>
-4. 창을 닫지 말고 그대로 두기 (5분 자동 반복)<br><br>
-<b>창이 이미 열려있다면</b><br>
-• 창 내용 확인 → 에러 메시지 있으면 스크린샷<br>
-• 창 닫고 다시 실행`
+<b>GitHub Actions 확인</b><br>
+1. <a href="https://github.com/kimchic1212-sudo/stock-rcm-x9k2p/actions" target="_blank" class="underline font-bold">GitHub Actions 페이지</a> 열기<br>
+2. POS Sync 최근 실행 결과 확인<br>
+3. ❌ 실패 시 클릭해서 오류 내용 확인<br><br>
+<b>영업 시간 중이라면</b><br>
+• 5~10분 후 자동 반영됩니다<br>
+• 별도로 실행할 프로그램 없음 ✅`
         },
         none: {
             title: '🔌 POS 미연동 — 설정 필요',
             color: 'gray',
-            body: `POS 동기화가 한 번도 실행되지 않았습니다.<br><br>
-<b>최초 설정 방법</b><br>
-1. Node.js 설치 확인 (<code>node -v</code>)<br>
-2. Downloads 폴더에 <b>sync_pos_sales.js</b>, <b>run_sync.bat</b> 있는지 확인<br>
-3. PowerShell에서:<br>
-<code class="block bg-gray-100 rounded px-2 py-1 my-1 text-xs">cd Downloads<br>npm install playwright<br>npx playwright install chromium</code>
-4. <b>run_sync.bat</b> 더블클릭으로 실행`
+            body: `아직 오늘 POS 판매 데이터가 없습니다.<br><br>
+<b>GitHub Actions 자동 동기화 중</b><br>
+• 노트북을 안 켜도 5분마다 자동으로 실행됩니다<br>
+• 별도로 실행할 프로그램 없음 ✅<br><br>
+<b>확인 방법</b><br>
+1. <a href="https://github.com/kimchic1212-sudo/stock-rcm-x9k2p/actions" target="_blank" class="underline font-bold">GitHub Actions 페이지</a>에서 실행 기록 확인<br>
+2. 오늘 판매가 발생하면 자동으로 뱃지가 초록색으로 바뀝니다`
         }
     };
     const g = guides[status];
