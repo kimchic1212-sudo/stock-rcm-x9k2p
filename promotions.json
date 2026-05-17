@@ -1,2843 +1,4382 @@
 {
-  "meta": {
-    "name": "SUMMER MODE : ON",
-    "period": "5.15(금) - 5.29(금)"
-  },
-  "items": {
-    "28748": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "28754": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "28760": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "92069438": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 259200,
-      "finalRate": 0.19999999999999996
-    },
-    "94310360": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 267200,
-      "finalRate": 0.19999999999999996
-    },
-    "94370163": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 296000,
-      "finalRate": 0.19999999999999996
-    },
-    "94370963": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 356000,
-      "finalRate": 0.19999999999999996
-    },
-    "94380158": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 195200,
-      "finalRate": 0.19999999999999996
-    },
-    "94380558": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 267200,
-      "finalRate": 0.19999999999999996
-    },
-    "94382558": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 207200,
-      "finalRate": 0.19999999999999996
-    },
-    "1122931-WHTWH": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "1122931-DBIWE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "1151077-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71200,
-      "finalRate": 0.19999999999999996
-    },
-    "1164154-HKCT": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 84000,
-      "finalRate": 0.19999999999999996
-    },
-    "1164154-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 84000,
-      "finalRate": 0.19999999999999996
-    },
-    "1170236-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 135200,
-      "finalRate": 0.19999999999999996
-    },
-    "1164330-HKB": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 36000,
-      "finalRate": 0.19999999999999996
-    },
-    "1164154-WHT": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 84000,
-      "finalRate": 0.19999999999999996
-    },
-    "1164154-HKB": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 84000,
-      "finalRate": 0.19999999999999996
-    },
-    "28758Q5-LMSP": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "44590-HEBK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 95200,
-      "finalRate": 0.19999999999999996
-    },
-    "24811Q5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 159200,
-      "finalRate": 0.19999999999999996
-    },
-    "24634Q5-SLPU": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 111200,
-      "finalRate": 0.19999999999999996
-    },
-    "47560Q5-GRZX": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 66400,
-      "finalRate": 0.19999999999999996
-    },
-    "28758-PNDG": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "47560Q5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 66400,
-      "finalRate": 0.19999999999999996
-    },
-    "28758-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "28758Q5-RVGN": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "24498R5-WSTO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76500,
-      "finalRate": 0.09999999999999998
-    },
-    "28818R5-BOB": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 62100,
-      "finalRate": 0.09999999999999998
-    },
-    "28758Q5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "44590-FZPN": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 95200,
-      "finalRate": 0.19999999999999996
-    },
-    "24658R5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 134100,
-      "finalRate": 0.09999999999999998
-    },
-    "57602-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 104300,
-      "finalRate": 0.30000000000000004
-    },
-    "57631-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 95200,
-      "finalRate": 0.19999999999999996
-    },
-    "28818R5-SHRB": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 62100,
-      "finalRate": 0.09999999999999998
-    },
-    "24658Q5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 108000,
-      "finalRate": 0.19999999999999996
-    },
-    "57595R5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 134100,
-      "finalRate": 0.09999999999999998
-    },
-    "23726R5-DYWH": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 85500,
-      "finalRate": 0.09999999999999998
-    },
-    "24498R5-BSNG": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76500,
-      "finalRate": 0.09999999999999998
-    },
-    "49521R5-WSTO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 260100,
-      "finalRate": 0.09999999999999998
-    },
-    "49495Q5-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 269100,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-E01-BLK500": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 38700,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-E02-BLK250": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 28800,
-      "finalRate": 0.09999999999999998
-    },
-    "C25FW-C03-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53100,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-S01-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 124200,
-      "finalRate": 0.09999999999999998
-    },
-    "C24FW-T03-WHT": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "C25FW-T02-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 58500,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-T01-GRE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 67500,
-      "finalRate": 0.09999999999999998
-    },
-    "C24FW-C01-BRW": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55800,
-      "finalRate": 0.09999999999999998
-    },
-    "C25FW-C04-ORG": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52200,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-S02-GRY": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 118800,
-      "finalRate": 0.09999999999999998
-    },
-    "C25FW-T01-OLV": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 46800,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-T04-FORREST": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "C24FW-T01-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "C25FW-C01-OLV": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52200,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-S02-BLU": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 118800,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-S03-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 112500,
-      "finalRate": 0.09999999999999998
-    },
-    "C25SS-S03-BRW": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 112500,
-      "finalRate": 0.09999999999999998
-    },
-    "C25FW-C01-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52200,
-      "finalRate": 0.09999999999999998
-    },
-    "PRO RACING SOCKS V4.0 RUN HIGH-WHITE.FLUO RED": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 26100,
-      "finalRate": 0.09999999999999998
-    },
-    "PRO MARATHON SOCKS V2.0-WHITE.BLACK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29700,
-      "finalRate": 0.09999999999999998
-    },
-    "PRO MARATHON SOCKS V2.0-BLACK.WHITE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29700,
-      "finalRate": 0.09999999999999998
-    },
-    "PRO RACING SOCKS V4.0 RUN HIGH-WHITE.BLACK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 26100,
-      "finalRate": 0.09999999999999998
-    },
-    "PRO RACING SOCKS V4.0 RUN HIGH-SUGAR.STORM": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 26100,
-      "finalRate": 0.09999999999999998
-    },
-    "K32002APS32BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 135000,
-      "finalRate": 0.09999999999999998
-    },
-    "K52001ATN24-LGR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 160000,
-      "finalRate": 0.19999999999999996
-    },
-    "K52001ATN12-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 112000,
-      "finalRate": 0.19999999999999996
-    },
-    "K34003EHG60BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 81000,
-      "finalRate": 0.09999999999999998
-    },
-    "K43013ATN80LGN": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 99000,
-      "finalRate": 0.09999999999999998
-    },
-    "K52001ATN12-MBR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 112000,
-      "finalRate": 0.19999999999999996
-    },
-    "K32001APS34BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 189000,
-      "finalRate": 0.09999999999999998
-    },
-    "K52001ATN12-YGN": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 112000,
-      "finalRate": 0.19999999999999996
-    },
-    "camelbak B": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 113400,
-      "finalRate": 0.09999999999999998
-    },
-    "camelbak C": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 198000,
-      "finalRate": 0.09999999999999998
-    },
-    "ULTRA BELT BLACK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 78300,
-      "finalRate": 0.09999999999999998
-    },
-    "YH-05": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 8910,
-      "finalRate": 0.09999999999999998
-    },
-    "YH-03": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 8910,
-      "finalRate": 0.09999999999999998
-    },
-    "YH-04": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 8910,
-      "finalRate": 0.09999999999999998
-    },
-    "2UF30130069": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 215100,
-      "finalRate": 0.09999999999999998
-    },
-    "2UF30130553": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 215100,
-      "finalRate": 0.09999999999999998
-    },
-    "UT-01": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 9600,
-      "finalRate": 0.4
-    },
-    "UT-02": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 9600,
-      "finalRate": 0.4
-    },
-    "UT-03": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 13200,
-      "finalRate": 0.4
-    },
-    "AMINOSHOT4": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 10800,
-      "finalRate": 0.09999999999999998
-    },
-    "AMINOCITRIC": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20250,
-      "finalRate": 0.09999999999999998
-    },
-    "AMINO380014": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 22500,
-      "finalRate": 0.09999999999999998
-    },
-    "AMINO4000-14": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 32400,
-      "finalRate": 0.09999999999999998
-    },
-    "KS0466": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53100,
-      "finalRate": 0.09999999999999998
-    },
-    "JY8624": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 62100,
-      "finalRate": 0.09999999999999998
-    },
-    "JZ0507": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.09999999999999998
-    },
-    "JD1160": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 35100,
-      "finalRate": 0.09999999999999998
-    },
-    "JZ0506": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.09999999999999998
-    },
-    "JZ7694": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "KS0471": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53100,
-      "finalRate": 0.09999999999999998
-    },
-    "JN0298": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 80100,
-      "finalRate": 0.09999999999999998
-    },
-    "JZ2478": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 58500,
-      "finalRate": 0.09999999999999998
-    },
-    "JV9036": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 98100,
-      "finalRate": 0.09999999999999998
-    },
-    "KS0469": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53100,
-      "finalRate": 0.09999999999999998
-    },
-    "KS0468": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53100,
-      "finalRate": 0.09999999999999998
-    },
-    "KS0470": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53100,
-      "finalRate": 0.09999999999999998
-    },
-    "KD6975": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 35100,
-      "finalRate": 0.09999999999999998
-    },
-    "KC4963": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 89100,
-      "finalRate": 0.09999999999999998
-    },
-    "KA0317": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 49500,
-      "finalRate": 0.09999999999999998
-    },
-    "KA0143": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 49500,
-      "finalRate": 0.09999999999999998
-    },
-    "IX8975": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 80100,
-      "finalRate": 0.09999999999999998
-    },
-    "JZ7684": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "JZ7762": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 49500,
-      "finalRate": 0.09999999999999998
-    },
-    "JP1492": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71100,
-      "finalRate": 0.09999999999999998
-    },
-    "JD9557": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 17100,
-      "finalRate": 0.09999999999999998
-    },
-    "JV6530": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 98100,
-      "finalRate": 0.09999999999999998
-    },
-    "KE8210": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71100,
-      "finalRate": 0.09999999999999998
-    },
-    "KE8213": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71100,
-      "finalRate": 0.09999999999999998
-    },
-    "KE8211": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71100,
-      "finalRate": 0.09999999999999998
-    },
-    "JP3773": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 80100,
-      "finalRate": 0.09999999999999998
-    },
-    "KB4332": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71100,
-      "finalRate": 0.09999999999999998
-    },
-    "KB5960": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.09999999999999998
-    },
-    "KA2799": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 80100,
-      "finalRate": 0.09999999999999998
-    },
-    "KC4962": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 89100,
-      "finalRate": 0.09999999999999998
-    },
-    "KB2601": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "JN7162": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 62100,
-      "finalRate": 0.09999999999999998
-    },
-    "KA0149": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 80100,
-      "finalRate": 0.09999999999999998
-    },
-    "KA2924": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 89100,
-      "finalRate": 0.09999999999999998
-    },
-    "JD4202": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 80100,
-      "finalRate": 0.09999999999999998
-    },
-    "JY7574": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 134100,
-      "finalRate": 0.09999999999999998
-    },
-    "JY7573": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 170100,
-      "finalRate": 0.09999999999999998
-    },
-    "KD6967": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 89100,
-      "finalRate": 0.09999999999999998
-    },
-    "U-2-CA-0118-BL001-ML": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 91200,
-      "finalRate": 0.19999999999999996
-    },
-    "U-2-CA-0057-GN010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52800,
-      "finalRate": 0.19999999999999996
-    },
-    "U-2-CA-0119-GN005-ML": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 81600,
-      "finalRate": 0.19999999999999996
-    },
-    "U-2-CA-0119-GR003-ML": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 81600,
-      "finalRate": 0.19999999999999996
-    },
-    "NWRSI31C008": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 96000,
-      "finalRate": 0.19999999999999996
-    },
-    "NMRSS31C008": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 104000,
-      "finalRate": 0.19999999999999996
-    },
-    "NMRSI31C008": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 96000,
-      "finalRate": 0.19999999999999996
-    },
-    "NWRSS31C008": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 104000,
-      "finalRate": 0.19999999999999996
-    },
-    "NMRSS31C007": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 104000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2337700": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 36000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC1986400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 27000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC1916000": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29700,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2801200": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 104000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2695200": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 104000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2693900": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 96000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC1917600": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 12000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2799100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2048200": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2692300": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 128000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2692500": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 120000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2037600": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "LC2847600": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 72000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2768200": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 72000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2855200": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 252000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2854500": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 198000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2179800": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 45000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2464900": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 198000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2461500": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 225000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2711100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 45000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2854900": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 135000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2465100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 198000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2854600": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 135000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2710400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2871300": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 243000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2863300": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 288000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2855300": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 252000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2464400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 207000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2461400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 72000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2533100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 261000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2483800": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 198000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2091500": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 72000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC1759600": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 207000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2176400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 207000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2177400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 180000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2683800": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 225000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2710300": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 234000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2176300": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 207000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2091700": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 225000,
-      "finalRate": 0.09999999999999998
-    },
-    "LC2863400": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 288000,
-      "finalRate": 0.09999999999999998
-    },
-    "BD681350-Black": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 56700,
-      "finalRate": 0.09999999999999998
-    },
-    "BD681350-Alloy": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 56700,
-      "finalRate": 0.09999999999999998
-    },
-    "WPCCP001FL24BB": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 65400,
-      "finalRate": 0.4
-    },
-    "WPCBP001FL24SE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71400,
-      "finalRate": 0.4
-    },
-    "MPRSP001FL24SE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 77400,
-      "finalRate": 0.4
-    },
-    "MPRSP001FL24SG": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 83400,
-      "finalRate": 0.4
-    },
-    "UPLRP001FL24CU": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29400,
-      "finalRate": 0.4
-    },
-    "UPLRP001FL24SI": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29400,
-      "finalRate": 0.4
-    },
-    "UPLRP001FL24TD": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29400,
-      "finalRate": 0.4
-    },
-    "WPCCP001FL24SM": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 65400,
-      "finalRate": 0.4
-    },
-    "WPSBP001FL24SE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 59400,
-      "finalRate": 0.4
-    },
-    "WPSBP001FL24TD": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 59400,
-      "finalRate": 0.4
-    },
-    "WPCCP001FL24SG": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 65400,
-      "finalRate": 0.4
-    },
-    "WPRSP001FL24SE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 77400,
-      "finalRate": 0.4
-    },
-    "WPSBP001FL24CU": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 59400,
-      "finalRate": 0.4
-    },
-    "UPLRP001FL24GR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29400,
-      "finalRate": 0.4
-    },
-    "MO Big Logo Red": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "MO Flipflop Navy": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 27300,
-      "finalRate": 0.30000000000000004
-    },
-    "MO Slide Navy": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 27300,
-      "finalRate": 0.30000000000000004
-    },
-    "MO Flipflop Black": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 27300,
-      "finalRate": 0.30000000000000004
-    },
-    "MO Big Logo Black": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "MO 3D RECOVERY SLIDE": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 125300,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU072": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 82600,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU060": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88900,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU016": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88900,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU064": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 82600,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU075": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88900,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU015": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 96600,
-      "finalRate": 0.30000000000000004
-    },
-    "SKU021": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88900,
-      "finalRate": 0.30000000000000004
-    },
-    "WP51141_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 63920,
-      "finalRate": 0.19999999999999996
-    },
-    "WS51288_HMO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT51205_HMO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT51208_HMO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "WT51227_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "WT51126_WT": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 47920,
-      "finalRate": 0.19999999999999996
-    },
-    "WB51052_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT41253_MEW": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "WS51288_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT41250_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "LAH91003_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44910,
-      "finalRate": 0.09999999999999998
-    },
-    "MT51205-BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT53215-BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "WB51052_HMO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "NBPFFB116I": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "MS53278-GAS": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 63920,
-      "finalRate": 0.19999999999999996
-    },
-    "NBPFFB116B": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "MT53216-BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT53216-LBN": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT51205-GAS": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "NBNVE4P06119": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71910,
-      "finalRate": 0.09999999999999998
-    },
-    "MS53279-BIT": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 63920,
-      "finalRate": 0.19999999999999996
-    },
-    "WS51288-BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "WS51288-GYM": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "NBNVE4P02219": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71910,
-      "finalRate": 0.09999999999999998
-    },
-    "NBNEE4P04219": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44910,
-      "finalRate": 0.09999999999999998
-    },
-    "NBNEE4P14117": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 53910,
-      "finalRate": 0.09999999999999998
-    },
-    "WT41290-URR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55920,
-      "finalRate": 0.19999999999999996
-    },
-    "WT51224-URR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55920,
-      "finalRate": 0.19999999999999996
-    },
-    "NBNGE4P01219": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44910,
-      "finalRate": 0.09999999999999998
-    },
-    "NBNVE4P02280": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71910,
-      "finalRate": 0.09999999999999998
-    },
-    "LAH00353-Black": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "MT51205-URR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "WT41290-BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55920,
-      "finalRate": 0.19999999999999996
-    },
-    "LAH21105_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 35910,
-      "finalRate": 0.09999999999999998
-    },
-    "NBNGE4P01280": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44910,
-      "finalRate": 0.09999999999999998
-    },
-    "NBNGE4P02119": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44910,
-      "finalRate": 0.09999999999999998
-    },
-    "NBNVE4P01219": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 89910,
-      "finalRate": 0.09999999999999998
-    },
-    "LAH00353-Light Gray": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39920,
-      "finalRate": 0.19999999999999996
-    },
-    "MS51283_BK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79920,
-      "finalRate": 0.19999999999999996
-    },
-    "N1ARS02-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.09999999999999998
-    },
-    "N2AMS02-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 36000,
-      "finalRate": 0.09999999999999998
-    },
-    "N2AMS02-003": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 36000,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARS02-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.09999999999999998
-    },
-    "N2CWTB1-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 142200,
-      "finalRate": 0.09999999999999998
-    },
-    "N2CWTB1-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 142200,
-      "finalRate": 0.09999999999999998
-    },
-    "NC2TS1M-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 115200,
-      "finalRate": 0.09999999999999998
-    },
-    "NC2TS1M-003": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 115200,
-      "finalRate": 0.09999999999999998
-    },
-    "NC2TS1W-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 115200,
-      "finalRate": 0.09999999999999998
-    },
-    "NC2TS1W-004": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 115200,
-      "finalRate": 0.09999999999999998
-    },
-    "NC4SH1W-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 178200,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARS03-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29700,
-      "finalRate": 0.09999999999999998
-    },
-    "NC4SH1M-003": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 178200,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARC03-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 58500,
-      "finalRate": 0.09999999999999998
-    },
-    "N1CWRT2-004": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76500,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARC03-003": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 58500,
-      "finalRate": 0.09999999999999998
-    },
-    "N2CMAT1-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 160200,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARC03-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 58500,
-      "finalRate": 0.09999999999999998
-    },
-    "N1CMRS2-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 142200,
-      "finalRate": 0.09999999999999998
-    },
-    "N1CWRS2-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 142200,
-      "finalRate": 0.09999999999999998
-    },
-    "N1CWRT2-006": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76500,
-      "finalRate": 0.09999999999999998
-    },
-    "N1CMTS2-007": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88200,
-      "finalRate": 0.09999999999999998
-    },
-    "N2AMS01-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 36000,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARS03-001": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 29700,
-      "finalRate": 0.09999999999999998
-    },
-    "N1ARV02-002": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 178200,
-      "finalRate": 0.09999999999999998
-    },
-    "008-NEVE-U": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 143200,
-      "finalRate": 0.19999999999999996
-    },
-    "RETRO SOCK-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 23200,
-      "finalRate": 0.19999999999999996
-    },
-    "AC4466-127": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 48300,
-      "finalRate": 0.30000000000000004
-    },
-    "AC4466-027": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 48300,
-      "finalRate": 0.30000000000000004
-    },
-    "CW7206-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 34300,
-      "finalRate": 0.30000000000000004
-    },
-    "IQ6027-039": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 71100,
-      "finalRate": 0.09999999999999998
-    },
-    "IQ7354-039": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 179100,
-      "finalRate": 0.09999999999999998
-    },
-    "IH8673-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39200,
-      "finalRate": 0.19999999999999996
-    },
-    "FB5682-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31200,
-      "finalRate": 0.19999999999999996
-    },
-    "IO8269-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "IO8269-009": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "HV6919-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 17600,
-      "finalRate": 0.19999999999999996
-    },
-    "DB5471-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52000,
-      "finalRate": 0.19999999999999996
-    },
-    "DB5471-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52000,
-      "finalRate": 0.19999999999999996
-    },
-    "DV5465-101": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 26400,
-      "finalRate": 0.19999999999999996
-    },
-    "HV6919-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 17600,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ4395-475": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 34300,
-      "finalRate": 0.30000000000000004
-    },
-    "FJ0736-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3385-736": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN2505-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76000,
-      "finalRate": 0.19999999999999996
-    },
-    "FB5681-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31200,
-      "finalRate": 0.19999999999999996
-    },
-    "HF0854-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 23200,
-      "finalRate": 0.19999999999999996
-    },
-    "SX7554-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20300,
-      "finalRate": 0.30000000000000004
-    },
-    "DX6822-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 34300,
-      "finalRate": 0.30000000000000004
-    },
-    "HV5204-377": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "IO9651-819": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN2329-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79200,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ5377-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3581-133": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3581-633": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "IO9651-030": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HV2163-133": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 63200,
-      "finalRate": 0.19999999999999996
-    },
-    "FV9950-247": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55300,
-      "finalRate": 0.30000000000000004
-    },
-    "DV9306-121": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52500,
-      "finalRate": 0.30000000000000004
-    },
-    "HJ3381-736": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3535-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "HM5221-502": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HM5221-897": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "SX6888-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20300,
-      "finalRate": 0.30000000000000004
-    },
-    "FZ0006-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 97300,
-      "finalRate": 0.30000000000000004
-    },
-    "HJ3535-133": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "IO9674-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 108000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN2329-085": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 66500,
-      "finalRate": 0.30000000000000004
-    },
-    "DM4756-635": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "IO9678-097": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "DM4756-084": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "IO9676-004": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79200,
-      "finalRate": 0.19999999999999996
-    },
-    "FN2329-696": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN2714-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76000,
-      "finalRate": 0.19999999999999996
-    },
-    "SX6888-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20300,
-      "finalRate": 0.30000000000000004
-    },
-    "IO9678-819": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HV9489-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "HV9500-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 24500,
-      "finalRate": 0.30000000000000004
-    },
-    "FZ1081-809": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 48300,
-      "finalRate": 0.30000000000000004
-    },
-    "HM8292-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "DM4762-635": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HV5204-084": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "IO9646-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "IF1630-532": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 84000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3353-085": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 73500,
-      "finalRate": 0.30000000000000004
-    },
-    "HV2009-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "DM4762-345": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HV5204-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3350-085": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 73500,
-      "finalRate": 0.30000000000000004
-    },
-    "FN2329-057": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79200,
-      "finalRate": 0.19999999999999996
-    },
-    "HV5204-635": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "IM6268-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN4232-845": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN4232-696": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 87200,
-      "finalRate": 0.19999999999999996
-    },
-    "HV5204-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3372-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "DA3588-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20000,
-      "finalRate": 0.19999999999999996
-    },
-    "FB7953-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39200,
-      "finalRate": 0.19999999999999996
-    },
-    "FZ1124-035": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 83300,
-      "finalRate": 0.30000000000000004
-    },
-    "HV2644-492": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "HQ4195-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "IF3582-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 28000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3688-110": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39200,
-      "finalRate": 0.19999999999999996
-    },
-    "HV9491-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "HV9495-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "DV9832-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 45500,
-      "finalRate": 0.30000000000000004
-    },
-    "HV9497-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 31500,
-      "finalRate": 0.30000000000000004
-    },
-    "DM4756-017": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 55200,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ2313-533": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HQ0621-607": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 52000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3272-016": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79200,
-      "finalRate": 0.19999999999999996
-    },
-    "FN4232-085": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76300,
-      "finalRate": 0.30000000000000004
-    },
-    "HV2288-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 100000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3272-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 79200,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ4171-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76000,
-      "finalRate": 0.19999999999999996
-    },
-    "DA3584-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3689-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 23200,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ4165-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 39200,
-      "finalRate": 0.19999999999999996
-    },
-    "HF6616-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "IF4061-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3903-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76500,
-      "finalRate": 0.09999999999999998
-    },
-    "SX6888-900": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20300,
-      "finalRate": 0.30000000000000004
-    },
-    "HJ2253-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 76000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ5377-499": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 60000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3689-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 23200,
-      "finalRate": 0.19999999999999996
-    },
-    "DA3588-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN3233-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 38500,
-      "finalRate": 0.30000000000000004
-    },
-    "HV6935-100": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 15200,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3378-057": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "FN2505-085": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 59500,
-      "finalRate": 0.30000000000000004
-    },
-    "DA3584-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ2259-010": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 68000,
-      "finalRate": 0.19999999999999996
-    },
-    "HJ3378-736": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 92000,
-      "finalRate": 0.19999999999999996
-    },
-    "WP8C0R": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP7C0R": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP7C5R": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP8C0L": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "WP8C5R": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP8CVL": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 44100,
-      "finalRate": 0.09999999999999998
-    },
-    "WP7C4R": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP8CIR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP8C4R": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "WP7CIR": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 40500,
-      "finalRate": 0.09999999999999998
-    },
-    "25SS-HIP-GRY": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 47200,
-      "finalRate": 0.19999999999999996
-    },
-    "24SS-BAS-OLVS": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 24000,
-      "finalRate": 0.19999999999999996
-    },
-    "FAG52AHDWHTO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20000,
-      "finalRate": 0.19999999999999996
-    },
-    "24SS-BAS-GRYS": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 24000,
-      "finalRate": 0.19999999999999996
-    },
-    "24SS-DTC-BEG": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 47200,
-      "finalRate": 0.19999999999999996
-    },
-    "FAG52AHDMGRO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 20000,
-      "finalRate": 0.19999999999999996
-    },
-    "24SS-BAS-BLKS": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 24000,
-      "finalRate": 0.19999999999999996
-    },
-    "FAG52SG2MNTO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 28800,
-      "finalRate": 0.09999999999999998
-    },
-    "FAG52SC2WHTO": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 9000,
-      "finalRate": 0.09999999999999998
-    },
-    "22FW-AD15-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 214200,
-      "finalRate": 0.09999999999999998
-    },
-    "21SS-VEST-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 111600,
-      "finalRate": 0.09999999999999998
-    },
-    "23FW-VHH-BLK": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 88200,
-      "finalRate": 0.09999999999999998
-    },
-    "60000-00006": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 208000,
-      "finalRate": 0.19999999999999996
-    },
-    "60000-00032": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 208000,
-      "finalRate": 0.19999999999999996
-    },
-    "60000-00004": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 208000,
-      "finalRate": 0.19999999999999996
-    },
-    "60000-00016": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 176000,
-      "finalRate": 0.19999999999999996
-    },
-    "60000-00011": {
-      "targetCat": "",
-      "weeklyPrice": null,
-      "weeklyRate": 0,
-      "finalPrice": 208000,
-      "finalRate": 0.19999999999999996
+  "promotions": [
+    {
+      "meta": {
+        "name": "SUMMER MODE : ON",
+        "period": "5.15(금) - 5.29(금)"
+      },
+      "items": {
+        "28748": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "28754": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "28760": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "92069438": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 259200,
+          "finalRate": 0.19999999999999996
+        },
+        "94310360": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 267200,
+          "finalRate": 0.19999999999999996
+        },
+        "94370163": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 296000,
+          "finalRate": 0.19999999999999996
+        },
+        "94370963": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 356000,
+          "finalRate": 0.19999999999999996
+        },
+        "94380158": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 195200,
+          "finalRate": 0.19999999999999996
+        },
+        "94380558": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 267200,
+          "finalRate": 0.19999999999999996
+        },
+        "94382558": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 207200,
+          "finalRate": 0.19999999999999996
+        },
+        "1122931-WHTWH": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "1122931-DBIWE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "1151077-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71200,
+          "finalRate": 0.19999999999999996
+        },
+        "1164154-HKCT": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 84000,
+          "finalRate": 0.19999999999999996
+        },
+        "1164154-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 84000,
+          "finalRate": 0.19999999999999996
+        },
+        "1170236-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 135200,
+          "finalRate": 0.19999999999999996
+        },
+        "1164330-HKB": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 36000,
+          "finalRate": 0.19999999999999996
+        },
+        "1164154-WHT": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 84000,
+          "finalRate": 0.19999999999999996
+        },
+        "1164154-HKB": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 84000,
+          "finalRate": 0.19999999999999996
+        },
+        "28758Q5-LMSP": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "44590-HEBK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 95200,
+          "finalRate": 0.19999999999999996
+        },
+        "24811Q5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 159200,
+          "finalRate": 0.19999999999999996
+        },
+        "24634Q5-SLPU": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 111200,
+          "finalRate": 0.19999999999999996
+        },
+        "47560Q5-GRZX": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 66400,
+          "finalRate": 0.19999999999999996
+        },
+        "28758-PNDG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "47560Q5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 66400,
+          "finalRate": 0.19999999999999996
+        },
+        "28758-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "28758Q5-RVGN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "24498R5-WSTO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76500,
+          "finalRate": 0.09999999999999998
+        },
+        "28818R5-BOB": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 62100,
+          "finalRate": 0.09999999999999998
+        },
+        "28758Q5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "44590-FZPN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 95200,
+          "finalRate": 0.19999999999999996
+        },
+        "24658R5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 134100,
+          "finalRate": 0.09999999999999998
+        },
+        "57602-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 104300,
+          "finalRate": 0.30000000000000004
+        },
+        "57631-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 95200,
+          "finalRate": 0.19999999999999996
+        },
+        "28818R5-SHRB": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 62100,
+          "finalRate": 0.09999999999999998
+        },
+        "24658Q5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 108000,
+          "finalRate": 0.19999999999999996
+        },
+        "57595R5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 134100,
+          "finalRate": 0.09999999999999998
+        },
+        "23726R5-DYWH": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 85500,
+          "finalRate": 0.09999999999999998
+        },
+        "24498R5-BSNG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76500,
+          "finalRate": 0.09999999999999998
+        },
+        "49521R5-WSTO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 260100,
+          "finalRate": 0.09999999999999998
+        },
+        "49495Q5-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 269100,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-E01-BLK500": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 38700,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-E02-BLK250": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 28800,
+          "finalRate": 0.09999999999999998
+        },
+        "C25FW-C03-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53100,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-S01-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 124200,
+          "finalRate": 0.09999999999999998
+        },
+        "C24FW-T03-WHT": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "C25FW-T02-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 58500,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-T01-GRE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 67500,
+          "finalRate": 0.09999999999999998
+        },
+        "C24FW-C01-BRW": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55800,
+          "finalRate": 0.09999999999999998
+        },
+        "C25FW-C04-ORG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52200,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-S02-GRY": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 118800,
+          "finalRate": 0.09999999999999998
+        },
+        "C25FW-T01-OLV": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 46800,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-T04-FORREST": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "C24FW-T01-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "C25FW-C01-OLV": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52200,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-S02-BLU": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 118800,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-S03-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 112500,
+          "finalRate": 0.09999999999999998
+        },
+        "C25SS-S03-BRW": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 112500,
+          "finalRate": 0.09999999999999998
+        },
+        "C25FW-C01-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52200,
+          "finalRate": 0.09999999999999998
+        },
+        "PRO RACING SOCKS V4.0 RUN HIGH-WHITE.FLUO RED": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 26100,
+          "finalRate": 0.09999999999999998
+        },
+        "PRO MARATHON SOCKS V2.0-WHITE.BLACK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29700,
+          "finalRate": 0.09999999999999998
+        },
+        "PRO MARATHON SOCKS V2.0-BLACK.WHITE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29700,
+          "finalRate": 0.09999999999999998
+        },
+        "PRO RACING SOCKS V4.0 RUN HIGH-WHITE.BLACK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 26100,
+          "finalRate": 0.09999999999999998
+        },
+        "PRO RACING SOCKS V4.0 RUN HIGH-SUGAR.STORM": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 26100,
+          "finalRate": 0.09999999999999998
+        },
+        "K32002APS32BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 135000,
+          "finalRate": 0.09999999999999998
+        },
+        "K52001ATN24-LGR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 160000,
+          "finalRate": 0.19999999999999996
+        },
+        "K52001ATN12-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 112000,
+          "finalRate": 0.19999999999999996
+        },
+        "K34003EHG60BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 81000,
+          "finalRate": 0.09999999999999998
+        },
+        "K43013ATN80LGN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 99000,
+          "finalRate": 0.09999999999999998
+        },
+        "K52001ATN12-MBR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 112000,
+          "finalRate": 0.19999999999999996
+        },
+        "K32001APS34BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 189000,
+          "finalRate": 0.09999999999999998
+        },
+        "K52001ATN12-YGN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 112000,
+          "finalRate": 0.19999999999999996
+        },
+        "camelbak B": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 113400,
+          "finalRate": 0.09999999999999998
+        },
+        "camelbak C": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 198000,
+          "finalRate": 0.09999999999999998
+        },
+        "ULTRA BELT BLACK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 78300,
+          "finalRate": 0.09999999999999998
+        },
+        "YH-05": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 8910,
+          "finalRate": 0.09999999999999998
+        },
+        "YH-03": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 8910,
+          "finalRate": 0.09999999999999998
+        },
+        "YH-04": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 8910,
+          "finalRate": 0.09999999999999998
+        },
+        "2UF30130069": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 215100,
+          "finalRate": 0.09999999999999998
+        },
+        "2UF30130553": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 215100,
+          "finalRate": 0.09999999999999998
+        },
+        "UT-01": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 9600,
+          "finalRate": 0.4
+        },
+        "UT-02": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 9600,
+          "finalRate": 0.4
+        },
+        "UT-03": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 13200,
+          "finalRate": 0.4
+        },
+        "AMINOSHOT4": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 10800,
+          "finalRate": 0.09999999999999998
+        },
+        "AMINOCITRIC": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20250,
+          "finalRate": 0.09999999999999998
+        },
+        "AMINO380014": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 22500,
+          "finalRate": 0.09999999999999998
+        },
+        "AMINO4000-14": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 32400,
+          "finalRate": 0.09999999999999998
+        },
+        "KS0466": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53100,
+          "finalRate": 0.09999999999999998
+        },
+        "JY8624": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 62100,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ0507": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.09999999999999998
+        },
+        "JD1160": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 35100,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ0506": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ7694": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "KS0471": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53100,
+          "finalRate": 0.09999999999999998
+        },
+        "JN0298": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 80100,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ2478": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 58500,
+          "finalRate": 0.09999999999999998
+        },
+        "JV9036": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 98100,
+          "finalRate": 0.09999999999999998
+        },
+        "KS0469": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53100,
+          "finalRate": 0.09999999999999998
+        },
+        "KS0468": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53100,
+          "finalRate": 0.09999999999999998
+        },
+        "KS0470": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53100,
+          "finalRate": 0.09999999999999998
+        },
+        "KD6975": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 35100,
+          "finalRate": 0.09999999999999998
+        },
+        "KC4963": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 89100,
+          "finalRate": 0.09999999999999998
+        },
+        "KA0317": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 49500,
+          "finalRate": 0.09999999999999998
+        },
+        "KA0143": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 49500,
+          "finalRate": 0.09999999999999998
+        },
+        "IX8975": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 80100,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ7684": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ7762": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 49500,
+          "finalRate": 0.09999999999999998
+        },
+        "JP1492": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71100,
+          "finalRate": 0.09999999999999998
+        },
+        "JD9557": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 17100,
+          "finalRate": 0.09999999999999998
+        },
+        "JV6530": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 98100,
+          "finalRate": 0.09999999999999998
+        },
+        "KE8210": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71100,
+          "finalRate": 0.09999999999999998
+        },
+        "KE8213": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71100,
+          "finalRate": 0.09999999999999998
+        },
+        "KE8211": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71100,
+          "finalRate": 0.09999999999999998
+        },
+        "JP3773": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 80100,
+          "finalRate": 0.09999999999999998
+        },
+        "KB4332": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71100,
+          "finalRate": 0.09999999999999998
+        },
+        "KB5960": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.09999999999999998
+        },
+        "KA2799": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 80100,
+          "finalRate": 0.09999999999999998
+        },
+        "KC4962": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 89100,
+          "finalRate": 0.09999999999999998
+        },
+        "KB2601": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "JN7162": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 62100,
+          "finalRate": 0.09999999999999998
+        },
+        "KA0149": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 80100,
+          "finalRate": 0.09999999999999998
+        },
+        "KA2924": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 89100,
+          "finalRate": 0.09999999999999998
+        },
+        "JD4202": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 80100,
+          "finalRate": 0.09999999999999998
+        },
+        "JY7574": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 134100,
+          "finalRate": 0.09999999999999998
+        },
+        "JY7573": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "KD6967": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 89100,
+          "finalRate": 0.09999999999999998
+        },
+        "U-2-CA-0118-BL001-ML": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 91200,
+          "finalRate": 0.19999999999999996
+        },
+        "U-2-CA-0057-GN010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52800,
+          "finalRate": 0.19999999999999996
+        },
+        "U-2-CA-0119-GN005-ML": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 81600,
+          "finalRate": 0.19999999999999996
+        },
+        "U-2-CA-0119-GR003-ML": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 81600,
+          "finalRate": 0.19999999999999996
+        },
+        "NWRSI31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 96000,
+          "finalRate": 0.19999999999999996
+        },
+        "NMRSS31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 104000,
+          "finalRate": 0.19999999999999996
+        },
+        "NMRSI31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 96000,
+          "finalRate": 0.19999999999999996
+        },
+        "NWRSS31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 104000,
+          "finalRate": 0.19999999999999996
+        },
+        "NMRSS31C007": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 104000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2337700": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 36000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC1986400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 27000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC1916000": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29700,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2801200": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 104000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2695200": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 104000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2693900": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 96000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC1917600": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 12000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2799100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2048200": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2692300": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 128000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2692500": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 120000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2037600": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "LC2847600": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 72000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2768200": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 72000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2855200": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 252000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2854500": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 198000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2179800": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 45000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2464900": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 198000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2461500": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 225000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2711100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 45000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2854900": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 135000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2465100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 198000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2854600": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 135000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2710400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2871300": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 243000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2863300": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 288000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2855300": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 252000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2464400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 207000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2461400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 72000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2533100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 261000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2483800": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 198000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2091500": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 72000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC1759600": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 207000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2176400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 207000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2177400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 180000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2683800": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 225000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2710300": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 234000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2176300": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 207000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2091700": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 225000,
+          "finalRate": 0.09999999999999998
+        },
+        "LC2863400": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 288000,
+          "finalRate": 0.09999999999999998
+        },
+        "BD681350-Black": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 56700,
+          "finalRate": 0.09999999999999998
+        },
+        "BD681350-Alloy": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 56700,
+          "finalRate": 0.09999999999999998
+        },
+        "WPCCP001FL24BB": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 65400,
+          "finalRate": 0.4
+        },
+        "WPCBP001FL24SE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71400,
+          "finalRate": 0.4
+        },
+        "MPRSP001FL24SE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 77400,
+          "finalRate": 0.4
+        },
+        "MPRSP001FL24SG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 83400,
+          "finalRate": 0.4
+        },
+        "UPLRP001FL24CU": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29400,
+          "finalRate": 0.4
+        },
+        "UPLRP001FL24SI": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29400,
+          "finalRate": 0.4
+        },
+        "UPLRP001FL24TD": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29400,
+          "finalRate": 0.4
+        },
+        "WPCCP001FL24SM": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 65400,
+          "finalRate": 0.4
+        },
+        "WPSBP001FL24SE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 59400,
+          "finalRate": 0.4
+        },
+        "WPSBP001FL24TD": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 59400,
+          "finalRate": 0.4
+        },
+        "WPCCP001FL24SG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 65400,
+          "finalRate": 0.4
+        },
+        "WPRSP001FL24SE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 77400,
+          "finalRate": 0.4
+        },
+        "WPSBP001FL24CU": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 59400,
+          "finalRate": 0.4
+        },
+        "UPLRP001FL24GR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29400,
+          "finalRate": 0.4
+        },
+        "MO Big Logo Red": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "MO Flipflop Navy": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 27300,
+          "finalRate": 0.30000000000000004
+        },
+        "MO Slide Navy": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 27300,
+          "finalRate": 0.30000000000000004
+        },
+        "MO Flipflop Black": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 27300,
+          "finalRate": 0.30000000000000004
+        },
+        "MO Big Logo Black": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "MO 3D RECOVERY SLIDE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 125300,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU072": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 82600,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU060": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88900,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU016": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88900,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU064": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 82600,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU075": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88900,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU015": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 96600,
+          "finalRate": 0.30000000000000004
+        },
+        "SKU021": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88900,
+          "finalRate": 0.30000000000000004
+        },
+        "WP51141_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 63920,
+          "finalRate": 0.19999999999999996
+        },
+        "WS51288_HMO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT51205_HMO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT51208_HMO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "WT51227_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "WT51126_WT": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 47920,
+          "finalRate": 0.19999999999999996
+        },
+        "WB51052_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT41253_MEW": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "WS51288_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT41250_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "LAH91003_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44910,
+          "finalRate": 0.09999999999999998
+        },
+        "MT51205-BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT53215-BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "WB51052_HMO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "NBPFFB116I": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "MS53278-GAS": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 63920,
+          "finalRate": 0.19999999999999996
+        },
+        "NBPFFB116B": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "MT53216-BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT53216-LBN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT51205-GAS": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "NBNVE4P06119": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71910,
+          "finalRate": 0.09999999999999998
+        },
+        "MS53279-BIT": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 63920,
+          "finalRate": 0.19999999999999996
+        },
+        "WS51288-BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "WS51288-GYM": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "NBNVE4P02219": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71910,
+          "finalRate": 0.09999999999999998
+        },
+        "NBNEE4P04219": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44910,
+          "finalRate": 0.09999999999999998
+        },
+        "NBNEE4P14117": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 53910,
+          "finalRate": 0.09999999999999998
+        },
+        "WT41290-URR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55920,
+          "finalRate": 0.19999999999999996
+        },
+        "WT51224-URR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55920,
+          "finalRate": 0.19999999999999996
+        },
+        "NBNGE4P01219": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44910,
+          "finalRate": 0.09999999999999998
+        },
+        "NBNVE4P02280": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71910,
+          "finalRate": 0.09999999999999998
+        },
+        "LAH00353-Black": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "MT51205-URR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "WT41290-BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55920,
+          "finalRate": 0.19999999999999996
+        },
+        "LAH21105_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 35910,
+          "finalRate": 0.09999999999999998
+        },
+        "NBNGE4P01280": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44910,
+          "finalRate": 0.09999999999999998
+        },
+        "NBNGE4P02119": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44910,
+          "finalRate": 0.09999999999999998
+        },
+        "NBNVE4P01219": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 89910,
+          "finalRate": 0.09999999999999998
+        },
+        "LAH00353-Light Gray": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39920,
+          "finalRate": 0.19999999999999996
+        },
+        "MS51283_BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79920,
+          "finalRate": 0.19999999999999996
+        },
+        "N1ARS02-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.09999999999999998
+        },
+        "N2AMS02-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 36000,
+          "finalRate": 0.09999999999999998
+        },
+        "N2AMS02-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 36000,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARS02-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.09999999999999998
+        },
+        "N2CWTB1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 142200,
+          "finalRate": 0.09999999999999998
+        },
+        "N2CWTB1-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 142200,
+          "finalRate": 0.09999999999999998
+        },
+        "NC2TS1M-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 115200,
+          "finalRate": 0.09999999999999998
+        },
+        "NC2TS1M-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 115200,
+          "finalRate": 0.09999999999999998
+        },
+        "NC2TS1W-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 115200,
+          "finalRate": 0.09999999999999998
+        },
+        "NC2TS1W-004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 115200,
+          "finalRate": 0.09999999999999998
+        },
+        "NC4SH1W-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 178200,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARS03-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29700,
+          "finalRate": 0.09999999999999998
+        },
+        "NC4SH1M-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 178200,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARC03-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 58500,
+          "finalRate": 0.09999999999999998
+        },
+        "N1CWRT2-004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76500,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARC03-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 58500,
+          "finalRate": 0.09999999999999998
+        },
+        "N2CMAT1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 160200,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARC03-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 58500,
+          "finalRate": 0.09999999999999998
+        },
+        "N1CMRS2-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 142200,
+          "finalRate": 0.09999999999999998
+        },
+        "N1CWRS2-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 142200,
+          "finalRate": 0.09999999999999998
+        },
+        "N1CWRT2-006": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76500,
+          "finalRate": 0.09999999999999998
+        },
+        "N1CMTS2-007": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88200,
+          "finalRate": 0.09999999999999998
+        },
+        "N2AMS01-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 36000,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARS03-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 29700,
+          "finalRate": 0.09999999999999998
+        },
+        "N1ARV02-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 178200,
+          "finalRate": 0.09999999999999998
+        },
+        "008-NEVE-U": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 143200,
+          "finalRate": 0.19999999999999996
+        },
+        "RETRO SOCK-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 23200,
+          "finalRate": 0.19999999999999996
+        },
+        "AC4466-127": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 48300,
+          "finalRate": 0.30000000000000004
+        },
+        "AC4466-027": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 48300,
+          "finalRate": 0.30000000000000004
+        },
+        "CW7206-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 34300,
+          "finalRate": 0.30000000000000004
+        },
+        "IQ6027-039": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 71100,
+          "finalRate": 0.09999999999999998
+        },
+        "IQ7354-039": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "IH8673-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39200,
+          "finalRate": 0.19999999999999996
+        },
+        "FB5682-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31200,
+          "finalRate": 0.19999999999999996
+        },
+        "IO8269-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "IO8269-009": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "HV6919-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 17600,
+          "finalRate": 0.19999999999999996
+        },
+        "DB5471-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52000,
+          "finalRate": 0.19999999999999996
+        },
+        "DB5471-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52000,
+          "finalRate": 0.19999999999999996
+        },
+        "DV5465-101": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 26400,
+          "finalRate": 0.19999999999999996
+        },
+        "HV6919-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 17600,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ4395-475": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 34300,
+          "finalRate": 0.30000000000000004
+        },
+        "FJ0736-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3385-736": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN2505-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76000,
+          "finalRate": 0.19999999999999996
+        },
+        "FB5681-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31200,
+          "finalRate": 0.19999999999999996
+        },
+        "HF0854-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 23200,
+          "finalRate": 0.19999999999999996
+        },
+        "SX7554-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20300,
+          "finalRate": 0.30000000000000004
+        },
+        "DX6822-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 34300,
+          "finalRate": 0.30000000000000004
+        },
+        "HV5204-377": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "IO9651-819": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN2329-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79200,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ5377-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3581-133": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3581-633": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "IO9651-030": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HV2163-133": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 63200,
+          "finalRate": 0.19999999999999996
+        },
+        "FV9950-247": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55300,
+          "finalRate": 0.30000000000000004
+        },
+        "DV9306-121": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52500,
+          "finalRate": 0.30000000000000004
+        },
+        "HJ3381-736": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3535-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "HM5221-502": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HM5221-897": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "SX6888-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20300,
+          "finalRate": 0.30000000000000004
+        },
+        "FZ0006-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 97300,
+          "finalRate": 0.30000000000000004
+        },
+        "HJ3535-133": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "IO9674-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 108000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN2329-085": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 66500,
+          "finalRate": 0.30000000000000004
+        },
+        "DM4756-635": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "IO9678-097": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "DM4756-084": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "IO9676-004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79200,
+          "finalRate": 0.19999999999999996
+        },
+        "FN2329-696": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN2714-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76000,
+          "finalRate": 0.19999999999999996
+        },
+        "SX6888-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20300,
+          "finalRate": 0.30000000000000004
+        },
+        "IO9678-819": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HV9489-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "HV9500-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 24500,
+          "finalRate": 0.30000000000000004
+        },
+        "FZ1081-809": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 48300,
+          "finalRate": 0.30000000000000004
+        },
+        "HM8292-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "DM4762-635": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HV5204-084": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "IO9646-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "IF1630-532": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 84000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3353-085": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 73500,
+          "finalRate": 0.30000000000000004
+        },
+        "HV2009-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "DM4762-345": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HV5204-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3350-085": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 73500,
+          "finalRate": 0.30000000000000004
+        },
+        "FN2329-057": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79200,
+          "finalRate": 0.19999999999999996
+        },
+        "HV5204-635": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "IM6268-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN4232-845": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN4232-696": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 87200,
+          "finalRate": 0.19999999999999996
+        },
+        "HV5204-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3372-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "DA3588-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20000,
+          "finalRate": 0.19999999999999996
+        },
+        "FB7953-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39200,
+          "finalRate": 0.19999999999999996
+        },
+        "FZ1124-035": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 83300,
+          "finalRate": 0.30000000000000004
+        },
+        "HV2644-492": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "HQ4195-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "IF3582-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 28000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3688-110": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39200,
+          "finalRate": 0.19999999999999996
+        },
+        "HV9491-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "HV9495-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "DV9832-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 45500,
+          "finalRate": 0.30000000000000004
+        },
+        "HV9497-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 31500,
+          "finalRate": 0.30000000000000004
+        },
+        "DM4756-017": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 55200,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ2313-533": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HQ0621-607": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 52000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3272-016": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79200,
+          "finalRate": 0.19999999999999996
+        },
+        "FN4232-085": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76300,
+          "finalRate": 0.30000000000000004
+        },
+        "HV2288-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 100000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3272-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 79200,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ4171-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76000,
+          "finalRate": 0.19999999999999996
+        },
+        "DA3584-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3689-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 23200,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ4165-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 39200,
+          "finalRate": 0.19999999999999996
+        },
+        "HF6616-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "IF4061-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3903-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76500,
+          "finalRate": 0.09999999999999998
+        },
+        "SX6888-900": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20300,
+          "finalRate": 0.30000000000000004
+        },
+        "HJ2253-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 76000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ5377-499": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 60000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3689-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 23200,
+          "finalRate": 0.19999999999999996
+        },
+        "DA3588-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN3233-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 38500,
+          "finalRate": 0.30000000000000004
+        },
+        "HV6935-100": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 15200,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3378-057": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "FN2505-085": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 59500,
+          "finalRate": 0.30000000000000004
+        },
+        "DA3584-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ2259-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 68000,
+          "finalRate": 0.19999999999999996
+        },
+        "HJ3378-736": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 92000,
+          "finalRate": 0.19999999999999996
+        },
+        "WP8C0R": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP7C0R": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP7C5R": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP8C0L": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "WP8C5R": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP8CVL": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 44100,
+          "finalRate": 0.09999999999999998
+        },
+        "WP7C4R": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP8CIR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP8C4R": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "WP7CIR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 40500,
+          "finalRate": 0.09999999999999998
+        },
+        "25SS-HIP-GRY": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 47200,
+          "finalRate": 0.19999999999999996
+        },
+        "24SS-BAS-OLVS": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 24000,
+          "finalRate": 0.19999999999999996
+        },
+        "FAG52AHDWHTO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20000,
+          "finalRate": 0.19999999999999996
+        },
+        "24SS-BAS-GRYS": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 24000,
+          "finalRate": 0.19999999999999996
+        },
+        "24SS-DTC-BEG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 47200,
+          "finalRate": 0.19999999999999996
+        },
+        "FAG52AHDMGRO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 20000,
+          "finalRate": 0.19999999999999996
+        },
+        "24SS-BAS-BLKS": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 24000,
+          "finalRate": 0.19999999999999996
+        },
+        "FAG52SG2MNTO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 28800,
+          "finalRate": 0.09999999999999998
+        },
+        "FAG52SC2WHTO": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 9000,
+          "finalRate": 0.09999999999999998
+        },
+        "22FW-AD15-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 214200,
+          "finalRate": 0.09999999999999998
+        },
+        "21SS-VEST-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 111600,
+          "finalRate": 0.09999999999999998
+        },
+        "23FW-VHH-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 88200,
+          "finalRate": 0.09999999999999998
+        },
+        "60000-00006": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 208000,
+          "finalRate": 0.19999999999999996
+        },
+        "60000-00032": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 208000,
+          "finalRate": 0.19999999999999996
+        },
+        "60000-00004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 208000,
+          "finalRate": 0.19999999999999996
+        },
+        "60000-00016": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 176000,
+          "finalRate": 0.19999999999999996
+        },
+        "60000-00011": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": 208000,
+          "finalRate": 0.19999999999999996
+        }
+      }
+    },
+    {
+      "id": "1778986870191",
+      "meta": {
+        "name": "RUN TOGETHER WEEK",
+        "period": "5.8(금) - 5.29(금)"
+      },
+      "items": {
+        "HV8150-003": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 167200,
+          "weeklyRate": 0.2,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "IO9571-400": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 223300,
+          "weeklyRate": 0.3,
+          "finalPrice": 319000,
+          "finalRate": 0
+        },
+        "S21055-172": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "IO9567-400": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 167300,
+          "weeklyRate": 0.3,
+          "finalPrice": 239000,
+          "finalRate": 0
+        },
+        "HQ3048-500": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 159200,
+          "weeklyRate": 0.2,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21059-103": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21007-172": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 175200,
+          "weeklyRate": 0.2,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "IH0869-605": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 223300,
+          "weeklyRate": 0.3,
+          "finalPrice": 319000,
+          "finalRate": 0
+        },
+        "S21070-172": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 151200,
+          "weeklyRate": 0.2,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11055-131": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "JS4939": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "JQ1668": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11058-121": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "JQ9667": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "JP8680": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 127200,
+          "weeklyRate": 0.2,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "JS4949": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 143200,
+          "weeklyRate": 0.2,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20996-97": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 153300,
+          "weeklyRate": 0.3,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20996-130": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 153300,
+          "weeklyRate": 0.3,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104202E020": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 139300,
+          "weeklyRate": 0.3,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "JR1613": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 127200,
+          "weeklyRate": 0.2,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "1147790-SNTF": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 148000,
+          "weeklyRate": 0.2,
+          "finalPrice": 166500,
+          "finalRate": 0.09999999999999998
+        },
+        "1104372E423": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 151200,
+          "weeklyRate": 0.2,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "JR7372": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 127200,
+          "weeklyRate": 0.2,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "KI4454": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 167200,
+          "weeklyRate": 0.2,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "S10996-97": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 153300,
+          "weeklyRate": 0.3,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "1147790-CLRSS": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 148000,
+          "weeklyRate": 0.2,
+          "finalPrice": 166500,
+          "finalRate": 0.09999999999999998
+        },
+        "1168690-TYS": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 159200,
+          "weeklyRate": 0.2,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "1203811D020": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 132300,
+          "weeklyRate": 0.3,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104321D441": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 132300,
+          "weeklyRate": 0.3,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11070-124": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 151200,
+          "weeklyRate": 0.2,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "KI4450": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 167200,
+          "weeklyRate": 0.2,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104341D408": {
+          "targetCat": "FOOTWEAR",
+          "weeklyPrice": 153300,
+          "weeklyRate": 0.3,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "JZ2478": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 52000,
+          "weeklyRate": 0.2,
+          "finalPrice": 65000,
+          "finalRate": 0
+        },
+        "FN2505-010": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 66500,
+          "weeklyRate": 0.3,
+          "finalPrice": 95000,
+          "finalRate": 0
+        },
+        "JY8624": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 55200,
+          "weeklyRate": 0.2,
+          "finalPrice": 69000,
+          "finalRate": 0
+        },
+        "JZ7694": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 39200,
+          "weeklyRate": 0.2,
+          "finalPrice": 49000,
+          "finalRate": 0
+        },
+        "DX6822-010": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 34300,
+          "weeklyRate": 0.3,
+          "finalPrice": 49000,
+          "finalRate": 0
+        },
+        "HV5204-377": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 55200,
+          "weeklyRate": 0.2,
+          "finalPrice": 69000,
+          "finalRate": 0
+        },
+        "IO9651-819": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 52500,
+          "weeklyRate": 0.3,
+          "finalPrice": 75000,
+          "finalRate": 0
+        },
+        "HJ3385-736": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 87500,
+          "weeklyRate": 0.3,
+          "finalPrice": 125000,
+          "finalRate": 0
+        },
+        "WP51141_BK": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 55930,
+          "weeklyRate": 0.3,
+          "finalPrice": 79900,
+          "finalRate": 0
+        },
+        "JN0298": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 71200,
+          "weeklyRate": 0.2,
+          "finalPrice": 89000,
+          "finalRate": 0
+        },
+        "KS0465": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 87200,
+          "weeklyRate": 0.2,
+          "finalPrice": 109000,
+          "finalRate": 0
+        },
+        "KS0470": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 47200,
+          "weeklyRate": 0.2,
+          "finalPrice": 59000,
+          "finalRate": 0
+        },
+        "KS0464": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 87200,
+          "weeklyRate": 0.2,
+          "finalPrice": 109000,
+          "finalRate": 0
+        },
+        "KS0466": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 47200,
+          "weeklyRate": 0.2,
+          "finalPrice": 59000,
+          "finalRate": 0
+        },
+        "KS0468": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 47200,
+          "weeklyRate": 0.2,
+          "finalPrice": 59000,
+          "finalRate": 0
+        },
+        "KS0469": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 47200,
+          "weeklyRate": 0.2,
+          "finalPrice": 59000,
+          "finalRate": 0
+        },
+        "KS0471": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 47200,
+          "weeklyRate": 0.2,
+          "finalPrice": 59000,
+          "finalRate": 0
+        },
+        "KS0472": {
+          "targetCat": "APPAREL",
+          "weeklyPrice": 47200,
+          "weeklyRate": 0.2,
+          "finalPrice": 59000,
+          "finalRate": 0
+        },
+        "IH8673-010": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 34300,
+          "weeklyRate": 0.3,
+          "finalPrice": 49000,
+          "finalRate": 0
+        },
+        "HV6919-100": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 17600,
+          "weeklyRate": 0.2,
+          "finalPrice": 22000,
+          "finalRate": 0
+        },
+        "DB5471-100": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 52000,
+          "weeklyRate": 0.2,
+          "finalPrice": 65000,
+          "finalRate": 0
+        },
+        "FB5682-010": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 27300,
+          "weeklyRate": 0.3,
+          "finalPrice": 39000,
+          "finalRate": 0
+        },
+        "DB5471-010": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 52000,
+          "weeklyRate": 0.2,
+          "finalPrice": 65000,
+          "finalRate": 0
+        },
+        "DV5465-101": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 23100,
+          "weeklyRate": 0.3,
+          "finalPrice": 33000,
+          "finalRate": 0
+        },
+        "HV6919-010": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 17600,
+          "weeklyRate": 0.2,
+          "finalPrice": 22000,
+          "finalRate": 0
+        },
+        "LC1928600": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 36000,
+          "weeklyRate": 0.2,
+          "finalPrice": 45000,
+          "finalRate": 0
+        },
+        "IO8269-010": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 44000,
+          "weeklyRate": 0.2,
+          "finalPrice": 55000,
+          "finalRate": 0
+        },
+        "IO8269-009": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 44000,
+          "weeklyRate": 0.2,
+          "finalPrice": 55000,
+          "finalRate": 0
+        },
+        "JD1160": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 31200,
+          "weeklyRate": 0.2,
+          "finalPrice": 39000,
+          "finalRate": 0
+        },
+        "LC2337700": {
+          "targetCat": "ACC/GEAR",
+          "weeklyPrice": 32000,
+          "weeklyRate": 0.2,
+          "finalPrice": 40000,
+          "finalRate": 0
+        },
+        "NBPFGS112T": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8154-102": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-405": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8154-001": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8154-012": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGB103T": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "JR4946": {
+          "targetCat": "",
+          "weeklyPrice": 299000,
+          "weeklyRate": 0,
+          "finalPrice": 299000,
+          "finalRate": 0
+        },
+        "S21064-140": {
+          "targetCat": "",
+          "weeklyPrice": 299000,
+          "weeklyRate": 0,
+          "finalPrice": 299000,
+          "finalRate": 0
+        },
+        "NBPFGS112J": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGS113T": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "1105032E020": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "JP6624": {
+          "targetCat": "",
+          "weeklyPrice": 299000,
+          "weeklyRate": 0,
+          "finalPrice": 299000,
+          "finalRate": 0
+        },
+        "1104791D131": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21023-172": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-102": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "KK3719": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "FV6040-001": {
+          "targetCat": "",
+          "weeklyPrice": 129000,
+          "weeklyRate": 0,
+          "finalPrice": 116100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21073-103": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162013-SCCG": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21008-142": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "1105031D092": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "IQ3439-211": {
+          "targetCat": "",
+          "weeklyPrice": 289000,
+          "weeklyRate": 0,
+          "finalPrice": 260100,
+          "finalRate": 0.09999999999999998
+        },
+        "FZ1626-500": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "IQ3435-045": {
+          "targetCat": "",
+          "weeklyPrice": 269000,
+          "weeklyRate": 0,
+          "finalPrice": 242100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3049-502": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "IF9630-001": {
+          "targetCat": "",
+          "weeklyPrice": 289000,
+          "weeklyRate": 0,
+          "finalPrice": 260100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162013-CYLT": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGS113M": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204681B110": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204921D133": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "KK2690": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "KI3381": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104791D392": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3049-500": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGS112Y": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3048-003": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11073-104": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ2592-105": {
+          "targetCat": "",
+          "weeklyPrice": 279000,
+          "weeklyRate": 0,
+          "finalPrice": 251100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204681B131": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "JH6206": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGS113Y": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "FQ5027-100": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162050-CRDS": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "IO9915-100": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104542E020": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGS104L": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HJ1102-106": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ2593-502": {
+          "targetCat": "",
+          "weeklyPrice": 279000,
+          "weeklyRate": 0,
+          "finalPrice": 251100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104542E189": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "HJ1101-105": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "HJ1101-500": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "IM6778-902": {
+          "targetCat": "",
+          "weeklyPrice": 289000,
+          "weeklyRate": 0,
+          "finalPrice": 260100,
+          "finalRate": 0.09999999999999998
+        },
+        "JS4958": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11024-232": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "JP9251": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104791D091": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11007-172": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3048-501": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3048-001": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB756L": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162050-VCH": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3049-001": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204431B020": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGB103W": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HJ1101-004": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "JH6208": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104541D020": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFGB103M": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HJ1101-607": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-009": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "KI3946": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162032-STLLR": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "KI3383": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB101L": {
+          "targetCat": "",
+          "weeklyPrice": 259000,
+          "weeklyRate": 0,
+          "finalPrice": 233100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204431D020": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "HJ1102-300": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ2592-004": {
+          "targetCat": "",
+          "weeklyPrice": 279000,
+          "weeklyRate": 0,
+          "finalPrice": 251100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20998-131": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "FB8502-402": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162013-BBLC": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "JP7149": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "FQ7262-103": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ7001-300": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20936-200": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "JP7147": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ7002-300": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ7001-003": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB756R": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162032-FFF": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "HM6804-102": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "S11000-104": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21000-137": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB105I": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "S21000-164": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20937-115": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "FQ7262-004": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162390-BCQ": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162410-BCQ": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFEB741M": {
+          "targetCat": "",
+          "weeklyPrice": 249000,
+          "weeklyRate": 0,
+          "finalPrice": 224100,
+          "finalRate": 0.09999999999999998
+        },
+        "FQ7262-002": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "DJ7884-007": {
+          "targetCat": "",
+          "weeklyPrice": 149000,
+          "weeklyRate": 0,
+          "finalPrice": 134100,
+          "finalRate": 0.09999999999999998
+        },
+        "DR2660-008": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "DR2670-104": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162014-BBLC": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "IQ0307-094": {
+          "targetCat": "",
+          "weeklyPrice": 289000,
+          "weeklyRate": 0,
+          "finalPrice": 260100,
+          "finalRate": 0.09999999999999998
+        },
+        "IQ0308-094": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ3048-101": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "IO9913-100": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162014-SDSTS": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-120": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "IF4456-001": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "IM3985-001": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ2050-103": {
+          "targetCat": "",
+          "weeklyPrice": 289000,
+          "weeklyRate": 0,
+          "finalPrice": 260100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204431B128": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "IM6011-060": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "FN8454-003": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-300": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "IH3251-001": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "IM6776-060": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "IM7659-394": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162032-BBLC": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-002": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB707B": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB707G": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB758I": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8154-601": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HV8150-004": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB758F": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB758O": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20998-210": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162011-SNTF": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104422E020": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104422E112": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104452E020": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104462E020": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "HM6804-600": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162032-HSK": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "FD2722-113": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20933-140": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "HQ1720-600": {
+          "targetCat": "",
+          "weeklyPrice": 169000,
+          "weeklyRate": 0,
+          "finalPrice": 152100,
+          "finalRate": 0.09999999999999998
+        },
+        "1104331D443": {
+          "targetCat": "",
+          "weeklyPrice": 189000,
+          "weeklyRate": 0,
+          "finalPrice": 170100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162011-WWH": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFFB102I": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20940-11": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "S20940-30": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "1162013-DNP": {
+          "targetCat": "",
+          "weeklyPrice": 229000,
+          "weeklyRate": 0,
+          "finalPrice": 206100,
+          "finalRate": 0.09999999999999998
+        },
+        "1204361B208": {
+          "targetCat": "",
+          "weeklyPrice": 239000,
+          "weeklyRate": 0,
+          "finalPrice": 215100,
+          "finalRate": 0.09999999999999998
+        },
+        "FD2722-006": {
+          "targetCat": "",
+          "weeklyPrice": 159000,
+          "weeklyRate": 0,
+          "finalPrice": 143100,
+          "finalRate": 0.09999999999999998
+        },
+        "FQ7261-003": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "1147790-DDW": {
+          "targetCat": "",
+          "weeklyPrice": 185000,
+          "weeklyRate": 0,
+          "finalPrice": 166500,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFEB717J": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        },
+        "1132210-FTG": {
+          "targetCat": "",
+          "weeklyPrice": 199000,
+          "weeklyRate": 0,
+          "finalPrice": 179100,
+          "finalRate": 0.09999999999999998
+        },
+        "NBPFEB708W": {
+          "targetCat": "",
+          "weeklyPrice": 209000,
+          "weeklyRate": 0,
+          "finalPrice": 188100,
+          "finalRate": 0.09999999999999998
+        },
+        "DJ7883-108": {
+          "targetCat": "",
+          "weeklyPrice": 149000,
+          "weeklyRate": 0,
+          "finalPrice": 134100,
+          "finalRate": 0.09999999999999998
+        },
+        "FQ7262-001": {
+          "targetCat": "",
+          "weeklyPrice": 219000,
+          "weeklyRate": 0,
+          "finalPrice": 197100,
+          "finalRate": 0.09999999999999998
+        },
+        "DR2665-010": {
+          "targetCat": "",
+          "weeklyPrice": 179000,
+          "weeklyRate": 0,
+          "finalPrice": 161100,
+          "finalRate": 0.09999999999999998
+        }
+      }
     }
-  }
+  ]
 }
