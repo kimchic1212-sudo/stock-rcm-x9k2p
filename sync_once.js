@@ -124,37 +124,53 @@ async function fetchPOSSales() {
     }
     await page.locator('input[type="password"]').first().fill(CONFIG.posPw);
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(8000);
+    // 네비게이션 로드까지 대기
+    await page.waitForResponse(r => r.url().includes('index_left_nav'), { timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(5000);
     log('로그인 완료');
 
-    // 메뉴 클릭 — 메인 + 모든 iframe 시도
-    const frames = page.frames();
-    log(`  프레임 수: ${frames.length}`);
-    for(const frame of frames) {
-      try { await frame.locator('text=영업').first().click({ force: true, timeout: 3000 }); } catch(e) {}
+    // 디버그: 모든 프레임 URL 출력
+    for(const f of page.frames()) log(`  Frame: ${f.url().substring(0,100)}`);
+
+    // 모든 프레임에서 링크 텍스트 스캔 (디버그)
+    for(const frame of page.frames()) {
+      const links = await frame.evaluate(() =>
+        Array.from(document.querySelectorAll('a,span,td,li')).map(e=>e.textContent.trim()).filter(t=>t.length>1&&t.length<20).slice(0,30)
+      ).catch(() => []);
+      if(links.length) log(`  [${frame.url().split('/').pop().substring(0,20)}] 텍스트: ${links.join('|')}`);
+    }
+
+    // 영업 메뉴 클릭 — 모든 프레임 시도
+    for(const frame of page.frames()) {
+      try { await frame.locator('text=영업').first().click({ force: true, timeout: 3000 }); log('  영업 클릭 OK'); } catch(e) {}
     }
     await page.waitForTimeout(2000);
-    for(const frame of frames) {
-      try { await frame.locator('text=영업 속보').first().click({ force: true, timeout: 3000 }); } catch(e) {}
+    for(const frame of page.frames()) {
+      try { await frame.locator('text=영업 속보').first().click({ force: true, timeout: 3000 }); log('  영업속보 클릭 OK'); } catch(e) {}
     }
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // 당일매출조회 클릭 — 모든 프레임에서 시도
     const clickDailySales = async () => {
       for(const frame of page.frames()) {
         const found = await frame.evaluate(() => {
+          // ID로 직접 찾기
           const el = document.getElementById('mf_wfm_side_gen_menu2_0_gen_menu3_2_btn_menu3');
           if(el) {
             let e = el;
             while(e && e !== document.body) { e.style.display='block'; e.style.visibility='visible'; e.style.opacity='1'; e=e.parentElement; }
             el.click(); return '당일매출조회(ID)';
           }
-          for(const a of document.querySelectorAll('a, span, div')) {
-            if(a.textContent.trim() === '당일매출조회') { a.click(); return '당일매출조회(text)'; }
+          // 텍스트로 찾기 (부분일치 포함)
+          for(const a of document.querySelectorAll('*')) {
+            const t = (a.childNodes.length===1&&a.childNodes[0].nodeType===3) ? a.textContent.trim() : '';
+            if(t === '당일매출조회') { a.click(); return `당일매출조회(text:${a.tagName})`; }
           }
-          return null;
+          // 키워드 포함된 링크 전체 목록 반환 (디버그)
+          const found = Array.from(document.querySelectorAll('a,span,td')).filter(e=>e.textContent.includes('매출')).map(e=>e.textContent.trim().substring(0,20));
+          return found.length ? `매출관련요소: ${found.slice(0,5).join('/')}` : null;
         }).catch(() => null);
-        if(found) { log(`  메뉴클릭: ${found} (frame: ${frame.url().split('/').pop().substring(0,40)})`); break; }
+        if(found) { log(`  [${frame.url().split('/').pop().substring(0,30)}] ${found}`); }
       }
     };
     await clickDailySales();
