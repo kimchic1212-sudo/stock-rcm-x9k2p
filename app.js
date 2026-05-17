@@ -117,6 +117,7 @@ const PROMOTIONS_PATH = "promotions.json";
 const SALES_GUIDE_PATH = "sales_guide_v2.json";
 const SALES_HISTORY_PATH = "sales_history.json";
 const SALES_DEDUCT_PATH = "sales.json";
+const DISPLAY_PATH = "display_items.json";
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 // 기본 GitHub 설정 (어떤 기기에서도 설정 없이 바로 작동)
@@ -149,6 +150,8 @@ function findPromoForCode(code) {
 } 
 let SALES_HISTORY = { meta: {}, items: {} };
 let SALES_DEDUCTIONS = null;
+// DP(전시) 관리: { "품번": { "260": { since: "2026-05-17" }, "265": { since: "..." } } }
+let DISPLAY_ITEMS = {};
 let visibleCount=60;
 let CURRENT_META = null;
 let CURRENT_PRODUCT = null;
@@ -514,7 +517,7 @@ function showPosSyncGuide(status) {
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} };
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; DISPLAY_ITEMS = cached.displayItems || {};
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
       const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
       setupQuickActionBar();
@@ -524,7 +527,7 @@ async function loadData(force = false){
       return;
   }
   try {
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes] = await Promise.all([
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
           fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
@@ -532,7 +535,8 @@ async function loadData(force = false){
           fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + DISPLAY_PATH + "?t=" + Date.now()).catch(()=>null)
       ]);
       const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
@@ -542,8 +546,9 @@ async function loadData(force = false){
       if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
       if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
+      if(diRes && diRes.ok) DISPLAY_ITEMS = await diRes.json(); else DISPLAY_ITEMS = {};
 
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, _timestamp: Date.now() }));
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, displayItems: DISPLAY_ITEMS, _timestamp: Date.now() }));
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
       const _bar2 = $("#actionBtnsWrap"); if(_bar2) _bar2.dataset.setup = "0";
       setupQuickActionBar();
@@ -554,6 +559,81 @@ async function loadData(force = false){
 }
 
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+// ── DP 저장 ──────────────────────────────────────────────────────────
+async function saveDisplayItems() {
+  try {
+    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
+    let sha = null;
+    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) sha = (await r.json()).sha; } catch(e) {}
+    const body = { message: "dp: update display items", content: utf8ToB64(JSON.stringify(DISPLAY_ITEMS, null, 2)), branch: GH.branch };
+    if (sha) body.sha = sha;
+    await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    // 캐시 갱신
+    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+  } catch(err) { console.error("DP 저장 실패:", err); throw err; }
+}
+
+// DP 버튼 클릭 핸들러 (모달 내 즉시 UI 반영)
+window._toggleDPBtn = async (btn, code, size) => {
+  const isActive = btn.dataset.active === "1";
+  // 즉시 UI 반영
+  if (isActive) {
+    btn.dataset.active = "0";
+    btn.className = btn.className.replace(/bg-violet-\d+|bg-orange-\d+|border-violet-\d+|border-orange-\d+|text-white|text-orange-\d+/g, '');
+    btn.className += " bg-white border-gray-300 text-gray-600";
+    btn.innerHTML = `□ ${size}`;
+  } else {
+    btn.dataset.active = "1";
+    btn.className = btn.className.replace(/bg-white|border-gray-\d+|text-gray-\d+/g, '');
+    btn.className += " bg-violet-600 border-violet-600 text-white";
+    btn.innerHTML = `🏷️ ${size}`;
+  }
+  btn.disabled = true;
+  try {
+    await toggleDP(code, size);
+  } catch(e) {
+    alert("DP 저장 실패: " + e.message);
+    // 원상복구
+    btn.dataset.active = isActive ? "1" : "0";
+  } finally {
+    btn.disabled = false;
+    if (window.lucide) lucide.createIcons();
+  }
+  // DP 현황 레이블 갱신
+  const dpSizes = getDPSizes(code);
+  const label = document.querySelector('#dpSizeBtns')?.previousElementSibling?.querySelector('span:last-child');
+  if (label) {
+    label.textContent = dpSizes.length > 0 ? `DP 중: ${dpSizes.join('·')}` : '미DP';
+  }
+};
+
+// DP 등록/해제 토글
+async function toggleDP(code, size) {
+  const now = new Date().toISOString().split('T')[0];
+  if (!DISPLAY_ITEMS[code]) DISPLAY_ITEMS[code] = {};
+  if (DISPLAY_ITEMS[code][size]) {
+    delete DISPLAY_ITEMS[code][size];
+    if (Object.keys(DISPLAY_ITEMS[code]).length === 0) delete DISPLAY_ITEMS[code];
+  } else {
+    DISPLAY_ITEMS[code][size] = { since: now };
+  }
+  await saveDisplayItems();
+  render();
+}
+
+// 품번의 DP 사이즈 목록
+function getDPSizes(code) { return Object.keys(DISPLAY_ITEMS[code] || {}); }
+// DP 상태: 'dp'=DP중, 'soldDP'=DP+재고0, 'none'=미DP
+function getDPStatus(p) {
+  const dpSizes = getDPSizes(p.품번);
+  if (dpSizes.length === 0) return 'none';
+  const hasSoldDP = dpSizes.some(sz => {
+    const sObj = p.sizes.find(s => String(s.size).trim() === sz);
+    return sObj && sObj.busan <= 0;
+  });
+  return hasSoldDP ? 'soldDP' : 'dp';
+}
 
 // ── 판매 데이터 자동 갱신 (5분마다) ──────────────────────────────────
 let _lastSalesSync = 0;
@@ -2196,6 +2276,22 @@ function card(p){
     todaySoldBadge = `<span class="bg-orange-500 text-white px-2 py-0.5 rounded font-black text-[10px] shadow-sm">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
   }
 
+  // DP 배지
+  let dpBadge = "";
+  const _dpSizes = getDPSizes(p.품번);
+  if (_dpSizes.length > 0) {
+    const _dpSt = getDPStatus(p);
+    const _dpSizeLabel = _dpSizes.join('·');
+    if (_dpSt === 'soldDP') {
+      dpBadge = `<span class="bg-orange-100 text-orange-700 border border-orange-300 px-2 py-0.5 rounded font-black text-[10px]">⚠️ 품절DP ${_dpSizeLabel}</span>`;
+    } else {
+      dpBadge = `<span class="bg-violet-100 text-violet-700 border border-violet-300 px-2 py-0.5 rounded font-black text-[10px]">🏷️ DP ${_dpSizeLabel}</span>`;
+    }
+  }
+
+  // 이미지 없음 배지 (관리자 모드에서만)
+  const _noImgBadge = !IMAGES[p.shopNo || p.품번] ? `<span class="bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded font-black text-[10px]">📷 이미지없음</span>` : "";
+
   const productMemos = MEMOS.filter(m => m.code === p.품번);
   let memoHtml = "";
   if(productMemos.length > 0) {
@@ -2259,10 +2355,12 @@ function card(p){
     <div class="flex flex-col flex-1">
         <div class="flex flex-wrap gap-1.5 text-xs font-bold text-gray-500 mb-2.5 items-center">
             ${busanOnlyBadge}
+            ${dpBadge}
             ${salesSpeedBadge}
             ${rtChanceBadge}
             ${todaySoldBadge}
             ${promoBadge}
+            ${getFilters().noImage ? _noImgBadge : ""}
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
             <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
             <span class="${gBadgeClass}">${escapeHtml(gLabel)}</span>
@@ -2340,6 +2438,8 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"),
     todaySoldOnly: !!$$('button.chip[data-todaysold]').find(b=>b.dataset.active==="1"),
+    dpFilter: ($$('button.chip[data-dp]').find(b=>b.dataset.active==="1")||{}).dataset?.dp || "ALL",
+    noImage: !!$$('button.chip[data-noimage]').find(b=>b.dataset.active==="1"),
     sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
     sizeGear: $("#sizeSelGear") ? $("#sizeSelGear").value : "ALL",
@@ -2406,6 +2506,13 @@ function render(){
     if(f.memoOnly && !p.hasMemo) return false;
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
     if(f.todaySoldOnly && !(p.todaySold > 0)) return false;
+    if(f.dpFilter !== "ALL") {
+      const dpSt = getDPStatus(p);
+      if(f.dpFilter === "dp" && dpSt === 'none') return false;
+      if(f.dpFilter === "nodp" && dpSt !== 'none') return false;
+      if(f.dpFilter === "soldDP" && dpSt !== 'soldDP') return false;
+    }
+    if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
     
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
@@ -2771,6 +2878,22 @@ function openDetail(p){
   }
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
+  const _dpSizesModal = getDPSizes(p.품번);
+  const _dpSizeCheckboxes = p.sizes.map(s => {
+    const sz = String(s.size).trim();
+    const isDPed = _dpSizesModal.includes(sz);
+    const isSoldOut = s.busan <= 0;
+    const btnCls = isDPed
+      ? (isSoldOut ? "bg-orange-100 border-orange-400 text-orange-700" : "bg-violet-600 border-violet-600 text-white")
+      : "bg-white border-gray-300 text-gray-600 hover:border-violet-400";
+    const icon = isDPed ? (isSoldOut ? "⚠️" : "🏷️") : "□";
+    return `<button onclick="window._toggleDPBtn(this,'${p.품번}','${sz}')"
+      class="dp-size-btn px-3 py-1.5 rounded-lg border-2 font-black text-xs transition-all ${btnCls}"
+      data-dp-size="${sz}" data-code="${p.품번}" data-active="${isDPed?'1':'0'}">
+      ${icon} ${sz}${isSoldOut && isDPed ? '<span class="ml-1 text-[9px]">품절</span>' : ''}
+    </button>`;
+  }).join('');
+
   $("#detailBody").innerHTML = `
     <div class="overflow-x-auto w-full no-scrollbar pb-3">
         <table class="w-full min-w-[500px] text-sm sm:text-base bg-white rounded-xl border-hidden shadow-sm">
@@ -2786,12 +2909,12 @@ function openDetail(p){
         </thead>
         <tbody>
         ${p.sizes.map(s => {
-            let centerRtBtn = s.center > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
+            let centerRtBtn = s.center > 0
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
-            
-            let sinsaRtBtn = s.sinsa > 0 
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>` 
+
+            let sinsaRtBtn = s.sinsa > 0
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
@@ -2805,6 +2928,16 @@ function openDetail(p){
         }).join("")}
         </tbody>
         </table>
+    </div>
+
+    <div class="mt-3 mx-1 p-3 bg-violet-50 border border-violet-200 rounded-xl">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black text-violet-700 flex items-center gap-1.5">🏷️ DP 관리 <span class="text-[10px] font-bold text-violet-400">(탭으로 토글)</span></span>
+        ${_dpSizesModal.length > 0 ? `<span class="text-[11px] font-black text-violet-600 bg-violet-100 px-2 py-0.5 rounded">DP 중: ${_dpSizesModal.join('·')}</span>` : `<span class="text-[11px] text-violet-300 font-bold">미DP</span>`}
+      </div>
+      <div class="flex flex-wrap gap-2" id="dpSizeBtns">
+        ${_dpSizeCheckboxes}
+      </div>
     </div>
   `;
   
@@ -3115,6 +3248,9 @@ $("#resetAll").onclick=()=>{
     if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400'); }
     const todaySoldBtn = $('button.chip[data-todaysold]');
     if(todaySoldBtn) { todaySoldBtn.dataset.active = "0"; todaySoldBtn.classList.remove('ring-2', 'ring-orange-400'); }
+    $$('button.chip[data-dp]').forEach(b => { b.dataset.active = "0"; b.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
+    const noImgBtn = $('button.chip[data-noimage]');
+    if(noImgBtn) { noImgBtn.dataset.active = "0"; noImgBtn.classList.remove('ring-2','ring-gray-400'); }
 
     $("#sortSel").value="default";
     if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
@@ -3482,6 +3618,51 @@ window.addEventListener('DOMContentLoaded', () => {
             todayBtn.dataset.active = todayBtn.dataset.active === "1" ? "0" : "1";
             if(todayBtn.dataset.active === "1") todayBtn.classList.add('ring-2', 'ring-orange-400');
             else todayBtn.classList.remove('ring-2', 'ring-orange-400');
+            visibleCount=60; render();
+        });
+    }
+
+    // ── DP 필터 칩 그룹 ──────────────────────────────────────────────
+    if(stockBtn && !$('button.chip[data-dp="dp"]')) {
+        const dpGroup = [
+            { key: 'dp',     label: '🏷️ DP 중',   cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
+            { key: 'nodp',   label: '🔲 미DP',      cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
+            { key: 'soldDP', label: '⚠️ 품절DP',   cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
+        ];
+        const sep = document.createElement("span");
+        sep.className = "text-gray-300 text-xs font-bold px-1 self-center";
+        sep.textContent = "|";
+        stockBtn.parentNode.appendChild(sep);
+        dpGroup.forEach(({ key, label, cls }) => {
+            const btn = document.createElement("button");
+            btn.className = `chip ${cls} font-black`;
+            btn.dataset.dp = key;
+            btn.dataset.active = "0";
+            btn.innerHTML = label;
+            stockBtn.parentNode.appendChild(btn);
+            btn.addEventListener("click", () => {
+                saveHistoryState();
+                const alreadyActive = btn.dataset.active === "1";
+                $$('button.chip[data-dp]').forEach(b => { b.dataset.active = "0"; b.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
+                if (!alreadyActive) { btn.dataset.active = "1"; btn.classList.add('ring-2', key === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400'); }
+                visibleCount=60; render();
+            });
+        });
+    }
+
+    // ── 이미지 없음 필터 칩 ────────────────────────────────────────────
+    if(stockBtn && !$('button.chip[data-noimage]')) {
+        const noImgBtn = document.createElement("button");
+        noImgBtn.className = "chip !bg-gray-50 !text-gray-500 !border-gray-300 font-black";
+        noImgBtn.dataset.noimage = "1";
+        noImgBtn.dataset.active = "0";
+        noImgBtn.innerHTML = "📷 이미지없음";
+        stockBtn.parentNode.appendChild(noImgBtn);
+        noImgBtn.addEventListener("click", () => {
+            saveHistoryState();
+            noImgBtn.dataset.active = noImgBtn.dataset.active === "1" ? "0" : "1";
+            if(noImgBtn.dataset.active === "1") noImgBtn.classList.add('ring-2','ring-gray-400');
+            else noImgBtn.classList.remove('ring-2','ring-gray-400');
             visibleCount=60; render();
         });
     }
