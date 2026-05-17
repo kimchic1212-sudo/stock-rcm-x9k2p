@@ -1,1 +1,8 @@
-(empty)
+시작: 2026-05-17T07:30:28.152Z
+브라우저 시작 OK
+페이지 생성 OK
+goto OK: https://cloudposoffice.shinsegae.com/
+waitForResponse 등록 완료 → Enter
+selTodaySalesList 실패: page.waitForResponse: Timeout 35000ms exceeded while waiting for event "response"
+selItemSalesList #1 실패: page.waitForResponse: Timeout 35000ms exceeded while waiting for event "response"
+완료: 품번 0개
