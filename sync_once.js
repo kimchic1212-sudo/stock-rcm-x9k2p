@@ -1,7 +1,6 @@
 /**
  * RACEMENT POS Sync - GitHub Actions용
- * 발견: 로그인 후 sla003m(당일매출조회) 자동 로드됨 → 메뉴 클릭 불필요
- * 목표: selItemSalesList 응답 내용 로깅 + 파싱 수정
+ * page.route()로 selTodaySalesList / selItemSalesList 직접 인터셉트
  */
 const { chromium } = require('playwright');
 const https = require('https');
@@ -60,26 +59,25 @@ async function uploadSalesHistory(data, sha) {
     content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
     branch: CONFIG.ghBranch, ...(sha && { sha })
   });
-  if (res.status !== 200 && res.status !== 201) throw new Error(`GitHub 실패: ${res.status} / ${JSON.stringify(res.body)}`);
+  if (res.status !== 200 && res.status !== 201) throw new Error(`GitHub 실패: ${res.status}`);
 }
 
-async function uploadDebugFile(name, content, isBase64 = false) {
+async function uploadDebugFile(name, content) {
   const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
   const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
   const sha = cur.status === 200 ? cur.body.sha : undefined;
   await ghRequest('PUT', path, {
     message: `debug: ${name}`,
-    content: isBase64 ? content : Buffer.from(content).toString('base64'),
+    content: Buffer.from(content || '(empty)').toString('base64'),
     branch: CONFIG.ghBranch,
     ...(sha && { sha })
-  }).catch(e => log(`  debug 업로드 실패: ${e.message}`));
+  }).catch(e => log(`debug 업로드 실패: ${e.message}`));
 }
 
 async function fetchPOSSales() {
   const browser = await chromium.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
-           '--disable-gpu', '--window-size=1920,1080']
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
   });
   const context = await browser.newContext({
     locale: 'ko-KR',
@@ -89,67 +87,77 @@ async function fetchPOSSales() {
   const page = await context.newPage();
 
   const todayItems = {};
-  const pending    = [];
-  let tradeNos     = [];
+  let tradeNos = [];
   let apiCallCount = 0;
-  const debugLog   = [];  // 파싱 디버그용
+  const debugLog = [];
+  const itemPromises = [];
 
-  page.on('response', async response => {
-    const url = response.url();
-
-    if (url.includes('selTodaySalesList')) {
-      debugLog.push(`=== selTodaySalesList 응답 수신 (status: ${response.status()}) ===`);
+  // ── page.route()로 직접 인터셉트 ──────────────────────────
+  await page.route('**/selTodaySalesList', async route => {
+    debugLog.push('=== selTodaySalesList 인터셉트 ===');
+    try {
+      const response = await route.fetch();
+      const body = await response.text();
+      debugLog.push(`status: ${response.status()}`);
+      debugLog.push(`raw(300자): ${body.substring(0, 300)}`);
       try {
-        const text = await response.text();
-        debugLog.push(`raw(200자): ${text.substring(0, 200)}`);
-        const d = JSON.parse(text);
+        const d = JSON.parse(body);
         tradeNos = (d.dlt_result || []).map(t => t.TRADE_NO);
-        log(`selTodaySalesList: 거래 ${tradeNos.length}건`);
         debugLog.push(`keys: ${Object.keys(d).join(', ')}`);
         debugLog.push(`거래수: ${tradeNos.length}`);
-        if (d.dlt_result && d.dlt_result.length > 0) {
-          debugLog.push(`첫번째 거래: ${JSON.stringify(d.dlt_result[0])}`);
+        if (d.dlt_result && d.dlt_result[0]) {
+          debugLog.push(`첫거래: ${JSON.stringify(d.dlt_result[0])}`);
         }
-      } catch(e) {
-        debugLog.push(`파싱 오류: ${e.message}`);
-        log(`  selTodaySalesList 파싱 오류: ${e.message}`);
+        log(`selTodaySalesList: ${tradeNos.length}건`);
+      } catch(pe) {
+        debugLog.push(`JSON 파싱 실패: ${pe.message}`);
       }
+      await route.fulfill({ response });
+    } catch(e) {
+      debugLog.push(`route 오류: ${e.message}`);
+      await route.continue();
     }
+  });
 
-    if (url.includes('selItemSalesList')) {
-      apiCallCount++;
-      const callNum = apiCallCount;
-      debugLog.push(`=== selItemSalesList #${callNum} 응답 수신 (status: ${response.status()}) ===`);
-      const p = (async () => {
+  await page.route('**/selItemSalesList', async route => {
+    apiCallCount++;
+    const callNum = apiCallCount;
+    debugLog.push(`=== selItemSalesList #${callNum} 인터셉트 ===`);
+    const p = (async () => {
+      try {
+        const response = await route.fetch();
+        const body = await response.text();
+        debugLog.push(`status: ${response.status()}`);
+        debugLog.push(`raw(300자): ${body.substring(0, 300)}`);
         try {
-          const text = await response.text();
-          debugLog.push(`raw(200자): ${text.substring(0, 200)}`);
-          const d = JSON.parse(text);
+          const d = JSON.parse(body);
           const items = d.dlt_item || d.dltItem || d.items || d.list || [];
           debugLog.push(`keys: ${Object.keys(d).join(', ')}`);
-          debugLog.push(`items 배열 길이: ${items.length}`);
-          if (items.length > 0) {
-            debugLog.push(`첫번째 아이템: ${JSON.stringify(items[0])}`);
-          }
+          debugLog.push(`items: ${items.length}개`);
+          if (items[0]) debugLog.push(`첫아이템: ${JSON.stringify(items[0])}`);
+
           for (const item of items) {
             if (item.NSALES_YN === 'Y') continue;
-            const nm = item.ITEM_NM || item.itemNm || item.ITEM_NAME || item.itemName || '';
-            debugLog.push(`  ITEM_NM: "${nm}" / NSALES_YN: ${item.NSALES_YN} / SALES_QTY: ${item.SALES_QTY}`);
+            const nm = item.ITEM_NM || item.itemNm || item.ITEM_NAME || '';
             const m = nm.match(/\[([^\],]+),\s*([^\]]+)\]/);
-            if (!m) { debugLog.push(`    → 정규식 불일치`); continue; }
+            if (!m) { debugLog.push(`  불일치: "${nm}"`); continue; }
             const code = m[1].trim(), size = m[2].trim();
-            const qty  = Math.abs(parseInt(item.SALES_QTY || item.salesQty) || 1);
-            if (!todayItems[code])       todayItems[code] = {};
+            const qty = Math.abs(parseInt(item.SALES_QTY || item.salesQty) || 1);
+            if (!todayItems[code]) todayItems[code] = {};
             if (!todayItems[code][size]) todayItems[code][size] = 0;
             todayItems[code][size] += qty;
-            debugLog.push(`    → 수집: ${code} / ${size} / ${qty}개`);
+            debugLog.push(`  수집: ${code}/${size}/${qty}개`);
           }
-        } catch(e) {
-          debugLog.push(`오류: ${e.message}`);
+        } catch(pe) {
+          debugLog.push(`JSON 파싱 실패: ${pe.message}`);
         }
-      })();
-      pending.push(p);
-    }
+        await route.fulfill({ response });
+      } catch(e) {
+        debugLog.push(`route 오류: ${e.message}`);
+        await route.continue();
+      }
+    })();
+    itemPromises.push(p);
   });
 
   try {
@@ -168,66 +176,50 @@ async function fetchPOSSales() {
     await page.locator('input[type="password"]').first().fill(CONFIG.posPw);
     await page.keyboard.press('Enter');
 
-    // ── 로그인 후 sla003m 자동 로드 대기 ──
-    // 발견: 로그인 후 당일매출조회 페이지(sla003m)가 자동 로드됨
-    log('sla003m 자동 로드 대기...');
-    await Promise.race([
-      page.waitForResponse(r => r.url().includes('selTodaySalesList'), { timeout: 25000 }),
-      page.waitForTimeout(25000)
-    ]).catch(() => {});
+    // ── selTodaySalesList 자동 로드 대기 (최대 30초) ──
+    log('selTodaySalesList 대기...');
+    await page.waitForURL(u => !u.includes('login'), { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(15000);  // sla003m 완전 로드 대기
 
-    log(`로그인+자동로드 완료. 거래 ${tradeNos.length}건`);
+    log(`로드 완료. 거래 ${tradeNos.length}건 / API ${apiCallCount}회`);
 
-    // ── 첫 selItemSalesList도 대기 ──
-    await Promise.race([
-      page.waitForResponse(r => r.url().includes('selItemSalesList'), { timeout: 10000 }),
-      page.waitForTimeout(10000)
-    ]).catch(() => {});
-    await page.waitForTimeout(1000);
-
-    // ── 행 순차 클릭 (나머지 거래 수집) ──
-    const totalRows = tradeNos.length;
-    log(`행 클릭 시작: ${totalRows}건`);
-
-    if (totalRows > 1) {
-      // 테이블 첫 행 클릭해서 포커스 잡기
+    // ── 나머지 행 클릭 ──
+    if (tradeNos.length > 1) {
       const tableInfo = await page.evaluate(() =>
         Array.from(document.querySelectorAll('table')).map((t, i) => ({
-          i, ths: t.querySelectorAll('thead th,thead td').length,
-          rows: t.querySelectorAll('tbody tr').length
+          i, rows: t.querySelectorAll('tbody tr').length,
+          ths: t.querySelectorAll('thead th,thead td').length
         }))
       );
       debugLog.push(`tables: ${JSON.stringify(tableInfo)}`);
       const main = tableInfo.find(t => t.ths >= 4 && t.rows >= 1)
                  || tableInfo.reduce((b, t) => (!b || t.rows > b.rows) ? t : b, null);
       const mainIdx = main?.i ?? 0;
-
       const rowsLoc = page.locator('table').nth(mainIdx).locator('tbody tr');
-      const bbox    = await rowsLoc.nth(0).boundingBox().catch(() => null);
+      const bbox = await rowsLoc.nth(0).boundingBox().catch(() => null);
       if (bbox) {
         await page.mouse.click(bbox.x + bbox.width / 2, bbox.y + bbox.height / 2);
-        log('  첫 행 클릭');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(800);
       }
-      for (let i = 1; i < totalRows; i++) {
+      for (let i = 1; i < tradeNos.length; i++) {
         await page.keyboard.press('ArrowDown');
         await page.waitForTimeout(700);
       }
     }
 
-    await Promise.all(pending);
-    await uploadDebugFile('parse_debug.txt', debugLog.join('\n'));
-    log(`수집 완료: API ${apiCallCount}회 / ${Object.keys(todayItems).length}개 품번`);
-    log(`파싱 디버그 → debug/parse_debug.txt 업로드 완료`);
+    await Promise.all(itemPromises);
+    log(`수집 완료: ${Object.keys(todayItems).length}개 품번`);
 
   } finally {
+    await uploadDebugFile('parse_debug.txt', debugLog.join('\n'));
+    log(`디버그 업로드 완료 (${debugLog.length}줄)`);
     await browser.close();
   }
   return todayItems;
 }
 
 (async () => {
-  log('=== POS 동기화 시작 (GitHub Actions) ===');
+  log('=== POS 동기화 시작 ===');
   try {
     const todayItems = await fetchPOSSales();
     const codes = Object.keys(todayItems);
@@ -252,7 +244,7 @@ async function fetchPOSSales() {
     };
     await uploadSalesHistory(history, sha);
     const total = Object.values(todayItems).reduce((s, sz) => s + Object.values(sz).reduce((a,b)=>a+b,0), 0);
-    log(`완료! ${codes.length}품번 / ${total}개 -> GitHub 반영`);
+    log(`완료! ${codes.length}품번 / ${total}개`);
     process.exit(0);
   } catch(err) {
     log(`오류: ${err.message}`);
