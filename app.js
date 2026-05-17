@@ -576,35 +576,16 @@ async function saveDisplayItems() {
 
 // DP 버튼 클릭 핸들러 (모달 내 즉시 UI 반영)
 window._toggleDPBtn = async (btn, code, size) => {
-  const isActive = btn.dataset.active === "1";
-  // 즉시 UI 반영
-  if (isActive) {
-    btn.dataset.active = "0";
-    btn.className = btn.className.replace(/bg-violet-\d+|bg-orange-\d+|border-violet-\d+|border-orange-\d+|text-white|text-orange-\d+/g, '');
-    btn.className += " bg-white border-gray-300 text-gray-600";
-    btn.innerHTML = `□ ${size}`;
-  } else {
-    btn.dataset.active = "1";
-    btn.className = btn.className.replace(/bg-white|border-gray-\d+|text-gray-\d+/g, '');
-    btn.className += " bg-violet-600 border-violet-600 text-white";
-    btn.innerHTML = `🏷️ ${size}`;
-  }
-  btn.disabled = true;
+  // 버튼 비활성화 (중복 클릭 방지)
+  $$('#dpSizeBtns button').forEach(b => b.disabled = true);
   try {
     await toggleDP(code, size);
+    // 패널 전체 재렌더링
+    if (window._dpRenderFn) window._dpRenderFn();
+    if (window.lucide) lucide.createIcons();
   } catch(e) {
     alert("DP 저장 실패: " + e.message);
-    // 원상복구
-    btn.dataset.active = isActive ? "1" : "0";
-  } finally {
-    btn.disabled = false;
-    if (window.lucide) lucide.createIcons();
-  }
-  // DP 현황 레이블 갱신
-  const dpSizes = getDPSizes(code);
-  const label = document.querySelector('#dpSizeBtns')?.previousElementSibling?.querySelector('span:last-child');
-  if (label) {
-    label.textContent = dpSizes.length > 0 ? `DP 중: ${dpSizes.join('·')}` : '미DP';
+    $$('#dpSizeBtns button').forEach(b => b.disabled = false);
   }
 };
 
@@ -2878,22 +2859,6 @@ function openDetail(p){
   }
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
-  const _dpSizesModal = getDPSizes(p.품번);
-  const _dpSizeCheckboxes = p.sizes.map(s => {
-    const sz = String(s.size).trim();
-    const isDPed = _dpSizesModal.includes(sz);
-    const isSoldOut = s.busan <= 0;
-    const btnCls = isDPed
-      ? (isSoldOut ? "bg-orange-100 border-orange-400 text-orange-700" : "bg-violet-600 border-violet-600 text-white")
-      : "bg-white border-gray-300 text-gray-600 hover:border-violet-400";
-    const icon = isDPed ? (isSoldOut ? "⚠️" : "🏷️") : "□";
-    return `<button onclick="window._toggleDPBtn(this,'${p.품번}','${sz}')"
-      class="dp-size-btn px-3 py-1.5 rounded-lg border-2 font-black text-xs transition-all ${btnCls}"
-      data-dp-size="${sz}" data-code="${p.품번}" data-active="${isDPed?'1':'0'}">
-      ${icon} ${sz}${isSoldOut && isDPed ? '<span class="ml-1 text-[9px]">품절</span>' : ''}
-    </button>`;
-  }).join('');
-
   $("#detailBody").innerHTML = `
     <div class="overflow-x-auto w-full no-scrollbar pb-3">
         <table class="w-full min-w-[500px] text-sm sm:text-base bg-white rounded-xl border-hidden shadow-sm">
@@ -2930,15 +2895,6 @@ function openDetail(p){
         </table>
     </div>
 
-    <div class="mt-3 mx-1 p-3 bg-violet-50 border border-violet-200 rounded-xl">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-black text-violet-700 flex items-center gap-1.5">🏷️ DP 관리 <span class="text-[10px] font-bold text-violet-400">(탭으로 토글)</span></span>
-        ${_dpSizesModal.length > 0 ? `<span class="text-[11px] font-black text-violet-600 bg-violet-100 px-2 py-0.5 rounded">DP 중: ${_dpSizesModal.join('·')}</span>` : `<span class="text-[11px] text-violet-300 font-bold">미DP</span>`}
-      </div>
-      <div class="flex flex-wrap gap-2" id="dpSizeBtns">
-        ${_dpSizeCheckboxes}
-      </div>
-    </div>
   `;
   
   let stickyFooterHtml = `
@@ -3154,6 +3110,45 @@ function openDetail(p){
       }
     </div>`;
   $("#detailBody").appendChild(_salesDiv);
+
+  // ── DP 관리 패널 ────────────────────────────────────────────────────
+  const _dpSizesModal = getDPSizes(p.품번);
+  const _dpDiv = document.createElement("div");
+  _dpDiv.className = "px-3 pb-3";
+  _dpDiv.id = "dpPanel";
+  const _renderDPPanel = () => {
+    const dpSizes = getDPSizes(p.품번);
+    const sizeCheckboxes = p.sizes.map(s => {
+      const sz = String(s.size).trim();
+      const isDPed = dpSizes.includes(sz);
+      const isSoldOut = s.busan <= 0;
+      let btnCls = isDPed
+        ? (isSoldOut ? "bg-orange-100 border-orange-400 text-orange-700" : "bg-violet-600 border-violet-600 text-white")
+        : "bg-white border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600";
+      const icon = isDPed ? (isSoldOut ? "⚠️" : "🏷️") : "□";
+      const soldLabel = (isSoldOut && isDPed) ? ` <span class="text-[9px] opacity-70">품절</span>` : "";
+      return `<button onclick="window._toggleDPBtn(this,'${p.품번}','${sz}')"
+        class="dp-size-btn px-3 py-1.5 rounded-lg border-2 font-black text-xs transition-all ${btnCls}"
+        data-dp-size="${sz}" data-code="${p.품번}" data-active="${isDPed?'1':'0'}">
+        ${icon} ${sz}${soldLabel}
+      </button>`;
+    }).join('');
+    _dpDiv.innerHTML = `
+      <div class="rounded-xl border border-violet-200 bg-violet-50 p-3">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-xs font-black text-violet-700 flex items-center gap-1.5">🏷️ DP 관리
+            <span class="text-[10px] font-normal text-violet-400">눌러서 등록/해제</span>
+          </span>
+          <span id="dpStatusLabel" class="text-[11px] font-black px-2 py-0.5 rounded ${dpSizes.length > 0 ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-400'}">
+            ${dpSizes.length > 0 ? `🏷️ DP 중: ${dpSizes.join('·')}` : '미DP'}
+          </span>
+        </div>
+        <div class="flex flex-wrap gap-2" id="dpSizeBtns">${sizeCheckboxes}</div>
+      </div>`;
+  };
+  _renderDPPanel();
+  window._dpRenderFn = _renderDPPanel;
+  $("#detailBody").appendChild(_dpDiv);
 
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
 
