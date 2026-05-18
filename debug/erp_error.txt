@@ -1,4 +1,5 @@
-2026-05-18T05:05:41.420Z
-browserContext.waitForEvent: Timeout 30000ms exceeded while waiting for event "download"
-browserContext.waitForEvent: Timeout 30000ms exceeded while waiting for event "download"
-    at runErpSync (C:\Users\ajoo\Downloads\POS_SYNC\erp_sync.js:386:37)
+2026-05-18T05:22:18.246Z
+Excel download timed out - check 05_after_search.png
+Error: Excel download timed out - check 05_after_search.png
+    at downloadExcel (C:\Users\ajoo\Downloads\POS_SYNC\erp_sync.js:292:9)
+    at async runErpSync (C:\Users\ajoo\Downloads\POS_SYNC\erp_sync.js:413:28)
