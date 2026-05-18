@@ -1383,7 +1383,7 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
-    TRANSFERS.push({ id: trId, code: code, product: p.품명, date: shortDate, size: size, qty: qty, memo: finalMemo });
+    TRANSFERS.push({ id: trId, code: code, product: p.품명, shopNo: p.shopNo || "", date: shortDate, size: size, qty: qty, memo: finalMemo });
     
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
         .then(r => r.json())
@@ -1418,7 +1418,11 @@ window.exportTransfersToExcel = () => {
         alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요.");
         const s = document.createElement('script'); s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'; document.head.appendChild(s); return;
     }
-    const wsData = TRANSFERS.map(t => ({ "요청일자": t.date, "품번": t.code, "품명": t.product, "사이즈": t.size, "수량": t.qty, "메모": t.memo }));
+    const wsData = TRANSFERS.map(t => {
+        // shopNo: 저장돼 있으면 그대로, 없으면 PRODUCTS에서 역참조
+        const shopNo = t.shopNo || (PRODUCTS.find(p => p.품번 === t.code)?.shopNo) || "";
+        return { "요청일자": t.date, "품목내부코드": shopNo, "품번": t.code, "품명": t.product, "사이즈": t.size, "수량": t.qty, "메모": t.memo };
+    });
     const ws = XLSX.utils.json_to_sheet(wsData);
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "이동요청목록");
     const d = new Date();
