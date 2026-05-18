@@ -1,0 +1,4 @@
+2026-05-18T05:00:00.934Z
+page.waitForTimeout: Target page, context or browser has been closed
+page.waitForTimeout: Target page, context or browser has been closed
+    at runErpSync (C:\Users\ajoo\Downloads\POS_SYNC\erp_sync.js:276:18)
