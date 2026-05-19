@@ -2509,7 +2509,7 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"),
     todaySoldOnly: !!$$('button.chip[data-todaysold]').find(b=>b.dataset.active==="1"),
-    dpFilter: ($$('button.chip[data-dp]').find(b=>b.dataset.active==="1")||{}).dataset?.dp || "ALL",
+    dpFilters: $$('button.chip[data-dp]').filter(b=>b.dataset.active==="1").map(b=>b.dataset.dp),
     noImage: !!$$('button.chip[data-noimage]').find(b=>b.dataset.active==="1"),
     sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
@@ -2577,11 +2577,15 @@ function render(){
     if(f.memoOnly && !p.hasMemo) return false;
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
     if(f.todaySoldOnly && !(p.todaySold > 0)) return false;
-    if(f.dpFilter !== "ALL") {
+    if(f.dpFilters.length > 0) {
       const dpSt = getDPStatus(p);
-      if(f.dpFilter === "dp" && dpSt === 'none') return false;
-      if(f.dpFilter === "nodp" && dpSt !== 'none') return false;
-      if(f.dpFilter === "soldDP" && dpSt !== 'soldDP') return false;
+      const match = f.dpFilters.some(filter => {
+        if(filter === "dp")     return dpSt !== 'none';
+        if(filter === "nodp")   return dpSt === 'none';
+        if(filter === "soldDP") return dpSt === 'soldDP';
+        return false;
+      });
+      if(!match) return false;
     }
     if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
     
@@ -3728,8 +3732,13 @@ window.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener("click", () => {
                 saveHistoryState();
                 const alreadyActive = btn.dataset.active === "1";
-                $$('button.chip[data-dp]').forEach(b => { b.dataset.active = "0"; b.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
-                if (!alreadyActive) { btn.dataset.active = "1"; btn.classList.add('ring-2', key === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400'); }
+                if (alreadyActive) {
+                    btn.dataset.active = "0";
+                    btn.classList.remove('ring-2','ring-violet-400','ring-orange-400');
+                } else {
+                    btn.dataset.active = "1";
+                    btn.classList.add('ring-2', key === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400');
+                }
                 visibleCount=60; render();
             });
         });
