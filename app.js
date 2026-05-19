@@ -1418,13 +1418,67 @@ window.exportTransfersToExcel = () => {
         alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요.");
         const s = document.createElement('script'); s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'; document.head.appendChild(s); return;
     }
-    const wsData = TRANSFERS.map(t => {
-        // shopNo: 저장돼 있으면 그대로, 없으면 PRODUCTS에서 역참조
+
+    // ── 이동요청리스트 양식에 맞게 출력 ──
+    // 행 구성: A열(빈칸), B~L열 데이터
+    const aoa = [];
+
+    // Row1: 빈 행
+    aoa.push(Array(12).fill(''));
+
+    // Row2: 타이틀 (B2, B2:L2 병합)
+    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '']);
+
+    // Row3: 헤더
+    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '품명', '규격', '품명(규격)', '요청수량', '물류센터재고', '매장재고', '단위이상']);
+
+    // Row4+: 데이터
+    TRANSFERS.forEach(t => {
         const shopNo = t.shopNo || (PRODUCTS.find(p => p.품번 === t.code)?.shopNo) || "";
-        return { "요청일자": t.date, "품목내부코드": shopNo, "품번": t.code, "품명": t.product, "사이즈": t.size, "수량": t.qty, "메모": t.memo };
+        // 품번 + 사이즈로 재고 조회
+        const prod = PRODUCTS.find(p => p.품번 === t.code && String(p.규격 || '').trim() === String(t.size || '').trim());
+        const wms   = prod ? (Number(prod['물류센터']) || 0) : '';
+        const store = prod ? (Number(prod['매장 (부산)']) || 0) : '';
+        const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
+        aoa.push([
+            '',                            // A (빈칸)
+            '',                            // B: ERP이동요청번호 (본사 입력)
+            t.date,                        // C: 요청일
+            shopNo,                        // D: 품목내부코드
+            t.code,                        // E: 품번
+            t.product,                     // F: 품명
+            t.size,                        // G: 규격
+            `${t.product}(${t.size})`,    // H: 품명(규격)
+            t.qty,                         // I: 요청수량
+            wms,                           // J: 물류센터재고
+            store,                         // K: 매장재고
+            diff,                          // L: 단위이상
+        ]);
     });
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "이동요청목록");
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // B2:L2 병합
+    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 11 } }];
+
+    // 열 너비
+    ws['!cols'] = [
+        { wch: 2 },   // A
+        { wch: 16 },  // B ERP이동요청번호
+        { wch: 18 },  // C 요청일
+        { wch: 10 },  // D 품목내부코드
+        { wch: 22 },  // E 품번
+        { wch: 30 },  // F 품명
+        { wch: 7 },   // G 규격
+        { wch: 35 },  // H 품명(규격)
+        { wch: 10 },  // I 요청수량
+        { wch: 12 },  // J 물류센터재고
+        { wch: 10 },  // K 매장재고
+        { wch: 10 },  // L 단위이상
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "이동요청리스트");
     const d = new Date();
     XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
 };
