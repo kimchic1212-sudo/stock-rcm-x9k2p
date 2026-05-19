@@ -648,8 +648,32 @@ async function loadSalesOnly() {
     console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
   } catch(e) {}
 }
-// 5분마다 자동 갱신
+// 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
 setInterval(loadSalesOnly, 5 * 60 * 1000);
+
+// ── POS 동기화 자동 트리거 ──────────────────────────────────
+// GitHub Actions cron이 throttle 되는 문제 보완:
+// 앱이 열려있는 동안 10분마다 workflow_dispatch로 직접 트리거
+let _lastPosTrigger = 0;
+async function autoTriggerPosSync() {
+    if (!getPat()) return; // PAT 없으면 skip
+    const now = Date.now();
+    // 마지막 트리거로부터 9분 이상 경과 시에만 실행 (중복 방지)
+    if (now - _lastPosTrigger < 9 * 60 * 1000) return;
+    _lastPosTrigger = now;
+    try {
+        const r = await fetch(
+            `https://api.github.com/repos/${GH.owner}/${GH.repo}/actions/workflows/pos_sync.yml/dispatches`,
+            { method: 'POST', headers: { Authorization: 'Bearer ' + getPat(), 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: GH.branch }) }
+        );
+        if (r.status === 204) console.log('[POS AutoSync] triggered at', new Date().toLocaleTimeString());
+    } catch(e) { console.log('[POS AutoSync] failed:', e.message); }
+}
+// 앱 시작 2분 후 첫 트리거, 이후 10분마다 반복
+setTimeout(() => {
+    autoTriggerPosSync();
+    setInterval(autoTriggerPosSync, 10 * 60 * 1000);
+}, 2 * 60 * 1000);
 
 // ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
 const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 수석 러닝 슈즈 애널리스트입니다.
