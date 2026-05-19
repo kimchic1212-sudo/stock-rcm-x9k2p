@@ -1,7 +1,7 @@
-시작: 2026-05-19T10:44:03.433Z
+시작: 2026-05-19T10:48:38.881Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17791874568021388.654421981278
+[RES] 200 login.xml&postfix=17791877330033257.123253172478
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 32건
+selTodaySalesList: 33건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"34044","ITEM_NM":"마인드 001 [HQ4307-300, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 32건
+메뉴 클릭 후 거래: 33건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"34047","ITEM_NM":"마인드 001 [HQ4307-300, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -142,4 +142,8 @@ selTodaySalesList: 32건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":280000,"ITEM_CD":"31433","ITEM_NM":"에어로 글라이드 4 그래블 [L49174800, 270]","SALES_AMT":252000,"NET_SALES_AMT"
   파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"24353","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 4]","SALES_AMT":36450,"NET_SALES_AMT":33136,
+  파싱 성공: 1건
 완료: 품번 38개
