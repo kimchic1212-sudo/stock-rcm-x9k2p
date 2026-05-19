@@ -458,47 +458,19 @@ function applyMeta(meta){
 }
 
 function showPosSyncGuide(status) {
-    const guides = {
-        ok: {
-            title: '✅ POS 연동 정상',
-            color: 'emerald',
-            body: `오늘 POS 판매 데이터가 정상 동기화 중입니다.<br><br>
-<b>현재 상태</b><br>
-• GitHub Actions가 5분마다 자동 동기화 중<br>
-• 오늘 판매분이 부산 재고에 실시간 반영 중<br>
-• 노트북을 안 켜도 자동으로 작동합니다 ✅<br><br>
-<span class="text-gray-500 text-xs">문제 발생 시: <a href="https://github.com/kimchic1212-sudo/stock-rcm-x9k2p/actions" target="_blank" class="underline">GitHub Actions 확인</a></span>`
-        },
-        stale: {
-            title: '⚠️ POS 미갱신 — 조치 필요',
-            color: 'yellow',
-            body: `오늘 POS 데이터가 아직 동기화되지 않았습니다.<br><br>
-<b>GitHub Actions 확인</b><br>
-1. <a href="https://github.com/kimchic1212-sudo/stock-rcm-x9k2p/actions" target="_blank" class="underline font-bold">GitHub Actions 페이지</a> 열기<br>
-2. POS Sync 최근 실행 결과 확인<br>
-3. ❌ 실패 시 클릭해서 오류 내용 확인<br><br>
-<b>영업 시간 중이라면</b><br>
-• 5~10분 후 자동 반영됩니다<br>
-• 별도로 실행할 프로그램 없음 ✅`
-        },
-        none: {
-            title: '🔌 POS 미연동 — 설정 필요',
-            color: 'gray',
-            body: `아직 오늘 POS 판매 데이터가 없습니다.<br><br>
-<b>GitHub Actions 자동 동기화 중</b><br>
-• 노트북을 안 켜도 5분마다 자동으로 실행됩니다<br>
-• 별도로 실행할 프로그램 없음 ✅<br><br>
-<b>확인 방법</b><br>
-1. <a href="https://github.com/kimchic1212-sudo/stock-rcm-x9k2p/actions" target="_blank" class="underline font-bold">GitHub Actions 페이지</a>에서 실행 기록 확인<br>
-2. 오늘 판매가 발생하면 자동으로 뱃지가 초록색으로 바뀝니다`
-        }
-    };
-    const g = guides[status];
     const colorMap = {
         emerald: 'bg-emerald-50 border-emerald-200 text-emerald-800',
         yellow:  'bg-yellow-50 border-yellow-300 text-yellow-900',
         gray:    'bg-gray-50 border-gray-200 text-gray-700'
     };
+    const titles = {
+        ok:    '⚡ POS 판매 연동',
+        stale: '⚠️ POS 미갱신',
+        none:  '🔌 POS 판매 없음'
+    };
+    const colors = { ok: 'emerald', stale: 'yellow', none: 'gray' };
+    const g = { title: titles[status], color: colors[status] };
+
     const existing = document.getElementById('posSyncGuideModal');
     if (existing) existing.remove();
     const modal = document.createElement('div');
@@ -508,11 +480,47 @@ function showPosSyncGuide(status) {
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 relative">
             <button onclick="document.getElementById('posSyncGuideModal').remove()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl font-black">✕</button>
             <div class="${colorMap[g.color]} border rounded-xl px-4 py-3 mb-4 text-sm font-black">${g.title}</div>
-            <div class="text-sm text-gray-700 leading-relaxed">${g.body}</div>
+            <div class="text-sm text-gray-700 leading-relaxed mb-4">
+                POS 판매 데이터를 지금 바로 불러옵니다.<br>
+                <span class="text-gray-400 text-xs">신세계 스파로스 POS → GitHub 자동 업로드 (약 2~3분 소요)</span>
+            </div>
+            <button id="posSyncNowBtn" onclick="window.triggerPosSync()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> 지금 동기화
+            </button>
+            <div id="posSyncNowResult" class="mt-3 text-xs text-center text-gray-400"></div>
         </div>`;
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
     document.body.appendChild(modal);
+    if (window.lucide) lucide.createIcons();
 }
+
+window.triggerPosSync = async () => {
+    const btn = document.getElementById('posSyncNowBtn');
+    const result = document.getElementById('posSyncNowResult');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> 실행 중...';
+    result.textContent = '';
+    try {
+        const r = await fetch(
+            `https://api.github.com/repos/${GH.owner}/${GH.repo}/actions/workflows/pos_sync.yml/dispatches`,
+            { method: 'POST', headers: { Authorization: 'Bearer ' + getPat(), 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: GH.branch }) }
+        );
+        if (r.status === 204) {
+            btn.innerHTML = '✅ 동기화 요청 완료!';
+            btn.className = btn.className.replace('bg-blue-600 hover:bg-blue-700', 'bg-emerald-500');
+            result.textContent = '약 2~3분 후 판매 데이터가 업데이트됩니다.';
+        } else {
+            throw new Error(`status ${r.status}`);
+        }
+    } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> 다시 시도';
+        btn.className = btn.className.replace('bg-blue-600 hover:bg-blue-700', 'bg-red-500 hover:bg-red-600');
+        result.textContent = '오류: ' + e.message;
+        if (window.lucide) lucide.createIcons();
+    }
+};
 
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
