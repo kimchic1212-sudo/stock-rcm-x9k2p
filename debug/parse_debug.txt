@@ -1,7 +1,7 @@
-시작: 2026-05-19T02:50:21.145Z
+시작: 2026-05-19T08:30:53.312Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17791590338718360.374265455697
+[RES] 200 login.xml&postfix=17791794667895322.449095979148
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,82 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 19건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"34044","ITEM_NM":"마인드 001 [HQ4307-300, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 19건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"34047","ITEM_NM":"마인드 001 [HQ4307-300, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 2건
-완료: 품번 2개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"17439","ITEM_NM":"펄사 벨트 [LC2179800, S]","SALES_AMT":40500,"NET_SALES_AMT":36818,"VAT_A
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26592","ITEM_NM":"아디제로 EVO SL [JH6206, 255]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"21420","ITEM_NM":"보메로 플러스 [HV8150-003, 270]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":10800,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":10800,"NET_SALES_AMT":
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"31871","ITEM_NM":"001A [001A-HORIZON-M, 280]","SALES_AMT":399000,"NET_SALES_AMT":3627
+  파싱 성공: 4건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":35100,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":28080,"NET_SALES_AMT":
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":269000,"ITEM_CD":"33057","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 255]","SALES_AMT":242100,"NET_SALES_AMT":2200
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":98000,"ITEM_CD":"15775","ITEM_NM":"에어 후디 [C25SS-H01-CREAM, XL]","SALES_AMT":78400,"NET_SALES_AMT":71273
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-249000,"ITEM_CD":"34337","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 260]","SALES_AMT":-249000,"NET_SALES_AMT":-226
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34337","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 260]","SALES_AMT":229000,"NET_SALES_AMT":208182,
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-249000,"ITEM_CD":"34337","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 260]","SALES_AMT":-229000,"NET_SALES_AMT":-208
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":204100,"ITEM_CD":"34337","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 260]","SALES_AMT":204100,"NET_SALES_AMT":185545,
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"34022","ITEM_NM":"라이트웨이트 런 크루 [IB6114-407, M]","SALES_AMT":19800,"NET_SALES_AMT":18000
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29236","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 280]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"33673","ITEM_NM":"ACG 드라이핏 UV 솔라 체이스 롱슬리브 후드 [IF1442-020, M]","SALES_AMT":103500,"NET
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30851","ITEM_NM":"마인드 001 [HQ4307-600, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33518","ITEM_NM":"ACG 제가마 트레일 [HV8115-103, 250]","SALES_AMT":153300,"NET_SALES_AMT":1
+  파싱 성공: 2건
+완료: 품번 26개
