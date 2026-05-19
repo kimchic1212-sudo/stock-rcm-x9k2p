@@ -1,7 +1,7 @@
-시작: 2026-05-18T22:12:21.326Z
+시작: 2026-05-19T02:50:21.145Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17791423563407916.030847110719
+[RES] 200 login.xml&postfix=17791590338718360.374265455697
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,6 +12,14 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 0건
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+selTodaySalesList: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"34044","ITEM_NM":"마인드 001 [HQ4307-300, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"34047","ITEM_NM":"마인드 001 [HQ4307-300, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 2건
+완료: 품번 2개
