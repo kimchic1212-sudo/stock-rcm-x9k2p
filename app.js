@@ -2599,28 +2599,24 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
   if (window.lucide) lucide.createIcons();
 }
 
-// 카테고리+속도 퀵필터 (패널에서 클릭 시 → 패널 닫고 카드 그리드 표시)
+// 카테고리+속도 퀵필터 (패널 유지 + 카드 그리드 필터)
 window._quickFilter = (cat, speed) => {
   saveHistoryState();
-  window._salesSummaryDismissed = true;
-  const _panel = $("#salesSummaryPanel");
-  if (_panel) _panel.classList.add("hidden");
+  // 패널은 닫지 않고 유지
   $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === cat ? '1' : '0'));
   _clearAllFilterChips();
   $$('button.chip[data-salesspeed]').forEach(b => b.dataset.active = (b.dataset.salesspeed === speed ? '1' : '0'));
   // 핫셀러/보통 필터 시 판매량 내림차순 정렬
   if (speed === 'hot' || speed === 'normal') { if($("#sortSel")) $("#sortSel").value = "salesDesc"; }
   visibleCount = 120; render();
+  // 패널 아래 그리드로 스크롤
   setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
 };
 
-// 특정 품번 퀵필터 (패널 품목 클릭 시 → 해당 제품만 표시)
+// 특정 품번 퀵필터 (패널 품목 클릭 시 → 패널 유지 + 해당 제품만 그리드 표시)
 window._quickFilterProduct = (code) => {
   saveHistoryState();
-  window._salesSummaryDismissed = true;
-  const _panel = $("#salesSummaryPanel");
-  if (_panel) _panel.classList.add("hidden");
-  // 카테고리·성별·필터 초기화 후 품번 검색
+  // 패널은 닫지 않고 유지
   $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === 'ALL' ? '1' : '0'));
   $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === 'ALL' ? '1' : '0'));
   _clearAllFilterChips();
