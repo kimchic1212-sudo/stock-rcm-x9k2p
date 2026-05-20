@@ -45,36 +45,50 @@ async function sendTelegram(text) {
   }
 }
 
-// ── Playwright로 전체 상품 수집 ────────────────────────────
+// ── Playwright로 SALE 카테고리 전체 수집 ───────────────────
 async function getAllProducts() {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
-  const page = await browser.newPage();
+  const all = [];
 
-  // 사이트 접속으로 세션/쿠키 확보
-  await page.goto('https://racement.co.kr', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
+  async function fetchPage(pageNum) {
+    const page = await browser.newPage();
+    let items = [], total = 0;
+    // 브라우저 요청을 가로채서 pageSize=100, pageNumber 변경
+    await page.route('**/products/search**', async route => {
+      let url = route.request().url();
+      url = url.replace(/pageSize=\d+/, 'pageSize=100').replace(/pageNumber=\d+/, `pageNumber=${pageNum}`);
+      if (!url.includes('hasTotalCount')) url += '&hasTotalCount=true';
+      await route.continue({ url });
+    });
+    await new Promise(resolve => {
+      page.on('response', async resp => {
+        if (resp.url().includes('products/search') && resp.url().includes('categoryNos=933747')) {
+          try {
+            const j = await resp.json();
+            if (j.items) { items = j.items; total = j.totalCount || 0; resolve(); }
+          } catch(e) {}
+        }
+      });
+      page.goto('https://racement.co.kr/products?categoryNo=933747', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
+      setTimeout(resolve, 25000);
+    });
+    await page.close();
+    console.log(`Page ${pageNum}: ${items.length} / ${total}`);
+    return { items, total };
+  }
 
-  // 브라우저 컨텍스트 내에서 API 전체 페이지 수집 (IP 제한 우회)
-  const all = await page.evaluate(async () => {
-    const CLIENT_ID = 'rc1WMJc07cwefntDdmOCoQ==';
-    const results = [];
-    let pageNum = 1;
-    while (true) {
-      const r = await fetch(
-        `https://shop-api.e-ncp.com/products?pageSize=100&pageNumber=${pageNum}&hasTotalCount=true&saleStatusType=ON_SALE`,
-        { headers: { clientId: CLIENT_ID, Accept: 'application/json' } }
-      );
-      const data = await r.json();
-      if (!data.items || data.items.length === 0) break;
-      results.push(...data.items);
-      if (data.totalCount && results.length >= data.totalCount) break;
-      pageNum++;
-    }
-    return results;
-  });
+  const first = await fetchPage(1);
+  all.push(...first.items);
+  const totalPages = Math.ceil(first.total / 100);
+  for (let p = 2; p <= totalPages; p++) {
+    const { items } = await fetchPage(p);
+    all.push(...items);
+  }
 
   await browser.close();
-  console.log(`Total products collected: ${all.length}`);
-  return all;
+  const unique = Object.values(all.reduce((acc, p) => { acc[p.productNo]=p; return acc; }, {}));
+  console.log(`Total unique collected: ${unique.length}`);
+  return unique;
 }
 
 // ── 숫자 포맷 ──────────────────────────────────────────────
