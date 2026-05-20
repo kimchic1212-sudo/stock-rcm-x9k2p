@@ -1136,7 +1136,7 @@ function setupQuickActionBar() {
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
         </button>
-        <button id="salesSummaryBtn" onclick="window._salesSummaryDismissed=false;renderSalesSummaryPanel();const _sp=document.getElementById('salesSummaryPanel');if(_sp){_sp.classList.remove('hidden');_sp.scrollIntoView({behavior:'smooth',block:'start'});}" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-red-600 transition-colors whitespace-nowrap">
+        <button id="salesSummaryBtn" onclick="const _sp=document.getElementById('salesSummaryPanel');if(_sp&&!_sp.classList.contains('hidden')){window._salesSummaryDismissed=true;_sp.classList.add('hidden');}else{window._salesSummaryDismissed=false;renderSalesSummaryPanel();if(_sp){_sp.classList.remove('hidden');_sp.scrollIntoView({behavior:'smooth',block:'start'});}}" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-red-600 transition-colors whitespace-nowrap">
             <i data-lucide="flame" class="w-3.5 h-3.5"></i><span>핫셀러 현황</span>
         </button>
         ${hasPromo ? `
