@@ -3736,6 +3736,14 @@ window.addEventListener('DOMContentLoaded', () => {
                     btn.dataset.active = "0";
                     btn.classList.remove('ring-2','ring-violet-400','ring-orange-400');
                 } else {
+                    // dp ↔ nodp 상호 배타: 반대 칩 해제
+                    if (key === 'dp') {
+                        const nodpBtn = $$('button.chip[data-dp]').find(b => b.dataset.dp === 'nodp');
+                        if (nodpBtn) { nodpBtn.dataset.active = "0"; nodpBtn.classList.remove('ring-2','ring-violet-400','ring-orange-400'); }
+                    } else if (key === 'nodp') {
+                        const dpBtn = $$('button.chip[data-dp]').find(b => b.dataset.dp === 'dp');
+                        if (dpBtn) { dpBtn.dataset.active = "0"; dpBtn.classList.remove('ring-2','ring-violet-400','ring-orange-400'); }
+                    }
                     btn.dataset.active = "1";
                     btn.classList.add('ring-2', key === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400');
                 }
