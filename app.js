@@ -2559,8 +2559,9 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
   const colHtml = cats.map(cat => {
     const g = grouped[cat];
     const hotItems = g.hot.slice(0, 8).map(({ p, d7 }) =>
-      `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilter('${cat}','hot')">
+      `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
         <span class="font-black text-[11px] text-gray-800 flex-1 truncate">${escapeHtml(p.품명)}</span>
+        <span class="text-[9px] text-gray-400 font-mono shrink-0 mr-0.5">${escapeHtml(String(p.품번))}</span>
         <span class="shrink-0 text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">7일 ${d7}개</span>
       </div>`
     ).join('');
@@ -2601,16 +2602,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 // 카테고리+속도 퀵필터 (패널에서 클릭 시 → 패널 닫고 카드 그리드 표시)
 window._quickFilter = (cat, speed) => {
   saveHistoryState();
-  // 패널 닫기
   window._salesSummaryDismissed = true;
   const _panel = $("#salesSummaryPanel");
   if (_panel) _panel.classList.add("hidden");
-  // 카테고리 칩 선택
   $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === cat ? '1' : '0'));
-  // 속도 칩 선택
+  _clearAllFilterChips();
   $$('button.chip[data-salesspeed]').forEach(b => b.dataset.active = (b.dataset.salesspeed === speed ? '1' : '0'));
+  // 핫셀러/보통 필터 시 판매량 내림차순 정렬
+  if (speed === 'hot' || speed === 'normal') { if($("#sortSel")) $("#sortSel").value = "salesDesc"; }
   visibleCount = 120; render();
-  // 그리드로 스크롤
+  setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+};
+
+// 특정 품번 퀵필터 (패널 품목 클릭 시 → 해당 제품만 표시)
+window._quickFilterProduct = (code) => {
+  saveHistoryState();
+  window._salesSummaryDismissed = true;
+  const _panel = $("#salesSummaryPanel");
+  if (_panel) _panel.classList.add("hidden");
+  // 카테고리·성별·필터 초기화 후 품번 검색
+  $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === 'ALL' ? '1' : '0'));
+  $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === 'ALL' ? '1' : '0'));
+  _clearAllFilterChips();
+  const qEl = $("#q");
+  if (qEl) qEl.value = String(code);
+  visibleCount = 120; render();
   setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
 };
 
@@ -3401,20 +3417,31 @@ $$('button[id^="close"]').forEach(btn => {
     btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
 });
 
+// 필터 칩 전체 해제 헬퍼 (카테고리·성별·브랜드 제외, 단일선택 그룹)
+function _clearAllFilterChips() {
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(x => x.dataset.active = "0");
+    const bb = $('button.chip[data-busanonly]');
+    if (bb) { bb.dataset.active = "0"; bb.classList.remove('ring-2','ring-blue-400'); }
+    const tb = $('button.chip[data-todaysold]');
+    if (tb) { tb.dataset.active = "0"; tb.classList.remove('ring-2','ring-orange-400'); }
+}
+
 $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-busanonly], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.addEventListener("click",()=>{
     saveHistoryState();
-    if(b.dataset.cat) { $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
-    else if(b.dataset.gender) { $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0")); }
-    else if(b.dataset.salesspeed) {
-        // 판매속도: 같은 버튼 다시 누르면 해제, 다른 버튼 누르면 단일 선택
+    if(b.dataset.cat) {
+        // 카테고리: 단일선택 (성별과 조합 가능)
+        $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0"));
+    } else if(b.dataset.gender) {
+        // 성별: 단일선택 (카테고리와 조합 가능)
+        $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0"));
+    } else {
+        // 나머지 필터칩: 단일선택 (하나만 활성화)
         const isActive = b.dataset.active === "1";
-        $$('button.chip[data-salesspeed]').forEach(x=>x.dataset.active="0");
-        if(!isActive) b.dataset.active = "1";
-    }
-    else { b.dataset.active = b.dataset.active==="1" ? "0" : "1"; }
-    if(b.dataset.busanonly) {
-        if(b.dataset.active === "1") b.classList.add('ring-2', 'ring-blue-400');
-        else b.classList.remove('ring-2', 'ring-blue-400');
+        _clearAllFilterChips();
+        if (!isActive) {
+            b.dataset.active = "1";
+            if(b.dataset.busanonly) b.classList.add('ring-2', 'ring-blue-400');
+        }
     }
     visibleCount=60; render();
 }));
@@ -3833,14 +3860,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     btn.dataset.active = "0";
                     btn.classList.remove('ring-2','ring-violet-400','ring-orange-400');
                 } else {
-                    // dp ↔ nodp 상호 배타: 반대 칩 해제
-                    if (key === 'dp') {
-                        const nodpBtn = $$('button.chip[data-dp]').find(b => b.dataset.dp === 'nodp');
-                        if (nodpBtn) { nodpBtn.dataset.active = "0"; nodpBtn.classList.remove('ring-2','ring-violet-400','ring-orange-400'); }
-                    } else if (key === 'nodp') {
-                        const dpBtn = $$('button.chip[data-dp]').find(b => b.dataset.dp === 'dp');
-                        if (dpBtn) { dpBtn.dataset.active = "0"; dpBtn.classList.remove('ring-2','ring-violet-400','ring-orange-400'); }
-                    }
+                    // DP 칩: 완전 단일선택 (3개 모두 상호 배타)
+                    $$('button.chip[data-dp]').forEach(x => { x.dataset.active = "0"; x.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
                     btn.dataset.active = "1";
                     btn.classList.add('ring-2', key === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400');
                 }
