@@ -2,8 +2,13 @@ name: Price Monitor
 
 on:
   schedule:
-    - cron: '0 * * * *'  # 매시 정각 (UTC) = 한국 매시+9
+    - cron: '0 2 * * *'   # 매일 KST 11:00 (UTC 02:00)
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'summary = 전체 할인 현황 | changes = 변동분만'
+        required: false
+        default: 'changes'
 
 jobs:
   check_prices:
@@ -15,11 +20,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check prices & notify
+      - name: Run price report
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: node price_check.js
+          REPORT_MODE: ${{ github.event.inputs.mode || 'changes' }}
+        run: node price_report.js
 
       - name: Save updated prices
         run: |
