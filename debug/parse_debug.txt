@@ -1,7 +1,7 @@
-시작: 2026-05-20T06:20:41.035Z
+시작: 2026-05-20T06:26:21.307Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17792580556313594.380845805629
+[RES] 200 login.xml&postfix=17792583953058204.99298463263
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 10건
+selTodaySalesList: 12건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-40500,"ITEM_CD":"24353","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 4]","SALES_AMT":-36450,"NET_SALES_AMT":-33
   파싱 성공: 1건
-메뉴 클릭 후 거래: 10건
+메뉴 클릭 후 거래: 12건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"24353","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 4]","SALES_AMT":36450,"NET_SALES_AMT":33136,
@@ -54,4 +54,12 @@ selTodaySalesList: 10건
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29700,"ITEM_CD":"18199","ITEM_NM":"프로 마라톤 삭스 V2.0 [PRO MARATHON SOCKS V2.0-BLACK.WHITE, T1]","SALES_AMT
   파싱 성공: 7건
-완료: 품번 18개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":81000,"ITEM_CD":"24353","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 4]","SALES_AMT":81000,"NET_SALES_AMT":73636,
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":204100,"ITEM_CD":"34363","ITEM_NM":"하이퍼부스트 엣지 [KK0288, 285]","SALES_AMT":204100,"NET_SALES_AMT":185545,
+  파싱 성공: 1건
+완료: 품번 19개
