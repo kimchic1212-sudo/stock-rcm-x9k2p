@@ -49,32 +49,31 @@ async function sendTelegram(text) {
 async function getAllProducts() {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   const page = await browser.newPage();
-  const all = [];
 
-  page.on('response', async resp => {
-    const url = resp.url();
-    if (url.includes('e-ncp.com/products') && url.includes('pageSize') && !url.includes('review') && !url.includes('inquir') && !url.includes('coupon')) {
-      try {
-        const json = await resp.json();
-        if (json.items && json.items.length > 0 && json.totalCount > 0) {
-          all.push(...json.items);
-          process.stdout.write(`\rProducts collected: ${all.length}/${json.totalCount}`);
-        }
-      } catch(e) {}
+  // 사이트 접속으로 세션/쿠키 확보
+  await page.goto('https://racement.co.kr', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
+
+  // 브라우저 컨텍스트 내에서 API 전체 페이지 수집 (IP 제한 우회)
+  const all = await page.evaluate(async () => {
+    const CLIENT_ID = 'rc1WMJc07cwefntDdmOCoQ==';
+    const results = [];
+    let pageNum = 1;
+    while (true) {
+      const r = await fetch(
+        `https://shop-api.e-ncp.com/products?pageSize=100&pageNumber=${pageNum}&hasTotalCount=true&saleStatusType=ON_SALE`,
+        { headers: { clientId: CLIENT_ID, Accept: 'application/json' } }
+      );
+      const data = await r.json();
+      if (!data.items || data.items.length === 0) break;
+      results.push(...data.items);
+      if (data.totalCount && results.length >= data.totalCount) break;
+      pageNum++;
     }
+    return results;
   });
 
-  // 메인 페이지 로드 → 첫 배치 수집
-  await page.goto('https://racement.co.kr/products', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
-
-  // 추가 페이지 API 직접 호출 (중복 제거용 map 사용)
-  const seen = new Set(all.map(p => p.productNo));
-
-  // SALE 카테고리 전용 수집 (할인 상품 확실히 포함)
-  await page.goto('https://racement.co.kr/products?categoryNo=933747', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
-
   await browser.close();
-  console.log(`\nTotal unique collected: ${all.length}`);
+  console.log(`Total products collected: ${all.length}`);
   return all;
 }
 
