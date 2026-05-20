@@ -1462,7 +1462,7 @@ window.exportTransfersToExcel = () => {
     aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '']);
 
     // Row3: 헤더
-    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '품명', '규격', '품명(규격)', '요청수량', '물류센터재고', '매장재고', '단위이상']);
+    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '품명', '규격', '품명', '요청수량', '물류센터재고', '매장재고', '단위이상']);
 
     // Row4+: 데이터
     TRANSFERS.forEach(t => {
@@ -1475,7 +1475,7 @@ window.exportTransfersToExcel = () => {
         aoa.push([
             '',                            // A (빈칸)
             '',                            // B: ERP이동요청번호 (본사 입력)
-            t.date,                        // C: 요청일
+            t.date ? t.date.slice(0, 10) : '',  // C: 요청일 (날짜만)
             shopNo,                        // D: 품목내부코드
             t.code,                        // E: 품번
             t.product,                     // F: 품명
@@ -1493,21 +1493,17 @@ window.exportTransfersToExcel = () => {
     // B2:L2 병합
     ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 11 } }];
 
-    // 열 너비
-    ws['!cols'] = [
-        { wch: 2 },   // A
-        { wch: 16 },  // B ERP이동요청번호
-        { wch: 18 },  // C 요청일
-        { wch: 10 },  // D 품목내부코드
-        { wch: 22 },  // E 품번
-        { wch: 30 },  // F 품명
-        { wch: 7 },   // G 규격
-        { wch: 35 },  // H 품명(규격)
-        { wch: 10 },  // I 요청수량
-        { wch: 12 },  // J 물류센터재고
-        { wch: 10 },  // K 매장재고
-        { wch: 10 },  // L 단위이상
-    ];
+    // 열 너비 — 각 열의 최대 글자 수 기준 자동 계산
+    const colCount = 12;
+    const colWidths = Array(colCount).fill(4);
+    aoa.forEach(row => {
+        row.forEach((cell, ci) => {
+            const len = String(cell ?? '').length;
+            if (len > colWidths[ci]) colWidths[ci] = len;
+        });
+    });
+    colWidths[0] = 2; // A열 고정
+    ws['!cols'] = colWidths.map(w => ({ wch: Math.min(w + 2, 40) }));
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "이동요청리스트");
