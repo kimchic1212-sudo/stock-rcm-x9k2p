@@ -176,6 +176,10 @@
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
         </button>
       </div>
+      <!-- DP / 이미지 필터 행 (JS가 채움) -->
+      <div id="dpFilterRow" class="flex flex-wrap gap-1.5 items-center hidden">
+        <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">DP</span>
+      </div>
       <!-- 브랜드 검색 + 정렬 + 중복체크 -->
       <div class="flex gap-1.5 items-center">
         <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">브랜드</span>
@@ -197,6 +201,9 @@
 </section>
 
 <main id="results" class="mx-auto max-w-7xl px-4 sm:px-6 mt-4 mb-6">
+  <!-- 판매 현황 요약 패널 (JS가 채움) -->
+  <div id="salesSummaryPanel" class="mb-3 hidden"></div>
+
   <div id="emptyState" class="card p-12 text-center hidden">
     <div class="text-xl font-black mb-2">데이터 없음</div>
     <div class="text-sm text-gray-500">우측 상단 ADMIN에서 엑셀을 업로드해주세요.</div>
