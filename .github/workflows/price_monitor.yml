@@ -1,0 +1,30 @@
+name: Price Monitor
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 매시 정각 (UTC) = 한국 매시+9
+  workflow_dispatch:
+
+jobs:
+  check_prices:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check prices & notify
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node price_check.js
+
+      - name: Save updated prices
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add prices.json
+          git diff --staged --quiet || git commit -m "prices: $(date -u +%Y-%m-%d\ %H:%M)"
+          git push
