@@ -1135,6 +1135,9 @@ function setupQuickActionBar() {
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
         </button>
+        <button id="salesSummaryBtn" onclick="_salesSummaryDismissed=false;renderSalesSummaryPanel([]);const p=document.getElementById('salesSummaryPanel');if(p)p.classList.remove('hidden');" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-indigo-700 transition-colors whitespace-nowrap">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i><span>판매 현황</span>
+        </button>
         ${hasPromo ? `
         <button id="promoViewBtn" onclick="window.togglePromoView(this)" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-purple-700 transition-colors whitespace-nowrap" data-active="0">
             <i data-lucide="gift" class="w-3.5 h-3.5"></i><span>기획전</span>
@@ -2328,8 +2331,8 @@ function card(p){
   // 판매 속도 뱃지
   const _cardSales = getSalesSummary(p.품번);
   let salesSpeedBadge = "";
-  if(_cardSales.d7 >= 5)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
-  else if(_cardSales.d7 >= 2) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
+  if(_cardSales.d7 >= 3)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
+  else if(_cardSales.d7 >= 1) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
 
   // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
   let rtChanceBadge = "";
@@ -2517,10 +2520,99 @@ function getFilters(){
   };
 }
 
+// ── 판매 현황 요약 패널 (카테고리별 핫셀러/보통/저조) ───────────────
+let _salesSummaryDismissed = false;
+function renderSalesSummaryPanel(filteredList) {
+  const panel = $("#salesSummaryPanel");
+  if (!panel || _salesSummaryDismissed) return;
+
+  const cats = ['신발', '의류', '용품'];
+  const catEmoji = { '신발': '👟', '의류': '👕', '용품': '🎒' };
+
+  // 카테고리별로 hot/normal/slow 분류
+  const grouped = {};
+  cats.forEach(c => { grouped[c] = { hot: [], normal: [], slow: [] }; });
+
+  PRODUCTS.forEach(p => {
+    const cat = p.카테고리;
+    if (!grouped[cat]) return;
+    const s = getSalesSummary(p.품번);
+    if (s.d7 >= 3) grouped[cat].hot.push({ p, d7: s.d7 });
+    else if (s.d7 >= 1) grouped[cat].normal.push({ p, d7: s.d7 });
+    else if (s.all > 0) grouped[cat].slow.push({ p, d7: s.d7 });
+  });
+
+  // hot 내림차순 정렬
+  cats.forEach(c => {
+    grouped[c].hot.sort((a, b) => b.d7 - a.d7);
+    grouped[c].normal.sort((a, b) => b.d7 - a.d7);
+  });
+
+  const totalHot = cats.reduce((s, c) => s + grouped[c].hot.length, 0);
+  const totalNormal = cats.reduce((s, c) => s + grouped[c].normal.length, 0);
+
+  if (totalHot + totalNormal === 0) { panel.classList.add("hidden"); return; }
+  panel.classList.remove("hidden");
+
+  // 각 카테고리 칼럼 HTML 생성
+  const colHtml = cats.map(cat => {
+    const g = grouped[cat];
+    const hotItems = g.hot.slice(0, 8).map(({ p, d7 }) =>
+      `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilter('${cat}','hot')">
+        <span class="font-black text-[11px] text-gray-800 flex-1 truncate">${escapeHtml(p.품명)}</span>
+        <span class="shrink-0 text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">7일 ${d7}개</span>
+      </div>`
+    ).join('');
+
+    const remainHot = g.hot.length > 8 ? `<div class="text-[10px] text-gray-400 font-bold px-1 pt-0.5 cursor-pointer hover:text-red-500" onclick="window._quickFilter('${cat}','hot')">+ ${g.hot.length - 8}개 더</div>` : '';
+
+    return `
+    <div class="flex-1 min-w-0 bg-white rounded-xl border border-gray-100 shadow-sm p-2.5 flex flex-col gap-1.5">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-xs font-black text-gray-700">${catEmoji[cat]} ${cat}</span>
+        <div class="flex gap-1">
+          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','hot')">🔥 ${g.hot.length}</span>
+          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','normal')">📈 ${g.normal.length}</span>
+          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-200 hover:bg-gray-400 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','slow')">📦 ${g.slow.length}</span>
+        </div>
+      </div>
+      ${g.hot.length > 0 ? `<div class="space-y-0.5">${hotItems}${remainHot}</div>` : `<div class="text-[10px] text-gray-300 font-bold text-center py-2">핫셀러 없음</div>`}
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden bg-gray-50">
+      <div class="flex items-center justify-between px-3 py-2 bg-white border-b border-gray-100">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black text-gray-800">📊 판매 현황 요약</span>
+          <span class="text-[10px] text-gray-400 font-bold">(7일 기준)</span>
+          <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-50 text-red-500">🔥 핫셀러 ${totalHot}개</span>
+          <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">📈 보통 ${totalNormal}개</span>
+        </div>
+        <button onclick="_salesSummaryDismissed=true;document.getElementById('salesSummaryPanel').classList.add('hidden')" class="text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+      </div>
+      <div class="flex gap-2 p-2">${colHtml}</div>
+    </div>`;
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// 카테고리+속도 퀵필터
+window._quickFilter = (cat, speed) => {
+  saveHistoryState();
+  // 카테고리 칩 선택
+  $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === cat ? '1' : '0'));
+  // 속도 칩 선택
+  $$('button.chip[data-salesspeed]').forEach(b => b.dataset.active = (b.dataset.salesspeed === speed ? '1' : '0'));
+  visibleCount = 120; render();
+  // 그리드로 스크롤
+  setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
+};
+
 function render(){
-  const grid = $("#grid"); 
-  
-  if(!RAW.length) { 
+  const grid = $("#grid");
+
+  if(!RAW.length) {
       grid.innerHTML = "";
       $("#emptyState").classList.remove("hidden"); 
       $("#results").classList.add("hidden"); 
@@ -2663,6 +2755,9 @@ function render(){
           $("#moreWrap").classList.add("hidden");
       }
   }
+
+  // 판매 현황 요약 패널 갱신
+  renderSalesSummaryPanel(filteredList);
 
   if(window.lucide) lucide.createIcons();
 }
@@ -2914,7 +3009,7 @@ function getSalesSummary(code) {
     if(diffDays <= 7) d7 += qty;
   }
   const avgDay = Math.round((d30/30)*10)/10;
-  const speed = d7 >= 5 ? 'hot' : d7 >= 2 ? 'normal' : d7 > 0 ? 'slow' : 'none';
+  const speed = d7 >= 3 ? 'hot' : d7 >= 1 ? 'normal' : all > 0 ? 'slow' : 'none';
   const result = { d7, d30, all, avgDay, speed };
   _salesCache.set(code, result);
   return result;
@@ -3155,8 +3250,8 @@ function openDetail(p){
   const _totalStock = p.sizes.reduce((s, sz) => s + (sz.busan||0) + (sz.center||0) + (sz.sinsa||0), 0);
   const _daysLeft = _sales.avgDay > 0 ? Math.round(_totalStock / _sales.avgDay) : null;
   const _hasData = _sales.all > 0;
-  const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 5 ? '🔥 핫셀러' : _sales.d7 >= 2 ? '📈 보통' : '📦 저조';
-  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 5 ? 'text-red-500' : _sales.d7 >= 2 ? 'text-blue-500' : 'text-gray-400';
+  const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 3 ? '🔥 핫셀러' : _sales.d7 >= 1 ? '📈 보통' : '📦 저조';
+  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 3 ? 'text-red-500' : _sales.d7 >= 1 ? 'text-blue-500' : 'text-gray-400';
   // 같은 기준(누적 전체)으로 막대 비율 계산
   const _maxSales = Math.max(_sales.all, 1);
   const _bar7  = Math.min(100, Math.round((_sales.d7  / _maxSales) * 100));
@@ -3470,7 +3565,10 @@ window.renderSalesHistoryAdmin = () => {
                         for(let size in sessionData[code][date]) {
                             if(!newItems[code][date][size]) newItems[code][date][size] = {};
                             for(let mgr in sessionData[code][date][size]) {
-                                newItems[code][date][size][mgr] = (newItems[code][date][size][mgr] || 0) + sessionData[code][date][size][mgr];
+                                // Math.max 로 중복 업로드 방지 (같은 엑셀 2번 올려도 합산 안됨)
+                                const existing = newItems[code][date][size][mgr] || 0;
+                                const incoming = sessionData[code][date][size][mgr];
+                                newItems[code][date][size][mgr] = Math.max(existing, incoming);
                             }
                         }
                     }
@@ -3707,24 +3805,22 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── DP 필터 칩 그룹 ──────────────────────────────────────────────
-    if(stockBtn && !$('button.chip[data-dp="dp"]')) {
+    // ── DP 필터 칩 그룹 (전용 행에 배치) ─────────────────────────────
+    const dpFilterRow = $("#dpFilterRow");
+    if(dpFilterRow && !$('button.chip[data-dp="dp"]')) {
+        dpFilterRow.classList.remove("hidden");
         const dpGroup = [
             { key: 'dp',     label: '🏷️ DP 중',   cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
             { key: 'nodp',   label: '🔲 미DP',      cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
             { key: 'soldDP', label: '⚠️ 품절DP',   cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
         ];
-        const sep = document.createElement("span");
-        sep.className = "text-gray-300 text-xs font-bold px-1 self-center";
-        sep.textContent = "|";
-        stockBtn.parentNode.appendChild(sep);
         dpGroup.forEach(({ key, label, cls }) => {
             const btn = document.createElement("button");
             btn.className = `chip ${cls} font-black`;
             btn.dataset.dp = key;
             btn.dataset.active = "0";
             btn.innerHTML = label;
-            stockBtn.parentNode.appendChild(btn);
+            dpFilterRow.appendChild(btn);
             btn.addEventListener("click", () => {
                 saveHistoryState();
                 const alreadyActive = btn.dataset.active === "1";
@@ -3748,14 +3844,14 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── 이미지 없음 필터 칩 ────────────────────────────────────────────
-    if(stockBtn && !$('button.chip[data-noimage]')) {
+    // ── 이미지 없음 필터 칩 (DP 행에 함께) ───────────────────────────
+    if(dpFilterRow && !$('button.chip[data-noimage]')) {
         const noImgBtn = document.createElement("button");
         noImgBtn.className = "chip !bg-gray-50 !text-gray-500 !border-gray-300 font-black";
         noImgBtn.dataset.noimage = "1";
         noImgBtn.dataset.active = "0";
         noImgBtn.innerHTML = "📷 이미지없음";
-        stockBtn.parentNode.appendChild(noImgBtn);
+        dpFilterRow.appendChild(noImgBtn);
         noImgBtn.addEventListener("click", () => {
             saveHistoryState();
             noImgBtn.dataset.active = noImgBtn.dataset.active === "1" ? "0" : "1";
