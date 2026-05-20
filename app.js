@@ -89,10 +89,10 @@ style.innerHTML = `
     .brand-code { font-size: 11px; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .product-name { font-size: 13px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* 브랜드칩 영역 스크롤 */
-    #brandChips { max-height: 88px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ddd transparent; }
-    #brandChips::-webkit-scrollbar { width: 4px; }
-    #brandChips::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+    /* 브랜드칩 영역 — 가로 스크롤 단일행 */
+    #brandChips { overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap !important; scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent; padding-bottom: 2px; }
+    #brandChips::-webkit-scrollbar { height: 3px; }
+    #brandChips::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
     /* 브랜드 정렬 토글 활성 */
     .brand-sort-btn[data-active="1"] { background: var(--ink) !important; color: #fff !important; }
     .brand-sort-btn[data-active="0"] { background: var(--surface) !important; color: var(--muted) !important; }
@@ -1393,34 +1393,58 @@ async function loadChartJS() {
     });
 }
 
+// GitHub transfers 저장 (딜레이 후 저장, 연속 클릭 시 debounce)
+async function _saveTransfersToGH() {
+    try {
+        const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+        const j = await r.json();
+        const body = { message:"update transfers", content: utf8ToB64(JSON.stringify(TRANSFERS, null, 2)), branch: GH.branch, sha: j.sha };
+        await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    } catch(err) { console.error('transfers save error:', err); }
+}
+
 window.quickRT = async (code, size, fromStr, qty, btn) => {
     if(!checkPat()) return;
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
-    qty = Number(qty) || 1;
-    if(qty <= 0) return;
 
-    // iPad/iOS Safari 대응: this가 제대로 바인딩 안 될 때 더미 버튼으로 대체
+    // iPad/iOS Safari 대응
     if(!btn || !btn.tagName) {
         try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
         catch(e) { btn = document.createElement('button'); }
     }
 
+    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
+
+    // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
+    const existing = TRANSFERS.find(t => t.code === code && t.size === size && t.memo === finalMemo);
+    if (existing) {
+        existing.qty += 1;
+        // 버튼: 수량 표시 유지 (계속 클릭 가능)
+        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+        if(window.lucide) lucide.createIcons();
+        // debounce 저장 (800ms 내 추가 클릭이 없을 때 저장)
+        clearTimeout(window._rtSaveTimer);
+        window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
+        showToast(`📦 ${fromStr} → ${size} | ${existing.qty}개로 업데이트`);
+        return;
+    }
+
+    // ── 신규 이동요청 추가 ──
     const origHtml = btn.innerHTML;
     const origClass = btn.className;
-    
-    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
-    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+|text-\w+)/g, '') + ' bg-green-500 text-white cursor-default';
-    btn.disabled = true;
+
+    // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
+    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>1개`;
+    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
     if(window.lucide) lucide.createIcons();
 
     const trId = "tr_" + Date.now();
     const d = new Date();
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
-    TRANSFERS.push({ id: trId, code: code, product: p.품명, shopNo: p.shopNo || "", date: shortDate, size: size, qty: qty, memo: finalMemo });
-    
+    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", date: shortDate, size, qty: 1, memo: finalMemo });
+
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
         .then(r => r.json())
         .then(j => {
@@ -1428,22 +1452,17 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
             return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         }).catch(err => console.error(err));
 
-    showToast(`📦 ${fromStr}에서 ${size} 사이즈 ${qty}개 RT를 요청했습니다.`, async () => {
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
-        
+    showToast(`📦 ${fromStr} → ${size} 1개 RT요청 (한 번 더 누르면 +1개)`, async () => {
+        // 실행취소
         TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        await apiPromise; 
-        
+        await apiPromise;
         try {
             const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
             const j = await r.json();
             const body = { message:"undo smart transfer", content: utf8ToB64(JSON.stringify(TRANSFERS, null, 2)), branch: GH.branch, sha: j.sha };
             await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
         } catch(err) {}
-        
-        btn.innerHTML = origHtml;
-        btn.className = origClass;
-        btn.disabled = false;
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
         if(window.lucide) lucide.createIcons();
     });
 };
@@ -1471,24 +1490,25 @@ window.exportTransfersToExcel = () => {
     // Row4+: 데이터
     TRANSFERS.forEach(t => {
         const shopNo = t.shopNo || (PRODUCTS.find(p => p.품번 === t.code)?.shopNo) || "";
-        // 품번 + 사이즈로 재고 조회
-        const prod = PRODUCTS.find(p => p.품번 === t.code && String(p.규격 || '').trim() === String(t.size || '').trim());
-        const wms   = prod ? (Number(prod['물류센터']) || 0) : '';
-        const store = prod ? (Number(prod['매장 (부산)']) || 0) : '';
+        // 품번으로 제품 찾고 sizes 배열에서 해당 사이즈의 물류센터 재고 조회
+        const prod = PRODUCTS.find(p => p.품번 === t.code);
+        const sizeObj = prod?.sizes?.find(s => String(s.size).trim() === String(t.size || '').trim());
+        const wms   = sizeObj !== undefined ? (sizeObj.center || 0) : '';
+        const store = sizeObj !== undefined ? (sizeObj.busan  || 0) : '';
         const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
         aoa.push([
-            '',                            // A (빈칸)
-            '',                            // B: ERP이동요청번호 (본사 입력)
-            t.date ? t.date.slice(0, 10) : '',  // C: 요청일 (날짜만)
-            shopNo,                        // D: 품목내부코드
-            t.code,                        // E: 품번
-            t.product,                     // F: 품명
-            t.size,                        // G: 규격
-            `${t.product}(${t.size})`,    // H: 품명(규격)
-            t.qty,                         // I: 요청수량
-            wms,                           // J: 물류센터재고
-            store,                         // K: 매장재고
-            diff,                          // L: 단위이상
+            '',                                    // A (빈칸)
+            '',                                    // B: ERP이동요청번호 (본사 입력)
+            t.date ? t.date.split(' ')[0] : '',    // C: 요청일 (날짜만, 시간 제거)
+            shopNo,                                // D: 품목내부코드
+            t.code,                                // E: 품번
+            t.product,                             // F: 품명
+            t.size,                                // G: 규격
+            t.product,                             // H: 품명 (사이즈 미포함)
+            t.qty,                                 // I: 요청수량
+            wms,                                   // J: 물류센터재고
+            store,                                 // K: 매장재고(부산)
+            diff,                                  // L: 단위이상
         ]);
     });
 
