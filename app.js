@@ -306,7 +306,7 @@ function restoreHistoryState() {
     $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === state.gender ? "1" : "0"));
     const _restoredBrands = Array.isArray(state.brand) ? state.brand : (state.brand && state.brand !== "ALL" ? [state.brand] : []);
     window._activeBrands = new Set(_restoredBrands);
-    _renderBrandChips();
+    if(window._renderBrandChips) window._renderBrandChips();
     
     if($('button.chip[data-stock]')) $('button.chip[data-stock]').dataset.active = state.stock ? "1" : "0";
     if($('button.chip[data-fav]')) $('button.chip[data-fav]').dataset.active = state.favOnly ? "1" : "0";
@@ -1039,7 +1039,7 @@ function rebuildIndex(){
   // 멀티셀렉트 브랜드 Set 초기화
   if(!window._activeBrands) window._activeBrands = new Set();
 
-  // 브랜드 칩 렌더링 (멀티셀렉트)
+  // 브랜드 칩 렌더링 (멀티셀렉트) — 전역 노출로 resetAll 등에서 접근 가능
   const _renderBrandChips = (filterQ = "") => {
       const wrap = $("#brandChips");
       if(!wrap) return;
@@ -1099,6 +1099,7 @@ function rebuildIndex(){
           rb.appendChild(btn);
       });
   };
+  window._renderBrandChips = _renderBrandChips; // 전역 노출 (resetAll 등에서 사용)
 
   _renderBrandChips();
 
@@ -1135,8 +1136,8 @@ function setupQuickActionBar() {
 <button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
         </button>
-        <button id="salesSummaryBtn" onclick="_salesSummaryDismissed=false;renderSalesSummaryPanel([]);const p=document.getElementById('salesSummaryPanel');if(p)p.classList.remove('hidden');" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg text-indigo-700 transition-colors whitespace-nowrap">
-            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i><span>판매 현황</span>
+        <button id="salesSummaryBtn" onclick="window._salesSummaryDismissed=false;renderSalesSummaryPanel();const _sp=document.getElementById('salesSummaryPanel');if(_sp){_sp.classList.remove('hidden');_sp.scrollIntoView({behavior:'smooth',block:'start'});}" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-red-600 transition-colors whitespace-nowrap">
+            <i data-lucide="flame" class="w-3.5 h-3.5"></i><span>핫셀러 현황</span>
         </button>
         ${hasPromo ? `
         <button id="promoViewBtn" onclick="window.togglePromoView(this)" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-purple-700 transition-colors whitespace-nowrap" data-active="0">
@@ -2521,10 +2522,10 @@ function getFilters(){
 }
 
 // ── 판매 현황 요약 패널 (카테고리별 핫셀러/보통/저조) ───────────────
-let _salesSummaryDismissed = false;
-function renderSalesSummaryPanel(filteredList) {
+window._salesSummaryDismissed = true; // 처음엔 숨김, 버튼 클릭 시에만 표시
+function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (전체 PRODUCTS 기준)
   const panel = $("#salesSummaryPanel");
-  if (!panel || _salesSummaryDismissed) return;
+  if (!panel || window._salesSummaryDismissed) return;
 
   const cats = ['신발', '의류', '용품'];
   const catEmoji = { '신발': '👟', '의류': '👕', '용품': '🎒' };
@@ -2589,7 +2590,7 @@ function renderSalesSummaryPanel(filteredList) {
           <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-50 text-red-500">🔥 핫셀러 ${totalHot}개</span>
           <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">📈 보통 ${totalNormal}개</span>
         </div>
-        <button onclick="_salesSummaryDismissed=true;document.getElementById('salesSummaryPanel').classList.add('hidden')" class="text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+        <button onclick="window._salesSummaryDismissed=true;document.getElementById('salesSummaryPanel').classList.add('hidden')" class="text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
       </div>
       <div class="flex gap-2 p-2">${colHtml}</div>
     </div>`;
@@ -2597,16 +2598,20 @@ function renderSalesSummaryPanel(filteredList) {
   if (window.lucide) lucide.createIcons();
 }
 
-// 카테고리+속도 퀵필터
+// 카테고리+속도 퀵필터 (패널에서 클릭 시 → 패널 닫고 카드 그리드 표시)
 window._quickFilter = (cat, speed) => {
   saveHistoryState();
+  // 패널 닫기
+  window._salesSummaryDismissed = true;
+  const _panel = $("#salesSummaryPanel");
+  if (_panel) _panel.classList.add("hidden");
   // 카테고리 칩 선택
   $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === cat ? '1' : '0'));
   // 속도 칩 선택
   $$('button.chip[data-salesspeed]').forEach(b => b.dataset.active = (b.dataset.salesspeed === speed ? '1' : '0'));
   visibleCount = 120; render();
   // 그리드로 스크롤
-  setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
+  setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
 };
 
 function render(){
@@ -3420,7 +3425,7 @@ $("#resetAll").onclick=()=>{
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.dataset.active="0");
     window._activeBrands = new Set();
-    _renderBrandChips();
+    if(window._renderBrandChips) window._renderBrandChips();
     if($("#brandSearch")) { $("#brandSearch").value = ""; }
     if($("#sortSel")) { $("#sortSel").value = "default"; }
 
