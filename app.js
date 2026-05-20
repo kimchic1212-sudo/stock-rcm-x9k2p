@@ -960,10 +960,10 @@ function rebuildIndex(){
           createSel("sizeSelAp", "의류", generateSizeOptionsHtml(allSizesAp)) +
           createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear));
 
-      // 필터 row 다음, 브랜드 검색 row 앞에 삽입
+      // 필터 row 다음, 브랜드 행 앞에 삽입
       const filterDetails = $("#filterDetails");
-      const brandSearchRow = $("#brandSearch")?.parentNode?.parentNode;
-      if(filterDetails && brandSearchRow) filterDetails.insertBefore(container, brandSearchRow);
+      const brandSearchRow = $("#brandRow") || $("#brandSearch")?.parentNode?.parentNode;
+      if(filterDetails && brandSearchRow && brandSearchRow.parentNode === filterDetails) filterDetails.insertBefore(container, brandSearchRow);
       else if(filterDetails) filterDetails.appendChild(container);
 
       const handleSizeChange = (e) => {
