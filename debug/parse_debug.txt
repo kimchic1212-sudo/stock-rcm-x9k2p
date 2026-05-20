@@ -1,7 +1,7 @@
-시작: 2026-05-20T03:36:19.981Z
+시작: 2026-05-20T03:40:35.983Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17792481907461026.5025660465287
+[RES] 200 login.xml&postfix=17792484486748873.655177768842
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 4건
+selTodaySalesList: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-40500,"ITEM_CD":"24353","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 4]","SALES_AMT":-36450,"NET_SALES_AMT":-33
   파싱 성공: 1건
-메뉴 클릭 후 거래: 4건
+메뉴 클릭 후 거래: 5건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"24353","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 4]","SALES_AMT":36450,"NET_SALES_AMT":33136,
@@ -30,4 +30,8 @@ selTodaySalesList: 4건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":259200,"ITEM_CD":"26094","ITEM_NM":"레이다락 패스 (아시안핏) [92069438, 1SIZE]","SALES_AMT":259200,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":31500,"ITEM_CD":"17200","ITEM_NM":"레이스 삭스 [N1ARS02-002, S]","SALES_AMT":31500,"NET_SALES_AMT":28636,"VA
+  파싱 성공: 1건
+완료: 품번 6개
