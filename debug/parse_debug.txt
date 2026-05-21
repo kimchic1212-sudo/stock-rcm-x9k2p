@@ -1,7 +1,7 @@
-시작: 2026-05-21T08:23:56.125Z
+시작: 2026-05-21T08:30:43.068Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17793518497471419.2196790963562
+[RES] 200 login.xml&postfix=17793522560499542.633632278408
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"34022","ITEM_NM":"라이트웨이트 런 크루 [IB6114-407, M]","SALES_AMT":22000,"NET_SALES_AMT":20000
   파싱 성공: 2건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":186100,"ITEM_CD":"12810","ITEM_NM":"본디 9 와이드 [1162013-BBLC, 270]","SALES_AMT":186100,"NET_SALES_AMT":16
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"34438","ITEM_NM":"엔돌핀 프로 5 [S21064-140, 270]","SALES_AMT":239200,"NET_SALES_AMT":2174
   파싱 성공: 2건
-완료: 품번 9개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":85000,"ITEM_CD":"29680","ITEM_NM":"울트라 캡 [2UF30044353, 1SIZE]","SALES_AMT":76500,"NET_SALES_AMT":69545,
+  파싱 성공: 2건
+완료: 품번 11개
