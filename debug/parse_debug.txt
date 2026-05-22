@@ -1,7 +1,7 @@
-시작: 2026-05-22T08:41:59.437Z
+시작: 2026-05-22T08:44:48.224Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17794393337902698.5333359174833
+[RES] 200 login.xml&postfix=17794394985813608.6143371045555
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 21건
+selTodaySalesList: 22건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153000,"ITEM_CD":"33556","ITEM_NM":"ACG 페가수스 트레일 [HV8121-310, 230]","SALES_AMT":153000,"NET_SALES_AMT":
   파싱 성공: 2건
-메뉴 클릭 후 거래: 21건
+메뉴 클릭 후 거래: 22건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":17600,"ITEM_CD":"20708","ITEM_NM":"라이트웨이트 크루 삭스 1팩 [HV6919-100, M]","SALES_AMT":17600,"NET_SALES_AMT":1
@@ -98,4 +98,8 @@ selTodaySalesList: 21건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"31265","ITEM_NM":"아드레날린 GTS 25 (와이드) [1104542E020, 270]","SALES_AMT":170100,"NET_SALE
   파싱 성공: 3건
-완료: 품번 31개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":10800,"ITEM_CD":"31978","ITEM_NM":"러닝에너지젤 [UT-01, 1SIZE]","SALES_AMT":10800,"NET_SALES_AMT":9818,"VAT_A
+  파싱 성공: 2건
+완료: 품번 33개
