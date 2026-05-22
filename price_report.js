@@ -25,7 +25,7 @@ function getCategory(displayCategoryNos) {
 
 // ── 텔레그램 발송 ──────────────────────────────────────────
 async function sendTelegram(text) {
-  if (!BOT_TOKEN || !CHAT_ID) { console.log('[Telegram skip] no token/chat_id'); return; }
+  if (!BOT_TOKEN || !CHAT_ID) { console.log('[Telegram skip] BOT_TOKEN 또는 CHAT_ID 미설정'); return; }
   const chunks = [];
   let t = text;
   while (t.length > 0) { chunks.push(t.slice(0, 4000)); t = t.slice(4000); }
@@ -37,12 +37,50 @@ async function sendTelegram(text) {
         path: `/bot${BOT_TOKEN}/sendMessage`,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
-      }, res => { res.resume(); resolve(); });
-      req.on('error', e => { console.error('Telegram:', e.message); resolve(); });
+      }, res => {
+        let raw = '';
+        res.on('data', c => raw += c);
+        res.on('end', () => {
+          try {
+            const j = JSON.parse(raw);
+            if (j.ok) {
+              console.log(`[Telegram OK] message_id=${j.result?.message_id}`);
+            } else {
+              console.error(`[Telegram ERROR] ${j.error_code}: ${j.description}`);
+              console.error(`  → BOT_TOKEN: ${BOT_TOKEN.slice(0,10)}... | CHAT_ID: ${CHAT_ID}`);
+            }
+          } catch(e) { console.error('[Telegram parse error]', raw.slice(0, 200)); }
+          resolve();
+        });
+      });
+      req.on('error', e => { console.error('[Telegram network error]', e.message); resolve(); });
       req.write(body); req.end();
     });
     await new Promise(r => setTimeout(r, 300));
   }
+}
+
+// ── CHAT_ID 자동 조회 (처음 설정 시 도움용) ──────────────────
+async function printChatId() {
+  if (!BOT_TOKEN) return;
+  return new Promise(resolve => {
+    https.get(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(d);
+          if (j.result && j.result.length > 0) {
+            const chats = [...new Set(j.result.map(u => u.message?.chat?.id || u.channel_post?.chat?.id).filter(Boolean))];
+            console.log('[getUpdates] 감지된 chat_id 목록:', chats);
+          } else {
+            console.log('[getUpdates] 메시지 없음 → 봇에게 먼저 /start 메시지를 보내세요');
+          }
+        } catch(e) { console.error('[getUpdates error]', d.slice(0, 200)); }
+        resolve();
+      });
+    }).on('error', resolve);
+  });
 }
 
 // ── Playwright로 SALE 카테고리 전체 수집 ───────────────────
@@ -213,6 +251,10 @@ async function sendChangesReport(products) {
 // ── 메인 ──────────────────────────────────────────────────
 async function main() {
   console.log(`Mode: ${MODE}`);
+  console.log(`BOT_TOKEN: ${BOT_TOKEN ? BOT_TOKEN.slice(0,10)+'...(설정됨)' : '❌ 미설정'}`);
+  console.log(`CHAT_ID: ${CHAT_ID || '❌ 미설정'}`);
+  // CHAT_ID 미설정 시 자동 조회 시도
+  if (BOT_TOKEN && !CHAT_ID) await printChatId();
   const products = await getAllProducts();
   if (MODE === 'summary') await sendSummaryReport(products);
   else await sendChangesReport(products);
