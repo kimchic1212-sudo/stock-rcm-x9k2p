@@ -2706,7 +2706,7 @@ function render(){
       const dpSt = getDPStatus(p);
       const match = f.dpFilters.some(filter => {
         if(filter === "dp")     return dpSt !== 'none';
-        if(filter === "nodp")   return dpSt === 'none';
+        if(filter === "nodp")   return dpSt === 'none' && p.busanTotal > 0; // 미DP이면서 재고있는 것만
         if(filter === "soldDP") return dpSt === 'soldDP';
         return false;
       });
