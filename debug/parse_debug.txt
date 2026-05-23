@@ -1,7 +1,7 @@
-시작: 2026-05-23T05:06:44.681Z
+시작: 2026-05-23T05:09:19.298Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17795128192281715.2616204167991
+[RES] 200 login.xml&postfix=17795129730487053.905796613745
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 17건
+selTodaySalesList: 18건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21007","ITEM_NM":"보메로 플러스 [HV8154-102, 235]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 2건
-메뉴 클릭 후 거래: 17건
+메뉴 클릭 후 거래: 18건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"27624","ITEM_NM":"아드레날린 GTS 25 (와이드) [1104542E189, 265]","SALES_AMT":170100,"NET_SALE
@@ -82,4 +82,8 @@ selTodaySalesList: 17건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":186100,"ITEM_CD":"30089","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 265]","SALES_AMT":186100,"NET_SALES_AMT":16
   파싱 성공: 1건
-완료: 품번 18개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26776","ITEM_NM":"아디제로 EVO SL [JH6208, 230]","SALES_AMT":20230,"NET_SALES_AMT":18391,
+  파싱 성공: 2건
+완료: 품번 19개
