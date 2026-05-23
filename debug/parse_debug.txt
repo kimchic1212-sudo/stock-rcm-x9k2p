@@ -1,7 +1,7 @@
-시작: 2026-05-23T03:37:06.301Z
+시작: 2026-05-23T03:40:37.673Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17795074369419880.304483237087
+[RES] 200 login.xml&postfix=17795076483341485.780098656646
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21007","ITEM_NM":"보메로 플러스 [HV8154-102, 235]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 2건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"27624","ITEM_NM":"아드레날린 GTS 25 (와이드) [1104542E189, 265]","SALES_AMT":170100,"NET_SALE
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"30719","ITEM_NM":"가이드 19 [S21059-103, 265]","SALES_AMT":161100,"NET_SALES_AMT":146455
   파싱 성공: 1건
-완료: 품번 6개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30382","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 260]","SALES_AMT":71100,"NET_SALES_AMT
+  파싱 성공: 1건
+완료: 품번 7개
