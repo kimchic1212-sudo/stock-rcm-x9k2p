@@ -3451,17 +3451,44 @@ function openDetail(p){
       $("#quickImgSave").onclick = async () => {
           if(!checkPat()) return;
           const url = $("#quickImgUrl").value.trim(); if (!url) return;
-          const msg = $("#quickImgMsg"); msg.textContent = "저장 중...";
+          const msgEl = $("#quickImgMsg"); msgEl.style.color = ""; msgEl.textContent = "저장 중...";
           try {
-              IMAGES[p.shopNo || p.품번] = url; 
+              const imgKey = p.shopNo || p.품번;
+              IMAGES[imgKey] = url;
               const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
-              let sha = null;
-              try { const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } }catch(e){}
-              const body = { message:"update image manual", content: utf8ToB64(JSON.stringify(IMAGES)), branch: GH.branch };
-              if(sha) body.sha = sha;
-              await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-              msg.style.color = "green"; msg.textContent = "✓ 완벽하게 저장되었습니다!"; render(); setTimeout(()=>{openDetail(p);}, 500);
-          } catch (err) { msg.style.color = "red"; msg.textContent = "실패: " + err.message; }
+
+              // SHA 재조회 (항상 최신 SHA 사용, 충돌 방지)
+              const metaRes = await fetch(apiBase + "?t=" + Date.now(), { headers:{ Authorization:"Bearer "+getPat() } });
+              if (!metaRes.ok) throw new Error(`GitHub 조회 실패 (${metaRes.status})`);
+              const meta = await metaRes.json();
+              const sha = meta.sha;
+
+              // GitHub에 저장된 최신 images.json 와 병합 (다른 탭/세션에서 추가된 것도 보존)
+              let latestImages = {};
+              try { latestImages = JSON.parse(atob(meta.content.replace(/\n/g,''))); } catch(e) {}
+              latestImages[imgKey] = url; // 내 변경만 덮어씀
+
+              const putRes = await fetch(apiBase, {
+                  method: "PUT",
+                  headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" },
+                  body: JSON.stringify({ message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(latestImages)), branch: GH.branch, sha })
+              });
+              if (!putRes.ok) {
+                  const errJ = await putRes.json().catch(()=>({}));
+                  throw new Error(`GitHub 저장 실패 (${putRes.status}): ${errJ.message || ''}`);
+              }
+
+              // 메모리·캐시도 최신으로 갱신
+              IMAGES = { ...latestImages };
+              sessionStorage.removeItem(CACHE_KEY);
+              msgEl.style.color = "green"; msgEl.textContent = "✓ 저장 완료!";
+              render();
+              setTimeout(()=>{ openDetail(p); }, 600);
+          } catch (err) {
+              // 저장 실패 시 메모리에서도 롤백
+              delete IMAGES[p.shopNo || p.품번];
+              msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
+          }
       };
   }
 
