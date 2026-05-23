@@ -1101,24 +1101,48 @@ function rebuildIndex(){
           rb.appendChild(btn);
       });
   };
-  // ── 브랜드 접힌 상태 미리보기 업데이트 ──────────────────
+  // ── 인기순 top N 브랜드 (항상 인기순, 정렬 토글 무관) ──
+  const _getTopBrands = (n) => Object.entries(brandCounts).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]);
+
+  // ── 브랜드 접힌 상태: 인기 top5 칩 + 선택 표시 ──────────
   const _updateBrandPreview = () => {
       const preview = $("#brandCollapsedPreview");
       const label = $("#brandToggleLabel");
       if (!preview) return;
-      if (window._activeBrands.size === 0) {
-          preview.innerHTML = '<span class="text-[10px] text-gray-400 font-bold">전체</span>';
-      } else {
-          const sel = [...window._activeBrands];
-          const shown = sel.slice(0, 5);
-          const rest = sel.length - shown.length;
-          preview.innerHTML = shown.map(b =>
-              `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-gray-900 text-white shrink-0">${escapeHtml(b)}</span>`
-          ).join('') + (rest > 0 ? `<span class="text-[10px] text-gray-400 font-bold shrink-0">+${rest}</span>` : '');
+
+      const top5 = _getTopBrands(5);
+      preview.innerHTML = "";
+
+      // top 5 인기 브랜드를 항상 클릭 가능한 칩으로 표시
+      top5.forEach(b => {
+          const btn = document.createElement("button");
+          btn.className = "chip shrink-0 text-[11px]";
+          btn.dataset.brand = b;
+          btn.dataset.active = window._activeBrands.has(b) ? "1" : "0";
+          btn.textContent = b;
+          btn.onclick = () => {
+              saveHistoryState();
+              if (window._activeBrands.has(b)) window._activeBrands.delete(b);
+              else window._activeBrands.add(b);
+              _renderBrandChips();
+              _updateBrandPreview();
+              visibleCount = 60; render();
+          };
+          preview.appendChild(btn);
+      });
+
+      // top5 외에 선택된 브랜드가 있으면 "+N개 선택" 표시
+      const extraSelected = [...window._activeBrands].filter(b => !top5.includes(b));
+      if (extraSelected.length > 0) {
+          const span = document.createElement("span");
+          span.className = "text-[10px] font-black text-blue-600 shrink-0 px-1";
+          span.textContent = `+${extraSelected.length}개 선택`;
+          preview.appendChild(span);
       }
-      // 접기/펼치기 라벨 업데이트
+
+      // 펼치기/접기 라벨
       const isOpen = $("#brandExpandedPanel")?.classList.contains("open");
-      if (label) label.textContent = isOpen ? "접기" : "펼치기";
+      if (label) label.textContent = isOpen ? "접기" : "전체보기";
   };
 
   window._renderBrandChips = (filterQ = "") => { _renderBrandChips(filterQ); _updateBrandPreview(); };
