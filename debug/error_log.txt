@@ -1,6 +1,6 @@
-2026-05-23T09:48:25.605Z
-GitHub 실패: 409
-Error: GitHub 실패: 409
+2026-05-23T11:22:21.602Z
+GitHub 실패: 422
+Error: GitHub 실패: 422
     at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:288:5
