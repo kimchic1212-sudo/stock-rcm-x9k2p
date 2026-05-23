@@ -1,6 +1,11 @@
-2026-05-23T11:22:21.602Z
-GitHub 실패: 422
-Error: GitHub 실패: 422
-    at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:288:5
+2026-05-23T21:01:05.378Z
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+  - waiting for locator('input[type="password"]').first() to be visible
+
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+  - waiting for locator('input[type="password"]').first() to be visible
+
+    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:164:58)
+    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:267:24
