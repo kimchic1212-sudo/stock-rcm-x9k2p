@@ -1110,7 +1110,7 @@ function rebuildIndex(){
       const label = $("#brandToggleLabel");
       if (!preview) return;
 
-      const top5 = _getTopBrands(5);
+      const top5 = _getTopBrands(10);
       preview.innerHTML = "";
 
       // top 5 인기 브랜드를 항상 클릭 가능한 칩으로 표시
