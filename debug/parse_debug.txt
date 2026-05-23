@@ -1,7 +1,7 @@
-시작: 2026-05-23T09:16:51.663Z
+시작: 2026-05-23T09:20:16.488Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17795278218266514.91247785248
+[RES] 200 login.xml&postfix=17795280295359710.42053920406
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 51건
+selTodaySalesList: 52건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21007","ITEM_NM":"보메로 플러스 [HV8154-102, 235]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 2건
-메뉴 클릭 후 거래: 51건
+메뉴 클릭 후 거래: 52건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"27624","ITEM_NM":"아드레날린 GTS 25 (와이드) [1104542E189, 265]","SALES_AMT":170100,"NET_SALE
@@ -218,4 +218,8 @@ selTodaySalesList: 51건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"21419","ITEM_NM":"보메로 플러스 [HV8150-003, 265]","SALES_AMT":179100,"NET_SALES_AMT":16281
   파싱 성공: 1건
-완료: 품번 55개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":205000,"ITEM_CD":"9324","ITEM_NM":"립스탑 나일론 자켓 [C24FW-J04-GRY, L]","SALES_AMT":164000,"NET_SALES_AMT":14
+  파싱 성공: 1건
+완료: 품번 56개
