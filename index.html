@@ -186,11 +186,9 @@
           <span>브랜드</span>
           <i data-lucide="chevron-down" id="brandChevron" class="w-3 h-3 transition-transform duration-200"></i>
         </button>
-        <!-- 접힌 상태 미리보기 (선택된 브랜드 or 전체) -->
-        <div id="brandCollapsedPreview" class="flex gap-1 flex-1 min-w-0 overflow-hidden items-center">
-          <span class="text-[10px] text-gray-400 font-bold">전체</span>
-        </div>
-        <button onclick="window._toggleBrandPanel()" class="shrink-0 text-[10px] text-gray-400 hover:text-gray-700 font-bold transition-colors" id="brandToggleLabel">펼치기</button>
+        <!-- 접힌 상태: 인기 top5 칩 항상 표시 (JS가 채움) -->
+        <div id="brandCollapsedPreview" class="flex gap-1 flex-wrap flex-1 min-w-0 items-center"></div>
+        <button onclick="window._toggleBrandPanel()" class="shrink-0 text-[10px] text-gray-400 hover:text-gray-700 font-bold transition-colors whitespace-nowrap" id="brandToggleLabel">전체보기</button>
       </div>
       <!-- 브랜드 펼쳐진 영역 (토글) -->
       <div id="brandExpandedPanel" class="hidden flex-col gap-1.5">
