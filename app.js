@@ -89,10 +89,10 @@ style.innerHTML = `
     .brand-code { font-size: 11px; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .product-name { font-size: 13px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* 브랜드칩 영역 — 가로 스크롤 단일행 */
-    #brandChips { overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap !important; scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent; padding-bottom: 2px; }
-    #brandChips::-webkit-scrollbar { height: 3px; }
-    #brandChips::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    /* 브랜드칩 영역 — 여러 줄 wrap */
+    #brandChips { flex-wrap: wrap; }
+    #brandExpandedPanel { display: none; flex-direction: column; gap: 6px; }
+    #brandExpandedPanel.open { display: flex; }
     /* 브랜드 정렬 토글 활성 */
     .brand-sort-btn[data-active="1"] { background: var(--ink) !important; color: #fff !important; }
     .brand-sort-btn[data-active="0"] { background: var(--surface) !important; color: var(--muted) !important; }
@@ -1056,6 +1056,7 @@ function rebuildIndex(){
           saveHistoryState();
           window._activeBrands.clear();
           _renderBrandChips(filterQ);
+          if(window._updateBrandPreview) window._updateBrandPreview();
           visibleCount = 60; render();
       };
       wrap.appendChild(allBtn);
@@ -1073,6 +1074,7 @@ function rebuildIndex(){
                   window._activeBrands.add(b);
               }
               _renderBrandChips(filterQ);
+              if(window._updateBrandPreview) window._updateBrandPreview();
               visibleCount = 60; render();
           };
           wrap.appendChild(btn);
@@ -1099,9 +1101,51 @@ function rebuildIndex(){
           rb.appendChild(btn);
       });
   };
-  window._renderBrandChips = _renderBrandChips; // 전역 노출 (resetAll 등에서 사용)
+  // ── 브랜드 접힌 상태 미리보기 업데이트 ──────────────────
+  const _updateBrandPreview = () => {
+      const preview = $("#brandCollapsedPreview");
+      const label = $("#brandToggleLabel");
+      if (!preview) return;
+      if (window._activeBrands.size === 0) {
+          preview.innerHTML = '<span class="text-[10px] text-gray-400 font-bold">전체</span>';
+      } else {
+          const sel = [...window._activeBrands];
+          const shown = sel.slice(0, 5);
+          const rest = sel.length - shown.length;
+          preview.innerHTML = shown.map(b =>
+              `<span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-gray-900 text-white shrink-0">${escapeHtml(b)}</span>`
+          ).join('') + (rest > 0 ? `<span class="text-[10px] text-gray-400 font-bold shrink-0">+${rest}</span>` : '');
+      }
+      // 접기/펼치기 라벨 업데이트
+      const isOpen = $("#brandExpandedPanel")?.classList.contains("open");
+      if (label) label.textContent = isOpen ? "접기" : "펼치기";
+  };
+
+  window._renderBrandChips = (filterQ = "") => { _renderBrandChips(filterQ); _updateBrandPreview(); };
+  window._updateBrandPreview = _updateBrandPreview;
+
+  // ── 브랜드 패널 토글 ─────────────────────────────────────
+  window._toggleBrandPanel = () => {
+      const panel = $("#brandExpandedPanel");
+      const chevron = $("#brandChevron");
+      const label = $("#brandToggleLabel");
+      if (!panel) return;
+      const isOpen = panel.classList.contains("open");
+      if (isOpen) {
+          panel.classList.remove("open");
+          if (chevron) chevron.style.transform = "";
+          if (label) label.textContent = "펼치기";
+      } else {
+          panel.classList.add("open");
+          if (chevron) chevron.style.transform = "rotate(180deg)";
+          if (label) label.textContent = "접기";
+          // 패널 열릴 때 검색창 포커스
+          setTimeout(() => { const s = $("#brandSearch"); if(s) s.focus(); }, 50);
+      }
+  };
 
   _renderBrandChips();
+  _updateBrandPreview();
 
   // 브랜드 검색 이벤트
   const brandSearchEl = $("#brandSearch");
