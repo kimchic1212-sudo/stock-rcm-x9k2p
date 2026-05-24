@@ -1,7 +1,7 @@
-시작: 2026-05-24T09:53:51.188Z
+시작: 2026-05-24T10:00:43.152Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17796164410526101.927341001957
+[RES] 200 login.xml&postfix=17796168561741399.4937223310033
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 56건
+selTodaySalesList: 57건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33202","ITEM_NM":"보메로 플러스 [HV8154-012, 245]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 56건
+메뉴 클릭 후 거래: 57건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":100000,"ITEM_CD":"27719","ITEM_NM":"레이스먼트 상품권 (10만원) [RM-GC10, 1SIZE]","SALES_AMT":100000,"NET_SALES_AM
@@ -238,4 +238,8 @@ selTodaySalesList: 56건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"30551","ITEM_NM":"엔돌핀 아주라 [S21070-172, 265]","SALES_AMT":170100,"NET_SALES_AMT":15463
   파싱 성공: 2건
-완료: 품번 66개
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"27183","ITEM_NM":"아디365 러닝 에센셜 롱슬리브 셔츠 [KE8416, L]","SALES_AMT":44100,"NET_SALES_AMT":
+  파싱 성공: 4건
+완료: 품번 69개
