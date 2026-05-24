@@ -1,7 +1,7 @@
-시작: 2026-05-24T03:15:55.375Z
+시작: 2026-05-24T03:20:38.262Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17795925644846643.414428932803
+[RES] 200 login.xml&postfix=17795928478776566.476971778785
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 3건
+selTodaySalesList: 4건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33202","ITEM_NM":"보메로 플러스 [HV8154-012, 245]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 3건
+메뉴 클릭 후 거래: 4건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":100000,"ITEM_CD":"27719","ITEM_NM":"레이스먼트 상품권 (10만원) [RM-GC10, 1SIZE]","SALES_AMT":100000,"NET_SALES_AM
@@ -26,4 +26,8 @@ selTodaySalesList: 3건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21421","ITEM_NM":"보메로 플러스 [HV8150-003, 275]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-완료: 품번 3개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21009","ITEM_NM":"보메로 플러스 [HV8154-102, 245]","SALES_AMT":197100,"NET_SALES_AMT":17918
+  파싱 성공: 1건
+완료: 품번 4개
