@@ -1,7 +1,7 @@
-시작: 2026-05-24T05:52:26.722Z
+시작: 2026-05-24T05:55:06.691Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17796019611584721.608726182235
+[RES] 200 login.xml&postfix=1779602120347839.853000609776
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 22건
+selTodaySalesList: 23건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33202","ITEM_NM":"보메로 플러스 [HV8154-012, 245]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 22건
+메뉴 클릭 후 거래: 23건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":100000,"ITEM_CD":"27719","ITEM_NM":"레이스먼트 상품권 (10만원) [RM-GC10, 1SIZE]","SALES_AMT":100000,"NET_SALES_AM
@@ -102,4 +102,8 @@ selTodaySalesList: 22건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":360000,"ITEM_CD":"34564","ITEM_NM":"SL 울트라트레일 FX.ONE [65625841, 115]","SALES_AMT":288000,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 31개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39920,"ITEM_CD":"22850","ITEM_NM":"애슬레틱스 그래픽 티셔츠 [MT53216-LBN, M]","SALES_AMT":35930,"NET_SALES_AMT":32
+  파싱 성공: 2건
+완료: 품번 33개
