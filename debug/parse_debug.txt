@@ -1,7 +1,7 @@
-시작: 2026-05-24T08:12:29.755Z
+시작: 2026-05-24T08:14:27.516Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17796103600221875.419763343721
+[RES] 200 login.xml&postfix=17796104779586196.357998563468
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 40건
+selTodaySalesList: 41건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33202","ITEM_NM":"보메로 플러스 [HV8154-012, 245]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 40건
+메뉴 클릭 후 거래: 41건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":100000,"ITEM_CD":"27719","ITEM_NM":"레이스먼트 상품권 (10만원) [RM-GC10, 1SIZE]","SALES_AMT":100000,"NET_SALES_AM
@@ -174,4 +174,8 @@ selTodaySalesList: 40건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"12887","ITEM_NM":"클리프톤 10 와이드 [1162050-CTNS, 235]","SALES_AMT":179100,"NET_SALES_AMT"
   파싱 성공: 1건
-완료: 품번 49개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32405","ITEM_NM":"우아 [1100Black, 250]","SALES_AMT":62100,"NET_SALES_AMT":56455,"VAT_AM
+  파싱 성공: 1건
+완료: 품번 50개
