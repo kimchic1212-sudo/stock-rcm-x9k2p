@@ -1,7 +1,7 @@
-시작: 2026-05-26T06:58:48.018Z
+시작: 2026-05-26T07:00:48.664Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17797787402858440.940903655048
+[RES] 200 login.xml&postfix=17797788616421647.9253725371045
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -36,11 +36,11 @@ selTodaySalesList: 10건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34354","ITEM_NM":"하이퍼부스트 엣지 [KK0288, 240]","SALES_AMT":224100,"NET_SALES_AMT":203727,
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"30125","ITEM_NM":"본디 9 와이드 [1162014-SDSTS, 235]","SALES_AMT":206100,"NET_SALES_AMT":1
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"30125","ITEM_NM":"본디 9 와이드 [1162014-SDSTS, 235]","SALES_AMT":206100,"NET_SALES_AMT":1
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34354","ITEM_NM":"하이퍼부스트 엣지 [KK0288, 240]","SALES_AMT":224100,"NET_SALES_AMT":203727,
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
