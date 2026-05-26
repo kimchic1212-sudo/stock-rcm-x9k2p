@@ -127,6 +127,23 @@ async function getAllProducts() {
   await browser.close();
   const unique = Object.values(all.reduce((acc, p) => { acc[p.productNo]=p; return acc; }, {}));
   console.log(`Total unique collected: ${unique.length}`);
+  // 🔍 필드명 디버그: 첫 번째 상품의 모든 키 출력
+  if (unique.length > 0) {
+    const sample = unique[0];
+    console.log('[DEBUG] 상품 키 목록:', Object.keys(sample).join(', '));
+    console.log('[DEBUG] 샘플:', JSON.stringify({
+      productNo: sample.productNo,
+      productName: sample.productName,
+      salePrice: sample.salePrice,
+      immediateDiscountAmt: sample.immediateDiscountAmt,
+      displayCategoryNos: sample.displayCategoryNos,
+      // 혹시 다른 필드명?
+      name: sample.name,
+      price: sample.price,
+      discountAmt: sample.discountAmt,
+      no: sample.no,
+    }));
+  }
   return unique;
 }
 
