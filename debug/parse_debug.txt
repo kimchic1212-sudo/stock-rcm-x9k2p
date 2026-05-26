@@ -1,7 +1,7 @@
-시작: 2026-05-26T03:30:57.969Z
+시작: 2026-05-26T03:36:30.659Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17797662724294169.319130523667
+[RES] 200 login.xml&postfix=17797666012126514.410100402434
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 4건
+selTodaySalesList: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319000,"ITEM_CD":"28976","ITEM_NM":"울트라플라이 2 [HF5668-801, 275]","SALES_AMT":223300,"NET_SALES_AMT":2030
   파싱 성공: 1건
-메뉴 클릭 후 거래: 4건
+메뉴 클릭 후 거래: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30837","ITEM_NM":"마인드 001 [HQ4309-001, 240]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -30,4 +30,8 @@ selTodaySalesList: 4건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34313","ITEM_NM":"글리세린 GTS 23 와이드 [1204921D133, 245]","SALES_AMT":188100,"NET_SALES_A
   파싱 성공: 1건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":44100,"ITEM_CD":"21554","ITEM_NM":"코어 런 울트라라이트 미드컷 삭스 V4 [WP8CVL, 4]","SALES_AMT":39690,"NET_SALES_AMT"
+  파싱 성공: 1건
+완료: 품번 6개
