@@ -1,4 +1,4 @@
-2026-05-24T05:01:48.211Z
+2026-05-26T04:11:45.415Z
 GitHub 실패: 409
 Error: GitHub 실패: 409
     at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
