@@ -1654,7 +1654,6 @@ window.exportTransfersToExcel = () => {
 
     // Row4+: 데이터
     TRANSFERS.forEach(t => {
-        const shopNo = t.shopNo || (PRODUCTS.find(p => p.품번 === t.code)?.shopNo) || "";
         // 품번으로 제품 찾고 sizes 배열에서 해당 사이즈의 물류센터 재고 조회
         const prod = PRODUCTS.find(p => p.품번 === t.code);
         const sizeObj = prod?.sizes?.find(s => String(s.size).trim() === String(t.size || '').trim());
@@ -1665,7 +1664,7 @@ window.exportTransfersToExcel = () => {
             '',                                    // A (빈칸)
             '',                                    // B: ERP이동요청번호 (본사 입력)
             t.date ? t.date.split(' ')[0] : '',    // C: 요청일 (날짜만, 시간 제거)
-            shopNo,                                // D: 품목내부코드
+            t.code,                                // D: 품목내부코드 (= 품번, ERP 내부코드)
             t.code,                                // E: 품번
             t.product,                             // F: 품명
             t.size,                                // G: 규격
