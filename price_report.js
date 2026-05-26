@@ -7,6 +7,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 const MODE = process.env.REPORT_MODE || 'summary'; // 'summary' | 'changes'
 const PRICES_FILE = 'prices.json';
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 // ── 카테고리 매핑 ──────────────────────────────────────────
 const CAT_MAP = {};
@@ -173,7 +174,7 @@ async function sendSummaryReport(products) {
       msg += `\n🔸 <b>${pct} 할인</b> (${items.length}개)\n`;
       for (const p of items) {
         const discPrice = p.salePrice - p.immediateDiscountAmt;
-        msg += `  • ${p.productName}\n    ${fmt(p.salePrice)} → <b>${fmt(discPrice)}</b>\n`;
+        msg += `  • ${esc(p.productName)}\n    ${fmt(p.salePrice)} → <b>${fmt(discPrice)}</b>\n`;
       }
     }
   }
@@ -228,20 +229,20 @@ async function sendChangesReport(products) {
   if (newDisc.length > 0) {
     msg += `\n🔻 <b>신규 할인 시작</b> (${newDisc.length}개)\n`;
     newDisc.forEach(({p, pct}) => {
-      msg += `  • ${p.productName}\n    ${fmt(p.salePrice)} → <b>${fmt(p.salePrice - p.immediateDiscountAmt)}</b> (-${pct}%)\n`;
+      msg += `  • ${esc(p.productName)}\n    ${fmt(p.salePrice)} → <b>${fmt(p.salePrice - p.immediateDiscountAmt)}</b> (-${pct}%)\n`;
     });
   }
   if (changedDisc.length > 0) {
     msg += `\n🔄 <b>할인율 변경</b> (${changedDisc.length}개)\n`;
     changedDisc.forEach(({p, prevPct, newPct, prevPrice, newPrice}) => {
       const arrow = newPct > prevPct ? '🔺' : '🔻';
-      msg += `  ${arrow} ${p.productName}\n    ${prevPct}% → <b>${newPct}%</b>  (${fmt(prevPrice)} → <b>${fmt(newPrice)}</b>)\n`;
+      msg += `  ${arrow} ${esc(p.productName)}\n    ${prevPct}% → <b>${newPct}%</b>  (${fmt(prevPrice)} → <b>${fmt(newPrice)}</b>)\n`;
     });
   }
   if (removedDisc.length > 0) {
     msg += `\n✅ <b>할인 종료</b> (${removedDisc.length}개)\n`;
     removedDisc.forEach(({p, prevPct}) => {
-      msg += `  • ${p.productName} (${prevPct}% 종료)\n`;
+      msg += `  • ${esc(p.productName)} (${prevPct}% 종료)\n`;
     });
   }
 
