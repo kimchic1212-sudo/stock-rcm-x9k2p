@@ -127,23 +127,6 @@ async function getAllProducts() {
   await browser.close();
   const unique = Object.values(all.reduce((acc, p) => { acc[p.productNo]=p; return acc; }, {}));
   console.log(`Total unique collected: ${unique.length}`);
-  // 🔍 필드명 디버그: 첫 번째 상품의 모든 키 출력
-  if (unique.length > 0) {
-    const sample = unique[0];
-    console.log('[DEBUG] 상품 키 목록:', Object.keys(sample).join(', '));
-    console.log('[DEBUG] 샘플:', JSON.stringify({
-      productNo: sample.productNo,
-      productName: sample.productName,
-      salePrice: sample.salePrice,
-      immediateDiscountAmt: sample.immediateDiscountAmt,
-      displayCategoryNos: sample.displayCategoryNos,
-      // 혹시 다른 필드명?
-      name: sample.name,
-      price: sample.price,
-      discountAmt: sample.discountAmt,
-      no: sample.no,
-    }));
-  }
   return unique;
 }
 
@@ -180,10 +163,10 @@ async function sendSummaryReport(products) {
   const KST = new Date(Date.now() + 9*3600*1000).toISOString().replace('T',' ').slice(0,16);
   let msg = `🏷️ <b>RACEMENT 현재 할인 현황</b>\n📅 ${KST} 기준 | 총 ${discounted.length}개 상품\n`;
 
-  for (const [cat, byPct] of [['신발','👟'],['의류','👕'],['용품','🎒'],['기타','📦']].map(([c,e])=>[c,e,byCat[c]])) {
+  for (const [cat, emoji] of [['신발','👟'],['의류','👕'],['용품','🎒'],['기타','📦']]) {
+    const byPct = byCat[cat];
     const pctKeys = Object.keys(byPct).sort((a,b)=>parseInt(a)-parseInt(b));
     if (pctKeys.length === 0) continue;
-    const emoji = { '신발':'👟', '의류':'👕', '용품':'🎒', '기타':'📦' }[cat];
     msg += `\n━━━━━━━━━━━━━━━\n${emoji} <b>${cat}</b>\n`;
     for (const pct of pctKeys) {
       const items = byPct[pct];
