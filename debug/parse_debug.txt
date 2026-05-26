@@ -1,7 +1,7 @@
-시작: 2026-05-26T10:40:35.029Z
+시작: 2026-05-26T12:50:41.066Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17797920472065999.10624028097
+[RES] 200 login.xml&postfix=17797998515554198.32501129199
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 20건
+selTodaySalesList: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319000,"ITEM_CD":"28976","ITEM_NM":"울트라플라이 2 [HF5668-801, 275]","SALES_AMT":223300,"NET_SALES_AMT":2030
   파싱 성공: 1건
-메뉴 클릭 후 거래: 20건
+메뉴 클릭 후 거래: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30837","ITEM_NM":"마인드 001 [HQ4309-001, 240]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -94,4 +94,20 @@ selTodaySalesList: 20건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":170100,"ITEM_CD":"30553","ITEM_NM":"엔돌핀 아주라 [S21070-172, 275]","SALES_AMT":153090,"NET_SALES_AMT":13917
   파싱 성공: 1건
-완료: 품번 25개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"17441","ITEM_NM":"펄사 벨트 [LC2179800, M]","SALES_AMT":40500,"NET_SALES_AMT":36818,"VAT_A
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":66000,"ITEM_CD":"18072","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, S/M]","SALES_AMT":66000,"NET_SALES_AMT":6
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":34300,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":30870,"NET_SALES_AMT
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"33925","ITEM_NM":"ACG 드라이핏 미드라이즈 브리프 라인드 트레일 러닝 쇼츠 [IO9658-010, S]","SALES_AMT":95000,
+  파싱 성공: 1건
+완료: 품번 29개
