@@ -903,7 +903,7 @@ function rebuildIndex(){
     }
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } for(const k of Object.keys(r)){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(/^\d{8,14}$/.test(v)) return v; } return ""; })(), sizes:[], hasMemo: false, periodSales: 0 });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), itemCode:String(r["품목내부코드"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } for(const k of Object.keys(r)){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(/^\d{8,14}$/.test(v)) return v; } return ""; })(), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
@@ -1608,7 +1608,7 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const d = new Date();
     const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
-    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", date: shortDate, size, qty: 1, memo: finalMemo });
+    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: p.itemCode || "", date: shortDate, size, qty: 1, memo: finalMemo });
 
     let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
         .then(r => r.json())
@@ -1660,11 +1660,13 @@ window.exportTransfersToExcel = () => {
         const wms   = sizeObj !== undefined ? (sizeObj.center || 0) : '';
         const store = sizeObj !== undefined ? (sizeObj.busan  || 0) : '';
         const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
+        // 품목내부코드: 저장된 itemCode 우선, 없으면 PRODUCTS에서 조회, 그것도 없으면 품번 fallback
+        const itemCode = t.itemCode || prod?.itemCode || t.code;
         aoa.push([
             '',                                    // A (빈칸)
             '',                                    // B: ERP이동요청번호 (본사 입력)
             t.date ? t.date.split(' ')[0] : '',    // C: 요청일 (날짜만, 시간 제거)
-            t.code,                                // D: 품목내부코드 (= 품번, ERP 내부코드)
+            itemCode,                              // D: 품목내부코드 (ERP 내부코드)
             t.code,                                // E: 품번
             t.product,                             // F: 품명
             t.size,                                // G: 규격
