@@ -181,7 +181,10 @@ async function sendSummaryReport(products) {
       msg += `\n🔸 <b>${pct} 할인</b> (${items.length}개)\n`;
       for (const p of items) {
         const discPrice = p.salePrice - p.immediateDiscountAmt;
-        msg += `  • ${esc(p.productName)}\n    ${fmt(p.salePrice)} → <b>${fmt(discPrice)}</b>\n`;
+        const brand = esc(p.brandName || '');
+        const code  = esc(p.groupManagementCode || '');
+        const info  = [brand, code].filter(Boolean).join(' · ');
+        msg += `  • ${esc(p.productName)}\n    <i>${info}</i>\n    ${fmt(p.salePrice)} → <b>${fmt(discPrice)}</b>\n`;
       }
     }
   }
