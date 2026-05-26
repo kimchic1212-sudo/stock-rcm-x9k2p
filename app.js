@@ -928,14 +928,21 @@ function rebuildIndex(){
     if (_pm) {
         const { promo: _pr, item: _pi } = _pm;
         const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d+\/\d+)\s*$/); return m?m[1]:''; })(_pr.meta?.period||'');
+        const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'6/14' };
         if (_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
-            p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _pr.meta?.name||'';
+            p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
             p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
             p.promoEndDate = _endDate || (_pi.targetCat==='FOOTWEAR'?'5/15':_pi.targetCat==='APPAREL'?'5/22':'5/29');
         } else if (_pi.finalPrice && _pi.finalPrice < p.소비자가) {
-            p.currentPromoPrice = _pi.finalPrice; p.promoType = 'general'; p.promoName = _pr.meta?.name||'';
+            p.currentPromoPrice = _pi.finalPrice; Object.assign(p, _promoMeta);
             p.promoRate = _pi.finalRate || ((p.소비자가 - _pi.finalPrice) / p.소비자가);
-            p.promoEndDate = _endDate || '5/29';
+        } else if (_pi.finalRate > 0 && p.소비자가 > 0) {
+            // finalPrice 없을 때 소비자가 × (1-rate) 로 계산
+            const _computed = Math.round(p.소비자가 * (1 - _pi.finalRate) / 10) * 10;
+            if (_computed < p.소비자가) {
+                p.currentPromoPrice = _computed; Object.assign(p, _promoMeta);
+                p.promoRate = _pi.finalRate;
+            }
         }
     }
     p._hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||"", p.barcode||""].join(" ").toLowerCase();
@@ -994,11 +1001,17 @@ function rebuildIndex(){
       if(promoWrap) {
           const _promos = getPromoList();
           const _activePN = window._activePromoName || "ALL";
-          const promoChips = _promos.length > 1
-              ? `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors hidden promo-name-chip ${_activePN==='ALL'?'bg-purple-600 text-white border-purple-700':'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'}" data-pname="ALL">🎁 전체</button>` +
+          // 기획전이 여러 개면 개별 칩을 항상 표시 (hidden 없음), 1개면 기존 방식
+          const _multiPromo = _promos.length > 1;
+          const _chipCls = (active) => active
+              ? 'bg-purple-600 text-white border-purple-700'
+              : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50';
+          const promoChips = _multiPromo
+              ? `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors promo-name-chip ${_chipCls(_activePN==='ALL')}" data-pname="ALL">🎁 전체</button>` +
                 _promos.map(pr => {
                   const nm = pr.meta?.name || '기획전';
-                  return `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors hidden promo-name-chip ${_activePN===nm?'bg-purple-600 text-white border-purple-700':'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'}" data-pname="${escapeHtml(nm)}">🎪 ${escapeHtml(nm)}</button>`;
+                  const period = pr.meta?.period ? ` <span class="opacity-70 text-[10px]">${escapeHtml(pr.meta.period)}</span>` : '';
+                  return `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors promo-name-chip ${_chipCls(_activePN===nm)}" data-pname="${escapeHtml(nm)}">🎪 ${escapeHtml(nm)}${period}</button>`;
                 }).join('')
               : '';
           promoWrap.innerHTML = promoChips + `
@@ -1008,6 +1021,9 @@ function rebuildIndex(){
           promoWrap.querySelectorAll(".promo-name-chip").forEach(btn => {
               btn.addEventListener("click", () => {
                   window._activePromoName = btn.dataset.pname;
+                  // 기획전 뷰가 꺼져있으면 자동으로 켜기
+                  const promoBtn = $("#promoViewBtn");
+                  if(promoBtn && promoBtn.dataset.active !== "1") window.togglePromoView(promoBtn, true);
                   saveHistoryState(); visibleCount = 60; render();
               });
           });
@@ -1320,6 +1336,7 @@ window.togglePromoView = (btn, bypassRender = false) => {
     if(!bypassRender) saveHistoryState();
     const isActive = btn.dataset.active === "1";
     btn.dataset.active = isActive ? "0" : "1";
+    const _isMultiPromo = getPromoList().length > 1;
     if(!isActive) {
         btn.classList.replace("bg-purple-50", "bg-purple-600");
         btn.classList.replace("text-purple-700", "text-white");
@@ -1327,7 +1344,8 @@ window.togglePromoView = (btn, bypassRender = false) => {
         window.tempPromoFilter = true;
         $("#promoTypeSel")?.classList.remove("hidden");
         $("#promoRateSel")?.classList.remove("hidden");
-        document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.remove("hidden"));
+        // 멀티 기획전 칩은 항상 표시 (remove hidden)
+        if(!_isMultiPromo) document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.remove("hidden"));
     } else {
         btn.classList.replace("bg-purple-600", "bg-purple-50");
         btn.classList.replace("text-white", "text-purple-700");
@@ -1336,7 +1354,8 @@ window.togglePromoView = (btn, bypassRender = false) => {
         window._activePromoName = "ALL";
         $("#promoTypeSel")?.classList.add("hidden");
         $("#promoRateSel")?.classList.add("hidden");
-        document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.add("hidden"));
+        // 멀티 기획전 칩은 숨기지 않음 (항상 표시)
+        if(!_isMultiPromo) document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.add("hidden"));
     }
     if(window.lucide) lucide.createIcons();
     if(!bypassRender) { visibleCount=60; render(); }
@@ -3800,32 +3819,47 @@ window.renderPromoAdmin = () => {
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
             const sheet = wb.Sheets[wb.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
-            let promoName = "기획전", promoPeriod = "";
-            for(let i=0; i<5; i++) {
+            // ① 기획전명 기본값: 파일명 (확장자 제거)
+            let promoName = f.name.replace(/\.(xlsx?|xls|csv)$/i, '').trim();
+            let promoPeriod = "";
+            for(let i=0; i<6; i++) {
                 if(!rows[i]) continue;
-                const col0 = String(rows[i][0]||"");
-                if(col0.includes("기획전명")) promoName = col0.replace("기획전명 :", "").replace("기획전명:", "").trim();
-                if(col0.includes("기간")) promoPeriod = col0.replace("기간 :", "").replace("기간:", "").trim();
+                const col0 = String(rows[i][0]||"").trim();
+                // 명시적 기획전명 셀 우선
+                if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
+                // 기간 파싱: "5.25 - 6.14" 또는 "5.25~6.14" 형태 추출
+                if(/기간/.test(col0)) {
+                    const pm = col0.match(/(\d+\.\d+\s*[-~]\s*\d+\.\d+)/);
+                    promoPeriod = pm ? pm[1].replace(/\s/g,'').replace('~','-') : col0.replace(/\*?\s*기간\s*:?\s*/,'').trim();
+                }
             }
             let items = {};
-            let headerRowIdx = rows.findIndex(r => r.includes('품번'));
+            let headerRowIdx = rows.findIndex(r => r.some(c => String(c||"").trim() === '품번'));
             if(headerRowIdx > -1) {
                 const headers = rows[headerRowIdx].map(h => String(h||"").trim());
-                const codeIdx = headers.indexOf('품번'), catIdx = headers.indexOf('특가 카테고리');
-                const wpIdx = headers.indexOf('위클리특가'), wrIdx = headers.indexOf('특가할인율');
-                const fpIdx = headers.indexOf('최종할인가');
-                let frIdx = headers.indexOf('최종 할인율'); if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
+                const codeIdx = headers.indexOf('품번');
+                const catIdx  = headers.indexOf('특가 카테고리');
+                const wpIdx   = headers.indexOf('위클리특가');
+                const wrIdx   = headers.indexOf('특가할인율');
+                const fpIdx   = headers.indexOf('최종할인가');
+                // 할인율 컬럼: 다양한 컬럼명 지원
+                let frIdx = headers.indexOf('최종 할인율');
+                if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
+                if(frIdx === -1) frIdx = headers.indexOf('할인율');
+                if(frIdx === -1) frIdx = headers.indexOf('할인');
+
                 for(let i=headerRowIdx+1; i<rows.length; i++) {
                     const r = rows[i];
                     const code = String(r[codeIdx]||"").trim(); if(!code) continue;
                     let wRate = parseFloat(r[wrIdx])||0; if(wRate>1) wRate/=100;
                     let fRate = parseFloat(r[frIdx])||0; if(fRate>1) fRate/=100;
+                    const fp = Number(String(r[fpIdx]||"").replace(/,/g,''))||null;
                     items[code] = {
                         targetCat: String(r[catIdx]||"").trim().toUpperCase(),
                         weeklyPrice: Number(String(r[wpIdx]||"").replace(/,/g,''))||null,
                         weeklyRate: wRate,
-                        finalPrice: Number(String(r[fpIdx]||"").replace(/,/g,''))||null,
-                        finalRate: fRate
+                        finalPrice: fp,
+                        finalRate: fRate   // 가격 없을 때는 rate로 계산
                     };
                 }
             }
