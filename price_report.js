@@ -7,7 +7,14 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 const MODE = process.env.REPORT_MODE || 'summary'; // 'summary' | 'changes'
 const PRICES_FILE = 'prices.json';
+const PRODUCT_MAP_FILE = 'product_map.json';
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ── 품번 매핑 로드 (shopby productNo → {품번, 품명, 브랜드}) ──────────
+const productMap = fs.existsSync(PRODUCT_MAP_FILE)
+  ? JSON.parse(fs.readFileSync(PRODUCT_MAP_FILE, 'utf-8'))
+  : {};
+console.log(`Product map loaded: ${Object.keys(productMap).length} entries`);
 
 // ── 카테고리 매핑 ──────────────────────────────────────────
 const CAT_MAP = {};
@@ -181,9 +188,10 @@ async function sendSummaryReport(products) {
       msg += `\n🔸 <b>${pct} 할인</b> (${items.length}개)\n`;
       for (const p of items) {
         const discPrice = p.salePrice - p.immediateDiscountAmt;
-        const brand = esc(p.brandName || '');
-        const no    = p.productNo || '';
-        const info  = [brand, no].filter(Boolean).join(' · ');
+        const mapped = productMap[String(p.productNo)] || {};
+        const brand  = esc(mapped.브랜드 || p.brandName || '');
+        const pcode  = esc(mapped.품번 || '');
+        const info   = [brand, pcode].filter(Boolean).join(' · ');
         msg += `  • ${esc(p.productName)}\n    <i>${info}</i>\n    ${fmt(p.salePrice)} → <b>${fmt(discPrice)}</b>\n`;
       }
     }
@@ -239,20 +247,32 @@ async function sendChangesReport(products) {
   if (newDisc.length > 0) {
     msg += `\n🔻 <b>신규 할인 시작</b> (${newDisc.length}개)\n`;
     newDisc.forEach(({p, pct}) => {
-      msg += `  • ${esc(p.productName)}\n    ${fmt(p.salePrice)} → <b>${fmt(p.salePrice - p.immediateDiscountAmt)}</b> (-${pct}%)\n`;
+      const mapped = productMap[String(p.productNo)] || {};
+      const brand  = esc(mapped.브랜드 || p.brandName || '');
+      const pcode  = esc(mapped.품번 || '');
+      const info   = [brand, pcode].filter(Boolean).join(' · ');
+      msg += `  • ${esc(p.productName)}\n    <i>${info}</i>\n    ${fmt(p.salePrice)} → <b>${fmt(p.salePrice - p.immediateDiscountAmt)}</b> (-${pct}%)\n`;
     });
   }
   if (changedDisc.length > 0) {
     msg += `\n🔄 <b>할인율 변경</b> (${changedDisc.length}개)\n`;
     changedDisc.forEach(({p, prevPct, newPct, prevPrice, newPrice}) => {
-      const arrow = newPct > prevPct ? '🔺' : '🔻';
-      msg += `  ${arrow} ${esc(p.productName)}\n    ${prevPct}% → <b>${newPct}%</b>  (${fmt(prevPrice)} → <b>${fmt(newPrice)}</b>)\n`;
+      const mapped = productMap[String(p.productNo)] || {};
+      const brand  = esc(mapped.브랜드 || p.brandName || '');
+      const pcode  = esc(mapped.품번 || '');
+      const info   = [brand, pcode].filter(Boolean).join(' · ');
+      const arrow  = newPct > prevPct ? '🔺' : '🔻';
+      msg += `  ${arrow} ${esc(p.productName)}\n    <i>${info}</i>\n    ${prevPct}% → <b>${newPct}%</b>  (${fmt(prevPrice)} → <b>${fmt(newPrice)}</b>)\n`;
     });
   }
   if (removedDisc.length > 0) {
     msg += `\n✅ <b>할인 종료</b> (${removedDisc.length}개)\n`;
     removedDisc.forEach(({p, prevPct}) => {
-      msg += `  • ${esc(p.productName)} (${prevPct}% 종료)\n`;
+      const mapped = productMap[String(p.productNo)] || {};
+      const brand  = esc(mapped.브랜드 || p.brandName || '');
+      const pcode  = esc(mapped.품번 || '');
+      const info   = [brand, pcode].filter(Boolean).join(' · ');
+      msg += `  • ${esc(p.productName)}\n    <i>${info}</i>  (${prevPct}% 종료)\n`;
     });
   }
 
