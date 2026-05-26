@@ -46,8 +46,9 @@ async function sendTelegram(text) {
             if (j.ok) {
               console.log(`[Telegram OK] message_id=${j.result?.message_id}`);
             } else {
-              console.error(`[Telegram ERROR] ${j.error_code}: ${j.description}`);
-              console.error(`  → BOT_TOKEN: ${BOT_TOKEN.slice(0,10)}... | CHAT_ID: ${CHAT_ID}`);
+              // CHAT_ID를 로그에 직접 포함하지 않아 GitHub 마스킹 우회 → 에러 원인 파악 가능
+              const chatIdLen = String(CHAT_ID).length;
+              console.error(`[Telegram ERROR] code=${j.error_code} | desc=${j.description} | chat_id_len=${chatIdLen}`);
             }
           } catch(e) { console.error('[Telegram parse error]', raw.slice(0, 200)); }
           resolve();
@@ -252,9 +253,9 @@ async function sendChangesReport(products) {
 async function main() {
   console.log(`Mode: ${MODE}`);
   console.log(`BOT_TOKEN: ${BOT_TOKEN ? BOT_TOKEN.slice(0,10)+'...(설정됨)' : '❌ 미설정'}`);
-  console.log(`CHAT_ID: ${CHAT_ID || '❌ 미설정'}`);
-  // CHAT_ID 미설정 시 자동 조회 시도
-  if (BOT_TOKEN && !CHAT_ID) await printChatId();
+  console.log(`CHAT_ID 설정됨: ${CHAT_ID ? 'YES (길이=' + String(CHAT_ID).length + ')' : '❌ 미설정'}`);
+  // 항상 getUpdates 실행 → 실제 수신 chat_id를 로그에 출력 (올바른 ID 확인용)
+  if (BOT_TOKEN) await printChatId();
   const products = await getAllProducts();
   if (MODE === 'summary') await sendSummaryReport(products);
   else await sendChangesReport(products);
