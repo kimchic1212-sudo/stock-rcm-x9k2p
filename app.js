@@ -995,40 +995,22 @@ function rebuildIndex(){
   if (!promoWrap && getPromoList().length > 0) {
       promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
       promoWrap.className = "flex gap-1.5 items-center overflow-x-auto no-scrollbar pl-[2.875rem]";
-      $("#brandChips").parentNode.insertBefore(promoWrap, $("#brandChips"));
+      // brandRow 앞에 삽입 (filterDetails 내)
+      const _brandRowRef = $("#brandRow");
+      if(_brandRowRef && _brandRowRef.parentNode) _brandRowRef.parentNode.insertBefore(promoWrap, _brandRowRef);
+      else { const _bc = $("#brandChips"); if(_bc?.parentNode) _bc.parentNode.insertBefore(promoWrap, _bc); }
   }
   if (getPromoList().length > 0) {
       if(promoWrap) {
-          const _promos = getPromoList();
-          const _activePN = window._activePromoName || "ALL";
-          // 기획전이 여러 개면 개별 칩을 항상 표시 (hidden 없음), 1개면 기존 방식
-          const _multiPromo = _promos.length > 1;
-          const _chipCls = (active) => active
-              ? 'bg-purple-600 text-white border-purple-700'
-              : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50';
-          const promoChips = _multiPromo
-              ? `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors promo-name-chip ${_chipCls(_activePN==='ALL')}" data-pname="ALL">🎁 전체</button>` +
-                _promos.map(pr => {
-                  const nm = pr.meta?.name || '기획전';
-                  const period = pr.meta?.period ? ` <span class="opacity-70 text-[10px]">${escapeHtml(pr.meta.period)}</span>` : '';
-                  return `<button class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors promo-name-chip ${_chipCls(_activePN===nm)}" data-pname="${escapeHtml(nm)}">🎪 ${escapeHtml(nm)}${period}</button>`;
-                }).join('')
-              : '';
-          promoWrap.innerHTML = promoChips + `
-              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
-              <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 hidden shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+          const _isPromoActive = window.tempPromoFilter === true;
+          const _showSel = _isPromoActive ? '' : 'hidden';
+          promoWrap.innerHTML = `
+              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
+              <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
           `;
-          promoWrap.querySelectorAll(".promo-name-chip").forEach(btn => {
-              btn.addEventListener("click", () => {
-                  window._activePromoName = btn.dataset.pname;
-                  // 기획전 뷰가 꺼져있으면 자동으로 켜기
-                  const promoBtn = $("#promoViewBtn");
-                  if(promoBtn && promoBtn.dataset.active !== "1") window.togglePromoView(promoBtn, true);
-                  saveHistoryState(); visibleCount = 60; render();
-              });
-          });
-          $("#promoTypeSel").onchange = () => { saveHistoryState(); visibleCount=60; render(); };
-          $("#promoRateSel").onchange = () => { saveHistoryState(); visibleCount=60; render(); };
+          const _ptSel = $("#promoTypeSel"), _prSel = $("#promoRateSel");
+          if(_ptSel) _ptSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
+          if(_prSel) _prSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
       }
   } else if (promoWrap) { promoWrap.innerHTML = ""; window._activePromoName = "ALL"; }
 
@@ -1332,33 +1314,129 @@ window.syncErpSales = async function() {
     }
 };
 
-window.togglePromoView = (btn, bypassRender = false) => {
-    if(!bypassRender) saveHistoryState();
-    const isActive = btn.dataset.active === "1";
-    btn.dataset.active = isActive ? "0" : "1";
-    const _isMultiPromo = getPromoList().length > 1;
-    if(!isActive) {
-        btn.classList.replace("bg-purple-50", "bg-purple-600");
-        btn.classList.replace("text-purple-700", "text-white");
-        btn.innerHTML = `<i data-lucide="x-circle" class="w-3.5 h-3.5"></i><span>해제</span>`;
-        window.tempPromoFilter = true;
-        $("#promoTypeSel")?.classList.remove("hidden");
-        $("#promoRateSel")?.classList.remove("hidden");
-        // 멀티 기획전 칩은 항상 표시 (remove hidden)
-        if(!_isMultiPromo) document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.remove("hidden"));
+// ── 기획전 버튼 상태 동기화 헬퍼 ──────────────────────────────
+function _syncPromoBtn(btn, active, pname) {
+    if(!btn) return;
+    btn.dataset.active = active ? "1" : "0";
+    if(active) {
+        btn.className = btn.className.replace(/bg-purple-50/g,'bg-purple-600').replace(/text-purple-700/g,'text-white').replace(/hover:bg-purple-100/g,'hover:bg-purple-700').replace(/border-purple-200/g,'border-purple-700');
+        const label = (!pname || pname === "ALL") ? "기획전" : (pname.length > 9 ? pname.slice(0,9)+'…' : pname);
+        btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i><span>${label} ✕</span>`;
     } else {
-        btn.classList.replace("bg-purple-600", "bg-purple-50");
-        btn.classList.replace("text-white", "text-purple-700");
+        btn.className = btn.className.replace(/bg-purple-600/g,'bg-purple-50').replace(/text-white/g,'text-purple-700').replace(/hover:bg-purple-700/g,'hover:bg-purple-100').replace(/border-purple-700/g,'border-purple-200');
         btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i><span>기획전</span>`;
-        window.tempPromoFilter = false;
-        window._activePromoName = "ALL";
-        $("#promoTypeSel")?.classList.add("hidden");
-        $("#promoRateSel")?.classList.add("hidden");
-        // 멀티 기획전 칩은 숨기지 않음 (항상 표시)
-        if(!_isMultiPromo) document.querySelectorAll(".promo-name-chip").forEach(c => c.classList.add("hidden"));
     }
     if(window.lucide) lucide.createIcons();
+}
+
+window.togglePromoView = (btn, bypassRender = false) => {
+    if(!bypassRender) saveHistoryState();
+    const _promos = getPromoList();
+    const _isMultiPromo = _promos.length > 1;
+
+    // ── 멀티 기획전: 드롭다운 팝오버 ────────────────────────────
+    if(_isMultiPromo) {
+        if(bypassRender) {
+            // 프로그래밍 방식 호출 (자동 활성화) — 드롭다운 없이 바로 적용
+            window.tempPromoFilter = true;
+            _syncPromoBtn(btn, true, window._activePromoName || "ALL");
+            return;
+        }
+        // 드롭다운 열기/닫기 토글
+        const existingDD = document.getElementById('promoDropdown');
+        if(existingDD) { existingDD.remove(); return; }
+
+        const dd = document.createElement('div');
+        dd.id = 'promoDropdown';
+        dd.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1.5px solid #e9d5ff;border-radius:14px;box-shadow:0 8px 28px rgba(88,28,135,0.18);overflow:hidden;min-width:190px;padding:6px 0;';
+
+        const activePN = window._activePromoName || "ALL";
+        const isFilterOn = window.tempPromoFilter === true;
+
+        // 기획전 목록 아이템
+        const ddItems = [
+            { pname: "ALL", label: "🎁 전체 기획전" },
+            ..._promos.map(pr => ({
+                pname: pr.meta?.name || '기획전',
+                label: `🎪 ${pr.meta?.name || '기획전'}${pr.meta?.period ? '  <span style="opacity:.6;font-size:10px;">'+escapeHtml(pr.meta.period)+'</span>' : ''}`
+            }))
+        ];
+        ddItems.forEach(item => {
+            const iBtn = document.createElement('button');
+            const isSelected = isFilterOn && activePN === item.pname;
+            iBtn.style.cssText = `display:block;width:100%;padding:9px 16px;text-align:left;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:background 0.12s;background:${isSelected?'#7c3aed':'#fff'};color:${isSelected?'#fff':'#6d28d9'};`;
+            iBtn.innerHTML = item.label;
+            iBtn.addEventListener('mouseover', () => { if(!isSelected) iBtn.style.background='#f5f3ff'; });
+            iBtn.addEventListener('mouseout', () => { if(!isSelected) iBtn.style.background='#fff'; });
+            iBtn.addEventListener('click', e => { e.stopPropagation(); window._selectPromoItem(item.pname); dd.remove(); });
+            dd.appendChild(iBtn);
+        });
+
+        // 필터 활성 시 해제 버튼
+        if(isFilterOn) {
+            const sep = document.createElement('div');
+            sep.style.cssText = 'height:1px;background:#f3e8ff;margin:6px 8px;';
+            dd.appendChild(sep);
+            const xBtn = document.createElement('button');
+            xBtn.style.cssText = 'display:block;width:100%;padding:8px 16px;text-align:left;font-size:11px;font-weight:700;color:#a855f7;background:#fff;border:none;cursor:pointer;';
+            xBtn.innerHTML = '✕ 기획전 필터 해제';
+            xBtn.addEventListener('mouseover', () => xBtn.style.background='#fdf4ff');
+            xBtn.addEventListener('mouseout', () => xBtn.style.background='#fff');
+            xBtn.addEventListener('click', e => { e.stopPropagation(); window._deactivatePromo(); dd.remove(); });
+            dd.appendChild(xBtn);
+        }
+
+        document.body.appendChild(dd);
+        const rect = btn.getBoundingClientRect();
+        dd.style.top = (rect.bottom + 6) + 'px';
+        dd.style.left = rect.left + 'px';
+
+        setTimeout(() => {
+            const closeDD = e => {
+                if(!dd.contains(e.target) && !btn.contains(e.target)) { dd.remove(); document.removeEventListener('click', closeDD); }
+            };
+            document.addEventListener('click', closeDD);
+        }, 10);
+        return;
+    }
+
+    // ── 단일 기획전: 기존 토글 ──────────────────────────────────
+    const isActive = btn.dataset.active === "1";
+    if(!isActive) {
+        window.tempPromoFilter = true;
+        _syncPromoBtn(btn, true, "ALL");
+        $("#promoTypeSel")?.classList.remove("hidden");
+        $("#promoRateSel")?.classList.remove("hidden");
+    } else {
+        window.tempPromoFilter = false;
+        window._activePromoName = "ALL";
+        _syncPromoBtn(btn, false);
+        $("#promoTypeSel")?.classList.add("hidden");
+        $("#promoRateSel")?.classList.add("hidden");
+    }
     if(!bypassRender) { visibleCount=60; render(); }
+};
+
+// 기획전 개별 선택
+window._selectPromoItem = (pname) => {
+    window._activePromoName = pname;
+    window.tempPromoFilter = true;
+    const btn = document.getElementById('promoViewBtn');
+    _syncPromoBtn(btn, true, pname);
+    $("#promoTypeSel")?.classList.remove("hidden");
+    $("#promoRateSel")?.classList.remove("hidden");
+    saveHistoryState(); visibleCount = 60; render();
+};
+
+// 기획전 필터 해제
+window._deactivatePromo = () => {
+    window.tempPromoFilter = false;
+    window._activePromoName = "ALL";
+    const btn = document.getElementById('promoViewBtn');
+    _syncPromoBtn(btn, false);
+    $("#promoTypeSel")?.classList.add("hidden");
+    $("#promoRateSel")?.classList.add("hidden");
+    saveHistoryState(); visibleCount = 60; render();
 };
 
 function setupSearchAutocomplete() {
