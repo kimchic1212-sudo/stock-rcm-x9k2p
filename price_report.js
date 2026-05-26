@@ -135,6 +135,15 @@ async function getAllProducts() {
   await browser.close();
   const unique = Object.values(all.reduce((acc, p) => { acc[p.productNo]=p; return acc; }, {}));
   console.log(`Total unique collected: ${unique.length}`);
+  // 할인 상품 1개의 코드 관련 필드 값 확인
+  const sample = unique.find(p => p.immediateDiscountAmt > 0);
+  if (sample) console.log('[CODE_DEBUG]', JSON.stringify({
+    productManagementCd: sample.productManagementCd,
+    groupManagementCode: sample.groupManagementCode,
+    groupManagementCodeName: sample.groupManagementCodeName,
+    brandName: sample.brandName,
+    productName: sample.productName,
+  }));
   return unique;
 }
 
