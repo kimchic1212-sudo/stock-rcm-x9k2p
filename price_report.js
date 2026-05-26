@@ -29,7 +29,14 @@ async function sendTelegram(text) {
   if (!BOT_TOKEN || !CHAT_ID) { console.log('[Telegram skip] BOT_TOKEN 또는 CHAT_ID 미설정'); return; }
   const chunks = [];
   let t = text;
-  while (t.length > 0) { chunks.push(t.slice(0, 4000)); t = t.slice(4000); }
+  while (t.length > 0) {
+    if (t.length <= 4000) { chunks.push(t); break; }
+    // <b> 태그 중간에서 분할되지 않도록 4000자 이내의 마지막 줄바꿈 위치에서 분할
+    let splitAt = t.lastIndexOf('\n', 4000);
+    if (splitAt <= 0) splitAt = 4000;
+    chunks.push(t.slice(0, splitAt));
+    t = t.slice(splitAt);
+  }
   for (const chunk of chunks) {
     await new Promise(resolve => {
       const body = JSON.stringify({ chat_id: CHAT_ID, text: chunk, parse_mode: 'HTML' });
