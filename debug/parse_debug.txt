@@ -1,7 +1,7 @@
-시작: 2026-05-27T10:52:22.578Z
+시작: 2026-05-27T11:00:51.162Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17798791559839807.168543271337
+[RES] 200 login.xml&postfix=17798796610708621.310288125913
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"34232","ITEM_NM":"포러너 165 [010-02863-AC, 1SIZE]","SALES_AMT":249000,"NET_SALES_AMT":2
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":81000,"ITEM_CD":"24352","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 3]","SALES_AMT":81000,"NET_SALES_AMT":73636,
@@ -66,4 +66,12 @@ selTodaySalesList: 13건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":288000,"ITEM_CD":"31612","ITEM_NM":"S/LAB 울트라 12 [LC2863300, S]","SALES_AMT":288000,"NET_SALES_AMT":261
   파싱 성공: 1건
-완료: 품번 15개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":138000,"ITEM_CD":"24140","ITEM_NM":"트레일 토트 그리드 [C25FW-B01-BGE, 1SIZE]","SALES_AMT":110400,"NET_SALES_AM
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":129000,"ITEM_CD":"29769","ITEM_NM":"퍼포먼스 롱 티 [1ME10240106, M]","SALES_AMT":116100,"NET_SALES_AMT":10554
+  파싱 성공: 3건
+완료: 품번 19개
