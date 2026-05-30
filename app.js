@@ -3263,7 +3263,7 @@ function openDetail(p){
             </tr>
         </thead>
         <tbody>
-        ${p.sizes.map(s => {
+        ${p.sizes.filter(s => s.busan > 0).map(s => {
             let centerRtBtn = s.center > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
@@ -3422,7 +3422,7 @@ function openDetail(p){
             </tr>
         </thead>
         <tbody>
-        ${p.sizes.map(s => {
+        ${p.sizes.filter(s => s.busan > 0).map(s => {
             const _s30b = _sizeSales30Busan[s.size] || 0;
             const _s30a = _sizeSales30Etc[s.size] || 0;
             let centerRtBtn = s.center > 0
