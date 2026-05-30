@@ -1,7 +1,7 @@
-시작: 2026-05-30T03:36:07.333Z
+시작: 2026-05-30T03:39:08.809Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17801121768447818.318245270223
+[RES] 200 login.xml&postfix=17801123599946121.50751836271
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,10 +12,14 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 1건
+selTodaySalesList: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":248000,"ITEM_CD":"31517","ITEM_NM":"제네시스 [L49137700, 270]","SALES_AMT":198400,"NET_SALES_AMT":180364,"V
   파싱 성공: 1건
-메뉴 클릭 후 거래: 1건
-완료: 품번 1개
+메뉴 클릭 후 거래: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"33059","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 265]","SALES_AMT":289000,"NET_SALES_AMT":2627
+  파싱 성공: 1건
+완료: 품번 2개
