@@ -1,4 +1,4 @@
-2026-05-29T09:22:26.693Z
+2026-05-30T07:04:57.013Z
 locator.waitFor: Timeout 15000ms exceeded.
 Call log:
   - waiting for locator('input[type="password"]').first() to be visible
@@ -7,5 +7,5 @@ locator.waitFor: Timeout 15000ms exceeded.
 Call log:
   - waiting for locator('input[type="password"]').first() to be visible
 
-    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:164:58)
-    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:267:24
+    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:167:58)
+    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:270:24
