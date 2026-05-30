@@ -910,15 +910,18 @@ function rebuildIndex(){
     const sinsa = Number(r["매장 (신사동)"] ?? r["매장(신사동)"] ?? 0);
     const center = Number(r["물류센터"] ?? 0);
     
+    const _sizeBarcode = (()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })();
     const found = p.sizes.find(s=>String(s.size)===String(r["규격"]));
-    if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; }
-    else p.sizes.push({ size:r["규격"], busan, sinsa, center });
+    if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; }
+    else p.sizes.push({ size:r["규격"], busan, sinsa, center, barcode:_sizeBarcode });
   }
   
   PRODUCTS = Array.from(map.values()).map(p=>{
     p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
+    // 부산 재고 있는 사이즈 중 바코드 누락된 것이 하나라도 있는지
+    p.noBarcodeBusan = p.sizes.some(s => s.busan > 0 && !s.barcode);
     
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
@@ -2880,7 +2883,7 @@ function render(){
       if(!match) return false;
     }
     if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
-    if(f.noBarcode && p.barcode) return false;
+    if(f.noBarcode && !p.noBarcodeBusan) return false;
     
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
