@@ -1,7 +1,7 @@
-시작: 2026-05-30T05:50:49.317Z
+시작: 2026-05-30T05:58:39.453Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17801202600493989.035224851004
+[RES] 200 login.xml&postfix=17801207297422538.7613916254627
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 17건
+selTodaySalesList: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":248000,"ITEM_CD":"31517","ITEM_NM":"제네시스 [L49137700, 270]","SALES_AMT":198400,"NET_SALES_AMT":180364,"V
   파싱 성공: 1건
-메뉴 클릭 후 거래: 17건
+메뉴 클릭 후 거래: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"33059","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 265]","SALES_AMT":289000,"NET_SALES_AMT":2627
@@ -82,4 +82,20 @@ selTodaySalesList: 17건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33374","ITEM_NM":"페가수스 42 와이드 [IR1228-102, 265]","SALES_AMT":152100,"NET_SALES_AMT":1
   파싱 성공: 1건
-완료: 품번 19개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":248000,"ITEM_CD":"34402","ITEM_NM":"에어 핏 스토리지 쇼츠 [GM76159-BLACK, S]","SALES_AMT":235600,"NET_SALES_AMT"
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-248000,"ITEM_CD":"34402","ITEM_NM":"에어 핏 스토리지 쇼츠 [GM76159-BLACK, S]","SALES_AMT":-235600,"NET_SALES_A
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"9395","ITEM_NM":"칩펑크 숏 슬리브 [C24FW-T03-WHT, M]","SALES_AMT":36000,"NET_SALES_AMT":32727
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21401","ITEM_NM":"보메로 플러스 [HV8150-102, 280]","SALES_AMT":197100,"NET_SALES_AMT":17918
+  파싱 성공: 1건
+완료: 품번 21개
