@@ -2697,6 +2697,7 @@ function getFilters(){
     todaySoldOnly: !!$$('button.chip[data-todaysold]').find(b=>b.dataset.active==="1"),
     dpFilters: $$('button.chip[data-dp]').filter(b=>b.dataset.active==="1").map(b=>b.dataset.dp),
     noImage: !!$$('button.chip[data-noimage]').find(b=>b.dataset.active==="1"),
+    noBarcode: !!$$('button.chip[data-nobarcode]').find(b=>b.dataset.active==="1"),
     sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
     sizeGear: $("#sizeSelGear") ? $("#sizeSelGear").value : "ALL",
@@ -2879,6 +2880,7 @@ function render(){
       if(!match) return false;
     }
     if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
+    if(f.noBarcode && p.barcode) return false;
     
     if(f.promoOnly) {
         if(!p.currentPromoPrice) return false; 
@@ -3672,6 +3674,8 @@ $("#resetAll").onclick=()=>{
     $$('button.chip[data-dp]').forEach(b => { b.dataset.active = "0"; b.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
     const noImgBtn = $('button.chip[data-noimage]');
     if(noImgBtn) { noImgBtn.dataset.active = "0"; noImgBtn.classList.remove('ring-2','ring-gray-400'); }
+    const noBarcodeBtn = $('button.chip[data-nobarcode]');
+    if(noBarcodeBtn) { noBarcodeBtn.dataset.active = "0"; noBarcodeBtn.classList.remove('ring-2','ring-amber-400'); }
 
     $("#sortSel").value="default";
     if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
@@ -4107,6 +4111,23 @@ window.addEventListener('DOMContentLoaded', () => {
             noImgBtn.dataset.active = noImgBtn.dataset.active === "1" ? "0" : "1";
             if(noImgBtn.dataset.active === "1") noImgBtn.classList.add('ring-2','ring-gray-400');
             else noImgBtn.classList.remove('ring-2','ring-gray-400');
+            visibleCount=60; render();
+        });
+    }
+
+    // ── 바코드 누락 필터 칩 ───────────────────────────────────────────
+    if(dpFilterRow && !$('button.chip[data-nobarcode]')) {
+        const noBarcodeBtn = document.createElement("button");
+        noBarcodeBtn.className = "chip !bg-amber-50 !text-amber-600 !border-amber-300 font-black";
+        noBarcodeBtn.dataset.nobarcode = "1";
+        noBarcodeBtn.dataset.active = "0";
+        noBarcodeBtn.innerHTML = "🔖 바코드누락";
+        dpFilterRow.appendChild(noBarcodeBtn);
+        noBarcodeBtn.addEventListener("click", () => {
+            saveHistoryState();
+            noBarcodeBtn.dataset.active = noBarcodeBtn.dataset.active === "1" ? "0" : "1";
+            if(noBarcodeBtn.dataset.active === "1") noBarcodeBtn.classList.add('ring-2','ring-amber-400');
+            else noBarcodeBtn.classList.remove('ring-2','ring-amber-400');
             visibleCount=60; render();
         });
     }
