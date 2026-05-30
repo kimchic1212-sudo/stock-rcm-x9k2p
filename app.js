@@ -760,8 +760,11 @@ function applyErpDeductions() {
     for(const p of PRODUCTS) {
         for(const s of p.sizes) {
             const key = p.품번 + '|' + String(s.size).trim();
-            if(bu[key]) s.busan = Math.max(0, s.busan - bu[key]);
-            if(si[key]) s.sinsa = Math.max(0, s.sinsa - si[key]);
+            // bu[key]가 양수(판매)면 차감, 음수(반품>판매)면 복원, 0이면 무시
+            const buNet = bu[key] ?? 0;
+            const siNet = si[key] ?? 0;
+            if(buNet !== 0) s.busan = Math.max(0, s.busan - buNet);
+            if(siNet !== 0) s.sinsa = Math.max(0, s.sinsa - siNet);
         }
         p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan, 0);
         p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa, 0);
@@ -3787,7 +3790,10 @@ window.renderSalesHistoryAdmin = () => {
 
                     const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
                     const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
-                    const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈"; 
+                    const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈";
+
+                    // 반품/반입/취소 row는 판매 데이터에서 제외
+                    if(typeStr && (typeStr.includes('반품') || typeStr.includes('반입') || typeStr.includes('취소') || typeStr.includes('환불'))) continue;
 
                     let locationGroup = "본사물류"; 
                     if(typeStr === "매장" || typeStr.includes("오프라인")) {
