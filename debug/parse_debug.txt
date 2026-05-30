@@ -1,7 +1,7 @@
-시작: 2026-05-30T07:59:16.667Z
+시작: 2026-05-30T08:00:43.109Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17801279719671868.5958124018887
+[RES] 200 login.xml&postfix=17801280560959049.762841970358
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 26건
+selTodaySalesList: 27건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":248000,"ITEM_CD":"31517","ITEM_NM":"제네시스 [L49137700, 270]","SALES_AMT":198400,"NET_SALES_AMT":180364,"V
   파싱 성공: 1건
-메뉴 클릭 후 거래: 26건
+메뉴 클릭 후 거래: 27건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"33059","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 265]","SALES_AMT":289000,"NET_SALES_AMT":2627
@@ -117,5 +117,9 @@ selTodaySalesList: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":141100,"ITEM_CD":"26637","ITEM_NM":"아디제로 보스턴 13 [JS4939, 270]","SALES_AMT":141100,"NET_SALES_AMT":12827
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26700","ITEM_NM":"아디제로 EVO SL [KI3381, 270]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
 완료: 품번 27개
