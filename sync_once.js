@@ -101,7 +101,10 @@ function parseItems(d, todayItems, debugLog) {
     const m = nm.match(/\[([^\],]+),\s*([^\]]+)\]/);
     if (!m) continue;
     const code = m[1].trim(), size = m[2].trim();
-    const qty = Math.abs(parseInt(item.SALES_QTY || item.salesQty) || 1);
+    const rawQty = parseInt(item.SALES_QTY || item.salesQty);
+    // 음수(반품)·0·NaN은 판매 집계에서 제외
+    if (!rawQty || rawQty <= 0) continue;
+    const qty = rawQty;
     if (!todayItems[code]) todayItems[code] = {};
     if (!todayItems[code][size]) todayItems[code][size] = 0;
     todayItems[code][size] += qty;
