@@ -1,7 +1,7 @@
-시작: 2026-05-30T06:56:19.692Z
+시작: 2026-05-30T06:59:07.160Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17801241925208296.236830115278
+[RES] 200 login.xml&postfix=17801243613595129.52743465102
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -65,7 +65,7 @@ selTodaySalesList: 25건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-209000,"ITEM_CD":"26702","ITEM_NM":"아디제로 EVO SL [KI3381, 280]","SALES_AMT":-198550,"NET_SALES_AMT":-1
-  파싱 성공: 1건
+  파싱 성공: 0건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26702","ITEM_NM":"아디제로 EVO SL [KI3381, 280]","SALES_AMT":198550,"NET_SALES_AMT":18050
@@ -89,7 +89,7 @@ selTodaySalesList: 25건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-248000,"ITEM_CD":"34402","ITEM_NM":"에어 핏 스토리지 쇼츠 [GM76159-BLACK, S]","SALES_AMT":-235600,"NET_SALES_A
-  파싱 성공: 2건
+  파싱 성공: 0건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"9395","ITEM_NM":"칩펑크 숏 슬리브 [C24FW-T03-WHT, M]","SALES_AMT":36000,"NET_SALES_AMT":32727
