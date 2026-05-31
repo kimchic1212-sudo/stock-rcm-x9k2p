@@ -1,7 +1,7 @@
-시작: 2026-05-31T05:40:33.658Z
+시작: 2026-05-31T05:44:38.362Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17802060485654962.809235197825
+[RES] 200 login.xml&postfix=17802062904489288.373453259937
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 10건
+selTodaySalesList: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":105000,"ITEM_CD":"33863","ITEM_NM":"ACG 트레일 드라이핏 하이라이즈 4인치 타이츠 [IO9644-010, L]","SALES_AMT":73500,"NET_
   파싱 성공: 1건
-메뉴 클릭 후 거래: 10건
+메뉴 클릭 후 거래: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"29721","ITEM_NM":"트랙 팩 35L 라이트 [2UE30300554, 1SIZE]","SALES_AMT":170100,"NET_SALES_AM
@@ -54,4 +54,8 @@ selTodaySalesList: 10건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26592","ITEM_NM":"아디제로 EVO SL [JH6206, 255]","SALES_AMT":188100,"NET_SALES_AMT":17100
   파싱 성공: 1건
-완료: 품번 11개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"30088","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 260]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 12개
