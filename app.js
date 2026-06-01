@@ -3894,7 +3894,8 @@ window.renderPromoAdmin = () => {
                 list.splice(idx, 1);
                 const newData = list.length > 0 ? { promotions: list } : {};
                 const body = { message:`end promotion: ${pName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch, sha: j.sha };
-                await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                const endRes = await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                if(!endRes.ok) { const errJ = await endRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${endRes.status}): ${errJ.message||''}`); }
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
                 rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin();
                 alert(`"${pName}" 기획전이 종료되었습니다.`);
@@ -3971,7 +3972,8 @@ window.renderPromoAdmin = () => {
                 const newData = { promotions: existingList };
                 const body = { message:`add promotion: ${promoName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch };
                 if(sha) body.sha = sha;
-                await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                const saveRes = await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                if(!saveRes.ok) { const errJ = await saveRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${saveRes.status}): ${errJ.message||''}`); }
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
                 rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin();
                 alert(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
