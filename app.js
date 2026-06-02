@@ -701,37 +701,33 @@ closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 
 async function callClaudeForGuide(brand, modelName, reviewText) {
     const key = getAnthKey();
-    if (!key) throw new Error("Gemini API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.");
+    if (!key) throw new Error("Groq API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.\n발급: console.groq.com (무료)");
     const userContent = reviewText.trim()
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
 
-    // 키 형식에 따라 인증 방식 자동 선택
-    // AIzaSy... → 구형 (URL 파라미터)
-    // AQ.Ab... → 신형 (x-goog-api-key 헤더)
-    const isNewFormat = key.startsWith('AQ.');
-    const url = isNewFormat
-        ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
-        : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
-    const headers = isNewFormat
-        ? { "Content-Type": "application/json", "x-goog-api-key": key }
-        : { "Content-Type": "application/json" };
-
-    const res = await fetch(url, {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${key}`
+        },
         body: JSON.stringify({
-            contents: [{ parts: [{ text: userContent }] }],
-            systemInstruction: { parts: [{ text: SALES_GUIDE_SYSTEM_PROMPT }] },
-            generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: SALES_GUIDE_SYSTEM_PROMPT },
+                { role: "user",   content: userContent }
+            ],
+            max_tokens: 1200,
+            temperature: 0.7
         })
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(`Gemini API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
+        throw new Error(`Groq API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
     }
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    return data.choices?.[0]?.message?.content || "";
 }
 
 function parseGuideResponse(text) {
@@ -4251,9 +4247,9 @@ window.addEventListener('DOMContentLoaded', () => {
                             <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
                         </div>
                         <div class="pt-3 border-t border-gray-200/40">
-                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Gemini API Key (AI 세일즈 가이드 자동생성)</label>
-                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="AIzaSy...">
-                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-purple-400 underline">aistudio.google.com</a> → 무료 / 미등록 탐지 → AI 자동생성에 사용</p>
+                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Groq API Key (AI 세일즈 가이드 자동생성)</label>
+                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="gsk_...">
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://console.groq.com" target="_blank" class="text-purple-400 underline">console.groq.com</a> → 무료 (하루 14,400회) / AI 세일즈 가이드 자동생성에 사용</p>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
