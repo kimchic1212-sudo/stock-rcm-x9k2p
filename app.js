@@ -701,22 +701,31 @@ closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 
 async function callClaudeForGuide(brand, modelName, reviewText) {
     const key = getAnthKey();
-    if (!key) throw new Error("Anthropic API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.");
+    if (!key) throw new Error("Gemini API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.");
     const userContent = reviewText.trim()
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
-    const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: userContent }] }],
-                systemInstruction: { parts: [{ text: SALES_GUIDE_SYSTEM_PROMPT }] },
-                generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
-            })
-        }
-    );
+
+    // 키 형식에 따라 인증 방식 자동 선택
+    // AIzaSy... → 구형 (URL 파라미터)
+    // AQ.Ab... → 신형 (x-goog-api-key 헤더)
+    const isNewFormat = key.startsWith('AQ.');
+    const url = isNewFormat
+        ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`
+        : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    const headers = isNewFormat
+        ? { "Content-Type": "application/json", "x-goog-api-key": key }
+        : { "Content-Type": "application/json" };
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: userContent }] }],
+            systemInstruction: { parts: [{ text: SALES_GUIDE_SYSTEM_PROMPT }] },
+            generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+        })
+    });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(`Gemini API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
