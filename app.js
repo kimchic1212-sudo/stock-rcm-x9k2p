@@ -706,7 +706,7 @@ async function callClaudeForGuide(brand, modelName, reviewText) {
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
     const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
