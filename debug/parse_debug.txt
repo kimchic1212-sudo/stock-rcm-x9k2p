@@ -1,7 +1,7 @@
-시작: 2026-06-02T10:47:32.272Z
+시작: 2026-06-02T10:50:47.648Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17803972659763905.059292463817
+[RES] 200 login.xml&postfix=1780397461464916.1568958888045
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 14건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"33839","ITEM_NM":"ACG 트레일 드라이핏 탱크 [IO9653-382, L]","SALES_AMT":10980,"NET_SALES_AMT":9
   파싱 성공: 2건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":200000,"ITEM_CD":"27719","ITEM_NM":"레이스먼트 상품권 (10만원) [RM-GC10, 1SIZE]","SALES_AMT":0,"NET_SALES_AMT":0,
@@ -66,4 +66,8 @@ selTodaySalesList: 13건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"34169","ITEM_NM":"페가수스 42 [IB1881-602, 240]","SALES_AMT":152100,"NET_SALES_AMT":13827
   파싱 성공: 1건
-완료: 품번 16개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":159000,"ITEM_CD":"30553","ITEM_NM":"엔돌핀 아주라 [S21070-172, 275]","SALES_AMT":143100,"NET_SALES_AMT":13009
+  파싱 성공: 2건
+완료: 품번 18개
