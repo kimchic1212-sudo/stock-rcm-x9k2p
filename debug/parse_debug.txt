@@ -1,7 +1,7 @@
-시작: 2026-06-03T04:55:54.106Z
+시작: 2026-06-03T05:00:41.904Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17804625673292818.1060737614985
+[RES] 200 login.xml&postfix=17804628544014210.3537615706355
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 12건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":78420,"NET_SALES_AMT":71291,"VA
   파싱 성공: 1건
-메뉴 클릭 후 거래: 12건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319000,"ITEM_CD":"33456","ITEM_NM":"울트라플라이 2 [HF5668-101, 255]","SALES_AMT":287100,"NET_SALES_AMT":2610
@@ -62,4 +62,16 @@ selTodaySalesList: 12건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"15780","ITEM_NM":"라이브 울 믹스 숏 슬리브 [C25SS-T01-GRE, S]","SALES_AMT":60000,"NET_SALES_AMT"
   파싱 성공: 1건
-완료: 품번 17개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"26744","ITEM_NM":"아디제로 보스턴 13 [JQ1668, 280]","SALES_AMT":170050,"NET_SALES_AMT":15459
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-179000,"ITEM_CD":"26744","ITEM_NM":"아디제로 보스턴 13 [JQ1668, 280]","SALES_AMT":-170050,"NET_SALES_AMT":-1
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"26744","ITEM_NM":"아디제로 보스턴 13 [JQ1668, 280]","SALES_AMT":161100,"NET_SALES_AMT":14645
+  파싱 성공: 1건
+완료: 품번 18개
