@@ -1,7 +1,7 @@
-시작: 2026-06-03T05:31:32.903Z
+시작: 2026-06-03T05:40:41.588Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17804647027589550.745181283488
+[RES] 200 login.xml&postfix=1780465252959169.58562812327438
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 16건
+selTodaySalesList: 17건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":78420,"NET_SALES_AMT":71291,"VA
   파싱 성공: 1건
-메뉴 클릭 후 거래: 16건
+메뉴 클릭 후 거래: 17건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319000,"ITEM_CD":"33456","ITEM_NM":"울트라플라이 2 [HF5668-101, 255]","SALES_AMT":287100,"NET_SALES_AMT":2610
@@ -78,4 +78,8 @@ selTodaySalesList: 16건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"30151","ITEM_NM":"본디 9 와이드 [1162013-CYLT, 260]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-완료: 품번 19개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"29169","ITEM_NM":"클라우드붐 맥스 [3MF30310438, 260]","SALES_AMT":224100,"NET_SALES_AMT":203
+  파싱 성공: 1건
+완료: 품번 20개
