@@ -1,7 +1,7 @@
-시작: 2026-06-03T09:50:45.868Z
+시작: 2026-06-03T10:00:47.178Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17804802602549326.395457695266
+[RES] 200 login.xml&postfix=17804808630213064.7134587383252
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 39건
+selTodaySalesList: 40건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":78420,"NET_SALES_AMT":71291,"VA
   파싱 성공: 1건
-메뉴 클릭 후 거래: 39건
+메뉴 클릭 후 거래: 40건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319000,"ITEM_CD":"33456","ITEM_NM":"울트라플라이 2 [HF5668-101, 255]","SALES_AMT":287100,"NET_SALES_AMT":2610
@@ -170,4 +170,8 @@ selTodaySalesList: 39건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26777","ITEM_NM":"아디제로 EVO SL [JH6208, 235]","SALES_AMT":198550,"NET_SALES_AMT":18050
   파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33502","ITEM_NM":"ACG 제가마 트레일 [HV8113-002, 275]","SALES_AMT":117930,"NET_SALES_AMT":1
+  파싱 성공: 1건
 완료: 품번 45개
