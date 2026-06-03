@@ -1,7 +1,7 @@
-시작: 2026-06-03T04:23:47.261Z
+시작: 2026-06-03T04:26:30.671Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1780460636444241.56681070752194
+[RES] 200 login.xml&postfix=17804608002097157.969110460517
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 8건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":78420,"NET_SALES_AMT":71291,"VA
   파싱 성공: 1건
-메뉴 클릭 후 거래: 8건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319000,"ITEM_CD":"33456","ITEM_NM":"울트라플라이 2 [HF5668-101, 255]","SALES_AMT":287100,"NET_SALES_AMT":2610
@@ -46,4 +46,12 @@ selTodaySalesList: 8건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":12000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":10800,"NET_SALES_AMT":
   파싱 성공: 2건
-완료: 품번 13개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":113200,"ITEM_CD":"30631","ITEM_NM":"라이드 19 [S11055-131, 245]","SALES_AMT":101880,"NET_SALES_AMT":92618,
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"27641","ITEM_NM":"아드레날린 GTS 25 [1204431B128, 245]","SALES_AMT":170100,"NET_SALES_AMT"
+  파싱 성공: 1건
+완료: 품번 15개
