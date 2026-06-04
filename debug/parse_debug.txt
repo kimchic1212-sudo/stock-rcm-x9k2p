@@ -1,7 +1,7 @@
-시작: 2026-06-04T04:38:02.244Z
+시작: 2026-06-04T04:40:37.312Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17805478929784669.928208048069
+[RES] 200 login.xml&postfix=17805480510874696.673587160197
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 4건
+selTodaySalesList: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"15781","ITEM_NM":"라이브 울 믹스 숏 슬리브 [C25SS-T01-GRE, M]","SALES_AMT":60000,"NET_SALES_AMT"
   파싱 성공: 1건
-메뉴 클릭 후 거래: 4건
+메뉴 클릭 후 거래: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33499","ITEM_NM":"ACG 제가마 트레일 [HV8113-002, 260]","SALES_AMT":169250,"NET_SALES_AMT":1
@@ -30,4 +30,8 @@ selTodaySalesList: 4건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"32050","ITEM_NM":"런 쇼츠 [SS5M-BLK, M]","SALES_AMT":159200,"NET_SALES_AMT":144727,"VAT_
   파싱 성공: 2건
-완료: 품번 4개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"17793","ITEM_NM":"에어셰드 프로 풀오버 [24192Q5-SBDY, S]","SALES_AMT":175200,"NET_SALES_AMT":1
+  파싱 성공: 1건
+완료: 품번 5개
