@@ -1,7 +1,7 @@
-시작: 2026-06-05T06:01:20.583Z
+시작: 2026-06-05T06:09:52.416Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17806392925362698.960934046961
+[RES] 200 login.xml&postfix=17806398070032979.91293590289
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 7건
+selTodaySalesList: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":175200,"ITEM_CD":"30490","ITEM_NM":"엔돌핀 스피드 5 [S21007-172, 275]","SALES_AMT":175200,"NET_SALES_AMT":159
   파싱 성공: 1건
-메뉴 클릭 후 거래: 7건
+메뉴 클릭 후 거래: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"34233","ITEM_NM":"포러너 165 [010-02863-AD, 1SIZE]","SALES_AMT":249000,"NET_SALES_AMT":2
@@ -42,4 +42,12 @@ selTodaySalesList: 7건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":75050,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 12개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"26741","ITEM_NM":"아디제로 보스턴 13 [JQ1668, 265]","SALES_AMT":149000,"NET_SALES_AMT":13545
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26906","ITEM_NM":"아디제로 EVO SL [KI3383, 250]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 1건
+완료: 품번 14개
