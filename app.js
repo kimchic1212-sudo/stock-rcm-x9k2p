@@ -3893,9 +3893,13 @@ window.renderPromoAdmin = () => {
             try {
                 const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
                 const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+                if(!r.ok) throw new Error(`GitHub 파일 조회 실패 (${r.status})`);
                 const j = await r.json();
-                let data = {}; try { data = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } catch(e){}
+                let data = {};
+                try { data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, ''))))); }
+                catch(e) { console.error('[기획전 종료] 파싱 실패:', e); throw new Error('기획전 데이터 파싱 실패: ' + e.message); }
                 let list = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
+                if(idx >= list.length) throw new Error(`인덱스 오류: idx=${idx}, 목록 길이=${list.length}`);
                 list.splice(idx, 1);
                 const newData = list.length > 0 ? { promotions: list } : {};
                 const body = { message:`end promotion: ${pName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch, sha: j.sha };
@@ -3969,7 +3973,7 @@ window.renderPromoAdmin = () => {
                     const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
                     if(r.ok) {
                         const j = await r.json(); sha = j.sha;
-                        const data = JSON.parse(decodeURIComponent(escape(atob(j.content))));
+                        const data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
                         existingList = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
                     }
                 } catch(e) {}
