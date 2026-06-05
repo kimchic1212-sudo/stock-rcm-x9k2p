@@ -1,7 +1,7 @@
-시작: 2026-06-05T04:50:46.242Z
+시작: 2026-06-05T04:59:56.815Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17806350564951256.4940702566619
+[RES] 200 login.xml&postfix=17806356071143718.7082398081207
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":175200,"ITEM_CD":"30490","ITEM_NM":"엔돌핀 스피드 5 [S21007-172, 275]","SALES_AMT":175200,"NET_SALES_AMT":159
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"34233","ITEM_NM":"포러너 165 [010-02863-AD, 1SIZE]","SALES_AMT":249000,"NET_SALES_AMT":2
@@ -34,4 +34,12 @@ selTodaySalesList: 5건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":44000,"ITEM_CD":"20709","ITEM_NM":"라이트웨이트 크루 삭스 1팩 [HV6919-100, L]","SALES_AMT":41800,"NET_SALES_AMT":3
   파싱 성공: 2건
-완료: 품번 10개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"32508","ITEM_NM":"후디니 재킷 [24142R5-BLSG, L]","SALES_AMT":179100,"NET_SALES_AMT":162818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":75050,"NET_SALES_AMT
+  파싱 성공: 1건
+완료: 품번 12개
