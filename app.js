@@ -914,6 +914,9 @@ function rebuildIndex(){
       map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), itemCode:String(r["품목내부코드"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })(), sizes:[], hasMemo: false, periodSales: 0 });
     }
     const p = map.get(code);
+    // 소비자가가 0이고 현재 행에 가격 있으면 업데이트 (첫 행이 0원인 경우 대비)
+    const rowPrice = Number(r["소비자가"]||0);
+    if(!p.소비자가 && rowPrice > 0) p.소비자가 = rowPrice;
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
     const sinsa = Number(r["매장 (신사동)"] ?? r["매장(신사동)"] ?? 0);
     const center = Number(r["물류센터"] ?? 0);
