@@ -358,8 +358,9 @@
 
     window.addEventListener('scroll', function(){
       const scrolled = window.scrollY > 120;
-      // 스크롤 내려가면 자동 접힘 (사용자가 수동으로 펼친 경우 제외)
-      if (scrolled && !userToggled && !isCollapsed) {
+      // 페이지에 스크롤할 내용이 충분할 때만 자동 접힘
+      const hasEnoughContent = (document.documentElement.scrollHeight - window.innerHeight) > 200;
+      if (scrolled && !userToggled && !isCollapsed && hasEnoughContent) {
         isCollapsed = true;
         applyState();
       }
