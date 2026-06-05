@@ -522,6 +522,21 @@ window.triggerPosSync = async () => {
     }
 };
 
+// GitHub Contents API에서 직접 읽기 (Pages 배포 대기 없이 즉시 반영)
+async function fetchGithubJson(path) {
+    const pat = getPat();
+    if(!pat || !GH.owner || !GH.repo) return null;
+    try {
+        const res = await fetch(
+            `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${GH.branch}&t=${Date.now()}`,
+            { headers: { Authorization: "Bearer " + pat, Accept: "application/vnd.github.v3+json" } }
+        );
+        if(!res.ok) return null;
+        const j = await res.json();
+        return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+    } catch(e) { return null; }
+}
+
 async function loadData(force = false){
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
@@ -540,7 +555,7 @@ async function loadData(force = false){
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
           fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
-          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),
+          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),  // 아래서 API로 덮어씀
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null),
           fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null),
@@ -550,7 +565,10 @@ async function loadData(force = false){
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
       if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
       if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
-      if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
+      // 기획전: GitHub API 직접 읽기 (Pages 배포 대기 없이 즉시 반영)
+      const promoApiData = await fetchGithubJson(PROMOTIONS_PATH);
+      if(promoApiData !== null) PROMOTIONS = promoApiData;
+      else if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
       if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
       if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
@@ -628,6 +646,10 @@ function getDPStatus(p) {
 let _lastSalesSync = 0;
 async function loadSalesOnly() {
   try {
+    // 기획전: API에서 직접 읽어 즉시 반영
+    const promoFresh = await fetchGithubJson(PROMOTIONS_PATH);
+    if(promoFresh !== null) PROMOTIONS = promoFresh;
+
     const res = await fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now());
     if (!res.ok) return;
     const newHistory = await res.json();
