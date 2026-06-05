@@ -1485,7 +1485,7 @@ function setupSearchAutocomplete() {
     };
 
     qEl.addEventListener("focus", () => { if(!qEl.value.trim()) showRecent(); });
-    document.addEventListener("click", (e) => { if(!qEl.contains(e.target) && !suggBox.contains(e.target)) suggBox.classList.add("hidden"); });
+    document.addEventListener("click", (e) => { if(qEl && suggBox && !qEl.contains(e.target) && !suggBox.contains(e.target)) suggBox.classList.add("hidden"); });
     qEl.addEventListener("keydown", (e) => { 
         if(e.key === "Enter" && qEl.value.trim()) { 
             saveHistoryState();
