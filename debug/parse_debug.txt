@@ -1,7 +1,7 @@
-시작: 2026-06-06T04:21:57.967Z
+시작: 2026-06-06T04:24:07.003Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17807197307496839.662278531925
+[RES] 200 login.xml&postfix=17807198575578243.292272341707
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 6건
+selTodaySalesList: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26905","ITEM_NM":"아디제로 EVO SL [KI3383, 245]","SALES_AMT":188100,"NET_SALES_AMT":17100
   파싱 성공: 1건
-메뉴 클릭 후 거래: 6건
+메뉴 클릭 후 거래: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":449000,"ITEM_CD":"32195","ITEM_NM":"더 락커 [40002-BK, 230]","SALES_AMT":404100,"NET_SALES_AMT":367364,"VA
@@ -38,4 +38,8 @@ selTodaySalesList: 6건
   items: 5개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"16796","ITEM_NM":"퍼포먼스 탱크 [1ME10222985, L]","SALES_AMT":90250,"NET_SALES_AMT":82045,"V
   파싱 성공: 5건
-완료: 품번 10개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":99000,"ITEM_CD":"28992","ITEM_NM":"ACG 세컨드 선라이즈 드라이 핏 ADV 5인치 브리프 라인드 쇼츠 [IO9676-010, S]","SALES_AMT":8
+  파싱 성공: 1건
+완료: 품번 11개
