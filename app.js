@@ -1016,7 +1016,7 @@ function rebuildIndex(){
     const sinsa = Number(r["매장 (신사동)"] ?? r["매장(신사동)"] ?? 0);
     const center = Number(r["물류센터"] ?? 0);
     
-    // _sizeBarcode: 위에서 이미 정의된 변수 재사용 (이중 정의 제거)
+    const _sizeBarcode = (()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })();
     const found = p.sizes.find(s=>String(s.size)===String(r["규격"]));
     if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; }
     else p.sizes.push({ size:r["규격"], busan, sinsa, center, barcode:_sizeBarcode });
