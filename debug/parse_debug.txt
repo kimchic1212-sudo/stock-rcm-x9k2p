@@ -1,7 +1,7 @@
-시작: 2026-06-06T05:20:41.438Z
+시작: 2026-06-06T05:25:43.936Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17807232552346462.952341760696
+[RES] 200 login.xml&postfix=17807235576288919.77316311442
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26905","ITEM_NM":"아디제로 EVO SL [KI3383, 245]","SALES_AMT":188100,"NET_SALES_AMT":17100
   파싱 성공: 1건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":449000,"ITEM_CD":"32195","ITEM_NM":"더 락커 [40002-BK, 230]","SALES_AMT":404100,"NET_SALES_AMT":367364,"VA
@@ -50,4 +50,8 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26617","ITEM_NM":"아디제로 EVO SL [JP7149, 275]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
-완료: 품번 13개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29236","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 280]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 14개
