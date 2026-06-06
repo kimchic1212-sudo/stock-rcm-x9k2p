@@ -2,7 +2,7 @@
 if (location.search) location.replace(location.pathname);
 
 // ── 앱 버전 ──────────────────────────────────────────────────
-const APP_VERSION = "v26.06.05";
+const APP_VERSION = "v26.06.06";
 document.addEventListener("DOMContentLoaded", () => {
     const badge = document.getElementById("appVersionBadge");
     if(badge) badge.textContent = APP_VERSION;
@@ -109,6 +109,27 @@ style.innerHTML = `
     .stats .stat-secondary { font-size: 11px; font-weight: 500; color: #999; }
     .stats .stat-primary-rev { font-size: 14px; font-weight: 900; color: #dc2626; }
     .stats .stat-secondary-rev { font-size: 11px; font-weight: 600; color: #555; }
+
+    /* ── 다크모드 동적 요소 대응 ── */
+    body.dark-mode #searchSuggestions { background:#1E1E1E; border-color:#374151; }
+    body.dark-mode #searchSuggestions > div { background:#1E1E1E; color:#9CA3AF; }
+    body.dark-mode #searchSuggestions > div:hover { background:#2d2d2d; }
+    body.dark-mode .toast { background: #334155; }
+    body.dark-mode #analyticsDashboard { background: #121212; }
+    body.dark-mode #analyticsDashboard .bg-white,
+    body.dark-mode #analyticsDashboard article { background: #1E1E1E !important; border-color: #374151 !important; }
+    body.dark-mode #analyticsDashboard h1, body.dark-mode #analyticsDashboard h2 { color: #F3F4F6; }
+    body.dark-mode #erpSyncModal > div,
+    body.dark-mode #posSyncGuideModal > div > div { background: #1E1E1E !important; color: #F3F4F6; }
+    body.dark-mode .list-item { border-color: #374151; }
+    body.dark-mode .list-item:hover { background-color: #1a1a1a; }
+    body.dark-mode .product-name { color: #F3F4F6; }
+    body.dark-mode .brand-code { color: #6B7280; }
+    body.dark-mode #detailModal .bg-white, body.dark-mode #detailModal .card { background: #1E1E1E; }
+    body.dark-mode select.ipt, body.dark-mode input.ipt { background: #1E1E1E; color: #F3F4F6; border-color: #374151; }
+    /* 스켈레톤 다크모드 */
+    body.dark-mode .animate-pulse .bg-gray-200 { background: #374151; }
+    body.dark-mode .animate-pulse .bg-gray-100 { background: #2d2d2d; }
 `;
 document.head.appendChild(style);
 
@@ -127,12 +148,12 @@ const SALES_DEDUCT_PATH = "sales.json";
 const DISPLAY_PATH = "display_items.json";
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
-// 기본 GitHub 설정 (어떤 기기에서도 설정 없이 바로 작동)
+// 기본 GitHub 설정 (owner·repo·branch만 기본값, PAT는 Admin에서 직접 입력)
 const DEFAULT_GH = {
   owner:  'kimchic1212-sudo',
   repo:   'stock-rcm-x9k2p',
   branch: 'main',
-  pat:    ['ghp_G1lhtm', 'QWovvxsnE7', 'JbvbQ9EiDnN8Se3NWNLb'].join(''),
+  pat:    '', // PAT는 소스에 저장하지 않음 — ADMIN > API 설정에서 등록
 };
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
@@ -544,10 +565,32 @@ async function fetchGithubJson(path) {
     } catch(e) { return null; }
 }
 
+function showSkeletonCards(n = 6) {
+    const grid = document.getElementById("grid");
+    const results = document.getElementById("results");
+    const emptyState = document.getElementById("emptyState");
+    if(!grid) return;
+    if(results) results.classList.remove("hidden");
+    if(emptyState) emptyState.classList.add("hidden");
+    const skeletonHtml = Array(n).fill(0).map(() => `
+      <div class="card p-5 flex flex-col gap-3 animate-pulse">
+        <div class="flex gap-1.5"><div class="h-5 w-16 bg-gray-200 rounded-full"></div><div class="h-5 w-20 bg-gray-200 rounded-full"></div></div>
+        <div class="flex justify-between gap-4">
+          <div class="flex-1 flex flex-col gap-2"><div class="h-4 w-3/4 bg-gray-200 rounded"></div><div class="h-3 w-1/2 bg-gray-100 rounded"></div></div>
+          <div class="w-[110px] h-[110px] bg-gray-100 rounded-xl shrink-0"></div>
+        </div>
+        <div class="flex gap-2">${Array(5).fill('<div class="w-[46px] h-[44px] bg-gray-100 rounded-lg"></div>').join('')}</div>
+        <div class="border-t pt-3 flex justify-between"><div class="h-3 w-24 bg-gray-100 rounded"></div><div class="h-5 w-20 bg-gray-200 rounded"></div></div>
+      </div>`).join('');
+    grid.innerHTML = skeletonHtml;
+}
+
 async function loadData(force = false){
+  // 캐시 없거나 강제 갱신이면 스켈레톤 표시
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+  if(!cached || force) showSkeletonCards();
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
-      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; DISPLAY_ITEMS = cached.displayItems || {};
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; SALES_DEDUCTIONS = cached.salesDeductions || null; DISPLAY_ITEMS = cached.displayItems || {};
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
       const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
       setupQuickActionBar();
@@ -581,14 +624,28 @@ async function loadData(force = false){
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
       if(diRes && diRes.ok) DISPLAY_ITEMS = await diRes.json(); else DISPLAY_ITEMS = {};
 
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, displayItems: DISPLAY_ITEMS, _timestamp: Date.now() }));
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, _timestamp: Date.now() }));
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
       const _bar2 = $("#actionBtnsWrap"); if(_bar2) _bar2.dataset.setup = "0";
       setupQuickActionBar();
       if(window.renderPromoAdmin) window.renderPromoAdmin();
       if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
       if(window.renderSalesAdmin) window.renderSalesAdmin();
-  } catch(e) { console.error("Data Load Error", e); }
+  } catch(e) {
+    console.error("Data Load Error", e);
+    const grid = document.getElementById("grid");
+    if(grid) grid.innerHTML = `
+      <div class="col-span-3 flex flex-col items-center justify-center py-20 gap-4">
+        <div class="text-4xl">⚠️</div>
+        <div class="text-lg font-black text-gray-700">데이터 로드 실패</div>
+        <div class="text-sm text-gray-400 font-bold">${e.message || '네트워크 오류'}</div>
+        <button onclick="loadData(true)" class="brutal px-5 py-2 bg-black text-white font-black text-sm mt-2">🔄 다시 시도</button>
+      </div>`;
+    const emptyState = document.getElementById("emptyState");
+    if(emptyState) emptyState.classList.add("hidden");
+    const results = document.getElementById("results");
+    if(results) results.classList.remove("hidden");
+  }
 }
 
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
@@ -678,18 +735,21 @@ async function loadSalesOnly() {
   } catch(e) {}
 }
 // 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
-setInterval(loadSalesOnly, 5 * 60 * 1000);
+const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
 
 // ── POS 동기화 자동 트리거 ──────────────────────────────────
 // GitHub Actions cron이 throttle 되는 문제 보완:
 // 앱이 열려있는 동안 10분마다 workflow_dispatch로 직접 트리거
 let _lastPosTrigger = 0;
+const _POS_TRIGGER_KEY = 'rcm_pos_last_trigger';
 async function autoTriggerPosSync() {
     if (!getPat()) return; // PAT 없으면 skip
     const now = Date.now();
-    // 마지막 트리거로부터 9분 이상 경과 시에만 실행 (중복 방지)
-    if (now - _lastPosTrigger < 9 * 60 * 1000) return;
+    // localStorage로 탭 간 공유 — 어느 탭에서든 9분 내 트리거했으면 skip
+    const sharedLast = parseInt(localStorage.getItem(_POS_TRIGGER_KEY) || '0');
+    if (now - Math.max(_lastPosTrigger, sharedLast) < 9 * 60 * 1000) return;
     _lastPosTrigger = now;
+    localStorage.setItem(_POS_TRIGGER_KEY, String(now));
     try {
         const r = await fetch(
             `https://api.github.com/repos/${GH.owner}/${GH.repo}/actions/workflows/pos_sync.yml/dispatches`,
@@ -699,10 +759,17 @@ async function autoTriggerPosSync() {
     } catch(e) { console.log('[POS AutoSync] failed:', e.message); }
 }
 // 앱 시작 2분 후 첫 트리거, 이후 10분마다 반복
+let _posIntervalId = null;
 setTimeout(() => {
     autoTriggerPosSync();
-    setInterval(autoTriggerPosSync, 10 * 60 * 1000);
+    _posIntervalId = setInterval(autoTriggerPosSync, 10 * 60 * 1000);
 }, 2 * 60 * 1000);
+
+// 탭 닫힐 때 interval 정리
+window.addEventListener('beforeunload', () => {
+    if(_salesIntervalId) clearInterval(_salesIntervalId);
+    if(_posIntervalId)   clearInterval(_posIntervalId);
+});
 
 // ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
 const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 수석 러닝 슈즈 애널리스트입니다.
@@ -728,7 +795,8 @@ best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프
 closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 %%APP_DATA_END%%`;
 
-async function callClaudeForGuide(brand, modelName, reviewText) {
+// Groq API (llama-3.3-70b) 호출 — AI 세일즈 가이드 자동생성
+async function callAIGuide(brand, modelName, reviewText) {
     const key = getAnthKey();
     if (!key) throw new Error("Groq API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.\n발급: console.groq.com (무료)");
     const userContent = reviewText.trim()
@@ -787,8 +855,9 @@ function parseGuideResponse(text) {
 
 function applyErpDeductions() {
     if(!SALES_DEDUCTIONS) return;
-    const d = new Date();
-    const today = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+    // KST 기준 날짜 계산 (UTC+9) — 자정 전후 오류 방지
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const today = `${kst.getUTCFullYear()}${String(kst.getUTCMonth()+1).padStart(2,'0')}${String(kst.getUTCDate()).padStart(2,'0')}`;
     if(SALES_DEDUCTIONS.date !== today) { SALES_DEDUCTIONS = null; return; }
     const bu = SALES_DEDUCTIONS.busan || {}, si = SALES_DEDUCTIONS.sinsa || {};
     for(const p of PRODUCTS) {
@@ -898,14 +967,11 @@ async function commitInventoryToGitHub(rows, meta) {
 }
 
 function getActiveWeeklyCategory() {
-    const now = Date.now();
-    const t1 = new Date('2026-05-08T00:00:00+09:00').getTime();
-    const t2 = new Date('2026-05-15T00:00:00+09:00').getTime();
-    const t3 = new Date('2026-05-22T00:00:00+09:00').getTime();
-    const t4 = new Date('2026-05-29T23:59:59+09:00').getTime();
-    if (now >= t1 && now < t2) return "FOOTWEAR";
-    if (now >= t2 && now < t3) return "APPAREL";
-    if (now >= t3 && now <= t4) return "ACC/GEAR";
+    // 하드코딩된 날짜 제거 — 위클리 카테고리는 기획전 데이터에서 읽어야 함
+    // 현재 활성 기획전 중 weeklyCategory 필드가 있으면 그것을 사용
+    for (const pr of getPromoList()) {
+        if (pr.meta?.weeklyCategory) return pr.meta.weeklyCategory;
+    }
     return null;
 }
 
@@ -950,7 +1016,7 @@ function rebuildIndex(){
     const sinsa = Number(r["매장 (신사동)"] ?? r["매장(신사동)"] ?? 0);
     const center = Number(r["물류센터"] ?? 0);
     
-    const _sizeBarcode = (()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })();
+    // _sizeBarcode: 위에서 이미 정의된 변수 재사용 (이중 정의 제거)
     const found = p.sizes.find(s=>String(s.size)===String(r["규격"]));
     if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; }
     else p.sizes.push({ size:r["규격"], busan, sinsa, center, barcode:_sizeBarcode });
@@ -2678,7 +2744,7 @@ function card(p){
            </div>
            
            <div class="card-img-wrap">
-               ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">` : '<div class="w-full h-full bg-gray-50 flex items-center justify-center text-xs text-gray-400 font-bold">NO IMG</div>'}
+               ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">` : `<div class="w-full h-full bg-gray-50 flex items-center justify-center flex-col gap-1"><span style="font-size:32px;opacity:.35">${p.카테고리==='신발'?'👟':p.카테고리==='의류'?'👕':'🎒'}</span></div>`}
                <button class="fav-btn bookmark-overlay text-gray-400 hover:text-yellow-500 outline-none" data-active="${isFav?'1':'0'}">
                     <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-yellow-400 text-yellow-400' : ''}"></i>
                </button>
@@ -2984,7 +3050,17 @@ function render(){
 
   grid.innerHTML = "";
   if(filteredList.length === 0){
-      $("#noMatch").classList.remove("hidden");
+      const f2 = getFilters();
+      const hasQuery = !!f2.q;
+      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.favOnly || f2.memoOnly || f2.noBarcode || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
+      const nm = $("#noMatch");
+      if(nm) nm.innerHTML = `
+        <div class="text-2xl mb-2">${hasQuery ? '🔍' : '📭'}</div>
+        <div class="text-xl font-black mb-1">결과 없음</div>
+        <div class="text-sm text-gray-500 mb-4">${hasQuery ? `"<b>${f2.q}</b>" 검색 결과가 없습니다` : '조건에 맞는 상품이 없습니다'}</div>
+        ${(hasQuery || hasFilters) ? `<button onclick="document.getElementById('resetAll').click()" class="brutal px-5 py-2 bg-black text-white font-black text-sm">↺ 필터 전체 초기화</button>` : ''}
+      `;
+      nm.classList.remove("hidden");
       $("#grid").parentElement.classList.remove("hidden");
       $("#moreWrap").classList.add("hidden");
   } else {
@@ -4173,7 +4249,8 @@ window.addEventListener('DOMContentLoaded', () => {
         noBarcodeBtn.className = "chip !bg-amber-50 !text-amber-600 !border-amber-300 font-black";
         noBarcodeBtn.dataset.nobarcode = "1";
         noBarcodeBtn.dataset.active = "0";
-        noBarcodeBtn.innerHTML = "🔖 바코드누락";
+        const _nbCount = PRODUCTS.filter(p => p.noBarcodeBusan).length;
+        noBarcodeBtn.innerHTML = `🔖 바코드누락${_nbCount > 0 ? ` <span class="ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]">${_nbCount}</span>` : ''}`;
         dpFilterRow.appendChild(noBarcodeBtn);
         noBarcodeBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -4460,7 +4537,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         e.target.disabled = true;
 
                         try {
-                            const rawText = await callClaudeForGuide(brand, name, reviewText);
+                            const rawText = await callAIGuide(brand, name, reviewText);
                             const parsed  = parseGuideResponse(rawText);
 
                             // 전체 결과 저장
@@ -4499,7 +4576,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if(bulkAiBtn) {
             bulkAiBtn.onclick = async () => {
                 if(!getAnthKey()) {
-                    alert("⚠️ Admin > API 설정에서 Gemini API Key를 먼저 등록해주세요.");
+                    alert("⚠️ Admin > API 설정에서 Groq API Key를 먼저 등록해주세요.\n발급: console.groq.com (무료)");
                     return;
                 }
                 const items = document.querySelectorAll(".ai-gen-btn");
@@ -4515,7 +4592,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     const name  = btn.dataset.name;
                     bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
                     try {
-                        const rawText = await callClaudeForGuide(brand, name, "");
+                        const rawText = await callAIGuide(brand, name, "");
                         const parsed  = parseGuideResponse(rawText);
                         window._missGuideData = window._missGuideData || {};
                         window._missGuideData[code] = parsed;
