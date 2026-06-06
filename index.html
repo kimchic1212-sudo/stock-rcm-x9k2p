@@ -361,14 +361,16 @@
 
     window.addEventListener('scroll', function(){
       const scrolled = window.scrollY > 120;
+      const atTop    = window.scrollY < 10;   // 진짜 최상단에 있을 때만
       // 페이지에 스크롤할 내용이 충분할 때만 자동 접힘
-      const hasEnoughContent = (document.documentElement.scrollHeight - window.innerHeight) > 200;
+      const hasEnoughContent = (document.documentElement.scrollHeight - window.innerHeight) > 300;
       if (scrolled && !userToggled && !isCollapsed && hasEnoughContent) {
         isCollapsed = true;
         applyState();
       }
-      // 맨 위로 올라오면 자동 펼침
-      if (!scrolled && isCollapsed) {
+      // 맨 위로 올라오면(진짜 최상단) 자동 펼침
+      // scrollY < 120 조건 사용 시: 필터 접힘→페이지 짧아짐→scrollY 강제하강→재펼침 루프 발생
+      if (atTop && isCollapsed) {
         isCollapsed = false;
         userToggled = false;
         applyState();
