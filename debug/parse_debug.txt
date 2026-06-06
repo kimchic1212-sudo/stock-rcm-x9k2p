@@ -1,7 +1,7 @@
-시작: 2026-06-06T06:27:21.417Z
+시작: 2026-06-06T06:30:43.087Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17807272547833142.6022255026264
+[RES] 200 login.xml&postfix=1780727457631950.9532909620133
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26905","ITEM_NM":"아디제로 EVO SL [KI3383, 245]","SALES_AMT":188100,"NET_SALES_AMT":17100
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":449000,"ITEM_CD":"32195","ITEM_NM":"더 락커 [40002-BK, 230]","SALES_AMT":404100,"NET_SALES_AMT":367364,"VA
@@ -66,4 +66,8 @@ selTodaySalesList: 13건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29000,"ITEM_CD":"36083","ITEM_NM":"테렉스 클라이마쿨 5패널 그래픽 캡 [KR6408, S]","SALES_AMT":27550,"NET_SALES_AMT":2
   파싱 성공: 1건
-완료: 품번 17개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"27416","ITEM_NM":"아디제로 러닝 스플릿 쇼츠 [IX8975, XL]","SALES_AMT":71200,"NET_SALES_AMT":64727
+  파싱 성공: 1건
+완료: 품번 18개
