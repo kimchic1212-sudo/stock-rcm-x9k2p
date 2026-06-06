@@ -1,6 +1,13 @@
 // Canonical URL redirect — ?v= 파라미터 자동 제거
 if (location.search) location.replace(location.pathname);
 
+// ── 앱 버전 ──────────────────────────────────────────────────
+const APP_VERSION = "v26.06.05";
+document.addEventListener("DOMContentLoaded", () => {
+    const badge = document.getElementById("appVersionBadge");
+    if(badge) badge.textContent = APP_VERSION;
+});
+
 // 🔥 1. 관리자 팝업창 스크롤, Z-index 및 모바일 최적화 CSS 🔥
 const style = document.createElement('style');
 style.innerHTML = `
