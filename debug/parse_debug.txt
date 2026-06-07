@@ -1,7 +1,7 @@
-시작: 2026-06-07T06:00:56.174Z
+시작: 2026-06-07T06:10:37.040Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17808120710158249.376919991635
+[RES] 200 login.xml&postfix=17808126482164536.737738266214
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29188","ITEM_NM":"클라우드붐 맥스 [3WF30180438, 250]","SALES_AMT":265050,"NET_SALES_AMT":240
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29173","ITEM_NM":"클라우드붐 맥스 [3MF30310438, 280]","SALES_AMT":265050,"NET_SALES_AMT":240
@@ -66,4 +66,8 @@ selTodaySalesList: 13건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"30551","ITEM_NM":"엔돌핀 아주라 [S21070-172, 265]","SALES_AMT":132300,"NET_SALES_AMT":12027
   파싱 성공: 1건
-완료: 품번 18개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21395","ITEM_NM":"보메로 플러스 [HV8150-102, 250]","SALES_AMT":197100,"NET_SALES_AMT":17918
+  파싱 성공: 2건
+완료: 품번 20개
