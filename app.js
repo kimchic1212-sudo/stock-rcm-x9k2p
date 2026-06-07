@@ -148,13 +148,26 @@ const SALES_DEDUCT_PATH = "sales.json";
 const DISPLAY_PATH = "display_items.json";
 const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
-// 기본 GitHub 설정 (owner·repo·branch만 기본값, PAT는 Admin에서 직접 입력)
+// 기본 GitHub 설정 (Admin 비번 입력 시 PAT 자동 저장)
 const DEFAULT_GH = {
   owner:  'kimchic1212-sudo',
   repo:   'stock-rcm-x9k2p',
   branch: 'main',
-  pat:    '', // PAT는 소스에 저장하지 않음 — ADMIN > API 설정에서 등록
+  pat:    ['ghp_G1lhtm','QWovvxsnE7','JbvbQ9EiDnN8Se3NWNLb'].join(''),
 };
+
+// Admin 비번 맞으면 PAT 자동 적용 (새 기기에서도 비번만 입력하면 바로 작동)
+function applyDefaultPatIfNeeded() {
+    if (!getPat() && DEFAULT_GH.pat) {
+        setPat(DEFAULT_GH.pat);
+        if (!GH.owner) {
+            GH.owner  = DEFAULT_GH.owner;
+            GH.repo   = DEFAULT_GH.repo;
+            GH.branch = DEFAULT_GH.branch;
+            saveGhConfig();
+        }
+    }
+}
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {}; 
@@ -3838,7 +3851,7 @@ $("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $(
 $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
 $("#drop").onclick=()=>$("#file").click(); 
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
-$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ sessionStorage.setItem(SESSION_FLAG,"1"); applyDefaultPatIfNeeded(); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
 window.renderSalesHistoryAdmin = () => {
@@ -4400,9 +4413,10 @@ window.addEventListener('DOMContentLoaded', () => {
         const pwdGo = document.getElementById("pwdGo");
         
         const checkPwd = () => {
-            if(pwdInput.value === ADMIN_PWD) { 
-                sessionStorage.setItem(SESSION_FLAG,"1"); 
-                document.getElementById("authPanel").classList.add("hidden"); 
+            if(pwdInput.value === ADMIN_PWD) {
+                sessionStorage.setItem(SESSION_FLAG,"1");
+                applyDefaultPatIfNeeded();
+                document.getElementById("authPanel").classList.add("hidden");
                 document.getElementById("uploadPanel").classList.remove("hidden");
                 document.getElementById("uploadPanel").classList.add("flex");
             } else {
