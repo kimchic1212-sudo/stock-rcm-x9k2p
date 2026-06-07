@@ -1,7 +1,7 @@
-시작: 2026-06-07T02:30:46.301Z
+시작: 2026-06-07T02:40:14.608Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17807994595301624.467920945697
+[RES] 200 login.xml&postfix=17808000257581658.6528404996236
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,18 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29188","ITEM_NM":"클라우드붐 맥스 [3WF30180438, 250]","SALES_AMT":265050,"NET_SALES_AMT":240
   파싱 성공: 1건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29173","ITEM_NM":"클라우드붐 맥스 [3MF30310438, 280]","SALES_AMT":265050,"NET_SALES_AMT":240
   파싱 성공: 1건
-완료: 품번 2개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":129000,"ITEM_CD":"29429","ITEM_NM":"퍼포먼스 볼트티 [1MG10632343, L]","SALES_AMT":116100,"NET_SALES_AMT":10554
+  파싱 성공: 1건
+완료: 품번 3개
