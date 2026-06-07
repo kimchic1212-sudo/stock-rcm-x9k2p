@@ -1,11 +1,11 @@
-2026-06-06T20:40:55.087Z
-page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
+2026-06-07T00:01:18.150Z
+locator.waitFor: Timeout 15000ms exceeded.
 Call log:
-  - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
+  - waiting for locator('input[type="password"]').first() to be visible
 
-page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
+locator.waitFor: Timeout 15000ms exceeded.
 Call log:
-  - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
+  - waiting for locator('input[type="password"]').first() to be visible
 
-    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:164:16)
+    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:167:58)
     at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:270:24
