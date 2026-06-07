@@ -1,7 +1,7 @@
-시작: 2026-06-07T08:30:46.508Z
+시작: 2026-06-07T08:40:44.324Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17808210565436488.447748715987
+[RES] 200 login.xml&postfix=17808216542717786.014306703819
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 22건
+selTodaySalesList: 25건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29188","ITEM_NM":"클라우드붐 맥스 [3WF30180438, 250]","SALES_AMT":265050,"NET_SALES_AMT":240
   파싱 성공: 1건
-메뉴 클릭 후 거래: 22건
+메뉴 클릭 후 거래: 25건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29173","ITEM_NM":"클라우드붐 맥스 [3MF30310438, 280]","SALES_AMT":265050,"NET_SALES_AMT":240
@@ -102,4 +102,16 @@ selTodaySalesList: 22건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21401","ITEM_NM":"보메로 플러스 [HV8150-102, 280]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 2건
-완료: 품번 27개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":9900,"ITEM_CD":"24176","ITEM_NM":"요헤미티-워터 (청포도) [YH-03, 1SIZE]","SALES_AMT":9900,"NET_SALES_AMT":9000,"
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-9900,"ITEM_CD":"24176","ITEM_NM":"요헤미티-워터 (청포도) [YH-03, 1SIZE]","SALES_AMT":-9900,"NET_SALES_AMT":-90
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"20623","ITEM_NM":"스위프트 드라이 핏 풀집 미드 레이어 러닝 탑 [IB1999-675, L]","SALES_AMT":109250,"NET_
+  파싱 성공: 1건
+완료: 품번 29개
