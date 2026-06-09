@@ -3395,7 +3395,7 @@ function openDetail(p){
             </tr>
         </thead>
         <tbody>
-        ${p.sizes.filter(s => s.busan > 0).map(s => {
+        ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
             let centerRtBtn = s.center > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
@@ -3404,9 +3404,9 @@ function openDetail(p){
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
-            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-red-50/40':''}">
                 <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}</td>
-                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</td>
+                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</td>
                 <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.center}</td>
                 <td class="py-2.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
                 <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.sinsa}</td>
@@ -3554,7 +3554,7 @@ function openDetail(p){
             </tr>
         </thead>
         <tbody>
-        ${p.sizes.filter(s => s.busan > 0).map(s => {
+        ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
             const _s30b = _sizeSales30Busan[s.size] || 0;
             const _s30a = _sizeSales30Etc[s.size] || 0;
             let centerRtBtn = s.center > 0
@@ -3563,13 +3563,13 @@ function openDetail(p){
             let sinsaRtBtn = s.sinsa > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
                 : `<span class="text-gray-300 text-sm">-</span>`;
-            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-amber-50/60':''}">
                 <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}</td>
                 <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-300'}">${_s30b>0?_s30b:'-'}</td>
                 <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30a>0?'text-indigo-500':'text-gray-300'}">${_s30a>0?_s30a:'-'}</td>
                 <td class="py-1 px-1 text-center bg-blue-50/30 border-r border-gray-100">
                     <div class="flex flex-col items-center leading-none gap-0.5">
-                        <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-red-500'}">${s.busan}</span>
+                        <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</span>
                         ${(_sizeSalesToday[s.size]||0)>0?`<span class="text-orange-500 text-[10px] font-bold leading-none">-${_sizeSalesToday[s.size]}↓</span>`:''}
                     </div>
                 </td>
