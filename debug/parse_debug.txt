@@ -1,7 +1,7 @@
-시작: 2026-06-09T05:34:43.258Z
+시작: 2026-06-09T05:40:41.667Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17809832945246913.031099104567
+[RES] 200 login.xml&postfix=17809836552596903.360224056209
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 4건
+selTodaySalesList: 5건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27521","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [JD1160, M]","SALES_AMT":35100,"NET_SALES_AMT":319
   파싱 성공: 2건
-메뉴 클릭 후 거래: 4건
+메뉴 클릭 후 거래: 5건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":66000,"ITEM_CD":"18071","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, L/XL]","SALES_AMT":63060,"NET_SALES_AMT":
@@ -30,4 +30,8 @@ selTodaySalesList: 4건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21420","ITEM_NM":"보메로 플러스 [HV8150-003, 270]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-완료: 품번 7개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":140100,"ITEM_CD":"30607","ITEM_NM":"엔돌핀 아주라 [S11070-124, 230]","SALES_AMT":140100,"NET_SALES_AMT":12736
+  파싱 성공: 2건
+완료: 품번 9개
