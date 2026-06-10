@@ -12,10 +12,10 @@
   :root{
     --bg:#FAF8F2; --surface:#FFFFFF;
     --ink:#0A0A0A; --ink-2:#3D3D3D; --muted:#8A8A8A;
-    --line:#E8E3D5; --accent:#E11D48; 
+    --line:#E8E3D5; --accent:#D97706;
   }
   :root.dark-mode {
-    --bg: #121212; --surface: #1E1E1E; --ink: #F3F4F6; --ink-2: #9CA3AF; --muted: #6B7280; --line: #374151; --accent:#F43F5E;
+    --bg: #121212; --surface: #1E1E1E; --ink: #F3F4F6; --ink-2: #9CA3AF; --muted: #6B7280; --line: #374151; --accent:#F59E0B;
   }
   *{ -webkit-tap-highlight-color: transparent; }
   html,body{ background:var(--bg); color:var(--ink); transition: background 0.2s, color 0.2s;}
@@ -23,7 +23,7 @@
   .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-feature-settings:"tnum","zero"; letter-spacing:-.005em; }
   .tnum{ font-variant-numeric:tabular-nums; }
   
-  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; position:relative; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; position:relative; }
   .card-hover:hover{ border-color:#0A0A0A; }
   
   .ipt{ border:1px solid var(--line); background:var(--surface); padding:.6rem .8rem; border-radius:10px; color:var(--ink); font-weight:600;}
@@ -35,11 +35,11 @@
   .loc-simple b { font-weight: 700; color: var(--ink); }
   .price-clean { font-family: sans-serif; font-weight: 600; color: var(--ink); font-size: 15px; letter-spacing: -0.01em; }
   
-  .size-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 8px; background: #FFFFFF; border: 1px solid #E0E0E0; color: #333333; }
+  .size-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E0E0E0; color: #333333; }
   body.dark-mode .size-cell { background: #1E1E1E; border-color: #374151; color: #F3F4F6; }
-  .size-cell .sz { font-size: 0.75rem; font-weight: 600; color: #666; }
+  .size-cell .sz { font-size: 0.68rem; font-weight: 600; color: #666; }
   body.dark-mode .size-cell .sz { color: #9CA3AF; }
-  .size-cell .qty { font-size: 1.05rem; font-weight: 800; }
+  .size-cell .qty { font-size: 0.95rem; font-weight: 800; }
   
   .size-cell.zero { background: #F5F5F5; border-color: #EEEEEE; color: #BDBDBD; }
   body.dark-mode .size-cell.zero { background: #121212; border-color: #1F2937; color: #4B5563; }
@@ -234,7 +234,7 @@
       <div class="text-gray-500 text-sm mt-1">조건에 맞는 상품이 없습니다.</div>
   </div>
   
-  <div id="grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+  <div id="grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2"></div>
   
   <div id="moreWrap" class="mt-5 flex justify-center hidden">
       <button id="moreBtn" class="brutal px-6 py-2.5 font-black bg-[color:var(--surface)] text-[color:var(--ink)]">더 보기 (+60)</button>
