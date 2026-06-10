@@ -391,9 +391,11 @@ function getPromoList() {
 
 }
 
-// 기간 문자열("06/19~06/22" 또는 "5.25~6.14") → {start, end} Date 객체
+// 기간 문자열 파싱 — 다양한 형식 지원:
+//   "06/19~06/22"  /  "5.25-6.14"  /  "06/19(목) ~ 06/22(일), 4일간"
 function _parsePromoPeriod(period) {
-  const m = (period||'').match(/(\d{1,2}[\/.]\d{1,2})\s*[~～\-]\s*(\d{1,2}[\/.]\d{1,2})/);
+  // .*? 비탐욕 매칭으로 날짜와 ~ 사이 임의 텍스트 허용
+  const m = (period||'').match(/(\d{1,2}[\/.]\d{1,2}).*?[~～\-].*?(\d{1,2}[\/.]\d{1,2})/);
   if(!m) return null;
   const toDate = s => { const [mo,d]=s.replace('.','/').split('/'); const yr=new Date().getFullYear(); return new Date(yr,parseInt(mo)-1,parseInt(d)); };
   const start = toDate(m[1]);
@@ -8199,11 +8201,11 @@ window.renderPromoAdmin = () => {
 
                 if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
 
-                // 기간 파싱: "5.25 - 6.14" / "5.25~6.14" / "06/19 ~ 06/22" 형태 지원
+                // 기간 파싱: "5.25~6.14" / "06/19 ~ 06/22" / "06/19(목) ~ 06/22(일), 4일간" 등 지원
 
                 if(/기간/.test(col0)) {
 
-                    const pm = col0.match(/(\d{1,2}[\./]\d{1,2})\s*[~～\-]\s*(\d{1,2}[\./]\d{1,2})/);
+                    const pm = col0.match(/(\d{1,2}[\./]\d{1,2}).*?[~～\-].*?(\d{1,2}[\./]\d{1,2})/);
 
                     if(pm) {
                         const s = pm[1].replace('.','/');
