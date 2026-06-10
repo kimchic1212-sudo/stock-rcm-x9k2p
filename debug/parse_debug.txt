@@ -1,7 +1,7 @@
-시작: 2026-06-10T09:20:40.152Z
+시작: 2026-06-10T09:25:26.451Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17810832530954606.430964643189
+[RES] 200 login.xml&postfix=17810835380999811.270813684405
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 11건
+selTodaySalesList: 13건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":55000,"ITEM_CD":"27206","ITEM_NM":"아디365 아이코닉 러닝 롱슬리브 [KE6842, M]","SALES_AMT":49500,"NET_SALES_AMT":45
   파싱 성공: 1건
-메뉴 클릭 후 거래: 11건
+메뉴 클릭 후 거래: 13건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":234000,"ITEM_CD":"32619","ITEM_NM":"카디 [NS4CD1M-001, 280]","SALES_AMT":222300,"NET_SALES_AMT":202091,"V
@@ -58,4 +58,12 @@ selTodaySalesList: 11건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"1966","ITEM_NM":"드라이핏 ADV 에어로스위프트 브리프라인드 하프타이즈 [FN3370-011, XXL]","SALES_AMT":85500,"N
   파싱 성공: 1건
-완료: 품번 11개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":3,"NSALES_YN":"N","TOT_SALES_AMT":300000,"ITEM_CD":"27719","ITEM_NM":"레이스먼트 상품권 (10만원) [RM-GC10, 1SIZE]","SALES_AMT":300000,"NET_SALES_AM
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29152","ITEM_NM":"클라우드붐 맥스 [3MF30310590, 280]","SALES_AMT":251100,"NET_SALES_AMT":228
+  파싱 성공: 1건
+완료: 품번 13개
