@@ -2134,9 +2134,9 @@ function rebuildIndex(){
 
         const { promo: _pr, item: _pi } = _pm;
 
-        const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d+\/\d+)\s*$/); return m?m[1]:''; })(_pr.meta?.period||'');
+        const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
 
-        const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'6/14' };
+        const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
 
         if (_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
 
@@ -5484,7 +5484,7 @@ function card(p){
 
       if (p.promoType === 'weekly') {
 
-          promoBadge = `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel} (~${p.promoEndDate})</span>`;
+          promoBadge = `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}</span>`;
 
           priceDisplay = `
 
@@ -5498,7 +5498,7 @@ function card(p){
 
       } else {
 
-          promoBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}쿠폰적용가 ${rateLabel} (~${p.promoEndDate})</span>`;
+          promoBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}쿠폰적용가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}</span>`;
 
           priceDisplay = `
 
@@ -8180,13 +8180,19 @@ window.renderPromoAdmin = () => {
 
                 if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
 
-                // 기간 파싱: "5.25 - 6.14" 또는 "5.25~6.14" 형태 추출
+                // 기간 파싱: "5.25 - 6.14" / "5.25~6.14" / "06/19 ~ 06/22" 형태 지원
 
                 if(/기간/.test(col0)) {
 
-                    const pm = col0.match(/(\d+\.\d+\s*[-~]\s*\d+\.\d+)/);
+                    const pm = col0.match(/(\d{1,2}[\./]\d{1,2})\s*[~～\-]\s*(\d{1,2}[\./]\d{1,2})/);
 
-                    promoPeriod = pm ? pm[1].replace(/\s/g,'').replace('~','-') : col0.replace(/\*?\s*기간\s*:?\s*/,'').trim();
+                    if(pm) {
+                        const s = pm[1].replace('.','/');
+                        const e = pm[2].replace('.','/');
+                        promoPeriod = `${s}~${e}`;
+                    } else {
+                        promoPeriod = col0.replace(/\*?\s*기간\s*:?\s*/,'').trim();
+                    }
 
                 }
 
