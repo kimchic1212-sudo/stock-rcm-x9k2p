@@ -1,7 +1,7 @@
-시작: 2026-06-10T03:40:39.449Z
+시작: 2026-06-10T03:45:45.057Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1781062851241391.0281592263509
+[RES] 200 login.xml&postfix=17810631571809347.950323609479
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,6 +12,10 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 0건
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+selTodaySalesList: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":55000,"ITEM_CD":"27206","ITEM_NM":"아디365 아이코닉 러닝 롱슬리브 [KE6842, M]","SALES_AMT":49500,"NET_SALES_AMT":45
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 1건
+완료: 품번 1개
