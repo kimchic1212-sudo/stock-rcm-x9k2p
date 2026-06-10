@@ -391,9 +391,28 @@ function getPromoList() {
 
 }
 
+// 기간 문자열("06/19~06/22" 또는 "5.25~6.14") → {start, end} Date 객체
+function _parsePromoPeriod(period) {
+  const m = (period||'').match(/(\d{1,2}[\/.]\d{1,2})\s*[~～\-]\s*(\d{1,2}[\/.]\d{1,2})/);
+  if(!m) return null;
+  const toDate = s => { const [mo,d]=s.replace('.','/').split('/'); const yr=new Date().getFullYear(); return new Date(yr,parseInt(mo)-1,parseInt(d)); };
+  const start = toDate(m[1]);
+  const end   = toDate(m[2]); end.setHours(23,59,59,999);
+  return { start, end };
+}
+
+function isPromoActive(pr) {
+  const range = _parsePromoPeriod(pr.meta?.period||'');
+  if(!range) return true; // 기간 정보 없으면 항상 활성
+  const now = new Date();
+  return now >= range.start && now <= range.end;
+}
+
 function findPromoForCode(code) {
 
   for(const pr of getPromoList()) {
+
+    if(!isPromoActive(pr)) continue; // 기간 범위 밖이면 스킵
 
     if(pr.items && pr.items[code]) return { promo: pr, item: pr.items[code] };
 
@@ -401,7 +420,7 @@ function findPromoForCode(code) {
 
   return null;
 
-} 
+}
 
 let SALES_HISTORY = { meta: {}, items: {} };
 
@@ -923,7 +942,7 @@ function applyMeta(meta){
 
         // 기획전 라벨 (복수 지원)
 
-        const _activePromos = getPromoList();
+        const _activePromos = getPromoList().filter(isPromoActive);
 
         let promoInfo = _activePromos.map(pr =>
 
