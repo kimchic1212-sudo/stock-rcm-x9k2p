@@ -1,7 +1,7 @@
-시작: 2026-06-10T06:09:44.936Z
+시작: 2026-06-10T06:10:49.772Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17810717961796865.873256480244
+[RES] 200 login.xml&postfix=17810718622063967.813990665586
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":55000,"ITEM_CD":"27206","ITEM_NM":"아디365 아이코닉 러닝 롱슬리브 [KE6842, M]","SALES_AMT":49500,"NET_SALES_AMT":45
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":234000,"ITEM_CD":"32619","ITEM_NM":"카디 [NS4CD1M-001, 280]","SALES_AMT":222300,"NET_SALES_AMT":202091,"V
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"12809","ITEM_NM":"본디 9 와이드 [1162013-BBLC, 265]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-완료: 품번 6개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26777","ITEM_NM":"아디제로 EVO SL [JH6208, 235]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 2건
+완료: 품번 8개
