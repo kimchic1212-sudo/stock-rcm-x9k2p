@@ -2093,11 +2093,14 @@ function rebuildIndex(){
 
     const _sizeBarcode = (()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })();
 
+    // 사이즈별 품목내부코드 (규격마다 다름 — 품번 레벨 itemCode와 별도 관리)
+    const _sizeItemCode = String(r["품목내부코드"] || "").trim();
+
     const found = p.sizes.find(s=>String(s.size)===String(r["규격"]));
 
-    if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; }
+    if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; if(!found.itemCode && _sizeItemCode) found.itemCode=_sizeItemCode; }
 
-    else p.sizes.push({ size:r["규격"], busan, sinsa, center, barcode:_sizeBarcode });
+    else p.sizes.push({ size:r["규격"], busan, sinsa, center, barcode:_sizeBarcode, itemCode:_sizeItemCode });
 
   }
 
@@ -3508,7 +3511,11 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
-    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: p.itemCode || "", date: shortDate, size, qty: 1, memo: finalMemo });
+    // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
+    const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
+    const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
+
+    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: _trItemCode, date: shortDate, size, qty: 1, memo: finalMemo });
 
 
 
@@ -3596,6 +3603,16 @@ window.exportTransfersToExcel = () => {
 
 
 
+    // ── 품번(규격) → 품목내부코드 룩업 테이블 (RAW 데이터 기반, 사이즈 레벨 정확 매칭) ──
+    // 기존에 itemCode가 잘못 저장된 항목도 이 테이블로 재매핑
+    const _itemCodeMap = {};
+    RAW.forEach(r => {
+        const 품번 = String(r["품번"] || "").trim();
+        const 규격 = String(r["규격"] || "").trim();
+        const 코드 = String(r["품목내부코드"] || "").trim();
+        if(품번 && 규격 && 코드) _itemCodeMap[`${품번}(${규격})`] = 코드;
+    });
+
     // Row4+: 데이터
 
     TRANSFERS.forEach(t => {
@@ -3612,9 +3629,14 @@ window.exportTransfersToExcel = () => {
 
         const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
 
-        // 품목내부코드: 저장된 itemCode 우선, 없으면 PRODUCTS에서 조회, 그것도 없으면 품번 fallback
-
-        const itemCode = t.itemCode || prod?.itemCode || t.code;
+        // 품목내부코드 우선순위:
+        //   1) RAW 룩업 테이블 [품번(규격)] — 가장 정확 (사이즈 레벨)
+        //   2) sizes[].itemCode — 현재 세션 rebuildIndex 결과
+        //   3) TRANSFERS에 저장된 itemCode — 과거 저장값
+        //   4) 품번 레벨 itemCode
+        //   5) 품번 자체 (최후 fallback)
+        const _lookupKey = `${t.code}(${t.size})`;
+        const itemCode = _itemCodeMap[_lookupKey] || sizeObj?.itemCode || t.itemCode || prod?.itemCode || t.code;
 
         aoa.push([
 
