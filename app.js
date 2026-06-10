@@ -54,11 +54,11 @@ style.innerHTML = `
 
     .brand-hidden { display: none !important; }
 
-    .card-img-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; border-radius: 12px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
+    .card-img-wrap { position: relative; width: 88px; height: 88px; flex-shrink: 0; border-radius: 8px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
 
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
 
-    .size-scroll-wrap { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 8px; margin-top: auto; margin-bottom: 12px; scroll-snap-type: x mandatory; }
+    .size-scroll-wrap { display: flex; overflow-x: auto; gap: 5px; padding-bottom: 4px; margin-top: auto; margin-bottom: 6px; scroll-snap-type: x mandatory; }
 
     .size-scroll-wrap::-webkit-scrollbar { height: 5px; }
 
@@ -1199,15 +1199,15 @@ function showSkeletonCards(n = 6) {
 
     const skeletonHtml = Array(n).fill(0).map(() => `
 
-      <div class="card p-5 flex flex-col gap-3 animate-pulse">
+      <div class="card p-3.5 flex flex-col gap-2 animate-pulse">
 
-        <div class="flex gap-1.5"><div class="h-5 w-16 bg-gray-200 rounded-full"></div><div class="h-5 w-20 bg-gray-200 rounded-full"></div></div>
+        <div class="flex gap-1"><div class="h-4 w-14 bg-gray-200 rounded-full"></div><div class="h-4 w-18 bg-gray-200 rounded-full"></div></div>
 
-        <div class="flex justify-between gap-4">
+        <div class="flex justify-between gap-3">
 
-          <div class="flex-1 flex flex-col gap-2"><div class="h-4 w-3/4 bg-gray-200 rounded"></div><div class="h-3 w-1/2 bg-gray-100 rounded"></div></div>
+          <div class="flex-1 flex flex-col gap-1.5"><div class="h-4 w-3/4 bg-gray-200 rounded"></div><div class="h-3 w-1/2 bg-gray-100 rounded"></div></div>
 
-          <div class="w-[110px] h-[110px] bg-gray-100 rounded-xl shrink-0"></div>
+          <div class="w-[88px] h-[88px] bg-gray-100 rounded-lg shrink-0"></div>
 
         </div>
 
@@ -5302,7 +5302,7 @@ function card(p){
 
   const el = document.createElement("article");
 
-  el.className = "card card-hover p-5 flex flex-col bg-white border border-gray-100 rounded-2xl shadow-sm h-full"; 
+  el.className = "card card-hover p-3.5 flex flex-col h-full";
 
   el.onclick = (e)=>{ 
 
@@ -5374,7 +5374,7 @@ function card(p){
 
   if ((p.todaySold || 0) > 0) {
 
-    todaySoldBadge = `<span class="bg-orange-500 text-white px-2 py-0.5 rounded font-black text-[10px] shadow-sm">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
+    todaySoldBadge = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded font-black text-[10px]">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
 
   }
 
@@ -5534,7 +5534,7 @@ function card(p){
 
     <div class="flex flex-col flex-1">
 
-        <div class="flex flex-wrap gap-1.5 text-xs font-bold text-gray-500 mb-2.5 items-center">
+        <div class="flex flex-wrap gap-1 text-xs font-bold text-gray-500 mb-1.5 items-center">
 
             ${busanOnlyBadge}
 
@@ -5562,15 +5562,15 @@ function card(p){
 
 
 
-        <div class="flex justify-between items-start w-full relative mb-2 gap-4">
+        <div class="flex justify-between items-start w-full relative mb-1.5 gap-3">
 
-           <div class="flex-1 min-w-0 mt-1">
+           <div class="flex-1 min-w-0">
 
-              <div class="copyable font-extrabold text-[15px] sm:text-[16px] leading-snug mb-1.5 text-left w-full hover:text-blue-600 text-gray-900 line-clamp-2" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+              <div class="copyable font-extrabold text-[14px] leading-snug mb-1 text-left w-full hover:text-blue-600 text-gray-900 line-clamp-2" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
 
-              
 
-              <div class="copyable text-[12px] font-bold text-gray-400 mb-2.5 text-left w-full hover:text-blue-600 flex items-center gap-1.5 line-clamp-1" data-copy="${escapeHtml(p.품번)}">
+
+              <div class="copyable text-[11px] font-bold text-gray-400 mb-1.5 text-left w-full hover:text-blue-600 flex items-center gap-1 line-clamp-1" data-copy="${escapeHtml(p.품번)}">
 
                   ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-4 h-4 opacity-60"></i>
 
@@ -5626,19 +5626,19 @@ function card(p){
 
 
 
-    <div class="flex flex-col gap-2 border-t border-gray-100 pt-4 mt-auto shrink-0">
+    <div class="flex flex-col gap-1.5 border-t border-gray-100 pt-2.5 mt-auto shrink-0">
 
-        <div class="flex items-center justify-between text-xs font-bold text-gray-500">
+        <div class="flex items-center justify-between text-[11px] font-bold text-gray-400">
 
-            <span>총 재고 요약</span>
+            <span>총 재고</span>
 
-            <span>부산 <b class="text-blue-600">${p.busanTotal}</b> | 신사 ${p.sinsaTotal} | 물류 ${p.centerTotal}</span>
+            <span>부산 <b class="text-blue-600">${p.busanTotal}</b> · 신사 ${p.sinsaTotal} · 물류 ${p.centerTotal}</span>
 
         </div>
 
-        <div class="flex items-center justify-between mt-1">
+        <div class="flex items-center justify-between">
 
-            <span class="text-sm font-black text-gray-800">소비자가</span>
+            <span class="text-xs font-black text-gray-600">소비자가</span>
 
             ${priceDisplay}
 
