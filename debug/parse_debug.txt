@@ -1,7 +1,7 @@
-시작: 2026-06-11T09:21:59.182Z
+시작: 2026-06-11T09:26:37.153Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1781169733851305.67237084436204
+[RES] 200 login.xml&postfix=17811700090645258.254773937076
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 7건
+selTodaySalesList: 8건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":259000,"ITEM_CD":"30048","ITEM_NM":"마파테 5 [1168722-CMNTB, 270]","SALES_AMT":233100,"NET_SALES_AMT":2119
   파싱 성공: 1건
-메뉴 클릭 후 거래: 7건
+메뉴 클릭 후 거래: 8건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-170100,"ITEM_CD":"30610","ITEM_NM":"엔돌핀 아주라 [S11070-124, 245]","SALES_AMT":-170100,"NET_SALES_AMT":-1
@@ -42,4 +42,8 @@ selTodaySalesList: 7건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"33059","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 265]","SALES_AMT":173400,"NET_SALES_AMT":1576
   파싱 성공: 1건
-완료: 품번 6개
+[RES] 200 selItemSalesList
+  items: 7개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"33975","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, L/XL]","SALES_AMT":24300,"NET_SALES_AM
+  파싱 성공: 7건
+완료: 품번 11개
