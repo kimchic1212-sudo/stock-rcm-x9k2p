@@ -5560,14 +5560,30 @@ function card(p){
           promoBadge = `<span class="${_isGray?'bg-gray-100 text-gray-400':'bg-purple-50 text-purple-600'} px-2 py-0.5 rounded text-[11px] font-black flex items-center gap-1">${_pnLabel}🎟️ 기획전${_previewLabel}</span>`;
 
           // 하단 할인 플로우 (소비자가 ↔ 가격 사이)
-          const _sep = `<span class="text-gray-300 text-[10px]">›</span>`;
+          // 중복 제거: 기획전=0이면 생략, 쿠폰=최종이면 최종 생략
+          const _gc = _isGray ? 'text-gray-400' : '';
           let _flow = '';
-          if(_erInt > 0) _flow += `<span class="${_isGray?'text-gray-400':'text-amber-600'} text-[11px] font-black">🎁${_erInt}%</span>${_sep}`;
-          if(_crInt > 0) _flow += `<span class="${_isGray?'text-gray-400':'text-indigo-600'} text-[11px] font-black">🎟️${_crInt}%</span>${_sep}`;
-          _flow += `<span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">✨${rateInt}%</span>`;
-          if(p.promoEndDate) _flow += `<span class="text-[10px] text-gray-400 ml-0.5">(~${p.promoEndDate})</span>`;
 
-          promoRateFlow = `<div class="flex items-center gap-0.5">${_flow}</div>`;
+          if(_erInt > 0 && _crInt > 0) {
+            // 둘 다 있을 때: 기획전▼10% + 쿠폰▼20% = ▼28%
+            _flow = `<span class="${_isGray?'text-gray-400':'text-amber-600'} text-[11px] font-black">기획전▼${_erInt}%</span>`
+                  + `<span class="text-gray-300 text-[10px] mx-0.5">+</span>`
+                  + `<span class="${_isGray?'text-gray-400':'text-indigo-600'} text-[11px] font-black">쿠폰▼${_crInt}%</span>`
+                  + `<span class="text-gray-300 text-[10px] mx-0.5">=</span>`
+                  + `<span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">최종▼${rateInt}%</span>`;
+          } else if(_erInt > 0) {
+            _flow = `<span class="${_isGray?'text-gray-400':'text-amber-600'} text-[11px] font-black">기획전▼${_erInt}%</span>`
+                  + (_crInt !== rateInt ? `<span class="text-gray-300 text-[10px] mx-0.5">=</span><span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">최종▼${rateInt}%</span>` : '');
+          } else if(_crInt > 0) {
+            // 쿠폰만: 쿠폰▼20% (최종과 같으면 최종 생략)
+            _flow = `<span class="${_isGray?'text-gray-400':'text-indigo-600'} text-[11px] font-black">쿠폰▼${_crInt}%</span>`
+                  + (_crInt !== rateInt ? `<span class="text-gray-300 text-[10px] mx-0.5">=</span><span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">최종▼${rateInt}%</span>` : '');
+          } else {
+            _flow = `<span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">▼${rateInt}%</span>`;
+          }
+          if(p.promoEndDate) _flow += `<span class="text-[10px] text-gray-400 ml-1">(~${p.promoEndDate})</span>`;
+
+          promoRateFlow = `<div class="flex items-center gap-0">${_flow}</div>`;
 
           priceDisplay = `
 
