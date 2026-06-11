@@ -438,6 +438,7 @@ function reapplyPromoData() {
     const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
     p.promoEventRate  = _pi.eventRate  || 0;
     p.promoCouponRate = _pi.couponRate || 0;
+    p.promoEventPrice = _pi.eventPrice || null;
     if(_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
       p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
       p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
@@ -5558,19 +5559,24 @@ function card(p){
           // 상단 배지: 기획전명만
           promoBadge = `<span class="${_isGray?'bg-gray-100 text-gray-400':'bg-purple-50 text-purple-600'} px-2 py-0.5 rounded text-[11px] font-black flex items-center gap-1">${_pnLabel}🎟️ 기획전${_previewLabel}</span>`;
 
-          // 할인 칩 전용 행 (총재고 아래, 소비자가 위)
-          const _chip = (bg, border, text, label) =>
-            `<span class="${_isGray ? 'bg-gray-100 border-gray-200 text-gray-400' : bg+' '+border+' '+text} border rounded-md px-2 py-0.5 text-xs font-black">${label}</span>`;
-          const _arrow = `<span class="text-gray-300 font-bold text-sm">›</span>`;
+          // 할인 칩 전용 행 — 2줄 (할인율 위 / 할인가 아래)
+          const _chip = (bg, border, text, rateLabel, price) => {
+            const priceRow = price
+              ? `<span class="block text-center font-black" style="font-size:11px;margin-top:1px">${krw(price)}</span>`
+              : '';
+            return `<span class="${_isGray ? 'bg-gray-100 border-gray-200 text-gray-400' : bg+' '+border+' '+text} border rounded-md px-2 py-1 font-black leading-tight flex flex-col items-center" style="min-width:64px">` +
+              `<span class="text-[11px]">${rateLabel}</span>${priceRow}</span>`;
+          };
+          const _arrow = `<span class="text-gray-300 font-bold text-sm self-center">›</span>`;
 
           let _chips = '';
-          if(_erInt > 0) _chips += _chip('bg-amber-50','border-amber-300','text-amber-700', `🎁 기획전 ▼${_erInt}%`) + _arrow;
-          if(_crInt > 0) _chips += _chip('bg-blue-50','border-blue-300','text-blue-700', `🎟️ 쿠폰 ▼${_crInt}%`) + _arrow;
-          _chips += _chip('bg-purple-50','border-purple-300','text-purple-700', `✨ 최종 ▼${rateInt}%`);
-          if(p.promoEndDate) _chips += `<span class="text-[11px] text-gray-400 font-bold">(~${p.promoEndDate})</span>`;
-          if(_isGray) _chips += `<span class="text-[10px] text-gray-400 font-bold">📅미리보기</span>`;
+          if(_erInt > 0) _chips += _chip('bg-amber-50','border-amber-300','text-amber-700', `🎁 기획전 ▼${_erInt}%`, p.promoEventPrice) + _arrow;
+          if(_crInt > 0) _chips += _chip('bg-blue-50','border-blue-300','text-blue-700', `🎟️ 쿠폰 ▼${_crInt}%`, null) + _arrow;
+          _chips += _chip('bg-purple-50','border-purple-300','text-purple-700', `✨ 최종 ▼${rateInt}%`, p.currentPromoPrice);
+          if(p.promoEndDate) _chips += `<span class="text-[11px] text-gray-400 font-bold self-center ml-1">(~${p.promoEndDate})</span>`;
+          if(_isGray) _chips += `<span class="text-[10px] text-gray-400 font-bold self-center">📅미리보기</span>`;
 
-          promoRateFlow = `<div class="flex items-center gap-1 flex-wrap">${_chips}</div>`;
+          promoRateFlow = `<div class="flex items-stretch gap-1 flex-wrap">${_chips}</div>`;
 
           priceDisplay = `
 
