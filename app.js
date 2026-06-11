@@ -5554,18 +5554,22 @@ function card(p){
 
           const _erInt = Math.round((p.promoEventRate||0)*100);
           const _crInt = Math.round((p.promoCouponRate||0)*100);
-          let _breakdownLabel = '';
-          if(_erInt > 0 && _crInt > 0) {
-            _breakdownLabel = `기획전▼${_erInt}%+쿠폰▼${_crInt}%`;
-          } else if(_erInt > 0) {
-            _breakdownLabel = `기획전▼${_erInt}%`;
-          } else if(_crInt > 0) {
-            _breakdownLabel = `쿠폰▼${_crInt}%`;
-          } else {
-            _breakdownLabel = `쿠폰적용가`;
-          }
+          const _isGray = p.promoIsPreview;
 
-          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-200 text-gray-500' : 'bg-purple-100 text-purple-700'} px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}${_breakdownLabel} → 최종▼${rateInt}%${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
+          const _chip = (bg, text, label) =>
+            `<span class="${_isGray ? 'bg-gray-200 text-gray-400' : bg+' '+text} px-1.5 py-0.5 rounded text-[11px] font-black flex items-center gap-0.5 shadow-sm">${label}</span>`;
+
+          const _endLabel = p.promoEndDate ? ` <span class="text-[10px] opacity-60">(~${p.promoEndDate})</span>` : '';
+
+          let _chips = '';
+          if(_erInt > 0) _chips += _chip('bg-amber-100','text-amber-700', `🎁 기획전 ▼${_erInt}%`);
+          if(_crInt > 0) _chips += _chip('bg-indigo-100','text-indigo-700', `🎟️ 쿠폰 ▼${_crInt}%`);
+          _chips += _chip('bg-purple-100','text-purple-700', `✨ 최종 ▼${rateInt}%`+(_erInt===0&&_crInt===0&&p.promoEndDate?` (~${p.promoEndDate})`:''));
+          if(p.promoEndDate && (_erInt>0||_crInt>0)) _chips += `<span class="text-[10px] font-bold text-gray-400">(~${p.promoEndDate})</span>`;
+          if(_isGray) _chips += `<span class="text-[9px] font-bold text-gray-400">📅미리보기</span>`;
+          if(_pnLabel) _chips = _pnLabel + _chips;
+
+          promoBadge = `<div class="flex flex-wrap items-center gap-1">${_chips}</div>`;
 
           priceDisplay = `
 
