@@ -424,6 +424,32 @@ function findPromoForCode(code) {
 
 }
 
+function reapplyPromoData() {
+  if(!PRODUCTS || !PRODUCTS.length) return;
+  const activeWeeklyCat = getActiveWeeklyCategory();
+  PRODUCTS.forEach(p => {
+    delete p.currentPromoPrice; delete p.promoType; delete p.promoName;
+    delete p.promoRate; delete p.promoEndDate; delete p.promoIsPreview;
+    const _pm = findPromoForCode(p.품번);
+    if(!_pm) return;
+    const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
+    p.promoIsPreview = !!_isPreview;
+    const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
+    const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+    if(_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
+      p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
+      p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
+      p.promoEndDate = _endDate;
+    } else if(_pi.finalPrice && _pi.finalPrice < p.소비자가) {
+      p.currentPromoPrice = _pi.finalPrice; Object.assign(p, _promoMeta);
+      p.promoRate = _pi.finalRate || ((p.소비자가 - _pi.finalPrice) / p.소비자가);
+    } else if(_pi.finalRate > 0 && p.소비자가 > 0) {
+      const _computed = Math.round(p.소비자가 * (1 - _pi.finalRate) / 10) * 10;
+      if(_computed < p.소비자가) { p.currentPromoPrice = _computed; Object.assign(p, _promoMeta); p.promoRate = _pi.finalRate; }
+    }
+  });
+}
+
 let SALES_HISTORY = { meta: {}, items: {} };
 
 let SALES_DEDUCTIONS = null;
@@ -2320,7 +2346,7 @@ function rebuildIndex(){
 
           const _ptSel = $("#promoTypeSel"), _prSel = $("#promoRateSel");
 
-          if(_ptSel) _ptSel.onchange = () => { window.promoPreviewMode = (_ptSel.value === 'PREVIEW'); saveHistoryState(); visibleCount=60; render(); };
+          if(_ptSel) _ptSel.onchange = () => { const _wasPreview = window.promoPreviewMode; window.promoPreviewMode = (_ptSel.value === 'PREVIEW'); if(window.promoPreviewMode !== _wasPreview) reapplyPromoData(); saveHistoryState(); visibleCount=60; render(); };
 
           if(_prSel) _prSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
 
