@@ -436,6 +436,8 @@ function reapplyPromoData() {
     p.promoIsPreview = !!_isPreview;
     const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
     const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+    p.promoEventRate  = _pi.eventRate  || 0;
+    p.promoCouponRate = _pi.couponRate || 0;
     if(_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
       p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
       p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
@@ -2185,6 +2187,9 @@ function rebuildIndex(){
         const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
 
         const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+
+        p.promoEventRate  = _pi.eventRate  || 0;
+        p.promoCouponRate = _pi.couponRate || 0;
 
         if (_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
 
@@ -5547,7 +5552,20 @@ function card(p){
 
       } else {
 
-          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-200 text-gray-500' : 'bg-purple-100 text-purple-700'} px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}쿠폰적용가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
+          const _erInt = Math.round((p.promoEventRate||0)*100);
+          const _crInt = Math.round((p.promoCouponRate||0)*100);
+          let _breakdownLabel = '';
+          if(_erInt > 0 && _crInt > 0) {
+            _breakdownLabel = `기획전▼${_erInt}%+쿠폰▼${_crInt}%`;
+          } else if(_erInt > 0) {
+            _breakdownLabel = `기획전▼${_erInt}%`;
+          } else if(_crInt > 0) {
+            _breakdownLabel = `쿠폰▼${_crInt}%`;
+          } else {
+            _breakdownLabel = `쿠폰적용가`;
+          }
+
+          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-200 text-gray-500' : 'bg-purple-100 text-purple-700'} px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}${_breakdownLabel} → 최종▼${rateInt}%${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
 
           priceDisplay = `
 
@@ -6232,6 +6250,12 @@ function render(){
     if(sortMode==="priceAsc") return priceA - priceB;
 
     if(sortMode==="priceDesc") return priceB - priceA;
+
+    if(sortMode==="promoRateDesc") return (b.promoRate||0) - (a.promoRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+
+    if(sortMode==="promoEventRateDesc") return (b.promoEventRate||0) - (a.promoEventRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+
+    if(sortMode==="promoCouponRateDesc") return (b.promoCouponRate||0) - (a.promoCouponRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
 
     
 
@@ -8259,13 +8283,19 @@ window.renderPromoAdmin = () => {
 
                 const catIdx  = headers.indexOf('특가 카테고리');
 
-                const wpIdx   = headers.indexOf('위클리특가');
+                let wpIdx = headers.indexOf('위클리특가');
+                if(wpIdx === -1) wpIdx = headers.indexOf('특가할인가');
 
                 const wrIdx   = headers.indexOf('특가할인율');
 
                 const fpIdx   = headers.indexOf('최종할인가');
 
-                // 할인율 컬럼: 다양한 컬럼명 지원
+                // 기획전/쿠폰 할인 컬럼
+                const epIdx   = headers.indexOf('기획전 할인가');
+                const erIdx   = headers.indexOf('기획전 할인율');
+                const crIdx   = headers.indexOf('쿠폰 할인율');
+
+                // 최종 할인율 컬럼: 다양한 컬럼명 지원
 
                 let frIdx = headers.indexOf('최종 할인율');
 
@@ -8287,7 +8317,13 @@ window.renderPromoAdmin = () => {
 
                     let fRate = parseFloat(r[frIdx])||0; if(fRate>1) fRate/=100;
 
+                    let eRate = parseFloat(r[erIdx])||0; if(eRate>1) eRate/=100;
+
+                    let cRate = parseFloat(r[crIdx])||0; if(cRate>1) cRate/=100;
+
                     const fp = Number(String(r[fpIdx]||"").replace(/,/g,''))||null;
+
+                    const ep = Number(String(r[epIdx]||"").replace(/,/g,''))||null;
 
                     items[code] = {
 
@@ -8299,7 +8335,13 @@ window.renderPromoAdmin = () => {
 
                         finalPrice: fp,
 
-                        finalRate: fRate   // 가격 없을 때는 rate로 계산
+                        finalRate: fRate,   // 가격 없을 때는 rate로 계산
+
+                        eventPrice: ep,
+
+                        eventRate: eRate,   // 기획전 할인율
+
+                        couponRate: cRate   // 쿠폰 할인율
 
                     };
 
