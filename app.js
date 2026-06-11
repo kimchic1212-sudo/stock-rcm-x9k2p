@@ -414,9 +414,9 @@ function findPromoForCode(code) {
 
   for(const pr of getPromoList()) {
 
-    if(!isPromoActive(pr)) continue; // 기간 범위 밖이면 스킵
+    if(!window.promoPreviewMode && !isPromoActive(pr)) continue; // 기간 범위 밖이면 스킵 (미리보기 모드 제외)
 
-    if(pr.items && pr.items[code]) return { promo: pr, item: pr.items[code] };
+    if(pr.items && pr.items[code]) return { promo: pr, item: pr.items[code], isPreview: !isPromoActive(pr) };
 
   }
 
@@ -2153,7 +2153,8 @@ function rebuildIndex(){
 
     if (_pm) {
 
-        const { promo: _pr, item: _pi } = _pm;
+        const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
+        p.promoIsPreview = !!_isPreview;
 
         const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
 
@@ -2311,7 +2312,7 @@ function rebuildIndex(){
 
           promoWrap.innerHTML = `
 
-              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option></select>
+              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option><option value="PREVIEW">📅 시작 전 미리보기</option></select>
 
               <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
 
@@ -2319,7 +2320,7 @@ function rebuildIndex(){
 
           const _ptSel = $("#promoTypeSel"), _prSel = $("#promoRateSel");
 
-          if(_ptSel) _ptSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
+          if(_ptSel) _ptSel.onchange = () => { window.promoPreviewMode = (_ptSel.value === 'PREVIEW'); saveHistoryState(); visibleCount=60; render(); };
 
           if(_prSel) _prSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
 
@@ -5502,10 +5503,11 @@ function card(p){
 
 
       const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${p.promoName}]</span> ` : '';
+      const _previewLabel = p.promoIsPreview ? `<span class="opacity-75 text-[9px] font-bold ml-1">📅미리보기</span>` : '';
 
       if (p.promoType === 'weekly') {
 
-          promoBadge = `<span class="bg-red-600 text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}</span>`;
+          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-400' : 'bg-red-600'} text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
 
           priceDisplay = `
 
@@ -5513,13 +5515,13 @@ function card(p){
 
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
 
-                <span class="text-lg sm:text-[20px] font-black text-red-600">🔥${krw(p.currentPromoPrice)}</span>
+                <span class="text-lg sm:text-[20px] font-black ${p.promoIsPreview ? 'text-gray-500' : 'text-red-600'}">${p.promoIsPreview ? '📅' : '🔥'}${krw(p.currentPromoPrice)}</span>
 
             </div>`;
 
       } else {
 
-          promoBadge = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}쿠폰적용가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}</span>`;
+          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-200 text-gray-500' : 'bg-purple-100 text-purple-700'} px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="ticket" class="w-3.5 h-3.5"></i>${_pnLabel}쿠폰적용가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
 
           priceDisplay = `
 
@@ -5527,7 +5529,7 @@ function card(p){
 
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
 
-                <span class="text-[17px] sm:text-lg font-black text-purple-700">🎟️${krw(p.currentPromoPrice)}</span>
+                <span class="text-[17px] sm:text-lg font-black ${p.promoIsPreview ? 'text-gray-500' : 'text-purple-700'}">${p.promoIsPreview ? '📅' : '🎟️'}${krw(p.currentPromoPrice)}</span>
 
             </div>`;
 
@@ -6105,7 +6107,7 @@ function render(){
 
         if(!p.currentPromoPrice) return false; 
 
-        if(f.promoType !== "ALL" && p.promoType !== f.promoType) return false;
+        if(f.promoType !== "ALL" && f.promoType !== "PREVIEW" && p.promoType !== f.promoType) return false;
 
         if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false;
 
