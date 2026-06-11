@@ -1,7 +1,7 @@
-시작: 2026-06-11T18:50:43.556Z
+시작: 2026-06-11T18:55:40.936Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17812038535919322.20851563118
+[RES] 200 login.xml&postfix=17812041516427103.084185385529
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -9,5 +9,49 @@ goto OK: https://cloudposoffice.shinsegae.com/
 스크린샷 업로드
 자동 로드 없음 → 메뉴 클릭 시도
 영업 클릭
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+영업속보 클릭
+[] 클릭OK(ID)
+[RES] 200 selTodaySalesList
+selTodaySalesList: 10건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":259000,"ITEM_CD":"30048","ITEM_NM":"마파테 5 [1168722-CMNTB, 270]","SALES_AMT":233100,"NET_SALES_AMT":2119
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 10건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-170100,"ITEM_CD":"30610","ITEM_NM":"엔돌핀 아주라 [S11070-124, 245]","SALES_AMT":-170100,"NET_SALES_AMT":-1
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32397","ITEM_NM":"오리지널 [1000Black, 270]","SALES_AMT":62100,"NET_SALES_AMT":56455,"VAT_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"32063","ITEM_NM":"런 캡 2.0 [SA28MW-BLK, 1SIZE]","SALES_AMT":71200,"NET_SALES_AMT":64727
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":88000,"ITEM_CD":"15264","ITEM_NM":"릴랙스 슬라이드 6.0 [L47112000, 265]","SALES_AMT":79200,"NET_SALES_AMT":720
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29791","ITEM_NM":"클라우드몬스터 3 [3WG10034861, 245]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"33059","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 265]","SALES_AMT":173400,"NET_SALES_AMT":1576
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 7개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"33975","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, L/XL]","SALES_AMT":24300,"NET_SALES_AM
+  파싱 성공: 7건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26612","ITEM_NM":"아디제로 EVO SL [JP7149, 250]","SALES_AMT":198550,"NET_SALES_AMT":18050
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26620","ITEM_NM":"아디제로 EVO SL [JP7149, 290]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 1건
+완료: 품번 12개
