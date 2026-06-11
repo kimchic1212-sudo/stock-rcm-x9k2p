@@ -5520,6 +5520,7 @@ function card(p){
 
 
   let promoBadge = "";
+  let promoRateFlow = "";  // 하단 가격행 중간에 표시할 할인 플로우
 
   let priceDisplay = `<div class="text-base sm:text-[17px] font-black">${krw(p.소비자가)}</div>`;
 
@@ -5531,10 +5532,8 @@ function card(p){
 
       const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
 
-
-
       const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${p.promoName}]</span> ` : '';
-      const _previewLabel = p.promoIsPreview ? `<span class="opacity-75 text-[9px] font-bold ml-1">📅미리보기</span>` : '';
+      const _previewLabel = p.promoIsPreview ? `<span class="text-[9px] font-bold text-gray-400 ml-0.5">📅미리보기</span>` : '';
 
       if (p.promoType === 'weekly') {
 
@@ -5555,21 +5554,20 @@ function card(p){
           const _erInt = Math.round((p.promoEventRate||0)*100);
           const _crInt = Math.round((p.promoCouponRate||0)*100);
           const _isGray = p.promoIsPreview;
+          const _col = _isGray ? 'text-gray-400' : '';
 
-          const _chip = (bg, text, label) =>
-            `<span class="${_isGray ? 'bg-gray-200 text-gray-400' : bg+' '+text} px-1.5 py-0.5 rounded text-[11px] font-black flex items-center gap-0.5 shadow-sm">${label}</span>`;
+          // 상단 배지: 기획전명만
+          promoBadge = `<span class="${_isGray?'bg-gray-100 text-gray-400':'bg-purple-50 text-purple-600'} px-2 py-0.5 rounded text-[11px] font-black flex items-center gap-1">${_pnLabel}🎟️ 기획전${_previewLabel}</span>`;
 
-          const _endLabel = p.promoEndDate ? ` <span class="text-[10px] opacity-60">(~${p.promoEndDate})</span>` : '';
+          // 하단 할인 플로우 (소비자가 ↔ 가격 사이)
+          const _sep = `<span class="text-gray-300 text-[10px]">›</span>`;
+          let _flow = '';
+          if(_erInt > 0) _flow += `<span class="${_isGray?'text-gray-400':'text-amber-600'} text-[11px] font-black">🎁${_erInt}%</span>${_sep}`;
+          if(_crInt > 0) _flow += `<span class="${_isGray?'text-gray-400':'text-indigo-600'} text-[11px] font-black">🎟️${_crInt}%</span>${_sep}`;
+          _flow += `<span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">✨${rateInt}%</span>`;
+          if(p.promoEndDate) _flow += `<span class="text-[10px] text-gray-400 ml-0.5">(~${p.promoEndDate})</span>`;
 
-          let _chips = '';
-          if(_erInt > 0) _chips += _chip('bg-amber-100','text-amber-700', `🎁 기획전 ▼${_erInt}%`);
-          if(_crInt > 0) _chips += _chip('bg-indigo-100','text-indigo-700', `🎟️ 쿠폰 ▼${_crInt}%`);
-          _chips += _chip('bg-purple-100','text-purple-700', `✨ 최종 ▼${rateInt}%`+(_erInt===0&&_crInt===0&&p.promoEndDate?` (~${p.promoEndDate})`:''));
-          if(p.promoEndDate && (_erInt>0||_crInt>0)) _chips += `<span class="text-[10px] font-bold text-gray-400">(~${p.promoEndDate})</span>`;
-          if(_isGray) _chips += `<span class="text-[9px] font-bold text-gray-400">📅미리보기</span>`;
-          if(_pnLabel) _chips = _pnLabel + _chips;
-
-          promoBadge = `<div class="flex flex-wrap items-center gap-1">${_chips}</div>`;
+          promoRateFlow = `<div class="flex items-center gap-0.5">${_flow}</div>`;
 
           priceDisplay = `
 
@@ -5577,7 +5575,7 @@ function card(p){
 
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
 
-                <span class="text-[17px] sm:text-lg font-black ${p.promoIsPreview ? 'text-gray-500' : 'text-purple-700'}">${p.promoIsPreview ? '📅' : '🎟️'}${krw(p.currentPromoPrice)}</span>
+                <span class="text-[17px] sm:text-lg font-black ${_isGray ? 'text-gray-500' : 'text-purple-700'}">${krw(p.currentPromoPrice)}</span>
 
             </div>`;
 
@@ -5707,9 +5705,11 @@ function card(p){
 
         </div>
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-1">
 
-            <span class="text-xs font-black text-gray-600">소비자가</span>
+            <span class="text-xs font-black text-gray-600 shrink-0">소비자가</span>
+
+            ${promoRateFlow}
 
             ${priceDisplay}
 
