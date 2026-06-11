@@ -5554,36 +5554,23 @@ function card(p){
           const _erInt = Math.round((p.promoEventRate||0)*100);
           const _crInt = Math.round((p.promoCouponRate||0)*100);
           const _isGray = p.promoIsPreview;
-          const _col = _isGray ? 'text-gray-400' : '';
 
           // 상단 배지: 기획전명만
           promoBadge = `<span class="${_isGray?'bg-gray-100 text-gray-400':'bg-purple-50 text-purple-600'} px-2 py-0.5 rounded text-[11px] font-black flex items-center gap-1">${_pnLabel}🎟️ 기획전${_previewLabel}</span>`;
 
-          // 하단 할인 플로우 (소비자가 ↔ 가격 사이)
-          // 중복 제거: 기획전=0이면 생략, 쿠폰=최종이면 최종 생략
-          const _gc = _isGray ? 'text-gray-400' : '';
-          let _flow = '';
+          // 할인 칩 전용 행 (총재고 아래, 소비자가 위)
+          const _chip = (bg, border, text, label) =>
+            `<span class="${_isGray ? 'bg-gray-100 border-gray-200 text-gray-400' : bg+' '+border+' '+text} border rounded-md px-2 py-0.5 text-xs font-black">${label}</span>`;
+          const _arrow = `<span class="text-gray-300 font-bold text-sm">›</span>`;
 
-          if(_erInt > 0 && _crInt > 0) {
-            // 둘 다 있을 때: 기획전▼10% + 쿠폰▼20% = ▼28%
-            _flow = `<span class="${_isGray?'text-gray-400':'text-amber-600'} text-[11px] font-black">기획전▼${_erInt}%</span>`
-                  + `<span class="text-gray-300 text-[10px] mx-0.5">+</span>`
-                  + `<span class="${_isGray?'text-gray-400':'text-indigo-600'} text-[11px] font-black">쿠폰▼${_crInt}%</span>`
-                  + `<span class="text-gray-300 text-[10px] mx-0.5">=</span>`
-                  + `<span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">최종▼${rateInt}%</span>`;
-          } else if(_erInt > 0) {
-            _flow = `<span class="${_isGray?'text-gray-400':'text-amber-600'} text-[11px] font-black">기획전▼${_erInt}%</span>`
-                  + (_crInt !== rateInt ? `<span class="text-gray-300 text-[10px] mx-0.5">=</span><span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">최종▼${rateInt}%</span>` : '');
-          } else if(_crInt > 0) {
-            // 쿠폰만: 쿠폰▼20% (최종과 같으면 최종 생략)
-            _flow = `<span class="${_isGray?'text-gray-400':'text-indigo-600'} text-[11px] font-black">쿠폰▼${_crInt}%</span>`
-                  + (_crInt !== rateInt ? `<span class="text-gray-300 text-[10px] mx-0.5">=</span><span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">최종▼${rateInt}%</span>` : '');
-          } else {
-            _flow = `<span class="${_isGray?'text-gray-400':'text-purple-700'} text-[11px] font-black">▼${rateInt}%</span>`;
-          }
-          if(p.promoEndDate) _flow += `<span class="text-[10px] text-gray-400 ml-1">(~${p.promoEndDate})</span>`;
+          let _chips = '';
+          if(_erInt > 0) _chips += _chip('bg-amber-50','border-amber-300','text-amber-700', `🎁 기획전 ▼${_erInt}%`) + _arrow;
+          if(_crInt > 0) _chips += _chip('bg-blue-50','border-blue-300','text-blue-700', `🎟️ 쿠폰 ▼${_crInt}%`) + _arrow;
+          _chips += _chip('bg-purple-50','border-purple-300','text-purple-700', `✨ 최종 ▼${rateInt}%`);
+          if(p.promoEndDate) _chips += `<span class="text-[11px] text-gray-400 font-bold">(~${p.promoEndDate})</span>`;
+          if(_isGray) _chips += `<span class="text-[10px] text-gray-400 font-bold">📅미리보기</span>`;
 
-          promoRateFlow = `<div class="flex items-center gap-0">${_flow}</div>`;
+          promoRateFlow = `<div class="flex items-center gap-1 flex-wrap">${_chips}</div>`;
 
           priceDisplay = `
 
@@ -5721,11 +5708,11 @@ function card(p){
 
         </div>
 
-        <div class="flex items-center justify-between gap-1">
+        ${promoRateFlow ? `<div class="flex items-center">${promoRateFlow}</div>` : ''}
+
+        <div class="flex items-center justify-between">
 
             <span class="text-xs font-black text-gray-600 shrink-0">소비자가</span>
-
-            ${promoRateFlow}
 
             ${priceDisplay}
 
