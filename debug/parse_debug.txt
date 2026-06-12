@@ -1,7 +1,7 @@
-시작: 2026-06-12T15:00:54.451Z
+시작: 2026-06-12T15:10:39.114Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17812764684234396.268105867673
+[RES] 200 login.xml&postfix=17812770524522787.86490148349
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -48,11 +48,11 @@ selTodaySalesList: 23건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34342","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 285]","SALES_AMT":199200,"NET_SALES_AMT":181091,
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":44100,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":35280,"NET_SALES_AMT
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":44100,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":35280,"NET_SALES_AMT
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34342","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 285]","SALES_AMT":199200,"NET_SALES_AMT":181091,
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
