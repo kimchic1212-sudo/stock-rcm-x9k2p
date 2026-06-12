@@ -1,7 +1,7 @@
-시작: 2026-06-12T05:31:15.373Z
+시작: 2026-06-12T05:34:50.334Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17812422873614631.139395188082
+[RES] 200 login.xml&postfix=17812425042678280.12788592873
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 8건
+selTodaySalesList: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"34170","ITEM_NM":"페가수스 42 [IB1881-602, 245]","SALES_AMT":118300,"NET_SALES_AMT":10754
   파싱 성공: 1건
-메뉴 클릭 후 거래: 8건
+메뉴 클릭 후 거래: 9건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":129500,"ITEM_CD":"14834","ITEM_NM":"러닝 디비전 리플렉티브 자켓 [HJ2194-010, XS]","SALES_AMT":129500,"NET_SALES_AMT
@@ -46,4 +46,8 @@ selTodaySalesList: 8건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":197100,"ITEM_CD":"21029","ITEM_NM":"보메로 플러스 [HV8154-001, 240]","SALES_AMT":157680,"NET_SALES_AMT":14334
   파싱 성공: 1건
-완료: 품번 14개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34342","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 285]","SALES_AMT":199200,"NET_SALES_AMT":181091,
+  파싱 성공: 1건
+완료: 품번 15개
