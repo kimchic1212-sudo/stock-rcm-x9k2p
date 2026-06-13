@@ -1,7 +1,7 @@
-시작: 2026-06-13T07:34:39.447Z
+시작: 2026-06-13T07:35:58.359Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813360941112811.1047015625877
+[RES] 200 login.xml&postfix=17813361712123677.75965284146
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 33건
+selTodaySalesList: 34건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 33건
+메뉴 클릭 후 거래: 34건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -146,4 +146,8 @@ selTodaySalesList: 33건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":170100,"ITEM_CD":"30553","ITEM_NM":"엔돌핀 아주라 [S21070-172, 275]","SALES_AMT":170100,"NET_SALES_AMT":15463
   파싱 성공: 1건
-완료: 품번 32개
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":65000,"ITEM_CD":"9260","ITEM_NM":"레이스 캡 [N1ARC03-003, 1SIZE]","SALES_AMT":45500,"NET_SALES_AMT":41364,"
+  파싱 성공: 3건
+완료: 품번 34개
