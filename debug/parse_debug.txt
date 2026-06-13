@@ -1,7 +1,7 @@
-시작: 2026-06-13T05:30:53.263Z
+시작: 2026-06-13T05:36:00.071Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813286673759158.383817197542
+[RES] 200 login.xml&postfix=17813289715961175.965522316338
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 18건
+selTodaySalesList: 19건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 18건
+메뉴 클릭 후 거래: 19건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -86,4 +86,8 @@ selTodaySalesList: 18건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":55000,"ITEM_CD":"28902","ITEM_NM":"프로 드라이 핏 언스트럭처드 스우시 러닝 캡 [IO8269-010, S/M]","SALES_AMT":33000,"NET_S
   파싱 성공: 1건
-완료: 품번 20개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":140100,"ITEM_CD":"27600","ITEM_NM":"아드레날린 GTS 25 (와이드) [1204431D020, 250]","SALES_AMT":130100,"NET_SALE
+  파싱 성공: 1건
+완료: 품번 21개
