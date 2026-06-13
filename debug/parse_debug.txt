@@ -1,7 +1,7 @@
-시작: 2026-06-13T08:36:03.584Z
+시작: 2026-06-13T08:40:35.465Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813397724855619.263919650543
+[RES] 200 login.xml&postfix=17813400494379892.927881250303
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 43건
+selTodaySalesList: 44건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 43건
+메뉴 클릭 후 거래: 44건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -186,4 +186,8 @@ selTodaySalesList: 43건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":429000,"ITEM_CD":"31911","ITEM_NM":"005 [005-LASER-M, 270]","SALES_AMT":300300,"NET_SALES_AMT":273000,"
   파싱 성공: 1건
-완료: 품번 46개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"29758","ITEM_NM":"트랙 팩 40L 엘리트 [2UE10170761, 1SIZE]","SALES_AMT":260100,"NET_SALES_AM
+  파싱 성공: 1건
+완료: 품번 47개
