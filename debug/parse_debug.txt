@@ -1,7 +1,7 @@
-시작: 2026-06-13T08:20:46.236Z
+시작: 2026-06-13T08:23:20.495Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813388564058721.637463952344
+[RES] 200 login.xml&postfix=1781339015084168.41976770497035
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 40건
+selTodaySalesList: 41건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 40건
+메뉴 클릭 후 거래: 41건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -174,4 +174,8 @@ selTodaySalesList: 40건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":323100,"ITEM_CD":"32817","ITEM_NM":"알파플라이 3 OR [IR1817-100, 260]","SALES_AMT":258480,"NET_SALES_AMT":23
   파싱 성공: 2건
-완료: 품번 42개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":269100,"ITEM_CD":"29987","ITEM_NM":"마파테 X [1161990-BCMN, 280]","SALES_AMT":215280,"NET_SALES_AMT":19570
+  파싱 성공: 2건
+완료: 품번 44개
