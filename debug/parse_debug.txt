@@ -1,7 +1,7 @@
-시작: 2026-06-13T07:46:20.489Z
+시작: 2026-06-13T07:47:52.041Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813367935547756.420821148934
+[RES] 200 login.xml&postfix=17813368863932434.0277226960725
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -100,11 +100,11 @@ selTodaySalesList: 35건
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":80100,"NET_SALES_AMT":72818,"VA
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"21599","ITEM_NM":"코어 런 울트라라이트 미드컷 삭스 V4 [WP8C0L, 4]","SALES_AMT":39200,"NET_SALES_AMT"
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"21599","ITEM_NM":"코어 런 울트라라이트 미드컷 삭스 V4 [WP8C0L, 4]","SALES_AMT":39200,"NET_SALES_AMT"
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":80100,"NET_SALES_AMT":72818,"VA
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
