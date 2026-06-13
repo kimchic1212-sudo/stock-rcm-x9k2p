@@ -1,7 +1,7 @@
-시작: 2026-06-13T09:41:44.049Z
+시작: 2026-06-13T09:45:58.354Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813437164715805.43216690725
+[RES] 200 login.xml&postfix=1781343971604530.3196610679339
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 49건
+selTodaySalesList: 50건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 49건
+메뉴 클릭 후 거래: 50건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -210,4 +210,8 @@ selTodaySalesList: 49건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32397","ITEM_NM":"오리지널 [1000Black, 270]","SALES_AMT":55200,"NET_SALES_AMT":50182,"VAT_
   파싱 성공: 1건
-완료: 품번 49개
+[RES] 200 selItemSalesList
+  items: 7개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27488","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFW]","SALES_AMT":31200,"NET_SALES_AMT":
+  파싱 성공: 7건
+완료: 품번 54개
