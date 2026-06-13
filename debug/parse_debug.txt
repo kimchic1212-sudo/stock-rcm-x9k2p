@@ -1,7 +1,7 @@
-시작: 2026-06-13T06:30:39.177Z
+시작: 2026-06-13T06:35:58.282Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813322537959794.259543174838
+[RES] 200 login.xml&postfix=17813325712234333.67537485304
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 22건
+selTodaySalesList: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 22건
+메뉴 클릭 후 거래: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -102,4 +102,12 @@ selTodaySalesList: 22건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"29504","ITEM_NM":"온 런 티 [1MG10840553, XL]","SALES_AMT":80100,"NET_SALES_AMT":72818,"VA
   파싱 성공: 2건
-완료: 품번 25개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"21599","ITEM_NM":"코어 런 울트라라이트 미드컷 삭스 V4 [WP8C0L, 4]","SALES_AMT":39200,"NET_SALES_AMT"
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"29661","ITEM_NM":"클라우드서퍼 맥스 [3WF30224726, 250]","SALES_AMT":197100,"NET_SALES_AMT":17
+  파싱 성공: 1건
+완료: 품번 28개
