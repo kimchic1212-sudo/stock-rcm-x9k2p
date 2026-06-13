@@ -1,7 +1,7 @@
-시작: 2026-06-13T08:13:21.521Z
+시작: 2026-06-13T08:15:52.021Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813384122736933.321477192099
+[RES] 200 login.xml&postfix=17813385665663633.288608324684
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 38건
+selTodaySalesList: 39건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 38건
+메뉴 클릭 후 거래: 39건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -166,4 +166,8 @@ selTodaySalesList: 38건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"20702","ITEM_NM":"드라이 핏 클럽 언스트럭쳐드 페더라이트 캡 [FB5682-010, M/L]","SALES_AMT":23400,"NET_SA
   파싱 성공: 1건
-완료: 품번 39개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21006","ITEM_NM":"보메로 플러스 [HV8154-102, 230]","SALES_AMT":131400,"NET_SALES_AMT":11945
+  파싱 성공: 1건
+완료: 품번 40개
