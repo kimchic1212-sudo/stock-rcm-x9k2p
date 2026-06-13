@@ -1,7 +1,7 @@
-시작: 2026-06-13T03:46:32.964Z
+시작: 2026-06-13T03:50:42.213Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813224073587990.629337962654
+[RES] 200 login.xml&postfix=17813226546727196.742277258253
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -32,7 +32,7 @@ selTodaySalesList: 6건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"20702","ITEM_NM":"드라이 핏 클럽 언스트럭쳐드 페더라이트 캡 [FB5682-010, M/L]","SALES_AMT":23400,"NET_SA
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":152100,"ITEM_CD":"33411","ITEM_NM":"페가수스 42 [IB1881-002, 240]","SALES_AMT":91260,"NET_SALES_AMT":82964,
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
