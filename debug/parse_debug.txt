@@ -1,7 +1,7 @@
-시작: 2026-06-13T07:25:55.749Z
+시작: 2026-06-13T07:30:45.461Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17813355670332506.6547382847857
+[RES] 200 login.xml&postfix=17813358554662343.138925298419
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 31건
+selTodaySalesList: 33건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"28956","ITEM_NM":"ACG 플라이 언스트럭처드 캡 [IH8673-010, M/L]","SALES_AMT":19400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 31건
+메뉴 클릭 후 거래: 33건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33974","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, M/L]","SALES_AMT":17000,"NET_SALES_AMT
@@ -137,5 +137,13 @@ selTodaySalesList: 31건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":252000,"ITEM_CD":"31634","ITEM_NM":"S/LAB 센스 6 SET [LC2855200, L]","SALES_AMT":201600,"NET_SALES_AMT":1
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26595","ITEM_NM":"아디제로 EVO SL [JH6206, 270]","SALES_AMT":167200,"NET_SALES_AMT":15200
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":170100,"ITEM_CD":"30553","ITEM_NM":"엔돌핀 아주라 [S21070-172, 275]","SALES_AMT":170100,"NET_SALES_AMT":15463
   파싱 성공: 1건
 완료: 품번 32개
