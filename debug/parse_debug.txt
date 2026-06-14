@@ -1,7 +1,7 @@
-시작: 2026-06-14T07:04:36.851Z
+시작: 2026-06-14T07:09:38.446Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17814206911266339.565779146768
+[RES] 200 login.xml&postfix=17814209915494064.329623335632
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 22건
+selTodaySalesList: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24352","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 3]","SALES_AMT":27000,"NET_SALES_AMT":24545,
   파싱 성공: 1건
-메뉴 클릭 후 거래: 22건
+메뉴 클릭 후 거래: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36536","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 235]","SALES_AMT":196100,"NET_SALES_AMT":17
@@ -102,4 +102,20 @@ selTodaySalesList: 22건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29258","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 285]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-완료: 품번 28개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26778","ITEM_NM":"아디제로 EVO SL [JH6208, 240]","SALES_AMT":157200,"NET_SALES_AMT":14290
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"25680","ITEM_NM":"라이트웨이트 마이크로 크루 삭스 1팩 [IB6114-100, M]","SALES_AMT":13200,"NET_SALES_A
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"25696","ITEM_NM":"라이트웨이트 마이크로 크루 삭스 1팩 [IB6114-702, M]","SALES_AMT":15480,"NET_SALES_A
+  파싱 성공: 4건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29788","ITEM_NM":"클라우드몬스터 3 [3WG10034861, 230]","SALES_AMT":196100,"NET_SALES_AMT":17
+  파싱 성공: 1건
+완료: 품번 34개
