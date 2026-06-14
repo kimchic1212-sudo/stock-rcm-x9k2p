@@ -1,7 +1,7 @@
-시작: 2026-06-14T03:10:37.656Z
+시작: 2026-06-14T03:15:40.460Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17814066491384444.07010590204
+[RES] 200 login.xml&postfix=17814069536847114.715384780801
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 4건
+selTodaySalesList: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24352","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 3]","SALES_AMT":27000,"NET_SALES_AMT":24545,
   파싱 성공: 1건
-메뉴 클릭 후 거래: 4건
+메뉴 클릭 후 거래: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36536","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 235]","SALES_AMT":196100,"NET_SALES_AMT":17
@@ -30,4 +30,8 @@ selTodaySalesList: 4건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29272","ITEM_NM":"클라우드몬스터 3 [3MG10054747, 250]","SALES_AMT":196100,"NET_SALES_AMT":17
   파싱 성공: 1건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":192000,"ITEM_CD":"32331","ITEM_NM":"모스테크 티셔츠 [11006-00A08, M]","SALES_AMT":192000,"NET_SALES_AMT":17454
+  파싱 성공: 1건
+완료: 품번 6개
