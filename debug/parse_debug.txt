@@ -1,7 +1,7 @@
-시작: 2026-06-14T04:50:34.743Z
+시작: 2026-06-14T04:53:43.020Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17814126472971688.7795914417047
+[RES] 200 login.xml&postfix=17814128345901018.9930587116713
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24352","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 3]","SALES_AMT":27000,"NET_SALES_AMT":24545,
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36536","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 235]","SALES_AMT":196100,"NET_SALES_AMT":17
@@ -66,4 +66,8 @@ selTodaySalesList: 13건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":589000,"ITEM_CD":"16270","ITEM_NM":"포러너 265S 뮤직 [010-2810-53, 1SIZE]","SALES_AMT":409330,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 18개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34325","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 305]","SALES_AMT":199200,"NET_SALES_AMT":181091,
+  파싱 성공: 1건
+완료: 품번 19개
