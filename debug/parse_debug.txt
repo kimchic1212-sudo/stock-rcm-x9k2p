@@ -1,7 +1,7 @@
-시작: 2026-06-14T09:50:42.919Z
+시작: 2026-06-14T09:55:43.269Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1781430653115870.2634737381087
+[RES] 200 login.xml&postfix=17814309560579564.6581497273
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 37건
+selTodaySalesList: 38건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24352","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C0R, 3]","SALES_AMT":27000,"NET_SALES_AMT":24545,
   파싱 성공: 1건
-메뉴 클릭 후 거래: 37건
+메뉴 클릭 후 거래: 38건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36536","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 235]","SALES_AMT":196100,"NET_SALES_AMT":17
@@ -162,4 +162,8 @@ selTodaySalesList: 37건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29700,"ITEM_CD":"29079","ITEM_NM":"ACG 아웃도어 쿠션 크루 1PR [DV5465-101, M]","SALES_AMT":18290,"NET_SALES_AMT
   파싱 성공: 2건
-완료: 품번 53개
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":94500,"ITEM_CD":"33869","ITEM_NM":"ACG 트레일 드라이핏 하이라이즈 4인치 타이츠 [IO9644-004, S]","SALES_AMT":69040,"NET_S
+  파싱 성공: 4건
+완료: 품번 56개
