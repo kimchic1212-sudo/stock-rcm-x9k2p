@@ -24,7 +24,7 @@ jobs:
         id: pw-cache
         with:
           path: ~/.cache/ms-playwright
-          key: pw-chromium-${{ runner.os }}-v1
+          key: pw-chromium-${{ runner.os }}-v2
 
       - name: Install Playwright
         run: npm install playwright
