@@ -5576,7 +5576,7 @@ function card(p){
           if(p.promoEndDate) _chips += `<span class="text-[11px] text-gray-400 font-bold self-center ml-1">(~${p.promoEndDate})</span>`;
           if(_isGray) _chips += `<span class="text-[10px] text-gray-400 font-bold self-center">📅미리보기</span>`;
 
-          promoRateFlow = `<div class="flex items-stretch gap-1 flex-wrap">${_chips}</div>`;
+          promoRateFlow = `<div class="flex items-stretch gap-1 overflow-x-auto no-scrollbar">${_chips}</div>`;
 
           priceDisplay = `
 
@@ -5628,9 +5628,9 @@ function card(p){
 
             ${getFilters().noImage ? _noImgBadge : ""}
 
-            <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
+            <span class="hidden sm:inline bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
 
-            <span class="bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
+            <span class="hidden sm:inline bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
 
             <span class="${gBadgeClass}">${escapeHtml(gLabel)}</span>
 
@@ -5648,9 +5648,9 @@ function card(p){
 
 
 
-              <div class="copyable text-[11px] font-bold text-gray-400 mb-1.5 text-left w-full hover:text-blue-600 flex items-center gap-1 line-clamp-1" data-copy="${escapeHtml(p.품번)}">
+              <div class="copyable text-[11px] font-bold text-gray-400 mb-1.5 text-left w-full hover:text-blue-600 flex items-center gap-1 overflow-hidden" data-copy="${escapeHtml(p.품번)}">
 
-                  ${escapeHtml(p.품번)} <i data-lucide="copy" class="w-4 h-4 opacity-60"></i>
+                  <span class="truncate">${escapeHtml(p.품번)}</span><i data-lucide="copy" class="w-4 h-4 opacity-60 shrink-0"></i>
 
               </div>
 
@@ -5710,7 +5710,7 @@ function card(p){
 
             <span>총 재고</span>
 
-            <span>부산 <b class="text-blue-600">${p.busanTotal}</b> · 신사 ${p.sinsaTotal} · 물류 ${p.centerTotal}</span>
+            <span class="shrink-0">부산 <b class="text-blue-600">${p.busanTotal}</b> · 신사 ${p.sinsaTotal} · 물류 ${p.centerTotal}</span>
 
         </div>
 
