@@ -1,7 +1,7 @@
-시작: 2026-06-17T08:33:49.845Z
+시작: 2026-06-17T08:39:59.220Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17816852448482640.0573801471583
+[RES] 200 login.xml&postfix=17816856105649967.609739953443
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 15건
+selTodaySalesList: 16건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30087","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 255]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 15건
+메뉴 클릭 후 거래: 16건
 [RES] 200 selItemSalesList
   items: 4개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"27246","ITEM_NM":"아디365 클라이마쿨 티셔츠 [JZ7694, M]","SALES_AMT":39200,"NET_SALES_AMT":35636
@@ -74,4 +74,8 @@ selTodaySalesList: 15건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29256","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 275]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 2건
-완료: 품번 19개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"34339","ITEM_NM":"하이퍼부스트 엣지 [KI1911, 270]","SALES_AMT":199200,"NET_SALES_AMT":181091,
+  파싱 성공: 1건
+완료: 품번 20개
