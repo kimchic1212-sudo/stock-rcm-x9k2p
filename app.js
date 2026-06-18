@@ -316,8 +316,10 @@ function convertSizeLabel(sz, gender) {
         if(window.sizeUnit === 'EU') return _SHOE_EU[n] !== undefined ? String(_SHOE_EU[n]) : String(sz);
         if(window.sizeUnit === 'US') {
             const isW = (gender === 'W' || gender === '여성' || gender === '여');
-            const map = isW ? _SHOE_USW : _SHOE_USM;
-            return map[n] !== undefined ? map[n] : String(sz);
+            const isM = (gender === 'M' || gender === '남성' || gender === '남');
+            if(isW) return _SHOE_USW[n] !== undefined ? _SHOE_USW[n] : String(sz);
+            // 남성 또는 성별미상: 남성 기준
+            return _SHOE_USM[n] !== undefined ? _SHOE_USM[n] : String(sz);
         }
     }
     if(_KR_CLOTH_EU[n] !== undefined) {
@@ -330,12 +332,13 @@ function convertSizeLabel(sz, gender) {
 window.setSizeUnit = function(unit) {
     window.sizeUnit = unit;
     localStorage.setItem('_rcm_sizeUnit', unit);
+    const isDark = document.documentElement.classList.contains('dark-mode');
     ['KR','EU','US'].forEach(u => {
         const btn = document.getElementById('sut-' + u);
         if(!btn) return;
         const on = u === unit;
-        btn.style.background = on ? '#dbeafe' : 'transparent';
-        btn.style.color = on ? '#1d4ed8' : '#9ca3af';
+        btn.style.background = on ? (isDark ? '#1e3a5f' : '#dbeafe') : 'transparent';
+        btn.style.color = on ? (isDark ? '#93c5fd' : '#1d4ed8') : (isDark ? '#6b7280' : '#9ca3af');
         btn.style.fontWeight = on ? '700' : '500';
     });
     render();
@@ -5757,7 +5760,7 @@ function card(p){
 
         </div>
 
-        ${promoRateFlow ? `<div class="flex items-center">${promoRateFlow}</div>` : ''}
+        ${promoRateFlow ? `<div class="flex items-center min-w-0 overflow-hidden">${promoRateFlow}</div>` : ''}
 
         <div class="flex items-center justify-between">
 
