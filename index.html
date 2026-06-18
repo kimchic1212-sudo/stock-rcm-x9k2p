@@ -183,6 +183,11 @@
           <option value="promoEventRateDesc">🎁 기획전 할인율 높은 순</option>
           <option value="promoCouponRateDesc">🏷️ 쿠폰 할인율 높은 순</option>
         </select>
+        <div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-1">
+          <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#dbeafe;color:#1d4ed8;font-weight:700;border:none;cursor:pointer;">KR</button>
+          <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
+          <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
+        </div>
         <button id="resetAll" class="ml-auto p-1.5 rounded-lg text-[color:var(--accent)] hover:bg-red-50 transition-colors shrink-0" title="전체 초기화">
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
         </button>
