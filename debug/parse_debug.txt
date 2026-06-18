@@ -1,7 +1,7 @@
-시작: 2026-06-18T05:21:04.721Z
+시작: 2026-06-18T05:23:30.384Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17817600761798760.479192823743
+[RES] 200 login.xml&postfix=17817602231658306.480751241084
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":33000,"ITEM_CD":"18072","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, S/M]","SALES_AMT":19800,"NET_SALES_AMT":1
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29207","ITEM_NM":"클라우드몬스터 3 [3WG10034854, 240]","SALES_AMT":206100,"NET_SALES_AMT":18
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79920,"ITEM_CD":"22891","ITEM_NM":"레이스 데이 울트라 라이트 싱글렛 [MT51205-GAS, L]","SALES_AMT":63940,"NET_SALES_AM
   파싱 성공: 1건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21010","ITEM_NM":"보메로 플러스 [HV8154-102, 250]","SALES_AMT":143300,"NET_SALES_AMT":13027
+  파싱 성공: 1건
+완료: 품번 6개
