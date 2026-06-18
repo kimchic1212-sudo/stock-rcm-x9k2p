@@ -300,6 +300,47 @@ const DISPLAY_PATH = "display_items.json";
 
 const FAVS_PATH = "favs.json";   // 즐겨찾기 기기 간 동기화
 
+// ── 사이즈 단위 전환 (KR / EU / US) ──────────────────────────
+window.sizeUnit = localStorage.getItem('_rcm_sizeUnit') || 'KR';
+
+const _SHOE_EU  = {200:32,205:32.5,210:33,215:34,220:35,225:35.5,230:36,235:36.5,240:37,245:38,250:38.5,255:39,260:40,265:41,270:42,275:42.5,280:43,285:44,290:44.5,295:45,300:46,305:46.5,310:47};
+const _SHOE_USW = {200:'3',205:'3.5',210:'4',215:'4.5',220:'5',225:'5.5',230:'6',235:'6.5',240:'7',245:'7.5',250:'8',255:'8.5',260:'9',265:'9.5',270:'10',275:'10.5',280:'11',285:'11.5',290:'12',295:'12.5',300:'13'};
+const _SHOE_USM = {200:'2',205:'2.5',210:'3',215:'3.5',220:'3.5',225:'4',230:'4.5',235:'5',240:'5.5',245:'6',250:'6.5',255:'7',260:'7.5',265:'8',270:'8.5',275:'9',280:'9.5',285:'10',290:'10.5',295:'11',300:'11.5',305:'12',310:'12.5'};
+const _KR_CLOTH_EU = {44:'32',55:'34',66:'36',77:'38',88:'40',95:'42',100:'44',105:'46'};
+const _KR_CLOTH_US = {44:'XS',55:'S',66:'M',77:'L',88:'XL',95:'2XL',100:'3XL',105:'4XL'};
+
+function convertSizeLabel(sz, gender) {
+    if(window.sizeUnit === 'KR') return String(sz);
+    const n = parseInt(sz);
+    if(n >= 200 && n <= 320 && n % 5 === 0) {
+        if(window.sizeUnit === 'EU') return _SHOE_EU[n] !== undefined ? String(_SHOE_EU[n]) : String(sz);
+        if(window.sizeUnit === 'US') {
+            const isW = (gender === 'W' || gender === '여성' || gender === '여');
+            const map = isW ? _SHOE_USW : _SHOE_USM;
+            return map[n] !== undefined ? map[n] : String(sz);
+        }
+    }
+    if(_KR_CLOTH_EU[n] !== undefined) {
+        if(window.sizeUnit === 'EU') return _KR_CLOTH_EU[n];
+        if(window.sizeUnit === 'US') return _KR_CLOTH_US[n];
+    }
+    return String(sz);
+}
+
+window.setSizeUnit = function(unit) {
+    window.sizeUnit = unit;
+    localStorage.setItem('_rcm_sizeUnit', unit);
+    ['KR','EU','US'].forEach(u => {
+        const btn = document.getElementById('sut-' + u);
+        if(!btn) return;
+        const on = u === unit;
+        btn.style.background = on ? '#dbeafe' : 'transparent';
+        btn.style.color = on ? '#1d4ed8' : '#9ca3af';
+        btn.style.fontWeight = on ? '700' : '500';
+    });
+    render();
+};
+
 // 즐겨찾기 GitHub 저장 (debounce 1s)
 let _favsSaveTimer = null;
 async function saveFavsToGH() {
@@ -5688,13 +5729,15 @@ function card(p){
 
               const soldToday = (p.todaySoldBySize || {})[String(s.size).trim()] || 0;
 
-              let cls = "size-cell tnum shrink-0 w-[46px] ";
+              const _szLabel = convertSizeLabel(s.size, p.gender||p.성별||'');
+              const _szWide = window.sizeUnit !== 'KR' && _szLabel.length > 3;
+              let cls = "size-cell tnum shrink-0 " + (_szWide ? "w-[52px] " : "w-[46px] ");
 
               if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
 
               const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:9px;margin-top:1px">↓${soldToday}판매</span>` : '';
 
-              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''}"><span class="sz">${s.size}</span><span class="qty real-qty">${q}</span>${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
 
           }).join("")}
 
@@ -8513,6 +8556,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // 다크모드 / 쇼룸모드 상태 복원
 
     if(localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark-mode");
+
+    // 사이즈 단위 토글 초기 상태 복원
+    window.setSizeUnit(window.sizeUnit);
 
 
 
