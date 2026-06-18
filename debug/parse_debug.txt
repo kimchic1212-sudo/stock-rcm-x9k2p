@@ -1,7 +1,7 @@
-시작: 2026-06-18T09:42:08.258Z
+시작: 2026-06-18T09:50:56.592Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1781775737670500.16957605472646
+[RES] 200 login.xml&postfix=17817762668276254.984799241681
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 24건
+selTodaySalesList: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":33000,"ITEM_CD":"18072","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, S/M]","SALES_AMT":19800,"NET_SALES_AMT":1
   파싱 성공: 1건
-메뉴 클릭 후 거래: 24건
+메뉴 클릭 후 거래: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29207","ITEM_NM":"클라우드몬스터 3 [3WG10034854, 240]","SALES_AMT":206100,"NET_SALES_AMT":18
@@ -110,4 +110,12 @@ selTodaySalesList: 24건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":66000,"ITEM_CD":"18072","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, S/M]","SALES_AMT":39600,"NET_SALES_AMT":3
   파싱 성공: 1건
-완료: 품번 31개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32395","ITEM_NM":"오리지널 [1000Black, 250]","SALES_AMT":55200,"NET_SALES_AMT":50182,"VAT_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":71100,"ITEM_CD":"30380","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 250]","SALES_AMT":56880,"NET_SALES_AMT
+  파싱 성공: 1건
+완료: 품번 33개
