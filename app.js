@@ -7624,77 +7624,78 @@ function openDetail(p){
 
           if(!checkPat()) return;
 
-          const url = $("#quickImgUrl").value.trim(); if (!url) return;
+          const inputUrl = $("#quickImgUrl").value.trim(); if (!inputUrl) return;
 
-          const msgEl = $("#quickImgMsg"); msgEl.style.color = ""; msgEl.textContent = "저장 중...";
+          const msgEl = $("#quickImgMsg"); msgEl.style.color = ""; msgEl.textContent = "이미지 다운로드 중...";
 
           try {
 
               const imgKey = p.shopNo || p.품번;
+              const safeKey = String(imgKey).replace(/[^a-zA-Z0-9_\-]/g, '_');
+              const pat = getPat();
+              const ghBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
+              const pagesBase = `https://${GH.owner}.github.io/${GH.repo}/product-images`;
 
-              IMAGES[imgKey] = url;
+              // 1. 이미지를 blob으로 다운로드 (CORS 우회: img → canvas)
+              let imgB64 = null, ext = 'jpg';
+              try {
+                  const imgResp = await fetch(inputUrl, {mode:'cors'});
+                  if(imgResp.ok) {
+                      const ct = imgResp.headers.get('Content-Type') || '';
+                      ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : ct.includes('gif') ? 'gif' : 'jpg';
+                      const buf = await imgResp.arrayBuffer();
+                      const bytes = new Uint8Array(buf);
+                      let binary = '';
+                      for(let i=0;i<bytes.byteLength;i++) binary += String.fromCharCode(bytes[i]);
+                      imgB64 = btoa(binary);
+                  }
+              } catch(e) { /* CORS 차단시 fallback: URL 그대로 저장 */ }
 
-              const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/images.json`;
-
-
-
-              // SHA 재조회 (항상 최신 SHA 사용, 충돌 방지)
-
-              const metaRes = await fetch(apiBase + "?t=" + Date.now(), { headers:{ Authorization:"Bearer "+getPat() } });
-
-              if (!metaRes.ok) throw new Error(`GitHub 조회 실패 (${metaRes.status})`);
-
-              const meta = await metaRes.json();
-
-              const sha = meta.sha;
-
-
-
-              // GitHub에 저장된 최신 images.json 와 병합 (다른 탭/세션에서 추가된 것도 보존)
-
-              let latestImages = {};
-
-              try { latestImages = JSON.parse(atob(meta.content.replace(/\n/g,''))); } catch(e) {}
-
-              latestImages[imgKey] = url; // 내 변경만 덮어씀
-
-
-
-              const putRes = await fetch(apiBase, {
-
-                  method: "PUT",
-
-                  headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" },
-
-                  body: JSON.stringify({ message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(latestImages)), branch: GH.branch, sha })
-
-              });
-
-              if (!putRes.ok) {
-
-                  const errJ = await putRes.json().catch(()=>({}));
-
-                  throw new Error(`GitHub 저장 실패 (${putRes.status}): ${errJ.message || ''}`);
-
+              let finalUrl;
+              if(imgB64) {
+                  msgEl.textContent = "GitHub에 업로드 중...";
+                  // 2. 이미지 파일을 GitHub에 직접 저장 (product-images/{key}.{ext})
+                  const imgPath = `product-images/${safeKey}.${ext}`;
+                  const imgFileApi = `${ghBase}/contents/${imgPath}`;
+                  // 기존 파일 SHA 확인
+                  const existRes = await fetch(imgFileApi + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+                  const existSha = existRes.ok ? (await existRes.json()).sha : undefined;
+                  const imgPutRes = await fetch(imgFileApi, {
+                      method:"PUT",
+                      headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                      body: JSON.stringify({message:`image: ${imgKey}`, content: imgB64, branch: GH.branch, ...(existSha && {sha:existSha})})
+                  });
+                  if(!imgPutRes.ok) throw new Error(`이미지 파일 업로드 실패 (${imgPutRes.status})`);
+                  finalUrl = `${pagesBase}/${safeKey}.${ext}`;
+              } else {
+                  // CORS 차단: URL 그대로 저장 (fallback)
+                  finalUrl = inputUrl;
               }
 
-
-
-              // 메모리·캐시도 최신으로 갱신
+              // 3. images.json 업데이트
+              msgEl.textContent = "images.json 업데이트 중...";
+              const apiBase = `${ghBase}/contents/images.json`;
+              const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+              if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
+              const meta = await metaRes.json();
+              let latestImages = {};
+              try { latestImages = JSON.parse(atob(meta.content.replace(/\n/g,''))); } catch(e) {}
+              latestImages[imgKey] = finalUrl;
+              const putRes = await fetch(apiBase, {
+                  method:"PUT",
+                  headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                  body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(latestImages)), branch: GH.branch, sha: meta.sha})
+              });
+              if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
 
               IMAGES = { ...latestImages };
-
               sessionStorage.removeItem(CACHE_KEY);
-
-              msgEl.style.color = "green"; msgEl.textContent = "✓ 저장 완료!";
-
+              msgEl.style.color = "green";
+              msgEl.textContent = imgB64 ? "✓ 저장 완료! (GitHub Pages에 영구 보관)" : "✓ 저장 완료! (URL 저장 — CORS 제한)";
               render();
-
               setTimeout(()=>{ openDetail(p); }, 600);
 
           } catch (err) {
-
-              // 저장 실패 시 메모리에서도 롤백
 
               delete IMAGES[p.shopNo || p.품번];
 
