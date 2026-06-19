@@ -7092,11 +7092,15 @@ function openDetail(p){
 
       stickyFooterHtml += `
 
-          <div class="flex items-center gap-1.5 pt-1.5 border-t border-gray-100 mt-1">
+          <div class="flex items-center gap-1 pt-1.5 border-t border-gray-100 mt-1">
 
               <span class="text-[11px] font-bold text-gray-400 shrink-0">🖼️</span>
 
-              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs px-2 py-1.5 rounded-lg border border-gray-200 mono min-w-0" placeholder="URL 붙여넣기 또는 Ctrl+V로 이미지">
+              <a href="https://www.google.com/search?q=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||'')+' '+(p.품명||''))}&tbm=isch" target="_blank" class="px-2 py-1.5 text-xs font-black bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg shrink-0 no-underline" title="구글 이미지 검색">🔍G</a>
+
+              <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||''))}" target="_blank" class="px-2 py-1.5 text-xs font-black bg-green-50 hover:bg-green-100 text-green-600 rounded-lg shrink-0 no-underline" title="네이버쇼핑 검색">🔍N</a>
+
+              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs px-2 py-1.5 rounded-lg border border-gray-200 mono min-w-0" placeholder="Ctrl+V로 이미지 붙여넣기">
 
               <label class="px-2 py-1.5 text-xs font-black bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg shrink-0 cursor-pointer" title="파일 선택">📁<input type="file" id="quickImgFile" accept="image/*" class="hidden"></label>
 
