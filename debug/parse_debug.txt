@@ -1,7 +1,7 @@
-시작: 2026-06-20T03:10:48.998Z
+시작: 2026-06-20T03:14:45.405Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17819250585671258.5578077039506
+[RES] 200 login.xml&postfix=17819252968099494.85540534001
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 10건
+selTodaySalesList: 13건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 10건
+메뉴 클릭 후 거래: 13건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29834","ITEM_NM":"마인드 001 [HQ4307-001, 250]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -54,4 +54,16 @@ selTodaySalesList: 10건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":151200,"ITEM_CD":"35386","ITEM_NM":"테렉스 아그라빅 SL [KH8801, 260]","SALES_AMT":141200,"NET_SALES_AMT":12836
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":80100,"ITEM_CD":"32417","ITEM_NM":"우클로그 [1200Black, 270]","SALES_AMT":64080,"NET_SALES_AMT":58255,"VAT_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29859","ITEM_NM":"마인드 001 [HQ4307-003, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+완료: 품번 7개
