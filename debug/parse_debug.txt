@@ -1,7 +1,7 @@
-시작: 2026-06-20T07:10:44.561Z
+시작: 2026-06-20T07:13:58.659Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17819394593232660.2805695459197
+[RES] 200 login.xml&postfix=17819396517592391.2576515138294
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 96건
+selTodaySalesList: 99건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 96건
+메뉴 클릭 후 거래: 99건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29834","ITEM_NM":"마인드 001 [HQ4307-001, 250]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -398,4 +398,16 @@ selTodaySalesList: 96건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":178800,"ITEM_CD":"23986","ITEM_NM":"토미르 02 [N2ZTR25-003, 255]","SALES_AMT":168800,"NET_SALES_AMT":15345
   파싱 성공: 1건
-완료: 품번 39개
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34927","ITEM_NM":"아디제로 EVO SL [KI4794, 235]","SALES_AMT":167200,"NET_SALES_AMT":15200
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"33167","ITEM_NM":"보메로 플러스 [HV8150-405, 280]","SALES_AMT":148300,"NET_SALES_AMT":13481
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":9600,"ITEM_CD":"16988","ITEM_NM":"곤텍스 5 (하산전용 무릎) [GONTEX ５-Beige, 1SIZE]","SALES_AMT":7680,"NET_SALES_
+  파싱 성공: 2건
+완료: 품번 44개
