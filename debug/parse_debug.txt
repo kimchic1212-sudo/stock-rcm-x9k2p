@@ -1,7 +1,7 @@
-시작: 2026-06-20T08:10:55.529Z
+시작: 2026-06-20T08:13:58.814Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17819430697992390.976276611434
+[RES] 200 login.xml&postfix=17819432486281544.3383178208414
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 106건
+selTodaySalesList: 107건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 106건
+메뉴 클릭 후 거래: 107건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29834","ITEM_NM":"마인드 001 [HQ4307-001, 250]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -48,11 +48,11 @@ selTodaySalesList: 106건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29859","ITEM_NM":"마인드 001 [HQ4307-003, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29859","ITEM_NM":"마인드 001 [HQ4307-003, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
@@ -438,4 +438,8 @@ selTodaySalesList: 106건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29855","ITEM_NM":"마인드 001 [HQ4307-003, 250]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-완료: 품번 49개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"31160","ITEM_NM":"엘립스 V1 (2E) [NBPFGS112T, 270]","SALES_AMT":151200,"NET_SALES_AMT":1
+  파싱 성공: 2건
+완료: 품번 51개
