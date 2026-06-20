@@ -1,7 +1,7 @@
-시작: 2026-06-20T06:57:16.658Z
+시작: 2026-06-20T06:59:13.083Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1781938649297708.9065014736973
+[RES] 200 login.xml&postfix=17819387627663133.812327991936
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 92건
+selTodaySalesList: 93건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 92건
+메뉴 클릭 후 거래: 93건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29834","ITEM_NM":"마인드 001 [HQ4307-001, 250]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -382,4 +382,8 @@ selTodaySalesList: 92건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34279","ITEM_NM":"글리세린 GTS 23 [1105031D092, 285]","SALES_AMT":188100,"NET_SALES_AMT":
   파싱 성공: 2건
-완료: 품번 35개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49500,"ITEM_CD":"28903","ITEM_NM":"프로 드라이 핏 언스트럭처드 스우시 러닝 캡 [IO8269-010, M/L]","SALES_AMT":39600,"NET_S
+  파싱 성공: 2건
+완료: 품번 36개
