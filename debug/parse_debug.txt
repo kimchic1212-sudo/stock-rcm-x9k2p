@@ -1,7 +1,7 @@
-시작: 2026-06-20T10:55:38.137Z
+시작: 2026-06-20T10:58:35.969Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17819529479949379.914785658839
+[RES] 200 login.xml&postfix=17819531273598126.898936552107
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -324,6 +324,10 @@ selTodaySalesList: 137건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"31349","ITEM_NM":"글리세린 맥스 2 [1104791D392, 270]","SALES_AMT":201650,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
 [RES] 200 selItemSalesList
@@ -332,16 +336,24 @@ selTodaySalesList: 137건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"34312","ITEM_NM":"글리세린 GTS 23 와이드 [1204921D133, 240]","SALES_AMT":161100,"NET_SALES_A
   파싱 성공: 2건
 [RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
-  파싱 성공: 1건
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":53100,"ITEM_CD":"1593","ITEM_NM":"드라이핏 ADV 플라이 [FJ0736-100, M/L]","SALES_AMT":42480,"NET_SALES_AMT":386
+  파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -356,20 +368,12 @@ selTodaySalesList: 137건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"30553","ITEM_NM":"엔돌핀 아주라 [S21070-172, 275]","SALES_AMT":170100,"NET_SALES_AMT":15463
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34298","ITEM_NM":"글리세린 GTS 23 와이드 [1105032E020, 275]","SALES_AMT":188100,"NET_SALES_A
   파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":53100,"ITEM_CD":"1593","ITEM_NM":"드라이핏 ADV 플라이 [FJ0736-100, M/L]","SALES_AMT":42480,"NET_SALES_AMT":386
-  파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -558,4 +562,4 @@ selTodaySalesList: 137건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29000,"ITEM_CD":"36084","ITEM_NM":"테렉스 클라이마쿨 5패널 그래픽 캡 [KR6408, M]","SALES_AMT":19000,"NET_SALES_AMT":1
   파싱 성공: 1건
-완료: 품번 63개
+완료: 품번 64개
