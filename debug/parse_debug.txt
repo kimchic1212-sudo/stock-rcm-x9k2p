@@ -1,7 +1,7 @@
-시작: 2026-06-20T08:40:54.961Z
+시작: 2026-06-20T08:50:50.951Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17819448653699611.232704786382
+[RES] 200 login.xml&postfix=17819454611416623.375945926839
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 118건
+selTodaySalesList: 121건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 118건
+메뉴 클릭 후 거래: 121건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29834","ITEM_NM":"마인드 001 [HQ4307-001, 250]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -486,4 +486,16 @@ selTodaySalesList: 118건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"27802","ITEM_NM":"스트럭처 플러스 EES [IO9913-100, 255]","SALES_AMT":152100,"NET_SALES_AMT":
   파싱 성공: 1건
-완료: 품번 55개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":3,"NSALES_YN":"N","TOT_SALES_AMT":195000,"ITEM_CD":"9260","ITEM_NM":"레이스 캡 [N1ARC03-003, 1SIZE]","SALES_AMT":136500,"NET_SALES_AMT":12409
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":192000,"ITEM_CD":"32331","ITEM_NM":"모스테크 티셔츠 [11006-00A08, M]","SALES_AMT":192000,"NET_SALES_AMT":17454
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+완료: 품번 56개
