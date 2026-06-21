@@ -7635,7 +7635,7 @@ function openDetail(p){
       const ghBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
       const pagesBase = `https://${GH.owner}.github.io/${GH.repo}/product-images`;
 
-      async function uploadAndSave(imgB64, ext) {
+      async function uploadAndSave(imgB64, ext, tempUrl) {
           msgEl.style.color = ""; msgEl.textContent = "GitHub에 업로드 중...";
           const imgPath = `product-images/${safeKey}.${ext}`;
           const imgFileApi = `${ghBase}/contents/${imgPath}`;
@@ -7663,6 +7663,8 @@ function openDetail(p){
           });
           if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
           IMAGES = { ...latestImages };
+          // GitHub Pages 서빙 딜레이 동안 blob URL로 즉시 표시
+          if(tempUrl) IMAGES[imgKey] = tempUrl;
           sessionStorage.removeItem(CACHE_KEY);
           msgEl.style.color = "green";
           msgEl.textContent = "✓ 저장 완료! (GitHub Pages에 영구 보관)";
@@ -7686,7 +7688,8 @@ function openDetail(p){
           msgEl.style.color = ""; msgEl.textContent = "파일 읽는 중...";
           try {
               const {b64, ext} = await fileToB64(file);
-              await uploadAndSave(b64, ext);
+              const tempUrl = URL.createObjectURL(file);
+              await uploadAndSave(b64, ext, tempUrl);
           } catch(err) {
               delete IMAGES[p.shopNo || p.품번];
               msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
