@@ -1,7 +1,7 @@
-시작: 2026-06-21T08:22:26.578Z
+시작: 2026-06-21T08:30:44.704Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17820301595529451.087802775075
+[RES] 200 login.xml&postfix=17820306538623626.1686568006066
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 53건
+selTodaySalesList: 54건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26618","ITEM_NM":"아디제로 EVO SL [JP7149, 280]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
-메뉴 클릭 후 거래: 53건
+메뉴 클릭 후 거래: 54건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":67500,"ITEM_CD":"29019","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, XL]","SALES_AMT":47250,"NE
@@ -226,4 +226,8 @@ selTodaySalesList: 53건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21031","ITEM_NM":"보메로 플러스 [HV8154-001, 250]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-완료: 품번 52개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21398","ITEM_NM":"보메로 플러스 [HV8150-102, 265]","SALES_AMT":131400,"NET_SALES_AMT":11945
+  파싱 성공: 1건
+완료: 품번 53개
