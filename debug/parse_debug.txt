@@ -1,7 +1,7 @@
-시작: 2026-06-21T07:11:57.087Z
+시작: 2026-06-21T07:16:46.620Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782025927309765.6107775749122
+[RES] 200 login.xml&postfix=17820262168212273.0678839035554
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -180,11 +180,11 @@ selTodaySalesList: 47건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29300","ITEM_NM":"클라우드몬스터 3 [3MG10054859, 285]","SALES_AMT":176100,"NET_SALES_AMT":16
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"15392","ITEM_NM":"액티브 핸드헬드 (물병 포함) [LC1928600, 1SIZE]","SALES_AMT":32400,"NET_SALES_AM
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"15392","ITEM_NM":"액티브 핸드헬드 (물병 포함) [LC1928600, 1SIZE]","SALES_AMT":32400,"NET_SALES_AM
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29300","ITEM_NM":"클라우드몬스터 3 [3MG10054859, 285]","SALES_AMT":176100,"NET_SALES_AMT":16
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
