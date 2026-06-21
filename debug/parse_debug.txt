@@ -1,7 +1,7 @@
-시작: 2026-06-21T06:24:40.934Z
+시작: 2026-06-21T06:30:48.871Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17820230947777891.249772691318
+[RES] 200 login.xml&postfix=17820234590555311.913069716828
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 35건
+selTodaySalesList: 37건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26618","ITEM_NM":"아디제로 EVO SL [JP7149, 280]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
-메뉴 클릭 후 거래: 35건
+메뉴 클릭 후 거래: 37건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":67500,"ITEM_CD":"29019","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, XL]","SALES_AMT":47250,"NE
@@ -154,4 +154,12 @@ selTodaySalesList: 35건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-완료: 품번 39개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34931","ITEM_NM":"아디제로 EVO SL [KI4794, 255]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29000,"ITEM_CD":"36084","ITEM_NM":"테렉스 클라이마쿨 5패널 그래픽 캡 [KR6408, M]","SALES_AMT":27550,"NET_SALES_AMT":2
+  파싱 성공: 1건
+완료: 품번 41개
