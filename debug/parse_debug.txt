@@ -1,7 +1,7 @@
-시작: 2026-06-21T10:03:06.746Z
+시작: 2026-06-21T10:10:41.507Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782036200804691.5470607491103
+[RES] 200 login.xml&postfix=17820366539316851.501948983966
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 65건
+selTodaySalesList: 69건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26618","ITEM_NM":"아디제로 EVO SL [JP7149, 280]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
-메뉴 클릭 후 거래: 65건
+메뉴 클릭 후 거래: 69건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":67500,"ITEM_CD":"29019","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, XL]","SALES_AMT":47250,"NE
@@ -274,4 +274,20 @@ selTodaySalesList: 65건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29234","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 270]","SALES_AMT":217550,"NET_SALES_AMT":19
   파싱 성공: 1건
-완료: 품번 59개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":252000,"ITEM_CD":"31633","ITEM_NM":"S/LAB 센스 6 SET [LC2855200, M]","SALES_AMT":201600,"NET_SALES_AMT":1
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36539","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 250]","SALES_AMT":217550,"NET_SALES_AMT":19
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-229000,"ITEM_CD":"29236","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 280]","SALES_AMT":-206100,"NET_SALES_AMT"
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29236","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 280]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 61개
