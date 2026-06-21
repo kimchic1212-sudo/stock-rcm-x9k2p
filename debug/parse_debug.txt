@@ -1,7 +1,7 @@
-시작: 2026-06-21T08:43:05.174Z
+시작: 2026-06-21T08:49:46.389Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17820313983895412.827566492515
+[RES] 200 login.xml&postfix=17820317971731439.3060170871452
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 55건
+selTodaySalesList: 57건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26618","ITEM_NM":"아디제로 EVO SL [JP7149, 280]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
-메뉴 클릭 후 거래: 55건
+메뉴 클릭 후 거래: 57건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":67500,"ITEM_CD":"29019","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, XL]","SALES_AMT":47250,"NE
@@ -45,10 +45,6 @@ selTodaySalesList: 55건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":170100,"ITEM_CD":"31112","ITEM_NM":"레벨 V5 (D) [NBPFGB165T, 240]","SALES_AMT":136080,"NET_SALES_AMT":123
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21028","ITEM_NM":"보메로 플러스 [HV8154-001, 235]","SALES_AMT":143300,"NET_SALES_AMT":13027
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
@@ -234,4 +230,12 @@ selTodaySalesList: 55건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":589000,"ITEM_CD":"34229","ITEM_NM":"포러너 265 뮤직 [010-02810-60, 1SIZE]","SALES_AMT":459000,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 53개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":159000,"ITEM_CD":"31264","ITEM_NM":"아드레날린 GTS 25 (와이드) [1104542E020, 265]","SALES_AMT":135150,"NET_SALE
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"21599","ITEM_NM":"코어 런 울트라라이트 미드컷 삭스 V4 [WP8C0L, 4]","SALES_AMT":34300,"NET_SALES_AMT"
+  파싱 성공: 1건
+완료: 품번 54개
