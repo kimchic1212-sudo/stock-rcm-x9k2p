@@ -1,7 +1,7 @@
-시작: 2026-06-21T06:33:08.079Z
+시작: 2026-06-21T06:40:41.070Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17820236025449488.725159852833
+[RES] 200 login.xml&postfix=17820240513141953.9847155003454
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 37건
+selTodaySalesList: 42건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26618","ITEM_NM":"아디제로 EVO SL [JP7149, 280]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
-메뉴 클릭 후 거래: 37건
+메뉴 클릭 후 거래: 42건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":67500,"ITEM_CD":"29019","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, XL]","SALES_AMT":47250,"NE
@@ -162,4 +162,24 @@ selTodaySalesList: 37건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29000,"ITEM_CD":"36084","ITEM_NM":"테렉스 클라이마쿨 5패널 그래픽 캡 [KR6408, M]","SALES_AMT":27550,"NET_SALES_AMT":2
   파싱 성공: 1건
-완료: 품번 41개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36539","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 250]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":359000,"ITEM_CD":"32821","ITEM_NM":"알파플라이 3 OR [IR1817-100, 280]","SALES_AMT":251300,"NET_SALES_AMT":22
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29232","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 260]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21010","ITEM_NM":"보메로 플러스 [HV8154-102, 250]","SALES_AMT":153300,"NET_SALES_AMT":13936
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":40500,"ITEM_CD":"15392","ITEM_NM":"액티브 핸드헬드 (물병 포함) [LC1928600, 1SIZE]","SALES_AMT":32400,"NET_SALES_AM
+  파싱 성공: 1건
+완료: 품번 44개
