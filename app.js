@@ -3498,32 +3498,82 @@ async function loadChartJS() {
 
 async function _saveTransfersToGH() {
 
-    try {
+    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
 
-        const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+    // 서버 최신 transfers.json을 읽어 id 기준으로 병합(union) 후 PUT.
+    // 409/422(SHA 충돌) 시 최신 sha로 재병합 후 재시도 — 다른 기기 요청을 덮어쓰지 않음.
+    for (let attempt = 0; attempt < 3; attempt++) {
 
-        const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+        try {
 
-        if(!r.ok) throw new Error('fetch ' + r.status);
+            const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
 
-        const j = await r.json();
+            if(!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
 
-        // 다른 기기에서 추가한 항목 보존 (서버 ↔ 로컬 병합)
-        let serverData = [];
-        try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {}
-        const merged = [...serverData];
-        for (const loc of TRANSFERS) {
-            const si = merged.findIndex(s => s.code===loc.code && s.size===loc.size && s.memo===loc.memo);
-            if(si >= 0) { merged[si].qty = Math.max(merged[si].qty||0, loc.qty||0); }
-            else { merged.push(loc); }
-        }
-        TRANSFERS = merged;
+            let serverData = [], sha;
+            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {} }
 
-        const body = { message:"update transfers", content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch, sha: j.sha };
+            // id union: 서버 레코드 보존 + 로컬 레코드 반영(같은 id면 로컬 우선)
+            const byId = new Map();
+            for (const s of serverData) byId.set(s.id, s);
+            for (const loc of TRANSFERS) byId.set(loc.id, loc);
+            const merged = Array.from(byId.values());
 
-        await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+            const body = { message:"update transfers", content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch, ...(sha && {sha}) };
 
-    } catch(err) { console.error('transfers save error:', err); showToast('RT 저장 실패. 다시 시도해주세요.'); }
+            const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+            if(put.status === 409 || put.status === 422) continue;   // 최신 sha로 재시도
+            if(!put.ok) throw new Error('PUT ' + put.status);
+
+            TRANSFERS = merged;
+            return true;
+
+        } catch(err) { if(attempt === 2) { console.error('transfers save error:', err); showToast('RT 저장 실패. 다시 시도해주세요.'); return false; } }
+
+    }
+
+    showToast('RT 저장 실패. 다시 시도해주세요.'); return false;
+
+}
+
+
+
+async function _removeTransferFromGH(trId) {
+
+    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+
+    // 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존), 409/422 시 재시도
+    for (let attempt = 0; attempt < 3; attempt++) {
+
+        try {
+
+            const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+
+            if(!r.ok) throw new Error('fetch ' + r.status);
+
+            const j = await r.json();
+
+            let serverData = [];
+            try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {}
+
+            const filtered = serverData.filter(t => t.id !== trId);
+
+            const body = { message:"undo transfer", content: utf8ToB64(JSON.stringify(filtered, null, 2)), branch: GH.branch, sha: j.sha };
+
+            const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+            if(put.status === 409 || put.status === 422) continue;
+            if(!put.ok) throw new Error('PUT ' + put.status);
+
+            TRANSFERS = filtered;
+            return true;
+
+        } catch(err) { if(attempt === 2) { console.error('transfer undo error:', err); return false; } }
+
+    }
+
+    return false;
 
 }
 
@@ -3617,39 +3667,32 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
-    let apiPromise = fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}})
+    // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
+    const _saveOk = await _saveTransfersToGH();
 
-        .then(r => r.json())
+    if(!_saveOk) {
 
-        .then(j => {
+        // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
 
-            const body = { message:"add smart transfer", content: utf8ToB64(JSON.stringify(TRANSFERS, null, 2)), branch: GH.branch, sha: j.sha };
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
 
-            return fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
 
-        }).catch(err => console.error(err));
+        if(window.lucide) lucide.createIcons();
+
+        return;
+
+    }
 
 
 
     showToast(`📦 ${fromStr} → ${size} 1개 RT요청 (한 번 더 누르면 +1개)`, async () => {
 
-        // 실행취소
+        // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
 
         TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
 
-        await apiPromise;
-
-        try {
-
-            const r = await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
-
-            const j = await r.json();
-
-            const body = { message:"undo smart transfer", content: utf8ToB64(JSON.stringify(TRANSFERS, null, 2)), branch: GH.branch, sha: j.sha };
-
-            await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-
-        } catch(err) {}
+        await _removeTransferFromGH(trId);
 
         btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
 
