@@ -1,7 +1,7 @@
-시작: 2026-06-23T05:01:04.662Z
+시작: 2026-06-23T05:10:20.368Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17821908741212145.985038200937
+[RES] 200 login.xml&postfix=17821914301199021.04807407969
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 7건
+selTodaySalesList: 8건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21397","ITEM_NM":"보메로 플러스 [HV8150-102, 260]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 7건
+메뉴 클릭 후 거래: 8건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30839","ITEM_NM":"마인드 001 [HQ4309-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -42,4 +42,8 @@ selTodaySalesList: 7건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"27375","ITEM_NM":"아디365 아이코닉 러닝 팬츠 [KE6742, L]","SALES_AMT":71200,"NET_SALES_AMT":6472
   파싱 성공: 1건
-완료: 품번 9개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"31307","ITEM_NM":"글리세린 맥스 2 [1104791D091, 270]","SALES_AMT":199200,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 10개
