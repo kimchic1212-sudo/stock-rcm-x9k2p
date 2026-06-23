@@ -1461,9 +1461,15 @@ async function saveDisplayItems() {
 
     const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
 
-    let sha = null;
+    let sha = null, serverCount = 0;
 
-    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) sha = (await r.json()).sha; } catch(e) {}
+    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) { const j = await r.json(); sha = j.sha; try { serverCount = Object.keys(JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))))).length; } catch(e2) {} } } catch(e) {}
+
+    // 안전장치: 캐시 꼬임 등으로 로컬 DP가 서버보다 비정상적으로 적으면 전체 덮어쓰기 차단 (DP 전체 삭제 사고 방지)
+    const localCount = Object.keys(DISPLAY_ITEMS).length;
+    if (serverCount - localCount > 3) {
+        throw new Error(`DP 데이터가 서버보다 비정상적으로 적습니다 (로컬 ${localCount} / 서버 ${serverCount}). 새로고침(🔄) 후 다시 시도하세요.`);
+    }
 
     const body = { message: "dp: update display items", content: utf8ToB64(JSON.stringify(DISPLAY_ITEMS, null, 2)), branch: GH.branch };
 
@@ -8003,7 +8009,7 @@ $("#file").onchange = async (e) => {
 
             RAW = rows; CURRENT_META = meta; 
 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, _timestamp: Date.now()})); 
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()})); 
 
             applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
 
@@ -9790,7 +9796,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                     RAW = rows; CURRENT_META = meta; 
 
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, _timestamp: Date.now()})); 
+                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()})); 
 
                     applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); 
 
