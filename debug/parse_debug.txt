@@ -1,7 +1,7 @@
-시작: 2026-06-23T07:01:58.302Z
+시작: 2026-06-23T07:06:42.459Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17821981283918292.792656373442
+[RES] 200 login.xml&postfix=1782198414645486.0346364018819
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 17건
+selTodaySalesList: 18건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21397","ITEM_NM":"보메로 플러스 [HV8150-102, 260]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 17건
+메뉴 클릭 후 거래: 18건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30839","ITEM_NM":"마인드 001 [HQ4309-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -82,4 +82,8 @@ selTodaySalesList: 17건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":30000,"ITEM_CD":"15036","ITEM_NM":"소프트 플라스크 250ml/8oz 28 [LC1986400, 1SIZE]","SALES_AMT":24000,"NET_SAL
   파싱 성공: 1건
-완료: 품번 19개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":48930,"ITEM_CD":"22897","ITEM_NM":"레이스 데이 싱글렛 [WT41290-BK, S]","SALES_AMT":32980,"NET_SALES_AMT":29982,
+  파싱 성공: 1건
+완료: 품번 20개
