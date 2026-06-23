@@ -1,7 +1,7 @@
-시작: 2026-06-23T09:31:04.260Z
+시작: 2026-06-23T09:32:21.678Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17822070785579292.555534951824
+[RES] 200 login.xml&postfix=17822071557418017.370348493878
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 24건
+selTodaySalesList: 25건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21397","ITEM_NM":"보메로 플러스 [HV8150-102, 260]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 24건
+메뉴 클릭 후 거래: 25건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30839","ITEM_NM":"마인드 001 [HQ4309-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -110,4 +110,8 @@ selTodaySalesList: 24건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":23000,"ITEM_CD":"36186","ITEM_NM":"러닝 컴피 크루 삭스 [KG9716, M]","SALES_AMT":18170,"NET_SALES_AMT":16518,"VA
   파싱 성공: 2건
-완료: 품번 28개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":188100,"ITEM_CD":"31030","ITEM_NM":"1080 V15 (D) [NBPFGS104L, 250]","SALES_AMT":150480,"NET_SALES_AMT":
+  파싱 성공: 1건
+완료: 품번 29개
