@@ -7153,6 +7153,8 @@ function openDetail(p){
 
               <label class="px-2 py-1.5 text-xs font-black bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg shrink-0 cursor-pointer" title="파일 선택">📁<input type="file" id="quickImgFile" accept="image/*" class="hidden"></label>
 
+              <label class="px-2 py-1.5 text-xs font-black bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg shrink-0 cursor-pointer" title="카메라로 촬영">📷<input type="file" id="quickImgCamera" accept="image/*" capture="environment" class="hidden"></label>
+
               <button id="quickImgSave" class="px-3 py-1.5 text-xs font-black bg-gray-700 hover:bg-black text-white rounded-lg shrink-0">저장</button>
 
               ${linkHtml}
@@ -7797,6 +7799,9 @@ function openDetail(p){
       // 파일 선택 버튼
       const fileInput = $("#quickImgFile");
       if(fileInput) fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+      const cameraInput = $("#quickImgCamera");
+      if(cameraInput) cameraInput.onchange = (e) => handleFile(e.target.files[0]);
 
       // 드래그 앤 드롭 + 클릭
       const dropZone = $("#quickImgDrop");
