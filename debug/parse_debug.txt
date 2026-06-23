@@ -1,7 +1,7 @@
-시작: 2026-06-23T09:43:18.947Z
+시작: 2026-06-23T09:50:48.879Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782207814027967.2032183601298
+[RES] 200 login.xml&postfix=17822082620294650.25184114087
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 25건
+selTodaySalesList: 29건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21397","ITEM_NM":"보메로 플러스 [HV8150-102, 260]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 25건
+메뉴 클릭 후 거래: 29건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30839","ITEM_NM":"마인드 001 [HQ4309-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -114,4 +114,20 @@ selTodaySalesList: 25건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":188100,"ITEM_CD":"31030","ITEM_NM":"1080 V15 (D) [NBPFGS104L, 250]","SALES_AMT":150480,"NET_SALES_AMT":
   파싱 성공: 1건
-완료: 품번 29개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":259200,"ITEM_CD":"26094","ITEM_NM":"레이다락 패스 (아시안핏) [92069438, 1SIZE]","SALES_AMT":207360,"NET_SALES_AMT
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":239000,"ITEM_CD":"23577","ITEM_NM":"울트라 베스트 프로 [2UF30130069, L]","SALES_AMT":215100,"NET_SALES_AMT":195
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-269100,"ITEM_CD":"29987","ITEM_NM":"마파테 X [1161990-BCMN, 280]","SALES_AMT":-215280,"NET_SALES_AMT":-1
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":233100,"ITEM_CD":"30050","ITEM_NM":"마파테 5 [1168722-CMNTB, 280]","SALES_AMT":186480,"NET_SALES_AMT":1695
+  파싱 성공: 1건
+완료: 품번 33개
