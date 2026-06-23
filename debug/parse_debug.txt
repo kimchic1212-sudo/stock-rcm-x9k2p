@@ -1,7 +1,7 @@
-시작: 2026-06-23T08:10:50.363Z
+시작: 2026-06-23T08:12:21.243Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17822022629954969.462432786302
+[RES] 200 login.xml&postfix=17822023564114938.059984786572
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 20건
+selTodaySalesList: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21397","ITEM_NM":"보메로 플러스 [HV8150-102, 260]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 20건
+메뉴 클릭 후 거래: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30839","ITEM_NM":"마인드 001 [HQ4309-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -94,4 +94,8 @@ selTodaySalesList: 20건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":139500,"ITEM_CD":"28810","ITEM_NM":"스위프트 리펠 재킷 NV [IM9481-010, M]","SALES_AMT":111600,"NET_SALES_AMT":1
   파싱 성공: 1건
-완료: 품번 22개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179100,"ITEM_CD":"30858","ITEM_NM":"ACG GOAT 팩 베스트 5L [IQ7354-039, M]","SALES_AMT":143280,"NET_SALES_AM
+  파싱 성공: 1건
+완료: 품번 23개
