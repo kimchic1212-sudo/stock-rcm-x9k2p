@@ -8413,7 +8413,16 @@ window.renderPromoAdmin = () => {
 
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
 
-            const sheet = wb.Sheets[wb.SheetNames[0]];
+            // 기획전 할인 컬럼이 있는 시트를 자동 선택 (재고 시트가 첫 시트로 와도 대응)
+            const _PROMO_COLS = ['최종할인가','기획전 할인가','최종 할인율','특가할인가','위클리특가'];
+            let sheet = null;
+            for(const sn of wb.SheetNames) {
+                const _rr = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:""});
+                const _hasCode = _rr.some(r => r.some(c => String(c||"").trim()==='품번'));
+                const _hasDisc = _rr.some(r => r.some(c => _PROMO_COLS.includes(String(c||"").trim())));
+                if(_hasCode && _hasDisc) { sheet = wb.Sheets[sn]; break; }
+            }
+            if(!sheet) sheet = wb.Sheets[wb.SheetNames[0]];
 
             const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
 
@@ -8427,24 +8436,31 @@ window.renderPromoAdmin = () => {
 
                 if(!rows[i]) continue;
 
-                const col0 = String(rows[i][0]||"").trim();
+                // 메타(기획전명/기간)는 시트에 따라 컬럼 위치가 달라 전체 셀 스캔
+                for(const _cell of rows[i]) {
 
-                // 명시적 기획전명 셀 우선
+                    const col0 = String(_cell||"").trim();
 
-                if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
+                    if(!col0) continue;
 
-                // 기간 파싱: "5.25~6.14" / "06/19 ~ 06/22" / "06/19(목) ~ 06/22(일), 4일간" 등 지원
+                    // 명시적 기획전명 셀 우선
 
-                if(/기간/.test(col0)) {
+                    if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
 
-                    const pm = col0.match(/(\d{1,2}[\./]\d{1,2}).*?[~～\-].*?(\d{1,2}[\./]\d{1,2})/);
+                    // 기간 파싱: "5.25~6.14" / "06/19 ~ 06/22" / "06/19(목) ~ 06/22(일), 4일간" 등 지원
 
-                    if(pm) {
-                        const s = pm[1].replace('.','/');
-                        const e = pm[2].replace('.','/');
-                        promoPeriod = `${s}~${e}`;
-                    } else {
-                        promoPeriod = col0.replace(/\*?\s*기간\s*:?\s*/,'').trim();
+                    if(/기간/.test(col0)) {
+
+                        const pm = col0.match(/(\d{1,2}[\./]\d{1,2}).*?[~～\-].*?(\d{1,2}[\./]\d{1,2})/);
+
+                        if(pm) {
+                            const s = pm[1].replace('.','/');
+                            const e = pm[2].replace('.','/');
+                            promoPeriod = `${s}~${e}`;
+                        } else {
+                            promoPeriod = col0.replace(/\*?\s*기간\s*:?\s*/,'').trim();
+                        }
+
                     }
 
                 }
