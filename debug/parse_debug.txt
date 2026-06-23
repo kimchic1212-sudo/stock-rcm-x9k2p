@@ -1,7 +1,7 @@
-시작: 2026-06-23T03:31:20.898Z
+시작: 2026-06-23T03:40:47.800Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17821854927199905.81237529824
+[RES] 200 login.xml&postfix=17821860623209269.163168895855
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,18 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21397","ITEM_NM":"보메로 플러스 [HV8150-102, 260]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30839","ITEM_NM":"마인드 001 [HQ4309-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-완료: 품번 2개
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":71100,"ITEM_CD":"30382","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 260]","SALES_AMT":56880,"NET_SALES_AMT
+  파싱 성공: 3건
+완료: 품번 5개
