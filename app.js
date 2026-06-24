@@ -37,6 +37,11 @@ style.innerHTML = `
       /* M4: 터치 타깃 확대 */
       .chip { min-height: 34px; }
       #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
+      /* 헤더 버튼: 모바일에선 아이콘만 → 패딩 축소해 한 줄 유지 */
+      header .chip { padding-left: .4rem; padding-right: .4rem; }
+      header #adminBtn { padding-left: .45rem; padding-right: .45rem; }
+      /* 로고 축소로 제목 자리 확보 */
+      .logo-symbol { height: 28px; }
       /* M5/M2: 가로 스크롤에 얇은 스크롤바 노출(스와이프 단서) */
       .no-scrollbar::-webkit-scrollbar { display: block !important; height: 4px; }
       .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.6); border-radius: 4px; }
@@ -8836,7 +8841,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         trBtn.className = $("#allMemosBtn").className.replace(/yellow/g, 'blue');
 
-        trBtn.innerHTML = `🚚 이동요청 목록`;
+        trBtn.innerHTML = `🚚<span class="hidden sm:inline"> 이동요청 목록</span>`;
 
         trBtn.onclick = window.renderTransfers;
 
