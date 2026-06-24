@@ -5743,25 +5743,21 @@ function card(p){
 
 
 
+  // 상단 상태 배지: 중요도 순으로 최대 3개만 노출, 나머지는 +N 축약 (품명이 밀리지 않게)
+  const _statusBadges = [dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
+  const _MAX_BADGES = 3;
+  let _badgesHtml = _statusBadges.slice(0, _MAX_BADGES).join("");
+  if (_statusBadges.length > _MAX_BADGES) {
+      _badgesHtml += `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-1.5 py-0.5 rounded font-black text-[10px]" title="추가 상태 ${_statusBadges.length - _MAX_BADGES}개">+${_statusBadges.length - _MAX_BADGES}</span>`;
+  }
+
   el.innerHTML = `
 
     <div class="flex flex-col flex-1">
 
         <div class="flex flex-wrap gap-1 text-xs font-bold text-gray-500 mb-1.5 items-center">
 
-            ${busanOnlyBadge}
-
-            ${dpBadge}
-
-            ${salesSpeedBadge}
-
-            ${rtChanceBadge}
-
-            ${todaySoldBadge}
-
-            ${promoBadge}
-
-            ${getFilters().noImage ? _noImgBadge : ""}
+            ${_badgesHtml}
 
             <span class="hidden sm:inline bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.카테고리||"-")}</span>
 
@@ -6484,6 +6480,10 @@ function render(){
   // 판매 현황 요약 패널 갱신
 
   renderSalesSummaryPanel(filteredList);
+
+  // 적용된 필터 요약 칩 갱신
+
+  renderActiveFilterBar();
 
 
 
@@ -7895,6 +7895,86 @@ $$('button[id^="close"]').forEach(btn => {
 
 });
 
+
+
+// 적용된 필터 요약 칩 바 — 켜진 필터를 한눈에 보여주고 ✕로 개별 해제
+function renderActiveFilterBar() {
+    const bar = $("#activeFilterBar");
+    if (!bar) return;
+
+    const items = []; // {label, onClear}
+
+    // 카테고리 (전체 제외)
+    const catBtn = $$('button.chip[data-cat]').find(b => b.dataset.active === "1");
+    if (catBtn && catBtn.dataset.cat !== "ALL") {
+        items.push({ label: catBtn.textContent.trim(), onClear: () => {
+            $$('button.chip[data-cat]').forEach(x => x.dataset.active = (x.dataset.cat === "ALL" ? "1" : "0"));
+        }});
+    }
+    // 성별 (전체 제외)
+    const genBtn = $$('button.chip[data-gender]').find(b => b.dataset.active === "1");
+    if (genBtn && genBtn.dataset.gender !== "ALL") {
+        items.push({ label: genBtn.textContent.trim(), onClear: () => {
+            $$('button.chip[data-gender]').forEach(x => x.dataset.active = (x.dataset.gender === "ALL" ? "1" : "0"));
+        }});
+    }
+    // 일반 필터칩 (단일·다중)
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode]').forEach(btn => {
+        if (btn.dataset.active === "1") {
+            items.push({ label: btn.textContent.trim(), onClear: () => {
+                btn.dataset.active = "0";
+                btn.classList.remove('ring-2', 'ring-blue-400', 'ring-orange-400', 'ring-violet-400', 'ring-gray-400', 'ring-amber-400');
+            }});
+        }
+    });
+    // 브랜드 (다중)
+    if (window._activeBrands && window._activeBrands.size > 0) {
+        [...window._activeBrands].forEach(brand => {
+            items.push({ label: brand, onClear: () => {
+                window._activeBrands.delete(brand);
+                if (window._renderBrandChips) window._renderBrandChips();
+            }});
+        });
+    }
+    // 사이즈
+    [["sizeSelFw", "신발"], ["sizeSelAp", "의류"], ["sizeSelGear", "용품"]].forEach(([id]) => {
+        const sel = $("#" + id);
+        if (sel && sel.value !== "ALL") {
+            items.push({ label: `사이즈 ${sel.value}`, onClear: () => { sel.value = "ALL"; }});
+        }
+    });
+    // 검색어
+    const qEl = $("#q");
+    if (qEl && qEl.value.trim()) {
+        items.push({ label: `"${qEl.value.trim()}"`, onClear: () => { qEl.value = ""; }});
+    }
+
+    if (items.length === 0) { bar.classList.add("hidden"); bar.innerHTML = ""; return; }
+
+    bar.classList.remove("hidden");
+    bar.innerHTML = "";
+
+    const lead = document.createElement("span");
+    lead.className = "text-[10px] font-bold text-[color:var(--muted)] shrink-0 self-center";
+    lead.textContent = "적용된 필터";
+    bar.appendChild(lead);
+
+    items.forEach(it => {
+        const chip = document.createElement("button");
+        chip.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold shrink-0 hover:bg-blue-100 transition-colors";
+        chip.innerHTML = `${escapeHtml(it.label)} <span class="text-blue-400 font-black">✕</span>`;
+        chip.onclick = () => { saveHistoryState(); it.onClear(); visibleCount = 60; render(); };
+        bar.appendChild(chip);
+    });
+
+    if (items.length >= 2) {
+        const clearAll = document.createElement("button");
+        clearAll.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-800 text-white text-[11px] font-bold shrink-0 hover:bg-black transition-colors ml-1";
+        clearAll.textContent = "전체 해제 ↺";
+        clearAll.onclick = () => { const r = $("#resetAll"); if (r) r.click(); };
+        bar.appendChild(clearAll);
+    }
+}
 
 
 // 필터 칩 전체 해제 헬퍼 (카테고리·성별·브랜드 제외, 단일선택 그룹)
