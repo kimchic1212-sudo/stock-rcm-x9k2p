@@ -1,7 +1,7 @@
-시작: 2026-06-24T06:14:17.231Z
+시작: 2026-06-24T06:20:34.479Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17822816701267023.351081523123
+[RES] 200 login.xml&postfix=17822820479042385.508209812498
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 11건
+selTodaySalesList: 12건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"33609","ITEM_NM":"ACG UV 에어리즈 재킷 [IF2105-010, L]","SALES_AMT":108500,"NET_SALES_AMT":
   파싱 성공: 1건
-메뉴 클릭 후 거래: 11건
+메뉴 클릭 후 거래: 12건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":164000,"ITEM_CD":"9316","ITEM_NM":"립스탑 나일론 자켓 [C24FW-J03-BLK, L]","SALES_AMT":114800,"NET_SALES_AMT":10
@@ -58,4 +58,8 @@ selTodaySalesList: 11건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"3877","ITEM_NM":"에어로스위프트 드라이핏 ADV 싱글렛 [FN4232-010, L]","SALES_AMT":80500,"NET_SALES_A
   파싱 성공: 1건
-완료: 품번 14개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"27413","ITEM_NM":"아디제로 러닝 스플릿 쇼츠 [IX8975, S]","SALES_AMT":71200,"NET_SALES_AMT":64727,
+  파싱 성공: 2건
+완료: 품번 16개
