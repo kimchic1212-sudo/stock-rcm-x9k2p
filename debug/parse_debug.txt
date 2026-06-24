@@ -1,7 +1,7 @@
-시작: 2026-06-24T03:28:29.746Z
+시작: 2026-06-24T03:30:57.601Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17822717205526266.625572823471
+[RES] 200 login.xml&postfix=17822718694925800.80650868846
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,6 +12,10 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 0건
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+selTodaySalesList: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"33609","ITEM_NM":"ACG UV 에어리즈 재킷 [IF2105-010, L]","SALES_AMT":108500,"NET_SALES_AMT":
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 1건
+완료: 품번 1개
