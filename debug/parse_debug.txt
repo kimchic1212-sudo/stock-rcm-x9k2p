@@ -1,7 +1,7 @@
-시작: 2026-06-24T08:02:32.971Z
+시작: 2026-06-24T08:04:47.750Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17822881630386426.267320103601
+[RES] 200 login.xml&postfix=1782288302817509.8904276009497
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 14건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"33609","ITEM_NM":"ACG UV 에어리즈 재킷 [IF2105-010, L]","SALES_AMT":108500,"NET_SALES_AMT":
   파싱 성공: 1건
-메뉴 클릭 후 거래: 14건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":164000,"ITEM_CD":"9316","ITEM_NM":"립스탑 나일론 자켓 [C24FW-J03-BLK, L]","SALES_AMT":114800,"NET_SALES_AMT":10
@@ -70,4 +70,8 @@ selTodaySalesList: 14건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":260100,"ITEM_CD":"28242","ITEM_NM":"페가수스 프리미엄 [IQ0307-094, 265]","SALES_AMT":208080,"NET_SALES_AMT":189
   파싱 성공: 2건
-완료: 품번 19개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":152100,"ITEM_CD":"33311","ITEM_NM":"페가수스 42 [IB1873-110, 265]","SALES_AMT":152100,"NET_SALES_AMT":13827
+  파싱 성공: 1건
+완료: 품번 20개
