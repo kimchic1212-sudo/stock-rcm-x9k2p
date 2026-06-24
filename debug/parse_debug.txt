@@ -1,7 +1,7 @@
-시작: 2026-06-24T15:21:04.790Z
+시작: 2026-06-24T15:31:01.621Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17823144748114010.39355278226
+[RES] 200 login.xml&postfix=17823150712904817.042689319498
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -9,109 +9,5 @@ goto OK: https://cloudposoffice.shinsegae.com/
 스크린샷 업로드
 자동 로드 없음 → 메뉴 클릭 시도
 영업 클릭
-영업속보 클릭
-[] 클릭OK(ID)
-[RES] 200 selTodaySalesList
-selTodaySalesList: 25건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"33609","ITEM_NM":"ACG UV 에어리즈 재킷 [IF2105-010, L]","SALES_AMT":108500,"NET_SALES_AMT":
-  파싱 성공: 1건
-메뉴 클릭 후 거래: 25건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":164000,"ITEM_CD":"9316","ITEM_NM":"립스탑 나일론 자켓 [C24FW-J03-BLK, L]","SALES_AMT":114800,"NET_SALES_AMT":10
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21011","ITEM_NM":"보메로 플러스 [HV8154-102, 255]","SALES_AMT":153300,"NET_SALES_AMT":13936
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":139500,"ITEM_CD":"33659","ITEM_NM":"ACG 트레일 리펠 재킷 [IO9749-020, S]","SALES_AMT":111600,"NET_SALES_AMT":1
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":192000,"ITEM_CD":"36273","ITEM_NM":"스페이스 오 싱글렛 [11146-11401, L]","SALES_AMT":88490,"NET_SALES_AMT":8044
-  파싱 성공: 3건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30093","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 285]","SALES_AMT":164880,"NET_SALES_AMT":14
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33504","ITEM_NM":"ACG 제가마 트레일 [HV8113-002, 285]","SALES_AMT":153300,"NET_SALES_AMT":1
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29231","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 255]","SALES_AMT":217550,"NET_SALES_AMT":19
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"3877","ITEM_NM":"에어로스위프트 드라이핏 ADV 싱글렛 [FN4232-010, L]","SALES_AMT":80500,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-115000,"ITEM_CD":"3877","ITEM_NM":"에어로스위프트 드라이핏 ADV 싱글렛 [FN4232-010, L]","SALES_AMT":-80500,"NET_SALE
-  파싱 성공: 0건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"3877","ITEM_NM":"에어로스위프트 드라이핏 ADV 싱글렛 [FN4232-010, L]","SALES_AMT":80500,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"27413","ITEM_NM":"아디제로 러닝 스플릿 쇼츠 [IX8975, S]","SALES_AMT":71200,"NET_SALES_AMT":64727,
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":78000,"ITEM_CD":"20702","ITEM_NM":"드라이 핏 클럽 언스트럭쳐드 페더라이트 캡 [FB5682-010, M/L]","SALES_AMT":46800,"NET_SA
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":260100,"ITEM_CD":"28242","ITEM_NM":"페가수스 프리미엄 [IQ0307-094, 265]","SALES_AMT":208080,"NET_SALES_AMT":189
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":152100,"ITEM_CD":"33311","ITEM_NM":"페가수스 42 [IB1873-110, 265]","SALES_AMT":152100,"NET_SALES_AMT":13827
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":23100,"ITEM_CD":"18210","ITEM_NM":"프로 마라톤 삭스 V2.0 [PRO MARATHON SOCKS V2.0-WHITE.BLACK, T2]","SALES_AMT
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"34103","ITEM_NM":"V-RUN [26W7001, 225]","SALES_AMT":164880,"NET_SALES_AMT":149891,"VA
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":71100,"ITEM_CD":"30382","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 260]","SALES_AMT":56880,"NET_SALES_AMT
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21419","ITEM_NM":"보메로 플러스 [HV8150-003, 265]","SALES_AMT":153300,"NET_SALES_AMT":13936
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21030","ITEM_NM":"보메로 플러스 [HV8154-001, 245]","SALES_AMT":123300,"NET_SALES_AMT":11209
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29273","ITEM_NM":"클라우드몬스터 3 [3MG10054747, 255]","SALES_AMT":176100,"NET_SALES_AMT":16
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":21600,"ITEM_CD":"32149","ITEM_NM":"C3fit 아치 서포트 쿼터 삭스 [GC23301-WHITE, 2]","SALES_AMT":17280,"NET_SALES_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":76200,"ITEM_CD":"19982","ITEM_NM":"메인테인 [SKU016, 1SIZE]","SALES_AMT":76200,"NET_SALES_AMT":69273,"VAT_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179100,"ITEM_CD":"32494","ITEM_NM":"후디니 재킷 [24142R5-BOB, M]","SALES_AMT":143280,"NET_SALES_AMT":130255,
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":159200,"ITEM_CD":"30273","ITEM_NM":"클리프톤 10 와이드 [1162050-CRDS, 240]","SALES_AMT":159200,"NET_SALES_AMT"
-  파싱 성공: 1건
-완료: 품번 31개
+메뉴 클릭 후 거래: 0건
+완료: 품번 0개
