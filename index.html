@@ -142,6 +142,7 @@
       <div id="actionBtnsWrap" class="flex gap-1.5 items-center shrink-0"></div>
     </div>
     <div id="recentSearches" class="hidden flex gap-1.5 mt-1.5 overflow-x-auto pb-1 items-center no-scrollbar"></div>
+    <div id="activeFilterBar" class="hidden flex flex-wrap gap-1.5 mt-1.5 items-center"></div>
 
     <!-- 필터 접기/펼치기 토글 (스크롤 시 자동 접힘) -->
     <button id="filterToggleBtn" class="hidden w-full mt-1.5 py-1 text-[11px] font-bold text-[color:var(--muted)] flex items-center justify-center gap-1 hover:text-gray-700 transition-colors" onclick="window._toggleFilter()">
@@ -306,7 +307,7 @@
   </div>
 </div>
 
-<script src="./app.js?v=26062302"></script>
+<script src="./app.js?v=26062303"></script>
 
 <!-- 맨 위로 버튼 -->
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"
