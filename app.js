@@ -24,11 +24,24 @@ const style = document.createElement('style');
 
 style.innerHTML = `
 
-    #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; overflow-y: auto !important; }
+    #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; max-height: 85dvh !important; overflow-y: auto !important; }
 
     .no-scrollbar::-webkit-scrollbar { display: none; }
 
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ===== 모바일/패드 개선 ===== */
+    @media (max-width: 767px) {
+      /* M1: iOS 텍스트 입력 포커스 시 자동 줌인 방지 (입력류만 16px) */
+      input[type="text"], input[type="search"], input[type="password"], input[type="email"], input[type="number"], input:not([type]), textarea { font-size: 16px !important; }
+      /* M4: 터치 타깃 확대 */
+      .chip { min-height: 34px; }
+      #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
+      /* M5/M2: 가로 스크롤에 얇은 스크롤바 노출(스와이프 단서) */
+      .no-scrollbar::-webkit-scrollbar { display: block !important; height: 4px; }
+      .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.6); border-radius: 4px; }
+      .no-scrollbar { -ms-overflow-style: auto !important; scrollbar-width: thin !important; }
+    }
 
     #detailModal, #dashDetailModal, #salesGuideModal, #allMemosModal, #transfersModal { z-index: 9999 !important; }
 
@@ -651,7 +664,7 @@ async function copyText(text, btn){
 
 
 
-function showToast(message, onUndo) {
+function showToast(message, onUndo, type) {
 
     let container = document.getElementById('toast-container');
 
@@ -669,7 +682,8 @@ function showToast(message, onUndo) {
 
     toast.className = 'toast';
 
-    toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i> ${escapeHtml(message)}</span>`;
+    const _isErr = type === 'error';
+    toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="${_isErr ? 'alert-circle' : 'check-circle'}" class="w-5 h-5 ${_isErr ? 'text-red-400' : 'text-green-400'}"></i> ${escapeHtml(message)}</span>`;
 
     
 
@@ -3535,11 +3549,11 @@ async function _saveTransfersToGH() {
             TRANSFERS = merged;
             return true;
 
-        } catch(err) { if(attempt === 2) { console.error('transfers save error:', err); showToast('RT 저장 실패. 다시 시도해주세요.'); return false; } }
+        } catch(err) { if(attempt === 2) { console.error('transfers save error:', err); showToast('RT 저장 실패. 다시 시도해주세요.', null, 'error'); return false; } }
 
     }
 
-    showToast('RT 저장 실패. 다시 시도해주세요.'); return false;
+    showToast('RT 저장 실패. 다시 시도해주세요.', null, 'error'); return false;
 
 }
 
@@ -3631,7 +3645,35 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
         window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
 
-        showToast(`📦 ${fromStr} → ${size} | ${existing.qty}개로 업데이트`);
+        showToast(`📦 ${fromStr} → ${size} | ${existing.qty}개로 업데이트`, async () => {
+
+            // 실행취소: 방금 올린 1개만 되돌림 (대기 중 저장 취소 후 정리)
+
+            clearTimeout(window._rtSaveTimer);
+
+            existing.qty -= 1;
+
+            if (existing.qty <= 0) {
+
+                TRANSFERS = TRANSFERS.filter(t => t.id !== existing.id);
+
+                btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
+
+                if(window.lucide) lucide.createIcons();
+
+                await _removeTransferFromGH(existing.id);
+
+            } else {
+
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+
+                if(window.lucide) lucide.createIcons();
+
+                await _saveTransfersToGH();
+
+            }
+
+        });
 
         return;
 
@@ -7091,23 +7133,18 @@ function openDetail(p){
 
   
 
+  const _memoStaffList = ["김종훈","김기태","김민정","임경준","박서영"];
+  const _lastStaff = localStorage.getItem('rcm_last_memo_staff') || "";
+
   let stickyFooterHtml = `
 
       <div class="flex gap-1.5 items-center">
 
           <select id="memoStaff" class="ipt text-xs font-bold bg-white px-2 py-1.5 rounded-lg border border-gray-200 shrink-0" style="width:5.5rem">
 
-              <option value="" disabled selected>작성자</option>
+              <option value="" disabled ${_lastStaff ? '' : 'selected'}>작성자</option>
 
-              <option value="김종훈">김종훈</option>
-
-              <option value="김기태">김기태</option>
-
-              <option value="김민정">김민정</option>
-
-              <option value="임경준">임경준</option>
-
-              <option value="박서영">박서영</option>
+              ${_memoStaffList.map(s => `<option value="${s}" ${s === _lastStaff ? 'selected' : ''}>${s}</option>`).join('')}
 
           </select>
 
@@ -7668,6 +7705,8 @@ function openDetail(p){
           if(!_memoRes.ok) throw new Error('저장 실패 ' + _memoRes.status);
 
           MEMOS = oldData; CURRENT_PRODUCT.hasMemo = true;
+
+          localStorage.setItem('rcm_last_memo_staff', staff);
 
           msg.style.color="green"; msg.textContent="✓ 저장 완료!"; $("#memoText").value = ""; render(); openDetail(p);
 
