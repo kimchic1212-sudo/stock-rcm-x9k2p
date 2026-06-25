@@ -1,7 +1,7 @@
-시작: 2026-06-25T06:47:00.166Z
+시작: 2026-06-25T06:50:49.736Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17823700325748116.724081472337
+[RES] 200 login.xml&postfix=17823702591925041.305636653379
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24367","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP7C5R, 2]","SALES_AMT":36000,"NET_SALES_AMT":32727,
   파싱 성공: 2건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":231200,"ITEM_CD":"28221","ITEM_NM":"보메로 프리미엄 [HQ2050-103, 265]","SALES_AMT":231200,"NET_SALES_AMT":2101
@@ -50,4 +50,8 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":200000,"ITEM_CD":"7538","ITEM_NM":"S/LAB 펄사 3 세트 [LC2091700, XS]","SALES_AMT":130000,"NET_SALES_AMT":11
   파싱 성공: 1건
-완료: 품번 11개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":223200,"ITEM_CD":"31516","ITEM_NM":"제네시스 [L49137700, 265]","SALES_AMT":178560,"NET_SALES_AMT":162327,"V
+  파싱 성공: 1건
+완료: 품번 12개
