@@ -300,6 +300,17 @@ const GH_PAT_KEY = "racement_gh_pat_v1";
 
 const CACHE_KEY = "racement_inventory_cache_v2";
 
+// 세션 캐시 저장 (iOS Safari 등 저장공간 한도 초과 시에도 앱이 죽지 않도록 안전 처리)
+function _safeSessionCache(obj) {
+    try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(obj));
+    } catch(e) {
+        // QuotaExceededError 등 → 캐시 생략 (60초 속도 최적화일 뿐, 동작엔 지장 없음)
+        try { sessionStorage.removeItem(CACHE_KEY); } catch(_) {}
+        console.warn('세션 캐시 저장 생략:', e && e.message);
+    }
+}
+
 const DATA_PATH = "inventory.json";
 
 const REQUESTS_PATH = "requests.json"; 
@@ -1420,7 +1431,7 @@ async function loadData(force = false){
 
 
 
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, _timestamp: Date.now() }));
+      _safeSessionCache({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, _timestamp: Date.now() });
 
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
 
@@ -8138,7 +8149,7 @@ $("#file").onchange = async (e) => {
 
             RAW = rows; CURRENT_META = meta; 
 
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()})); 
+            _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()});
 
             applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
 
@@ -9941,7 +9952,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                     RAW = rows; CURRENT_META = meta; 
 
-                    sessionStorage.setItem(CACHE_KEY, JSON.stringify({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()})); 
+                    _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()});
 
                     applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); 
 
