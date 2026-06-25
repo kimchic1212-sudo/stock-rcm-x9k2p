@@ -1,7 +1,7 @@
-시작: 2026-06-25T04:02:09.434Z
+시작: 2026-06-25T04:03:10.308Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17823601401339441.098309933383
+[RES] 200 login.xml&postfix=17823602002418712.00676232889
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,18 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 3건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24367","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP7C5R, 2]","SALES_AMT":36000,"NET_SALES_AMT":32727,
   파싱 성공: 2건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":231200,"ITEM_CD":"28221","ITEM_NM":"보메로 프리미엄 [HQ2050-103, 265]","SALES_AMT":231200,"NET_SALES_AMT":2101
   파싱 성공: 1건
-완료: 품번 3개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":72000,"ITEM_CD":"22835","ITEM_NM":"소프트 플라스크 500ml 울트라/17oz ULT [LC2337700, 1SIZE]","SALES_AMT":57600,"N
+  파싱 성공: 2건
+완료: 품번 5개
