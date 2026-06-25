@@ -1,7 +1,7 @@
-시작: 2026-06-25T02:40:48.815Z
+시작: 2026-06-25T02:42:56.040Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17823552592771139.6756567368227
+[RES] 200 login.xml&postfix=17823553900953476.5016839273712
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,6 +12,10 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 0건
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+selTodaySalesList: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24367","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP7C5R, 2]","SALES_AMT":36000,"NET_SALES_AMT":32727,
+  파싱 성공: 2건
+메뉴 클릭 후 거래: 1건
+완료: 품번 2개
