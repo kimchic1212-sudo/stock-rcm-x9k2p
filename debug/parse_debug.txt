@@ -1,7 +1,7 @@
-시작: 2026-06-25T10:21:25.844Z
+시작: 2026-06-25T10:27:08.484Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17823828990682757.6975158233477
+[RES] 200 login.xml&postfix=17823832415665220.772569054958
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 11건
+selTodaySalesList: 12건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24367","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP7C5R, 2]","SALES_AMT":36000,"NET_SALES_AMT":32727,
   파싱 성공: 2건
-메뉴 클릭 후 거래: 11건
+메뉴 클릭 후 거래: 12건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":231200,"ITEM_CD":"28221","ITEM_NM":"보메로 프리미엄 [HQ2050-103, 265]","SALES_AMT":231200,"NET_SALES_AMT":2101
@@ -58,4 +58,8 @@ selTodaySalesList: 11건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":124200,"ITEM_CD":"32585","ITEM_NM":"덕빌 캡 [28818R5-BOB, 1SIZE]","SALES_AMT":99360,"NET_SALES_AMT":90327,
   파싱 성공: 1건
-완료: 품번 13개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21009","ITEM_NM":"보메로 플러스 [HV8154-102, 245]","SALES_AMT":153300,"NET_SALES_AMT":13936
+  파싱 성공: 1건
+완료: 품번 14개
