@@ -7760,7 +7760,13 @@ function openDetail(p){
           if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
           const meta = await metaRes.json();
           let latestImages = {};
-          try { latestImages = JSON.parse(atob(meta.content.replace(/\n/g,''))); } catch(e) {}
+          let _imgParseOk = false;
+          // UTF-8(한글 키) 안전 디코딩 — bare atob는 한글에서 깨져 전체 유실의 원인이 됨
+          try { latestImages = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _imgParseOk = true; } catch(e) {}
+          // 기존 목록을 못 읽으면 빈 맵으로 덮어써 전체가 날아가므로 저장 중단
+          if(!_imgParseOk || typeof latestImages !== 'object' || latestImages === null) {
+              throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+          }
           latestImages[imgKey] = finalUrl;
           const putRes = await fetch(apiBase, {
               method:"PUT",
@@ -7830,7 +7836,11 @@ function openDetail(p){
                   if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
                   const meta = await metaRes.json();
                   let latestImages = {};
-                  try { latestImages = JSON.parse(atob(meta.content.replace(/\n/g,''))); } catch(e) {}
+                  let _imgParseOk2 = false;
+                  try { latestImages = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _imgParseOk2 = true; } catch(e) {}
+                  if(!_imgParseOk2 || typeof latestImages !== 'object' || latestImages === null) {
+                      throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+                  }
                   latestImages[imgKey] = inputUrl;
                   const putRes = await fetch(apiBase, {
                       method:"PUT",
