@@ -1,7 +1,7 @@
-시작: 2026-06-26T10:53:07.008Z
+시작: 2026-06-26T10:57:34.586Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824711997315646.299378126726
+[RES] 200 login.xml&postfix=17824714655595048.014357023369
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 36건
+selTodaySalesList: 37건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 36건
+메뉴 클릭 후 거래: 37건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -157,5 +157,9 @@ selTodaySalesList: 36건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26596","ITEM_NM":"아디제로 EVO SL [JH6206, 275]","SALES_AMT":167200,"NET_SALES_AMT":15200
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26594","ITEM_NM":"아디제로 EVO SL [JH6206, 265]","SALES_AMT":167200,"NET_SALES_AMT":15200
   파싱 성공: 1건
 완료: 품번 36개
