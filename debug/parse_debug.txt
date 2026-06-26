@@ -1,7 +1,7 @@
-시작: 2026-06-26T09:57:59.448Z
+시작: 2026-06-26T10:00:58.815Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824678919775192.257643024528
+[RES] 200 login.xml&postfix=17824680711689626.45926131273
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 26건
+selTodaySalesList: 27건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 26건
+메뉴 클릭 후 거래: 27건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -118,4 +118,8 @@ selTodaySalesList: 26건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29940,"ITEM_CD":"13895","ITEM_NM":"애슬레틱스 티셔츠 [MT41253_MEW, L]","SALES_AMT":29940,"NET_SALES_AMT":27218,
   파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":192000,"ITEM_CD":"32318","ITEM_NM":"모스테크 티셔츠 [11006-00A04, M]","SALES_AMT":132000,"NET_SALES_AMT":12000
+  파싱 성공: 1건
 완료: 품번 29개
