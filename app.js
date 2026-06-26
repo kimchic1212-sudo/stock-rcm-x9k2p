@@ -382,7 +382,10 @@ async function saveFavsToGH() {
         try {
             const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${FAVS_PATH}`;
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
-            const sha = r.ok ? (await r.json()).sha : undefined;
+            let sha, serverFavs = [];
+            if(r.ok){ const j = await r.json(); sha = j.sha; try { serverFavs = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e){} }
+            // 안전장치: 메모리 FAVS가 비었는데 서버엔 있으면(로드 실패 등) 덮어쓰지 않음 — 전체 유실 방지
+            if(FAVS.length === 0 && Array.isArray(serverFavs) && serverFavs.length > 0) return;
             const body = { message:"update favs", content: utf8ToB64(JSON.stringify(FAVS)), branch: GH.branch };
             if(sha) body.sha = sha;
             await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
