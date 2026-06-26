@@ -1,7 +1,7 @@
-시작: 2026-06-26T04:32:57.635Z
+시작: 2026-06-26T04:40:23.299Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824483912912508.7356004473195
+[RES] 200 login.xml&postfix=17824488378284634.135242448934
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -34,4 +34,12 @@ selTodaySalesList: 5건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21395","ITEM_NM":"보메로 플러스 [HV8150-102, 250]","SALES_AMT":143300,"NET_SALES_AMT":13027
   파싱 성공: 1건
-완료: 품번 3개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24288","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C5R, 3]","SALES_AMT":36000,"NET_SALES_AMT":32727,
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":85500,"ITEM_CD":"33933","ITEM_NM":"ACG 드라이핏 미드라이즈 브리프 라인드 트레일 러닝 쇼츠 [IO9658-020, S]","SALES_AMT":68400,
+  파싱 성공: 1건
+완료: 품번 5개
