@@ -7759,24 +7759,30 @@ function openDetail(p){
           const finalUrl = `${pagesBase}/${safeKey}.${ext}`;
           msgEl.textContent = "images.json 업데이트 중...";
           const apiBase = `${ghBase}/contents/images.json`;
-          const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
-          if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
-          const meta = await metaRes.json();
-          let latestImages = {};
-          let _imgParseOk = false;
-          // UTF-8(한글 키) 안전 디코딩 — bare atob는 한글에서 깨져 전체 유실의 원인이 됨
-          try { latestImages = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _imgParseOk = true; } catch(e) {}
-          // 기존 목록을 못 읽으면 빈 맵으로 덮어써 전체가 날아가므로 저장 중단
-          if(!_imgParseOk || typeof latestImages !== 'object' || latestImages === null) {
-              throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+          // 충돌(409/422) 시 최신을 다시 읽어 재병합 후 재시도 — 동시 업로드·SHA 갱신 대응
+          let latestImages = null;
+          for(let _att=0; _att<4; _att++){
+              const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+              if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
+              const meta = await metaRes.json();
+              let parsed = {}, _ok = false;
+              // UTF-8(한글 키) 안전 디코딩 — bare atob는 한글에서 깨져 전체 유실의 원인이 됨
+              try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+              // 기존 목록을 못 읽으면 빈 맵으로 덮어써 전체가 날아가므로 저장 중단
+              if(!_ok || typeof parsed !== 'object' || parsed === null) {
+                  throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+              }
+              parsed[imgKey] = finalUrl;
+              const putRes = await fetch(apiBase, {
+                  method:"PUT",
+                  headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                  body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
+              });
+              if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
+              if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
+              latestImages = parsed; break;
           }
-          latestImages[imgKey] = finalUrl;
-          const putRes = await fetch(apiBase, {
-              method:"PUT",
-              headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
-              body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(latestImages)), branch: GH.branch, sha: meta.sha})
-          });
-          if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
+          if(!latestImages) throw new Error('images.json 저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
           IMAGES = { ...latestImages };
           // GitHub Pages 서빙 딜레이 동안 blob URL로 즉시 표시
           if(tempUrl) IMAGES[imgKey] = tempUrl;
@@ -7835,22 +7841,28 @@ function openDetail(p){
               } else {
                   msgEl.textContent = "images.json 업데이트 중...";
                   const apiBase = `${ghBase}/contents/images.json`;
-                  const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
-                  if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
-                  const meta = await metaRes.json();
-                  let latestImages = {};
-                  let _imgParseOk2 = false;
-                  try { latestImages = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _imgParseOk2 = true; } catch(e) {}
-                  if(!_imgParseOk2 || typeof latestImages !== 'object' || latestImages === null) {
-                      throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+                  // 충돌(409/422) 시 최신을 다시 읽어 재병합 후 재시도
+                  let latestImages = null;
+                  for(let _att=0; _att<4; _att++){
+                      const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+                      if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
+                      const meta = await metaRes.json();
+                      let parsed = {}, _ok = false;
+                      try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+                      if(!_ok || typeof parsed !== 'object' || parsed === null) {
+                          throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+                      }
+                      parsed[imgKey] = inputUrl;
+                      const putRes = await fetch(apiBase, {
+                          method:"PUT",
+                          headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                          body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
+                      });
+                      if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
+                      if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
+                      latestImages = parsed; break;
                   }
-                  latestImages[imgKey] = inputUrl;
-                  const putRes = await fetch(apiBase, {
-                      method:"PUT",
-                      headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
-                      body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(latestImages)), branch: GH.branch, sha: meta.sha})
-                  });
-                  if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
+                  if(!latestImages) throw new Error('images.json 저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
                   IMAGES = { ...latestImages };
                   sessionStorage.removeItem(CACHE_KEY);
                   msgEl.style.color = "green";
