@@ -1,7 +1,7 @@
-시작: 2026-06-26T06:44:42.105Z
+시작: 2026-06-26T06:47:30.222Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824562916257709.609844715126
+[RES] 200 login.xml&postfix=17824564617933225.373124434768
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 15건
+selTodaySalesList: 16건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 15건
+메뉴 클릭 후 거래: 16건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -74,4 +74,8 @@ selTodaySalesList: 15건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"25681","ITEM_NM":"라이트웨이트 마이크로 크루 삭스 1팩 [IB6114-100, L]","SALES_AMT":13200,"NET_SALES_A
   파싱 성공: 1건
-완료: 품번 16개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59950,"ITEM_CD":"12015","ITEM_NM":"스테미나 스쿱 넥 크롭탑 [WPCCP001FL24SG, S]","SALES_AMT":44000,"NET_SALES_AMT"
+  파싱 성공: 1건
+완료: 품번 17개
