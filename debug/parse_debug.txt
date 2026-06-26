@@ -1,7 +1,7 @@
-시작: 2026-06-26T07:05:21.908Z
+시작: 2026-06-26T07:10:47.579Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824575337233213.922888377484
+[RES] 200 login.xml&postfix=17824578619097746.355177128915
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 16건
+selTodaySalesList: 17건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 16건
+메뉴 클릭 후 거래: 17건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -78,4 +78,8 @@ selTodaySalesList: 16건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59950,"ITEM_CD":"12015","ITEM_NM":"스테미나 스쿱 넥 크롭탑 [WPCCP001FL24SG, S]","SALES_AMT":44000,"NET_SALES_AMT"
   파싱 성공: 1건
-완료: 품번 17개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":170100,"ITEM_CD":"31238","ITEM_NM":"엘립스 V1 (D) [NBPFGS113Y, 240]","SALES_AMT":136080,"NET_SALES_AMT":12
+  파싱 성공: 1건
+완료: 품번 18개
