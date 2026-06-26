@@ -1,7 +1,7 @@
-시작: 2026-06-26T04:52:56.725Z
+시작: 2026-06-26T04:59:19.987Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824495880836599.375711580468
+[RES] 200 login.xml&postfix=1782449976856927.6086216641188
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 8건
+selTodaySalesList: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 8건
+메뉴 클릭 후 거래: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -46,4 +46,8 @@ selTodaySalesList: 8건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"33886","ITEM_NM":"ACG 드라이핏 와일드씨 베이스레이어 쇼츠 [IQ5128-010, M]","SALES_AMT":18140,"NET_SALE
   파싱 성공: 2건
-완료: 품번 7개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27520","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [JD1160, S]","SALES_AMT":31200,"NET_SALES_AMT":283
+  파싱 성공: 2건
+완료: 품번 8개
