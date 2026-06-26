@@ -1,7 +1,7 @@
-시작: 2026-06-26T10:30:59.199Z
+시작: 2026-06-26T10:33:11.888Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782469868888529.3449598044664
+[RES] 200 login.xml&postfix=17824700009581126.0384150245384
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 31건
+selTodaySalesList: 32건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 31건
+메뉴 클릭 후 거래: 32건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -138,4 +138,8 @@ selTodaySalesList: 31건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":151200,"ITEM_CD":"31078","ITEM_NM":"레벨 V5 (2E) [NBPFGS163E, 280]","SALES_AMT":151200,"NET_SALES_AMT":13
   파싱 성공: 1건
-완료: 품번 32개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":360000,"ITEM_CD":"31412","ITEM_NM":"그래블 컨셉 [L49275500, 270]","SALES_AMT":288000,"NET_SALES_AMT":261818,
+  파싱 성공: 1건
+완료: 품번 33개
