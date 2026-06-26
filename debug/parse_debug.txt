@@ -1,7 +1,7 @@
-시작: 2026-06-26T09:23:08.443Z
+시작: 2026-06-26T09:28:04.297Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17824658017884601.739176275148
+[RES] 200 login.xml&postfix=17824660948948465.57024505841
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 23건
+selTodaySalesList: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":164880,"NET_SALES_AMT":14
   파싱 성공: 1건
-메뉴 클릭 후 거래: 23건
+메뉴 클릭 후 거래: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-206100,"ITEM_CD":"30090","ITEM_NM":"본디 9 와이드 [1162013-SCCG, 270]","SALES_AMT":-164880,"NET_SALES_AMT"
@@ -106,4 +106,8 @@ selTodaySalesList: 23건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"36537","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 240]","SALES_AMT":179100,"NET_SALES_AMT":16
   파싱 성공: 2건
-완료: 품번 25개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":58800,"ITEM_CD":"7996","ITEM_NM":"하이드레이션 힙 색 [23FW-VHH-BLK, 1SIZE]","SALES_AMT":58800,"NET_SALES_AMT":5
+  파싱 성공: 1건
+완료: 품번 26개
