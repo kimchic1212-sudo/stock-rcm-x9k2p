@@ -1,11 +1,6 @@
-2026-06-25T18:01:25.132Z
-locator.waitFor: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator('input[type="password"]').first() to be visible
-
-locator.waitFor: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator('input[type="password"]').first() to be visible
-
-    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:167:58)
-    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:270:24
+2026-06-26T08:43:51.142Z
+GitHub 실패: 409
+Error: GitHub 실패: 409
+    at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:291:5
