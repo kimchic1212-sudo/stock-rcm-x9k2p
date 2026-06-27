@@ -1,7 +1,7 @@
-시작: 2026-06-27T03:25:30.200Z
+시작: 2026-06-27T03:30:51.998Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825307399701515.9213941960436
+[RES] 200 login.xml&postfix=17825310650493292.826575512715
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 15건
+selTodaySalesList: 16건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 15건
+메뉴 클릭 후 거래: 16건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -73,5 +73,9 @@ selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":67500,"ITEM_CD":"29041","ITEM_NM":"ACG 드라이 핏 숏 슬리브 탑 [IO9651-030, M]","SALES_AMT":54000,"NET_SALES_AMT"
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
 완료: 품번 11개
