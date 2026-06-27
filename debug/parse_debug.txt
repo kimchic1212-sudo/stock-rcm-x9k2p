@@ -1,7 +1,7 @@
-시작: 2026-06-27T04:25:30.053Z
+시작: 2026-06-27T04:30:53.853Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825343441564814.589499775338
+[RES] 200 login.xml&postfix=17825346688084949.749162876567
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 23건
+selTodaySalesList: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 23건
+메뉴 클릭 후 거래: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -106,4 +106,8 @@ selTodaySalesList: 23건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59940,"ITEM_CD":"13958","ITEM_NM":"RC 울트라 라이트 스플릿 쇼츠 3인치 [MS51283_BK, M]","SALES_AMT":57430,"NET_SALES_
   파싱 성공: 2건
-완료: 품번 21개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"33609","ITEM_NM":"ACG UV 에어리즈 재킷 [IF2105-010, L]","SALES_AMT":122450,"NET_SALES_AMT":
+  파싱 성공: 1건
+완료: 품번 22개
