@@ -1,7 +1,7 @@
-시작: 2026-06-27T07:16:12.578Z
+시작: 2026-06-27T07:20:51.560Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782544582882543.2653301708912
+[RES] 200 login.xml&postfix=17825448631717894.406718198129
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 42건
+selTodaySalesList: 43건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 42건
+메뉴 클릭 후 거래: 43건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -182,4 +182,8 @@ selTodaySalesList: 42건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33499","ITEM_NM":"ACG 제가마 트레일 [HV8113-002, 260]","SALES_AMT":175200,"NET_SALES_AMT":1
   파싱 성공: 2건
-완료: 품번 48개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":144000,"ITEM_CD":"34392","ITEM_NM":"임팩트 에어 카고 하프 타이츠 [GC15152-BLACK, L]","SALES_AMT":113760,"NET_SALES_
+  파싱 성공: 1건
+완료: 품번 49개
