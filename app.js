@@ -1367,6 +1367,11 @@ async function loadData(force = false){
       // FAVS GitHub 비동기 로드 (기기 간 즐겨찾기 동기화)
       fetchGithubJson(FAVS_PATH).then(d=>{if(Array.isArray(d)){FAVS=d;localStorage.setItem('FAVS',JSON.stringify(FAVS));render();}}).catch(()=>{});
 
+      // DP가 비어있으면(잘못된 캐시) API로 복구 후 재렌더 — 체크 사라져 보이는 문제 방지
+      if(!DISPLAY_ITEMS || Object.keys(DISPLAY_ITEMS).length === 0) {
+          fetchGithubJson(DISPLAY_PATH).then(d=>{ if(d && typeof d==='object' && Object.keys(d).length>0){ DISPLAY_ITEMS = d; if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn(); render(); } }).catch(()=>{});
+      }
+
       const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
 
       setupQuickActionBar();
@@ -1430,7 +1435,13 @@ async function loadData(force = false){
 
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
 
-      if(diRes && diRes.ok) DISPLAY_ITEMS = await diRes.json(); else DISPLAY_ITEMS = {};
+      if(diRes && diRes.ok) { try { DISPLAY_ITEMS = await diRes.json(); } catch(e) { DISPLAY_ITEMS = {}; } } else DISPLAY_ITEMS = {};
+
+      // DP 데이터: Pages 로드 실패/빈값이면 GitHub API로 폴백 (체크가 사라져 보이는 문제 방지)
+      if(!DISPLAY_ITEMS || typeof DISPLAY_ITEMS !== 'object' || Object.keys(DISPLAY_ITEMS).length === 0) {
+          const _diApi = await fetchGithubJson(DISPLAY_PATH);
+          if(_diApi && typeof _diApi === 'object' && Object.keys(_diApi).length > 0) DISPLAY_ITEMS = _diApi;
+      }
 
 
 
