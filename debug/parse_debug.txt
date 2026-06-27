@@ -1,7 +1,7 @@
-시작: 2026-06-27T05:31:09.181Z
+시작: 2026-06-27T05:34:25.974Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825382819363435.3540432394834
+[RES] 200 login.xml&postfix=17825384752869257.272129696774
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 30건
+selTodaySalesList: 31건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 30건
+메뉴 클릭 후 거래: 31건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -134,4 +134,8 @@ selTodaySalesList: 30건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":223200,"ITEM_CD":"34414","ITEM_NM":"에어 핏 스토리지 쇼츠 [GM76159-JET BROWN, S]","SALES_AMT":178560,"NET_SALES_
   파싱 성공: 2건
-완료: 품번 29개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":192000,"ITEM_CD":"36272","ITEM_NM":"스페이스 오 싱글렛 [11146-11401, M]","SALES_AMT":144990,"NET_SALES_AMT":131
+  파싱 성공: 1건
+완료: 품번 30개
