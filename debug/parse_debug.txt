@@ -1,7 +1,7 @@
-시작: 2026-06-27T09:53:23.134Z
+시작: 2026-06-27T09:55:11.926Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825540169356137.351396438521
+[RES] 200 login.xml&postfix=17825541220094623.799779483106
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 51건
+selTodaySalesList: 52건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 51건
+메뉴 클릭 후 거래: 52건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -218,4 +218,8 @@ selTodaySalesList: 51건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-2,"NSALES_YN":"N","TOT_SALES_AMT":-59400,"ITEM_CD":"18072","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, S/M]","SALES_AMT":-47520,"NET_SALES_AMT
   파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27520","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [JD1160, S]","SALES_AMT":31200,"NET_SALES_AMT":283
+  파싱 성공: 1건
 완료: 품번 59개
