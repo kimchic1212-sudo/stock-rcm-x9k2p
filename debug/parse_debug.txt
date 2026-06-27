@@ -1,7 +1,7 @@
-시작: 2026-06-27T08:46:06.323Z
+시작: 2026-06-27T08:47:28.141Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825499801041575.7715249938765
+[RES] 200 login.xml&postfix=17825500626371218.6297570226257
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 45건
+selTodaySalesList: 46건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 45건
+메뉴 클릭 후 거래: 46건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -194,4 +194,8 @@ selTodaySalesList: 45건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":44100,"ITEM_CD":"27166","ITEM_NM":"아디365 러닝 에센셜 롱슬리브 탑 [KE8424, M]","SALES_AMT":35280,"NET_SALES_AMT":3
   파싱 성공: 1건
-완료: 품번 51개
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":127200,"ITEM_CD":"32016","ITEM_NM":"테크 티 [ST2M-WHI, M]","SALES_AMT":127200,"NET_SALES_AMT":115636,"VAT_
+  파싱 성공: 4건
+완료: 품번 55개
