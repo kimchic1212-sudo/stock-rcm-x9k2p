@@ -1,7 +1,7 @@
-시작: 2026-06-27T04:46:48.287Z
+시작: 2026-06-27T04:50:49.578Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825356199554794.901890300647
+[RES] 200 login.xml&postfix=17825358591753315.890251799196
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 25건
+selTodaySalesList: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 25건
+메뉴 클릭 후 거래: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -114,4 +114,8 @@ selTodaySalesList: 25건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"27622","ITEM_NM":"아드레날린 GTS 25 (와이드) [1104542E189, 255]","SALES_AMT":170100,"NET_SALE
   파싱 성공: 1건
-완료: 품번 23개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21401","ITEM_NM":"보메로 플러스 [HV8150-102, 280]","SALES_AMT":153300,"NET_SALES_AMT":13936
+  파싱 성공: 1건
+완료: 품번 24개
