@@ -1,7 +1,7 @@
-시작: 2026-06-27T04:05:06.614Z
+시작: 2026-06-27T04:10:09.008Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17825331193023549.581411866561
+[RES] 200 login.xml&postfix=17825334186627294.573220689221
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 21건
+selTodaySalesList: 22건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 21건
+메뉴 클릭 후 거래: 22건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
@@ -98,4 +98,8 @@ selTodaySalesList: 21건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34948","ITEM_NM":"아디제로 EVO SL EXO [KJ0440, 230]","SALES_AMT":167200,"NET_SALES_AMT":1
   파싱 성공: 1건
-완료: 품번 18개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32396","ITEM_NM":"오리지널 [1000Black, 260]","SALES_AMT":55200,"NET_SALES_AMT":50182,"VAT_
+  파싱 성공: 1건
+완료: 품번 19개
