@@ -1,7 +1,7 @@
-시작: 2026-06-28T07:35:39.238Z
+시작: 2026-06-28T07:39:07.297Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17826321538086238.331337126102
+[RES] 200 login.xml&postfix=17826323614717857.273757263996
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 39건
+selTodaySalesList: 40건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 39건
+메뉴 클릭 후 거래: 40건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289250,"ITEM_CD":"32481","ITEM_NM":"플란타리스 프리즘 그레이 편광 [94370963, 1SIZE]","SALES_AMT":289250,"NET_SALES_A
@@ -170,4 +170,8 @@ selTodaySalesList: 39건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"32751","ITEM_NM":"아디제로 아디오스 프로 4 [JR1269, 285]","SALES_AMT":239200,"NET_SALES_AMT":21
   파싱 성공: 2건
-완료: 품번 49개
+[RES] 200 selItemSalesList
+  items: 6개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":58500,"ITEM_CD":"33857","ITEM_NM":"드라이핏 ADV 스트라이드 탱크 [HV5211-010, XXL]","SALES_AMT":46800,"NET_SALES_AM
+  파싱 성공: 6건
+완료: 품번 53개
