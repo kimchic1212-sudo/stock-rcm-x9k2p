@@ -1,7 +1,7 @@
-시작: 2026-06-28T02:40:53.850Z
+시작: 2026-06-28T02:42:23.381Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17826144681483951.5161949708645
+[RES] 200 login.xml&postfix=17826145542506954.678660051415
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289250,"ITEM_CD":"32481","ITEM_NM":"플란타리스 프리즘 그레이 편광 [94370963, 1SIZE]","SALES_AMT":289250,"NET_SALES_A
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":35000,"ITEM_CD":"27504","ITEM_NM":"러닝 에센셜 클라이마쿨 베이스볼 캡 [JZ0506, S]","SALES_AMT":24500,"NET_SALES_AMT":2
   파싱 성공: 2건
-완료: 품번 6개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":220000,"ITEM_CD":"31653","ITEM_NM":"어드밴스드 스킨 5 SET [LC2854500, M]","SALES_AMT":154000,"NET_SALES_AMT":1
+  파싱 성공: 1건
+완료: 품번 7개
