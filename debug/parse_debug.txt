@@ -1,7 +1,7 @@
-시작: 2026-06-28T05:01:03.378Z
+시작: 2026-06-28T05:02:43.840Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17826228757477152.439513034282
+[RES] 200 login.xml&postfix=1782622978389910.2372008078341
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 20건
+selTodaySalesList: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 20건
+메뉴 클릭 후 거래: 21건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289250,"ITEM_CD":"32481","ITEM_NM":"플란타리스 프리즘 그레이 편광 [94370963, 1SIZE]","SALES_AMT":289250,"NET_SALES_A
@@ -94,4 +94,8 @@ selTodaySalesList: 20건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"30716","ITEM_NM":"가이드 19 [S21059-103, 250]","SALES_AMT":98040,"NET_SALES_AMT":89127,"
   파싱 성공: 1건
-완료: 품번 25개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29233","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 265]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 26개
