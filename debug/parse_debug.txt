@@ -1,7 +1,7 @@
-시작: 2026-06-28T03:20:48.950Z
+시작: 2026-06-28T03:22:13.019Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17826168628021907.700478951021
+[RES] 200 login.xml&postfix=17826169425417289.944331497983
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 12건
+selTodaySalesList: 13건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 12건
+메뉴 클릭 후 거래: 13건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289250,"ITEM_CD":"32481","ITEM_NM":"플란타리스 프리즘 그레이 편광 [94370963, 1SIZE]","SALES_AMT":289250,"NET_SALES_A
@@ -62,4 +62,8 @@ selTodaySalesList: 12건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":153300,"ITEM_CD":"21399","ITEM_NM":"보메로 플러스 [HV8150-102, 270]","SALES_AMT":153300,"NET_SALES_AMT":13936
   파싱 성공: 1건
-완료: 품번 17개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":70950,"ITEM_CD":"12086","ITEM_NM":"벤토 3인치 스플리티 런 쇼츠 [WPRSP001FL24SE, XS]","SALES_AMT":70950,"NET_SALES_
+  파싱 성공: 1건
+완료: 품번 18개
