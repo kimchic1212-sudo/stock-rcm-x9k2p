@@ -1,7 +1,7 @@
-시작: 2026-06-30T06:05:42.334Z
+시작: 2026-06-30T06:11:07.082Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17827995560592699.365933585456
+[RES] 200 login.xml&postfix=1782799876976605.9887888048443
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 12건
+selTodaySalesList: 13건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":19800,"ITEM_CD":"20709","ITEM_NM":"라이트웨이트 크루 삭스 1팩 [HV6919-100, L]","SALES_AMT":17820,"NET_SALES_AMT":1
   파싱 성공: 2건
-메뉴 클릭 후 거래: 12건
+메뉴 클릭 후 거래: 13건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
@@ -62,4 +62,8 @@ selTodaySalesList: 12건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"31384","ITEM_NM":"글리세린 맥스 2 [1204681B131, 235]","SALES_AMT":224100,"NET_SALES_AMT":20
   파싱 성공: 2건
-완료: 품번 15개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"33975","ITEM_NM":"ACG 플라이 언스트럭쳐드 캡 [IH8673-025, L/XL]","SALES_AMT":40500,"NET_SALES_AM
+  파싱 성공: 2건
+완료: 품번 16개
