@@ -1,7 +1,7 @@
-시작: 2026-06-30T05:10:58.828Z
+시작: 2026-06-30T05:20:20.963Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782796274484555.0455568172474
+[RES] 200 login.xml&postfix=17827968341184520.165189950748
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 11건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":19800,"ITEM_CD":"20709","ITEM_NM":"라이트웨이트 크루 삭스 1팩 [HV6919-100, L]","SALES_AMT":17820,"NET_SALES_AMT":1
   파싱 성공: 2건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
@@ -50,4 +50,12 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-완료: 품번 13개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-229000,"ITEM_CD":"29231","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 255]","SALES_AMT":-206100,"NET_SALES_AMT"
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29232","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 260]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 2건
+완료: 품번 14개
