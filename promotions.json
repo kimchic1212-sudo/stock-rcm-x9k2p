@@ -176,6 +176,135 @@
           "finalRate": 0.1
         }
       }
+    },
+    {
+      "id": "1782787174462",
+      "meta": {
+        "name": "아디다스 SS26 시즌오프 세일리스트",
+        "period": "06/30~07/12"
+      },
+      "items": {
+        "JQ1668": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "JS4949": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "JZ7718": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "KE8416": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "KE8213": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "JN7162": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "JY8624": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "HZ3696": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "KA0317": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "KA0143": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "KB4332": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "JZ0506": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.2,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        }
+      }
     }
   ]
 }
