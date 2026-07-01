@@ -1,7 +1,7 @@
-시작: 2026-07-01T04:30:59.057Z
+시작: 2026-07-01T04:35:17.477Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17828802678364122.502105210962
+[RES] 200 login.xml&postfix=17828805273941407.9750015898073
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39202","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, L]","SALES_AMT":155000,"NET_SALES_A
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39201","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, M]","SALES_AMT":155000,"NET_SALES_A
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39202","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, L]","SALES_AMT":155000,"NET_SALES_A
   파싱 성공: 1건
-완료: 품번 10개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22500,"ITEM_CD":"17231","ITEM_NM":"프로 3800 14P [AMINO380014, 1SIZE]","SALES_AMT":22500,"NET_SALES_AMT":
+  파싱 성공: 1건
+완료: 품번 11개
