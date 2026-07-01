@@ -1,7 +1,7 @@
-시작: 2026-07-01T11:51:54.075Z
+시작: 2026-07-01T12:01:03.245Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17829067273118179.39713873266
+[RES] 200 login.xml&postfix=17829072763895174.634841907342
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -18,10 +18,6 @@ selTodaySalesList: 11건
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39202","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, L]","SALES_AMT":155000,"NET_SALES_A
   파싱 성공: 1건
 메뉴 클릭 후 거래: 11건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39201","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, M]","SALES_AMT":155000,"NET_SALES_A
-  파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39201","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, M]","SALES_AMT":155000,"NET_SALES_A
@@ -57,5 +53,9 @@ selTodaySalesList: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39201","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, M]","SALES_AMT":155000,"NET_SALES_A
   파싱 성공: 1건
 완료: 품번 15개
