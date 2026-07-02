@@ -1,7 +1,7 @@
-시작: 2026-07-02T08:30:58.915Z
+시작: 2026-07-02T08:31:27.466Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17829810729194096.867672584987
+[RES] 200 login.xml&postfix=17829810972856349.968672350694
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -11,5 +11,14 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업 클릭
 영업속보 클릭
 [] 클릭OK(ID)
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+[RES] 200 selTodaySalesList
+selTodaySalesList: 17건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 17건
+[RES] 200 selItemSalesList
+  items: 0개 / keys: rsMsg
+  파싱 성공: 0건
+완료: 품번 1개
