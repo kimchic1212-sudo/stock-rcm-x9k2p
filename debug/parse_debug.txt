@@ -1,7 +1,7 @@
-시작: 2026-07-02T05:10:55.460Z
+시작: 2026-07-02T05:14:55.932Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1782969069843381.78160630141014
+[RES] 200 login.xml&postfix=17829693072817314.469797269825
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 4건
+selTodaySalesList: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
   파싱 성공: 1건
-메뉴 클릭 후 거래: 4건
+메뉴 클릭 후 거래: 5건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39496","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, S/M]","SALES_AMT":59000,"NET_SALES_A
@@ -30,4 +30,8 @@ selTodaySalesList: 4건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39498","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, L/XL]","SALES_AMT":59000,"NET_SALES_
   파싱 성공: 1건
-완료: 품번 2개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"31362","ITEM_NM":"글리세린 맥스 2 [1204681B110, 230]","SALES_AMT":194100,"NET_SALES_AMT":17
+  파싱 성공: 1건
+완료: 품번 3개
