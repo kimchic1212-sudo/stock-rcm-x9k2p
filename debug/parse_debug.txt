@@ -1,7 +1,7 @@
-시작: 2026-07-03T07:31:07.723Z
+시작: 2026-07-03T07:33:37.353Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17830638833917536.603629914105
+[RES] 200 login.xml&postfix=17830640334968742.414146892143
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 11건
+selTodaySalesList: 12건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":71100,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 11건
+메뉴 클릭 후 거래: 12건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":149000,"ITEM_CD":"27539","ITEM_NM":"엑스페리어 트레일 베스트 2.5L [JY7574, XS]","SALES_AMT":49200,"NET_SALES_AMT":
@@ -58,4 +58,8 @@ selTodaySalesList: 11건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":449000,"ITEM_CD":"32206","ITEM_NM":"더 락커 [40002-BK, 285]","SALES_AMT":404100,"NET_SALES_AMT":367364,"VA
   파싱 성공: 1건
-완료: 품번 20개
+[RES] 200 selItemSalesList
+  items: 5개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":43000,"ITEM_CD":"15903","ITEM_NM":"소프트 플라스크 하이드라팩 500ml [C25SS-E01-BLK500, 1SIZE]","SALES_AMT":40850,"N
+  파싱 성공: 5건
+완료: 품번 25개
