@@ -1,7 +1,7 @@
-시작: 2026-07-03T08:40:53.590Z
+시작: 2026-07-03T08:43:38.226Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17830680672015503.974363611774
+[RES] 200 login.xml&postfix=17830682317864039.686107307614
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -51,10 +51,6 @@ selTodaySalesList: 15건
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":38000,"ITEM_CD":"32183","ITEM_NM":"페이퍼 파이버 타비 쿼터 삭스 [GC25105-BLACK, 2]","SALES_AMT":34200,"NET_SALES_AM
   파싱 성공: 1건
 [RES] 200 selItemSalesList
-  items: 4개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"29779","ITEM_NM":"퍼포먼스 티 [1ME10230106, XL]","SALES_AMT":103500,"NET_SALES_AMT":94091,
-  파싱 성공: 4건
-[RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":449000,"ITEM_CD":"32206","ITEM_NM":"더 락커 [40002-BK, 285]","SALES_AMT":404100,"NET_SALES_AMT":367364,"VA
   파싱 성공: 1건
@@ -74,4 +70,4 @@ selTodaySalesList: 15건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33200","ITEM_NM":"보메로 플러스 [HV8154-012, 235]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-완료: 품번 31개
+완료: 품번 27개
