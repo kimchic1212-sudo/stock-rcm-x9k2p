@@ -1,7 +1,7 @@
-시작: 2026-07-02T23:51:07.321Z
+시작: 2026-07-03T00:01:06.700Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17830362824526913.146569201554
+[RES] 200 login.xml&postfix=17830368809004021.2001923296457
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,94 +12,6 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 22건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36392","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, M]","SALES_AMT":165000,"NET_SALES_AM
-  파싱 성공: 1건
-메뉴 클릭 후 거래: 22건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39496","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, S/M]","SALES_AMT":59000,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39496","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, S/M]","SALES_AMT":59000,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39498","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, L/XL]","SALES_AMT":59000,"NET_SALES_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":249000,"ITEM_CD":"31362","ITEM_NM":"글리세린 맥스 2 [1204681B110, 230]","SALES_AMT":194100,"NET_SALES_AMT":17
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37688","ITEM_NM":"엔돌핀 아주라 [S101348-1032, 240]","SALES_AMT":179550,"NET_SALES_AMT":163
-  파싱 성공: 3건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":82800,"ITEM_CD":"19981","ITEM_NM":"메인테인 [SKU015, 1SIZE]","SALES_AMT":82800,"NET_SALES_AMT":75273,"VAT_A
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39498","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, L/XL]","SALES_AMT":59000,"NET_SALES_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39498","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, L/XL]","SALES_AMT":59000,"NET_SALES_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":-165000,"NET_SALE
-  파싱 성공: 0건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, L]","SALES_AMT":165000,"NET_SALES_AM
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79900,"ITEM_CD":"7871","ITEM_NM":"RC 4부 쇼츠 (스탠다드핏) [NBNVE4P06119, L]","SALES_AMT":75900,"NET_SALES_AMT"
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 5개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-45000,"ITEM_CD":"22808","ITEM_NM":"펄스 벨트 [LC2711100, S]","SALES_AMT":-36000,"NET_SALES_AMT":-32727,"V
-  파싱 성공: 0건
-[RES] 200 selItemSalesList
-  items: 4개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":36000,"ITEM_CD":"22808","ITEM_NM":"펄스 벨트 [LC2711100, S]","SALES_AMT":36000,"NET_SALES_AMT":32727,"VAT_A
-  파싱 성공: 4건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"31847","ITEM_NM":"001A [001A-SKY-M, 265]","SALES_AMT":359100,"NET_SALES_AMT":326455,"
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 4개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":85000,"ITEM_CD":"33708","ITEM_NM":"드라이핏 ADV 스트라이드 노벨티 숏슬리브 [IF2089-494, L]","SALES_AMT":76500,"NET_SALE
-  파싱 성공: 4건
-[RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"36057","ITEM_NM":"아디제로 아카이브 러닝 쇼츠 [KT4854, M]","SALES_AMT":71100,"NET_SALES_AMT":64636
-  파싱 성공: 3건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"35006","ITEM_NM":"아디제로 EVO SL EXO [KJ0430, 300]","SALES_AMT":161100,"NET_SALES_AMT":1
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"27246","ITEM_NM":"아디365 클라이마쿨 티셔츠 [JZ7694, M]","SALES_AMT":44100,"NET_SALES_AMT":40091
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"23037","ITEM_NM":"클라우드서퍼 맥스 [3MF30430106, 275]","SALES_AMT":208050,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"24741","ITEM_NM":"캡 쿨 메리노 블렌드 그래픽 셔츠 [44590-FZPN, M]","SALES_AMT":107100,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39201","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, M]","SALES_AMT":155000,"NET_SALES_A
-  파싱 성공: 1건
-완료: 품번 27개
+selTodaySalesList: 0건
+메뉴 클릭 후 거래: 0건
+완료: 품번 0개
