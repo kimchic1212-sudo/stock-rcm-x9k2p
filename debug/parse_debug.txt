@@ -1,7 +1,7 @@
-시작: 2026-07-03T10:32:17.533Z
+시작: 2026-07-03T10:38:58.464Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17830747489354172.443468713875
+[RES] 200 login.xml&postfix=17830751500413325.4248316634294
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 16건
+selTodaySalesList: 18건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":71100,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 16건
+메뉴 클릭 후 거래: 18건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":149000,"ITEM_CD":"27539","ITEM_NM":"엑스페리어 트레일 베스트 2.5L [JY7574, XS]","SALES_AMT":49200,"NET_SALES_AMT":
@@ -78,4 +78,12 @@ selTodaySalesList: 16건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":50000,"ITEM_CD":"17441","ITEM_NM":"펄사 벨트 [LC2179800, M]","SALES_AMT":45000,"NET_SALES_AMT":40909,"VAT_A
   파싱 성공: 1건
-완료: 품번 32개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33201","ITEM_NM":"보메로 플러스 [HV8154-012, 240]","SALES_AMT":219000,"NET_SALES_AMT":19909
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":38500,"ITEM_CD":"27254","ITEM_NM":"아디365 브리즈 티 [JZ7762, M]","SALES_AMT":38500,"NET_SALES_AMT":35000,"VA
+  파싱 성공: 2건
+완료: 품번 34개
