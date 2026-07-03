@@ -1,7 +1,7 @@
-시작: 2026-07-03T07:23:36.803Z
+시작: 2026-07-03T07:29:15.981Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17830634302144460.201699051329
+[RES] 200 login.xml&postfix=17830637677405470.610212156372
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":71100,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":149000,"ITEM_CD":"27539","ITEM_NM":"엑스페리어 트레일 베스트 2.5L [JY7574, XS]","SALES_AMT":49200,"NET_SALES_AMT":
@@ -50,4 +50,8 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":38000,"ITEM_CD":"32183","ITEM_NM":"페이퍼 파이버 타비 쿼터 삭스 [GC25105-BLACK, 2]","SALES_AMT":34200,"NET_SALES_AM
   파싱 성공: 1건
-완료: 품번 15개
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"29779","ITEM_NM":"퍼포먼스 티 [1ME10230106, XL]","SALES_AMT":103500,"NET_SALES_AMT":94091,
+  파싱 성공: 4건
+완료: 품번 19개
