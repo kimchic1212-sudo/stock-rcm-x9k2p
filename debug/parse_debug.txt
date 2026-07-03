@@ -1,7 +1,7 @@
-시작: 2026-07-03T10:52:22.365Z
+시작: 2026-07-03T10:58:57.842Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17830759523421325.8698651275736
+[RES] 200 login.xml&postfix=17830763510559277.136056375151
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 19건
+selTodaySalesList: 20건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":71100,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 19건
+메뉴 클릭 후 거래: 20건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":149000,"ITEM_CD":"27539","ITEM_NM":"엑스페리어 트레일 베스트 2.5L [JY7574, XS]","SALES_AMT":49200,"NET_SALES_AMT":
@@ -90,4 +90,8 @@ selTodaySalesList: 19건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24416","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP7C0R, 3]","SALES_AMT":40500,"NET_SALES_AMT":36818,
   파싱 성공: 3건
-완료: 품번 37개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36394","ITEM_NM":"ACG 래디컬 에어플로우 NXT [IQ5849-100, XL]","SALES_AMT":165000,"NET_SALES_A
+  파싱 성공: 1건
+완료: 품번 38개
