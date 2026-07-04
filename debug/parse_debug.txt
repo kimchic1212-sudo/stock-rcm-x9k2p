@@ -1,7 +1,7 @@
-시작: 2026-07-04T05:50:50.357Z
+시작: 2026-07-04T05:51:37.816Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17831442623913276.314475165979
+[RES] 200 login.xml&postfix=17831443071844491.098750698376
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 14건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33378","ITEM_NM":"페가수스 42 와이드 [IR1228-102, 285]","SALES_AMT":160550,"NET_SALES_AMT":1
   파싱 성공: 1건
-메뉴 클릭 후 거래: 14건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"33830","ITEM_NM":"ACG 트레일 드라이핏 탱크 [IO9653-416, M]","SALES_AMT":52500,"NET_SALES_AMT":4
@@ -70,4 +70,8 @@ selTodaySalesList: 14건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":589000,"ITEM_CD":"16270","ITEM_NM":"포러너 265S 뮤직 [010-2810-53, 1SIZE]","SALES_AMT":459000,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 17개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"36033","ITEM_NM":"아디제로 아카이브 러닝 쇼츠 [KH1056, M]","SALES_AMT":71100,"NET_SALES_AMT":64636
+  파싱 성공: 1건
+완료: 품번 18개
