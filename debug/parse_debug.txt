@@ -1,7 +1,7 @@
-시작: 2026-07-04T23:11:38.665Z
+시작: 2026-07-04T23:21:07.332Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832067098877903.10328607966
+[RES] 200 login.xml&postfix=17832072778155791.070229088927
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -73,10 +73,6 @@ selTodaySalesList: 32건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"36033","ITEM_NM":"아디제로 아카이브 러닝 쇼츠 [KH1056, M]","SALES_AMT":71100,"NET_SALES_AMT":64636
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"37583","ITEM_NM":"엔돌핀 스피드 5 [S101368-1002, 265]","SALES_AMT":167100,"NET_SALES_AMT":1
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
