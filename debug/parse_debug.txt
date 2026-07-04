@@ -1,7 +1,7 @@
-시작: 2026-07-04T05:11:33.957Z
+시작: 2026-07-04T05:20:35.018Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17831419065138573.471149528208
+[RES] 200 login.xml&postfix=17831424503562412.1506336937273
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 14건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33378","ITEM_NM":"페가수스 42 와이드 [IR1228-102, 285]","SALES_AMT":160550,"NET_SALES_AMT":1
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 14건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"33830","ITEM_NM":"ACG 트레일 드라이핏 탱크 [IO9653-416, M]","SALES_AMT":52500,"NET_SALES_AMT":4
@@ -66,4 +66,8 @@ selTodaySalesList: 13건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":55000,"ITEM_CD":"27206","ITEM_NM":"아디365 아이코닉 러닝 롱슬리브 [KE6842, M]","SALES_AMT":49500,"NET_SALES_AMT":45
   파싱 성공: 2건
-완료: 품번 16개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":589000,"ITEM_CD":"16270","ITEM_NM":"포러너 265S 뮤직 [010-2810-53, 1SIZE]","SALES_AMT":459000,"NET_SALES_AMT
+  파싱 성공: 1건
+완료: 품번 17개
