@@ -1,7 +1,7 @@
-시작: 2026-07-04T09:02:12.193Z
+시작: 2026-07-04T09:10:39.805Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17831557417575833.578390848392
+[RES] 200 login.xml&postfix=17831562528633549.9535962700847
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 26건
+selTodaySalesList: 27건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33378","ITEM_NM":"페가수스 42 와이드 [IR1228-102, 285]","SALES_AMT":160550,"NET_SALES_AMT":1
   파싱 성공: 1건
-메뉴 클릭 후 거래: 26건
+메뉴 클릭 후 거래: 27건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"33830","ITEM_NM":"ACG 트레일 드라이핏 탱크 [IO9653-416, M]","SALES_AMT":52500,"NET_SALES_AMT":4
@@ -118,4 +118,8 @@ selTodaySalesList: 26건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"26406","ITEM_NM":"아디제로 아디오스 프로 4 베를린 [JP6624, 270]","SALES_AMT":209300,"NET_SALES_AMT
   파싱 성공: 1건
-완료: 품번 31개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29252","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 255]","SALES_AMT":217550,"NET_SALES_AMT":19
+  파싱 성공: 1건
+완료: 품번 32개
