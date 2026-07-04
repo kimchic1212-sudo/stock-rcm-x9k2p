@@ -1,7 +1,7 @@
-시작: 2026-07-04T04:41:33.272Z
+시작: 2026-07-04T04:50:33.141Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17831401089709349.891745815812
+[RES] 200 login.xml&postfix=17831406469879114.38212695852
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 8건
+selTodaySalesList: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33378","ITEM_NM":"페가수스 42 와이드 [IR1228-102, 285]","SALES_AMT":160550,"NET_SALES_AMT":1
   파싱 성공: 1건
-메뉴 클릭 후 거래: 8건
+메뉴 클릭 후 거래: 9건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"33830","ITEM_NM":"ACG 트레일 드라이핏 탱크 [IO9653-416, M]","SALES_AMT":52500,"NET_SALES_AMT":4
@@ -46,4 +46,8 @@ selTodaySalesList: 8건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21399","ITEM_NM":"보메로 플러스 [HV8150-102, 270]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-완료: 품번 8개
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"30261","ITEM_NM":"클리프톤 10 와이드 [1162032-STLLR, 285]","SALES_AMT":179100,"NET_SALES_AMT
+  파싱 성공: 3건
+완료: 품번 11개
