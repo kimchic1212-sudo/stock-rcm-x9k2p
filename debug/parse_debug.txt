@@ -1,7 +1,7 @@
-시작: 2026-07-05T02:41:02.553Z
+시작: 2026-07-05T02:46:16.747Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832192722412836.9309951495634
+[RES] 200 login.xml&postfix=17832195862232372.3193267967545
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,6 +12,10 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 0건
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+selTodaySalesList: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37066","ITEM_NM":"퍼포먼스 티 [1WE10314994, S]","SALES_AMT":109250,"NET_SALES_AMT":99318,"
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 1건
+완료: 품번 1개
