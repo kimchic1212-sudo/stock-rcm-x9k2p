@@ -1,7 +1,7 @@
-시작: 2026-07-05T07:48:42.543Z
+시작: 2026-07-05T07:51:11.704Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832377354349399.819744722301
+[RES] 200 login.xml&postfix=1783237881700147.58767692078067
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -45,10 +45,6 @@ selTodaySalesList: 27건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":50000,"ITEM_CD":"17442","ITEM_NM":"펄사 벨트 [LC2179800, XS]","SALES_AMT":45000,"NET_SALES_AMT":40909,"VAT_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"33879","ITEM_NM":"ACG 드라이핏 ADV 라바루프 하프 타이츠 [IO9672-382, L]","SALES_AMT":57000,"NET_SAL
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
@@ -122,4 +118,4 @@ selTodaySalesList: 27건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26617","ITEM_NM":"아디제로 EVO SL [JP7149, 275]","SALES_AMT":188100,"NET_SALES_AMT":17100
   파싱 성공: 3건
-완료: 품번 28개
+완료: 품번 27개
