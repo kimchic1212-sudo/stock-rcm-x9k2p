@@ -1,7 +1,7 @@
-시작: 2026-07-05T15:36:10.652Z
+시작: 2026-07-05T15:41:08.267Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832657811566042.390418895274
+[RES] 200 login.xml&postfix=1783266078464722.6842449627724
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -9,5 +9,145 @@ goto OK: https://cloudposoffice.shinsegae.com/
 스크린샷 업로드
 자동 로드 없음 → 메뉴 클릭 시도
 영업 클릭
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+영업속보 클릭
+[] 클릭OK(ID)
+[RES] 200 selTodaySalesList
+selTodaySalesList: 34건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37066","ITEM_NM":"퍼포먼스 티 [1WE10314994, S]","SALES_AMT":109250,"NET_SALES_AMT":99318,"
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 34건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":24000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":24000,"NET_SALES_AMT":
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"28264","ITEM_NM":"페가수스 프리미엄 [HQ2592-105, 270]","SALES_AMT":251100,"NET_SALES_AMT":228
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29297","ITEM_NM":"클라우드몬스터 3 [3MG10054859, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29171","ITEM_NM":"클라우드붐 맥스 [3MF30310438, 270]","SALES_AMT":251100,"NET_SALES_AMT":228
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":25000,"ITEM_CD":"36131","ITEM_NM":"러닝 클라이마쿨 헤드 밴드 [KR8955, S]","SALES_AMT":22500,"NET_SALES_AMT":20455,
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39203","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, XL]","SALES_AMT":155000,"NET_SALES_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":50000,"ITEM_CD":"17442","ITEM_NM":"펄사 벨트 [LC2179800, XS]","SALES_AMT":45000,"NET_SALES_AMT":40909,"VAT_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"33879","ITEM_NM":"ACG 드라이핏 ADV 라바루프 하프 타이츠 [IO9672-382, L]","SALES_AMT":57000,"NET_SAL
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":99900,"ITEM_CD":"13861","ITEM_NM":"레이스 데이 울트라 라이트 티셔츠 [WT51227_BK, S]","SALES_AMT":89910,"NET_SALES_AMT
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"21400","ITEM_NM":"보메로 플러스 [HV8150-102, 275]","SALES_AMT":170100,"NET_SALES_AMT":15463
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"30523","ITEM_NM":"엔돌핀 스피드 5 [S11007-172, 230]","SALES_AMT":175200,"NET_SALES_AMT":159
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29314","ITEM_NM":"클라우드몬스터 3 [3MG10053388, 250]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"12812","ITEM_NM":"본디 9 와이드 [1162013-BBLC, 280]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33433","ITEM_NM":"페가수스 42 [IB1881-003, 245]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33292","ITEM_NM":"페가수스 42 [IB1873-003, 275]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"28698","ITEM_NM":"페가수스 프리미엄 [HQ2593-502, 235]","SALES_AMT":167400,"NET_SALES_AMT":152
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":33000,"ITEM_CD":"22834","ITEM_NM":"소프트 플라스크 500ml/17oz 42 [LC1916000, 1SIZE]","SALES_AMT":29700,"NET_SA
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-169000,"ITEM_CD":"33292","ITEM_NM":"페가수스 42 [IB1873-003, 275]","SALES_AMT":-101400,"NET_SALES_AMT":-9
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-279000,"ITEM_CD":"28698","ITEM_NM":"페가수스 프리미엄 [HQ2593-502, 235]","SALES_AMT":-167400,"NET_SALES_AMT":
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-33000,"ITEM_CD":"22834","ITEM_NM":"소프트 플라스크 500ml/17oz 42 [LC1916000, 1SIZE]","SALES_AMT":-29700,"NET
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"28698","ITEM_NM":"페가수스 프리미엄 [HQ2593-502, 235]","SALES_AMT":167400,"NET_SALES_AMT":152
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33292","ITEM_NM":"페가수스 42 [IB1873-003, 275]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"22814","ITEM_NM":"펄스 슬링 벨트 [LC2710400, 1SIZE]","SALES_AMT":42750,"NET_SALES_AMT":38864
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26617","ITEM_NM":"아디제로 EVO SL [JP7149, 275]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-209000,"ITEM_CD":"26617","ITEM_NM":"아디제로 EVO SL [JP7149, 275]","SALES_AMT":-188100,"NET_SALES_AMT":-1
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26617","ITEM_NM":"아디제로 EVO SL [JP7149, 275]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37671","ITEM_NM":"엔돌핀 아주라 [S101329-1041, 265]","SALES_AMT":170100,"NET_SALES_AMT":154
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36537","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 240]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"28593","ITEM_NM":"보메로 18 EES [IO9915-100, 235]","SALES_AMT":161100,"NET_SALES_AMT":14
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29255","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 270]","SALES_AMT":217550,"NET_SALES_AMT":19
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":85000,"ITEM_CD":"33721","ITEM_NM":"드라이핏 ADV 스트라이드 노벨티 숏슬리브 [IF2089-010, L]","SALES_AMT":76500,"NET_SALE
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"29657","ITEM_NM":"클라우드서퍼 맥스 [3WF30224726, 230]","SALES_AMT":208050,"NET_SALES_AMT":18
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"26383","ITEM_NM":"아디제로 아디오스 프로 4 [JS2579, 260]","SALES_AMT":209300,"NET_SALES_AMT":19
+  파싱 성공: 2건
+완료: 품번 37개
