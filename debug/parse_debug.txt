@@ -1,7 +1,7 @@
-시작: 2026-07-05T07:21:05.529Z
+시작: 2026-07-05T07:26:09.750Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832360799282985.9743646904813
+[RES] 200 login.xml&postfix=17832363793146502.421791764495
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 23건
+selTodaySalesList: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37066","ITEM_NM":"퍼포먼스 티 [1WE10314994, S]","SALES_AMT":109250,"NET_SALES_AMT":99318,"
   파싱 성공: 1건
-메뉴 클릭 후 거래: 23건
+메뉴 클릭 후 거래: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":24000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":24000,"NET_SALES_AMT":
@@ -106,4 +106,8 @@ selTodaySalesList: 23건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33292","ITEM_NM":"페가수스 42 [IB1873-003, 275]","SALES_AMT":101400,"NET_SALES_AMT":92182
   파싱 성공: 1건
-완료: 품번 25개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"22814","ITEM_NM":"펄스 슬링 벨트 [LC2710400, 1SIZE]","SALES_AMT":42750,"NET_SALES_AMT":38864
+  파싱 성공: 2건
+완료: 품번 27개
