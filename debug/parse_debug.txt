@@ -1,7 +1,7 @@
-시작: 2026-07-05T04:11:06.849Z
+시작: 2026-07-05T04:16:08.320Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832246779852372.9480228263687
+[RES] 200 login.xml&postfix=17832249815967590.006281491358
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 6건
+selTodaySalesList: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37066","ITEM_NM":"퍼포먼스 티 [1WE10314994, S]","SALES_AMT":109250,"NET_SALES_AMT":99318,"
   파싱 성공: 1건
-메뉴 클릭 후 거래: 6건
+메뉴 클릭 후 거래: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":24000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":24000,"NET_SALES_AMT":
@@ -38,4 +38,8 @@ selTodaySalesList: 6건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":25000,"ITEM_CD":"36131","ITEM_NM":"러닝 클라이마쿨 헤드 밴드 [KR8955, S]","SALES_AMT":22500,"NET_SALES_AMT":20455,
   파싱 성공: 2건
-완료: 품번 9개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39203","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, XL]","SALES_AMT":155000,"NET_SALES_
+  파싱 성공: 1건
+완료: 품번 10개
