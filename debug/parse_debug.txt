@@ -1,7 +1,7 @@
-시작: 2026-07-05T09:51:05.899Z
+시작: 2026-07-05T09:56:06.370Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832450755466676.221518265805
+[RES] 200 login.xml&postfix=17832453805711914.8254354629123
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 33건
+selTodaySalesList: 34건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37066","ITEM_NM":"퍼포먼스 티 [1WE10314994, S]","SALES_AMT":109250,"NET_SALES_AMT":99318,"
   파싱 성공: 1건
-메뉴 클릭 후 거래: 33건
+메뉴 클릭 후 거래: 34건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":24000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":24000,"NET_SALES_AMT":
@@ -146,4 +146,8 @@ selTodaySalesList: 33건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"29657","ITEM_NM":"클라우드서퍼 맥스 [3WF30224726, 230]","SALES_AMT":208050,"NET_SALES_AMT":18
   파싱 성공: 2건
-완료: 품번 35개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"26383","ITEM_NM":"아디제로 아디오스 프로 4 [JS2579, 260]","SALES_AMT":209300,"NET_SALES_AMT":19
+  파싱 성공: 2건
+완료: 품번 37개
