@@ -1,7 +1,7 @@
-시작: 2026-07-05T06:51:07.077Z
+시작: 2026-07-05T06:56:17.394Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17832342771611669.2121551810535
+[RES] 200 login.xml&postfix=17832345879497646.536785409723
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37066","ITEM_NM":"퍼포먼스 티 [1WE10314994, S]","SALES_AMT":109250,"NET_SALES_AMT":99318,"
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":24000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":24000,"NET_SALES_AMT":
@@ -66,4 +66,12 @@ selTodaySalesList: 13건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29314","ITEM_NM":"클라우드몬스터 3 [3MG10053388, 250]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 3건
-완료: 품번 19개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"12812","ITEM_NM":"본디 9 와이드 [1162013-BBLC, 280]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33433","ITEM_NM":"페가수스 42 [IB1881-003, 245]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  파싱 성공: 1건
+완료: 품번 21개
