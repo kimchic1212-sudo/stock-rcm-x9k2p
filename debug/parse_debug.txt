@@ -1,7 +1,7 @@
-시작: 2026-07-07T08:53:08.049Z
+시작: 2026-07-07T08:55:08.951Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17834143993586823.378733146466
+[RES] 200 login.xml&postfix=17834145179723726.297674981819
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
