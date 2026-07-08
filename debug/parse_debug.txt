@@ -1,7 +1,7 @@
-시작: 2026-07-08T11:07:19.636Z
+시작: 2026-07-08T11:11:13.132Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17835088497519488.235864725915
+[RES] 200 login.xml&postfix=17835090866363342.205870757938
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 20건
+selTodaySalesList: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39487","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-100, M/L]","SALES_AMT":59000,"NET_SALES_A
   파싱 성공: 1건
-메뉴 클릭 후 거래: 20건
+메뉴 클릭 후 거래: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39497","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, M/L]","SALES_AMT":41300,"NET_SALES_A
@@ -94,4 +94,8 @@ selTodaySalesList: 20건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"16829","ITEM_NM":"5인치 퍼포먼스 쇼츠 [1MF10750553, XL]","SALES_AMT":103500,"NET_SALES_AMT":9
   파싱 성공: 1건
-완료: 품번 27개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":359000,"ITEM_CD":"32839","ITEM_NM":"알파플라이 3 CM [II7290-100, 260]","SALES_AMT":341050,"NET_SALES_AMT":31
+  파싱 성공: 1건
+완료: 품번 28개
