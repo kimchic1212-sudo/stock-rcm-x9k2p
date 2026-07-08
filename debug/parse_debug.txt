@@ -1,7 +1,7 @@
-시작: 2026-07-08T07:41:11.929Z
+시작: 2026-07-08T07:43:17.740Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17834964825509370.311988769716
+[RES] 200 login.xml&postfix=17834966131884984.348396580261
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 10건
+selTodaySalesList: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39487","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-100, M/L]","SALES_AMT":59000,"NET_SALES_A
   파싱 성공: 1건
-메뉴 클릭 후 거래: 10건
+메뉴 클릭 후 거래: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39497","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, M/L]","SALES_AMT":41300,"NET_SALES_A
@@ -54,4 +54,8 @@ selTodaySalesList: 10건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59950,"ITEM_CD":"12024","ITEM_NM":"스테미나 스쿱 넥 크롭탑 [WPCCP001FL24SM, M]","SALES_AMT":59950,"NET_SALES_AMT"
   파싱 성공: 2건
-완료: 품번 12개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21401","ITEM_NM":"보메로 플러스 [HV8150-102, 280]","SALES_AMT":197100,"NET_SALES_AMT":17918
+  파싱 성공: 1건
+완료: 품번 13개
