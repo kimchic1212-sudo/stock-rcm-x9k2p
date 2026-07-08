@@ -1,7 +1,7 @@
-시작: 2026-07-08T07:13:21.615Z
+시작: 2026-07-08T07:20:33.661Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17834948139385574.831704862194
+[RES] 200 login.xml&postfix=1783495247352778.0425725960449
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39487","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-100, M/L]","SALES_AMT":59000,"NET_SALES_A
   파싱 성공: 1건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39497","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, M/L]","SALES_AMT":41300,"NET_SALES_A
@@ -50,4 +50,8 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"32789","ITEM_NM":"아디제로 아디오스 프로 4 [JR1094, 265]","SALES_AMT":209300,"NET_SALES_AMT":19
   파싱 성공: 1건
-완료: 품번 10개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59950,"ITEM_CD":"12024","ITEM_NM":"스테미나 스쿱 넥 크롭탑 [WPCCP001FL24SM, M]","SALES_AMT":59950,"NET_SALES_AMT"
+  파싱 성공: 2건
+완료: 품번 12개
