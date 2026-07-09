@@ -1,7 +1,7 @@
-시작: 2026-07-09T09:41:27.964Z
+시작: 2026-07-09T09:51:15.257Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17835900988488219.96248261763
+[RES] 200 login.xml&postfix=17835906861996916.733032008875
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 6건
+selTodaySalesList: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26778","ITEM_NM":"아디제로 EVO SL [JH6208, 240]","SALES_AMT":188100,"NET_SALES_AMT":17100
   파싱 성공: 1건
-메뉴 클릭 후 거래: 6건
+메뉴 클릭 후 거래: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"29662","ITEM_NM":"클라우드서퍼 맥스 [3WF30224726, 255]","SALES_AMT":208050,"NET_SALES_AMT":18
@@ -38,4 +38,8 @@ selTodaySalesList: 6건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79900,"ITEM_CD":"22916","ITEM_NM":"5인치 러닝 쇼츠 [MS53278-GAS, XL]","SALES_AMT":75900,"NET_SALES_AMT":69000
   파싱 성공: 1건
-완료: 품번 10개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"34233","ITEM_NM":"포러너 165 [010-02863-AD, 1SIZE]","SALES_AMT":249000,"NET_SALES_AMT":2
+  파싱 성공: 1건
+완료: 품번 11개
