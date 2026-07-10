@@ -1,7 +1,7 @@
-시작: 2026-07-10T04:35:39.257Z
+시작: 2026-07-10T04:37:18.819Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17836581525626151.841206283994
+[RES] 200 login.xml&postfix=17836582539827221.647536318239
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 44건
+selTodaySalesList: 45건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 44건
+메뉴 클릭 후 거래: 45건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -190,4 +190,8 @@ selTodaySalesList: 44건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29842","ITEM_NM":"마인드 001 [HQ4307-001, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-209000,"ITEM_CD":"26701","ITEM_NM":"아디제로 EVO SL [KI3381, 275]","SALES_AMT":-188100,"NET_SALES_AMT":-1
+  파싱 성공: 0건
 완료: 품번 8개
