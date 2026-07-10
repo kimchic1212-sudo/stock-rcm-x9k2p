@@ -1,4 +1,4 @@
-2026-07-09T20:40:46.767Z
+2026-07-10T11:33:08.603Z
 GitHub 실패: 422
 Error: GitHub 실패: 422
     at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
