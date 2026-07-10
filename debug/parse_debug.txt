@@ -1,7 +1,7 @@
-시작: 2026-07-10T09:41:02.452Z
+시작: 2026-07-10T09:48:52.734Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17836764745285057.580585438501
+[RES] 200 login.xml&postfix=17836769436499785.619872201913
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 71건
+selTodaySalesList: 73건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 71건
+메뉴 클릭 후 거래: 73건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -297,5 +297,13 @@ selTodaySalesList: 71건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":339000,"ITEM_CD":"32909","ITEM_NM":"알파플라이 3 [FD8311-300, 280]","SALES_AMT":322050,"NET_SALES_AMT":29277
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29838","ITEM_NM":"마인드 001 [HQ4307-001, 270]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
 완료: 품번 23개
