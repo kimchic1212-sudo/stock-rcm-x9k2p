@@ -1,7 +1,7 @@
-시작: 2026-07-10T08:01:07.902Z
+시작: 2026-07-10T08:06:06.009Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17836704827986892.336759193023
+[RES] 200 login.xml&postfix=17836707773771960.6267270529509
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 65건
+selTodaySalesList: 66건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 65건
+메뉴 클릭 후 거래: 66건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -274,4 +274,8 @@ selTodaySalesList: 65건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":50000,"ITEM_CD":"22838","ITEM_NM":"펄사 벨트 [LC2179800, XL]","SALES_AMT":40040,"NET_SALES_AMT":36400,"VAT_
   파싱 성공: 1건
-완료: 품번 18개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":50000,"ITEM_CD":"27710","ITEM_NM":"레이스먼트 상품권 (5만원) [RM-GC05, 1SIZE]","SALES_AMT":50000,"NET_SALES_AMT":
+  파싱 성공: 1건
+완료: 품번 19개
