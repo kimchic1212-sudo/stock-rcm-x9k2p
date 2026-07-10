@@ -328,6 +328,7 @@ const SALES_DEDUCT_PATH = "sales.json";
 const DISPLAY_PATH = "display_items.json";
 
 const FAVS_PATH = "favs.json";   // 즐겨찾기 기기 간 동기화
+const STOCK_OVERRIDES_PATH = "stock_overrides.json";   // 실재고 보정(부산) — ADMIN 전용
 
 // ── 사이즈 단위 전환 (KR / EU / US) ──────────────────────────
 window.sizeUnit = localStorage.getItem('_rcm_sizeUnit') || 'KR';
@@ -532,6 +533,9 @@ function reapplyPromoData() {
 let SALES_HISTORY = { meta: {}, items: {} };
 
 let SALES_DEDUCTIONS = null;
+
+// 실재고 보정(부산): { "품번": { "260": { actual, system, by, at } } }  — 시스템재고 ≠ 실재고일 때 ADMIN이 수동 보정
+let STOCK_OVERRIDES = {};
 
 // DP(전시) 관리: { "품번": { "260": { since: "2026-05-17" }, "265": { since: "..." } } }
 
@@ -1360,9 +1364,9 @@ async function loadData(force = false){
 
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
 
-      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; SALES_DEDUCTIONS = cached.salesDeductions || null; DISPLAY_ITEMS = cached.displayItems || {};
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; SALES_DEDUCTIONS = cached.salesDeductions || null; DISPLAY_ITEMS = cached.displayItems || {}; STOCK_OVERRIDES = cached.stockOverrides || {};
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
 
       // FAVS GitHub 비동기 로드 (기기 간 즐겨찾기 동기화)
       fetchGithubJson(FAVS_PATH).then(d=>{if(Array.isArray(d)){FAVS=d;localStorage.setItem('FAVS',JSON.stringify(FAVS));render();}}).catch(()=>{});
@@ -1370,6 +1374,11 @@ async function loadData(force = false){
       // DP가 비어있으면(잘못된 캐시) API로 복구 후 재렌더 — 체크 사라져 보이는 문제 방지
       if(!DISPLAY_ITEMS || Object.keys(DISPLAY_ITEMS).length === 0) {
           fetchGithubJson(DISPLAY_PATH).then(d=>{ if(d && typeof d==='object' && Object.keys(d).length>0){ DISPLAY_ITEMS = d; if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn(); render(); } }).catch(()=>{});
+      }
+
+      // 재고보정이 비어있으면 API로 복구
+      if(!STOCK_OVERRIDES || Object.keys(STOCK_OVERRIDES).length === 0) {
+          fetchGithubJson(STOCK_OVERRIDES_PATH).then(d=>{ if(d && typeof d==='object' && Object.keys(d).length>0){ STOCK_OVERRIDES = d; _recomputeStock(); render(); } }).catch(()=>{});
       }
 
       const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
@@ -1391,7 +1400,7 @@ async function loadData(force = false){
 
   try {
 
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes, soRes] = await Promise.all([
 
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
 
@@ -1409,7 +1418,9 @@ async function loadData(force = false){
 
           fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null),
 
-          fetch("./" + DISPLAY_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + DISPLAY_PATH + "?t=" + Date.now()).catch(()=>null),
+
+          fetch("./" + STOCK_OVERRIDES_PATH + "?t=" + Date.now()).catch(()=>null)
 
       ]);
 
@@ -1443,11 +1454,19 @@ async function loadData(force = false){
           if(_diApi && typeof _diApi === 'object' && Object.keys(_diApi).length > 0) DISPLAY_ITEMS = _diApi;
       }
 
+      if(soRes && soRes.ok) { try { STOCK_OVERRIDES = await soRes.json(); } catch(e) { STOCK_OVERRIDES = {}; } } else STOCK_OVERRIDES = {};
+
+      // 재고보정: Pages 로드 실패/빈값이면 GitHub API로 폴백
+      if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object' || Object.keys(STOCK_OVERRIDES).length === 0) {
+          const _soApi = await fetchGithubJson(STOCK_OVERRIDES_PATH);
+          if(_soApi && typeof _soApi === 'object') STOCK_OVERRIDES = _soApi;
+      }
 
 
-      _safeSessionCache({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, _timestamp: Date.now() });
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); render(); setupSearchAutocomplete();
+      _safeSessionCache({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, stockOverrides: STOCK_OVERRIDES, _timestamp: Date.now() });
+
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
 
       const _bar2 = $("#actionBtnsWrap"); if(_bar2) _bar2.dataset.setup = "0";
 
@@ -1529,6 +1548,96 @@ async function saveDisplayItems() {
 
 }
 
+
+
+// ── 실재고 보정(부산) 엔진 ───────────────────────────────────────────
+// 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
+// 별도 파일 저장 → 엑셀 재업로드해도 유지. 적용은 판매차감 이후 마지막 단계(항상 우선).
+function applyStockOverrides() {
+    if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object') return;
+    PRODUCTS.forEach(p => {
+        p._hasOverride = false;
+        p.sizes.forEach(s => { delete s._override; delete s._overrideStale; });
+        const ov = STOCK_OVERRIDES[p.품번];
+        if(!ov) return;
+        p.sizes.forEach(s => {
+            const o = ov[String(s.size).trim()];
+            if(!o || o.actual === undefined || o.actual === null) return;
+            const actual = Number(o.actual);
+            if(!Number.isFinite(actual)) return;
+            const sysNow = s.busan;   // 판매차감까지 반영된 현재 시스템값
+            s._override = { actual, system: o.system, by: o.by, at: o.at, sysNow };
+            s._overrideStale = (typeof o.system === 'number' && sysNow !== o.system); // 보정 후 시스템값이 바뀜 → 재확인
+            s.busan = actual;
+            p._hasOverride = true;
+        });
+        p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
+    });
+}
+
+// 저장 — DP와 동일한 안전장치(서버보다 비정상 감소 시 차단) + 캐시 갱신
+async function saveStockOverrides() {
+    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${STOCK_OVERRIDES_PATH}`;
+    let sha = null, serverCount = 0;
+    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) { const j = await r.json(); sha = j.sha; try { serverCount = Object.keys(JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,'')))))).length; } catch(e2) {} } } catch(e) {}
+    const localCount = Object.keys(STOCK_OVERRIDES).length;
+    if (serverCount - localCount > 3) throw new Error(`재고보정이 서버보다 비정상적으로 적습니다 (로컬 ${localCount}/서버 ${serverCount}). 새로고침 후 다시.`);
+    const body = { message: "stock: update overrides", content: utf8ToB64(JSON.stringify(STOCK_OVERRIDES, null, 2)), branch: GH.branch };
+    if (sha) body.sha = sha;
+    const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if(!put.ok) throw new Error('저장 실패 ' + put.status);
+    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.stockOverrides = STOCK_OVERRIDES; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+}
+
+// 보정 설정/해제 (ADMIN 전용) — 설정 후 base부터 재계산해 일관 상태 유지
+function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); }
+function _reopenDetail(code){ const dm=document.getElementById('detailModal'); if(dm && !dm.classList.contains('hidden')){ const np=PRODUCTS.find(x=>x.품번===code); if(np) openDetail(np); } }
+
+// 실재고 보정 입력 프롬프트 (ADMIN 전용)
+window._promptStockOverride = (code, size) => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return; }
+    const p = PRODUCTS.find(x => x.품번 === code);
+    const s = p && p.sizes.find(x => String(x.size).trim() === String(size).trim());
+    if(!s) return;
+    const sysVal = s._override ? s._override.sysNow : s.busan;   // 시스템값
+    const existing = s._override ? String(s._override.actual) : '';
+    const v = prompt(`[${size}] 실제 부산 재고 수량\n(시스템 표시: ${sysVal}개)\n\n· 숫자 = 그 수량으로 보정\n· 빈칸 후 확인 = 보정 해제(시스템값 복귀)`, existing);
+    if(v === null) return;
+    const t = String(v).trim();
+    if(t === '') { window._clearStockOverride(code, size); return; }
+    const n = parseInt(t, 10);
+    if(!Number.isFinite(n) || n < 0) { showToast('0 이상의 숫자를 입력하세요.', null, 'error'); return; }
+    window._setStockOverride(code, size, n);
+};
+
+window._setStockOverride = async (code, size, actual) => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
+    if(!checkPat()) return false;
+    const sz = String(size).trim();
+    const p = PRODUCTS.find(x => x.품번 === code);
+    const s = p && p.sizes.find(x => String(x.size).trim() === sz);
+    const sysNow = s ? s.busan : null;
+    const prev = STOCK_OVERRIDES[code] ? STOCK_OVERRIDES[code][sz] : undefined;
+    if(!STOCK_OVERRIDES[code]) STOCK_OVERRIDES[code] = {};
+    STOCK_OVERRIDES[code][sz] = { actual: Number(actual), system: sysNow, by: (localStorage.getItem('rcm_last_memo_staff')||'ADMIN'), at: new Date().toISOString().slice(0,16).replace('T',' ') };
+    try { await saveStockOverrides(); } catch(e) { if(prev!==undefined) STOCK_OVERRIDES[code][sz]=prev; else { delete STOCK_OVERRIDES[code][sz]; if(!Object.keys(STOCK_OVERRIDES[code]).length) delete STOCK_OVERRIDES[code]; } showToast('보정 저장 실패: '+e.message, null, 'error'); return false; }
+    _recomputeStock(); render(); _reopenDetail(code);
+    showToast(`✏️ ${size} 실재고 ${actual}개로 보정`);
+    return true;
+};
+
+window._clearStockOverride = async (code, size) => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
+    if(!checkPat()) return false;
+    const sz = String(size).trim();
+    if(!STOCK_OVERRIDES[code] || STOCK_OVERRIDES[code][sz]===undefined) return false;
+    const prev = STOCK_OVERRIDES[code][sz];
+    delete STOCK_OVERRIDES[code][sz]; if(!Object.keys(STOCK_OVERRIDES[code]).length) delete STOCK_OVERRIDES[code];
+    try { await saveStockOverrides(); } catch(e) { if(!STOCK_OVERRIDES[code]) STOCK_OVERRIDES[code]={}; STOCK_OVERRIDES[code][sz]=prev; showToast('해제 저장 실패: '+e.message, null, 'error'); return false; }
+    _recomputeStock(); render(); _reopenDetail(code);
+    showToast(`↩️ ${size} 보정 해제 (시스템값으로 복귀)`);
+    return true;
+};
 
 
 // DP 버튼 클릭 핸들러 (모달 내 즉시 UI 반영)
@@ -5629,6 +5738,12 @@ function card(p){
 
   const _noImgBadge = !IMAGES[p.shopNo || p.품번] ? `<span class="bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded font-black text-[10px]">📷 이미지없음</span>` : "";
 
+  // 실재고 보정 배지
+  const _hasStale = p._hasOverride && p.sizes.some(s => s._override && s._overrideStale);
+  const overrideBadge = p._hasOverride
+    ? `<span class="bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded font-black text-[10px]">✏️ 재고보정${_hasStale?' ⚠️':''}</span>`
+    : "";
+
 
 
   const productMemos = MEMOS.filter(m => m.code === p.품번);
@@ -5774,7 +5889,7 @@ function card(p){
 
 
   // 상단 상태 배지: 중요도 순으로 최대 3개만 노출, 나머지는 +N 축약 (품명이 밀리지 않게)
-  const _statusBadges = [dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
+  const _statusBadges = [overrideBadge, dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
   const _MAX_BADGES = 3;
   let _badgesHtml = _statusBadges.slice(0, _MAX_BADGES).join("");
   if (_statusBadges.length > _MAX_BADGES) {
@@ -5857,7 +5972,9 @@ function card(p){
 
               const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:9px;margin-top:1px">↓${soldToday}판매</span>` : '';
 
-              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+              const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:9px;margin-top:1px" title="시스템 ${s._override.sysNow}→실재고 ${s._override.actual}">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
+
+              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
 
           }).join("")}
 
@@ -5954,6 +6071,8 @@ function getFilters(){
     noImage: !!$$('button.chip[data-noimage]').find(b=>b.dataset.active==="1"),
 
     noBarcode: !!$$('button.chip[data-nobarcode]').find(b=>b.dataset.active==="1"),
+
+    overrideOnly: !!$$('button.chip[data-override]').find(b=>b.dataset.active==="1"),
 
     sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
 
@@ -6321,7 +6440,9 @@ function render(){
 
     if(f.noBarcode && !p.noBarcodeBusan) return false;
 
-    
+    if(f.overrideOnly && !p._hasOverride) return false;
+
+
 
     if(f.promoOnly) {
 
@@ -7672,6 +7793,33 @@ function openDetail(p){
 
   $("#detailBody").appendChild(_dpDiv);
 
+  // ── 실재고 보정 패널 (ADMIN 전용, 전체 사이즈) ─────────────────────────
+  if (checkAdminSession()) {
+      const _soDiv = document.createElement("div");
+      _soDiv.className = "px-3 pb-3";
+      const _soBtns = p.sizes.map(s => {
+          const sz = String(s.size).trim();
+          const ov = s._override;
+          const cls = ov
+            ? (s._overrideStale ? "bg-amber-100 border-amber-400 text-amber-800" : "bg-emerald-50 border-emerald-500 text-emerald-700")
+            : "bg-white border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600";
+          const label = ov
+            ? `✏️ ${sz}<span class="block text-[10px] font-bold leading-tight">시스템 ${ov.sysNow}→<b>${ov.actual}</b>${s._overrideStale?' ⚠️':''}</span>`
+            : `${sz}<span class="block text-[10px] text-gray-400 leading-tight">${s.busan}</span>`;
+          return `<button onclick="window._promptStockOverride('${escapeHtml(p.품번)}','${sz}')" class="px-2.5 py-1.5 rounded-lg border-2 font-black text-xs transition-all text-center leading-tight ${cls}">${label}</button>`;
+      }).join('');
+      _soDiv.innerHTML = `
+        <div class="rounded-xl border border-blue-200 bg-blue-50/40 p-3">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-black text-blue-700 flex items-center gap-1.5">📦 실재고 보정 <span class="text-[10px] font-normal text-blue-400">시스템과 실제가 다르면 눌러서 수정</span></span>
+            <span class="text-[10px] font-black px-2 py-0.5 rounded bg-gray-100 text-gray-400">ADMIN</span>
+          </div>
+          <div class="flex flex-wrap gap-2">${_soBtns}</div>
+          <div class="text-[10px] text-gray-400 mt-2">⚠️ = 보정 후 시스템값이 바뀜(재확인) · 입력창 빈칸 저장 시 보정 해제</div>
+        </div>`;
+      $("#detailBody").appendChild(_soDiv);
+  }
+
 
 
   $("#detailMemosWrap").innerHTML = detailMemoHtml;
@@ -7971,7 +8119,7 @@ function renderActiveFilterBar() {
         }});
     }
     // 일반 필터칩 (단일·다중)
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode]').forEach(btn => {
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override]').forEach(btn => {
         if (btn.dataset.active === "1") {
             items.push({ label: btn.textContent.trim(), onClear: () => {
                 btn.dataset.active = "0";
@@ -8124,6 +8272,10 @@ $("#resetAll").onclick=()=>{
     const noBarcodeBtn = $('button.chip[data-nobarcode]');
 
     if(noBarcodeBtn) { noBarcodeBtn.dataset.active = "0"; noBarcodeBtn.classList.remove('ring-2','ring-amber-400'); }
+
+    const ovBtn = $('button.chip[data-override]');
+
+    if(ovBtn) { ovBtn.dataset.active = "0"; ovBtn.classList.remove('ring-2','ring-amber-400'); }
 
 
 
@@ -9098,7 +9250,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
     }
 
-    
+    // ── 재고보정 필터 칩 (보기는 전체, 편집은 ADMIN) ─────────────────────
+    if(dpFilterRow && !$('button.chip[data-override]')) {
+        const ovBtn = document.createElement("button");
+        ovBtn.className = "chip !bg-amber-50 !text-amber-700 !border-amber-400 font-black";
+        ovBtn.dataset.override = "1";
+        ovBtn.dataset.active = "0";
+        const _ovCount = PRODUCTS.filter(p => p._hasOverride).length;
+        ovBtn.innerHTML = `✏️ 재고보정${_ovCount > 0 ? ` <span class="ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]">${_ovCount}</span>` : ''}`;
+        dpFilterRow.appendChild(ovBtn);
+        ovBtn.addEventListener("click", () => {
+            saveHistoryState();
+            ovBtn.dataset.active = ovBtn.dataset.active === "1" ? "0" : "1";
+            if(ovBtn.dataset.active === "1") ovBtn.classList.add('ring-2','ring-amber-400');
+            else ovBtn.classList.remove('ring-2','ring-amber-400');
+            visibleCount=60; render();
+        });
+    }
+
+
 
     // 🔥 Admin Modal : 기능(비밀번호, 설정, 업로드) + 디자인(Glassmorphism) 완벽 결합 🔥
 
