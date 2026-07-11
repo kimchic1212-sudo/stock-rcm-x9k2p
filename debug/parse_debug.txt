@@ -1,7 +1,7 @@
-시작: 2026-07-11T07:06:21.067Z
+시작: 2026-07-11T07:09:54.242Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17837535919234678.694610296894
+[RES] 200 login.xml&postfix=17837538090935357.028477077512
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 35건
+selTodaySalesList: 36건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30837","ITEM_NM":"마인드 001 [HQ4309-001, 240]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 35건
+메뉴 클릭 후 거래: 36건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":33000,"ITEM_CD":"29079","ITEM_NM":"ACG 아웃도어 쿠션 크루 1PR [DV5465-101, M]","SALES_AMT":29700,"NET_SALES_AMT
@@ -154,4 +154,8 @@ selTodaySalesList: 35건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37987","ITEM_NM":"보메로 프리미엄 [HQ2050-104, 260]","SALES_AMT":179400,"NET_SALES_AMT":1630
   파싱 성공: 1건
-완료: 품번 30개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":289000,"ITEM_CD":"33060","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 270]","SALES_AMT":173400,"NET_SALES_AMT":1576
+  파싱 성공: 1건
+완료: 품번 31개
