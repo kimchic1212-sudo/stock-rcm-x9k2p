@@ -1,11 +1,6 @@
-2026-07-11T10:21:02.010Z
-page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
-Call log:
-  - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
-
-page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
-Call log:
-  - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
-
-    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:164:16)
-    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:270:24
+2026-07-11T13:41:59.102Z
+GitHub 실패: 409
+Error: GitHub 실패: 409
+    at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:291:5
