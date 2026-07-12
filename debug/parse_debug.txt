@@ -1,7 +1,7 @@
-시작: 2026-07-12T02:31:07.240Z
+시작: 2026-07-12T02:31:52.140Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17838234766139333.69756116277
+[RES] 200 login.xml&postfix=17838235215731244.894490630437
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,18 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 3건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":-35100,"NET_SALES_AM
   파싱 성공: 0건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 3건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
   파싱 성공: 7건
-완료: 품번 7개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":55000,"ITEM_CD":"27311","ITEM_NM":"아디365 소프트 터치 탱크 탑 [KA0143, L]","SALES_AMT":33000,"NET_SALES_AMT":300
+  파싱 성공: 1건
+완료: 품번 8개
