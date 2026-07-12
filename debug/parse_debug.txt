@@ -1,7 +1,7 @@
-시작: 2026-07-12T03:21:09.385Z
+시작: 2026-07-12T03:30:20.001Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17838264800583924.973298270681
+[RES] 200 login.xml&postfix=1783827035639521.3754363351342
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 8건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":-35100,"NET_SALES_AM
   파싱 성공: 0건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 8건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
@@ -34,4 +34,16 @@ selTodaySalesList: 5건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37556","ITEM_NM":"엔돌핀 프로 5 [S101308-1006, 240]","SALES_AMT":239200,"NET_SALES_AMT":21
   파싱 성공: 3건
-완료: 품번 12개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36539","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 250]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":66000,"ITEM_CD":"18071","ITEM_NM":"프로 파텔라 밴드 3.0 [DA6935-010, L/XL]","SALES_AMT":39600,"NET_SALES_AMT":
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33309","ITEM_NM":"페가수스 42 [IB1873-110, 255]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  파싱 성공: 1건
+완료: 품번 16개
