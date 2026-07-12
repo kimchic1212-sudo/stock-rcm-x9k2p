@@ -1,7 +1,7 @@
-시작: 2026-07-12T06:13:30.256Z
+시작: 2026-07-12T06:21:06.048Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17838368211466600.019858257861
+[RES] 200 login.xml&postfix=17838372776924706.265296948411
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 17건
+selTodaySalesList: 18건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":-35100,"NET_SALES_AM
   파싱 성공: 0건
-메뉴 클릭 후 거래: 17건
+메뉴 클릭 후 거래: 18건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
@@ -82,4 +82,8 @@ selTodaySalesList: 17건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":359000,"ITEM_CD":"32840","ITEM_NM":"알파플라이 3 CM [II7290-100, 265]","SALES_AMT":293100,"NET_SALES_AMT":26
   파싱 성공: 1건
-완료: 품번 28개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21007","ITEM_NM":"보메로 플러스 [HV8154-102, 235]","SALES_AMT":197100,"NET_SALES_AMT":17918
+  파싱 성공: 2건
+완료: 품번 29개
