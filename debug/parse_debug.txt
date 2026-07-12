@@ -1,7 +1,7 @@
-시작: 2026-07-12T03:51:55.223Z
+시작: 2026-07-12T04:00:25.130Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17838283309887285.749350833041
+[RES] 200 login.xml&postfix=17838288344246027.9154913835955
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 11건
+selTodaySalesList: 12건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":-35100,"NET_SALES_AM
   파싱 성공: 0건
-메뉴 클릭 후 거래: 11건
+메뉴 클릭 후 거래: 12건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
@@ -58,4 +58,8 @@ selTodaySalesList: 11건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"33988","ITEM_NM":"라이트웨이트 런 크루 [IB6114-010, M]","SALES_AMT":13200,"NET_SALES_AMT":12000
   파싱 성공: 2건
-완료: 품번 21개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33410","ITEM_NM":"페가수스 42 [IB1881-002, 235]","SALES_AMT":160550,"NET_SALES_AMT":14595
+  파싱 성공: 1건
+완료: 품번 22개
