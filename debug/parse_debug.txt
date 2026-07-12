@@ -1,7 +1,7 @@
-시작: 2026-07-12T07:32:09.430Z
+시작: 2026-07-12T07:40:30.426Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17838415440048742.90598658022
+[RES] 200 login.xml&postfix=17838420427245461.0544774614
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 26건
+selTodaySalesList: 30건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":-35100,"NET_SALES_AM
   파싱 성공: 0건
-메뉴 클릭 후 거래: 26건
+메뉴 클릭 후 거래: 30건
 [RES] 200 selItemSalesList
   items: 7개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
@@ -118,4 +118,20 @@ selTodaySalesList: 26건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21027","ITEM_NM":"보메로 플러스 [HV8154-001, 230]","SALES_AMT":131400,"NET_SALES_AMT":11945
   파싱 성공: 1건
-완료: 품번 37개
+[RES] 200 selItemSalesList
+  items: 4개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":449000,"ITEM_CD":"32202","ITEM_NM":"더 락커 [40002-BK, 265]","SALES_AMT":449000,"NET_SALES_AMT":408182,"VA
+  파싱 성공: 4건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37985","ITEM_NM":"보메로 프리미엄 [HQ2050-104, 250]","SALES_AMT":179400,"NET_SALES_AMT":1630
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36495","ITEM_NM":"클라우드몬스터 3 [3MG10055256, 250]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21029","ITEM_NM":"보메로 플러스 [HV8154-001, 240]","SALES_AMT":131400,"NET_SALES_AMT":11945
+  파싱 성공: 1건
+완료: 품번 39개
