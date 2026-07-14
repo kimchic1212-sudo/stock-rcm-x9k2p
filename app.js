@@ -10242,3 +10242,51 @@ window.addEventListener('DOMContentLoaded', () => {
 
 loadGhConfig(); loadData();
 
+
+
+// ── 공용 비밀번호 게이트 (허브 서버 검증 · 90일 기기 기억) ─────────────
+// 비밀번호는 소스에 없다 — racement-hub 서버(HUB_PASSWORD)에서 검증.
+(function(){
+    const GATE_KEY = 'racement_gate_v1';
+    const GATE_API = 'https://racement-hub.vercel.app/api/inv-gate';
+    if (parseInt(localStorage.getItem(GATE_KEY) || '0') > Date.now()) return;
+
+    function showGate(){
+        const ov = document.createElement('div');
+        ov.id = 'rcGateOverlay';
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FAF8F2;display:flex;align-items:center;justify-content:center;padding:20px;';
+        ov.innerHTML =
+            '<div style="width:100%;max-width:340px;background:#fff;border:2px solid #0A0A0A;border-radius:12px;box-shadow:4px 4px 0 0 #0A0A0A;padding:28px;text-align:center;font-family:Pretendard,-apple-system,sans-serif;">'
+            + '<div style="font-size:34px;margin-bottom:10px;">🔐</div>'
+            + '<div style="font-weight:800;font-size:18px;color:#0A0A0A;">RACEMENT 재고조회</div>'
+            + '<div style="font-size:13px;color:#8A8A8A;margin:6px 0 18px;">매장 공용 비밀번호를 입력하세요</div>'
+            + '<input id="rcGatePw" type="password" placeholder="공용 비밀번호" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #E8E3D5;border-radius:10px;font-size:15px;text-align:center;outline:none;font-weight:600;">'
+            + '<div id="rcGateErr" style="display:none;color:#E11D48;font-size:13px;font-weight:700;margin-top:10px;">비밀번호가 틀렸습니다</div>'
+            + '<button id="rcGateGo" style="width:100%;margin-top:14px;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;">입장</button>'
+            + '</div>';
+        document.body.appendChild(ov);
+        const pw = document.getElementById('rcGatePw');
+        const go = document.getElementById('rcGateGo');
+        const err = document.getElementById('rcGateErr');
+        pw.focus();
+        async function verify(){
+            if (!pw.value) return;
+            go.textContent = '확인 중…'; go.disabled = true; err.style.display = 'none';
+            try {
+                const r = await fetch(GATE_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw.value }) });
+                if (r.ok) {
+                    localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000));
+                    ov.remove();
+                    return;
+                }
+            } catch(e) {}
+            err.style.display = 'block'; pw.value = '';
+            go.textContent = '입장'; go.disabled = false;
+        }
+        go.onclick = verify;
+        pw.onkeydown = e => { if (e.key === 'Enter') verify(); };
+    }
+
+    if (document.body) showGate();
+    else document.addEventListener('DOMContentLoaded', showGate);
+})();
