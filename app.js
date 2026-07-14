@@ -408,31 +408,45 @@ const DEFAULT_GH = {
 
   branch: 'main',
 
-  pat:    ['ghp_G1lhtm','QWovvxsnE7','JbvbQ9EiDnN8Se3NWNLb'].join(''),
-
 };
 
+const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
 
+// Admin 비번 입력 시 허브 서버에서 PAT 발급 (토큰은 소스에 두지 않는다)
+// 성공 시 항상 최신 토큰으로 갱신 → 토큰 교체(rotation) 자동 대응
 
-// Admin 비번 맞으면 PAT 자동 적용 (새 기기에서도 비번만 입력하면 바로 작동)
+async function applyDefaultPatIfNeeded(pwd) {
 
-function applyDefaultPatIfNeeded() {
+    try {
 
-    if (!getPat() && DEFAULT_GH.pat) {
+        const r = await fetch(HUB_TOKEN_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pwd }),
+        });
 
-        setPat(DEFAULT_GH.pat);
-
-        if (!GH.owner) {
-
-            GH.owner  = DEFAULT_GH.owner;
-
-            GH.repo   = DEFAULT_GH.repo;
-
-            GH.branch = DEFAULT_GH.branch;
-
-            saveGhConfig();
-
+        if (r.ok) {
+            const j = await r.json();
+            if (j.pat) setPat(j.pat);
+        } else if (!getPat()) {
+            alert('저장 토큰 발급 실패 — 저장 기능이 제한될 수 있습니다');
         }
+
+    } catch(e) {
+
+        if (!getPat()) alert('네트워크 오류 — 저장 토큰 발급 실패');
+
+    }
+
+    if (!GH.owner) {
+
+        GH.owner  = DEFAULT_GH.owner;
+
+        GH.repo   = DEFAULT_GH.repo;
+
+        GH.branch = DEFAULT_GH.branch;
+
+        saveGhConfig();
 
     }
 
@@ -601,7 +615,7 @@ function loadGhConfig(){
 
 function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); }
 
-function getPat(){ return localStorage.getItem(GH_PAT_KEY) || DEFAULT_GH.pat; }
+function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 
 function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
 
@@ -8371,7 +8385,7 @@ $("#drop").onclick=()=>$("#file").click();
 
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
 
-$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ setAdminSession(); applyDefaultPatIfNeeded(); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ setAdminSession(); applyDefaultPatIfNeeded($("#pwd").value); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
@@ -9560,7 +9574,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 setAdminSession();
 
-                applyDefaultPatIfNeeded();
+                applyDefaultPatIfNeeded(pwdInput.value);
 
                 document.getElementById("authPanel").classList.add("hidden");
 
