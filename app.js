@@ -629,10 +629,19 @@ function setAnthKey(v){ if(v) localStorage.setItem(ANTH_KEY, v); else localStora
 
 function checkPat() {
 
-    if(!getPat()) { alert("⚠️ 설정 탭에서 GitHub 토큰(PAT)을 먼저 등록해주세요."); return false; }
+    if(!getPat()) { alert("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 다시 입력하면 토큰이 재발급됩니다."); return false; }
 
     return true;
 
+}
+
+// PAT가 없을 때(어드민 세션은 유효) 관리자 비밀번호로 토큰 재발급 시도
+async function ensurePatForAdmin() {
+    if(getPat()) return true;
+    const pw = prompt('저장하려면 관리자 비밀번호를 다시 입력해주세요.\n(GitHub 저장 토큰 재발급 — 세션이 만료됐거나 이 기기에서 처음 저장할 때)');
+    if(pw === null) return false;
+    await applyDefaultPatIfNeeded(String(pw).trim());
+    return !!getPat();
 }
 
 
@@ -1626,7 +1635,7 @@ window._promptStockOverride = (code, size) => {
 
 window._setStockOverride = async (code, size, actual) => {
     if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
-    if(!checkPat()) return false;
+    if(!getPat() && !(await ensurePatForAdmin())) { showToast('저장 토큰이 없어 저장하지 못했습니다. ADMIN 재로그인 후 다시 시도하세요.', null, 'error'); return false; }
     const sz = String(size).trim();
     const p = PRODUCTS.find(x => x.품번 === code);
     const s = p && p.sizes.find(x => String(x.size).trim() === sz);
@@ -1642,7 +1651,7 @@ window._setStockOverride = async (code, size, actual) => {
 
 window._clearStockOverride = async (code, size) => {
     if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
-    if(!checkPat()) return false;
+    if(!getPat() && !(await ensurePatForAdmin())) { showToast('저장 토큰이 없어 저장하지 못했습니다. ADMIN 재로그인 후 다시 시도하세요.', null, 'error'); return false; }
     const sz = String(size).trim();
     if(!STOCK_OVERRIDES[code] || STOCK_OVERRIDES[code][sz]===undefined) return false;
     const prev = STOCK_OVERRIDES[code][sz];
