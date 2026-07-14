@@ -1,7 +1,7 @@
-시작: 2026-07-14T06:54:22.632Z
+시작: 2026-07-14T07:01:10.985Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17840120728504483.700657202257
+[RES] 200 login.xml&postfix=17840124842053395.674612767705
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 5건
+selTodaySalesList: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"34434","ITEM_NM":"엔돌핀 프로 5 [S21064-140, 250]","SALES_AMT":269100,"NET_SALES_AMT":2446
   파싱 성공: 1건
-메뉴 클릭 후 거래: 5건
+메뉴 클릭 후 거래: 6건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29836","ITEM_NM":"마인드 001 [HQ4307-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -34,4 +34,8 @@ selTodaySalesList: 5건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33201","ITEM_NM":"보메로 플러스 [HV8154-012, 240]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26614","ITEM_NM":"아디제로 EVO SL [JP7149, 260]","SALES_AMT":188100,"NET_SALES_AMT":17100
+  파싱 성공: 2건
+완료: 품번 7개
