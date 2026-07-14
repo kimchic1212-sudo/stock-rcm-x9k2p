@@ -1,7 +1,7 @@
-시작: 2026-07-14T06:18:16.197Z
+시작: 2026-07-14T06:19:56.502Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17840099080157163.241735157116
+[RES] 200 login.xml&postfix=17840100087492751.7999717537114
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 3건
+selTodaySalesList: 4건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"34434","ITEM_NM":"엔돌핀 프로 5 [S21064-140, 250]","SALES_AMT":269100,"NET_SALES_AMT":2446
   파싱 성공: 1건
-메뉴 클릭 후 거래: 3건
+메뉴 클릭 후 거래: 4건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29836","ITEM_NM":"마인드 001 [HQ4307-001, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -26,4 +26,8 @@ selTodaySalesList: 3건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":88000,"ITEM_CD":"15217","ITEM_NM":"릴랙스 슬라이드 6.0 [L47740900, 240]","SALES_AMT":79200,"NET_SALES_AMT":720
   파싱 성공: 1건
-완료: 품번 3개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319200,"ITEM_CD":"31890","ITEM_NM":"001A [001A-ASTRAL-M, 270]","SALES_AMT":319200,"NET_SALES_AMT":29018
+  파싱 성공: 1건
+완료: 품번 4개
