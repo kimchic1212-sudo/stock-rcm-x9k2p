@@ -629,7 +629,17 @@ function setAnthKey(v){ if(v) localStorage.setItem(ANTH_KEY, v); else localStora
 
 function checkPat() {
 
-    if(!getPat()) { alert("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 다시 입력하면 토큰이 재발급됩니다."); return false; }
+    if(!getPat()) {
+        if(checkAdminSession() && !window._patPrompting) {
+            // 어드민인데 토큰 없음 → 비번 재입력으로 자동 재발급 유도 후 재시도 안내
+            window._patPrompting = true;
+            ensurePatForAdmin().then(ok => { if(ok) showToast('✓ 토큰 재발급 완료 — 저장을 한 번 더 눌러주세요.'); })
+                .finally(() => { window._patPrompting = false; });
+        } else if(!checkAdminSession()) {
+            alert("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 입력해주세요.");
+        }
+        return false;
+    }
 
     return true;
 
