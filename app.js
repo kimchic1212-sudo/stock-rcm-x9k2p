@@ -415,7 +415,7 @@ const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
 // Admin 비번 입력 시 허브 서버에서 PAT 발급 (토큰은 소스에 두지 않는다)
 // 성공 시 항상 최신 토큰으로 갱신 → 토큰 교체(rotation) 자동 대응
 
-async function applyDefaultPatIfNeeded(pwd) {
+async function applyDefaultPatIfNeeded(pwd, silent) {
 
     try {
 
@@ -428,13 +428,13 @@ async function applyDefaultPatIfNeeded(pwd) {
         if (r.ok) {
             const j = await r.json();
             if (j.pat) setPat(j.pat);
-        } else if (!getPat()) {
+        } else if (!getPat() && !silent) {
             alert('저장 토큰 발급 실패 — 저장 기능이 제한될 수 있습니다');
         }
 
     } catch(e) {
 
-        if (!getPat()) alert('네트워크 오류 — 저장 토큰 발급 실패');
+        if (!getPat() && !silent) alert('네트워크 오류 — 저장 토큰 발급 실패');
 
     }
 
@@ -645,12 +645,16 @@ function checkPat() {
 
 }
 
-// PAT가 없을 때(어드민 세션은 유효) 관리자 비밀번호로 토큰 재발급 시도
+// PAT가 없을 때(어드민 세션은 유효) 토큰 자동 재발급
 async function ensurePatForAdmin() {
     if(getPat()) return true;
-    const pw = prompt('저장하려면 관리자 비밀번호를 다시 입력해주세요.\n(GitHub 저장 토큰 재발급 — 세션이 만료됐거나 이 기기에서 처음 저장할 때)');
+    // 1차: 저장된 관리자 비번으로 허브에서 자동 발급 (프롬프트 없음)
+    try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {}
+    if(getPat()) return true;
+    // 2차: 자동 실패 시에만 수동 입력
+    const pw = prompt('저장하려면 관리자 비밀번호를 입력해주세요.');
     if(pw === null) return false;
-    await applyDefaultPatIfNeeded(String(pw).trim());
+    try { await applyDefaultPatIfNeeded(String(pw).trim()); } catch(e) {}
     return !!getPat();
 }
 
@@ -1388,6 +1392,9 @@ function showSkeletonCards(n = 6) {
 
 
 async function loadData(force = false){
+
+  // 어드민 세션인데 저장 토큰이 없으면 미리 자동 발급 (저장 시 끊김 방지)
+  if(checkAdminSession() && !getPat()) { applyDefaultPatIfNeeded(ADMIN_PWD, true).catch(()=>{}); }
 
   // 캐시 없거나 강제 갱신이면 스켈레톤 표시
 
