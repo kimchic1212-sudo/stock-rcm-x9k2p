@@ -2228,17 +2228,25 @@ async function commitInventoryToGitHub(rows, meta) {
 
     if(sha) payload.sha = sha;
 
-    const r2 = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(payload) });
-
-    if(!r2.ok) {
-
+    // 409/422(SHA 충돌·read-after-write 지연) 시 최신 sha로 재시도 (엑셀은 전체 교체라 재병합 불필요)
+    let r2;
+    for(let attempt = 0; attempt < 4; attempt++) {
+        r2 = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(payload) });
+        if(r2.ok) return await r2.json();
+        if((r2.status === 409 || r2.status === 422) && attempt < 3) {
+            await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+            try {
+                const rr = await fetch(apiBase + "?ref=" + encodeURIComponent(GH.branch) + "&t=" + Date.now(), { headers });
+                if(rr.ok) { const jj = await rr.json(); payload.sha = jj.sha; }
+                else if(rr.status === 404) { delete payload.sha; }
+            } catch(e) {}
+            continue;
+        }
         const j = await r2.json().catch(() => ({}));
-
         throw new Error((j.message || "commit 실패") + " (status " + r2.status + ")");
-
     }
-
-    return await r2.json();
+    const jf = await r2.json().catch(() => ({}));
+    throw new Error((jf.message || "commit 실패(충돌 반복)") + " (status " + (r2 ? r2.status : '?') + ")");
 
 }
 
@@ -8337,9 +8345,9 @@ $("#file").onchange = async (e) => {
 
             RAW = rows; CURRENT_META = meta; 
 
-            _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()});
+            _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, _timestamp: Date.now()});
 
-            applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
+            applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
 
             alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
 
@@ -10158,9 +10166,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
                     RAW = rows; CURRENT_META = meta; 
 
-                    _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, _timestamp: Date.now()});
+                    _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, _timestamp: Date.now()});
 
-                    applyMeta(CURRENT_META); rebuildIndex(); render(); setupSearchAutocomplete(); setupQuickActionBar(); 
+                    applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); 
 
                     document.getElementById("adminModal").classList.add("hidden");
 
