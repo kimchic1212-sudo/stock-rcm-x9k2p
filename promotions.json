@@ -1,1 +1,1003 @@
-{}
+{
+  "promotions": [
+    {
+      "id": "1784088131048",
+      "meta": {
+        "name": "클리어런스세일 제품 리스트(7월)",
+        "period": ""
+      },
+      "items": {
+        "N2ZTR02-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5661800318273023,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR02-006": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5661800318273023,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR02-007": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5661800318273023,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR02-010": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5661800318273023,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR02-005": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5281256486542586,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR02-013": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5281256486542586,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR02-014": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5281256486542586,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ZKSM1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.46557649010546276,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTRW1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.45585300964416364,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ARC03-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.44055944055944063,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ZKGM2-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216495,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR25-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216495,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR25-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216495,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTR25-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216495,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTRG1-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216495,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2ZTRG1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216495,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ZKGM1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216494,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ZKGM1-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216494,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ZKGM1-004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216494,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ZKGM1-005": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4329896907216494,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ARV02-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ARS02-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ARS02-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1ARS03-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CMRS2-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CWRS2-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NC4SH1M-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NC4SH1W-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CWRT2-004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CWRT2-006": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CMTS2-007": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NC2TS1M-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NC2TS1M-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NC2TS1W-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NC2TS1W-004": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2AMS01-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2AMS02-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2AMS02-003": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CMWJ1-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N1CMWJ1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2CMAT1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3939393939393939,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NS4CD1M-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3699885452462771,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NS4CD1M-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3699885452462771,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NS4CD1W-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.3699885452462771,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2CMAF1-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.368421052631579,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2CWTB1-001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.36842105263157887,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "N2CWTB1-002": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.36842105263157887,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "MO 3D RECOVERY SLIDE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "MO Big Logo Black": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "MO Big Logo Red": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "MO Flipflop Navy": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "MO Slide Navy": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "11000-00001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "11000-91001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "11006-00A04": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "11006-00A08": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "11146-00001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "11146-11401": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "12074-00000": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "12076-00000": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "12076-91000": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "31000-00001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "34001-08F02": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "40002-AW": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "40002-BK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "40002-FA-SE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "40002-SH-SE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.19999999999999996,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NMRSI31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NMRSS31C007": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NMRSS31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NWRSI31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "NWRSS31C008": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "DFNXM33076CLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "DFNXM33076MYG": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "DFNXW33076WW2": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "DFNXM33082AAE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.5,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "DFOXM33063ASN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4545454545454546,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85NC923": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85ND923": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85NJ330": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85NJ921": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85NJ923": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85NK336": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85Q9001": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85RG000": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "AL0A85RH580": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "ALOA85PE480": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K32001APS34BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K32002APS32BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K34003EHG60BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K52001ATN12-BLK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K52001ATN12-MBR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K52001ATN12-YGN": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "K52001ATN24-LGR": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.4,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "PRO MARATHON SOCKS V2.0-BLACK.WHITE": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.30000000000000004,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "PRO MARATHON SOCKS V2.0-WHITE.BLACK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.30000000000000004,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "PRO RACING SOCKS V4.0 RUN HIGH-SUGAR.STORM": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.30000000000000004,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "PRO RACING SOCKS V4.0 RUN HIGH-WHITE.BLACK": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.30000000000000004,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        },
+        "PRO RACING SOCKS V4.0 RUN HIGH-WHITE.FLUO RED": {
+          "targetCat": "",
+          "weeklyPrice": null,
+          "weeklyRate": 0,
+          "finalPrice": null,
+          "finalRate": 0.30000000000000004,
+          "eventPrice": null,
+          "eventRate": 0,
+          "couponRate": 0
+        }
+      }
+    }
+  ]
+}
