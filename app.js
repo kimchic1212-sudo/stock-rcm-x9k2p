@@ -286,7 +286,7 @@ document.head.appendChild(style);
 
 
 
-const ADMIN_PWD = "1212";
+const ADMIN_PWD = "4885";
 
 const SESSION_FLAG = "racement_admin_session";
 
@@ -7898,37 +7898,47 @@ function openDetail(p){
 
           const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${REQUESTS_PATH}`;
 
-          let sha = null; let oldData = [];
-
-          try { 
-
-              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
-
-              if(r.ok){ const j=await r.json(); sha=j.sha; oldData = JSON.parse(decodeURIComponent(escape(atob(j.content)))); } 
-
-          }catch(e){}
-
           const d = new Date();
 
           const shortDate = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
-          const uniqueId = "memo_" + Date.now(); 
+          const newMemo = { id: "memo_" + Date.now(), code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text };
 
-          oldData.push({ id: uniqueId, code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text });
+          // 서버 최신 requests.json을 읽어 append 후 PUT.
+          // 로드 실패 시 저장 중단(빈 배열로 기존 메모 전체 덮어쓰기 방지),
+          // 409/422(SHA 충돌) 시 최신본 재읽기 후 재append — 다른 기기 메모 보존.
+          let oldData = null;
 
-          const body = { message:"add memo", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch };
+          for (let attempt = 0; attempt < 3; attempt++) {
 
-          if(sha) body.sha = sha;
+              const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
 
-          let _memoRes = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+              if(!r.ok && r.status !== 404) throw new Error('메모 로드 실패 ' + r.status);
 
-          // PUT 충돌(409/422) 시 최신 SHA로 1회 retry
-          if(_memoRes.status === 409 || _memoRes.status === 422) {
-              const r2 = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
-              if(r2.ok){ const j2=await r2.json(); body.sha=j2.sha; }
-              _memoRes = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+              let serverData = [], sha;
+
+              if(r.ok) {
+                  const j = await r.json(); sha = j.sha;
+                  let _ok = false;
+                  try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g,''))))); _ok = true; } catch(e2) {}
+                  if(!_ok || !Array.isArray(serverData)) throw new Error('기존 메모 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+              }
+
+              if(!serverData.some(m => m.id === newMemo.id)) serverData.push(newMemo);
+
+              const body = { message:"add memo", content: utf8ToB64(JSON.stringify(serverData, null, 2)), branch: GH.branch, ...(sha && {sha}) };
+
+              const put = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+              if(put.status === 409 || put.status === 422) continue;
+
+              if(!put.ok) throw new Error('저장 실패 ' + put.status);
+
+              oldData = serverData; break;
+
           }
-          if(!_memoRes.ok) throw new Error('저장 실패 ' + _memoRes.status);
+
+          if(!oldData) throw new Error('저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
 
           MEMOS = oldData; CURRENT_PRODUCT.hasMemo = true;
 
@@ -7936,7 +7946,7 @@ function openDetail(p){
 
           msg.style.color="green"; msg.textContent="✓ 저장 완료!"; $("#memoText").value = ""; render(); openDetail(p);
 
-      } catch(e) { msg.style.color="red"; msg.textContent="메모 저장 실패!"; }
+      } catch(e) { msg.style.color="red"; msg.textContent = (e && e.message && e.message.indexOf("덮어쓰기")>=0) ? e.message : "메모 저장 실패!"; }
 
   };
 
