@@ -1,7 +1,7 @@
-시작: 2026-07-15T10:16:31.409Z
+시작: 2026-07-15T11:49:51.865Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17841106053129309.228314139613
+[RES] 200 login.xml&postfix=17841162036185066.1636485635945
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"30717","ITEM_NM":"가이드 19 [S21059-103, 255]","SALES_AMT":161100,"NET_SALES_AMT":146455
   파싱 성공: 3건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26592","ITEM_NM":"아디제로 EVO SL [JH6206, 255]","SALES_AMT":188100,"NET_SALES_AMT":17100
@@ -50,4 +50,8 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT 롱슬리브 [IQ5849-100, L]","SALES_AMT":165000,"NET_SAL
   파싱 성공: 1건
-완료: 품번 15개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36538","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 245]","SALES_AMT":217550,"NET_SALES_AMT":19
+  파싱 성공: 1건
+완료: 품번 16개
