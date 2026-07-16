@@ -55,7 +55,7 @@
 
   .copyable { cursor: pointer; transition: opacity 0.1s; display:inline-flex; align-items:center; gap:4px; padding: 2px 6px -ml-1; border-radius: 6px; }
   .copyable:active { opacity: 0.5; background: #eee; }
-  .copyable:hover { color: #2563EB; background: #f0f4ff; }
+  .copyable:hover { color: #c2410c; background: #fff0e9; }
   
   /* 즐겨찾기 북마크 아이콘으로 크기 키움 */
   .fav-btn { padding: 8px; border-radius: 8px; color: #A1A1AA; transition: all 0.2s; cursor:pointer; }
@@ -89,7 +89,7 @@
       <div class="min-w-0 leading-tight">
         <div class="mono text-[10px] tracking-[.18em] text-[color:var(--muted)] hidden sm:flex items-center gap-2">
           HAEUNDAE · INVENTORY
-          <span id="appVersionBadge" class="px-1.5 py-0.5 rounded text-[9px] font-black bg-indigo-100 text-indigo-500" style="letter-spacing:0.05em;"></span>
+          <span id="appVersionBadge" class="px-1.5 py-0.5 rounded text-[9px] font-black" style="letter-spacing:0.05em;background:#fff0e9;color:#c2410c;"></span>
         </div>
         <h1 class="text-sm sm:text-lg font-extrabold truncate"><span class="sm:hidden">해운대</span><span class="hidden sm:inline">해운대 재고조회</span></h1>
       </div>
@@ -98,7 +98,7 @@
       <button id="allMemosBtn" class="chip mono text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200"><i data-lucide="bell-ring" class="w-3.5 h-3.5"></i><span class="hidden sm:inline"> 오늘의 메모</span></button>
       <button id="showroomBtn" class="chip mono text-[11px]"><i data-lucide="eye" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">쇼룸</span></button>
       <button id="darkModeBtn" class="chip mono text-[11px]">🌙</button>
-      <span id="_syncBadge" class="hidden sm:inline" style="font-size:10px;color:#6366f1;font-weight:700;opacity:0.5;transition:opacity 1s;white-space:nowrap;"></span>
+      <span id="_syncBadge" class="hidden sm:inline" style="font-size:10px;color:#ff5a1f;font-weight:700;opacity:0.5;transition:opacity 1s;white-space:nowrap;"></span>
       <button id="refreshBtn" class="chip mono text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
       <button id="adminBtn" class="brutal mono font-black px-2.5 sm:px-3 py-2 text-sm bg-[color:var(--surface)]">ADMIN</button>
     </div>
@@ -185,7 +185,7 @@
           <option value="promoCouponRateDesc">🏷️ 쿠폰 할인율 높은 순</option>
         </select>
         <div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-1">
-          <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#dbeafe;color:#1d4ed8;font-weight:700;border:none;cursor:pointer;">KR</button>
+          <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#fff0e9;color:#c2410c;font-weight:700;border:none;cursor:pointer;">KR</button>
           <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
           <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
         </div>
@@ -307,7 +307,7 @@
   </div>
 </div>
 
-<script src="./app.js?v=26071601"></script>
+<script src="./app.js?v=26071602"></script>
 
 <!-- 맨 위로 버튼 -->
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"
