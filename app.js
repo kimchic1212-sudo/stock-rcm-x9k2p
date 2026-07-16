@@ -367,8 +367,8 @@ window.setSizeUnit = function(unit) {
         const btn = document.getElementById('sut-' + u);
         if(!btn) return;
         const on = u === unit;
-        btn.style.background = on ? (isDark ? '#1e3a5f' : '#dbeafe') : 'transparent';
-        btn.style.color = on ? (isDark ? '#93c5fd' : '#1d4ed8') : (isDark ? '#6b7280' : '#9ca3af');
+        btn.style.background = on ? (isDark ? '#3b1a10' : '#fff0e9') : 'transparent';
+        btn.style.color = on ? (isDark ? '#ff8a5c' : '#c2410c') : (isDark ? '#6b7280' : '#9ca3af');
         btn.style.fontWeight = on ? '700' : '500';
     });
     render();
