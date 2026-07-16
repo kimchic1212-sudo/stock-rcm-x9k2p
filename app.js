@@ -286,7 +286,7 @@ document.head.appendChild(style);
 
 
 
-const ADMIN_PWD = "4885";
+const ADMIN_PWD = "1212";
 
 const SESSION_FLAG = "racement_admin_session";
 
@@ -1393,8 +1393,8 @@ function showSkeletonCards(n = 6) {
 
 async function loadData(force = false){
 
-  // 어드민 세션인데 저장 토큰이 없으면 미리 자동 발급 (저장 시 끊김 방지)
-  if(checkAdminSession() && !getPat()) { applyDefaultPatIfNeeded(ADMIN_PWD, true).catch(()=>{}); }
+  // 어드민 세션이면 로드 시 항상 최신 토큰 재발급 (옛/만료 토큰이 남아있어도 교체 → 401 방지)
+  if(checkAdminSession()) { applyDefaultPatIfNeeded(ADMIN_PWD, true).catch(()=>{}); }
 
   // 캐시 없거나 강제 갱신이면 스켈레톤 표시
 
@@ -2241,6 +2241,9 @@ window.showErpSyncModal = function() {
 async function commitInventoryToGitHub(rows, meta) {
 
     if(!GH.owner || !GH.repo) throw new Error("저장소 설정 없음 (ADMIN > API 설정 확인)");
+
+    // 업로드 직전 항상 최신 토큰 확보 (옛/만료 토큰으로 인한 401 방지)
+    if(checkAdminSession()) { try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {} }
 
     const pat = getPat();
 
