@@ -10264,13 +10264,13 @@ loadGhConfig(); loadData();
     function showGate(){
         const ov = document.createElement('div');
         ov.id = 'rcGateOverlay';
-        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FAF8F2;display:flex;align-items:center;justify-content:center;padding:20px;';
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f2f3f5;display:flex;align-items:center;justify-content:center;padding:20px;';
         ov.innerHTML =
             '<div style="width:100%;max-width:340px;background:#fff;border:2px solid #0A0A0A;border-radius:12px;box-shadow:4px 4px 0 0 #0A0A0A;padding:28px;text-align:center;font-family:Pretendard,-apple-system,sans-serif;">'
             + '<div style="font-size:34px;margin-bottom:10px;">🔐</div>'
             + '<div style="font-weight:800;font-size:18px;color:#0A0A0A;">RACEMENT 재고조회</div>'
             + '<div style="font-size:13px;color:#8A8A8A;margin:6px 0 18px;">매장 공용 비밀번호를 입력하세요</div>'
-            + '<input id="rcGatePw" type="password" placeholder="공용 비밀번호" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #E8E3D5;border-radius:10px;font-size:15px;text-align:center;outline:none;font-weight:600;">'
+            + '<input id="rcGatePw" type="password" placeholder="공용 비밀번호" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #e8eaef;border-radius:10px;font-size:15px;text-align:center;outline:none;font-weight:600;">'
             + '<div id="rcGateErr" style="display:none;color:#E11D48;font-size:13px;font-weight:700;margin-top:10px;">비밀번호가 틀렸습니다</div>'
             + '<button id="rcGateGo" style="width:100%;margin-top:14px;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;">입장</button>'
             + '</div>';
