@@ -1,7 +1,7 @@
-시작: 2026-07-15T23:34:07.031Z
+시작: 2026-07-16T00:59:45.855Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17841584583476167.7372796964055
+[RES] 200 login.xml&postfix=17841635968111310.68345072623
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,46 +12,6 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 10건
-[RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"30717","ITEM_NM":"가이드 19 [S21059-103, 255]","SALES_AMT":161100,"NET_SALES_AMT":146455
-  파싱 성공: 3건
-메뉴 클릭 후 거래: 10건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26592","ITEM_NM":"아디제로 EVO SL [JH6206, 255]","SALES_AMT":188100,"NET_SALES_AMT":17100
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":158100,"ITEM_CD":"34296","ITEM_NM":"글리세린 GTS 23 와이드 [1105032E020, 265]","SALES_AMT":158100,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37672","ITEM_NM":"엔돌핀 아주라 [S101329-1041, 270]","SALES_AMT":170100,"NET_SALES_AMT":154
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26596","ITEM_NM":"아디제로 EVO SL [JH6206, 275]","SALES_AMT":188100,"NET_SALES_AMT":17100
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"27350","ITEM_NM":"아디365 브리즈 티 [JZ7684, M]","SALES_AMT":45000,"NET_SALES_AMT":40909,"VA
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"30154","ITEM_NM":"본디 9 와이드 [1162013-CYLT, 275]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 6개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29255","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 6건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":165000,"ITEM_CD":"36393","ITEM_NM":"ACG 래디컬 에어플로우 NXT 롱슬리브 [IQ5849-100, L]","SALES_AMT":165000,"NET_SAL
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36538","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 245]","SALES_AMT":217550,"NET_SALES_AMT":19
-  파싱 성공: 1건
-완료: 품번 16개
+selTodaySalesList: 0건
+메뉴 클릭 후 거래: 0건
+완료: 품번 0개
