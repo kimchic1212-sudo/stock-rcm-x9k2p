@@ -1411,15 +1411,24 @@ async function loadData(force = false){
       // FAVS GitHub 비동기 로드 (기기 간 즐겨찾기 동기화)
       fetchGithubJson(FAVS_PATH).then(d=>{if(Array.isArray(d)){FAVS=d;localStorage.setItem('FAVS',JSON.stringify(FAVS));render();}}).catch(()=>{});
 
-      // DP가 비어있으면(잘못된 캐시) API로 복구 후 재렌더 — 체크 사라져 보이는 문제 방지
-      if(!DISPLAY_ITEMS || Object.keys(DISPLAY_ITEMS).length === 0) {
-          fetchGithubJson(DISPLAY_PATH).then(d=>{ if(d && typeof d==='object' && Object.keys(d).length>0){ DISPLAY_ITEMS = d; if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn(); render(); } }).catch(()=>{});
-      }
+      // DP: 캐시로 먼저 그린 뒤 백그라운드로 최신을 받아 반영 (다른 기기 체크가 60초 캐시에 막히지 않게)
+      fetchGithubJson(DISPLAY_PATH).then(d=>{
+          if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(DISPLAY_ITEMS)) {
+              DISPLAY_ITEMS = d;
+              try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+              if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn();
+              render();
+          }
+      }).catch(()=>{});
 
-      // 재고보정이 비어있으면 API로 복구
-      if(!STOCK_OVERRIDES || Object.keys(STOCK_OVERRIDES).length === 0) {
-          fetchGithubJson(STOCK_OVERRIDES_PATH).then(d=>{ if(d && typeof d==='object' && Object.keys(d).length>0){ STOCK_OVERRIDES = d; _recomputeStock(); render(); } }).catch(()=>{});
-      }
+      // 재고보정: 동일하게 백그라운드 동기화
+      fetchGithubJson(STOCK_OVERRIDES_PATH).then(d=>{
+          if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(STOCK_OVERRIDES)) {
+              STOCK_OVERRIDES = d;
+              try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.stockOverrides = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+              _recomputeStock(); render();
+          }
+      }).catch(()=>{});
 
       const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
 
@@ -1468,13 +1477,22 @@ async function loadData(force = false){
 
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
 
-      if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
+      // 기기 간 공유되고 자주 바뀌는 데이터(기획전·DP·RT·메모·재고보정)는 GitHub API 우선 읽기.
+      // Pages는 저장 후 1~2분 배포 지연 + CDN 캐시 때문에 다른 기기 변경이 안 보임 → API로 즉시 동기화.
+      // (PAT 없는 기기는 null 반환 → 아래 Pages 응답으로 자동 폴백)
+      const [promoApiData, _diApi, _trApi, _memoApi, _soApi] = await Promise.all([
+          fetchGithubJson(PROMOTIONS_PATH),
+          fetchGithubJson(DISPLAY_PATH),
+          fetchGithubJson(TRANSFERS_PATH),
+          fetchGithubJson(REQUESTS_PATH),
+          fetchGithubJson(STOCK_OVERRIDES_PATH),
+      ]);
 
-      if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+      if(Array.isArray(_memoApi)) MEMOS = _memoApi;
+      else if(memoRes && memoRes.ok) MEMOS = await memoRes.json(); else MEMOS = [];
 
-      // 기획전: GitHub API 직접 읽기 (Pages 배포 대기 없이 즉시 반영)
-
-      const promoApiData = await fetchGithubJson(PROMOTIONS_PATH);
+      if(Array.isArray(_trApi)) TRANSFERS = _trApi;
+      else if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
 
       if(promoApiData !== null) PROMOTIONS = promoApiData;
 
@@ -1486,21 +1504,13 @@ async function loadData(force = false){
 
       if(sdRes && sdRes.ok) SALES_DEDUCTIONS = await sdRes.json(); else SALES_DEDUCTIONS = null;
 
-      if(diRes && diRes.ok) { try { DISPLAY_ITEMS = await diRes.json(); } catch(e) { DISPLAY_ITEMS = {}; } } else DISPLAY_ITEMS = {};
+      if(_diApi && typeof _diApi === 'object') DISPLAY_ITEMS = _diApi;
+      else if(diRes && diRes.ok) { try { DISPLAY_ITEMS = await diRes.json(); } catch(e) { DISPLAY_ITEMS = {}; } }
+      else DISPLAY_ITEMS = {};
 
-      // DP 데이터: Pages 로드 실패/빈값이면 GitHub API로 폴백 (체크가 사라져 보이는 문제 방지)
-      if(!DISPLAY_ITEMS || typeof DISPLAY_ITEMS !== 'object' || Object.keys(DISPLAY_ITEMS).length === 0) {
-          const _diApi = await fetchGithubJson(DISPLAY_PATH);
-          if(_diApi && typeof _diApi === 'object' && Object.keys(_diApi).length > 0) DISPLAY_ITEMS = _diApi;
-      }
-
-      if(soRes && soRes.ok) { try { STOCK_OVERRIDES = await soRes.json(); } catch(e) { STOCK_OVERRIDES = {}; } } else STOCK_OVERRIDES = {};
-
-      // 재고보정: Pages 로드 실패/빈값이면 GitHub API로 폴백
-      if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object' || Object.keys(STOCK_OVERRIDES).length === 0) {
-          const _soApi = await fetchGithubJson(STOCK_OVERRIDES_PATH);
-          if(_soApi && typeof _soApi === 'object') STOCK_OVERRIDES = _soApi;
-      }
+      if(_soApi && typeof _soApi === 'object') STOCK_OVERRIDES = _soApi;
+      else if(soRes && soRes.ok) { try { STOCK_OVERRIDES = await soRes.json(); } catch(e) { STOCK_OVERRIDES = {}; } }
+      else STOCK_OVERRIDES = {};
 
 
 
@@ -1795,11 +1805,25 @@ async function loadSalesOnly() {
 
   try {
 
-    // 기획전: API에서 직접 읽어 즉시 반영
+    // 기획전·DP·재고보정: API에서 직접 읽어 즉시 반영 (앱을 켜둔 기기도 자동 동기화)
 
-    const promoFresh = await fetchGithubJson(PROMOTIONS_PATH);
+    const [promoFresh, _dpFresh, _soFresh] = await Promise.all([
+        fetchGithubJson(PROMOTIONS_PATH),
+        fetchGithubJson(DISPLAY_PATH),
+        fetchGithubJson(STOCK_OVERRIDES_PATH),
+    ]);
 
     if(promoFresh !== null) PROMOTIONS = promoFresh;
+
+    let _syncChanged = false;
+    if(_dpFresh && typeof _dpFresh === 'object' && JSON.stringify(_dpFresh) !== JSON.stringify(DISPLAY_ITEMS)) { DISPLAY_ITEMS = _dpFresh; _syncChanged = true; }
+    if(_soFresh && typeof _soFresh === 'object' && JSON.stringify(_soFresh) !== JSON.stringify(STOCK_OVERRIDES)) { STOCK_OVERRIDES = _soFresh; _syncChanged = true; }
+    if(_syncChanged) {
+        try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c.stockOverrides = STOCK_OVERRIDES; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+        _recomputeStock();
+        if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn();
+        render();
+    }
 
 
 
@@ -1821,13 +1845,9 @@ async function loadSalesOnly() {
 
     clearSalesCache();
 
-    // ERP 원본 재고 복원 후 차감 순서대로 재계산
+    // ERP 원본 재고 복원 후 차감 + 실재고 보정까지 순서대로 재계산
 
-    rebuildIndex();
-
-    applyErpDeductions();
-
-    applyPosSalesDeductions();
+    _recomputeStock();
 
     render();
 
@@ -8493,7 +8513,7 @@ window.renderSalesHistoryAdmin = () => {
 
                 SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY); 
 
-                rebuildIndex(); render(); window.renderSalesHistoryAdmin();
+                _recomputeStock(); render(); window.renderSalesHistoryAdmin();
 
                 alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
 
@@ -8671,7 +8691,7 @@ window.renderSalesHistoryAdmin = () => {
 
                     SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY); 
 
-                    rebuildIndex(); render(); window.renderSalesHistoryAdmin();
+                    _recomputeStock(); render(); window.renderSalesHistoryAdmin();
 
                     alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!`);
 
@@ -8799,7 +8819,7 @@ window.renderPromoAdmin = () => {
 
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
 
-                rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+                _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
 
                 alert(`"${pName}" 기획전이 종료되었습니다.`);
 
@@ -8995,7 +9015,7 @@ window.renderPromoAdmin = () => {
 
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
 
-                rebuildIndex(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+                _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
 
                 alert(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
 
@@ -9083,7 +9103,7 @@ window.renderSalesAdmin = () => {
 
                     SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY); 
 
-                    rebuildIndex(); render(); window.renderSalesAdmin();
+                    _recomputeStock(); render(); window.renderSalesAdmin();
 
                     alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
 
@@ -10170,7 +10190,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                     sessionStorage.removeItem(CACHE_KEY);
 
-                    rebuildIndex(); render(); window.renderSalesAdmin();
+                    _recomputeStock(); render(); window.renderSalesAdmin();
 
                     alert(`✅ ${Object.keys(newEntries).length}개 가이드가 성공적으로 등록되었습니다!`);
 
