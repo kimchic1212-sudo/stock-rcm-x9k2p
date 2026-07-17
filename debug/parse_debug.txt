@@ -1,7 +1,7 @@
-시작: 2026-07-16T23:30:56.400Z
+시작: 2026-07-17T01:02:25.335Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17842446675702889.466833444043
+[RES] 200 login.xml&postfix=17842501573047630.896792121408
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,54 +12,6 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 12건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36537","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 240]","SALES_AMT":183200,"NET_SALES_AMT":16
-  파싱 성공: 1건
-메뉴 클릭 후 거래: 12건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36536","ITEM_NM":"클라우드몬스터 3 [3WG10035259, 235]","SALES_AMT":217550,"NET_SALES_AMT":19
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33202","ITEM_NM":"보메로 플러스 [HV8154-012, 245]","SALES_AMT":208050,"NET_SALES_AMT":18913
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33201","ITEM_NM":"보메로 플러스 [HV8154-012, 240]","SALES_AMT":208050,"NET_SALES_AMT":18913
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29236","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 280]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29255","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 270]","SALES_AMT":217550,"NET_SALES_AMT":19
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49900,"ITEM_CD":"13894","ITEM_NM":"애슬레틱스 티셔츠 [MT41253_MEW, M]","SALES_AMT":44910,"NET_SALES_AMT":40827,
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21417","ITEM_NM":"보메로 플러스 [HV8150-003, 255]","SALES_AMT":131400,"NET_SALES_AMT":11945
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29234","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"29642","ITEM_NM":"클라우드서퍼 넥스트 [3ME30024476, 260]","SALES_AMT":179550,"NET_SALES_AMT":1
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":25000,"ITEM_CD":"36126","ITEM_NM":"러닝 클라이마쿨 헤드 밴드 [KR8955, 1SIZE]","SALES_AMT":23750,"NET_SALES_AMT":21
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33292","ITEM_NM":"페가수스 42 [IB1873-003, 275]","SALES_AMT":143650,"NET_SALES_AMT":13059
-  파싱 성공: 1건
-완료: 품번 10개
+selTodaySalesList: 0건
+메뉴 클릭 후 거래: 0건
+완료: 품번 0개
