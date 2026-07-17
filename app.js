@@ -1578,7 +1578,9 @@ async function saveDisplayItems() {
 
     if (sha) body.sha = sha;
 
-    await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const _put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+    if (!_put.ok) throw new Error("DP 저장 실패 (" + _put.status + ")");
 
     // 캐시 갱신
 
@@ -1714,25 +1716,46 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 async function toggleDP(code, size) {
 
-  const now = new Date().toISOString().split('T')[0];
+  const sz = String(size).trim();
+  const today = new Date().toISOString().split('T')[0];
+  // 사용자가 화면에서 본 상태 기준 의도 (등록 vs 해제)
+  const wantAdd = !(DISPLAY_ITEMS[code] && DISPLAY_ITEMS[code][sz]);
+  const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
 
-  if (!DISPLAY_ITEMS[code]) DISPLAY_ITEMS[code] = {};
+  for (let attempt = 0; attempt < 4; attempt++) {
+    // 1) 서버 최신 상태 읽기 (다른 기기가 방금 바꾼 것 보존)
+    let server = {}, sha = null;
+    const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } });
+    if (r.ok) {
+      const j = await r.json(); sha = j.sha;
+      let parsed = null;
+      try { parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e) {}
+      if (!parsed || typeof parsed !== 'object') throw new Error("기존 DP 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지)");
+      server = parsed;
+    } else if (r.status === 401) {
+      throw new Error("인증 실패 — ADMIN 재로그인 후 다시 시도하세요");
+    } else if (r.status !== 404) {
+      throw new Error("DP 조회 실패 " + r.status);
+    }
 
-  if (DISPLAY_ITEMS[code][size]) {
+    // 2) 이 토글 하나만 반영
+    if (wantAdd) { if (!server[code]) server[code] = {}; server[code][sz] = { since: today }; }
+    else if (server[code]) { delete server[code][sz]; if (!Object.keys(server[code]).length) delete server[code]; }
 
-    delete DISPLAY_ITEMS[code][size];
+    // 3) 저장 — 반드시 성공 여부 확인 (조용한 실패 방지)
+    const body = { message: "dp: update display items", content: utf8ToB64(JSON.stringify(server, null, 2)), branch: GH.branch };
+    if (sha) body.sha = sha;
+    const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }  // 충돌 → 최신 다시 읽어 재시도
+    if (!put.ok) throw new Error("DP 저장 실패 (" + put.status + ")");
 
-    if (Object.keys(DISPLAY_ITEMS[code]).length === 0) delete DISPLAY_ITEMS[code];
-
-  } else {
-
-    DISPLAY_ITEMS[code][size] = { since: now };
-
+    // 4) 로컬/캐시 동기화
+    DISPLAY_ITEMS = server;
+    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+    render();
+    return;
   }
-
-  await saveDisplayItems();
-
-  render();
+  throw new Error("DP 저장 실패 (충돌 반복) — 잠시 후 다시 시도하세요");
 
 }
 
