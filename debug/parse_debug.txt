@@ -1,7 +1,7 @@
-시작: 2026-07-17T06:26:00.538Z
+시작: 2026-07-17T08:32:02.619Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17842695704508838.330931720438
+[RES] 200 login.xml&postfix=17842771338621419.9082657419215
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 18건
+selTodaySalesList: 25건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":9900,"ITEM_CD":"24178","ITEM_NM":"요헤미티-워터 (피치) [YH-05, 1SIZE]","SALES_AMT":9900,"NET_SALES_AMT":9000,"V
   파싱 성공: 2건
-메뉴 클릭 후 거래: 18건
+메뉴 클릭 후 거래: 25건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21398","ITEM_NM":"보메로 플러스 [HV8150-102, 265]","SALES_AMT":131400,"NET_SALES_AMT":11945
@@ -86,4 +86,32 @@ selTodaySalesList: 18건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":309000,"ITEM_CD":"28027","ITEM_NM":"줌 X 베이퍼플라이 4 [HF6414-800, 290]","SALES_AMT":185400,"NET_SALES_AMT":
   파싱 성공: 1건
-완료: 품번 23개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27489","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [KD6975, OSFM]","SALES_AMT":35100,"NET_SALES_AMT":
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"33200","ITEM_NM":"보메로 플러스 [HV8154-012, 235]","SALES_AMT":160650,"NET_SALES_AMT":14604
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39477","ITEM_NM":"드라이핏 ADV 플라이 캡 [FJ0736-654, M/L]","SALES_AMT":35400,"NET_SALES_AMT":
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 6개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24289","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C5R, 4]","SALES_AMT":38250,"NET_SALES_AMT":34773,
+  파싱 성공: 6건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21009","ITEM_NM":"보메로 플러스 [HV8154-102, 245]","SALES_AMT":131400,"NET_SALES_AMT":11945
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 5개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37669","ITEM_NM":"엔돌핀 아주라 [S101329-1041, 255]","SALES_AMT":141750,"NET_SALES_AMT":128
+  파싱 성공: 5건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"33059","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 265]","SALES_AMT":179400,"NET_SALES_AMT":1630
+  파싱 성공: 1건
+완료: 품번 39개
