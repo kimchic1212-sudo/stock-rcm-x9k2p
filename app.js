@@ -384,7 +384,8 @@ async function saveFavsToGH() {
             const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${FAVS_PATH}`;
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
             let sha, serverFavs = [];
-            if(r.ok){ const j = await r.json(); sha = j.sha; try { serverFavs = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e){} }
+            if(r.ok){ const j = await r.json(); sha = j.sha; try { serverFavs = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e){ return; /* 서버본 파싱 실패 — 상태 불명이므로 덮어쓰지 않음 */ } }
+            else if(r.status !== 404) return; // 조회 실패 — 다음 토글 때 재시도
             // 안전장치: 메모리 FAVS가 비었는데 서버엔 있으면(로드 실패 등) 덮어쓰지 않음 — 전체 유실 방지
             if(FAVS.length === 0 && Array.isArray(serverFavs) && serverFavs.length > 0) return;
             const body = { message:"update favs", content: utf8ToB64(JSON.stringify(FAVS)), branch: GH.branch };
@@ -8985,21 +8986,22 @@ window.renderPromoAdmin = () => {
 
                 let sha = null, existingList = [];
 
-                try {
+                // 기존 목록을 못 읽으면 저장 중단 — 빈 목록으로 덮어써 기획전 전체가 날아가는 것 방지 (404=최초 생성만 허용)
+                const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
 
-                    const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+                if(r.ok) {
 
-                    if(r.ok) {
+                    const j = await r.json(); sha = j.sha;
 
-                        const j = await r.json(); sha = j.sha;
+                    try {
 
                         const data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
 
                         existingList = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
 
-                    }
+                    } catch(e) { throw new Error('기존 기획전 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.'); }
 
-                } catch(e) {}
+                } else if(r.status !== 404) { throw new Error('기획전 목록 조회 실패 (' + r.status + ') — 저장을 중단했습니다.'); }
 
                 existingList.push(newPromo);
 
