@@ -1,7 +1,7 @@
-시작: 2026-07-18T07:04:09.910Z
+시작: 2026-07-18T08:54:56.484Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17843582636438463.858885161222
+[RES] 200 login.xml&postfix=17843649062813992.8296086566493
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 29건
+selTodaySalesList: 42건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37539","ITEM_NM":"엔돌핀 프로 5 [S101360-1010, 265]","SALES_AMT":269100,"NET_SALES_AMT":24
   파싱 성공: 1건
-메뉴 클릭 후 거래: 29건
+메뉴 클릭 후 거래: 42건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29863","ITEM_NM":"마인드 001 [HQ4307-003, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -130,4 +130,56 @@ selTodaySalesList: 29건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33431","ITEM_NM":"페가수스 42 [IB1881-003, 235]","SALES_AMT":101400,"NET_SALES_AMT":92182
   파싱 성공: 2건
-완료: 품번 42개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":99000,"ITEM_CD":"28992","ITEM_NM":"ACG 세컨드 선라이즈 드라이 핏 ADV 5인치 브리프 라인드 쇼츠 [IO9676-010, S]","SALES_AMT":3
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 5개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"33989","ITEM_NM":"라이트웨이트 런 크루 [IB6114-010, L]","SALES_AMT":19800,"NET_SALES_AMT":18000
+  파싱 성공: 5건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29857","ITEM_NM":"마인드 001 [HQ4307-003, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-119000,"ITEM_CD":"29857","ITEM_NM":"마인드 001 [HQ4307-003, 260]","SALES_AMT":-119000,"NET_SALES_AMT":-1
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"39539","ITEM_NM":"마인드 001 [HQ4307-200, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29840","ITEM_NM":"마인드 001 [HQ4307-001, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"28910","ITEM_NM":"패스트 라이트웨이트 크루 1PR [HV6919-010, L]","SALES_AMT":19800,"NET_SALES_AMT"
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"39537","ITEM_NM":"마인드 001 [HQ4307-200, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"34205","ITEM_NM":"런 벨트 [IQ5928-077, M]","SALES_AMT":71100,"NET_SALES_AMT":64636,"VAT_A
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":319200,"ITEM_CD":"31850","ITEM_NM":"001A [001A-SKY-M, 280]","SALES_AMT":319200,"NET_SALES_AMT":290182,"
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-319200,"ITEM_CD":"31850","ITEM_NM":"001A [001A-SKY-M, 280]","SALES_AMT":-319200,"NET_SALES_AMT":-2901
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29234","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 2건
+완료: 품번 53개
