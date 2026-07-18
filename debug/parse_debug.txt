@@ -1,7 +1,7 @@
-시작: 2026-07-18T11:13:10.371Z
+시작: 2026-07-18T12:03:23.628Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17843732054837935.2378920189085
+[RES] 200 login.xml&postfix=17843762131046866.535532676351
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 52건
+selTodaySalesList: 56건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37539","ITEM_NM":"엔돌핀 프로 5 [S101360-1010, 265]","SALES_AMT":269100,"NET_SALES_AMT":24
   파싱 성공: 1건
-메뉴 클릭 후 거래: 52건
+메뉴 클릭 후 거래: 56건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29863","ITEM_NM":"마인드 001 [HQ4307-003, 290]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -222,4 +222,20 @@ selTodaySalesList: 52건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29857","ITEM_NM":"마인드 001 [HQ4307-003, 260]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-완료: 품번 61개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"28817","ITEM_NM":"스위프트 리펠 재킷 NV [IM9481-502, S]","SALES_AMT":139500,"NET_SALES_AMT":1
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":138000,"ITEM_CD":"24148","ITEM_NM":"트레일 토트 그리드 [C25FW-B02-KHK, 1SIZE]","SALES_AMT":110400,"NET_SALES_AM
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32397","ITEM_NM":"오리지널 [1000Black, 270]","SALES_AMT":55200,"NET_SALES_AMT":50182,"VAT_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"30837","ITEM_NM":"마인드 001 [HQ4309-001, 240]","SALES_AMT":119000,"NET_SALES_AMT":10818
+  파싱 성공: 1건
+완료: 품번 64개
