@@ -1,7 +1,7 @@
-시작: 2026-07-18T16:28:45.449Z
+시작: 2026-07-18T17:29:48.170Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17843921365647236.800503319276
+[RES] 200 login.xml&postfix=17843957984857298.871580997981
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -52,7 +52,7 @@ selTodaySalesList: 59건
   파싱 성공: 3건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":192000,"ITEM_CD":"36272","ITEM_NM":"스페이스 오 싱글렛 [11146-11401, M]","SALES_AMT":182400,"NET_SALES_AMT":165
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":240000,"ITEM_CD":"36281","ITEM_NM":"스페이스 오 쇼츠 [12076-00000, L]","SALES_AMT":228000,"NET_SALES_AMT":2072
   파싱 성공: 3건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
@@ -64,7 +64,7 @@ selTodaySalesList: 59건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37688","ITEM_NM":"엔돌핀 아주라 [S101348-1032, 240]","SALES_AMT":170100,"NET_SALES_AMT":154
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37670","ITEM_NM":"엔돌핀 아주라 [S101329-1041, 260]","SALES_AMT":170100,"NET_SALES_AMT":154
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
@@ -80,7 +80,7 @@ selTodaySalesList: 59건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33411","ITEM_NM":"페가수스 42 [IB1881-002, 240]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33390","ITEM_NM":"페가수스 42 [IB1881-102, 240]","SALES_AMT":101400,"NET_SALES_AMT":92182
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
@@ -96,7 +96,7 @@ selTodaySalesList: 59건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 4개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":155000,"ITEM_CD":"39203","ITEM_NM":"ACG 래디컬 에어플로우 숏슬리브 [IV5367-100, XL]","SALES_AMT":155000,"NET_SALES_
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"14803","ITEM_NM":"스위프트 하이웨이스트 4인치 타이트 포켓 러닝 쇼츠 [HJ2259-010, S]","SALES_AMT":62300,"NET
   파싱 성공: 4건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
@@ -104,7 +104,7 @@ selTodaySalesList: 59건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"33076","ITEM_NM":"보메로 프리미엄 [HM5973-606, 245]","SALES_AMT":284050,"NET_SALES_AMT":2582
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"34775","ITEM_NM":"아디제로 타쿠미센 11 [KH8901, 245]","SALES_AMT":208050,"NET_SALES_AMT":1891
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
@@ -112,7 +112,7 @@ selTodaySalesList: 59건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"34023","ITEM_NM":"라이트웨이트 런 크루 [IB6114-407, L]","SALES_AMT":13200,"NET_SALES_AMT":12000
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37990","ITEM_NM":"보메로 프리미엄 [HQ2050-104, 275]","SALES_AMT":179400,"NET_SALES_AMT":1630
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
@@ -128,7 +128,7 @@ selTodaySalesList: 59건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33289","ITEM_NM":"페가수스 42 [IB1873-003, 260]","SALES_AMT":101400,"NET_SALES_AMT":92182
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":169000,"ITEM_CD":"33431","ITEM_NM":"페가수스 42 [IB1881-003, 235]","SALES_AMT":101400,"NET_SALES_AMT":92182
   파싱 성공: 2건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
