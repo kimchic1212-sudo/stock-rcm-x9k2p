@@ -1,7 +1,7 @@
-시작: 2026-07-19T10:41:53.938Z
+시작: 2026-07-19T11:41:09.014Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17844577267721169.5311958935606
+[RES] 200 login.xml&postfix=17844612827957396.402586088495
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -80,7 +80,7 @@ selTodaySalesList: 41건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 4개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-89000,"ITEM_CD":"14803","ITEM_NM":"스위프트 하이웨이스트 4인치 타이트 포켓 러닝 쇼츠 [HJ2259-010, S]","SALES_AMT":-62300,"
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-159200,"ITEM_CD":"32051","ITEM_NM":"런 쇼츠 [SS5M-BLK, L]","SALES_AMT":-143280,"NET_SALES_AMT":-130255,"
   파싱 성공: 0건
 [RES] 200 selItemSalesList
   items: 4개 / keys: dlt_item,rsMsg
@@ -108,7 +108,7 @@ selTodaySalesList: 41건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-45000,"ITEM_CD":"27348","ITEM_NM":"아디365 브리즈 티 [JZ7684, XS]","SALES_AMT":-40500,"NET_SALES_AMT":-3681
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-59000,"ITEM_CD":"1593","ITEM_NM":"드라이핏 ADV 플라이 [FJ0736-100, M/L]","SALES_AMT":-53100,"NET_SALES_AMT":
   파싱 성공: 0건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
@@ -140,7 +140,7 @@ selTodaySalesList: 41건
   파싱 성공: 1건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":399000,"ITEM_CD":"34232","ITEM_NM":"포러너 165 [010-02863-AC, 1SIZE]","SALES_AMT":249000,"NET_SALES_AMT":2
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"34005","ITEM_NM":"ACG 에브리데이 엘리베이티드 크루 [IH8647-010, M]","SALES_AMT":19800,"NET_SALES_AM
   파싱 성공: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
