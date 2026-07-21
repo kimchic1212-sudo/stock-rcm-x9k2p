@@ -1,7 +1,7 @@
-시작: 2026-07-21T07:16:35.187Z
+시작: 2026-07-21T07:18:00.589Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17846182069978574.560105897313
+[RES] 200 login.xml&postfix=17846182940043218.1168423031413
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 18건
+selTodaySalesList: 19건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29861","ITEM_NM":"마인드 001 [HQ4307-003, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
   파싱 성공: 1건
-메뉴 클릭 후 거래: 18건
+메뉴 클릭 후 거래: 19건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":119000,"ITEM_CD":"29861","ITEM_NM":"마인드 001 [HQ4307-003, 280]","SALES_AMT":119000,"NET_SALES_AMT":10818
@@ -86,4 +86,8 @@ selTodaySalesList: 18건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"34131","ITEM_NM":"V-RUN [26M7001, 260]","SALES_AMT":194650,"NET_SALES_AMT":176955,"VA
   파싱 성공: 1건
-완료: 품번 11개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":44000,"ITEM_CD":"20708","ITEM_NM":"라이트웨이트 크루 삭스 1팩 [HV6919-100, M]","SALES_AMT":26400,"NET_SALES_AMT":2
+  파싱 성공: 1건
+완료: 품번 12개
