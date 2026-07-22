@@ -226,6 +226,10 @@ style.innerHTML = `
 
     .brand-sort-btn[data-active="0"] { background: var(--surface) !important; color: var(--muted) !important; }
 
+    .dash-view-btn[data-active="1"] { background: #ff5a1f; color: #fff; }
+
+    .dash-view-btn[data-active="0"] { background: #fff; color: #9ca3af; }
+
 
 
     .stats { text-align: right; display: flex; flex-direction: column; gap: 1px; margin-left: 10px; flex-shrink: 0; min-width: 68px; }
@@ -4177,6 +4181,8 @@ window.openAnalyticsReport = async () => {
 
     let currentDashSort = "qty"; // 판매수량순 or 판매금액순
 
+    let currentDashView = "sku"; // 'sku'=품번별 / 'model'=품명(모델) 통합
+
     let currentDashBrand = "ALL"; // 대시보드 내 브랜드 필터
 
 
@@ -4499,6 +4505,14 @@ window.openAnalyticsReport = async () => {
 
                             <div class="flex items-center gap-1.5">
 
+                                <div class="flex rounded-lg overflow-hidden border border-gray-200 text-[11px] font-bold shrink-0">
+
+                                    <button id="dashViewSku" class="dash-view-btn px-2.5 py-1.5 transition-colors" data-view="sku">SKU별</button>
+
+                                    <button id="dashViewModel" class="dash-view-btn px-2.5 py-1.5 border-l border-gray-200 transition-colors" data-view="model">모델별</button>
+
+                                </div>
+
                                 <select id="dashSortSel" class="ipt text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded px-2 py-1.5 outline-none cursor-pointer">
 
                                     <option value="qty">수량순</option>
@@ -4599,6 +4613,10 @@ window.openAnalyticsReport = async () => {
 
         };
 
+        const _syncDashViewBtns = () => { $$('.dash-view-btn').forEach(b => b.dataset.active = (b.dataset.view === currentDashView ? "1" : "0")); };
+        _syncDashViewBtns();
+        $$('.dash-view-btn').forEach(b => b.onclick = () => { currentDashView = b.dataset.view; _syncDashViewBtns(); renderDashState(); });
+
 
 
         const _parseDate = (s) => {
@@ -4674,6 +4692,53 @@ window.openAnalyticsReport = async () => {
     };
 
 
+
+    // 모델(품명) 통합: 색상·성별 SKU를 브랜드+품명 기준으로 합산
+    const _groupByModel = (items) => {
+        const map = new Map();
+        items.forEach(p => {
+            const key = (p.브랜드 || '') + '||' + (p.품명 || '');
+            let g = map.get(key);
+            if (!g) { g = { 브랜드: p.브랜드, 품명: p.품명, 품번: p.품번, shopNo: p.shopNo, dashSales: 0, dashRev: 0, skuCount: 0, mSales: 0, wSales: 0, uSales: 0, _maxSku: -1, _skus: [] }; map.set(key, g); }
+            g.dashSales += p.dashSales; g.dashRev += p.dashRev; g.skuCount += 1; g._skus.push(p.품번);
+            let gg = p.성별 || p.gender || 'U';
+            if (gg === 'M' || gg === '남성' || gg === '남') g.mSales += p.dashSales;
+            else if (gg === 'W' || gg === '여성' || gg === '여') g.wSales += p.dashSales;
+            else g.uSales += p.dashSales;
+            if (p.dashSales > g._maxSku) { g._maxSku = p.dashSales; g.품번 = p.품번; g.shopNo = p.shopNo; } // 대표 = 최다판매 SKU
+        });
+        return [...map.values()];
+    };
+
+    // 모델 통합 리스트 카드 1행
+    const _modelCard = (g, idx) => {
+        const imgSrc = IMAGES[g.shopNo || g.품번] || null;
+        const rankClass = idx < 3 ? "rank top3" : "rank";
+        const total = g.dashSales || 1;
+        const mPct = Math.round(g.mSales / total * 100), wPct = Math.round(g.wSales / total * 100), uPct = 100 - mPct - wPct;
+        const seg = (pct, cls) => pct > 0 ? `<div class="${cls}" style="width:${pct}%"></div>` : '';
+        const mixBar = `<div class="flex h-1.5 w-16 rounded-full overflow-hidden bg-gray-100" title="남 ${mPct}% · 여 ${wPct}%">${seg(mPct, 'bg-sky-400')}${seg(wPct, 'bg-pink-400')}${seg(uPct, 'bg-purple-300')}</div>`;
+        const mixTxt = [g.mSales > 0 ? `남 ${mPct}%` : '', g.wSales > 0 ? `여 ${wPct}%` : ''].filter(Boolean).join(' · ');
+        const statsHtml = currentDashSort === 'rev'
+            ? `<div class="stats"><div class="stat-primary-rev">${krw(g.dashRev)}</div><div class="stat-secondary-rev">${fmt(g.dashSales)}개</div></div>`
+            : `<div class="stats"><div class="stat-primary">${fmt(g.dashSales)}개</div><div class="stat-secondary">${krw(g.dashRev)}</div></div>`;
+        return `
+            <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${g.품번}', '${(currentPeriod === 'CUSTOM' ? `CUSTOM_${currentCustomStart}_${currentCustomEnd}` : currentPeriod)}')">
+                <div class="flex items-center w-full">
+                    <div class="${rankClass}">${idx + 1}</div>
+                    <div class="thumbnail shrink-0">${imgSrc ? `<img src="${imgSrc}" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}</div>
+                    <div class="info">
+                        <div class="meta">
+                            <span class="brand-code">${escapeHtml(g.브랜드)}</span>
+                            <span class="text-[10px] font-black text-orange-500 bg-orange-50 border border-orange-200 rounded px-1.5">SKU ${g.skuCount}</span>
+                            ${mixBar}<span class="text-[10px] text-gray-400 font-bold">${mixTxt}</span>
+                        </div>
+                        <div class="product-name">${escapeHtml(g.품명)}</div>
+                    </div>
+                    ${statsHtml}
+                </div>
+            </div>`;
+    };
 
     const renderDashState = () => {
 
@@ -4765,7 +4830,19 @@ window.openAnalyticsReport = async () => {
 
 
 
-        $("#dashListBody").innerHTML = filteredItems.map((p, idx) => {
+        let _listSrc = filteredItems;
+
+        if (currentDashView === 'model') {
+
+            _listSrc = _groupByModel(filteredItems);
+
+            _listSrc.sort((a, b) => currentDashSort === 'rev' ? b.dashRev - a.dashRev : b.dashSales - a.dashSales);
+
+        }
+
+        $("#dashListBody").innerHTML = _listSrc.map((p, idx) => {
+
+            if (currentDashView === 'model') return _modelCard(p, idx);
 
             const imgSrc = IMAGES[p.shopNo || p.품번] || null;
 
@@ -4873,7 +4950,7 @@ window.openAnalyticsReport = async () => {
 
 
 
-        if (filteredItems.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+        if (_listSrc.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
 
 
 
