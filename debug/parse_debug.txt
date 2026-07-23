@@ -1,7 +1,7 @@
-시작: 2026-07-23T05:24:42.291Z
+시작: 2026-07-23T05:34:08.106Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17847842967563852.960343968851
+[RES] 200 login.xml&postfix=17847848577779716.716352926747
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,34 +12,13 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 7건
+selTodaySalesList: 8건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":36000,"NET_SALES_
   파싱 성공: 1건
-메뉴 클릭 후 거래: 7건
+메뉴 클릭 후 거래: 8건
 [RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":-36000,"NET_SAL
+  items: 0개 / keys: rsMsg
   파싱 성공: 0건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":36000,"NET_SALES_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":-36000,"NET_SAL
-  파싱 성공: 0건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":159000,"ITEM_CD":"37095","ITEM_NM":"퍼포먼스 타이츠 24 [1WG31400553, S]","SALES_AMT":135150,"NET_SALES_AMT":12
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":65000,"ITEM_CD":"35925","ITEM_NM":"아디365 러닝 클라이마쿨 쇼츠 레깅스 [KD9193, M]","SALES_AMT":61750,"NET_SALES_AMT"
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":269000,"ITEM_CD":"28283","ITEM_NM":"페가수스 프리미엄 [IQ3435-045, 260]","SALES_AMT":215200,"NET_SALES_AMT":195
-  파싱 성공: 1건
-완료: 품번 5개
+완료: 품번 1개
