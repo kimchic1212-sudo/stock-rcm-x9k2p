@@ -1,7 +1,7 @@
-시작: 2026-07-23T08:47:36.330Z
+시작: 2026-07-23T08:53:31.739Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17847964686143481.1125355721083
+[RES] 200 login.xml&postfix=17847968227885788.66205908101
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 14건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":36000,"NET_SALES_
   파싱 성공: 1건
-메뉴 클릭 후 거래: 14건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":-36000,"NET_SAL
@@ -70,4 +70,8 @@ selTodaySalesList: 14건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29234","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-완료: 품번 21개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":160000,"ITEM_CD":"32291","ITEM_NM":"오라라이트 티셔츠 [11000-00001, S]","SALES_AMT":160000,"NET_SALES_AMT":1454
+  파싱 성공: 1건
+완료: 품번 22개
