@@ -1,7 +1,7 @@
-시작: 2026-07-23T04:13:46.919Z
+시작: 2026-07-23T04:27:51.525Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17847800367649275.150383536791
+[RES] 200 login.xml&postfix=17847808834522277.3210609154016
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 6건
+selTodaySalesList: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":36000,"NET_SALES_
   파싱 성공: 1건
-메뉴 클릭 후 거래: 6건
+메뉴 클릭 후 거래: 7건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-36000,"ITEM_CD":"10256","ITEM_NM":"아미노바이탈 4000 14P [AMINO4000-14, 1SIZE]","SALES_AMT":-36000,"NET_SAL
@@ -38,4 +38,8 @@ selTodaySalesList: 6건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":65000,"ITEM_CD":"35925","ITEM_NM":"아디365 러닝 클라이마쿨 쇼츠 레깅스 [KD9193, M]","SALES_AMT":61750,"NET_SALES_AMT"
   파싱 성공: 1건
-완료: 품번 4개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":269000,"ITEM_CD":"28283","ITEM_NM":"페가수스 프리미엄 [IQ3435-045, 260]","SALES_AMT":215200,"NET_SALES_AMT":195
+  파싱 성공: 1건
+완료: 품번 5개
