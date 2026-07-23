@@ -1,7 +1,7 @@
-시작: 2026-07-23T16:34:49.187Z
+시작: 2026-07-23T16:45:37.060Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17848245020712024.5509664191109
+[RES] 200 login.xml&postfix=17848251469695017.569017743901
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -59,43 +59,6 @@ selTodaySalesList: 21건
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"35846","ITEM_NM":"아디365 러닝 클라이마쿨 아이코닉 티셔츠 [KS3248, M]","SALES_AMT":41650,"NET_SALES_AM
   파싱 성공: 1건
 [RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"33934","ITEM_NM":"ACG 드라이핏 미드라이즈 브리프 라인드 트레일 러닝 쇼츠 [IO9658-020, M]","SALES_AMT":85500,
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"29491","ITEM_NM":"클라우드러너 3 [3MG10071043, 265]","SALES_AMT":170100,"NET_SALES_AMT":154
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29234","ITEM_NM":"클라우드몬스터 3 [3MG10051043, 270]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":160000,"ITEM_CD":"32291","ITEM_NM":"오라라이트 티셔츠 [11000-00001, S]","SALES_AMT":160000,"NET_SALES_AMT":1454
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29272","ITEM_NM":"클라우드몬스터 3 [3MG10054747, 250]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":58000,"ITEM_CD":"24092","ITEM_NM":"더블 위브 트레일 캡 [C25FW-C01-OLV, 1SIZE]","SALES_AMT":40600,"NET_SALES_AMT
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"38489","ITEM_NM":"보메로 플러스 SE [IM8331-001, 240]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29334","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 245]","SALES_AMT":194650,"NET_SALES_AMT":17
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"37082","ITEM_NM":"퍼포먼스 탱크 [1ME10225425, XL]","SALES_AMT":80750,"NET_SALES_AMT":73409,"
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-147420,"ITEM_CD":"32636","ITEM_NM":"카디 [NS4CD1M-002, 260]","SALES_AMT":-147000,"NET_SALES_AMT":-13363
+  items: 0개 / keys: rsMsg
   파싱 성공: 0건
-완료: 품번 29개
+완료: 품번 17개
