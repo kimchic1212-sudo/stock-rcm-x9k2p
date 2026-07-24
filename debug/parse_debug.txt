@@ -1,7 +1,7 @@
-시작: 2026-07-24T03:24:43.122Z
+시작: 2026-07-24T03:34:57.495Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17848634957066169.734359575458
+[RES] 200 login.xml&postfix=17848641072529799.277449082076
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,6 +12,10 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 0건
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+selTodaySalesList: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29187","ITEM_NM":"클라우드붐 맥스 [3WF30180438, 245]","SALES_AMT":237150,"NET_SALES_AMT":215
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 1건
+완료: 품번 1개
