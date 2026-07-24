@@ -1,7 +1,7 @@
-시작: 2026-07-24T14:05:57.187Z
+시작: 2026-07-24T14:15:45.566Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17849019681757951.269586917778
+[RES] 200 login.xml&postfix=17849025576816333.579126361105
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -19,83 +19,6 @@ selTodaySalesList: 21건
   파싱 성공: 1건
 메뉴 클릭 후 거래: 21건
 [RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":799000,"ITEM_CD":"34234","ITEM_NM":"포러너 570 42mm [010-02970-41, 1SIZE]","SALES_AMT":719100,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":186150,"ITEM_CD":"37623","ITEM_NM":"엔돌핀 스피드 5 [S101391-1004, 245]","SALES_AMT":156150,"NET_SALES_AMT":1
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"33078","ITEM_NM":"보메로 프리미엄 [HM5973-606, 255]","SALES_AMT":254150,"NET_SALES_AMT":2310
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"32753","ITEM_NM":"아디제로 아디오스 프로 4 [JR1269, 295]","SALES_AMT":209300,"NET_SALES_AMT":19
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26593","ITEM_NM":"아디제로 EVO SL [JH6206, 260]","SALES_AMT":167200,"NET_SALES_AMT":15200
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"37583","ITEM_NM":"엔돌핀 스피드 5 [S101368-1002, 265]","SALES_AMT":197100,"NET_SALES_AMT":1
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37068","ITEM_NM":"퍼포먼스 티 [1WE10314994, L]","SALES_AMT":115000,"NET_SALES_AMT":104545,
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"36501","ITEM_NM":"클라우드몬스터 3 [3MG10055256, 280]","SALES_AMT":194650,"NET_SALES_AMT":17
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":79000,"ITEM_CD":"30384","ITEM_NM":"오라 리커버리 슬라이드 3 [1135061-BBLC, 270]","SALES_AMT":67150,"NET_SALES_AMT
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"39228","ITEM_NM":"에어로핏 스트라이드 숏슬리브 탑 [IH0746-010, L]","SALES_AMT":85500,"NET_SALES_AMT"
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 2개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"35317","ITEM_NM":"테렉스 아그라빅 SL [KH8804, 230]","SALES_AMT":151200,"NET_SALES_AMT":13745
-  파싱 성공: 2건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29331","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 230]","SALES_AMT":206100,"NET_SALES_AMT":18
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":261000,"ITEM_CD":"26090","ITEM_NM":"아이자켓 리덕스 [94380158, 1SIZE]","SALES_AMT":221850,"NET_SALES_AMT":2016
-  파싱 성공: 3건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":19000,"ITEM_CD":"27525","ITEM_NM":"런 X 아디제로 삭스 [JD9557, L]","SALES_AMT":19000,"NET_SALES_AMT":17273,"VA
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34311","ITEM_NM":"글리세린 GTS 23 와이드 [1204921D133, 235]","SALES_AMT":177650,"NET_SALES_A
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29335","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 250]","SALES_AMT":194650,"NET_SALES_AMT":17
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 4개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":280000,"ITEM_CD":"31468","ITEM_NM":"에어로 글라이드 4 그래블 [L49175400, 235]","SALES_AMT":252000,"NET_SALES_AMT"
-  파싱 성공: 4건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":120000,"ITEM_CD":"32381","ITEM_NM":"소프트셀 반다나 [34001-08F02, 1SIZE]","SALES_AMT":84000,"NET_SALES_AMT":76
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"34774","ITEM_NM":"아디제로 타쿠미센 11 [KH8901, 240]","SALES_AMT":186150,"NET_SALES_AMT":1692
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39486","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-100, S/M]","SALES_AMT":56050,"NET_SALES_A
-  파싱 성공: 1건
-완료: 품번 28개
+  items: 0개 / keys: rsMsg
+  파싱 성공: 0건
+완료: 품번 1개
