@@ -1,7 +1,7 @@
-시작: 2026-07-24T09:41:47.773Z
+시작: 2026-07-24T09:52:49.997Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=1784886120965886.6991491322796
+[RES] 200 login.xml&postfix=178488678298842.15421851770485
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 13건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":279000,"ITEM_CD":"29187","ITEM_NM":"클라우드붐 맥스 [3WF30180438, 245]","SALES_AMT":237150,"NET_SALES_AMT":215
   파싱 성공: 1건
-메뉴 클릭 후 거래: 13건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":799000,"ITEM_CD":"34234","ITEM_NM":"포러너 570 42mm [010-02970-41, 1SIZE]","SALES_AMT":719100,"NET_SALES_A
@@ -66,4 +66,12 @@ selTodaySalesList: 13건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29331","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 230]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-완료: 품번 16개
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":261000,"ITEM_CD":"26090","ITEM_NM":"아이자켓 리덕스 [94380158, 1SIZE]","SALES_AMT":221850,"NET_SALES_AMT":2016
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":19000,"ITEM_CD":"27525","ITEM_NM":"런 X 아디제로 삭스 [JD9557, L]","SALES_AMT":19000,"NET_SALES_AMT":17273,"VA
+  파싱 성공: 1건
+완료: 품번 20개
