@@ -8713,7 +8713,20 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+                // 필수 컬럼(품번·일자·수량)을 못 찾으면 중단 — 못 찾으면 인덱스가 -1이 되어
+                // 엉뚱한 셀(엑셀 열 좌표 'AI','G' 등)이 품번/날짜로 저장되는 오염이 발생함 (2026-07 실제 사례)
+                if(codeIdx < 0 || dateIdx < 0 || qtyIdx < 0) {
+                    const _missing = [codeIdx<0?'품번':null, dateIdx<0?'일자':null, qtyIdx<0?'수량':null].filter(Boolean).join(', ');
+                    alert(`❌ 판매 엑셀에서 필수 컬럼을 찾지 못했습니다: ${_missing}\n\n인식된 헤더: ${headers.filter(Boolean).slice(0,15).join(' | ')}\n\n올바른 판매 엑셀인지 확인해주세요.`);
+                    e.target.value = ""; return;
+                }
+
                 let sessionData = {};
+
+                let _skippedBad = 0;
+
+                // 날짜 형식 검증 (YYYY-MM-DD 또는 YYYY/MM/DD 등 숫자 기반만 허용)
+                const _isValidDate = (s) => /\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/.test(s) || /^\d{8}$/.test(s);
 
                 for(let i=headerRowIdx+1; i<rows.length; i++) {
 
@@ -8725,9 +8738,12 @@ window.renderSalesHistoryAdmin = () => {
 
                     const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
 
-                    
+
 
                     if(!code || !date) continue;
+
+                    // 날짜가 날짜 형식이 아니거나 수량이 0 이하면 잘못된 행 → 저장하지 않음
+                    if(!_isValidDate(date) || qty <= 0) { _skippedBad++; continue; }
 
 
 
@@ -8831,7 +8847,7 @@ window.renderSalesHistoryAdmin = () => {
 
                     _recomputeStock(); render(); window.renderSalesHistoryAdmin();
 
-                    alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!`);
+                    alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!` + (_skippedBad > 0 ? `\n\n⚠️ 형식이 잘못된 ${_skippedBad}개 행은 제외했습니다 (날짜 형식 오류 또는 수량 0).` : ''));
 
                 } catch(err) { alert("업로드 실패: " + err.message); }
 
