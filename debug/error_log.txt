@@ -1,6 +1,11 @@
-2026-07-24T15:57:36.084Z
-GitHub 실패: 503
-Error: GitHub 실패: 503
-    at uploadSalesHistory (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:62:55)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:291:5
+2026-07-25T06:03:57.672Z
+page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
+Call log:
+  - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
+
+page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
+Call log:
+  - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
+
+    at fetchPOSSales (/home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:164:16)
+    at async /home/runner/work/stock-rcm-x9k2p/stock-rcm-x9k2p/sync_once.js:270:24
