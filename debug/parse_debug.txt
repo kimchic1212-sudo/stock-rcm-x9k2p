@@ -1,7 +1,7 @@
-시작: 2026-07-25T03:36:35.163Z
+시작: 2026-07-25T03:42:36.461Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17849506047748533.364965000992
+[RES] 200 login.xml&postfix=17849509684936083.567797277869
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 7건
+selTodaySalesList: 9건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":58000,"ITEM_CD":"24092","ITEM_NM":"더블 위브 트레일 캡 [C25FW-C01-OLV, 1SIZE]","SALES_AMT":46400,"NET_SALES_AMT
   파싱 성공: 1건
-메뉴 클릭 후 거래: 7건
+메뉴 클릭 후 거래: 9건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":199000,"ITEM_CD":"32042","ITEM_NM":"런 쇼츠 [SS5M-KHA, M]","SALES_AMT":139300,"NET_SALES_AMT":126636,"VAT_
@@ -42,4 +42,12 @@ selTodaySalesList: 7건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"23481","ITEM_NM":"퍼포먼스 런 삭 하이 [2UF10040813, S]","SALES_AMT":33150,"NET_SALES_AMT":3013
   파싱 성공: 1건
-완료: 품번 9개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-89000,"ITEM_CD":"32416","ITEM_NM":"우클로그 [1200Black, 260]","SALES_AMT":-80100,"NET_SALES_AMT":-72818,"
+  파싱 성공: 0건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":69000,"ITEM_CD":"32405","ITEM_NM":"우아 [1100Black, 250]","SALES_AMT":62100,"NET_SALES_AMT":56455,"VAT_AM
+  파싱 성공: 1건
+완료: 품번 10개
