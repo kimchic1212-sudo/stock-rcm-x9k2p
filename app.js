@@ -2395,6 +2395,31 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+// 재고 엑셀 시트 파싱 — 맨 위에 제목행(예: "창고별 시즌재고조회_ajl")이 끼어있어도
+// 진짜 헤더 행("품번" 포함)을 자동으로 찾아 그 행부터 파싱한다.
+// (2026-07-24 이런 제목행 때문에 헤더가 한 칸 밀려 전체 재고가 0건으로 로딩된 사고 이후 추가)
+function parseInventorySheet(sheet, XLSXLib) {
+    const X = XLSXLib || window.XLSX;
+    const aoa = X.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+    let headerRowIdx = aoa.findIndex(row => row.some(cell => String(cell).trim() === "품번"));
+    if (headerRowIdx === -1) headerRowIdx = 0; // 못 찾으면 기존 동작(첫 행) 유지
+    if (headerRowIdx === 0) {
+        return X.utils.sheet_to_json(sheet, { defval: "", raw: true });
+    }
+    // 진짜 헤더가 밀려있던 경우: 그 행을 헤더로 삼아 이후 행만 파싱
+    const headers = aoa[headerRowIdx].map(h => String(h).trim());
+    const rows = [];
+    for (let i = headerRowIdx + 1; i < aoa.length; i++) {
+        const line = aoa[i];
+        if (line.every(c => c === "" || c === undefined || c === null)) continue; // 빈 행 스킵
+        const obj = {};
+        headers.forEach((h, idx) => { if (h) obj[h] = line[idx] !== undefined ? line[idx] : ""; });
+        rows.push(obj);
+    }
+    console.warn(`[재고 업로드] 헤더가 ${headerRowIdx}행 밀려있어 자동 보정함 (제목행 등 추정)`);
+    return rows;
+}
+
 function rebuildIndex(){
 
   const map = new Map();
@@ -6500,15 +6525,36 @@ function render(){
 
       grid.innerHTML = "";
 
-      $("#emptyState").classList.remove("hidden"); 
+      $("#emptyState").classList.remove("hidden");
 
-      $("#results").classList.add("hidden"); 
+      $("#results").classList.add("hidden");
 
-      return; 
+      return;
 
   }
 
-  
+  // RAW는 있는데 PRODUCTS가 0개면 파싱 실패(예: 엑셀 헤더행 밀림) — "결과 없음"과 구분되는 명확한 경고 표시
+  if(!PRODUCTS.length) {
+
+      console.error(`[재고 파싱 실패] RAW ${RAW.length}건을 읽었으나 상품이 0개로 처리됨. 엑셀 헤더 구조를 확인하세요.`);
+
+      grid.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 gap-3 text-center">
+          <div class="text-4xl">⚠️</div>
+          <div class="text-lg font-black text-gray-700">재고 데이터 처리 실패</div>
+          <div class="text-sm text-gray-400 max-w-md">엑셀 ${fmt(RAW.length)}건을 불러왔지만 상품으로 변환하지 못했습니다.<br>보통 엑셀 맨 위에 제목행이 끼어 헤더가 밀렸을 때 발생합니다.<br>ADMIN에서 재고 파일을 다시 업로드해 보세요.</div>
+      </div>`;
+
+      $("#emptyState").classList.add("hidden");
+
+      $("#results").classList.remove("hidden");
+
+      $("#noMatch")?.classList.add("hidden");
+
+      return;
+
+  }
+
+
 
   $("#emptyState").classList.add("hidden");
 
@@ -8523,7 +8569,7 @@ $("#file").onchange = async (e) => {
 
         const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
 
-        let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+        let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], XLSX);
 
         const meta = { fileName:f.name, uploadedAt: dateStr };
 
@@ -10343,7 +10389,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 const wb = window.XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
 
-                let rows = window.XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:"", raw:true});
+                let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], window.XLSX);
 
                 const meta = { fileName:f.name, uploadedAt: dateStr };
 
