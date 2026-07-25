@@ -1,0 +1,12 @@
+{
+  "zones": [
+    { "id": "accL1", "group": "ACC DP 좌측", "label": "좌측 ACC DP 1", "x": 34.2, "y": 60.5, "slots": ["1층-좌", "1층-우", "2층-좌", "2층-우"] },
+    { "id": "accL2", "group": "ACC DP 좌측", "label": "좌측 ACC DP 2", "x": 38.0, "y": 60.5, "slots": ["1층-좌", "1층-우", "2층-좌", "2층-우"] },
+    { "id": "accC1", "group": "ACC DP 중앙", "label": "중앙 ACC DP 1", "x": 63.0, "y": 67.0, "slots": ["앞-1층", "앞-2층", "뒤-1층", "뒤-2층"] },
+    { "id": "accC2", "group": "ACC DP 중앙", "label": "중앙 ACC DP 2", "x": 66.3, "y": 67.0, "slots": ["앞-1층", "앞-2층", "뒤-1층", "뒤-2층"] },
+    { "id": "stool", "group": "중앙 스툴", "label": "중앙 곡선 스툴 서랍", "x": 52.0, "y": 57.0, "slots": [] },
+    { "id": "storage1", "group": "스토리지", "label": "스토리지 01", "x": 88.0, "y": 58.0, "slots": [] },
+    { "id": "storage2", "group": "스토리지", "label": "스토리지 02", "x": 72.0, "y": 21.0, "slots": [] }
+  ],
+  "assignments": {}
+}
