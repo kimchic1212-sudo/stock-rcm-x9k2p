@@ -1,4 +1,4 @@
-2026-07-25T06:03:57.672Z
+2026-07-25T23:18:52.342Z
 page.goto: net::ERR_CONNECTION_RESET at https://cloudposoffice.shinsegae.com/
 Call log:
   - navigating to "https://cloudposoffice.shinsegae.com/", waiting until "domcontentloaded"
