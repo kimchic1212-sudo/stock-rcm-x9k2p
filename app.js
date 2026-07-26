@@ -8781,7 +8781,7 @@ $("#drop").onclick=()=>$("#file").click();
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); };
 
 // ── 위치찾기: 창고 위치 관리(구역 핀 추가/수정/삭제) ─────────────────────
-function floorplanUrl(){ return `https://${GH.owner}.github.io/${GH.repo}/floorplan.png?v=1`; }
+function floorplanUrl(){ return `https://${GH.owner}.github.io/${GH.repo}/floorplan.png?v=2`; }
 
 function _uniqueZoneId(label){
     const base = String(label).trim().toLowerCase().replace(/[^a-z0-9가-힣]+/g,'-').replace(/^-+|-+$/g,'') || 'zone';
