@@ -8781,7 +8781,9 @@ $("#drop").onclick=()=>$("#file").click();
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); };
 
 // ── 위치찾기: 창고 위치 관리(구역 핀 추가/수정/삭제) ─────────────────────
-function floorplanUrl(){ return `https://${GH.owner}.github.io/${GH.repo}/floorplan.png?v=2`; }
+// GH.owner/repo(로컬 설정값)에 기대지 않고 고정 URL 사용 — 일부 기기에서 이미지가 안 뜨는 문제 방어.
+// 파일명 자체를 floorplan-map.png로 바꿔 통신사/기기 프록시의 쿼리스트링 무시 캐시도 우회.
+function floorplanUrl(){ return `https://kimchic1212-sudo.github.io/stock-rcm-x9k2p/floorplan-map.png`; }
 
 function _uniqueZoneId(label){
     const base = String(label).trim().toLowerCase().replace(/[^a-z0-9가-힣]+/g,'-').replace(/^-+|-+$/g,'') || 'zone';
@@ -8984,6 +8986,10 @@ window.renderSalesHistoryAdmin = () => {
 
                 let typeIdx = headers.findIndex(h => h.includes('수주구분') || h.includes('판매구분'));
 
+                let whIdx = headers.findIndex(h => h === '창고' || h.includes('창고'));
+
+                let invoiceIdx = headers.findIndex(h => h.includes('거래명세서번호'));
+
 
 
                 // 필수 컬럼(품번·일자·수량)을 못 찾으면 중단 — 못 찾으면 인덱스가 -1이 되어
@@ -9001,6 +9007,10 @@ window.renderSalesHistoryAdmin = () => {
                 // 날짜 형식 검증 (YYYY-MM-DD 또는 YYYY/MM/DD 등 숫자 기반만 허용)
                 const _isValidDate = (s) => /\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/.test(s) || /^\d{8}$/.test(s);
 
+                // 원본 ERP 엑셀에 완전히 동일한 거래 행이 중복으로 찍혀 나오는 경우가 있어(2026-07 실사례),
+                // 같은 (거래명세서번호+품번+규격+수량) 조합은 한 번만 반영
+                const _seenLines = new Set();
+
                 for(let i=headerRowIdx+1; i<rows.length; i++) {
 
                     const r = rows[i];
@@ -9015,8 +9025,14 @@ window.renderSalesHistoryAdmin = () => {
 
                     if(!code || !date) continue;
 
-                    // 날짜가 날짜 형식이 아니거나 수량이 0 이하면 잘못된 행 → 저장하지 않음
-                    if(!_isValidDate(date) || qty <= 0) { _skippedBad++; continue; }
+                    // 날짜가 날짜 형식이 아니거나 수량이 0이면 저장하지 않음 (반품 등 음수는 순매출 계산을 위해 유지)
+                    if(!_isValidDate(date) || qty === 0) { _skippedBad++; continue; }
+
+                    if(invoiceIdx > -1) {
+                        const lineKey = String(r[invoiceIdx]||"") + "|" + code + "|" + String(r[sizeIdx>-1?sizeIdx:-1]||"") + "|" + qty;
+                        if(_seenLines.has(lineKey)) continue;
+                        _seenLines.add(lineKey);
+                    }
 
 
 
@@ -9026,17 +9042,17 @@ window.renderSalesHistoryAdmin = () => {
 
                     const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈";
 
-
-
-                    // 반품/반입/취소 row는 판매 데이터에서 제외
-
-                    if(typeStr && (typeStr.includes('반품') || typeStr.includes('반입') || typeStr.includes('취소') || typeStr.includes('환불'))) continue;
+                    const whStr = whIdx > -1 ? String(r[whIdx]||"").trim() : "";
 
 
 
-                    let locationGroup = "본사물류"; 
-
-                    if(typeStr === "매장" || typeStr.includes("오프라인")) {
+                    // 창고(매장) 컬럼이 있으면 이걸로 지점 판정 (담당자명은 매장 소속과 무관할 수 있어 부정확)
+                    let locationGroup = "본사물류";
+                    if(whStr) {
+                        if(whStr.includes("부산")) locationGroup = "부산(김종훈)";
+                        else if(whStr.includes("신사")) locationGroup = "신사(승호강)";
+                        else locationGroup = "본사물류";
+                    } else if(typeStr === "매장" || typeStr.includes("오프라인")) {
 
                         if(rawManager.includes("김종훈") || rawManager.includes("부산")) locationGroup = "부산(김종훈)";
 
@@ -9052,19 +9068,38 @@ window.renderSalesHistoryAdmin = () => {
 
                     if(!sessionData[code][date][size]) sessionData[code][date][size] = {};
 
+                    // qty는 양수(판매)/음수(반품) 그대로 합산 → 같은 날 반품분이 순매출에서 자동 차감됨
                     sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
 
+                }
+
+
+
+                // 반품이 판매보다 많아 순매출이 0 이하가 된 항목은 제거 (음수 판매량으로 남지 않도록)
+                for(let code in sessionData) {
+                    for(let date in sessionData[code]) {
+                        for(let size in sessionData[code][date]) {
+                            for(let mgr in sessionData[code][date][size]) {
+                                if(sessionData[code][date][size][mgr] <= 0) delete sessionData[code][date][size][mgr];
+                            }
+                            if(Object.keys(sessionData[code][date][size]).length === 0) delete sessionData[code][date][size];
+                        }
+                        if(Object.keys(sessionData[code][date]).length === 0) delete sessionData[code][date];
+                    }
+                    if(Object.keys(sessionData[code]).length === 0) delete sessionData[code];
                 }
 
                 
 
                 let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
 
+                const _todayStr = (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+
                 for(let code in sessionData) {
 
                     if(!newItems[code]) newItems[code] = {};
 
-                    for(let date in sessionData[code]) { 
+                    for(let date in sessionData[code]) {
 
                         if(typeof newItems[code][date] === 'number') {
 
@@ -9082,13 +9117,18 @@ window.renderSalesHistoryAdmin = () => {
 
                             for(let mgr in sessionData[code][date][size]) {
 
-                                // Math.max 로 중복 업로드 방지 (같은 엑셀 2번 올려도 합산 안됨)
-
-                                const existing = newItems[code][date][size][mgr] || 0;
-
                                 const incoming = sessionData[code][date][size][mgr];
 
-                                newItems[code][date][size][mgr] = Math.max(existing, incoming);
+                                if(date === _todayStr) {
+                                    // 오늘 날짜는 실시간 POS 자동동기화가 곧 더 완전한 값으로 다시 덮어쓰므로,
+                                    // 엑셀 업로드 시점의 부분적인 스냅샷으로 낮춰지지 않도록 더 큰 값 유지
+                                    const existing = newItems[code][date][size][mgr] || 0;
+                                    newItems[code][date][size][mgr] = Math.max(existing, incoming);
+                                } else {
+                                    // 과거 날짜는 이 엑셀(전체 기간 재집계본)을 최신 정답으로 간주해 덮어씀
+                                    // → 반품으로 순매출이 낮아진 경우도 정확히 반영됨 (예전엔 Math.max라 반품 반영이 막혔음)
+                                    newItems[code][date][size][mgr] = incoming;
+                                }
 
                             }
 
