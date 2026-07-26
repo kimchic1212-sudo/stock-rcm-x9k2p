@@ -4732,7 +4732,11 @@ window.openAnalyticsReport = async () => {
 
 
 
-        $("#closeDashboardBtn").onclick = () => { modal.classList.add("opacity-0"); setTimeout(() => modal.classList.add("hidden"), 300); };
+        $("#closeDashboardBtn").onclick = () => {
+            modal.classList.add("opacity-0");
+            setTimeout(() => modal.classList.add("hidden"), 300);
+            if (document.body.classList.contains('dashboard-only-mode')) _revealDashOnlyUI(); // 팝업 전용모드였으면 닫을 때 재고앱 화면 노출
+        };
 
         $("#dashResetBtn").onclick = () => {
 
@@ -10695,9 +10699,21 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-loadGhConfig(); loadData().then(() => {
-    if (location.hash === '#dashboard' && window.openAnalyticsReport) window.openAnalyticsReport();
-}).catch(()=>{});
+function _revealDashOnlyUI() {
+    document.body.classList.remove('dashboard-only-mode');
+    const ld = document.getElementById('dashOnlyLoading');
+    if (ld) ld.remove();
+}
+
+loadGhConfig(); loadData().then(async () => {
+    if (location.hash === '#dashboard' && window.openAnalyticsReport) {
+        try { await window.openAnalyticsReport(); }
+        finally { const ld = document.getElementById('dashOnlyLoading'); if (ld) ld.remove(); } // 대시보드가 화면을 이미 덮으므로 재고앱 본체는 계속 숨긴 채 둠
+    }
+}).catch(() => { _revealDashOnlyUI(); }); // 로딩 실패 시엔 숨겨뒀던 재고앱을 다시 보여줌(빈 화면 방지)
+
+// 대시보드 열기 실패 등 만약을 대비한 안전장치 — 15초 뒤에도 로딩화면이면 강제로 재고앱 노출
+setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOnlyUI(); }, 15000);
 
 
 
