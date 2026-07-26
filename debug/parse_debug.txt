@@ -1,7 +1,7 @@
-시작: 2026-07-26T02:52:38.535Z
+시작: 2026-07-26T02:56:28.029Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17850343712802434.356041133429
+[RES] 200 login.xml&postfix=1785034599557385.22578778981466
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,18 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29336","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 255]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 3건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"37167","ITEM_NM":"코어 헤드밴드 [2UE30480553, 1SIZE]","SALES_AMT":44100,"NET_SALES_AMT":4009
   파싱 성공: 1건
-완료: 품번 2개
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"29017","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, M]","SALES_AMT":45000,"NET
+  파싱 성공: 3건
+완료: 품번 5개
