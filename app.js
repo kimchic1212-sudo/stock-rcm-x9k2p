@@ -847,6 +847,8 @@ function getCurrentFilterState() {
 
         busanOnly: ($('button.chip[data-busanonly]')?.dataset.active === "1"),
 
+        otherOnly: ($('button.chip[data-otherbranch]')?.dataset.active === "1"),
+
         sizeFw: $("#sizeSelFw")?.value || "ALL",
 
         sizeAp: $("#sizeSelAp")?.value || "ALL",
@@ -928,6 +930,16 @@ function restoreHistoryState() {
         if(state.busanOnly) $('button.chip[data-busanonly]').classList.add('ring-2', 'ring-blue-400');
 
         else $('button.chip[data-busanonly]').classList.remove('ring-2', 'ring-blue-400');
+
+    }
+
+    if($('button.chip[data-otherbranch]')) {
+
+        $('button.chip[data-otherbranch]').dataset.active = state.otherOnly ? "1" : "0";
+
+        if(state.otherOnly) $('button.chip[data-otherbranch]').classList.add('ring-2', 'ring-teal-400');
+
+        else $('button.chip[data-otherbranch]').classList.remove('ring-2', 'ring-teal-400');
 
     }
 
@@ -5910,6 +5922,14 @@ function card(p){
 
   }
 
+  let otherBranchOnlyBadge = "";
+
+  if (p.busanTotal === 0 && (p.sinsaTotal > 0 || p.centerTotal > 0)) {
+
+      otherBranchOnlyBadge = `<span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 타지점 ONLY</span>`;
+
+  }
+
 
 
   // 판매 속도 뱃지
@@ -6129,7 +6149,7 @@ function card(p){
 
 
   // 상단 상태 배지: 중요도 순으로 최대 3개만 노출, 나머지는 +N 축약 (품명이 밀리지 않게)
-  const _statusBadges = [overrideBadge, dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
+  const _statusBadges = [overrideBadge, dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, otherBranchOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
   const _MAX_BADGES = 3;
   let _badgesHtml = _statusBadges.slice(0, _MAX_BADGES).join("");
   if (_statusBadges.length > _MAX_BADGES) {
@@ -6303,6 +6323,8 @@ function getFilters(){
     memoOnly: !!$$('button.chip[data-memo]').find(b=>b.dataset.active==="1"),
 
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"),
+
+    otherOnly: !!$$('button.chip[data-otherbranch]').find(b=>b.dataset.active==="1"),
 
     todaySoldOnly: !!$$('button.chip[data-todaysold]').find(b=>b.dataset.active==="1"),
 
@@ -6674,6 +6696,8 @@ function render(){
     if(f.memoOnly && !p.hasMemo) return false;
 
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
+
+    if(f.otherOnly && !(p.busanTotal === 0 && (p.sinsaTotal > 0 || p.centerTotal > 0))) return false;
 
     if(f.todaySoldOnly && !(p.todaySold > 0)) return false;
 
@@ -8476,11 +8500,11 @@ function renderActiveFilterBar() {
         }});
     }
     // 일반 필터칩 (단일·다중)
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override]').forEach(btn => {
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-otherbranch], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override]').forEach(btn => {
         if (btn.dataset.active === "1") {
             items.push({ label: btn.textContent.trim(), onClear: () => {
                 btn.dataset.active = "0";
-                btn.classList.remove('ring-2', 'ring-blue-400', 'ring-orange-400', 'ring-violet-400', 'ring-gray-400', 'ring-amber-400');
+                btn.classList.remove('ring-2', 'ring-blue-400', 'ring-orange-400', 'ring-violet-400', 'ring-gray-400', 'ring-amber-400', 'ring-teal-400');
             }});
         }
     });
@@ -8543,6 +8567,10 @@ function _clearAllFilterChips() {
     const bb = $('button.chip[data-busanonly]');
 
     if (bb) { bb.dataset.active = "0"; bb.classList.remove('ring-2','ring-blue-400'); }
+
+    const ob = $('button.chip[data-otherbranch]');
+
+    if (ob) { ob.dataset.active = "0"; ob.classList.remove('ring-2','ring-teal-400'); }
 
     const tb = $('button.chip[data-todaysold]');
 
@@ -8615,6 +8643,10 @@ $("#resetAll").onclick=()=>{
     const busanOnlyBtn = $('button.chip[data-busanonly]');
 
     if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400'); }
+
+    const otherBranchBtn = $('button.chip[data-otherbranch]');
+
+    if(otherBranchBtn) { otherBranchBtn.dataset.active = "0"; otherBranchBtn.classList.remove('ring-2', 'ring-teal-400'); }
 
     const todaySoldBtn = $('button.chip[data-todaysold]');
 
@@ -9547,6 +9579,40 @@ window.addEventListener('DOMContentLoaded', () => {
             if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
 
             else busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
+
+            visibleCount=60; render();
+
+        });
+
+    }
+
+    // 타지점 ONLY 필터 버튼 (부산엔 없는데 신사/물류엔 있는 품목 — 다른 매장엔 있는데 우리만 없는 경우)
+
+    if(stockBtn && !$('button.chip[data-otherbranch]')) {
+
+        const otherBranchBtn = document.createElement("button");
+
+        otherBranchBtn.className = "chip !bg-teal-50 !text-teal-700 !border-teal-200 font-black";
+
+        otherBranchBtn.dataset.otherbranch = "1";
+
+        otherBranchBtn.dataset.active = "0";
+
+        otherBranchBtn.innerHTML = "🚚 타지점 ONLY";
+
+        const _busanOnlyRef = $('button.chip[data-busanonly]');
+
+        (_busanOnlyRef || stockBtn).parentNode.insertBefore(otherBranchBtn, (_busanOnlyRef || stockBtn).nextSibling);
+
+        otherBranchBtn.addEventListener("click", () => {
+
+            saveHistoryState();
+
+            otherBranchBtn.dataset.active = otherBranchBtn.dataset.active === "1" ? "0" : "1";
+
+            if(otherBranchBtn.dataset.active === "1") otherBranchBtn.classList.add('ring-2', 'ring-teal-400');
+
+            else otherBranchBtn.classList.remove('ring-2', 'ring-teal-400');
 
             visibleCount=60; render();
 
