@@ -329,6 +329,8 @@ const SALES_HISTORY_PATH = "sales_history.json";
 
 const SALES_DEDUCT_PATH = "sales.json";
 
+const LOCATIONS_PATH = "locations.json"; // 창고/매장 위치찾기 (도면 구역 + 상품 배정)
+
 const DISPLAY_PATH = "display_items.json";
 
 const FAVS_PATH = "favs.json";   // 즐겨찾기 기기 간 동기화
@@ -573,6 +575,9 @@ let STOCK_OVERRIDES = {};
 // DP(전시) 관리: { "품번": { "260": { since: "2026-05-17" }, "265": { since: "..." } } }
 
 let DISPLAY_ITEMS = {};
+
+// 위치찾기: { zones:[{id,group,label,x,y,slots:[]}], assignments:{ "품번": {zoneId, slot} } }
+let LOCATIONS = { zones: [], assignments: {} };
 
 let visibleCount=60;
 
@@ -1423,7 +1428,16 @@ async function loadData(force = false){
 
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
 
-      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; SALES_DEDUCTIONS = cached.salesDeductions || null; DISPLAY_ITEMS = cached.displayItems || {}; STOCK_OVERRIDES = cached.stockOverrides || {};
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; MEMOS = cached.memos || []; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; SALES_DEDUCTIONS = cached.salesDeductions || null; DISPLAY_ITEMS = cached.displayItems || {}; STOCK_OVERRIDES = cached.stockOverrides || {}; LOCATIONS = cached.locations || { zones: [], assignments: {} };
+
+      // 위치 데이터 백그라운드 동기화 (다른 기기가 방금 태그한 위치 반영)
+      fetchGithubJson(LOCATIONS_PATH).then(d=>{
+          if(d && typeof d==='object' && Array.isArray(d.zones)) {
+              LOCATIONS = d;
+              try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.locations = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+              if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn();
+          }
+      }).catch(()=>{});
 
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
 
@@ -1468,7 +1482,7 @@ async function loadData(force = false){
 
   try {
 
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes, soRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes, soRes, locRes] = await Promise.all([
 
           fetch("./" + DATA_PATH + "?t=" + Date.now()),
 
@@ -1488,13 +1502,17 @@ async function loadData(force = false){
 
           fetch("./" + DISPLAY_PATH + "?t=" + Date.now()).catch(()=>null),
 
-          fetch("./" + STOCK_OVERRIDES_PATH + "?t=" + Date.now()).catch(()=>null)
+          fetch("./" + STOCK_OVERRIDES_PATH + "?t=" + Date.now()).catch(()=>null),
+
+          fetch("./" + LOCATIONS_PATH + "?t=" + Date.now()).catch(()=>null)
 
       ]);
 
       const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
 
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
+
+      if(locRes && locRes.ok) { try { const _loc = await locRes.json(); if(_loc && Array.isArray(_loc.zones)) LOCATIONS = _loc; } catch(e) {} }
 
       // 기기 간 공유되고 자주 바뀌는 데이터(기획전·DP·RT·메모·재고보정)는 GitHub API 우선 읽기.
       // Pages는 저장 후 1~2분 배포 지연 + CDN 캐시 때문에 다른 기기 변경이 안 보임 → API로 즉시 동기화.
@@ -1533,7 +1551,7 @@ async function loadData(force = false){
 
 
 
-      _safeSessionCache({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, stockOverrides: STOCK_OVERRIDES, _timestamp: Date.now() });
+      _safeSessionCache({ rows: RAW, meta: CURRENT_META, images: IMAGES, memos: MEMOS, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, salesDeductions: SALES_DEDUCTIONS, displayItems: DISPLAY_ITEMS, stockOverrides: STOCK_OVERRIDES, locations: LOCATIONS, _timestamp: Date.now() });
 
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
 
@@ -3872,6 +3890,48 @@ async function _removeTransferFromGH(trId) {
 
     return false;
 
+}
+
+
+
+// ── 위치찾기: locations.json 안전 저장 ──────────────────────────────
+// 서버 최신본을 읽어 mutateFn으로 변형한 뒤 저장 (다른 기기의 구역/배정 변경을 보존).
+// 로드 실패 시 저장 중단(빈 데이터로 덮어쓰기 방지), 409/422는 최신본 재조회 후 재시도.
+async function saveLocations(mutateFn) {
+    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${LOCATIONS_PATH}`;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            const r = await fetch(apiUrl + `?t=${Date.now()}`, { headers: { Authorization: "Bearer " + getPat() } });
+            if (!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
+
+            let serverData = { zones: [], assignments: {} }, sha;
+            if (r.ok) {
+                const j = await r.json(); sha = j.sha;
+                let ok = false;
+                try {
+                    const parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+                    if (parsed && Array.isArray(parsed.zones)) { serverData = parsed; ok = true; }
+                } catch (e2) {}
+                if (!ok) throw new Error('기존 위치 데이터를 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+            }
+
+            const next = mutateFn(serverData);
+
+            const body = { message: "update locations", content: utf8ToB64(JSON.stringify(next, null, 2)), branch: GH.branch, ...(sha && { sha }) };
+            const put = await fetch(apiUrl, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+            if (put.status === 409 || put.status === 422) continue; // 최신 sha로 재시도
+            if (!put.ok) throw new Error('PUT ' + put.status);
+
+            LOCATIONS = next;
+            try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.locations = next; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch (e) {}
+            return true;
+
+        } catch (err) {
+            if (attempt === 2) { console.error('locations save error:', err); showToast(err.message && err.message.includes('중단') ? err.message : '위치 저장 실패. 다시 시도해주세요.', null, 'error'); return false; }
+        }
+    }
+    return false;
 }
 
 
@@ -8025,6 +8085,92 @@ function openDetail(p){
 
   $("#detailBody").appendChild(_dpDiv);
 
+  // ── 위치찾기: 상품 위치(도서관식) 표시 + (ADMIN) 배정 ────────────────────
+  const _locDiv = document.createElement("div");
+  _locDiv.className = "px-3 pb-3";
+  const _renderLocPanel = () => {
+    const asn = LOCATIONS.assignments[p.품번];
+    const zone = asn ? LOCATIONS.zones.find(z => z.id === asn.zoneId) : null;
+    const isAdmin = checkAdminSession();
+
+    const zoneOptionsHtml = () => {
+        const groups = {};
+        LOCATIONS.zones.forEach(z => { (groups[z.group||'기타'] = groups[z.group||'기타']||[]).push(z); });
+        let html = `<option value="">위치 미지정</option>`;
+        for(const g in groups){
+            html += `<optgroup label="${escapeHtml(g)}">` + groups[g].map(z =>
+                `<option value="${z.id}" ${asn && asn.zoneId===z.id ? 'selected':''}>${escapeHtml(z.label)}</option>`).join('') + `</optgroup>`;
+        }
+        return html;
+    };
+
+    let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치</span>
+        ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-400 hover:text-gray-700">구역 관리</button>` : ''}
+      </div>`;
+
+    if(zone){
+        html += `<div onclick="window.openFloorPlanView('${zone.id}'${asn.slot?`,'${escapeHtml(asn.slot)}'`:''})" class="flex items-center gap-2.5 cursor-pointer group">
+            <div style="width:64px;height:55px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;position:relative;flex-shrink:0;background:#fff;">
+                <img src="${floorplanUrl()}" style="width:100%;height:100%;object-fit:cover;">
+                <div style="position:absolute;left:${zone.x}%;top:${zone.y}%;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#ff5a1f;border:1.5px solid #fff;"></div>
+            </div>
+            <div class="min-w-0">
+                <div class="font-black text-sm text-gray-800 group-hover:underline">${escapeHtml(zone.label)}</div>
+                ${asn.slot ? `<div class="text-xs font-bold text-gray-500">${escapeHtml(asn.slot)}</div>` : ''}
+                <div class="text-[10px] text-gray-400 mt-0.5">탭하면 도면에서 크게 보기</div>
+            </div>
+        </div>`;
+    } else if(!isAdmin){
+        html += `<div class="text-xs text-gray-400 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
+    }
+
+    if(isAdmin){
+        html += `<div class="flex items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
+            <select id="locZoneSel" class="ipt text-xs py-1.5 px-2 flex-1 min-w-0">${zoneOptionsHtml()}</select>
+            <select id="locSlotSel" class="ipt text-xs py-1.5 px-2 ${zone && zone.slots && zone.slots.length ? '' : 'hidden'}" style="max-width:110px;">
+                ${zone ? (zone.slots||[]).map(s => `<option value="${escapeHtml(s)}" ${asn && asn.slot===s?'selected':''}>${escapeHtml(s)}</option>`).join('') : ''}
+            </select>
+            <button id="locSaveBtn" class="brutal px-2.5 py-1.5 text-xs font-black bg-[color:var(--surface)]">저장</button>
+        </div>`;
+    }
+
+    html += `</div>`;
+    _locDiv.innerHTML = html;
+
+    if(isAdmin){
+        // _locDiv가 아직 문서에 붙기 전(최초 렌더)일 수 있어 document 전역 $() 대신 _locDiv 안에서만 탐색
+        const zoneSel = _locDiv.querySelector("#locZoneSel");
+        const slotSel0 = _locDiv.querySelector("#locSlotSel");
+        const saveBtn = _locDiv.querySelector("#locSaveBtn");
+        zoneSel.onchange = () => {
+            const z = LOCATIONS.zones.find(zz => zz.id === zoneSel.value);
+            if(z && z.slots && z.slots.length){
+                slotSel0.innerHTML = z.slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+                slotSel0.classList.remove('hidden');
+            } else { slotSel0.innerHTML = ''; slotSel0.classList.add('hidden'); }
+        };
+        saveBtn.onclick = async () => {
+            if(!checkPat()) return;
+            const zoneId = zoneSel.value;
+            const slot = slotSel0.classList.contains('hidden') ? null : slotSel0.value;
+            const btn = saveBtn; btn.disabled = true; btn.textContent = '저장 중…';
+            const ok = await saveLocations(server => {
+                const assignments = {...server.assignments};
+                if(zoneId) assignments[p.품번] = slot ? { zoneId, slot } : { zoneId };
+                else delete assignments[p.품번];
+                return { zones: server.zones, assignments };
+            });
+            btn.disabled = false; btn.textContent = '저장';
+            if(ok){ showToast('✓ 위치 저장 완료'); _renderLocPanel(); render(); }
+        };
+    }
+  };
+  _renderLocPanel();
+  window._locRenderFn = _renderLocPanel;
+  $("#detailBody").appendChild(_locDiv);
+
   // ── 실재고 보정 패널 (ADMIN 전용, 전체 사이즈) ─────────────────────────
   if (checkAdminSession()) {
       const _soDiv = document.createElement("div");
@@ -8579,7 +8725,7 @@ $("#file").onchange = async (e) => {
 
             RAW = rows; CURRENT_META = meta; 
 
-            _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, _timestamp: Date.now()});
+            _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
 
             applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
 
@@ -8603,7 +8749,105 @@ $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
 
 $("#drop").onclick=()=>$("#file").click(); 
 
-$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); }; 
+$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); };
+
+// ── 위치찾기: 창고 위치 관리(구역 핀 추가/수정/삭제) ─────────────────────
+function floorplanUrl(){ return `https://${GH.owner}.github.io/${GH.repo}/floorplan.png?v=1`; }
+
+function _uniqueZoneId(label){
+    const base = String(label).trim().toLowerCase().replace(/[^a-z0-9가-힣]+/g,'-').replace(/^-+|-+$/g,'') || 'zone';
+    let id = base, n = 1;
+    const exists = id2 => LOCATIONS.zones.some(z => z.id === id2);
+    while (exists(id)) { id = `${base}-${++n}`; }
+    return id;
+}
+
+let _zmAddMode = false;
+
+function renderZonePins(){
+    const wrap = $("#zmPins"); if(!wrap) return;
+    wrap.innerHTML = LOCATIONS.zones.map(z => `
+        <div class="zm-pin" data-zone="${z.id}" style="position:absolute; left:${z.x}%; top:${z.y}%; transform:translate(-50%,-50%); cursor:pointer;">
+            <div style="width:16px;height:16px;border-radius:50%;background:#ff5a1f;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>
+            <div style="position:absolute; top:18px; left:50%; transform:translateX(-50%); white-space:nowrap; background:#111; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:5px; pointer-events:none;">${escapeHtml(z.label)}</div>
+        </div>`).join('');
+    wrap.querySelectorAll('.zm-pin').forEach(el=>{
+        el.onclick = (e) => {
+            e.stopPropagation();
+            const z = LOCATIONS.zones.find(zz => zz.id === el.dataset.zone);
+            if(!z) return;
+            const action = prompt(`구역: ${z.label}\n\n· 이름을 바꾸려면 새 이름 입력 후 확인\n· 삭제하려면 DELETE 입력\n· 그대로 두려면 취소`, z.label);
+            if(action === null) return;
+            const trimmed = action.trim();
+            if(trimmed.toUpperCase() === 'DELETE'){
+                if(!confirm(`"${z.label}" 구역을 삭제할까요? 배정된 상품의 위치 정보도 사라집니다.`)) return;
+                saveLocations(server => {
+                    const zones = server.zones.filter(zz => zz.id !== z.id);
+                    const assignments = {...server.assignments};
+                    for(const code in assignments) if(assignments[code].zoneId === z.id) delete assignments[code];
+                    return { zones, assignments };
+                }).then(ok => { if(ok){ renderZonePins(); showToast('구역 삭제됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+                return;
+            }
+            if(trimmed && trimmed !== z.label){
+                const slotsStr = prompt('세부 칸 목록 (쉼표로 구분, 없으면 빈칸으로 확인)\n예: 1층-좌, 1층-우, 2층-좌, 2층-우', (z.slots||[]).join(', '));
+                if(slotsStr === null) return;
+                const slots = slotsStr.split(',').map(s=>s.trim()).filter(Boolean);
+                saveLocations(server => {
+                    const zones = server.zones.map(zz => zz.id === z.id ? {...zz, label: trimmed, slots} : zz);
+                    return { zones, assignments: server.assignments };
+                }).then(ok => { if(ok){ renderZonePins(); showToast('구역 수정됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+            }
+        };
+    });
+}
+
+window.openZoneManager = () => {
+    $("#zmFloorImg").src = floorplanUrl();
+    renderZonePins();
+    _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
+    $("#zoneManagerModal").classList.remove("hidden");
+};
+$("#openZoneManager").onclick = window.openZoneManager;
+$("#closeZoneManager").onclick = () => $("#zoneManagerModal").classList.add("hidden");
+
+$("#zmAddModeBtn").onclick = () => {
+    _zmAddMode = !_zmAddMode;
+    $("#zmAddModeHint").classList.toggle("hidden", !_zmAddMode);
+    $("#zmAddModeBtn").style.background = _zmAddMode ? '#fff0e9' : '';
+};
+
+$("#zmImgWrap").onclick = (e) => {
+    if(!_zmAddMode) return;
+    if(e.target.closest('.zm-pin')) return;
+    const rect = $("#zmImgWrap").getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 1000) / 10;
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 1000) / 10;
+    const label = prompt('새 구역 이름 (예: 스토리지1 랙3, ACC DP 좌측1)');
+    if(!label || !label.trim()) return;
+    const group = prompt('그룹명 (선택, 예: 스토리지 / ACC DP 좌측)', '') || '';
+    const slotsStr = prompt('세부 칸 목록 (쉼표로 구분, 선택사항)\n예: 1층-좌, 1층-우, 2층-좌, 2층-우', '') || '';
+    const slots = slotsStr.split(',').map(s=>s.trim()).filter(Boolean);
+    const newZone = { id: _uniqueZoneId(label), group: group.trim(), label: label.trim(), x, y, slots };
+    saveLocations(server => ({ zones: [...server.zones, newZone], assignments: server.assignments }))
+        .then(ok => {
+            if(ok){ renderZonePins(); showToast('구역 추가됨: ' + newZone.label); }
+            _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
+        });
+};
+
+// ── 위치찾기: 도면 크게 보기(직원용, 하이라이트 핀) ──────────────────────
+window.openFloorPlanView = (zoneId, extraLabel) => {
+    const z = LOCATIONS.zones.find(zz => zz.id === zoneId);
+    if(!z) return;
+    $("#fpvFloorImg").src = floorplanUrl();
+    $("#fpvTitle").textContent = `📍 ${z.label}${extraLabel ? ' · ' + extraLabel : ''}`;
+    $("#fpvPin").style.left = z.x + '%';
+    $("#fpvPin").style.top = z.y + '%';
+    $("#floorPlanViewModal").classList.remove("hidden");
+};
+$("#closeFloorPlanView").onclick = () => $("#floorPlanViewModal").classList.add("hidden");
+
 
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ setAdminSession(); applyDefaultPatIfNeeded($("#pwd").value); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
 
@@ -10417,7 +10661,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
                     RAW = rows; CURRENT_META = meta; 
 
-                    _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, _timestamp: Date.now()});
+                    _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
 
                     applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); 
 
@@ -10451,7 +10695,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-loadGhConfig(); loadData();
+loadGhConfig(); loadData().then(() => {
+    if (location.hash === '#dashboard' && window.openAnalyticsReport) window.openAnalyticsReport();
+}).catch(()=>{});
 
 
 
