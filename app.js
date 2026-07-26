@@ -4127,19 +4127,19 @@ window.exportTransfersToExcel = () => {
 
     // Row1: 빈 행
 
-    aoa.push(Array(12).fill(''));
+    aoa.push(Array(13).fill(''));
 
 
 
-    // Row2: 타이틀 (B2, B2:L2 병합)
+    // Row2: 타이틀 (B2, B2:M2 병합)
 
-    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '']);
+    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '', '']);
 
 
 
     // Row3: 헤더
 
-    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '품명', '규격', '품명', '요청수량', '물류센터재고', '매장재고', '단위이상']);
+    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '품명', '규격', '품명', '요청수량', '물류센터재고', '매장재고', '단위이상', '카테고리']);
 
 
 
@@ -4232,6 +4232,8 @@ window.exportTransfersToExcel = () => {
 
             diff,                                  // L: 단위이상
 
+            prod?.카테고리 || '',                    // M: 카테고리 (신발/의류/용품 — 엑셀 내 구분용)
+
         ]);
 
     });
@@ -4242,15 +4244,15 @@ window.exportTransfersToExcel = () => {
 
 
 
-    // B2:L2 병합
+    // B2:M2 병합
 
-    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 11 } }];
+    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 12 } }];
 
 
 
     // 열 너비 — 각 열의 최대 글자 수 기준 자동 계산
 
-    const colCount = 12;
+    const colCount = 13;
 
     const colWidths = Array(colCount).fill(4);
 
