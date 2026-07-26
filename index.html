@@ -288,6 +288,7 @@
       
       <div id="uploadPanel" class="hidden">
         <button id="openSettings" class="text-xs mb-3 border px-2 py-1 bg-gray-100 rounded">⚙️ 깃허브 설정 / 토큰 관리</button>
+        <button id="openZoneManager" class="text-xs mb-3 ml-1.5 border px-2 py-1 rounded" style="background:#fff0e9;color:#c2410c;border-color:#ffd8c4;">📍 창고 위치 관리</button>
         <div id="drop" class="border-2 border-dashed border-gray-400 p-10 text-center cursor-pointer bg-gray-50 dark:bg-gray-800 rounded-xl">
             <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400 mb-2"></i>
             <div class="font-bold">엑셀 파일 클릭 또는 드래그</div>
@@ -307,7 +308,43 @@
   </div>
 </div>
 
-<script src="./app.js?v=26072502"></script>
+<!-- 창고 위치 관리 (관리자) — 도면 위에 구역 핀을 추가/편집/삭제 -->
+<div id="zoneManagerModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-2 sm:p-4">
+    <div class="card w-full max-w-4xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
+      <button id="closeZoneManager" class="absolute top-3 right-3 p-2 z-10"><i data-lucide="x"></i></button>
+      <h3 class="text-lg font-black mb-1">📍 창고 위치 관리</h3>
+      <div class="text-xs text-gray-500 mb-3">도면을 클릭해 구역(랙·서랍 등)을 추가하세요. 기존 핀을 클릭하면 수정·삭제할 수 있습니다.</div>
+      <div class="flex items-center gap-2 mb-3">
+        <button id="zmAddModeBtn" class="brutal px-3 py-1.5 text-xs font-black bg-[color:var(--surface)]">＋ 구역 추가 모드</button>
+        <span id="zmAddModeHint" class="hidden text-xs font-bold" style="color:#c2410c;">도면을 클릭해 새 구역 위치를 지정하세요</span>
+      </div>
+      <div id="zmImgWrap" style="position:relative; width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line); cursor:default;">
+        <img id="zmFloorImg" src="" style="width:100%; display:block;" draggable="false">
+        <div id="zmPins" style="position:absolute; inset:0;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 위치 보기 (직원용) — 상품 상세에서 클릭 시 도면 위 위치 하이라이트 -->
+<div id="floorPlanViewModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-2 sm:p-4">
+    <div class="card w-full max-w-3xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
+      <button id="closeFloorPlanView" class="absolute top-3 right-3 p-2 z-10"><i data-lucide="x"></i></button>
+      <h3 id="fpvTitle" class="text-lg font-black mb-3">📍 위치</h3>
+      <div id="fpvImgWrap" style="position:relative; width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line);">
+        <img id="fpvFloorImg" src="" style="width:100%; display:block;" draggable="false">
+        <div id="fpvPin" style="position:absolute; width:22px; height:22px; margin-left:-11px; margin-top:-11px; border-radius:50%; background:#ff5a1f; box-shadow:0 0 0 4px rgba(255,90,31,.35); animation:fpv-pulse 1.4s ease-in-out infinite;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes fpv-pulse { 0%,100%{ box-shadow:0 0 0 4px rgba(255,90,31,.35);} 50%{ box-shadow:0 0 0 10px rgba(255,90,31,.12);} }
+</style>
+
+<script src="./app.js?v=26072601"></script>
 
 <!-- 맨 위로 버튼 -->
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"
