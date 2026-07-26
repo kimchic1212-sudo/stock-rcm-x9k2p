@@ -4127,19 +4127,19 @@ window.exportTransfersToExcel = () => {
 
     // Row1: 빈 행
 
-    aoa.push(Array(13).fill(''));
+    aoa.push(Array(12).fill(''));
 
 
 
-    // Row2: 타이틀 (B2, B2:M2 병합)
+    // Row2: 타이틀 (B2, B2:L2 병합)
 
-    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '', '']);
+    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '']);
 
 
 
-    // Row3: 헤더
+    // Row3: 헤더 — 카테고리는 품번 바로 뒤(대분류 위치)에 배치, 중복이던 품명은 하나로 통합
 
-    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '품명', '규격', '품명', '요청수량', '물류센터재고', '매장재고', '단위이상', '카테고리']);
+    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '카테고리', '품명', '규격', '요청수량', '물류센터재고', '매장재고', '단위이상']);
 
 
 
@@ -4218,11 +4218,11 @@ window.exportTransfersToExcel = () => {
 
             t.code,                                // E: 품번
 
-            t.product,                             // F: 품명
+            prod?.카테고리 || '',                    // F: 카테고리 (신발/의류/용품 — 대분류)
 
-            t.size,                                // G: 규격
+            t.product,                             // G: 품명
 
-            t.product,                             // H: 품명 (사이즈 미포함)
+            t.size,                                // H: 규격
 
             t.qty,                                 // I: 요청수량
 
@@ -4231,8 +4231,6 @@ window.exportTransfersToExcel = () => {
             store,                                 // K: 매장재고(부산)
 
             diff,                                  // L: 단위이상
-
-            prod?.카테고리 || '',                    // M: 카테고리 (신발/의류/용품 — 엑셀 내 구분용)
 
         ]);
 
@@ -4244,15 +4242,15 @@ window.exportTransfersToExcel = () => {
 
 
 
-    // B2:M2 병합
+    // B2:L2 병합
 
-    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 12 } }];
+    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 11 } }];
 
 
 
     // 열 너비 — 각 열의 최대 글자 수 기준 자동 계산
 
-    const colCount = 13;
+    const colCount = 12;
 
     const colWidths = Array(colCount).fill(4);
 
