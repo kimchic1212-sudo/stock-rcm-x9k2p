@@ -102,8 +102,9 @@ function parseItems(d, todayItems, debugLog) {
     if (!m) continue;
     const code = m[1].trim(), size = m[2].trim();
     const rawQty = parseInt(item.SALES_QTY || item.salesQty);
-    // 음수(반품)·0·NaN은 판매 집계에서 제외
-    if (!rawQty || rawQty <= 0) continue;
+    // NaN만 제외. 음수(반품)는 그대로 합산해 당일 순매출에서 자동 차감되도록 함
+    if (!rawQty && rawQty !== 0) continue;
+    if (rawQty === 0) continue;
     const qty = rawQty;
     if (!todayItems[code]) todayItems[code] = {};
     if (!todayItems[code][size]) todayItems[code][size] = 0;
@@ -279,7 +280,8 @@ async function fetchPOSSales() {
       if (!history.items[code]) history.items[code] = {};
       history.items[code][dateKey] = {};
       for (const [size, qty] of Object.entries(sizes)) {
-        history.items[code][dateKey][size] = { '부산(김종훈)': qty };
+        // 반품이 판매보다 많아 순수량이 0 이하면 오늘 판매 없음으로 처리 (음수로 남기지 않음)
+        if (qty > 0) history.items[code][dateKey][size] = { '부산(김종훈)': qty };
       }
     }
     history.meta = {
