@@ -336,8 +336,13 @@
         <button id="zmAddModeBtn" class="brutal px-3 py-1.5 text-xs font-black bg-[color:var(--surface)]">＋ 구역 추가 모드</button>
         <span id="zmAddModeHint" class="hidden text-xs font-bold" style="color:#c2410c;">도면을 클릭해 새 구역 위치를 지정하세요</span>
       </div>
-      <div id="zmImgWrap" style="position:relative; width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line); cursor:default;">
-        <img id="zmFloorImg" src="" style="width:100%; display:block;" draggable="false">
+      <div id="zmImgWrap" style="position:relative; width:100%; aspect-ratio:1800/1552; background:#fafafa; border-radius:12px; overflow:hidden; border:1px solid var(--line); cursor:default;">
+        <img id="zmFloorImg" src="" style="width:100%; height:100%; object-fit:contain; display:block; filter:contrast(1.15) saturate(0.9);" draggable="false"
+             onerror="this.style.display='none'; document.getElementById('zmImgErr').classList.remove('hidden');"
+             onload="document.getElementById('zmImgErr').classList.add('hidden');">
+        <div id="zmImgErr" class="hidden" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; font-size:12px; font-weight:700; color:#c2410c;">
+          도면 이미지를 불러오지 못했습니다.<br>새로고침 후 다시 시도하거나 관리자에게 문의하세요.
+        </div>
         <div id="zmPins" style="position:absolute; inset:0;"></div>
       </div>
     </div>
@@ -350,8 +355,13 @@
     <div class="card w-full max-w-3xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
       <button id="closeFloorPlanView" class="absolute top-3 right-3 p-2 z-10"><i data-lucide="x"></i></button>
       <h3 id="fpvTitle" class="text-lg font-black mb-3">📍 위치</h3>
-      <div id="fpvImgWrap" style="position:relative; width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--line);">
-        <img id="fpvFloorImg" src="" style="width:100%; display:block;" draggable="false">
+      <div id="fpvImgWrap" style="position:relative; width:100%; aspect-ratio:1800/1552; background:#fafafa; border-radius:12px; overflow:hidden; border:1px solid var(--line);">
+        <img id="fpvFloorImg" src="" style="width:100%; height:100%; object-fit:contain; display:block; filter:contrast(1.15) saturate(0.9);" draggable="false"
+             onerror="this.style.display='none'; document.getElementById('fpvImgErr').classList.remove('hidden');"
+             onload="document.getElementById('fpvImgErr').classList.add('hidden');">
+        <div id="fpvImgErr" class="hidden" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; font-size:12px; font-weight:700; color:#c2410c;">
+          도면 이미지를 불러오지 못했습니다.<br>새로고침 후 다시 시도해주세요.
+        </div>
         <div id="fpvPin" style="position:absolute; width:22px; height:22px; margin-left:-11px; margin-top:-11px; border-radius:50%; background:#ff5a1f; box-shadow:0 0 0 4px rgba(255,90,31,.35); animation:fpv-pulse 1.4s ease-in-out infinite;"></div>
       </div>
     </div>
@@ -361,7 +371,7 @@
 @keyframes fpv-pulse { 0%,100%{ box-shadow:0 0 0 4px rgba(255,90,31,.35);} 50%{ box-shadow:0 0 0 10px rgba(255,90,31,.12);} }
 </style>
 
-<script src="./app.js?v=26072607"></script>
+<script src="./app.js?v=26072608"></script>
 
 <!-- 맨 위로 버튼 -->
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"
