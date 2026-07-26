@@ -1,7 +1,7 @@
-시작: 2026-07-26T08:07:53.298Z
+시작: 2026-07-26T08:17:46.894Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=178505328790474.67343794590909
+[RES] 200 login.xml&postfix=17850538768716506.318706297963
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 21건
+selTodaySalesList: 22건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29336","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 255]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 1건
-메뉴 클릭 후 거래: 21건
+메뉴 클릭 후 거래: 22건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"37167","ITEM_NM":"코어 헤드밴드 [2UE30480553, 1SIZE]","SALES_AMT":44100,"NET_SALES_AMT":4009
@@ -98,4 +98,8 @@ selTodaySalesList: 21건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37988","ITEM_NM":"보메로 프리미엄 [HQ2050-104, 265]","SALES_AMT":269100,"NET_SALES_AMT":2446
   파싱 성공: 2건
-완료: 품번 22개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21027","ITEM_NM":"보메로 플러스 [HV8154-001, 230]","SALES_AMT":131400,"NET_SALES_AMT":11945
+  파싱 성공: 2건
+완료: 품번 24개
