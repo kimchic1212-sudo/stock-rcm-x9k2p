@@ -1043,6 +1043,8 @@ document.addEventListener("keydown", (e) => {
 
                 setTimeout(() => dash.classList.add("hidden"), 300);
 
+                if (document.body.classList.contains('dashboard-only-mode') && typeof _revealDashOnlyUI === 'function') _revealDashOnlyUI(); // 팝업 전용모드에서 ESC로 닫아도 재고앱 화면 노출 (안 하면 화면 먹통됨)
+
             }
 
         }
@@ -4939,41 +4941,6 @@ window.openAnalyticsReport = async () => {
 
 
 
-            let insightHtml = ""; let isBusanLowStock = false;
-
-            if (activeSizeFilter !== "ALL") {
-
-                const sObj = p.sizes.find(s => String(s.size).trim() === activeSizeFilter);
-
-                if (sObj && sObj.busan <= 2) isBusanLowStock = true;
-
-            } else { if (p.busanTotal <= 3) isBusanLowStock = true; } 
-
-            
-
-            let isCenterOrSinsaHasStock = (p.centerTotal + p.sinsaTotal) > 0;
-
-            let isBusanSellingWell = p.dashBusanSalesTotal >= 2; 
-
-            let isBusanDominating = p.dashBusanSalesTotal > p.dashSinsaSalesTotal;
-
-
-
-            if (isBusanLowStock && isCenterOrSinsaHasStock && isBusanSellingWell && isBusanDominating) {
-
-                insightHtml = `
-
-                    <div class="mt-1.5 bg-red-50 border border-red-100 px-3 py-2 rounded-lg flex items-center gap-2 w-full ml-[68px]">
-
-                        <i data-lucide="zap" class="w-4 h-4 text-red-500 shrink-0"></i>
-
-                        <div class="text-xs text-red-700 leading-snug font-bold">🔥 긴급확보 추천! 판매 ${p.dashBusanSalesTotal}개 · 타지점 재고 ${p.centerTotal + p.sinsaTotal}개 있음</div>
-
-                    </div>
-
-                `;
-
-            }
 
 
 
@@ -5030,8 +4997,6 @@ window.openAnalyticsReport = async () => {
                     ${statsHtml}
 
                 </div>
-
-                ${insightHtml}
 
             </div>
 
