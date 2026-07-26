@@ -4153,13 +4153,41 @@ window.exportTransfersToExcel = () => {
         if(품번 && 규격 && 코드) _itemCodeMap[`${품번}(${규격})`] = 코드;
     });
 
-    // Row4+: 데이터
+    // Row4+: 데이터 — 카테고리(신발→의류→용품) → 브랜드 가나다순 → 품번(같은 품목끼리 묶임) → 규격 오름차순 정렬
 
-    TRANSFERS.forEach(t => {
+    const _sortedTransfers = TRANSFERS.map(t => ({ t, prod: PRODUCTS.find(p => p.품번 === t.code) })).sort((a, b) => {
 
-        // 품번으로 제품 찾고 sizes 배열에서 해당 사이즈의 물류센터 재고 조회
+        const ca = CAT_ORDER[a.prod?.카테고리] ?? 9;
 
-        const prod = PRODUCTS.find(p => p.품번 === t.code);
+        const cb = CAT_ORDER[b.prod?.카테고리] ?? 9;
+
+        if (ca !== cb) return ca - cb;
+
+        const brandCmp = String(a.prod?.브랜드 || '').localeCompare(String(b.prod?.브랜드 || ''), 'ko');
+
+        if (brandCmp !== 0) return brandCmp;
+
+        const codeCmp = String(a.t.code || '').localeCompare(String(b.t.code || ''), 'ko');
+
+        if (codeCmp !== 0) return codeCmp;
+
+        // 같은 품번끼리는 규격(사이즈) 오름차순 — 숫자 사이즈면 숫자로 비교
+
+        const sa = String(a.t.size || ''), sb = String(b.t.size || '');
+
+        const na = parseFloat(sa), nb = parseFloat(sb);
+
+        if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+
+        return sa.localeCompare(sb, 'ko');
+
+    });
+
+
+
+    _sortedTransfers.forEach(({ t, prod }) => {
+
+        // sizes 배열에서 해당 사이즈의 물류센터 재고 조회 (prod는 위에서 미리 조회)
 
         const sizeObj = prod?.sizes?.find(s => String(s.size).trim() === String(t.size || '').trim());
 
