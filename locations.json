@@ -3,7 +3,7 @@
     {
       "id": "accL1",
       "group": "ACC DP 좌측",
-      "label": "좌측 ACC DP 1",
+      "label": "모션랩 앞 1",
       "x": 34.2,
       "y": 60.5,
       "slots": [
@@ -16,7 +16,7 @@
     {
       "id": "accL2",
       "group": "ACC DP 좌측",
-      "label": "좌측 ACC DP 2",
+      "label": "모션랩 앞 2",
       "x": 38,
       "y": 60.5,
       "slots": [
@@ -29,7 +29,7 @@
     {
       "id": "accC1",
       "group": "ACC DP 중앙",
-      "label": "중앙 ACC DP 1",
+      "label": "카운터 앞 1",
       "x": 63,
       "y": 67,
       "slots": [
@@ -42,7 +42,7 @@
     {
       "id": "accC2",
       "group": "ACC DP 중앙",
-      "label": "중앙 ACC DP 2",
+      "label": "카운터 앞 2",
       "x": 66.3,
       "y": 67,
       "slots": [
@@ -51,14 +51,6 @@
         "뒤-1층",
         "뒤-2층"
       ]
-    },
-    {
-      "id": "stool",
-      "group": "중앙 스툴",
-      "label": "중앙 곡선 스툴 서랍",
-      "x": 52,
-      "y": 57,
-      "slots": []
     },
     {
       "id": "storage1",
@@ -74,6 +66,46 @@
       "label": "스토리지 02",
       "x": 72,
       "y": 21,
+      "slots": []
+    },
+    {
+      "id": "mainzone-stool-1",
+      "group": "메인존",
+      "label": "메인존 스툴 1",
+      "x": 56.2,
+      "y": 36.4,
+      "slots": []
+    },
+    {
+      "id": "mainzone-stool-2",
+      "group": "메인존",
+      "label": "메인존 스툴 2",
+      "x": 52.6,
+      "y": 40.5,
+      "slots": []
+    },
+    {
+      "id": "mainzone-stool-3",
+      "group": "메인존",
+      "label": "메인존 스툴 3",
+      "x": 52.5,
+      "y": 45.3,
+      "slots": []
+    },
+    {
+      "id": "mainzone-stool-4",
+      "group": "메인존",
+      "label": "메인존 스툴 4",
+      "x": 52.5,
+      "y": 56.6,
+      "slots": []
+    },
+    {
+      "id": "mainzone-stool-5",
+      "group": "메인존",
+      "label": "메인존 스툴 5",
+      "x": 48.9,
+      "y": 60.5,
       "slots": []
     }
   ],
