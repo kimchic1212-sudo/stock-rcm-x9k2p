@@ -1,11 +1,53 @@
-시작: 2026-07-26T04:37:02.921Z
+시작: 2026-07-26T04:37:03.456Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17850406331081779.7196989943254
+[RES] 200 login.xml&postfix=17850406348998106.801164559935
 폼 입력 완료
 [RES] 200 login
+[RES] 200 init
 로그인 후 URL: https://cloudposoffice.shinsegae.com/
 스크린샷 업로드
 자동 로드 없음 → 메뉴 클릭 시도
-메뉴 클릭 후 거래: 0건
-완료: 품번 0개
+영업 클릭
+영업속보 클릭
+[] 클릭OK(ID)
+[RES] 200 selTodaySalesList
+selTodaySalesList: 9건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29336","ITEM_NM":"클라우드몬스터 3 [3WG10032852, 255]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+메뉴 클릭 후 거래: 9건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":49000,"ITEM_CD":"37167","ITEM_NM":"코어 헤드밴드 [2UE30480553, 1SIZE]","SALES_AMT":44100,"NET_SALES_AMT":4009
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 3개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":75000,"ITEM_CD":"29017","ITEM_NM":"ACG 드라이 핏 ADV 솔라 체이스 숏 슬리브 탑 [IO9678-097, M]","SALES_AMT":45000,"NET
+  파싱 성공: 3건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"33060","ITEM_NM":"보메로 프리미엄 [HQ2050-106, 270]","SALES_AMT":254150,"NET_SALES_AMT":2310
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"16803","ITEM_NM":"퍼포먼스 탱크 [1ME10220106, M]","SALES_AMT":90250,"NET_SALES_AMT":82045,"V
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"33202","ITEM_NM":"보메로 플러스 [HV8154-012, 245]","SALES_AMT":186150,"NET_SALES_AMT":16922
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"29672","ITEM_NM":"스펙터 캡 [2UG10040553, 1SIZE]","SALES_AMT":103500,"NET_SALES_AMT":9409
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27522","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [JD1160, L]","SALES_AMT":35100,"NET_SALES_AMT":319
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":239000,"ITEM_CD":"36973","ITEM_NM":"퍼포먼스 볼트 베스트 [1MG30670561, M]","SALES_AMT":203000,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 13개
