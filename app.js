@@ -4842,7 +4842,7 @@ window.openAnalyticsReport = async () => {
     };
 
     // 모델 통합 리스트 카드 1행
-    const _modelCard = (g, idx) => {
+    const _modelCard = (g, idx, totalRev) => {
         const imgSrc = IMAGES[g.shopNo || g.품번] || null;
         const rankClass = idx < 3 ? "rank top3" : "rank";
         const total = g.dashSales || 1;
@@ -4850,9 +4850,11 @@ window.openAnalyticsReport = async () => {
         const seg = (pct, cls) => pct > 0 ? `<div class="${cls}" style="width:${pct}%"></div>` : '';
         const mixBar = `<div class="flex h-1.5 w-16 rounded-full overflow-hidden bg-gray-100" title="남 ${mPct}% · 여 ${wPct}%">${seg(mPct, 'bg-sky-400')}${seg(wPct, 'bg-pink-400')}${seg(uPct, 'bg-purple-300')}</div>`;
         const mixTxt = [g.mSales > 0 ? `남 ${mPct}%` : '', g.wSales > 0 ? `여 ${wPct}%` : ''].filter(Boolean).join(' · ');
+        const revPct = totalRev > 0 ? (g.dashRev / totalRev * 100).toFixed(1) : '0.0';
+        const revPctBadge = `<span class="text-[10px] font-black text-red-500">${revPct}%</span>`;
         const statsHtml = currentDashSort === 'rev'
-            ? `<div class="stats"><div class="stat-primary-rev">${krw(g.dashRev)}</div><div class="stat-secondary-rev">${fmt(g.dashSales)}개</div></div>`
-            : `<div class="stats"><div class="stat-primary">${fmt(g.dashSales)}개</div><div class="stat-secondary">${krw(g.dashRev)}</div></div>`;
+            ? `<div class="stats"><div class="stat-primary-rev">${krw(g.dashRev)} ${revPctBadge}</div><div class="stat-secondary-rev">${fmt(g.dashSales)}개</div></div>`
+            : `<div class="stats"><div class="stat-primary">${fmt(g.dashSales)}개</div><div class="stat-secondary">${krw(g.dashRev)} ${revPctBadge}</div></div>`;
         return `
             <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${g.품번}', '${(currentPeriod === 'CUSTOM' ? `CUSTOM_${currentCustomStart}_${currentCustomEnd}` : currentPeriod)}')">
                 <div class="flex items-center w-full">
@@ -4973,7 +4975,7 @@ window.openAnalyticsReport = async () => {
 
         $("#dashListBody").innerHTML = _listSrc.map((p, idx) => {
 
-            if (currentDashView === 'model') return _modelCard(p, idx);
+            if (currentDashView === 'model') return _modelCard(p, idx, totalRev);
 
             const imgSrc = IMAGES[p.shopNo || p.품번] || null;
 
@@ -5000,11 +5002,15 @@ window.openAnalyticsReport = async () => {
 
             const rankClass = idx < 3 ? "rank top3" : "rank";
 
+            const _revPct = totalRev > 0 ? (p.dashRev / totalRev * 100).toFixed(1) : '0.0';
+
+            const _revPctBadge = `<span class="text-[10px] font-black text-red-500">${_revPct}%</span>`;
+
             const statsHtml = currentDashSort === 'rev'
 
-                ? `<div class="stats"><div class="stat-primary-rev">${krw(p.dashRev)}</div><div class="stat-secondary-rev">${fmt(p.dashSales)}개</div></div>`
+                ? `<div class="stats"><div class="stat-primary-rev">${krw(p.dashRev)} ${_revPctBadge}</div><div class="stat-secondary-rev">${fmt(p.dashSales)}개</div></div>`
 
-                : `<div class="stats"><div class="stat-primary">${fmt(p.dashSales)}개</div><div class="stat-secondary">${krw(p.dashRev)}</div></div>`;
+                : `<div class="stats"><div class="stat-primary">${fmt(p.dashSales)}개</div><div class="stat-secondary">${krw(p.dashRev)} ${_revPctBadge}</div></div>`;
 
             return `
 
