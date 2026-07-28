@@ -8843,10 +8843,12 @@ function renderZonePins(){
 function loadFloorImg(imgId, errId){
     const img = $("#" + imgId), err = $("#" + errId);
     if(!img) return;
-    if(err) err.classList.add("hidden");
+    // 에러 표시는 style.display로만 제어 — .hidden 클래스는 인라인 display에 밀려 무시됨
+    const showErr = (on) => { if(err) err.style.display = on ? "flex" : "none"; };
+    showErr(false);
     img.style.display = "block";
-    img.onerror = () => { img.style.display = "none"; if(err) err.classList.remove("hidden"); };
-    img.onload  = () => { img.style.display = "block"; if(err) err.classList.add("hidden"); };
+    img.onerror = () => { img.style.display = "none"; showErr(true); };
+    img.onload  = () => { img.style.display = "block"; showErr(false); };
     img.src = floorplanUrl();
 }
 
