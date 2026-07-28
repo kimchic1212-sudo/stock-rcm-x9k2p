@@ -6,7 +6,31 @@
 
 
 
+
+
+
+
+
+
+
+
 if (location.search) location.replace(location.pathname);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30,7 +54,23 @@ if (location.search) location.replace(location.pathname);
 
 
 
+
+
+
+
+
+
+
+
 const APP_VERSION = "v26.06.06";
+
+
+
+
+
+
+
+
 
 
 
@@ -46,6 +86,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
     const badge = document.getElementById("appVersionBadge");
 
 
@@ -54,7 +102,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
     if(badge) badge.textContent = APP_VERSION;
+
+
+
+
+
+
+
+
 
 
 
@@ -78,7 +142,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 🔥 1. 관리자 팝업창 스크롤, Z-index 및 모바일 최적화 CSS 🔥
+
+
+
+
+
+
+
+
 
 
 
@@ -94,7 +182,23 @@ const style = document.createElement('style');
 
 
 
+
+
+
+
+
+
+
+
 style.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -110,7 +214,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .no-scrollbar::-webkit-scrollbar { display: none; }
+
+
+
+
+
+
+
+
 
 
 
@@ -126,7 +246,19 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     /* ===== 모바일/패드 개선 ===== */
+
+
+
+
 
 
 
@@ -134,7 +266,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       /* M1: iOS 텍스트 입력 포커스 시 자동 줌인 방지 (입력류만 16px) */
+
+
+
+
 
 
 
@@ -142,7 +282,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       /* M4: 터치 타깃 확대 */
+
+
+
+
 
 
 
@@ -150,7 +298,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
+
+
+
+
 
 
 
@@ -158,7 +314,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       header .chip { padding-left: .4rem; padding-right: .4rem; }
+
+
+
+
 
 
 
@@ -166,7 +330,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       /* 로고 축소로 제목 자리 확보 */
+
+
+
+
 
 
 
@@ -174,7 +346,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       /* M5/M2: 가로 스크롤에 얇은 스크롤바 노출(스와이프 단서) */
+
+
+
+
 
 
 
@@ -182,7 +362,15 @@ style.innerHTML = `
 
 
 
+
+
+
+
       .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.6); border-radius: 4px; }
+
+
+
+
 
 
 
@@ -190,7 +378,19 @@ style.innerHTML = `
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -206,11 +406,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     #analyticsDashboard { z-index: 105 !important; }
 
 
 
+
+
+
+
     #zoneManagerModal, #floorPlanViewModal { z-index: 10001 !important; }
+
+
+
+
+
+
+
+
 
 
 
@@ -226,7 +446,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+
+
+
+
+
+
+
+
 
 
 
@@ -242,7 +478,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
+
+
+
+
+
+
+
+
 
 
 
@@ -254,7 +506,19 @@ style.innerHTML = `
 
 
 
+
+
+
+
     .card img:not(.floorplan-img) { opacity: 0; transition: opacity 0.3s ease-in-out; }
+
+
+
+
+
+
+
+
 
 
 
@@ -270,7 +534,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .card img.floorplan-img { opacity: 1 !important; }
+
+
+
+
+
+
+
+
 
 
 
@@ -286,7 +566,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .chip:hover { background-color: #f8fafc; }
+
+
+
+
+
+
+
+
 
 
 
@@ -302,7 +598,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .brand-hidden { display: none !important; }
+
+
+
+
+
+
+
+
 
 
 
@@ -318,7 +630,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
+
+
+
+
+
+
+
+
 
 
 
@@ -334,7 +662,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .size-scroll-wrap::-webkit-scrollbar { height: 5px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -350,7 +694,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .size-scroll-wrap > div { scroll-snap-align: start; }
+
+
+
+
+
+
+
+
 
 
 
@@ -366,7 +726,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 12px; width: 90%; max-width: 420px; pointer-events: none; }
+
+
+
+
+
+
+
+
 
 
 
@@ -382,6 +758,14 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 
@@ -390,7 +774,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
+
+
+
+
+
+
+
+
 
 
 
@@ -414,7 +814,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* 🔥 Glassmorphism 모달 컨테이너 🔥 */
+
+
+
+
+
+
+
+
 
 
 
@@ -430,7 +854,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         width: 100%; max-width: 800px; padding: 24px;
+
+
+
+
+
+
+
+
 
 
 
@@ -446,7 +886,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+
+
+
+
+
+
+
+
 
 
 
@@ -462,7 +918,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         border-radius: 16px;
+
+
+
+
+
+
+
+
 
 
 
@@ -478,6 +950,14 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         position: relative; box-sizing: border-box;
 
 
@@ -486,7 +966,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -502,6 +998,14 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         position: absolute; top: 24px; right: 24px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333; transition: transform 0.2s ease;
 
 
@@ -510,7 +1014,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -526,7 +1046,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .modal-header { margin-bottom: 24px; text-align: center; }
+
+
+
+
+
+
+
+
 
 
 
@@ -542,7 +1078,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -558,7 +1110,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -574,7 +1142,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -590,7 +1174,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         background: rgba(255, 255, 255, 0.4); border: 2px dashed rgba(0, 0, 0, 0.15); border-radius: 16px;
+
+
+
+
+
+
+
+
 
 
 
@@ -606,7 +1206,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -622,7 +1238,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .upload-icon { font-size: 48px; margin-bottom: 16px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -638,7 +1270,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .settings-section { display: flex; flex-direction: column; gap: 12px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -654,7 +1302,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
         background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px;
+
+
+
+
+
+
+
+
 
 
 
@@ -670,7 +1334,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -686,6 +1366,14 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .card-orange { border-left: 4px solid #ff9a9e; }
 
 
@@ -694,7 +1382,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .card-pink { border-left: 4px solid #fecfef; }
+
+
+
+
+
+
+
+
 
 
 
@@ -718,7 +1422,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* 대시보드 리스트 스타일 */
+
+
+
+
+
+
+
+
 
 
 
@@ -734,7 +1462,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .list-item:last-child { border-bottom: none; }
+
+
+
+
+
+
+
+
 
 
 
@@ -750,7 +1494,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .rank { width: 22px; font-weight: 800; color: #bbb; font-size: 11px; text-align: center; shrink: 0; }
+
+
+
+
+
+
+
+
 
 
 
@@ -766,7 +1526,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .thumbnail { width: 48px; height: 48px; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; overflow: hidden; border: 1px solid #eee; flex-shrink: 0; }
+
+
+
+
+
+
+
+
 
 
 
@@ -782,7 +1558,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+
+
+
+
+
+
+
 
 
 
@@ -806,7 +1598,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     .ui-badge { padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: -0.5px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -822,7 +1638,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .ui-badge.unisex { background: #f3e8ff; color: #9333ea; }
+
+
+
+
+
+
+
+
 
 
 
@@ -846,7 +1678,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     .brand-code { font-size: 11px; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+
+
+
+
+
+
 
 
 
@@ -870,7 +1726,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* 브랜드칩 영역 — 여러 줄 wrap */
+
+
+
+
+
+
+
+
 
 
 
@@ -886,7 +1766,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     #brandExpandedPanel { display: none; flex-direction: column; gap: 6px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -902,7 +1798,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     /* 브랜드 정렬 토글 활성 */
+
+
+
+
+
+
+
+
 
 
 
@@ -918,6 +1830,14 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .brand-sort-btn[data-active="0"] { background: var(--surface) !important; color: var(--muted) !important; }
 
 
@@ -926,7 +1846,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .dash-view-btn[data-active="1"] { background: #ff5a1f; color: #fff; }
+
+
+
+
+
+
+
+
 
 
 
@@ -950,7 +1886,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     .stats { text-align: right; display: flex; flex-direction: column; gap: 1px; margin-left: 10px; flex-shrink: 0; min-width: 68px; }
+
+
+
+
+
+
+
+
 
 
 
@@ -966,6 +1926,14 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .stats .stat-secondary { font-size: 11px; font-weight: 500; color: #999; }
 
 
@@ -974,7 +1942,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     .stats .stat-primary-rev { font-size: 14px; font-weight: 900; color: #dc2626; }
+
+
+
+
+
+
+
+
 
 
 
@@ -998,7 +1982,31 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* ── 다크모드 동적 요소 대응 ── */
+
+
+
+
+
+
+
+
 
 
 
@@ -1014,7 +2022,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode #searchSuggestions > div { background:#1E1E1E; color:#9CA3AF; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1030,7 +2054,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode .toast { background: #334155; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1046,7 +2086,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode #analyticsDashboard .bg-white,
+
+
+
+
+
+
+
+
 
 
 
@@ -1062,7 +2118,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode #analyticsDashboard h1, body.dark-mode #analyticsDashboard h2 { color: #F3F4F6; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1078,7 +2150,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode #posSyncGuideModal > div > div { background: #1E1E1E !important; color: #F3F4F6; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1094,7 +2182,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode .list-item:hover { background-color: #1a1a1a; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1110,7 +2214,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode .brand-code { color: #6B7280; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1126,7 +2246,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode select.ipt, body.dark-mode input.ipt { background: #1E1E1E; color: #F3F4F6; border-color: #374151; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1142,7 +2278,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
     body.dark-mode .animate-pulse .bg-gray-200 { background: #374151; }
+
+
+
+
+
+
+
+
 
 
 
@@ -1158,7 +2310,23 @@ style.innerHTML = `
 
 
 
+
+
+
+
+
+
+
+
 `;
+
+
+
+
+
+
+
+
 
 
 
@@ -1182,7 +2350,31 @@ document.head.appendChild(style);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const ADMIN_PWD = "1212";
+
+
+
+
+
+
+
+
 
 
 
@@ -1198,7 +2390,19 @@ const SESSION_FLAG = "racement_admin_session";
 
 
 
+
+
+
+
+
+
+
+
 // 어드민 세션 helpers — localStorage + 8시간 만료 (iOS Safari 탭 kill 대응)
+
+
+
+
 
 
 
@@ -1206,7 +2410,19 @@ function setAdminSession() { localStorage.setItem(SESSION_FLAG, String(Date.now(
 
 
 
+
+
+
+
 function checkAdminSession() { return parseInt(localStorage.getItem(SESSION_FLAG) || '0') > Date.now(); }
+
+
+
+
+
+
+
+
 
 
 
@@ -1222,7 +2438,23 @@ const GH_CONFIG_KEY = "racement_gh_config_v1";
 
 
 
+
+
+
+
+
+
+
+
 const GH_PAT_KEY = "racement_gh_pat_v1";
+
+
+
+
+
+
+
+
 
 
 
@@ -1238,7 +2470,19 @@ const CACHE_KEY = "racement_inventory_cache_v2";
 
 
 
+
+
+
+
+
+
+
+
 // 세션 캐시 저장 (iOS Safari 등 저장공간 한도 초과 시에도 앱이 죽지 않도록 안전 처리)
+
+
+
+
 
 
 
@@ -1246,7 +2490,15 @@ function _safeSessionCache(obj) {
 
 
 
+
+
+
+
     try {
+
+
+
+
 
 
 
@@ -1254,7 +2506,15 @@ function _safeSessionCache(obj) {
 
 
 
+
+
+
+
     } catch(e) {
+
+
+
+
 
 
 
@@ -1262,7 +2522,15 @@ function _safeSessionCache(obj) {
 
 
 
+
+
+
+
         try { sessionStorage.removeItem(CACHE_KEY); } catch(_) {}
+
+
+
+
 
 
 
@@ -1270,11 +2538,27 @@ function _safeSessionCache(obj) {
 
 
 
+
+
+
+
     }
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -1290,7 +2574,23 @@ const DATA_PATH = "inventory.json";
 
 
 
+
+
+
+
+
+
+
+
 const REQUESTS_PATH = "requests.json"; 
+
+
+
+
+
+
+
+
 
 
 
@@ -1306,7 +2606,23 @@ const TRANSFERS_PATH = "transfers.json";
 
 
 
+
+
+
+
+
+
+
+
 const PROMOTIONS_PATH = "promotions.json"; 
+
+
+
+
+
+
+
+
 
 
 
@@ -1322,7 +2638,23 @@ const SALES_GUIDE_PATH = "sales_guide_v2.json";
 
 
 
+
+
+
+
+
+
+
+
 const SALES_HISTORY_PATH = "sales_history.json";
+
+
+
+
+
+
+
+
 
 
 
@@ -1338,7 +2670,23 @@ const SALES_DEDUCT_PATH = "sales.json";
 
 
 
+
+
+
+
+
+
+
+
 const LOCATIONS_PATH = "locations.json"; // 창고/매장 위치찾기 (도면 구역 + 상품 배정)
+
+
+
+
+
+
+
+
 
 
 
@@ -1354,7 +2702,19 @@ const DISPLAY_PATH = "display_items.json";
 
 
 
+
+
+
+
+
+
+
+
 const FAVS_PATH = "favs.json";   // 즐겨찾기 기기 간 동기화
+
+
+
+
 
 
 
@@ -1366,7 +2726,19 @@ const STOCK_OVERRIDES_PATH = "stock_overrides.json";   // 실재고 보정(부�
 
 
 
+
+
+
+
+
+
+
+
 // ── 사이즈 단위 전환 (KR / EU / US) ──────────────────────────
+
+
+
+
 
 
 
@@ -1378,7 +2750,19 @@ window.sizeUnit = localStorage.getItem('_rcm_sizeUnit') || 'KR';
 
 
 
+
+
+
+
+
+
+
+
 // ── 신발 사이즈 변환 (브랜드별) — 실제 매장 박스 라벨 기준 ────────────────
+
+
+
+
 
 
 
@@ -1386,7 +2770,15 @@ window.sizeUnit = localStorage.getItem('_rcm_sizeUnit') || 'KR';
 
 
 
+
+
+
+
 // EU는 브랜드별 체계가 달라(나이키·써코니=0.5단위 / 아디다스·노말=⅔·⅓단위) usm→EU 표로 관리.
+
+
+
+
 
 
 
@@ -1394,7 +2786,15 @@ window.sizeUnit = localStorage.getItem('_rcm_sizeUnit') || 'KR';
 
 
 
+
+
+
+
 const _SHOE_BRANDS = {
+
+
+
+
 
 
 
@@ -1402,7 +2802,15 @@ const _SHOE_BRANDS = {
 
 
 
+
+
+
+
   '아디다스': { anchorMm:270, anchorUsm:9, wOffset:1.5, eu:{"4.5":"36⅔","5":"37⅓","5.5":"38","6":"38⅔","6.5":"39⅓","7":"40","7.5":"40⅔","8":"41⅓","8.5":"42","9":"42⅔","9.5":"43⅓","10":"44","10.5":"44⅔","11":"45⅓","11.5":"46","12":"46⅔","12.5":"47⅓"} },
+
+
+
+
 
 
 
@@ -1410,7 +2818,15 @@ const _SHOE_BRANDS = {
 
 
 
+
+
+
+
   '써코니':   { anchorMm:270, anchorUsm:9, wOffset:1.5, eu:{"4.5":"37","5":"37.5","5.5":"38","6":"38.5","6.5":"39","7":"40","7.5":"40.5","8":"41","8.5":"42","9":"42.5","9.5":"43","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46"} },
+
+
+
+
 
 
 
@@ -1418,11 +2834,23 @@ const _SHOE_BRANDS = {
 
 
 
+
+
+
+
 const _SHOE_DEFAULT = _SHOE_BRANDS['나이키'];  // 박스 미확보 브랜드는 나이키 표준 사용 (호카·뉴발란스·온러닝·브룩스 등)
 
 
 
+
+
+
+
 const _KR_CLOTH_EU = {44:'32',55:'34',66:'36',77:'38',88:'40',95:'42',100:'44',105:'46'};
+
+
+
+
 
 
 
@@ -1434,7 +2862,19 @@ const _KR_CLOTH_US = {44:'XS',55:'S',66:'M',77:'L',88:'XL',95:'2XL',100:'3XL',10
 
 
 
+
+
+
+
+
+
+
+
 function convertSizeLabel(sz, gender, brand) {
+
+
+
+
 
 
 
@@ -1442,7 +2882,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
     const n = parseInt(sz);
+
+
+
+
 
 
 
@@ -1450,7 +2898,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
     if(n >= 200 && n <= 320 && n % 5 === 0) {
+
+
+
+
 
 
 
@@ -1458,7 +2914,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
         const usm = c.anchorUsm + (n - c.anchorMm) / 10;   // 남성 US
+
+
+
+
 
 
 
@@ -1466,7 +2930,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
             const isW = (gender === 'W' || gender === '여성' || gender === '여');
+
+
+
+
 
 
 
@@ -1474,7 +2946,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
         }
+
+
+
+
 
 
 
@@ -1482,7 +2962,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
             const key = String(usm);
+
+
+
+
 
 
 
@@ -1490,7 +2978,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
             if(_SHOE_DEFAULT.eu[key] !== undefined) return _SHOE_DEFAULT.eu[key];
+
+
+
+
 
 
 
@@ -1498,11 +2994,23 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
         }
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -1510,7 +3018,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
     if(_KR_CLOTH_EU[n] !== undefined) {
+
+
+
+
 
 
 
@@ -1518,7 +3034,15 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
         if(window.sizeUnit === 'US') return _KR_CLOTH_US[n];
+
+
+
+
 
 
 
@@ -1526,11 +3050,27 @@ function convertSizeLabel(sz, gender, brand) {
 
 
 
+
+
+
+
     return String(sz);
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -1542,7 +3082,15 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
     window.sizeUnit = unit;
+
+
+
+
 
 
 
@@ -1550,7 +3098,15 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
     const isDark = document.documentElement.classList.contains('dark-mode');
+
+
+
+
 
 
 
@@ -1558,7 +3114,15 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
         const btn = document.getElementById('sut-' + u);
+
+
+
+
 
 
 
@@ -1566,7 +3130,15 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
         const on = u === unit;
+
+
+
+
 
 
 
@@ -1574,7 +3146,15 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
         btn.style.color = on ? (isDark ? '#ff8a5c' : '#c2410c') : (isDark ? '#6b7280' : '#9ca3af');
+
+
+
+
 
 
 
@@ -1582,11 +3162,23 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
     });
 
 
 
+
+
+
+
     render();
+
+
+
+
 
 
 
@@ -1598,7 +3190,19 @@ window.setSizeUnit = function(unit) {
 
 
 
+
+
+
+
+
+
+
+
 // 즐겨찾기 GitHub 저장 (debounce 1s)
+
+
+
+
 
 
 
@@ -1606,7 +3210,15 @@ let _favsSaveTimer = null;
 
 
 
+
+
+
+
 async function saveFavsToGH() {
+
+
+
+
 
 
 
@@ -1614,7 +3226,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
     _favsSaveTimer = setTimeout(async () => {
+
+
+
+
 
 
 
@@ -1622,7 +3242,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
         try {
+
+
+
+
 
 
 
@@ -1630,7 +3258,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+
+
+
+
 
 
 
@@ -1638,7 +3274,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
             if(r.ok){ const j = await r.json(); sha = j.sha; try { serverFavs = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e){ return; /* 서버본 파싱 실패 — 상태 불명이므로 덮어쓰지 않음 */ } }
+
+
+
+
 
 
 
@@ -1646,7 +3290,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
             // 안전장치: 메모리 FAVS가 비었는데 서버엔 있으면(로드 실패 등) 덮어쓰지 않음 — 전체 유실 방지
+
+
+
+
 
 
 
@@ -1654,7 +3306,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
             const body = { message:"update favs", content: utf8ToB64(JSON.stringify(FAVS)), branch: GH.branch };
+
+
+
+
 
 
 
@@ -1662,7 +3322,15 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
             await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+
+
+
 
 
 
@@ -1670,11 +3338,27 @@ async function saveFavsToGH() {
 
 
 
+
+
+
+
     }, 1000);
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -1698,7 +3382,31 @@ const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 기본 GitHub 설정 (Admin 비번 입력 시 PAT 자동 저장)
+
+
+
+
+
+
+
+
 
 
 
@@ -1714,7 +3422,23 @@ const DEFAULT_GH = {
 
 
 
+
+
+
+
+
+
+
+
   owner:  'kimchic1212-sudo',
+
+
+
+
+
+
+
+
 
 
 
@@ -1730,7 +3454,23 @@ const DEFAULT_GH = {
 
 
 
+
+
+
+
+
+
+
+
   branch: 'main',
+
+
+
+
+
+
+
+
 
 
 
@@ -1746,7 +3486,23 @@ const DEFAULT_GH = {
 
 
 
+
+
+
+
+
+
+
+
 const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
+
+
+
+
+
+
+
+
 
 
 
@@ -1758,7 +3514,19 @@ const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
 
 
 
+
+
+
+
 // 성공 시 항상 최신 토큰으로 갱신 → 토큰 교체(rotation) 자동 대응
+
+
+
+
+
+
+
+
 
 
 
@@ -1774,7 +3542,23 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -1786,7 +3570,15 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
             method: 'POST',
+
+
+
+
 
 
 
@@ -1794,7 +3586,15 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
             body: JSON.stringify({ password: pwd }),
+
+
+
+
 
 
 
@@ -1806,7 +3606,19 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
         if (r.ok) {
+
+
+
+
 
 
 
@@ -1814,7 +3626,15 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
             if (j.pat) setPat(j.pat);
+
+
+
+
 
 
 
@@ -1822,11 +3642,27 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
             alert('저장 토큰 발급 실패 — 저장 기능이 제한될 수 있습니다');
 
 
 
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -1842,6 +3678,14 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
         if (!getPat() && !silent) alert('네트워크 오류 — 저장 토큰 발급 실패');
 
 
@@ -1850,7 +3694,23 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -1866,7 +3726,23 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
         GH.owner  = DEFAULT_GH.owner;
+
+
+
+
+
+
+
+
 
 
 
@@ -1882,7 +3758,23 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
         GH.branch = DEFAULT_GH.branch;
+
+
+
+
+
+
+
+
 
 
 
@@ -1898,7 +3790,23 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -1914,7 +3822,23 @@ async function applyDefaultPatIfNeeded(pwd, silent) {
 
 
 
+
+
+
+
+
+
+
+
 let GH = { owner:"", repo:"", branch:"main" };
+
+
+
+
+
+
+
+
 
 
 
@@ -1930,7 +3854,23 @@ let RAW=[], PRODUCTS=[], filtered=[];
 
 
 
+
+
+
+
+
+
+
+
 let IMAGES = {}; 
+
+
+
+
+
+
+
+
 
 
 
@@ -1946,6 +3886,14 @@ let MEMOS = [];
 
 
 
+
+
+
+
+
+
+
+
 let TRANSFERS = []; 
 
 
@@ -1954,7 +3902,23 @@ let TRANSFERS = [];
 
 
 
+
+
+
+
+
+
+
+
 let PROMOTIONS = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -1978,7 +3942,31 @@ let SALES_GUIDES = {};
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 복수 기획전 헬퍼
+
+
+
+
+
+
+
+
 
 
 
@@ -1994,7 +3982,23 @@ function getPromoList() {
 
 
 
+
+
+
+
+
+
+
+
   if(!PROMOTIONS) return [];
+
+
+
+
+
+
+
+
 
 
 
@@ -2010,7 +4014,23 @@ function getPromoList() {
 
 
 
+
+
+
+
+
+
+
+
   if(PROMOTIONS.meta && PROMOTIONS.items && Object.keys(PROMOTIONS.items||{}).length > 0) return [PROMOTIONS];
+
+
+
+
+
+
+
+
 
 
 
@@ -2026,7 +4046,23 @@ function getPromoList() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2038,7 +4074,15 @@ function getPromoList() {
 
 
 
+
+
+
+
 //   "06/19~06/22"  /  "5.25-6.14"  /  "06/19(목) ~ 06/22(일), 4일간"
+
+
+
+
 
 
 
@@ -2046,7 +4090,15 @@ function _parsePromoPeriod(period) {
 
 
 
+
+
+
+
   // .*? 비탐욕 매칭으로 날짜와 ~ 사이 임의 텍스트 허용
+
+
+
+
 
 
 
@@ -2054,7 +4106,15 @@ function _parsePromoPeriod(period) {
 
 
 
+
+
+
+
   if(!m) return null;
+
+
+
+
 
 
 
@@ -2062,7 +4122,15 @@ function _parsePromoPeriod(period) {
 
 
 
+
+
+
+
   const start = toDate(m[1]);
+
+
+
+
 
 
 
@@ -2070,11 +4138,27 @@ function _parsePromoPeriod(period) {
 
 
 
+
+
+
+
   return { start, end };
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2086,7 +4170,15 @@ function isPromoActive(pr) {
 
 
 
+
+
+
+
   const range = _parsePromoPeriod(pr.meta?.period||'');
+
+
+
+
 
 
 
@@ -2094,7 +4186,15 @@ function isPromoActive(pr) {
 
 
 
+
+
+
+
   const now = new Date();
+
+
+
+
 
 
 
@@ -2102,7 +4202,19 @@ function isPromoActive(pr) {
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2118,7 +4230,23 @@ function findPromoForCode(code) {
 
 
 
+
+
+
+
+
+
+
+
   for(const pr of getPromoList()) {
+
+
+
+
+
+
+
+
 
 
 
@@ -2134,7 +4262,23 @@ function findPromoForCode(code) {
 
 
 
+
+
+
+
+
+
+
+
     if(pr.items && pr.items[code]) return { promo: pr, item: pr.items[code], isPreview: !isPromoActive(pr) };
+
+
+
+
+
+
+
+
 
 
 
@@ -2150,6 +4294,14 @@ function findPromoForCode(code) {
 
 
 
+
+
+
+
+
+
+
+
   return null;
 
 
@@ -2158,7 +4310,23 @@ function findPromoForCode(code) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2170,7 +4338,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
   if(!PRODUCTS || !PRODUCTS.length) return;
+
+
+
+
 
 
 
@@ -2178,7 +4354,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
   PRODUCTS.forEach(p => {
+
+
+
+
 
 
 
@@ -2186,7 +4370,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     delete p.promoRate; delete p.promoEndDate; delete p.promoIsPreview;
+
+
+
+
 
 
 
@@ -2194,7 +4386,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     if(!_pm) return;
+
+
+
+
 
 
 
@@ -2202,7 +4402,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     p.promoIsPreview = !!_isPreview;
+
+
+
+
 
 
 
@@ -2210,7 +4418,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+
+
+
+
 
 
 
@@ -2218,7 +4434,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     p.promoCouponRate = _pi.couponRate || 0;
+
+
+
+
 
 
 
@@ -2226,7 +4450,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     if(_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
+
+
+
+
 
 
 
@@ -2234,7 +4466,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
       p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
+
+
+
+
 
 
 
@@ -2242,7 +4482,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     } else if(_pi.finalPrice && _pi.finalPrice < p.소비자가) {
+
+
+
+
 
 
 
@@ -2250,7 +4498,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
       p.promoRate = _pi.finalRate || ((p.소비자가 - _pi.finalPrice) / p.소비자가);
+
+
+
+
 
 
 
@@ -2258,7 +4514,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
       const _computed = Math.round(p.소비자가 * (1 - _pi.finalRate) / 10) * 10;
+
+
+
+
 
 
 
@@ -2266,7 +4530,15 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -2274,7 +4546,19 @@ function reapplyPromoData() {
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2290,7 +4574,23 @@ let SALES_HISTORY = { meta: {}, items: {} };
 
 
 
+
+
+
+
+
+
+
+
 let SALES_DEDUCTIONS = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -2302,7 +4602,19 @@ let SALES_DEDUCTIONS = null;
 
 
 
+
+
+
+
 let STOCK_OVERRIDES = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -2318,7 +4630,23 @@ let STOCK_OVERRIDES = {};
 
 
 
+
+
+
+
+
+
+
+
 let DISPLAY_ITEMS = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -2330,7 +4658,19 @@ let DISPLAY_ITEMS = {};
 
 
 
+
+
+
+
 let LOCATIONS = { zones: [], assignments: {} };
+
+
+
+
+
+
+
+
 
 
 
@@ -2346,7 +4686,23 @@ let visibleCount=60;
 
 
 
+
+
+
+
+
+
+
+
 let CURRENT_META = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -2370,7 +4726,31 @@ let CURRENT_PRODUCT = null;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 let FAVS = JSON.parse(localStorage.getItem('FAVS') || '[]');
+
+
+
+
+
+
+
+
 
 
 
@@ -2394,7 +4774,31 @@ let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V4') || '
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 let windowDashItems = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -2418,7 +4822,31 @@ let windowCurrentDashIndex = 0;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 let filterHistory = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -2442,7 +4870,31 @@ let isUndoing = false;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const $ = (s,r=document)=>r.querySelector(s);
+
+
+
+
+
+
+
+
 
 
 
@@ -2458,6 +4910,14 @@ const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 
 
 
+
+
+
+
+
+
+
+
 const fmt = n => (n??0).toLocaleString("ko-KR");
 
 
@@ -2466,7 +4926,31 @@ const fmt = n => (n??0).toLocaleString("ko-KR");
 
 
 
+
+
+
+
+
+
+
+
 const krw = n => "₩" + fmt(n);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2498,7 +4982,31 @@ const isFwSize = s => /^\d{3}$/.test(s) && s !== "120" && s !== "130";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function loadGhConfig(){
+
+
+
+
+
+
+
+
 
 
 
@@ -2514,7 +5022,23 @@ function loadGhConfig(){
 
 
 
+
+
+
+
+
+
+
+
     const c = localStorage.getItem(GH_CONFIG_KEY);
+
+
+
+
+
+
+
+
 
 
 
@@ -2530,7 +5054,23 @@ function loadGhConfig(){
 
 
 
+
+
+
+
+
+
+
+
     // 설정이 없으면 기본값으로 자동 설정 (iPad 등 새 기기 대응)
+
+
+
+
+
+
+
+
 
 
 
@@ -2546,7 +5086,23 @@ function loadGhConfig(){
 
 
 
+
+
+
+
+
+
+
+
     if(!getPat()) setPat(DEFAULT_GH.pat);
+
+
+
+
+
+
+
+
 
 
 
@@ -2562,7 +5118,23 @@ function loadGhConfig(){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2578,7 +5150,23 @@ function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH))
 
 
 
+
+
+
+
+
+
+
+
 function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
+
+
+
+
+
+
+
+
 
 
 
@@ -2594,6 +5182,14 @@ function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage
 
 
 
+
+
+
+
+
+
+
+
 const ANTH_KEY = "racement_anth_key_v1";
 
 
@@ -2602,7 +5198,23 @@ const ANTH_KEY = "racement_anth_key_v1";
 
 
 
+
+
+
+
+
+
+
+
 function getAnthKey(){ return localStorage.getItem(ANTH_KEY) || ""; }
+
+
+
+
+
+
+
+
 
 
 
@@ -2626,7 +5238,31 @@ function setAnthKey(v){ if(v) localStorage.setItem(ANTH_KEY, v); else localStora
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function checkPat() {
+
+
+
+
+
+
+
+
 
 
 
@@ -2638,7 +5274,15 @@ function checkPat() {
 
 
 
+
+
+
+
         if(checkAdminSession() && !window._patPrompting) {
+
+
+
+
 
 
 
@@ -2646,7 +5290,15 @@ function checkPat() {
 
 
 
+
+
+
+
             window._patPrompting = true;
+
+
+
+
 
 
 
@@ -2654,7 +5306,15 @@ function checkPat() {
 
 
 
+
+
+
+
                 .finally(() => { window._patPrompting = false; });
+
+
+
+
 
 
 
@@ -2662,7 +5322,15 @@ function checkPat() {
 
 
 
+
+
+
+
             alert("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 입력해주세요.");
+
+
+
+
 
 
 
@@ -2670,11 +5338,27 @@ function checkPat() {
 
 
 
+
+
+
+
         return false;
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -2690,7 +5374,23 @@ function checkPat() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -2702,11 +5402,23 @@ function checkPat() {
 
 
 
+
+
+
+
 async function ensurePatForAdmin() {
 
 
 
+
+
+
+
     if(getPat()) return true;
+
+
+
+
 
 
 
@@ -2714,7 +5426,15 @@ async function ensurePatForAdmin() {
 
 
 
+
+
+
+
     try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {}
+
+
+
+
 
 
 
@@ -2722,7 +5442,15 @@ async function ensurePatForAdmin() {
 
 
 
+
+
+
+
     // 2차: 자동 실패 시에만 수동 입력
+
+
+
+
 
 
 
@@ -2730,7 +5458,15 @@ async function ensurePatForAdmin() {
 
 
 
+
+
+
+
     if(pw === null) return false;
+
+
+
+
 
 
 
@@ -2738,11 +5474,35 @@ async function ensurePatForAdmin() {
 
 
 
+
+
+
+
     return !!getPat();
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2766,7 +5526,23 @@ function detectGender(code, sex){
 
 
 
+
+
+
+
+
+
+
+
   const g = String(sex||"").trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -2782,7 +5558,23 @@ function detectGender(code, sex){
 
 
 
+
+
+
+
+
+
+
+
   if(g==="여성"||g==="여"||g.toUpperCase()==="W") return "W";
+
+
+
+
+
+
+
+
 
 
 
@@ -2798,7 +5590,31 @@ function detectGender(code, sex){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2822,7 +5638,23 @@ function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;
 
 
 
+
+
+
+
+
+
+
+
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+
+
+
+
+
+
+
+
 
 
 
@@ -2838,7 +5670,23 @@ function getChosung(str){
 
 
 
+
+
+
+
+
+
+
+
   let r = ""; const s = String(str||"");
+
+
+
+
+
+
+
+
 
 
 
@@ -2854,7 +5702,23 @@ function getChosung(str){
 
 
 
+
+
+
+
+
+
+
+
     const code = s.charCodeAt(i);
+
+
+
+
+
+
+
+
 
 
 
@@ -2870,7 +5734,23 @@ function getChosung(str){
 
 
 
+
+
+
+
+
+
+
+
     else r += s[i].toLowerCase();
+
+
+
+
+
+
+
+
 
 
 
@@ -2886,6 +5766,14 @@ function getChosung(str){
 
 
 
+
+
+
+
+
+
+
+
   return r;
 
 
@@ -2894,7 +5782,31 @@ function getChosung(str){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2926,7 +5838,31 @@ function isAllChosung(str) { return /^[ㄱ-ㅎ]+$/.test(str); }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function copyText(text, btn){
+
+
+
+
+
+
+
+
 
 
 
@@ -2942,7 +5878,23 @@ async function copyText(text, btn){
 
 
 
+
+
+
+
+
+
+
+
     await navigator.clipboard.writeText(text);
+
+
+
+
+
+
+
+
 
 
 
@@ -2958,7 +5910,23 @@ async function copyText(text, btn){
 
 
 
+
+
+
+
+
+
+
+
       const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
+
+
+
+
+
+
+
+
 
 
 
@@ -2974,7 +5942,23 @@ async function copyText(text, btn){
 
 
 
+
+
+
+
+
+
+
+
       setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); if(window.lucide) lucide.createIcons(); }, 1200);
+
+
+
+
+
+
+
+
 
 
 
@@ -2990,6 +5974,14 @@ async function copyText(text, btn){
 
 
 
+
+
+
+
+
+
+
+
   }catch(e){ alert("복사 실패"); }
 
 
@@ -2998,7 +5990,31 @@ async function copyText(text, btn){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3022,7 +6038,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     let container = document.getElementById('toast-container');
+
+
+
+
+
+
+
+
 
 
 
@@ -3038,7 +6070,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         container = document.createElement('div');
+
+
+
+
+
+
+
+
 
 
 
@@ -3054,6 +6102,14 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         document.body.appendChild(container);
 
 
@@ -3062,7 +6118,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -3078,7 +6150,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     toast.className = 'toast';
+
+
+
+
+
+
+
+
 
 
 
@@ -3090,6 +6178,10 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
     toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="${_isErr ? 'alert-circle' : 'check-circle'}" class="w-5 h-5 ${_isErr ? 'text-red-400' : 'text-green-400'}"></i> ${escapeHtml(message)}</span>`;
 
 
@@ -3098,7 +6190,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -3114,7 +6222,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     if(onUndo) {
+
+
+
+
+
+
+
+
 
 
 
@@ -3130,7 +6254,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         undoBtn.className = 'toast-undo';
+
+
+
+
+
+
+
+
 
 
 
@@ -3146,7 +6286,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         undoBtn.onclick = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -3162,7 +6318,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
             onUndo();
+
+
+
+
+
+
+
+
 
 
 
@@ -3178,7 +6350,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
             toast.style.opacity = '0';
+
+
+
+
+
+
+
+
 
 
 
@@ -3194,7 +6382,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
             toast.style.transition = 'all 0.2s';
+
+
+
+
+
+
+
+
 
 
 
@@ -3210,7 +6414,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -3226,7 +6446,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -3242,7 +6478,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -3258,7 +6510,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     timer = setTimeout(() => {
+
+
+
+
+
+
+
+
 
 
 
@@ -3274,7 +6542,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         toast.style.opacity = '0';
+
+
+
+
+
+
+
+
 
 
 
@@ -3290,7 +6574,23 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
         toast.style.transition = 'all 0.3s';
+
+
+
+
+
+
+
+
 
 
 
@@ -3306,6 +6606,14 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
     }, 5000);
 
 
@@ -3314,7 +6622,31 @@ function showToast(message, onUndo, type) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3338,7 +6670,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
     return {
+
+
+
+
+
+
+
+
 
 
 
@@ -3354,7 +6702,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
+
+
+
+
+
+
+
+
 
 
 
@@ -3370,7 +6734,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         q: $("#q").value,
+
+
+
+
+
+
+
+
 
 
 
@@ -3386,7 +6766,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         favOnly: ($$('button.chip[data-fav]').find(b=>b.dataset.active==="1")? true : false),
+
+
+
+
+
+
+
+
 
 
 
@@ -3402,7 +6798,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         busanOnly: ($('button.chip[data-busanonly]')?.dataset.active === "1"),
+
+
+
+
+
+
+
+
 
 
 
@@ -3418,7 +6830,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         sizeFw: $("#sizeSelFw")?.value || "ALL",
+
+
+
+
+
+
+
+
 
 
 
@@ -3434,7 +6862,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         sizeGear: $("#sizeSelGear")?.value || "ALL",
+
+
+
+
+
+
+
+
 
 
 
@@ -3450,7 +6894,23 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
         promoOnly: window.tempPromoFilter === true
+
+
+
+
+
+
+
+
 
 
 
@@ -3466,7 +6926,31 @@ function getCurrentFilterState() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3490,7 +6974,23 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if(isUndoing) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -3506,7 +7006,23 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -3522,7 +7038,23 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
         const last = filterHistory[filterHistory.length - 1];
+
+
+
+
+
+
+
+
 
 
 
@@ -3538,6 +7070,14 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     }
 
 
@@ -3546,7 +7086,23 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -3562,7 +7118,23 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if(filterHistory.length > 20) filterHistory.shift(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -3578,6 +7150,14 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     updateUndoBtnUI();
 
 
@@ -3586,7 +7166,31 @@ function saveHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3610,7 +7214,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if(filterHistory.length === 0) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -3626,6 +7246,14 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     const state = filterHistory.pop();
 
 
@@ -3634,7 +7262,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -3650,7 +7294,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === state.gender ? "1" : "0"));
+
+
+
+
+
+
+
+
 
 
 
@@ -3666,7 +7326,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     window._activeBrands = new Set(_restoredBrands);
+
+
+
+
+
+
+
+
 
 
 
@@ -3682,7 +7358,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -3698,7 +7390,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if($('button.chip[data-fav]')) $('button.chip[data-fav]').dataset.active = state.favOnly ? "1" : "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -3714,7 +7422,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if($('button.chip[data-busanonly]')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -3730,7 +7454,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
         if(state.busanOnly) $('button.chip[data-busanonly]').classList.add('ring-2', 'ring-blue-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -3746,7 +7486,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -3762,7 +7518,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
         $('button.chip[data-otherbranch]').dataset.active = state.otherOnly ? "1" : "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -3778,6 +7550,14 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
         else $('button.chip[data-otherbranch]').classList.remove('ring-2', 'ring-teal-400');
 
 
@@ -3786,7 +7566,31 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3810,7 +7614,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if($("#sizeSelFw")) $("#sizeSelFw").value = state.sizeFw;
+
+
+
+
+
+
+
+
 
 
 
@@ -3826,7 +7646,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     if($("#sizeSelGear")) $("#sizeSelGear").value = state.sizeGear;
+
+
+
+
+
+
+
+
 
 
 
@@ -3842,7 +7678,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -3858,7 +7710,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     const promoBtn = $('button[onclick^="window.togglePromoView"]');
+
+
+
+
+
+
+
+
 
 
 
@@ -3874,7 +7742,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
         promoBtn.dataset.active = state.promoOnly ? "0" : "1"; 
+
+
+
+
+
+
+
+
 
 
 
@@ -3890,7 +7774,31 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3914,7 +7822,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     visibleCount = 60;
+
+
+
+
+
+
+
+
 
 
 
@@ -3930,7 +7854,23 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
     isUndoing = false;
+
+
+
+
+
+
+
+
 
 
 
@@ -3946,7 +7886,31 @@ function restoreHistoryState() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3970,7 +7934,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
     let btn = $("#mobileUndoBtn");
+
+
+
+
+
+
+
+
 
 
 
@@ -3986,7 +7966,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
         btn = document.createElement("button");
+
+
+
+
+
+
+
+
 
 
 
@@ -4002,7 +7998,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
         btn.innerHTML = `<i data-lucide="undo-2" class="w-6 h-6"></i>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -4018,7 +8030,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
         btn.onclick = restoreHistoryState;
+
+
+
+
+
+
+
+
 
 
 
@@ -4034,6 +8062,14 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
         if(window.lucide) lucide.createIcons();
 
 
@@ -4042,7 +8078,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -4058,7 +8110,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
         btn.style.display = "flex";
+
+
+
+
+
+
+
+
 
 
 
@@ -4074,7 +8142,23 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
         btn.style.display = "none";
+
+
+
+
+
+
+
+
 
 
 
@@ -4090,7 +8174,31 @@ function updateUndoBtnUI() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4114,7 +8222,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     // 💡 수정됨: #adminModal 을 선택자에 추가하여 ESC로 닫히게 복구
+
+
+
+
+
+
+
+
 
 
 
@@ -4130,7 +8254,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
         const modals = $$('#adminModal, #detailModal, #dashDetailModal, #salesGuideModal, #transfersModal, #allMemosModal, .modal-backdrop');
+
+
+
+
+
+
+
+
 
 
 
@@ -4146,7 +8286,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
         modals.forEach(m => {
+
+
+
+
+
+
+
+
 
 
 
@@ -4162,7 +8318,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
                 m.classList.add("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -4178,7 +8350,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -4194,7 +8382,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
         if(closedAny) document.body.style.overflow = '';
+
+
+
+
+
+
+
+
 
 
 
@@ -4210,7 +8414,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
             const dash = document.querySelector("#analyticsDashboard");
+
+
+
+
+
+
+
+
 
 
 
@@ -4226,7 +8446,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
                 dash.classList.add("opacity-0");
+
+
+
+
+
+
+
+
 
 
 
@@ -4242,7 +8478,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
                 if (document.body.classList.contains('dashboard-only-mode') && typeof _revealDashOnlyUI === 'function') _revealDashOnlyUI(); // 팝업 전용모드에서 ESC로 닫아도 재고앱 화면 노출 (안 하면 화면 먹통됨)
+
+
+
+
+
+
+
+
 
 
 
@@ -4258,6 +8510,14 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
         }
 
 
@@ -4266,7 +8526,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -4282,7 +8558,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+
+
+
+
+
+
+
+
 
 
 
@@ -4298,7 +8590,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
         e.preventDefault();
+
+
+
+
+
+
+
+
 
 
 
@@ -4314,7 +8622,31 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4338,7 +8670,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     if(dashModal && !dashModal.classList.contains("hidden")) {
+
+
+
+
+
+
+
+
 
 
 
@@ -4354,6 +8702,14 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
         if(e.key === "ArrowRight") $("#nextDashBtn")?.click();
 
 
@@ -4362,7 +8718,23 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -4386,7 +8758,31 @@ document.addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function applyMeta(meta){
+
+
+
+
+
+
+
+
 
 
 
@@ -4402,7 +8798,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         // 하단에 렌더링되던 불필요한 구역 삭제
+
+
+
+
+
+
+
+
 
 
 
@@ -4418,6 +8830,14 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         if(oldSourceBar) oldSourceBar.remove();
 
 
@@ -4426,7 +8846,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         const globalHeader = document.getElementById("globalHeaderData");
+
+
+
+
+
+
+
+
 
 
 
@@ -4450,7 +8886,31 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const statSrcEl = document.getElementById("statSrc");
+
+
+
+
+
+
+
+
 
 
 
@@ -4474,7 +8934,31 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 판매 DB 라벨
+
+
+
+
+
+
+
+
 
 
 
@@ -4490,7 +8974,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-100 flex items-center gap-1 shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -4506,7 +9006,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                </div>`
+
+
+
+
+
+
+
+
 
 
 
@@ -4530,7 +9046,31 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 기획전 라벨 (복수 지원)
+
+
+
+
+
+
+
+
 
 
 
@@ -4546,6 +9086,14 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         let promoInfo = _activePromos.map(pr =>
 
 
@@ -4554,7 +9102,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0">🎁 ${escapeHtml(pr.meta?.name||'기획전')}</div>`
+
+
+
+
+
+
+
+
 
 
 
@@ -4578,7 +9142,31 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // POS 판매 동기화 뱃지
+
+
+
+
+
+
+
+
 
 
 
@@ -4594,7 +9182,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         const lastSynced = SALES_HISTORY.meta?.lastSynced;
+
+
+
+
+
+
+
+
 
 
 
@@ -4610,7 +9214,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             const d = new Date(lastSynced);
+
+
+
+
+
+
+
+
 
 
 
@@ -4626,7 +9246,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             const isToday = d.getFullYear() === now.getFullYear()
+
+
+
+
+
+
+
+
 
 
 
@@ -4642,7 +9278,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                          && d.getDate()     === now.getDate();
+
+
+
+
+
+
+
+
 
 
 
@@ -4658,7 +9310,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             const min = String(d.getMinutes()).padStart(2,'0');
+
+
+
+
+
+
+
+
 
 
 
@@ -4674,7 +9342,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 // 오늘 데이터 → 초록 + 시간만
+
+
+
+
+
+
+
+
 
 
 
@@ -4690,6 +9374,14 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                     <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${hh}:${min}
 
 
@@ -4698,7 +9390,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 </div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -4714,7 +9422,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 // 어제 이전 데이터 → 노란색 경고
+
+
+
+
+
+
+
+
 
 
 
@@ -4730,7 +9454,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 const dd = String(d.getDate());
+
+
+
+
+
+
+
+
 
 
 
@@ -4746,7 +9486,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                     <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${mm}/${dd} (미갱신)
+
+
+
+
+
+
+
+
 
 
 
@@ -4762,7 +9518,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -4778,7 +9550,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             posSyncInfo = `<div onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
+
+
+
+
+
+
+
+
 
 
 
@@ -4794,6 +9582,14 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             </div>`;
 
 
@@ -4802,7 +9598,31 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4826,7 +9646,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         statSrcEl.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -4842,7 +9678,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-[11px] font-black border border-blue-100 flex items-center gap-1 shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -4858,7 +9710,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -4874,7 +9742,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
                 ${addInfo}
+
+
+
+
+
+
+
+
 
 
 
@@ -4890,7 +9774,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -4906,7 +9806,23 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
         if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -4922,7 +9838,31 @@ function applyMeta(meta){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4946,7 +9886,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     const colorMap = {
+
+
+
+
+
+
+
+
 
 
 
@@ -4962,7 +9918,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
         yellow:  'bg-yellow-50 border-yellow-300 text-yellow-900',
+
+
+
+
+
+
+
+
 
 
 
@@ -4978,7 +9950,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
 
 
 
@@ -4994,7 +9982,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
         ok:    '⚡ POS 판매 연동',
+
+
+
+
+
+
+
+
 
 
 
@@ -5010,7 +10014,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
         none:  '🔌 POS 판매 없음'
+
+
+
+
+
+
+
+
 
 
 
@@ -5026,7 +10046,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     const colors = { ok: 'emerald', stale: 'yellow', none: 'gray' };
+
+
+
+
+
+
+
+
 
 
 
@@ -5050,7 +10086,31 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const existing = document.getElementById('posSyncGuideModal');
+
+
+
+
+
+
+
+
 
 
 
@@ -5066,7 +10126,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     const modal = document.createElement('div');
+
+
+
+
+
+
+
+
 
 
 
@@ -5082,7 +10158,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     modal.className = 'fixed inset-0 flex items-center justify-center z-[99999] p-4 bg-black/50';
+
+
+
+
+
+
+
+
 
 
 
@@ -5098,7 +10190,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 relative">
+
+
+
+
+
+
+
+
 
 
 
@@ -5114,7 +10222,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
             <div class="${colorMap[g.color]} border rounded-xl px-4 py-3 mb-4 text-sm font-black">${g.title}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5130,7 +10254,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
                 POS 판매 데이터를 지금 바로 불러옵니다.<br>
+
+
+
+
+
+
+
+
 
 
 
@@ -5146,7 +10286,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5162,7 +10318,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
                 <i data-lucide="refresh-cw" class="w-4 h-4"></i> 지금 동기화
+
+
+
+
+
+
+
+
 
 
 
@@ -5178,7 +10350,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
             <div id="posSyncNowResult" class="mt-3 text-xs text-center text-gray-400"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5194,7 +10382,23 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+
+
+
+
+
+
+
 
 
 
@@ -5210,6 +10414,14 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
     if (window.lucide) lucide.createIcons();
 
 
@@ -5218,7 +10430,31 @@ function showPosSyncGuide(status) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5242,7 +10478,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
     const btn = document.getElementById('posSyncNowBtn');
+
+
+
+
+
+
+
+
 
 
 
@@ -5258,7 +10510,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
     if (!btn) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -5274,7 +10542,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
     btn.innerHTML = '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> 실행 중...';
+
+
+
+
+
+
+
+
 
 
 
@@ -5290,7 +10574,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -5306,7 +10606,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
             `https://api.github.com/repos/${GH.owner}/${GH.repo}/actions/workflows/pos_sync.yml/dispatches`,
+
+
+
+
+
+
+
+
 
 
 
@@ -5322,7 +10638,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
         );
+
+
+
+
+
+
+
+
 
 
 
@@ -5338,7 +10670,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
             btn.innerHTML = '✅ 동기화 요청 완료!';
+
+
+
+
+
+
+
+
 
 
 
@@ -5354,7 +10702,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
             result.textContent = '약 2~3분 후 판매 데이터가 업데이트됩니다.';
+
+
+
+
+
+
+
+
 
 
 
@@ -5370,7 +10734,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
             throw new Error(`status ${r.status}`);
+
+
+
+
+
+
+
+
 
 
 
@@ -5386,7 +10766,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
     } catch(e) {
+
+
+
+
+
+
+
+
 
 
 
@@ -5402,7 +10798,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
         btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> 다시 시도';
+
+
+
+
+
+
+
+
 
 
 
@@ -5418,7 +10830,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
         result.textContent = '오류: ' + e.message;
+
+
+
+
+
+
+
+
 
 
 
@@ -5434,7 +10862,23 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -5458,7 +10902,31 @@ window.triggerPosSync = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // GitHub Contents API에서 직접 읽기 (Pages 배포 대기 없이 즉시 반영)
+
+
+
+
+
+
+
+
 
 
 
@@ -5474,7 +10942,23 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
     const pat = getPat();
+
+
+
+
+
+
+
+
 
 
 
@@ -5490,7 +10974,23 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -5506,7 +11006,23 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
             `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${GH.branch}&t=${Date.now()}`,
+
+
+
+
+
+
+
+
 
 
 
@@ -5522,7 +11038,23 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
         );
+
+
+
+
+
+
+
+
 
 
 
@@ -5538,7 +11070,23 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
         const j = await res.json();
+
+
+
+
+
+
+
+
 
 
 
@@ -5554,6 +11102,14 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
     } catch(e) { return null; }
 
 
@@ -5562,7 +11118,31 @@ async function fetchGithubJson(path) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5586,7 +11166,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
     const grid = document.getElementById("grid");
+
+
+
+
+
+
+
+
 
 
 
@@ -5602,7 +11198,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
     const emptyState = document.getElementById("emptyState");
+
+
+
+
+
+
+
+
 
 
 
@@ -5618,7 +11230,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
     if(results) results.classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -5634,7 +11262,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
     const skeletonHtml = Array(n).fill(0).map(() => `
+
+
+
+
+
+
+
+
 
 
 
@@ -5650,7 +11294,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
         <div class="flex gap-1"><div class="h-4 w-14 bg-gray-200 rounded-full"></div><div class="h-4 w-18 bg-gray-200 rounded-full"></div></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5666,7 +11326,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
           <div class="flex-1 flex flex-col gap-1.5"><div class="h-4 w-3/4 bg-gray-200 rounded"></div><div class="h-3 w-1/2 bg-gray-100 rounded"></div></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5682,7 +11358,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5698,7 +11390,23 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
         <div class="border-t pt-3 flex justify-between"><div class="h-3 w-24 bg-gray-100 rounded"></div><div class="h-5 w-20 bg-gray-200 rounded"></div></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -5714,6 +11422,14 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
     grid.innerHTML = skeletonHtml;
 
 
@@ -5722,7 +11438,31 @@ function showSkeletonCards(n = 6) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5746,11 +11486,31 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
   // 어드민 세션이면 로드 시 항상 최신 토큰 재발급 (옛/만료 토큰이 남아있어도 교체 → 401 방지)
 
 
 
+
+
+
+
   if(checkAdminSession()) { applyDefaultPatIfNeeded(ADMIN_PWD, true).catch(()=>{}); }
+
+
+
+
+
+
+
+
 
 
 
@@ -5766,7 +11526,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+
+
+
+
+
+
+
+
 
 
 
@@ -5782,7 +11558,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
   if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
+
+
+
+
+
+
+
+
 
 
 
@@ -5798,7 +11590,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       // 위치 데이터 백그라운드 동기화 (다른 기기가 방금 태그한 위치 반영)
+
+
+
+
 
 
 
@@ -5806,7 +11610,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
           if(d && typeof d==='object' && Array.isArray(d.zones)) {
+
+
+
+
 
 
 
@@ -5814,7 +11626,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
               try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.locations = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+
+
+
+
 
 
 
@@ -5822,11 +11642,27 @@ async function loadData(force = false){
 
 
 
+
+
+
+
           }
 
 
 
+
+
+
+
       }).catch(()=>{});
+
+
+
+
+
+
+
+
 
 
 
@@ -5842,7 +11678,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       // FAVS GitHub 비동기 로드 (기기 간 즐겨찾기 동기화)
+
+
+
+
 
 
 
@@ -5854,7 +11702,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       // DP: 캐시로 먼저 그린 뒤 백그라운드로 최신을 받아 반영 (다른 기기 체크가 60초 캐시에 막히지 않게)
+
+
+
+
 
 
 
@@ -5862,7 +11722,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
           if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(DISPLAY_ITEMS)) {
+
+
+
+
 
 
 
@@ -5870,7 +11738,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
               try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+
+
+
+
 
 
 
@@ -5878,7 +11754,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
               render();
+
+
+
+
 
 
 
@@ -5886,7 +11770,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
       }).catch(()=>{});
+
+
+
+
+
+
+
+
 
 
 
@@ -5898,7 +11794,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
       fetchGithubJson(STOCK_OVERRIDES_PATH).then(d=>{
+
+
+
+
 
 
 
@@ -5906,7 +11810,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
               STOCK_OVERRIDES = d;
+
+
+
+
 
 
 
@@ -5914,7 +11826,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
               _recomputeStock(); render();
+
+
+
+
 
 
 
@@ -5922,7 +11842,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
       }).catch(()=>{});
+
+
+
+
+
+
+
+
 
 
 
@@ -5938,7 +11870,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       setupQuickActionBar();
+
+
+
+
+
+
+
+
 
 
 
@@ -5954,7 +11902,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -5970,11 +11934,31 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       // FAVS 백그라운드 갱신 (기기 간 즐겨찾기 동기화)
 
 
 
+
+
+
+
       fetchGithubJson(FAVS_PATH).then(d=>{if(Array.isArray(d)){FAVS=d;localStorage.setItem('FAVS',JSON.stringify(FAVS));render();}}).catch(()=>{});
+
+
+
+
+
+
+
+
 
 
 
@@ -5990,7 +11974,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -6006,7 +12006,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes, soRes, locRes] = await Promise.all([
+
+
+
+
+
+
+
+
 
 
 
@@ -6022,7 +12038,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
           fetch("./images.json?t=" + Date.now()).catch(()=>null),
+
+
+
+
+
+
+
+
 
 
 
@@ -6038,7 +12070,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
           fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
+
+
+
+
+
+
+
+
 
 
 
@@ -6054,7 +12102,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
           fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
+
+
+
+
+
+
+
+
 
 
 
@@ -6070,7 +12134,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
           fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null),
+
+
+
+
+
+
+
+
 
 
 
@@ -6086,7 +12166,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
           fetch("./" + STOCK_OVERRIDES_PATH + "?t=" + Date.now()).catch(()=>null),
+
+
+
+
+
+
+
+
 
 
 
@@ -6102,7 +12198,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       ]);
+
+
+
+
+
+
+
+
 
 
 
@@ -6118,7 +12230,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -6134,7 +12262,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       // 기기 간 공유되고 자주 바뀌는 데이터(기획전·DP·RT·메모·재고보정)는 GitHub API 우선 읽기.
+
+
+
+
 
 
 
@@ -6142,7 +12282,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
       // (PAT 없는 기기는 null 반환 → 아래 Pages 응답으로 자동 폴백)
+
+
+
+
 
 
 
@@ -6150,7 +12298,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
           fetchGithubJson(PROMOTIONS_PATH),
+
+
+
+
 
 
 
@@ -6158,7 +12314,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
           fetchGithubJson(TRANSFERS_PATH),
+
+
+
+
 
 
 
@@ -6166,7 +12330,15 @@ async function loadData(force = false){
 
 
 
+
+
+
+
           fetchGithubJson(STOCK_OVERRIDES_PATH),
+
+
+
+
 
 
 
@@ -6178,7 +12350,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(Array.isArray(_memoApi)) MEMOS = _memoApi;
+
+
+
+
 
 
 
@@ -6190,11 +12374,31 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(Array.isArray(_trApi)) TRANSFERS = _trApi;
 
 
 
+
+
+
+
       else if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -6210,7 +12414,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       else if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -6226,7 +12446,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
+
+
+
+
+
+
+
+
 
 
 
@@ -6242,11 +12478,27 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(_diApi && typeof _diApi === 'object') DISPLAY_ITEMS = _diApi;
 
 
 
+
+
+
+
       else if(diRes && diRes.ok) { try { DISPLAY_ITEMS = await diRes.json(); } catch(e) { DISPLAY_ITEMS = {}; } }
+
+
+
+
 
 
 
@@ -6258,7 +12510,19 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(_soApi && typeof _soApi === 'object') STOCK_OVERRIDES = _soApi;
+
+
+
+
 
 
 
@@ -6266,7 +12530,27 @@ async function loadData(force = false){
 
 
 
+
+
+
+
       else STOCK_OVERRIDES = {};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6290,7 +12574,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
+
+
+
+
+
+
+
+
 
 
 
@@ -6306,7 +12606,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       setupQuickActionBar();
+
+
+
+
+
+
+
+
 
 
 
@@ -6322,7 +12638,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -6338,7 +12670,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
   } catch(e) {
+
+
+
+
+
+
+
+
 
 
 
@@ -6354,7 +12702,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
     const grid = document.getElementById("grid");
+
+
+
+
+
+
+
+
 
 
 
@@ -6370,7 +12734,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
       <div class="col-span-3 flex flex-col items-center justify-center py-20 gap-4">
+
+
+
+
+
+
+
+
 
 
 
@@ -6386,7 +12766,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
         <div class="text-lg font-black text-gray-700">데이터 로드 실패</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -6402,7 +12798,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
         <button onclick="loadData(true)" class="brutal px-5 py-2 bg-black text-white font-black text-sm mt-2">🔄 다시 시도</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -6418,7 +12830,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
     const emptyState = document.getElementById("emptyState");
+
+
+
+
+
+
+
+
 
 
 
@@ -6434,7 +12862,23 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
     const results = document.getElementById("results");
+
+
+
+
+
+
+
+
 
 
 
@@ -6450,6 +12894,14 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
   }
 
 
@@ -6458,7 +12910,31 @@ async function loadData(force = false){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6490,7 +12966,31 @@ function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ── DP 저장 ──────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -6506,7 +13006,23 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
   try {
+
+
+
+
+
+
+
+
 
 
 
@@ -6522,7 +13038,23 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
     let sha = null, serverCount = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -6538,7 +13070,19 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
     // 안전장치: 캐시 꼬임 등으로 로컬 DP가 서버보다 비정상적으로 적으면 전체 덮어쓰기 차단 (DP 전체 삭제 사고 방지)
+
+
+
+
 
 
 
@@ -6546,7 +13090,15 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
     if (serverCount - localCount > 3) {
+
+
+
+
 
 
 
@@ -6554,7 +13106,19 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -6570,7 +13134,23 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
     if (sha) body.sha = sha;
+
+
+
+
+
+
+
+
 
 
 
@@ -6586,7 +13166,23 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
     if (!_put.ok) throw new Error("DP 저장 실패 (" + _put.status + ")");
+
+
+
+
+
+
+
+
 
 
 
@@ -6602,7 +13198,23 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
     try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+
+
+
+
+
+
+
+
 
 
 
@@ -6618,7 +13230,31 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6638,7 +13274,15 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
 // 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
+
+
+
+
 
 
 
@@ -6646,7 +13290,15 @@ async function saveDisplayItems() {
 
 
 
+
+
+
+
 function applyStockOverrides() {
+
+
+
+
 
 
 
@@ -6654,7 +13306,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
     PRODUCTS.forEach(p => {
+
+
+
+
 
 
 
@@ -6662,7 +13322,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
         p.sizes.forEach(s => { delete s._override; delete s._overrideStale; });
+
+
+
+
 
 
 
@@ -6670,7 +13338,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
         if(!ov) return;
+
+
+
+
 
 
 
@@ -6678,7 +13354,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
             const o = ov[String(s.size).trim()];
+
+
+
+
 
 
 
@@ -6686,7 +13370,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
             const actual = Number(o.actual);
+
+
+
+
 
 
 
@@ -6694,7 +13386,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
             const sysNow = s.busan;   // 판매차감까지 반영된 현재 시스템값
+
+
+
+
 
 
 
@@ -6702,7 +13402,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
             s._overrideStale = (typeof o.system === 'number' && sysNow !== o.system); // 보정 후 시스템값이 바뀜 → 재확인
+
+
+
+
 
 
 
@@ -6710,7 +13418,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
             p._hasOverride = true;
+
+
+
+
 
 
 
@@ -6718,7 +13434,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
         p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
+
+
+
+
 
 
 
@@ -6726,7 +13450,19 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -6738,7 +13474,15 @@ function applyStockOverrides() {
 
 
 
+
+
+
+
 async function saveStockOverrides() {
+
+
+
+
 
 
 
@@ -6746,7 +13490,15 @@ async function saveStockOverrides() {
 
 
 
+
+
+
+
     let sha = null, serverCount = 0;
+
+
+
+
 
 
 
@@ -6754,7 +13506,15 @@ async function saveStockOverrides() {
 
 
 
+
+
+
+
     const localCount = Object.keys(STOCK_OVERRIDES).length;
+
+
+
+
 
 
 
@@ -6762,7 +13522,15 @@ async function saveStockOverrides() {
 
 
 
+
+
+
+
     const body = { message: "stock: update overrides", content: utf8ToB64(JSON.stringify(STOCK_OVERRIDES, null, 2)), branch: GH.branch };
+
+
+
+
 
 
 
@@ -6770,7 +13538,15 @@ async function saveStockOverrides() {
 
 
 
+
+
+
+
     const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+
+
+
 
 
 
@@ -6778,7 +13554,15 @@ async function saveStockOverrides() {
 
 
 
+
+
+
+
     try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.stockOverrides = STOCK_OVERRIDES; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+
+
+
+
 
 
 
@@ -6790,11 +13574,27 @@ async function saveStockOverrides() {
 
 
 
+
+
+
+
+
+
+
+
 // 보정 설정/해제 (ADMIN 전용) — 설정 후 base부터 재계산해 일관 상태 유지
 
 
 
+
+
+
+
 function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); }
+
+
+
+
 
 
 
@@ -6806,7 +13606,19 @@ function _reopenDetail(code){ const dm=document.getElementById('detailModal'); i
 
 
 
+
+
+
+
+
+
+
+
 // 실재고 보정 입력 프롬프트 (ADMIN 전용)
+
+
+
+
 
 
 
@@ -6814,7 +13626,15 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return; }
+
+
+
+
 
 
 
@@ -6822,7 +13642,15 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     const s = p && p.sizes.find(x => String(x.size).trim() === String(size).trim());
+
+
+
+
 
 
 
@@ -6830,7 +13658,15 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     const sysVal = s._override ? s._override.sysNow : s.busan;   // 시스템값
+
+
+
+
 
 
 
@@ -6838,7 +13674,15 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     const v = prompt(`[${size}] 실제 부산 재고 수량\n(시스템 표시: ${sysVal}개)\n\n· 숫자 = 그 수량으로 보정\n· 빈칸 후 확인 = 보정 해제(시스템값 복귀)`, existing);
+
+
+
+
 
 
 
@@ -6846,7 +13690,15 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     const t = String(v).trim();
+
+
+
+
 
 
 
@@ -6854,7 +13706,15 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     const n = parseInt(t, 10);
+
+
+
+
 
 
 
@@ -6862,11 +13722,27 @@ window._promptStockOverride = (code, size) => {
 
 
 
+
+
+
+
     window._setStockOverride(code, size, n);
 
 
 
+
+
+
+
 };
+
+
+
+
+
+
+
+
 
 
 
@@ -6878,7 +13754,15 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
+
+
+
+
 
 
 
@@ -6886,7 +13770,15 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     const sz = String(size).trim();
+
+
+
+
 
 
 
@@ -6894,7 +13786,15 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     const s = p && p.sizes.find(x => String(x.size).trim() === sz);
+
+
+
+
 
 
 
@@ -6902,7 +13802,15 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     const prev = STOCK_OVERRIDES[code] ? STOCK_OVERRIDES[code][sz] : undefined;
+
+
+
+
 
 
 
@@ -6910,7 +13818,15 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     STOCK_OVERRIDES[code][sz] = { actual: Number(actual), system: sysNow, by: (localStorage.getItem('rcm_last_memo_staff')||'ADMIN'), at: new Date().toISOString().slice(0,16).replace('T',' ') };
+
+
+
+
 
 
 
@@ -6918,7 +13834,15 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     _recomputeStock(); render(); _reopenDetail(code);
+
+
+
+
 
 
 
@@ -6926,11 +13850,27 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
+
+
+
+
     return true;
 
 
 
+
+
+
+
 };
+
+
+
+
+
+
+
+
 
 
 
@@ -6942,7 +13882,15 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
     if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
+
+
+
+
 
 
 
@@ -6950,7 +13898,15 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
     const sz = String(size).trim();
+
+
+
+
 
 
 
@@ -6958,7 +13914,15 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
     const prev = STOCK_OVERRIDES[code][sz];
+
+
+
+
 
 
 
@@ -6966,7 +13930,15 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
     try { await saveStockOverrides(); } catch(e) { if(!STOCK_OVERRIDES[code]) STOCK_OVERRIDES[code]={}; STOCK_OVERRIDES[code][sz]=prev; showToast('해제 저장 실패: '+e.message, null, 'error'); return false; }
+
+
+
+
 
 
 
@@ -6974,7 +13946,15 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
     showToast(`↩️ ${size} 보정 해제 (시스템값으로 복귀)`);
+
+
+
+
 
 
 
@@ -6982,7 +13962,23 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7002,7 +13998,23 @@ window._clearStockOverride = async (code, size) => {
 
 
 
+
+
+
+
+
+
+
+
 window._toggleDPBtn = async (btn, code, size) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -7018,7 +14030,23 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
   $$('#dpSizeBtns button').forEach(b => b.disabled = true);
+
+
+
+
+
+
+
+
 
 
 
@@ -7034,7 +14062,23 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
     await toggleDP(code, size);
+
+
+
+
+
+
+
+
 
 
 
@@ -7050,7 +14094,23 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
     if (window._dpRenderFn) window._dpRenderFn();
+
+
+
+
+
+
+
+
 
 
 
@@ -7066,7 +14126,23 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
   } catch(e) {
+
+
+
+
+
+
+
+
 
 
 
@@ -7082,7 +14158,23 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
     $$('#dpSizeBtns button').forEach(b => b.disabled = false);
+
+
+
+
+
+
+
+
 
 
 
@@ -7098,7 +14190,31 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7122,7 +14238,23 @@ window._toggleDPBtn = async (btn, code, size) => {
 
 
 
+
+
+
+
+
+
+
+
 async function toggleDP(code, size) {
+
+
+
+
+
+
+
+
 
 
 
@@ -7134,7 +14266,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
   const today = new Date().toISOString().split('T')[0];
+
+
+
+
 
 
 
@@ -7142,7 +14282,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
   const wantAdd = !(DISPLAY_ITEMS[code] && DISPLAY_ITEMS[code][sz]);
+
+
+
+
 
 
 
@@ -7154,7 +14302,19 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
+
+
+
+
   for (let attempt = 0; attempt < 4; attempt++) {
+
+
+
+
 
 
 
@@ -7162,7 +14322,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     let server = {}, sha = null;
+
+
+
+
 
 
 
@@ -7170,7 +14338,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     if (r.ok) {
+
+
+
+
 
 
 
@@ -7178,7 +14354,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
       let parsed = null;
+
+
+
+
 
 
 
@@ -7186,7 +14370,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
       if (!parsed || typeof parsed !== 'object') throw new Error("기존 DP 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지)");
+
+
+
+
 
 
 
@@ -7194,7 +14386,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     } else if (r.status === 401) {
+
+
+
+
 
 
 
@@ -7202,11 +14402,23 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     } else if (r.status !== 404) {
 
 
 
+
+
+
+
       throw new Error("DP 조회 실패 " + r.status);
+
+
+
+
 
 
 
@@ -7218,11 +14430,27 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
+
+
+
+
     // 2) 이 토글 하나만 반영
 
 
 
+
+
+
+
     if (wantAdd) { if (!server[code]) server[code] = {}; server[code][sz] = { since: today }; }
+
+
+
+
 
 
 
@@ -7234,7 +14462,19 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
+
+
+
+
     // 3) 저장 — 반드시 성공 여부 확인 (조용한 실패 방지)
+
+
+
+
 
 
 
@@ -7242,7 +14482,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     if (sha) body.sha = sha;
+
+
+
+
 
 
 
@@ -7250,7 +14498,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }  // 충돌 → 최신 다시 읽어 재시도
+
+
+
+
 
 
 
@@ -7262,7 +14518,19 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
+
+
+
+
     // 4) 로컬/캐시 동기화
+
+
+
+
 
 
 
@@ -7270,7 +14538,15 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+
+
+
+
 
 
 
@@ -7278,11 +14554,23 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
     return;
 
 
 
+
+
+
+
   }
+
+
+
+
 
 
 
@@ -7294,7 +14582,31 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7318,7 +14630,23 @@ async function toggleDP(code, size) {
 
 
 
+
+
+
+
+
+
+
+
 function getDPSizes(code) { return Object.keys(DISPLAY_ITEMS[code] || {}); }
+
+
+
+
+
+
+
+
 
 
 
@@ -7334,7 +14662,23 @@ function getDPSizes(code) { return Object.keys(DISPLAY_ITEMS[code] || {}); }
 
 
 
+
+
+
+
+
+
+
+
 function getDPStatus(p) {
+
+
+
+
+
+
+
+
 
 
 
@@ -7350,7 +14694,23 @@ function getDPStatus(p) {
 
 
 
+
+
+
+
+
+
+
+
   if (dpSizes.length === 0) return 'none';
+
+
+
+
+
+
+
+
 
 
 
@@ -7366,7 +14726,23 @@ function getDPStatus(p) {
 
 
 
+
+
+
+
+
+
+
+
     const sObj = p.sizes.find(s => String(s.size).trim() === sz);
+
+
+
+
+
+
+
+
 
 
 
@@ -7382,7 +14758,23 @@ function getDPStatus(p) {
 
 
 
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
 
 
 
@@ -7398,7 +14790,31 @@ function getDPStatus(p) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7422,7 +14838,23 @@ function getDPStatus(p) {
 
 
 
+
+
+
+
+
+
+
+
 let _lastSalesSync = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -7438,7 +14870,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
   try {
+
+
+
+
+
+
+
+
 
 
 
@@ -7454,7 +14902,19 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     const [promoFresh, _dpFresh, _soFresh] = await Promise.all([
+
+
+
+
 
 
 
@@ -7462,7 +14922,15 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
         fetchGithubJson(DISPLAY_PATH),
+
+
+
+
 
 
 
@@ -7470,7 +14938,19 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
     ]);
+
+
+
+
+
+
+
+
 
 
 
@@ -7486,7 +14966,19 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     let _syncChanged = false;
+
+
+
+
 
 
 
@@ -7494,7 +14986,15 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
     if(_soFresh && typeof _soFresh === 'object' && JSON.stringify(_soFresh) !== JSON.stringify(STOCK_OVERRIDES)) { STOCK_OVERRIDES = _soFresh; _syncChanged = true; }
+
+
+
+
 
 
 
@@ -7502,7 +15002,15 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
         try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c.stockOverrides = STOCK_OVERRIDES; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+
+
+
+
 
 
 
@@ -7510,7 +15018,15 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
         if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn();
+
+
+
+
 
 
 
@@ -7518,7 +15034,27 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7542,7 +15078,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     if (!res.ok) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -7558,7 +15110,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     // 변경된 경우에만 갱신
+
+
+
+
+
+
+
+
 
 
 
@@ -7574,7 +15142,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     if (newStr === JSON.stringify(SALES_HISTORY.meta) &&
+
+
+
+
+
+
+
+
 
 
 
@@ -7590,7 +15174,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     SALES_HISTORY = newHistory;
+
+
+
+
+
+
+
+
 
 
 
@@ -7606,7 +15206,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     // ERP 원본 재고 복원 후 차감 + 실재고 보정까지 순서대로 재계산
+
+
+
+
+
+
+
+
 
 
 
@@ -7622,7 +15238,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     render();
+
+
+
+
+
+
+
+
 
 
 
@@ -7638,7 +15270,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     // DATA SOURCE POS판매 뱃지 갱신
+
+
+
+
+
+
+
+
 
 
 
@@ -7654,7 +15302,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
     console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
+
+
+
+
+
+
+
+
 
 
 
@@ -7670,6 +15334,14 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
 }
 
 
@@ -7678,7 +15350,23 @@ async function loadSalesOnly() {
 
 
 
+
+
+
+
+
+
+
+
 // 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
+
+
+
+
+
+
+
+
 
 
 
@@ -7702,7 +15390,31 @@ const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ── POS 동기화 자동 트리거 ──────────────────────────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -7718,7 +15430,23 @@ const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
 
 
 
+
+
+
+
+
+
+
+
 // 앱이 열려있는 동안 10분마다 workflow_dispatch로 직접 트리거
+
+
+
+
+
+
+
+
 
 
 
@@ -7734,7 +15462,23 @@ let _lastPosTrigger = 0;
 
 
 
+
+
+
+
+
+
+
+
 const _POS_TRIGGER_KEY = 'rcm_pos_last_trigger';
+
+
+
+
+
+
+
+
 
 
 
@@ -7750,7 +15494,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
     if (!getPat()) return; // PAT 없으면 skip
+
+
+
+
+
+
+
+
 
 
 
@@ -7766,7 +15526,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
     // localStorage로 탭 간 공유 — 어느 탭에서든 9분 내 트리거했으면 skip
+
+
+
+
+
+
+
+
 
 
 
@@ -7782,7 +15558,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
     if (now - Math.max(_lastPosTrigger, sharedLast) < 9 * 60 * 1000) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -7798,7 +15590,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
     localStorage.setItem(_POS_TRIGGER_KEY, String(now));
+
+
+
+
+
+
+
+
 
 
 
@@ -7814,7 +15622,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
         const r = await fetch(
+
+
+
+
+
+
+
+
 
 
 
@@ -7830,7 +15654,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
             { method: 'POST', headers: { Authorization: 'Bearer ' + getPat(), 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: GH.branch }) }
+
+
+
+
+
+
+
+
 
 
 
@@ -7846,7 +15686,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
         if (r.status === 204) console.log('[POS AutoSync] triggered at', new Date().toLocaleTimeString());
+
+
+
+
+
+
+
+
 
 
 
@@ -7862,7 +15718,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -7878,7 +15750,23 @@ async function autoTriggerPosSync() {
 
 
 
+
+
+
+
+
+
+
+
 let _posIntervalId = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -7894,6 +15782,14 @@ setTimeout(() => {
 
 
 
+
+
+
+
+
+
+
+
     autoTriggerPosSync();
 
 
@@ -7902,7 +15798,23 @@ setTimeout(() => {
 
 
 
+
+
+
+
+
+
+
+
     _posIntervalId = setInterval(autoTriggerPosSync, 10 * 60 * 1000);
+
+
+
+
+
+
+
+
 
 
 
@@ -7926,7 +15838,31 @@ setTimeout(() => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 탭 닫힐 때 interval 정리
+
+
+
+
+
+
+
+
 
 
 
@@ -7942,6 +15878,14 @@ window.addEventListener('beforeunload', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(_salesIntervalId) clearInterval(_salesIntervalId);
 
 
@@ -7950,7 +15894,23 @@ window.addEventListener('beforeunload', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(_posIntervalId)   clearInterval(_posIntervalId);
+
+
+
+
+
+
+
+
 
 
 
@@ -7974,7 +15934,31 @@ window.addEventListener('beforeunload', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -7990,6 +15974,14 @@ const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 
 
 
 
+
+
+
+
+
+
+
+
 요청받은 러닝화에 대해 RunRepeat·Believe in the Run·브랜드 공식 스펙·러닝 커뮤니티 데이터 등 보유한 모든 지식을 활용하여 아래 형식의 가이드를 생성하세요.
 
 
@@ -7998,7 +15990,23 @@ const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 
 
 
 
+
+
+
+
+
+
+
+
 수치를 정확히 모를 경우 "약 OOg" 형식으로 추정값을 제공하세요 (추정이라도 비워두지 말 것).
+
+
+
+
+
+
+
+
 
 
 
@@ -8022,7 +16030,31 @@ const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 출력 블록 (파싱용 — 키 이름·순서 절대 변경 금지)
+
+
+
+
+
+
+
+
 
 
 
@@ -8038,7 +16070,23 @@ const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 
 
 
 
+
+
+
+
+
+
+
+
 keywords: 태그1,태그2,태그3,태그4,태그5
+
+
+
+
+
+
+
+
 
 
 
@@ -8054,7 +16102,23 @@ features: (핵심 기술 특징 2문장. 폼/플레이트/소재 명시)
 
 
 
+
+
+
+
+
+
+
+
 target: (추천 대상. 페이스 구간·발형·거리 포함)
+
+
+
+
+
+
+
+
 
 
 
@@ -8070,7 +16134,23 @@ pitch: (판매 멘트 1~2문장. 구어체)
 
 
 
+
+
+
+
+
+
+
+
 weight: (남성 기준 무게. 예: 238g)
+
+
+
+
+
+
+
+
 
 
 
@@ -8086,7 +16166,23 @@ heel_stack: (힐 스택. 예: 40mm)
 
 
 
+
+
+
+
+
+
+
+
 fore_stack: (포어풋 스택. 예: 32mm)
+
+
+
+
+
+
+
+
 
 
 
@@ -8102,7 +16198,23 @@ drop: (드롭. 예: 8mm)
 
 
 
+
+
+
+
+
+
+
+
 spec_analysis: (스펙 수치의 실전 의미 1~2문장. "OOg이라 OO할 때 OO" 형식)
+
+
+
+
+
+
+
+
 
 
 
@@ -8118,7 +16230,23 @@ vs_prev: (전작 대비 핵심 개선점 1~2문장. 전작 없으면 "초대 모
 
 
 
+
+
+
+
+
+
+
+
 vs_others: (동급 경쟁 모델 1~2개 언급 후 본 모델 우위 1~2문장)
+
+
+
+
+
+
+
+
 
 
 
@@ -8134,6 +16262,14 @@ why: (이 신발의 한 줄 정의. "카본 없이 카본 속도를 내는 슈�
 
 
 
+
+
+
+
+
+
+
+
 best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프~풀 준비 중립 발")
 
 
@@ -8142,7 +16278,23 @@ best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프
 
 
 
+
+
+
+
+
+
+
+
 closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
+
+
+
+
+
+
+
+
 
 
 
@@ -8166,7 +16318,31 @@ closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Groq API (llama-3.3-70b) 호출 — AI 세일즈 가이드 자동생성
+
+
+
+
+
+
+
+
 
 
 
@@ -8182,7 +16358,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
     const key = getAnthKey();
+
+
+
+
+
+
+
+
 
 
 
@@ -8198,6 +16390,14 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
     const userContent = reviewText.trim()
 
 
@@ -8206,7 +16406,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
+
+
+
+
+
+
+
+
 
 
 
@@ -8230,7 +16446,31 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+
+
+
+
+
+
+
+
 
 
 
@@ -8246,7 +16486,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
         headers: {
+
+
+
+
+
+
+
+
 
 
 
@@ -8262,7 +16518,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
             "Authorization": `Bearer ${key}`
+
+
+
+
+
+
+
+
 
 
 
@@ -8278,7 +16550,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
         body: JSON.stringify({
+
+
+
+
+
+
+
+
 
 
 
@@ -8294,7 +16582,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
             messages: [
+
+
+
+
+
+
+
+
 
 
 
@@ -8310,7 +16614,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
                 { role: "user",   content: userContent }
+
+
+
+
+
+
+
+
 
 
 
@@ -8326,7 +16646,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
             max_tokens: 1200,
+
+
+
+
+
+
+
+
 
 
 
@@ -8342,7 +16678,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
         })
+
+
+
+
+
+
+
+
 
 
 
@@ -8358,7 +16710,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
     if (!res.ok) {
+
+
+
+
+
+
+
+
 
 
 
@@ -8374,7 +16742,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
         throw new Error(`Groq API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
+
+
+
+
+
+
+
+
 
 
 
@@ -8390,7 +16774,23 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
     const data = await res.json();
+
+
+
+
+
+
+
+
 
 
 
@@ -8406,7 +16806,31 @@ async function callAIGuide(brand, modelName, reviewText) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8430,7 +16854,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     const result = { keywords: [], features: "", target: "", pitch: "",
+
+
+
+
+
+
+
+
 
 
 
@@ -8446,7 +16886,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
                      spec_analysis: "", vs_prev: "", vs_others: "",
+
+
+
+
+
+
+
+
 
 
 
@@ -8462,7 +16918,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     const blockMatch = text.match(/%%APP_DATA_START%%([\s\S]*?)%%APP_DATA_END%%/);
+
+
+
+
+
+
+
+
 
 
 
@@ -8478,7 +16950,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     const block = blockMatch[1];
+
+
+
+
+
+
+
+
 
 
 
@@ -8494,7 +16982,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.keywords     = field("keywords").split(",").map(k => k.trim()).filter(Boolean);
+
+
+
+
+
+
+
+
 
 
 
@@ -8510,7 +17014,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.target       = field("target");
+
+
+
+
+
+
+
+
 
 
 
@@ -8526,7 +17046,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.weight       = field("weight");
+
+
+
+
+
+
+
+
 
 
 
@@ -8542,7 +17078,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.fore_stack   = field("fore_stack");
+
+
+
+
+
+
+
+
 
 
 
@@ -8558,7 +17110,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.spec_analysis= field("spec_analysis");
+
+
+
+
+
+
+
+
 
 
 
@@ -8574,7 +17142,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.vs_others    = field("vs_others");
+
+
+
+
+
+
+
+
 
 
 
@@ -8590,7 +17174,23 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     result.best_for     = field("best_for");
+
+
+
+
+
+
+
+
 
 
 
@@ -8606,6 +17206,14 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
     return result;
 
 
@@ -8614,7 +17222,31 @@ function parseGuideResponse(text) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8638,7 +17270,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     if(!SALES_DEDUCTIONS) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -8654,7 +17302,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+
+
+
+
+
+
+
+
 
 
 
@@ -8670,7 +17334,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     if(SALES_DEDUCTIONS.date !== today) { SALES_DEDUCTIONS = null; return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -8686,7 +17366,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     for(const p of PRODUCTS) {
+
+
+
+
+
+
+
+
 
 
 
@@ -8702,7 +17398,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             const key = p.품번 + '|' + String(s.size).trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -8718,7 +17430,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             const buNet = bu[key] ?? 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -8734,7 +17462,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             if(buNet !== 0) s.busan = Math.max(0, s.busan - buNet);
+
+
+
+
+
+
+
+
 
 
 
@@ -8750,7 +17494,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -8766,7 +17526,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
         p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa, 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -8782,7 +17558,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     window._erpDeductApplied = true;
+
+
+
+
+
+
+
+
 
 
 
@@ -8798,7 +17590,31 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8822,7 +17638,23 @@ function applyErpDeductions() {
 
 
 
+
+
+
+
+
+
+
+
 // 아침 ERP 재고 - 오늘 POS 판매 = 실시간 부산 잔여 재고
+
+
+
+
+
+
+
+
 
 
 
@@ -8838,6 +17670,14 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     if (!SALES_HISTORY || !SALES_HISTORY.items) return;
 
 
@@ -8846,7 +17686,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     const d = new Date();
+
+
+
+
+
+
+
+
 
 
 
@@ -8870,6 +17726,22 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     for (const p of PRODUCTS) {
 
 
@@ -8878,7 +17750,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
         const todaySales = SALES_HISTORY.items[p.품번]?.[todayStr];
+
+
+
+
+
+
+
+
 
 
 
@@ -8902,7 +17790,31 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let changed = false;
+
+
+
+
+
+
+
+
 
 
 
@@ -8918,7 +17830,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             const sizeKey = String(s.size).trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -8934,7 +17862,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             if (!saleEntry) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -8950,7 +17894,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             const sold = Math.max(saleEntry['부산(김종훈)'] || 0, saleEntry['부산'] || 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -8966,7 +17926,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
                 s.busan = Math.max(0, s.busan - sold);
+
+
+
+
+
+
+
+
 
 
 
@@ -8982,6 +17958,14 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             }
 
 
@@ -8990,7 +17974,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -9006,7 +18006,23 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
             p.busanTotal = p.sizes.reduce((a, b) => a + b.busan, 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -9022,6 +18038,14 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
     }
 
 
@@ -9030,7 +18054,31 @@ function applyPosSalesDeductions() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9054,7 +18102,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
     // DOM scraping bookmarklet: reads table visible after user clicks 조회 (supports td/th headers)
+
+
+
+
+
+
+
+
 
 
 
@@ -9078,7 +18142,31 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const existing = document.getElementById('erpSyncModal');
+
+
+
+
+
+
+
+
 
 
 
@@ -9094,7 +18182,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
     const modal = document.createElement('div');
+
+
+
+
+
+
+
+
 
 
 
@@ -9110,7 +18214,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+
+
+
+
+
+
+
 
 
 
@@ -9126,6 +18246,14 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
       <div style="background:#fff;border-radius:20px;padding:28px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.25);font-family:sans-serif;">
 
 
@@ -9134,7 +18262,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
         <h3 style="margin:0 0 4px;font-size:18px;font-weight:800;color:#0f172a;">ERP 판매 연동</h3>
+
+
+
+
+
+
+
+
 
 
 
@@ -9158,7 +18302,31 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:18px;margin-bottom:14px;">
+
+
+
+
+
+
+
+
 
 
 
@@ -9174,7 +18342,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
           <p style="margin:0 0 12px;font-size:12px;color:#166534;">아래 버튼을 북마크 바로 <b>드래그</b>해서 추가하세요</p>
+
+
+
+
+
+
+
+
 
 
 
@@ -9190,7 +18374,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
             📎 ERP 동기화
+
+
+
+
+
+
+
+
 
 
 
@@ -9206,6 +18406,14 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
           <p style="margin:10px 0 0;font-size:11px;color:#6b7280;">드래그가 안 되면: 주소창에 북마크 저장 후 북마크 바로 이동</p>
 
 
@@ -9214,7 +18422,31 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9238,7 +18470,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
           <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#1d4ed8;">② 매일 사용 방법 (2단계)</p>
+
+
+
+
+
+
+
+
 
 
 
@@ -9254,7 +18502,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
             <li>ERP 주문내역조회 → <b>구분: POS</b>, 오늘 날짜로 <b>조회</b> 클릭</li>
+
+
+
+
+
+
+
+
 
 
 
@@ -9270,6 +18534,14 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
             <li>재고앱 새로고침 → 판매차감 자동 반영</li>
 
 
@@ -9278,7 +18550,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
           </ol>
+
+
+
+
+
+
+
+
 
 
 
@@ -9302,7 +18590,31 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <button onclick="document.getElementById('erpSyncModal').remove()" style="width:100%;padding:12px;background:#0f172a;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -9318,7 +18630,23 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
     modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+
+
+
+
+
+
+
+
 
 
 
@@ -9334,7 +18662,31 @@ window.showErpSyncModal = function() {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9358,7 +18710,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
     if(!GH.owner || !GH.repo) throw new Error("저장소 설정 없음 (ADMIN > API 설정 확인)");
+
+
+
+
+
+
+
+
 
 
 
@@ -9370,7 +18738,19 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
     if(checkAdminSession()) { try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {} }
+
+
+
+
+
+
+
+
 
 
 
@@ -9386,7 +18766,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
     if(!pat) throw new Error("PAT 토큰이 없습니다 (ADMIN > API 설정 확인)");
+
+
+
+
+
+
+
+
 
 
 
@@ -9402,7 +18798,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
     const headers = { Authorization: "Bearer " + pat, "Content-Type": "application/json" };
+
+
+
+
+
+
+
+
 
 
 
@@ -9418,7 +18830,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -9434,7 +18862,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
         if(r.ok) { const j = await r.json(); sha = j.sha; }
+
+
+
+
+
+
+
+
 
 
 
@@ -9450,7 +18894,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
         else if(r.status !== 404) throw new Error("파일 조회 실패: " + r.status);
+
+
+
+
+
+
+
+
 
 
 
@@ -9466,7 +18926,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
     const payload = { message: "update inventory: " + (meta.fileName || "upload") + " by " + (meta.uploadedAt || ""), content: utf8ToB64(JSON.stringify({ meta, rows })), branch: GH.branch };
+
+
+
+
+
+
+
+
 
 
 
@@ -9482,7 +18958,19 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
     // 409/422(SHA 충돌·read-after-write 지연) 시 최신 sha로 재시도 (엑셀은 전체 교체라 재병합 불필요)
+
+
+
+
 
 
 
@@ -9490,7 +18978,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
     for(let attempt = 0; attempt < 4; attempt++) {
+
+
+
+
 
 
 
@@ -9498,7 +18994,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
         if(r2.ok) return await r2.json();
+
+
+
+
 
 
 
@@ -9506,7 +19010,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
             await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+
+
+
+
 
 
 
@@ -9514,7 +19026,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
                 const rr = await fetch(apiBase + "?ref=" + encodeURIComponent(GH.branch) + "&t=" + Date.now(), { headers });
+
+
+
+
 
 
 
@@ -9522,7 +19042,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
                 else if(rr.status === 404) { delete payload.sha; }
+
+
+
+
 
 
 
@@ -9530,7 +19058,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
             continue;
+
+
+
+
 
 
 
@@ -9538,7 +19074,15 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
         const j = await r2.json().catch(() => ({}));
+
+
+
+
 
 
 
@@ -9546,11 +19090,23 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
     }
 
 
 
+
+
+
+
     const jf = await r2.json().catch(() => ({}));
+
+
+
+
 
 
 
@@ -9562,7 +19118,31 @@ async function commitInventoryToGitHub(rows, meta) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9586,7 +19166,23 @@ function getActiveWeeklyCategory() {
 
 
 
+
+
+
+
+
+
+
+
     // 하드코딩된 날짜 제거 — 위클리 카테고리는 기획전 데이터에서 읽어야 함
+
+
+
+
+
+
+
+
 
 
 
@@ -9602,7 +19198,23 @@ function getActiveWeeklyCategory() {
 
 
 
+
+
+
+
+
+
+
+
     for (const pr of getPromoList()) {
+
+
+
+
+
+
+
+
 
 
 
@@ -9618,7 +19230,23 @@ function getActiveWeeklyCategory() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -9634,7 +19262,31 @@ function getActiveWeeklyCategory() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9658,7 +19310,23 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
+
+
+
+
     const arr = Array.from(sizesSet).map(s => String(s).trim()).filter(Boolean);
+
+
+
+
+
+
+
+
 
 
 
@@ -9674,7 +19342,23 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
+
+
+
+
     arr.sort((a,b) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -9690,7 +19374,23 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
+
+
+
+
         return (apOrder[a.toUpperCase()]||99) - (apOrder[b.toUpperCase()]||99);
+
+
+
+
+
+
+
+
 
 
 
@@ -9706,6 +19406,14 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
+
+
+
+
     return arr.map(s => `<option value="${s}">${s}</option>`).join('');
 
 
@@ -9714,7 +19422,31 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9734,7 +19466,15 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
 // 진짜 헤더 행("품번" 포함)을 자동으로 찾아 그 행부터 파싱한다.
+
+
+
+
 
 
 
@@ -9742,7 +19482,15 @@ function generateSizeOptionsHtml(sizesSet) {
 
 
 
+
+
+
+
 function parseInventorySheet(sheet, XLSXLib) {
+
+
+
+
 
 
 
@@ -9750,7 +19498,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
     const aoa = X.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+
+
+
+
 
 
 
@@ -9758,7 +19514,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
     if (headerRowIdx === -1) headerRowIdx = 0; // 못 찾으면 기존 동작(첫 행) 유지
+
+
+
+
 
 
 
@@ -9766,11 +19530,23 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
         return X.utils.sheet_to_json(sheet, { defval: "", raw: true });
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -9778,7 +19554,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
     const headers = aoa[headerRowIdx].map(h => String(h).trim());
+
+
+
+
 
 
 
@@ -9786,7 +19570,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
     for (let i = headerRowIdx + 1; i < aoa.length; i++) {
+
+
+
+
 
 
 
@@ -9794,7 +19586,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
         if (line.every(c => c === "" || c === undefined || c === null)) continue; // 빈 행 스킵
+
+
+
+
 
 
 
@@ -9802,7 +19602,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
         headers.forEach((h, idx) => { if (h) obj[h] = line[idx] !== undefined ? line[idx] : ""; });
+
+
+
+
 
 
 
@@ -9810,7 +19618,15 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -9818,11 +19634,27 @@ function parseInventorySheet(sheet, XLSXLib) {
 
 
 
+
+
+
+
     return rows;
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -9838,7 +19670,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const map = new Map();
+
+
+
+
+
+
+
+
 
 
 
@@ -9854,7 +19702,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const allSizesFw = new Set(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -9870,7 +19734,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const allSizesGear = new Set(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -9886,6 +19766,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   
 
 
@@ -9894,7 +19782,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   if($("#statItems")) $("#statItems").className = ($("#statItems").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
+
+
+
+
+
+
+
+
 
 
 
@@ -9918,7 +19822,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   for(const r of RAW){
+
+
+
+
+
+
+
+
 
 
 
@@ -9934,7 +19862,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     const size = String(r["규격"]||"").trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -9950,7 +19894,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
         if (isFwSize(size)) allSizesFw.add(size);
+
+
+
+
+
+
+
+
 
 
 
@@ -9966,6 +19926,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
         else allSizesGear.add(size);
 
 
@@ -9974,7 +19942,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9998,7 +19990,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), itemCode:String(r["품목내부코드"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })(), sizes:[], hasMemo: false, periodSales: 0 });
+
+
+
+
+
+
+
+
 
 
 
@@ -10014,7 +20022,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     const p = map.get(code);
+
+
+
+
+
+
+
+
 
 
 
@@ -10030,7 +20054,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     const rowPrice = Number(r["소비자가"]||0);
+
+
+
+
+
+
+
+
 
 
 
@@ -10046,7 +20086,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -10062,6 +20118,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     const center = Number(r["물류센터"] ?? 0);
 
 
@@ -10070,7 +20134,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -10086,11 +20166,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     // 사이즈별 품목내부코드 (규격마다 다름 — 품번 레벨 itemCode와 별도 관리)
 
 
 
+
+
+
+
     const _sizeItemCode = String(r["품목내부코드"] || "").trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -10106,7 +20206,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; if(!found.itemCode && _sizeItemCode) found.itemCode=_sizeItemCode; }
+
+
+
+
+
+
+
+
 
 
 
@@ -10122,7 +20238,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -10138,7 +20270,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   PRODUCTS = Array.from(map.values()).map(p=>{
+
+
+
+
+
+
+
+
 
 
 
@@ -10154,7 +20302,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
+
+
+
+
+
+
+
+
 
 
 
@@ -10170,7 +20334,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     // 부산 재고 있는 사이즈 중 바코드 누락된 것이 하나라도 있는지
+
+
+
+
+
+
+
+
 
 
 
@@ -10186,7 +20366,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -10202,7 +20398,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -10226,7 +20438,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const _pm = findPromoForCode(p.품번);
+
+
+
+
+
+
+
+
 
 
 
@@ -10242,11 +20478,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
         const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
 
 
 
+
+
+
+
         p.promoIsPreview = !!_isPreview;
+
+
+
+
+
+
+
+
 
 
 
@@ -10262,7 +20518,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
         const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+
+
+
+
+
+
+
+
 
 
 
@@ -10274,7 +20546,19 @@ function rebuildIndex(){
 
 
 
+
+
+
+
         p.promoCouponRate = _pi.couponRate || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -10290,7 +20574,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
             p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
+
+
+
+
+
+
+
+
 
 
 
@@ -10306,7 +20606,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
             p.promoEndDate = _endDate || (_pi.targetCat==='FOOTWEAR'?'5/15':_pi.targetCat==='APPAREL'?'5/22':'5/29');
+
+
+
+
+
+
+
+
 
 
 
@@ -10322,7 +20638,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
             p.currentPromoPrice = _pi.finalPrice; Object.assign(p, _promoMeta);
+
+
+
+
+
+
+
+
 
 
 
@@ -10338,7 +20670,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
         } else if (_pi.finalRate > 0 && p.소비자가 > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -10354,7 +20702,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
             const _computed = Math.round(p.소비자가 * (1 - _pi.finalRate) / 10) * 10;
+
+
+
+
+
+
+
+
 
 
 
@@ -10370,7 +20734,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
                 p.currentPromoPrice = _computed; Object.assign(p, _promoMeta);
+
+
+
+
+
+
+
+
 
 
 
@@ -10386,7 +20766,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -10402,7 +20798,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -10418,7 +20830,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     p._hayClean = p._hay.replace(/[\s\-_]/g, ""); 
+
+
+
+
+
+
+
+
 
 
 
@@ -10434,7 +20862,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
     return p;
+
+
+
+
+
+
+
+
 
 
 
@@ -10458,6 +20902,22 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if(!$("#sizeSelFw") && $("#sortSel")) {
 
 
@@ -10466,7 +20926,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const container = document.createElement("div");
+
+
+
+
+
+
+
+
 
 
 
@@ -10490,7 +20966,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       const createSel = (id, label, optionsHtml) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -10506,7 +21006,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
                      <option value="ALL">📏 ${label}</option>${optionsHtml}
+
+
+
+
+
+
+
+
 
 
 
@@ -10522,7 +21038,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -10546,7 +21086,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           `<span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">사이즈</span>` +
+
+
+
+
+
+
+
+
 
 
 
@@ -10562,7 +21118,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           createSel("sizeSelAp", "의류", generateSizeOptionsHtml(allSizesAp)) +
+
+
+
+
+
+
+
+
 
 
 
@@ -10586,7 +21158,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       // 필터 row 다음, 브랜드 행 앞에 삽입
+
+
+
+
+
+
+
+
 
 
 
@@ -10602,6 +21198,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const brandSearchRow = $("#brandRow") || $("#brandSearch")?.parentNode?.parentNode;
 
 
@@ -10610,7 +21214,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       if(filterDetails && brandSearchRow && brandSearchRow.parentNode === filterDetails) filterDetails.insertBefore(container, brandSearchRow);
+
+
+
+
+
+
+
+
 
 
 
@@ -10634,7 +21254,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       const handleSizeChange = (e) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -10650,7 +21294,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           if(e.target.id === "sizeSelFw") { $("#sizeSelAp").value = "ALL"; $("#sizeSelGear").value = "ALL"; }
+
+
+
+
+
+
+
+
 
 
 
@@ -10666,7 +21326,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           if(e.target.id === "sizeSelGear") { $("#sizeSelFw").value = "ALL"; $("#sizeSelAp").value = "ALL"; }
+
+
+
+
+
+
+
+
 
 
 
@@ -10682,7 +21358,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       };
+
+
+
+
+
+
+
+
 
 
 
@@ -10698,7 +21390,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       $("#sizeSelFw").onchange = handleSizeChange;
+
+
+
+
+
+
+
+
 
 
 
@@ -10714,6 +21422,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       $("#sizeSelGear").onchange = handleSizeChange;
 
 
@@ -10722,7 +21438,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -10738,7 +21470,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -10754,6 +21502,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       $("#sortSel").appendChild(opt);
 
 
@@ -10762,7 +21518,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -10786,7 +21566,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   if (!promoWrap && getPromoList().length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -10802,7 +21598,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       promoWrap.className = "flex gap-1.5 items-center overflow-x-auto no-scrollbar pl-[2.875rem]";
+
+
+
+
+
+
+
+
 
 
 
@@ -10818,7 +21630,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const _brandRowRef = $("#brandRow");
+
+
+
+
+
+
+
+
 
 
 
@@ -10834,7 +21662,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       else { const _bc = $("#brandChips"); if(_bc?.parentNode) _bc.parentNode.insertBefore(promoWrap, _bc); }
+
+
+
+
+
+
+
+
 
 
 
@@ -10850,7 +21694,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   if (getPromoList().length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -10866,7 +21726,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           const _isPromoActive = window.tempPromoFilter === true;
+
+
+
+
+
+
+
+
 
 
 
@@ -10882,7 +21758,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           promoWrap.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -10898,7 +21790,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+
+
+
+
+
+
+
+
 
 
 
@@ -10914,7 +21822,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           const _ptSel = $("#promoTypeSel"), _prSel = $("#promoRateSel");
+
+
+
+
+
+
+
+
 
 
 
@@ -10930,6 +21854,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           if(_prSel) _prSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
 
 
@@ -10938,7 +21870,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -10962,6 +21910,22 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 브랜드 카운트 계산
 
 
@@ -10970,7 +21934,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const brandCounts = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -10994,7 +21974,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 최근 브랜드 localStorage
+
+
+
+
+
+
+
+
 
 
 
@@ -11010,7 +22014,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const _getRecentBrands = () => { try { return JSON.parse(localStorage.getItem(_RECENT_KEY)||"[]"); } catch { return []; } };
+
+
+
+
+
+
+
+
 
 
 
@@ -11026,7 +22046,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       let arr = _getRecentBrands().filter(x => x !== b); arr.unshift(b); arr = arr.slice(0, 5);
+
+
+
+
+
+
+
+
 
 
 
@@ -11042,7 +22078,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -11066,7 +22126,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const _isAlpha = () => $("#brandSortAlpha")?.dataset.active === "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -11082,7 +22158,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const entries = Object.entries(brandCounts);
+
+
+
+
+
+
+
+
 
 
 
@@ -11098,6 +22190,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       return entries.sort((a,b) => b[1]-a[1]).map(x=>x[0]);
 
 
@@ -11106,7 +22206,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -11130,7 +22254,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   if(!window._activeBrands) window._activeBrands = new Set();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -11154,7 +22302,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const _renderBrandChips = (filterQ = "") => {
+
+
+
+
+
+
+
+
 
 
 
@@ -11170,6 +22334,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       if(!wrap) return;
 
 
@@ -11178,7 +22350,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const brands = _getSortedBrands();
+
+
+
+
+
+
+
+
 
 
 
@@ -11202,7 +22390,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       wrap.innerHTML = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -11218,7 +22430,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const allBtn = document.createElement("button");
+
+
+
+
+
+
+
+
 
 
 
@@ -11234,7 +22462,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       allBtn.dataset.active = window._activeBrands.size === 0 ? "1" : "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -11250,7 +22494,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       allBtn.onclick = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -11266,7 +22526,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           window._activeBrands.clear();
+
+
+
+
+
+
+
+
 
 
 
@@ -11282,7 +22558,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           if(window._updateBrandPreview) window._updateBrandPreview();
+
+
+
+
+
+
+
+
 
 
 
@@ -11298,7 +22590,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       };
+
+
+
+
+
+
+
+
 
 
 
@@ -11322,7 +22630,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       brands.filter(b => !q || b.toLowerCase().includes(q)).forEach(b => {
+
+
+
+
+
+
+
+
 
 
 
@@ -11338,7 +22670,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           btn.className = "chip shrink-0"; btn.dataset.brand = b;
+
+
+
+
+
+
+
+
 
 
 
@@ -11354,7 +22702,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           btn.textContent = b;
+
+
+
+
+
+
+
+
 
 
 
@@ -11370,7 +22734,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -11386,7 +22766,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
                   window._activeBrands.delete(b);
+
+
+
+
+
+
+
+
 
 
 
@@ -11402,7 +22798,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
                   window._activeBrands.add(b);
+
+
+
+
+
+
+
+
 
 
 
@@ -11418,7 +22830,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               _renderBrandChips(filterQ);
+
+
+
+
+
+
+
+
 
 
 
@@ -11434,7 +22862,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               visibleCount = 60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -11450,7 +22894,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           wrap.appendChild(btn);
+
+
+
+
+
+
+
+
 
 
 
@@ -11466,7 +22926,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -11490,7 +22974,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const _renderRecentBrands = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -11506,7 +23006,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const recents = _getRecentBrands().filter(b => brandCounts[b]);
+
+
+
+
+
+
+
+
 
 
 
@@ -11522,7 +23038,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       rb.classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -11538,7 +23070,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       rb.innerHTML = '<span class="text-[10px] text-[color:var(--muted)] shrink-0 font-bold">최근:</span>';
+
+
+
+
+
+
+
+
 
 
 
@@ -11554,7 +23102,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           const btn = document.createElement("button");
+
+
+
+
+
+
+
+
 
 
 
@@ -11570,7 +23134,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           btn.onclick = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -11586,7 +23166,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -11602,7 +23198,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -11618,7 +23230,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           rb.appendChild(btn);
+
+
+
+
+
+
+
+
 
 
 
@@ -11634,6 +23262,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
 
 
@@ -11642,7 +23278,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   // ── 인기순 top N 브랜드 (항상 인기순, 정렬 토글 무관) ──
+
+
+
+
+
+
+
+
 
 
 
@@ -11666,7 +23318,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // ── 브랜드 접힌 상태: 인기 top5 칩 + 선택 표시 ──────────
+
+
+
+
+
+
+
+
 
 
 
@@ -11682,6 +23358,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const preview = $("#brandCollapsedPreview");
 
 
@@ -11690,7 +23374,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const label = $("#brandToggleLabel");
+
+
+
+
+
+
+
+
 
 
 
@@ -11714,7 +23414,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       const top5 = _getTopBrands(10);
+
+
+
+
+
+
+
+
 
 
 
@@ -11738,7 +23462,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       // top 5 인기 브랜드를 항상 클릭 가능한 칩으로 표시
+
+
+
+
+
+
+
+
 
 
 
@@ -11754,7 +23502,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           const btn = document.createElement("button");
+
+
+
+
+
+
+
+
 
 
 
@@ -11770,7 +23534,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           btn.dataset.brand = b;
+
+
+
+
+
+
+
+
 
 
 
@@ -11786,7 +23566,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           btn.textContent = b;
+
+
+
+
+
+
+
+
 
 
 
@@ -11802,7 +23598,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -11818,7 +23630,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               else window._activeBrands.add(b);
+
+
+
+
+
+
+
+
 
 
 
@@ -11834,7 +23662,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
               _updateBrandPreview();
+
+
+
+
+
+
+
+
 
 
 
@@ -11850,6 +23694,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           };
 
 
@@ -11858,7 +23710,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           preview.appendChild(btn);
+
+
+
+
+
+
+
+
 
 
 
@@ -11882,7 +23750,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       // top5 외에 선택된 브랜드가 있으면 "+N개 선택" 표시
+
+
+
+
+
+
+
+
 
 
 
@@ -11898,7 +23790,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       if (extraSelected.length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -11914,7 +23822,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           span.className = "text-[10px] font-black text-blue-600 shrink-0 px-1";
+
+
+
+
+
+
+
+
 
 
 
@@ -11930,6 +23854,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           preview.appendChild(span);
 
 
@@ -11938,7 +23870,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -11962,7 +23918,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const isOpen = $("#brandExpandedPanel")?.classList.contains("open");
+
+
+
+
+
+
+
+
 
 
 
@@ -11978,7 +23950,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -12002,7 +23998,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   window._updateBrandPreview = _updateBrandPreview;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -12026,7 +24046,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   window._toggleBrandPanel = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -12042,7 +24078,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const chevron = $("#brandChevron");
+
+
+
+
+
+
+
+
 
 
 
@@ -12058,7 +24110,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       if (!panel) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -12074,7 +24142,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       if (isOpen) {
+
+
+
+
+
+
+
+
 
 
 
@@ -12090,7 +24174,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           if (chevron) chevron.style.transform = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -12106,7 +24206,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -12122,7 +24238,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           if (chevron) chevron.style.transform = "rotate(180deg)";
+
+
+
+
+
+
+
+
 
 
 
@@ -12138,7 +24270,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
           // 패널 열릴 때 검색창 포커스
+
+
+
+
+
+
+
+
 
 
 
@@ -12154,6 +24302,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       }
 
 
@@ -12162,7 +24318,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -12186,7 +24366,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   _updateBrandPreview();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -12210,7 +24414,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   const brandSearchEl = $("#brandSearch");
+
+
+
+
+
+
+
+
 
 
 
@@ -12226,7 +24446,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       brandSearchEl.dataset.setup = "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -12242,7 +24478,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       brandSearchEl.addEventListener("search", () => _renderBrandChips(""));
+
+
+
+
+
+
+
+
 
 
 
@@ -12266,7 +24518,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 정렬 토글 이벤트
+
+
+
+
+
+
+
+
 
 
 
@@ -12282,7 +24558,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       const popBtn = $("#brandSortPop"); const alphaBtn = $("#brandSortAlpha");
+
+
+
+
+
+
+
+
 
 
 
@@ -12298,7 +24590,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       popBtn.dataset.setup = "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -12314,6 +24622,14 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
       alphaBtn.onclick = () => { alphaBtn.dataset.active="1"; popBtn.dataset.active="0"; _renderBrandChips(brandSearchEl?.value||""); };
 
 
@@ -12322,7 +24638,23 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
 
 
 
@@ -12346,7 +24678,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if($("#statItems")) $("#statItems").textContent = fmt(PRODUCTS.length);
+
+
+
+
+
+
+
+
 
 
 
@@ -12362,7 +24718,31 @@ function rebuildIndex(){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -12386,6 +24766,14 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
     const wrap = $("#actionBtnsWrap");
 
 
@@ -12394,7 +24782,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
     if(!wrap || wrap.dataset.setup === "1") return;
+
+
+
+
+
+
+
+
 
 
 
@@ -12418,7 +24822,31 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const hasPromo = getPromoList().length > 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -12434,7 +24862,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
     wrap.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -12450,6 +24894,14 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
             <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
 
 
@@ -12458,7 +24910,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
         </button>
+
+
+
+
+
+
+
+
 
 
 
@@ -12474,7 +24942,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
             <i data-lucide="flame" class="w-3.5 h-3.5"></i><span>핫셀러 현황</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -12490,7 +24974,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
         ${hasPromo ? `
+
+
+
+
+
+
+
+
 
 
 
@@ -12506,7 +25006,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
             <i data-lucide="gift" class="w-3.5 h-3.5"></i><span>기획전</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -12522,7 +25038,23 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
     `;
+
+
+
+
+
+
+
+
 
 
 
@@ -12538,7 +25070,31 @@ function setupQuickActionBar() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -12562,6 +25118,14 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
     const ERP_URL = localStorage.getItem('rcm_erp_url') || 'http://121.156.75.226';
 
 
@@ -12570,7 +25134,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
     const d = new Date();
+
+
+
+
+
+
+
+
 
 
 
@@ -12594,7 +25174,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const btn = document.getElementById('erpSyncBtn');
+
+
+
+
+
+
+
+
 
 
 
@@ -12618,7 +25222,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const payload = {
+
+
+
+
+
+
+
+
 
 
 
@@ -12634,7 +25262,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         Action: 228002, ActionType: 0,
+
+
+
+
+
+
+
+
 
 
 
@@ -12650,7 +25294,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         Param: "", SPName: null, SPAlias: null, DBType: null, WFType: null,
+
+
+
+
+
+
+
+
 
 
 
@@ -12666,7 +25326,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         IsExcelQuery: false, IsCommonLuaService: false, IsAuthService: false, IsRunService: false,
+
+
+
+
+
+
+
+
 
 
 
@@ -12682,7 +25358,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         JSonData: {
+
+
+
+
+
+
+
+
 
 
 
@@ -12698,7 +25390,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
                 TableName: "DataBlock1",
+
+
+
+
+
+
+
+
 
 
 
@@ -12714,7 +25422,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
                 ColumnsType: [0,0,0,1,0,0,5,1,5,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,5,5,5,5,1,1,1,1,1,1,1,1,0,0,1,0,0,1,5,5,5,5,1,5],
+
+
+
+
+
+
+
+
 
 
 
@@ -12730,7 +25454,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             }],
+
+
+
+
+
+
+
+
 
 
 
@@ -12746,7 +25486,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         },
+
+
+
+
+
+
+
+
 
 
 
@@ -12762,7 +25518,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         Option: { PgmSeq: null, PgmId: null, WorkingTag: null, XmlFlags: null, Timeout: 3600, LoginPgmSeq: 0, ExecuteSeq: "0", ServiceLayer: null, PgmMethodSeq: 0, ToDsn: null, IsDebug: null, PgmEventSeq: 0, DebugMode: null, JumpPgmSeq: 0, MenuSeq: 0, IsAsyncService: false, IsUseSendMessage: false, SendDateKey: null },
+
+
+
+
+
+
+
+
 
 
 
@@ -12778,7 +25550,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         LoginOptionMsg: null,
+
+
+
+
+
+
+
+
 
 
 
@@ -12794,7 +25582,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         AuthOption: { Type: 0, Data: "" }
+
+
+
+
+
+
+
+
 
 
 
@@ -12818,7 +25622,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -12834,7 +25662,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             method: 'POST',
+
+
+
+
+
+
+
+
 
 
 
@@ -12850,7 +25694,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             credentials: 'include',
+
+
+
+
+
+
+
+
 
 
 
@@ -12866,6 +25726,14 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         });
 
 
@@ -12874,7 +25742,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         if(!res.ok) throw new Error('HTTP ' + res.status);
+
+
+
+
+
+
+
+
 
 
 
@@ -12898,7 +25782,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const table = data?.JSonData?.Tables?.[0];
+
+
+
+
+
+
+
+
 
 
 
@@ -12922,7 +25830,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const cols = table.Columns;
+
+
+
+
+
+
+
+
 
 
 
@@ -12938,7 +25870,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         const iNo = cols.indexOf('productNo');
+
+
+
+
+
+
+
+
 
 
 
@@ -12954,7 +25902,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         const iQty = cols.indexOf('Qty');
+
+
+
+
+
+
+
+
 
 
 
@@ -12970,7 +25934,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         const iDate = cols.indexOf('orderYmdt');
+
+
+
+
+
+
+
+
 
 
 
@@ -12994,7 +25974,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const busanDed = {}, sinsaDed = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -13010,7 +26014,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             if(String(row[iDate]) !== today) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -13026,7 +26046,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             const pno = String(row[iNo] || '').trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -13042,7 +26078,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             const qty = parseInt(row[iQty]) || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -13058,7 +26110,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             if(!pno || !spec) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -13074,7 +26142,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             if(wh.includes('부산')) busanDed[key] = (busanDed[key] || 0) + qty;
+
+
+
+
+
+
+
+
 
 
 
@@ -13090,7 +26174,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -13114,7 +26222,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         if(allKeys.size === 0) { showToast('오늘 POS 판매 내역 없음'); return; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -13138,7 +26270,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             for(const s of p.sizes) {
+
+
+
+
+
+
+
+
 
 
 
@@ -13154,7 +26302,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
                 if(busanDed[key]) s.busan = Math.max(0, s.busan - busanDed[key]);
+
+
+
+
+
+
+
+
 
 
 
@@ -13170,7 +26334,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -13186,6 +26366,14 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa, 0);
 
 
@@ -13194,7 +26382,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -13218,7 +26430,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         window._erpDeductTime = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+
+
+
+
+
+
+
+
 
 
 
@@ -13234,7 +26462,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         setupQuickActionBar();
+
+
+
+
+
+
+
+
 
 
 
@@ -13250,7 +26494,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         render();
+
+
+
+
+
+
+
+
 
 
 
@@ -13274,7 +26534,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     } catch(e) {
+
+
+
+
+
+
+
+
 
 
 
@@ -13290,7 +26574,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             showToast('CORS 차단 — ERP 직접 연동 불가. 북마크릿 방식으로 전환 필요합니다.');
+
+
+
+
+
+
+
+
 
 
 
@@ -13306,7 +26606,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
             showToast('ERP 오류: ' + e.message);
+
+
+
+
+
+
+
+
 
 
 
@@ -13322,7 +26638,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
         console.error('ERP sync:', e);
+
+
+
+
+
+
+
+
 
 
 
@@ -13338,6 +26670,14 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
     }
 
 
@@ -13346,7 +26686,31 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -13370,7 +26734,23 @@ window.syncErpSales = async function() {
 
 
 
+
+
+
+
+
+
+
+
 function _syncPromoBtn(btn, active, pname) {
+
+
+
+
+
+
+
+
 
 
 
@@ -13386,7 +26766,23 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
     btn.dataset.active = active ? "1" : "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -13402,7 +26798,23 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
         btn.className = btn.className.replace(/bg-purple-50/g,'bg-purple-600').replace(/text-purple-700/g,'text-white').replace(/hover:bg-purple-100/g,'hover:bg-purple-700').replace(/border-purple-200/g,'border-purple-700');
+
+
+
+
+
+
+
+
 
 
 
@@ -13418,7 +26830,23 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
         btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i><span>${label} ✕</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -13434,7 +26862,23 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
         btn.className = btn.className.replace(/bg-purple-600/g,'bg-purple-50').replace(/text-white/g,'text-purple-700').replace(/hover:bg-purple-700/g,'hover:bg-purple-100').replace(/border-purple-700/g,'border-purple-200');
+
+
+
+
+
+
+
+
 
 
 
@@ -13450,6 +26894,14 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
     }
 
 
@@ -13458,7 +26910,23 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
     if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -13482,7 +26950,31 @@ function _syncPromoBtn(btn, active, pname) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 window.togglePromoView = (btn, bypassRender = false) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -13498,7 +26990,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
     const _promos = getPromoList();
+
+
+
+
+
+
+
+
 
 
 
@@ -13522,7 +27030,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // ── 멀티 기획전: 드롭다운 팝오버 ────────────────────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -13538,7 +27070,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         if(bypassRender) {
+
+
+
+
+
+
+
+
 
 
 
@@ -13554,7 +27102,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             window.tempPromoFilter = true;
+
+
+
+
+
+
+
+
 
 
 
@@ -13570,7 +27134,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             return;
+
+
+
+
+
+
+
+
 
 
 
@@ -13586,6 +27166,14 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         // 드롭다운 열기/닫기 토글
 
 
@@ -13594,7 +27182,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         const existingDD = document.getElementById('promoDropdown');
+
+
+
+
+
+
+
+
 
 
 
@@ -13618,6 +27222,22 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const dd = document.createElement('div');
 
 
@@ -13626,7 +27246,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         dd.id = 'promoDropdown';
+
+
+
+
+
+
+
+
 
 
 
@@ -13650,7 +27286,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const activePN = window._activePromoName || "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -13674,7 +27334,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 기획전 목록 아이템
+
+
+
+
+
+
+
+
 
 
 
@@ -13690,7 +27374,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             { pname: "ALL", label: "🎁 전체 기획전" },
+
+
+
+
+
+
+
+
 
 
 
@@ -13706,7 +27406,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
                 pname: pr.meta?.name || '기획전',
+
+
+
+
+
+
+
+
 
 
 
@@ -13722,7 +27438,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             }))
+
+
+
+
+
+
+
+
 
 
 
@@ -13738,7 +27470,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         ddItems.forEach(item => {
+
+
+
+
+
+
+
+
 
 
 
@@ -13754,7 +27502,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             const isSelected = isFilterOn && activePN === item.pname;
+
+
+
+
+
+
+
+
 
 
 
@@ -13770,7 +27534,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             iBtn.innerHTML = item.label;
+
+
+
+
+
+
+
+
 
 
 
@@ -13786,7 +27566,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             iBtn.addEventListener('mouseout', () => { if(!isSelected) iBtn.style.background='#fff'; });
+
+
+
+
+
+
+
+
 
 
 
@@ -13802,7 +27598,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             dd.appendChild(iBtn);
+
+
+
+
+
+
+
+
 
 
 
@@ -13826,7 +27638,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 필터 활성 시 해제 버튼
+
+
+
+
+
+
+
+
 
 
 
@@ -13842,7 +27678,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             const sep = document.createElement('div');
+
+
+
+
+
+
+
+
 
 
 
@@ -13858,7 +27710,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             dd.appendChild(sep);
+
+
+
+
+
+
+
+
 
 
 
@@ -13874,7 +27742,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             xBtn.style.cssText = 'display:block;width:100%;padding:8px 16px;text-align:left;font-size:11px;font-weight:700;color:#a855f7;background:#fff;border:none;cursor:pointer;';
+
+
+
+
+
+
+
+
 
 
 
@@ -13890,7 +27774,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             xBtn.addEventListener('mouseover', () => xBtn.style.background='#fdf4ff');
+
+
+
+
+
+
+
+
 
 
 
@@ -13906,6 +27806,14 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             xBtn.addEventListener('click', e => { e.stopPropagation(); window._deactivatePromo(); dd.remove(); });
 
 
@@ -13914,7 +27822,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             dd.appendChild(xBtn);
+
+
+
+
+
+
+
+
 
 
 
@@ -13938,7 +27862,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         document.body.appendChild(dd);
+
+
+
+
+
+
+
+
 
 
 
@@ -13954,7 +27902,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         dd.style.top = (rect.bottom + 6) + 'px';
+
+
+
+
+
+
+
+
 
 
 
@@ -13978,7 +27942,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         setTimeout(() => {
+
+
+
+
+
+
+
+
 
 
 
@@ -13994,7 +27982,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
                 if(!dd.contains(e.target) && !btn.contains(e.target)) { dd.remove(); document.removeEventListener('click', closeDD); }
+
+
+
+
+
+
+
+
 
 
 
@@ -14010,7 +28014,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
             document.addEventListener('click', closeDD);
+
+
+
+
+
+
+
+
 
 
 
@@ -14026,6 +28046,14 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         return;
 
 
@@ -14034,7 +28062,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14058,7 +28110,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
     const isActive = btn.dataset.active === "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -14074,7 +28142,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         window.tempPromoFilter = true;
+
+
+
+
+
+
+
+
 
 
 
@@ -14090,7 +28174,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         $("#promoTypeSel")?.classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -14106,7 +28206,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
     } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -14122,7 +28238,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         window._activePromoName = "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -14138,7 +28270,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
         $("#promoTypeSel")?.classList.add("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -14154,7 +28302,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -14170,7 +28334,31 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14194,7 +28382,23 @@ window.togglePromoView = (btn, bypassRender = false) => {
 
 
 
+
+
+
+
+
+
+
+
 window._selectPromoItem = (pname) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -14210,7 +28414,23 @@ window._selectPromoItem = (pname) => {
 
 
 
+
+
+
+
+
+
+
+
     window.tempPromoFilter = true;
+
+
+
+
+
+
+
+
 
 
 
@@ -14226,7 +28446,23 @@ window._selectPromoItem = (pname) => {
 
 
 
+
+
+
+
+
+
+
+
     _syncPromoBtn(btn, true, pname);
+
+
+
+
+
+
+
+
 
 
 
@@ -14242,7 +28478,23 @@ window._selectPromoItem = (pname) => {
 
 
 
+
+
+
+
+
+
+
+
     $("#promoRateSel")?.classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -14258,7 +28510,31 @@ window._selectPromoItem = (pname) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14282,7 +28558,23 @@ window._selectPromoItem = (pname) => {
 
 
 
+
+
+
+
+
+
+
+
 window._deactivatePromo = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -14298,7 +28590,23 @@ window._deactivatePromo = () => {
 
 
 
+
+
+
+
+
+
+
+
     window._activePromoName = "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -14314,7 +28622,23 @@ window._deactivatePromo = () => {
 
 
 
+
+
+
+
+
+
+
+
     _syncPromoBtn(btn, false);
+
+
+
+
+
+
+
+
 
 
 
@@ -14330,6 +28654,14 @@ window._deactivatePromo = () => {
 
 
 
+
+
+
+
+
+
+
+
     $("#promoRateSel")?.classList.add("hidden");
 
 
@@ -14338,7 +28670,23 @@ window._deactivatePromo = () => {
 
 
 
+
+
+
+
+
+
+
+
     saveHistoryState(); visibleCount = 60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -14362,7 +28710,31 @@ window._deactivatePromo = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function setupSearchAutocomplete() {
+
+
+
+
+
+
+
+
 
 
 
@@ -14378,7 +28750,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     if(!qEl || qEl.dataset.acSetup === "1") return;
+
+
+
+
+
+
+
+
 
 
 
@@ -14394,7 +28782,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -14410,7 +28814,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     if(!wrapper.classList.contains("relative")) {
+
+
+
+
+
+
+
+
 
 
 
@@ -14426,7 +28846,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         const sugg = document.createElement("div");
+
+
+
+
+
+
+
+
 
 
 
@@ -14442,7 +28878,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         sugg.className = "absolute w-full bg-white border border-gray-200 rounded-xl shadow-2xl hidden top-full mt-2 left-0 flex flex-col z-[999] overflow-hidden";
+
+
+
+
+
+
+
+
 
 
 
@@ -14458,7 +28910,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14490,7 +28966,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const showRecent = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -14506,7 +29006,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         suggBox.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -14522,7 +29038,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                 <span>🕒 최근 검색어</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -14538,7 +29070,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -14554,7 +29102,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                 <div class="p-3.5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
+
+
+
+
+
+
+
+
 
 
 
@@ -14570,7 +29134,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                     <i data-lucide="search" class="w-4 h-4 text-gray-300 group-hover:text-blue-500"></i>
+
+
+
+
+
+
+
+
 
 
 
@@ -14586,7 +29166,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
             `).join('')}
+
+
+
+
+
+
+
+
 
 
 
@@ -14602,6 +29198,14 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         suggBox.classList.remove("hidden");
 
 
@@ -14610,7 +29214,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -14634,7 +29254,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     qEl.addEventListener("focus", () => { if(!qEl.value.trim()) showRecent(); });
+
+
+
+
+
+
+
+
 
 
 
@@ -14650,7 +29294,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     qEl.addEventListener("keydown", (e) => { 
+
+
+
+
+
+
+
+
 
 
 
@@ -14666,7 +29326,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
             saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -14682,7 +29358,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
             saveRecentSearch(qEl.value.trim()); 
+
+
+
+
+
+
+
+
 
 
 
@@ -14698,6 +29390,14 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         } 
 
 
@@ -14706,7 +29406,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14730,7 +29454,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     qEl.addEventListener("input", (e) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -14746,7 +29486,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         debounceTimer = setTimeout(saveHistoryState, 500); 
+
+
+
+
+
+
+
+
 
 
 
@@ -14762,6 +29518,14 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         const val = e.target.value.trim().toLowerCase();
 
 
@@ -14770,7 +29534,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         const cleanVal = val.replace(/[\s\-_]/g, "");
+
+
+
+
+
+
+
+
 
 
 
@@ -14794,7 +29574,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let matches = PRODUCTS.filter(p => p._hayClean.includes(cleanVal) || p._chosung.includes(cleanVal)).slice(0, 5);
+
+
+
+
+
+
+
+
 
 
 
@@ -14818,7 +29622,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         suggBox.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -14834,7 +29662,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
             ${matches.map(p => {
+
+
+
+
+
+
+
+
 
 
 
@@ -14850,7 +29694,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                 return `
+
+
+
+
+
+
+
+
 
 
 
@@ -14866,7 +29726,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                 ${imgSrc ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+
+
+
+
+
+
+
+
 
 
 
@@ -14882,7 +29758,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                     <span class="text-xs font-bold text-gray-400 truncate">${p.브랜드} | ${p.품번}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -14898,7 +29790,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -14914,7 +29822,23 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
         `;
+
+
+
+
+
+
+
+
 
 
 
@@ -14930,6 +29854,14 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
     });
 
 
@@ -14938,7 +29870,31 @@ function setupSearchAutocomplete() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14962,7 +29918,23 @@ window.applySearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
     saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -14978,7 +29950,23 @@ window.applySearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
     qEl.value = term;
+
+
+
+
+
+
+
+
 
 
 
@@ -14994,7 +29982,23 @@ window.applySearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
     saveRecentSearch(term);
+
+
+
+
+
+
+
+
 
 
 
@@ -15010,7 +30014,31 @@ window.applySearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15034,7 +30062,23 @@ window.saveRecentSearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
     if(!term) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -15050,7 +30094,23 @@ window.saveRecentSearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
     RECENT_SEARCHES.unshift(term);
+
+
+
+
+
+
+
+
 
 
 
@@ -15066,6 +30126,14 @@ window.saveRecentSearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
     localStorage.setItem('RECENT_SEARCHES_V4', JSON.stringify(RECENT_SEARCHES));
 
 
@@ -15074,7 +30142,31 @@ window.saveRecentSearch = (term) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15098,7 +30190,23 @@ window.clearRecentSearches = (e) => {
 
 
 
+
+
+
+
+
+
+
+
     e.stopPropagation();
+
+
+
+
+
+
+
+
 
 
 
@@ -15114,6 +30222,14 @@ window.clearRecentSearches = (e) => {
 
 
 
+
+
+
+
+
+
+
+
     localStorage.removeItem('RECENT_SEARCHES_V4');
 
 
@@ -15122,7 +30238,23 @@ window.clearRecentSearches = (e) => {
 
 
 
+
+
+
+
+
+
+
+
     document.getElementById("searchSuggestions").classList.add("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -15146,7 +30278,31 @@ window.clearRecentSearches = (e) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function loadChartJS() {
+
+
+
+
+
+
+
+
 
 
 
@@ -15162,7 +30318,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
         if (window.Chart && window.ChartDataLabels) return resolve();
+
+
+
+
+
+
+
+
 
 
 
@@ -15178,7 +30350,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
             const script = document.createElement('script'); script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+
+
+
+
+
+
+
+
 
 
 
@@ -15194,7 +30382,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
                 if (!window.ChartDataLabels) {
+
+
+
+
+
+
+
+
 
 
 
@@ -15210,7 +30414,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
                     plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
+
+
+
+
+
+
+
+
 
 
 
@@ -15226,7 +30446,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
                 } else resolve();
+
+
+
+
+
+
+
+
 
 
 
@@ -15242,7 +30478,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
             document.head.appendChild(script);
+
+
+
+
+
+
+
+
 
 
 
@@ -15258,7 +30510,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
             const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+
+
+
+
+
+
+
+
 
 
 
@@ -15274,7 +30542,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
             document.head.appendChild(plugin);
+
+
+
+
+
+
+
+
 
 
 
@@ -15290,6 +30574,14 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
     });
 
 
@@ -15298,7 +30590,31 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15322,7 +30638,23 @@ async function loadChartJS() {
 
 
 
+
+
+
+
+
+
+
+
 async function _saveTransfersToGH() {
+
+
+
+
+
+
+
+
 
 
 
@@ -15338,7 +30670,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
     // 서버 최신 transfers.json을 읽어 id 기준으로 병합(union) 후 PUT.
+
+
+
+
 
 
 
@@ -15346,7 +30690,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
     for (let attempt = 0; attempt < 3; attempt++) {
+
+
+
+
+
+
+
+
 
 
 
@@ -15362,7 +30718,23 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+
+
+
+
+
+
+
+
 
 
 
@@ -15378,7 +30750,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
             let serverData = [], sha;
+
+
+
+
 
 
 
@@ -15390,7 +30774,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
             // id union: 서버 레코드 보존 + 로컬 레코드 반영(같은 id면 로컬 우선)
+
+
+
+
 
 
 
@@ -15398,7 +30794,15 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
             for (const s of serverData) byId.set(s.id, s);
+
+
+
+
 
 
 
@@ -15406,7 +30810,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
             const merged = Array.from(byId.values());
+
+
+
+
+
+
+
+
 
 
 
@@ -15422,7 +30838,23 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
             const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -15434,7 +30866,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
             if(!put.ok) throw new Error('PUT ' + put.status);
+
+
+
+
+
+
+
+
 
 
 
@@ -15446,7 +30890,19 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
             return true;
+
+
+
+
+
+
+
+
 
 
 
@@ -15462,7 +30918,23 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -15478,7 +30950,31 @@ async function _saveTransfersToGH() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15502,7 +30998,23 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
     const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -15514,7 +31026,19 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
     for (let attempt = 0; attempt < 3; attempt++) {
+
+
+
+
+
+
+
+
 
 
 
@@ -15530,7 +31054,23 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+
+
+
+
+
+
+
+
 
 
 
@@ -15546,7 +31086,23 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
             const j = await r.json();
+
+
+
+
+
+
+
+
 
 
 
@@ -15558,7 +31114,19 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
             try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {}
+
+
+
+
+
+
+
+
 
 
 
@@ -15574,7 +31142,23 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
             const body = { message:"undo transfer", content: utf8ToB64(JSON.stringify(filtered, null, 2)), branch: GH.branch, sha: j.sha };
+
+
+
+
+
+
+
+
 
 
 
@@ -15590,7 +31174,19 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
             if(put.status === 409 || put.status === 422) continue;
+
+
+
+
 
 
 
@@ -15602,11 +31198,31 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
             TRANSFERS = filtered;
 
 
 
+
+
+
+
             return true;
+
+
+
+
+
+
+
+
 
 
 
@@ -15622,7 +31238,23 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -15638,7 +31270,31 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15658,7 +31314,15 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
 // 서버 최신본을 읽어 mutateFn으로 변형한 뒤 저장 (다른 기기의 구역/배정 변경을 보존).
+
+
+
+
 
 
 
@@ -15666,7 +31330,15 @@ async function _removeTransferFromGH(trId) {
 
 
 
+
+
+
+
 async function saveLocations(mutateFn) {
+
+
+
+
 
 
 
@@ -15674,7 +31346,15 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
     for (let attempt = 0; attempt < 3; attempt++) {
+
+
+
+
 
 
 
@@ -15682,7 +31362,15 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
             const r = await fetch(apiUrl + `?t=${Date.now()}`, { headers: { Authorization: "Bearer " + getPat() } });
+
+
+
+
 
 
 
@@ -15694,7 +31382,19 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
+
+
+
+
             let serverData = { zones: [], assignments: {} }, sha;
+
+
+
+
 
 
 
@@ -15702,7 +31402,15 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
                 const j = await r.json(); sha = j.sha;
+
+
+
+
 
 
 
@@ -15710,7 +31418,15 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
                 try {
+
+
+
+
 
 
 
@@ -15718,7 +31434,15 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
                     if (parsed && Array.isArray(parsed.zones)) { serverData = parsed; ok = true; }
+
+
+
+
 
 
 
@@ -15726,11 +31450,27 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
                 if (!ok) throw new Error('기존 위치 데이터를 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
 
 
 
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -15746,7 +31486,19 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
+
+
+
+
             const body = { message: "update locations", content: utf8ToB64(JSON.stringify(next, null, 2)), branch: GH.branch, ...(sha && { sha }) };
+
+
+
+
 
 
 
@@ -15758,7 +31510,19 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
+
+
+
+
             if (put.status === 409 || put.status === 422) continue; // 최신 sha로 재시도
+
+
+
+
 
 
 
@@ -15770,11 +31534,27 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
+
+
+
+
             LOCATIONS = next;
 
 
 
+
+
+
+
             try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.locations = next; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch (e) {}
+
+
+
+
 
 
 
@@ -15786,7 +31566,19 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
+
+
+
+
         } catch (err) {
+
+
+
+
 
 
 
@@ -15794,7 +31586,15 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
         }
+
+
+
+
 
 
 
@@ -15802,11 +31602,35 @@ async function saveLocations(mutateFn) {
 
 
 
+
+
+
+
     return false;
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15830,6 +31654,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     if(!checkPat()) return;
 
 
@@ -15838,7 +31670,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     const p = PRODUCTS.find(x => x.품번 === code);
+
+
+
+
+
+
+
+
 
 
 
@@ -15862,7 +31710,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // iPad/iOS Safari 대응
+
+
+
+
+
+
+
+
 
 
 
@@ -15878,7 +31750,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
+
+
+
+
+
+
+
+
 
 
 
@@ -15894,7 +31782,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -15926,7 +31838,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
+
+
+
+
+
+
+
+
 
 
 
@@ -15942,7 +31878,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     if (existing) {
+
+
+
+
+
+
+
+
 
 
 
@@ -15958,7 +31910,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         // 버튼: 수량 표시 유지 (계속 클릭 가능)
+
+
+
+
+
+
+
+
 
 
 
@@ -15974,7 +31942,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -15990,7 +31974,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         clearTimeout(window._rtSaveTimer);
+
+
+
+
+
+
+
+
 
 
 
@@ -16006,7 +32006,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         showToast(`📦 ${fromStr} → ${size} | ${existing.qty}개로 업데이트`, async () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -16022,7 +32038,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
             clearTimeout(window._rtSaveTimer);
+
+
+
+
+
+
+
+
 
 
 
@@ -16038,7 +32070,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
             if (existing.qty <= 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -16054,6 +32102,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
                 btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
 
 
@@ -16062,7 +32118,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
                 if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -16078,7 +32150,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
             } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -16094,7 +32182,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
                 if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -16110,7 +32214,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -16126,6 +32246,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         return;
 
 
@@ -16134,7 +32262,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -16158,7 +32310,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     const origHtml = btn.innerHTML;
+
+
+
+
+
+
+
+
 
 
 
@@ -16182,7 +32350,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
+
+
+
+
+
+
+
+
 
 
 
@@ -16198,7 +32390,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
+
+
+
+
+
+
+
+
 
 
 
@@ -16222,6 +32430,22 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const trId = "tr_" + Date.now();
 
 
@@ -16230,7 +32454,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     const d = new Date();
+
+
+
+
+
+
+
+
 
 
 
@@ -16254,7 +32494,27 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
+
+
+
+
 
 
 
@@ -16262,7 +32522,19 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
     const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
+
+
+
+
+
+
+
+
 
 
 
@@ -16286,11 +32558,39 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
 
 
 
+
+
+
+
     const _saveOk = await _saveTransfersToGH();
+
+
+
+
+
+
+
+
 
 
 
@@ -16306,7 +32606,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
+
+
+
+
+
+
+
+
 
 
 
@@ -16322,7 +32638,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+
+
+
+
+
+
+
+
 
 
 
@@ -16338,6 +32670,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         return;
 
 
@@ -16346,7 +32686,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -16370,7 +32734,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
+
+
+
+
+
+
+
+
 
 
 
@@ -16386,7 +32766,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         await _removeTransferFromGH(trId);
+
+
+
+
+
+
+
+
 
 
 
@@ -16402,6 +32798,14 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
         if(window.lucide) lucide.createIcons();
 
 
@@ -16410,7 +32814,23 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
     });
+
+
+
+
+
+
+
+
 
 
 
@@ -16434,7 +32854,31 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 window.exportTransfersToExcel = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -16450,7 +32894,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     if(!window.XLSX || !window.XLSX.writeFile) {
+
+
+
+
+
+
+
+
 
 
 
@@ -16466,7 +32926,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const s = document.createElement('script'); s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'; document.head.appendChild(s); return;
+
+
+
+
+
+
+
+
 
 
 
@@ -16490,6 +32966,22 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // ── 이동요청리스트 양식에 맞게 출력 ──
 
 
@@ -16498,7 +32990,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     // 행 구성: A열(빈칸), B~L열 데이터
+
+
+
+
+
+
+
+
 
 
 
@@ -16522,7 +33030,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Row1: 빈 행
+
+
+
+
+
+
+
+
 
 
 
@@ -16546,7 +33078,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Row2: 타이틀 (B2, B2:L2 병합)
+
+
+
+
+
+
+
+
 
 
 
@@ -16570,7 +33126,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Row3: 헤더 — 카테고리는 품번 바로 뒤(대분류 위치)에 배치, 중복이던 품명은 하나로 통합
+
+
+
+
+
+
+
+
 
 
 
@@ -16594,7 +33174,27 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // ── 품번(규격) → 품목내부코드 룩업 테이블 (RAW 데이터 기반, 사이즈 레벨 정확 매칭) ──
+
+
+
+
 
 
 
@@ -16602,7 +33202,15 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
     const _itemCodeMap = {};
+
+
+
+
 
 
 
@@ -16610,7 +33218,15 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
         const 품번 = String(r["품번"] || "").trim();
+
+
+
+
 
 
 
@@ -16618,7 +33234,15 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
         const 코드 = String(r["품목내부코드"] || "").trim();
+
+
+
+
 
 
 
@@ -16626,7 +33250,19 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
     });
+
+
+
+
+
+
+
+
 
 
 
@@ -16642,7 +33278,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     const _sortedTransfers = TRANSFERS.map(t => ({ t, prod: PRODUCTS.find(p => p.품번 === t.code) })).sort((a, b) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -16658,7 +33310,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const cb = CAT_ORDER[b.prod?.카테고리] ?? 9;
+
+
+
+
+
+
+
+
 
 
 
@@ -16674,7 +33342,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const brandCmp = String(a.prod?.브랜드 || '').localeCompare(String(b.prod?.브랜드 || ''), 'ko');
+
+
+
+
+
+
+
+
 
 
 
@@ -16690,7 +33374,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const codeCmp = String(a.t.code || '').localeCompare(String(b.t.code || ''), 'ko');
+
+
+
+
+
+
+
+
 
 
 
@@ -16706,7 +33406,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         // 같은 품번끼리는 규격(사이즈) 오름차순 — 숫자 사이즈면 숫자로 비교
+
+
+
+
+
+
+
+
 
 
 
@@ -16722,7 +33438,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const na = parseFloat(sa), nb = parseFloat(sb);
+
+
+
+
+
+
+
+
 
 
 
@@ -16738,6 +33470,14 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         return sa.localeCompare(sb, 'ko');
 
 
@@ -16746,7 +33486,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -16770,7 +33534,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         // sizes 배열에서 해당 사이즈의 물류센터 재고 조회 (prod는 위에서 미리 조회)
+
+
+
+
+
+
+
+
 
 
 
@@ -16786,7 +33566,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const wms   = sizeObj !== undefined ? (sizeObj.center || 0) : '';
+
+
+
+
+
+
+
+
 
 
 
@@ -16802,7 +33598,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
+
+
+
+
+
+
+
+
 
 
 
@@ -16814,7 +33626,15 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
         //   1) RAW 룩업 테이블 [품번(규격)] — 가장 정확 (사이즈 레벨)
+
+
+
+
 
 
 
@@ -16822,7 +33642,15 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
         //   3) TRANSFERS에 저장된 itemCode — 과거 저장값
+
+
+
+
 
 
 
@@ -16830,7 +33658,15 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
         //   5) 품번 자체 (최후 fallback)
+
+
+
+
 
 
 
@@ -16838,7 +33674,19 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
         const itemCode = _itemCodeMap[_lookupKey] || sizeObj?.itemCode || t.itemCode || prod?.itemCode || t.code;
+
+
+
+
+
+
+
+
 
 
 
@@ -16854,7 +33702,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             '',                                    // A (빈칸)
+
+
+
+
+
+
+
+
 
 
 
@@ -16870,7 +33734,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             t.date ? t.date.split(' ')[0] : '',    // C: 요청일 (날짜만, 시간 제거)
+
+
+
+
+
+
+
+
 
 
 
@@ -16886,7 +33766,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             t.code,                                // E: 품번
+
+
+
+
+
+
+
+
 
 
 
@@ -16902,7 +33798,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             t.product,                             // G: 품명
+
+
+
+
+
+
+
+
 
 
 
@@ -16918,7 +33830,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             t.qty,                                 // I: 요청수량
+
+
+
+
+
+
+
+
 
 
 
@@ -16934,7 +33862,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             store,                                 // K: 매장재고(부산)
+
+
+
+
+
+
+
+
 
 
 
@@ -16950,6 +33894,14 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         ]);
 
 
@@ -16958,7 +33910,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -16990,7 +33966,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // B2:L2 병합
+
+
+
+
+
+
+
+
 
 
 
@@ -17014,7 +34014,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 열 너비 — 각 열의 최대 글자 수 기준 자동 계산
+
+
+
+
+
+
+
+
 
 
 
@@ -17030,7 +34054,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     const colWidths = Array(colCount).fill(4);
+
+
+
+
+
+
+
+
 
 
 
@@ -17046,7 +34086,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
         row.forEach((cell, ci) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -17062,7 +34118,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
             if (len > colWidths[ci]) colWidths[ci] = len;
+
+
+
+
+
+
+
+
 
 
 
@@ -17078,6 +34150,14 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     });
 
 
@@ -17086,7 +34166,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     colWidths[0] = 2; // A열 고정
+
+
+
+
+
+
+
+
 
 
 
@@ -17110,7 +34206,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const wb = XLSX.utils.book_new();
+
+
+
+
+
+
+
+
 
 
 
@@ -17126,6 +34246,14 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     const d = new Date();
 
 
@@ -17134,7 +34262,23 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
     XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
+
+
+
+
+
+
+
+
 
 
 
@@ -17158,7 +34302,31 @@ window.exportTransfersToExcel = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 window.openAnalyticsReport = async () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -17174,7 +34342,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     let dashFilter = { cat: null, brand: null, gender: null };
+
+
+
+
+
+
+
+
 
 
 
@@ -17190,7 +34374,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     let currentCustomStart = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -17206,7 +34406,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -17222,7 +34438,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     let currentSizeAp = "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -17238,7 +34470,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -17254,7 +34502,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     let currentDashView = "sku"; // 'sku'=품번별 / 'model'=품명(모델) 통합
+
+
+
+
+
+
+
+
 
 
 
@@ -17278,7 +34542,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const generateDateOptions = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -17294,7 +34582,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         html += '<optgroup label="월간 조회">';
+
+
+
+
+
+
+
+
 
 
 
@@ -17310,7 +34614,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+
+
+
+
+
+
+
 
 
 
@@ -17326,7 +34646,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const lastDay = new Date(y, d.getMonth() + 1, 0).getDate();
+
+
+
+
+
+
+
+
 
 
 
@@ -17342,7 +34678,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             html += `<option value="${val}">${y}년 ${d.getMonth() + 1}월</option>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -17358,7 +34710,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         html += '</optgroup><optgroup label="주간 조회">';
+
+
+
+
+
+
+
+
 
 
 
@@ -17374,7 +34742,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1); 
+
+
+
+
+
+
+
+
 
 
 
@@ -17398,7 +34782,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         for(let i=0; i<5; i++) {
+
+
+
+
+
+
+
+
 
 
 
@@ -17414,7 +34822,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const y1 = monday.getFullYear(); const m1 = String(monday.getMonth()+1).padStart(2,'0'); const d1 = String(monday.getDate()).padStart(2,'0');
+
+
+
+
+
+
+
+
 
 
 
@@ -17430,7 +34854,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const weekNum = Math.ceil(monday.getDate() / 7);
+
+
+
+
+
+
+
+
 
 
 
@@ -17446,7 +34886,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             html += `<option value="${val}">${y1}년 ${monday.getMonth()+1}월 ${weekNum}주차 (${m1}/${d1}~${m2}/${d2})</option>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -17462,7 +34918,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -17478,7 +34950,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         return html;
+
+
+
+
+
+
+
+
 
 
 
@@ -17502,7 +34990,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const allSizesFwSet = new Set();
+
+
+
+
+
+
+
+
 
 
 
@@ -17518,7 +35030,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     const allSizesGearSet = new Set();
+
+
+
+
+
+
+
+
 
 
 
@@ -17534,7 +35062,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         p.sizes.forEach(s => {
+
+
+
+
+
+
+
+
 
 
 
@@ -17550,7 +35094,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if (isFwSize(size)) allSizesFwSet.add(size);
+
+
+
+
+
+
+
+
 
 
 
@@ -17566,6 +35126,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             else allSizesGearSet.add(size);
 
 
@@ -17574,7 +35142,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         });
+
+
+
+
+
+
+
+
 
 
 
@@ -17598,7 +35182,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const getPeriodItems = (period, start, end) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -17614,7 +35222,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
+
+
+
+
+
+
+
+
 
 
 
@@ -17630,7 +35254,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         else if (period && period !== "ALL") {
+
+
+
+
+
+
+
+
 
 
 
@@ -17646,7 +35286,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17678,6 +35342,22 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         PRODUCTS.forEach(p => {
 
 
@@ -17686,7 +35366,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             let busanSales = 0; let sinsaSales = 0; let centerSales = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -17710,7 +35406,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -17726,7 +35446,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
+
+
+
+
+
+
+
+
 
 
 
@@ -17742,7 +35478,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         if (typeof dayData === 'number') {
+
+
+
+
+
+
+
+
 
 
 
@@ -17758,7 +35510,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         } else if (typeof dayData === 'object') {
+
+
+
+
+
+
+
+
 
 
 
@@ -17774,7 +35542,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 if (typeof dayData[size] === 'object') {
+
+
+
+
+
+
+
+
 
 
 
@@ -17790,7 +35574,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                     // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+
+
+
+
+
+
+
+
 
 
 
@@ -17806,7 +35606,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                     if (bq > 0) { busanSales += bq; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + bq; }
+
+
+
+
+
+
+
+
 
 
 
@@ -17822,7 +35638,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                         const qty = sd[mgr];
+
+
+
+
+
+
+
+
 
 
 
@@ -17838,7 +35670,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                         if(mgr.includes("물류") || mgr.includes("본사") || mgr.includes("온라인")) { centerSales += qty; }
+
+
+
+
+
+
+
+
 
 
 
@@ -17854,7 +35702,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -17870,7 +35734,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -17886,7 +35766,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -17902,6 +35798,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
 
 
@@ -17910,7 +35814,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17934,7 +35862,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             p.dashSizeSalesMap = sizeSalesMap;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17958,7 +35910,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(finalSales > 0) items.push({ ...p, dashSales: finalSales, dashRev: finalSales * (p.currentPromoPrice || p.소비자가 || 0) });
+
+
+
+
+
+
+
+
 
 
 
@@ -17974,6 +35942,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
@@ -17982,7 +35958,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -18006,7 +36006,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     let catChartInstance = null; let brandChartInstance = null; let genderChartInstance = null;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -18030,7 +36054,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         let modal = $("#analyticsDashboard");
+
+
+
+
+
+
+
+
 
 
 
@@ -18046,7 +36086,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             modal = document.createElement("div"); modal.id = "analyticsDashboard";
+
+
+
+
+
+
+
+
 
 
 
@@ -18062,7 +36118,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             document.body.appendChild(modal);
+
+
+
+
+
+
+
+
 
 
 
@@ -18086,7 +36158,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         modal.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -18102,7 +36198,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 <div class="flex flex-wrap items-center justify-between gap-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -18118,7 +36230,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <h1 class="text-base font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 <span class="text-xs font-bold text-gray-400 hidden sm:inline">(담당: 김종훈)</span></h1>
+
+
+
+
+
+
+
+
 
 
 
@@ -18134,7 +36262,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18150,7 +36294,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <select id="dashBrandSel" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700">
+
+
+
+
+
+
+
+
 
 
 
@@ -18166,7 +36326,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         </select>
+
+
+
+
+
+
+
+
 
 
 
@@ -18182,7 +36358,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <select id="dashSizeAp" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">의류</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
+
+
+
+
+
+
+
+
 
 
 
@@ -18198,7 +36390,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="w-px h-5 bg-gray-200 mx-0.5 shrink-0"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18214,7 +36422,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             <optgroup label="빠른 기간">
+
+
+
+
+
+
+
+
 
 
 
@@ -18230,7 +36454,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <option value="90">최근 3개월</option><option value="180">최근 6개월</option><option value="ALL">전체 누적</option>
+
+
+
+
+
+
+
+
 
 
 
@@ -18246,7 +36486,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             </optgroup>
+
+
+
+
+
+
+
+
 
 
 
@@ -18262,7 +36518,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         </select>
+
+
+
+
+
+
+
+
 
 
 
@@ -18278,6 +36550,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
 
 
@@ -18286,7 +36566,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18302,7 +36598,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     <span class="text-xs font-black text-orange-700 shrink-0">📅 기간 직접 지정</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -18318,7 +36630,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     <span class="text-orange-400 font-bold">~</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -18334,7 +36662,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     <button id="dashApply" class="px-3 py-1.5 bg-orange-500 text-white rounded text-xs font-black shrink-0 hover:bg-orange-600">적용</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -18350,7 +36694,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18366,7 +36726,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             <main class="flex-1 overflow-y-auto dash-scroll p-3 flex flex-col gap-3">
+
+
+
+
+
+
+
+
 
 
 
@@ -18382,6 +36758,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
 
@@ -18390,7 +36774,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+
+
+
+
+
+
+
+
 
 
 
@@ -18406,7 +36806,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="relative w-full" style="height:175px"><canvas id="catChart"></canvas></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18422,7 +36838,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+
+
+
+
+
+
+
+
 
 
 
@@ -18438,6 +36870,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="relative w-full" style="height:175px"><canvas id="genderChart"></canvas></div>
 
 
@@ -18446,7 +36886,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         </article>
+
+
+
+
+
+
+
+
 
 
 
@@ -18462,7 +36918,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="award" class="w-3 h-3 text-emerald-400"></i> 브랜드 Top5</h2>
+
+
+
+
+
+
+
+
 
 
 
@@ -18478,7 +36950,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         </article>
+
+
+
+
+
+
+
+
 
 
 
@@ -18494,7 +36982,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     <section class="flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -18510,7 +37014,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="flex items-center gap-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -18526,6 +37046,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div id="activeFilterLabel" class="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-1 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors">차트 필터 ✖</div>
 
 
@@ -18534,7 +37062,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18550,7 +37094,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div class="flex rounded-lg overflow-hidden border border-gray-200 text-[11px] font-bold shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -18566,7 +37126,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                     <button id="dashViewModel" class="dash-view-btn px-2.5 py-1.5 border-l border-gray-200 transition-colors" data-view="model">모델별</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -18582,7 +37158,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <select id="dashSortSel" class="ipt text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded px-2 py-1.5 outline-none cursor-pointer">
+
+
+
+
+
+
+
+
 
 
 
@@ -18598,7 +37190,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                     <option value="rev">금액순</option>
+
+
+
+
+
+
+
+
 
 
 
@@ -18614,7 +37222,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <button id="dashResetBtn" class="text-[11px] font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap">↩ 필터 초기화</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -18630,7 +37254,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -18646,7 +37286,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     </section>
+
+
+
+
+
+
+
+
 
 
 
@@ -18662,7 +37318,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             </main>
+
+
+
+
+
+
+
+
 
 
 
@@ -18686,7 +37358,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         $("#dashPeriodSel").value = "7";
+
+
+
+
+
+
+
+
 
 
 
@@ -18702,7 +37398,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const val = e.target.value;
+
+
+
+
+
+
+
+
 
 
 
@@ -18718,7 +37430,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 $("#dashCustomDateWrap").style.display = "flex";
+
+
+
+
+
+
+
+
 
 
 
@@ -18734,7 +37462,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 $("#dashCustomDateWrap").style.display = "none";
+
+
+
+
+
+
+
+
 
 
 
@@ -18750,7 +37494,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 else { currentPeriod = val; }
+
+
+
+
+
+
+
+
 
 
 
@@ -18766,6 +37526,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             }
 
 
@@ -18774,7 +37542,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -18798,7 +37590,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(e.target.id === "dashSizeFw") { $("#dashSizeAp").value = "ALL"; $("#dashSizeGear").value = "ALL"; }
+
+
+
+
+
+
+
+
 
 
 
@@ -18814,7 +37622,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(e.target.id === "dashSizeGear") { $("#dashSizeFw").value = "ALL"; $("#dashSizeAp").value = "ALL"; }
+
+
+
+
+
+
+
+
 
 
 
@@ -18830,7 +37654,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             currentSizeFw = $("#dashSizeFw").value;
+
+
+
+
+
+
+
+
 
 
 
@@ -18846,7 +37686,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             currentSizeGear = $("#dashSizeGear").value;
+
+
+
+
+
+
+
+
 
 
 
@@ -18862,7 +37718,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -18886,7 +37766,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         $("#dashSizeAp").onchange = handleDashSizeChange;
+
+
+
+
+
+
+
+
 
 
 
@@ -18910,7 +37806,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         $("#dashBrandSel").onchange = (e) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -18926,6 +37846,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             renderDashState();
 
 
@@ -18934,7 +37862,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -18958,7 +37910,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             currentDashSort = e.target.value;
+
+
+
+
+
+
+
+
 
 
 
@@ -18974,7 +37942,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -18986,11 +37970,35 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         _syncDashViewBtns();
 
 
 
+
+
+
+
         $$('.dash-view-btn').forEach(b => b.onclick = () => { currentDashView = b.dataset.view; _syncDashViewBtns(); renderDashState(); });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19014,7 +38022,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             s = (s || "").trim().replace(/[\/\.]/g, '-');
+
+
+
+
+
+
+
+
 
 
 
@@ -19030,7 +38054,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+
+
+
+
+
+
+
 
 
 
@@ -19046,7 +38086,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -19062,7 +38118,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const start = _parseDate($("#dashStart").value);
+
+
+
+
+
+
+
+
 
 
 
@@ -19078,7 +38150,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(!start || !end) { alert("날짜 형식을 확인하세요.\n예: 2026-05-01 또는 20260501"); return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -19094,6 +38182,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
 
 
@@ -19102,7 +38198,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19122,7 +38242,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             modal.classList.add("opacity-0");
+
+
+
+
 
 
 
@@ -19130,11 +38258,27 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             if (document.body.classList.contains('dashboard-only-mode')) _revealDashOnlyUI(); // 팝업 전용모드였으면 닫을 때 재고앱 화면 노출
 
 
 
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -19150,7 +38294,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             dashFilter = { cat: null, brand: null, gender: null };
+
+
+
+
+
+
+
+
 
 
 
@@ -19166,7 +38326,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if($("#dashBrandSel")) $("#dashBrandSel").value = "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -19182,7 +38358,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             currentSizeFw = "ALL"; currentSizeAp = "ALL"; currentSizeGear = "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -19198,7 +38390,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -19214,7 +38422,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19238,6 +38470,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         rawSoldItems = getPeriodItems(currentPeriod, currentCustomStart, currentCustomEnd);
 
 
@@ -19246,7 +38486,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         
+
+
+
+
+
+
+
+
 
 
 
@@ -19262,7 +38518,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         rawSoldItems.forEach(p => { if(p.브랜드) brandSet.add(p.브랜드); });
+
+
+
+
+
+
+
+
 
 
 
@@ -19278,7 +38550,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         $("#dashBrandSel").innerHTML = `<option value="ALL">브랜드 필터</option>${brandOptions}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -19294,6 +38582,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         renderDashState();
 
 
@@ -19302,7 +38598,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19322,7 +38642,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
     const _groupByModel = (items) => {
+
+
+
+
 
 
 
@@ -19330,7 +38658,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         items.forEach(p => {
+
+
+
+
 
 
 
@@ -19338,7 +38674,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             let g = map.get(key);
+
+
+
+
 
 
 
@@ -19346,7 +38690,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             g.dashSales += p.dashSales; g.dashRev += p.dashRev; g.skuCount += 1; g._skus.push(p.품번);
+
+
+
+
 
 
 
@@ -19354,7 +38706,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             if (gg === 'M' || gg === '남성' || gg === '남') g.mSales += p.dashSales;
+
+
+
+
 
 
 
@@ -19362,7 +38722,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             else g.uSales += p.dashSales;
+
+
+
+
 
 
 
@@ -19370,7 +38738,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         });
+
+
+
+
 
 
 
@@ -19378,7 +38754,19 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
     };
+
+
+
+
+
+
+
+
 
 
 
@@ -19390,7 +38778,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
     const _modelCard = (g, idx, totalRev) => {
+
+
+
+
 
 
 
@@ -19398,7 +38794,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         const rankClass = idx < 3 ? "rank top3" : "rank";
+
+
+
+
 
 
 
@@ -19406,7 +38810,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         const mPct = Math.round(g.mSales / total * 100), wPct = Math.round(g.wSales / total * 100), uPct = 100 - mPct - wPct;
+
+
+
+
 
 
 
@@ -19414,7 +38826,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         const mixBar = `<div class="flex h-1.5 w-16 rounded-full overflow-hidden bg-gray-100" title="남 ${mPct}% · 여 ${wPct}%">${seg(mPct, 'bg-sky-400')}${seg(wPct, 'bg-pink-400')}${seg(uPct, 'bg-purple-300')}</div>`;
+
+
+
+
 
 
 
@@ -19422,7 +38842,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         const revPct = totalRev > 0 ? (g.dashRev / totalRev * 100).toFixed(1) : '0.0';
+
+
+
+
 
 
 
@@ -19430,7 +38858,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
         const statsHtml = currentDashSort === 'rev'
+
+
+
+
 
 
 
@@ -19438,7 +38874,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             : `<div class="stats"><div class="stat-primary">${fmt(g.dashSales)}개</div><div class="stat-secondary">${krw(g.dashRev)} ${revPctBadge}</div></div>`;
+
+
+
+
 
 
 
@@ -19446,7 +38890,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${g.품번}', '${(currentPeriod === 'CUSTOM' ? `CUSTOM_${currentCustomStart}_${currentCustomEnd}` : currentPeriod)}')">
+
+
+
+
 
 
 
@@ -19454,7 +38906,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
                     <div class="${rankClass}">${idx + 1}</div>
+
+
+
+
 
 
 
@@ -19462,7 +38922,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
                     <div class="info">
+
+
+
+
 
 
 
@@ -19470,7 +38938,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
                             <span class="brand-code">${escapeHtml(g.브랜드)}</span>
+
+
+
+
 
 
 
@@ -19478,7 +38954,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
                             ${mixBar}<span class="text-[10px] text-gray-400 font-bold">${mixTxt}</span>
+
+
+
+
 
 
 
@@ -19486,7 +38970,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
                         <div class="product-name">${escapeHtml(g.품명)}</div>
+
+
+
+
 
 
 
@@ -19494,7 +38986,15 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
                     ${statsHtml}
+
+
+
+
 
 
 
@@ -19502,11 +39002,27 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
             </div>`;
 
 
 
+
+
+
+
     };
+
+
+
+
+
+
+
+
 
 
 
@@ -19522,7 +39038,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         let filteredItems = rawSoldItems.filter(p => {
+
+
+
+
+
+
+
+
 
 
 
@@ -19538,7 +39070,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if (dashFilter.brand && p.브랜드 !== dashFilter.brand) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -19562,7 +39110,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             let g = p.성별 || p.gender || "U";
+
+
+
+
+
+
+
+
 
 
 
@@ -19578,7 +39150,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if (dashFilter.gender && g !== dashFilter.gender) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -19594,7 +39182,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19618,7 +39230,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(currentDashSort === 'rev') return b.dashRev - a.dashRev;
+
+
+
+
+
+
+
+
 
 
 
@@ -19634,7 +39262,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -19666,7 +39318,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let totalSales = 0; let totalRev = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -19690,7 +39366,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         filteredItems.forEach(p => {
+
+
+
+
+
+
+
+
 
 
 
@@ -19706,7 +39406,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             catData[p.카테고리||"기타"] = (catData[p.카테고리||"기타"] || 0) + p.dashSales;
+
+
+
+
+
+
+
+
 
 
 
@@ -19722,7 +39438,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             let g = p.성별 || p.gender || "U";
+
+
+
+
+
+
+
+
 
 
 
@@ -19738,7 +39470,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             genderData[g] = (genderData[g] || 0) + p.dashSales;
+
+
+
+
+
+
+
+
 
 
 
@@ -19762,6 +39510,22 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const activeSizeFilter = [currentSizeFw, currentSizeAp, currentSizeGear].find(s => s !== "ALL") || "ALL";
 
 
@@ -19770,7 +39534,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         let sizeText = activeSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${activeSizeFilter} 사이즈 필터됨]</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -19794,7 +39574,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const filterLabel = $("#activeFilterLabel"); let labelText = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -19810,7 +39614,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
+
+
+
+
+
+
+
+
 
 
 
@@ -19834,7 +39654,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if (labelText.length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -19850,7 +39694,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             filterLabel.onclick = () => { dashFilter = { cat: null, brand: null, gender: null }; renderDashState(); };
+
+
+
+
+
+
+
+
 
 
 
@@ -19874,7 +39734,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let _listSrc = filteredItems;
+
+
+
+
+
+
+
+
 
 
 
@@ -19890,7 +39774,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             _listSrc = _groupByModel(filteredItems);
+
+
+
+
+
+
+
+
 
 
 
@@ -19906,7 +39806,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -19922,6 +39838,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if (currentDashView === 'model') return _modelCard(p, idx, totalRev);
 
 
@@ -19930,7 +39854,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+
+
+
+
+
+
+
+
 
 
 
@@ -19966,7 +39906,43 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             let gLabel = p.성별 || p.gender || "U";
+
+
+
+
+
+
+
+
 
 
 
@@ -19990,6 +39966,22 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             let gColorClass = "ui-badge unisex";
 
 
@@ -19998,7 +39990,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(gLabel === "남성") gColorClass = "ui-badge men";
+
+
+
+
+
+
+
+
 
 
 
@@ -20022,7 +40030,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             const rankClass = idx < 3 ? "rank top3" : "rank";
+
+
+
+
+
+
+
+
 
 
 
@@ -20038,7 +40070,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             const _revPctBadge = `<span class="text-[10px] font-black text-red-500">${_revPct}%</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -20054,7 +40102,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 ? `<div class="stats"><div class="stat-primary-rev">${krw(p.dashRev)} ${_revPctBadge}</div><div class="stat-secondary-rev">${fmt(p.dashSales)}개</div></div>`
+
+
+
+
+
+
+
+
 
 
 
@@ -20070,7 +40134,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             return `
+
+
+
+
+
+
+
+
 
 
 
@@ -20086,7 +40166,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 <div class="flex items-center w-full">
+
+
+
+
+
+
+
+
 
 
 
@@ -20102,7 +40198,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="thumbnail shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -20118,7 +40230,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -20134,7 +40262,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="meta">
+
+
+
+
+
+
+
+
 
 
 
@@ -20150,7 +40294,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             <span class="brand-code">${escapeHtml(p.브랜드)} · ${escapeHtml(p.품번)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -20166,7 +40326,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="product-name">${escapeHtml(p.품명)}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -20182,7 +40358,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     ${statsHtml}
+
+
+
+
+
+
+
+
 
 
 
@@ -20198,6 +40390,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
 
 
@@ -20206,7 +40406,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             `}).join('');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -20238,7 +40462,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const renderPieChart = (ctxId, dataObj, filterKey, colors) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -20254,7 +40502,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             if(!ctx) return null;
+
+
+
+
+
+
+
+
 
 
 
@@ -20270,7 +40534,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
             return new Chart(ctx, {
+
+
+
+
+
+
+
+
 
 
 
@@ -20286,7 +40566,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] },
+
+
+
+
+
+
+
+
 
 
 
@@ -20302,7 +40598,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     responsive: true, maintainAspectRatio: false, cutout: '58%',
+
+
+
+
+
+
+
+
 
 
 
@@ -20318,7 +40630,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     plugins: {
+
+
+
+
+
+
+
+
 
 
 
@@ -20334,7 +40662,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         datalabels: { color: '#fff', font: { weight: '900', size: 10 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 6 ? pct + '%' : ''; } }
+
+
+
+
+
+
+
+
 
 
 
@@ -20350,7 +40694,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                     onClick: (e, elements, chart) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -20366,7 +40726,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             const clickedLabel = chart.data.labels[elements[0].index];
+
+
+
+
+
+
+
+
 
 
 
@@ -20382,7 +40758,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                             if(filterKey) {
+
+
+
+
+
+
+
+
 
 
 
@@ -20398,7 +40790,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                                 renderDashState();
+
+
+
+
+
+
+
+
 
 
 
@@ -20414,7 +40822,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -20430,7 +40854,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -20446,7 +40886,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -20478,7 +40942,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const defaultColors = ['#5c6bc0', '#42a5f5', '#66bb6a', '#ffa726', '#ef5350', '#ab47bc', '#ec407a', '#29b6f6', '#f97316'];
+
+
+
+
+
+
+
+
 
 
 
@@ -20494,7 +40982,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         
+
+
+
+
+
+
+
+
 
 
 
@@ -20510,7 +41014,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         let topBrandData = {}; let otherSales = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -20526,7 +41046,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
+
+
+
+
+
+
+
+
 
 
 
@@ -20550,6 +41086,22 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#0284c7'; if(k==='여성') return '#e11d48'; return '#9333ea'; });
 
 
@@ -20558,7 +41110,23 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
         genderChartInstance = renderPieChart('genderChart', genderData, 'gender', genderColors);
+
+
+
+
+
+
+
+
 
 
 
@@ -20582,7 +41150,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     if(!$("#analyticsDashboard")) renderDashUI(); else $("#analyticsDashboard").classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -20598,6 +41190,14 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
     updateDashData();
 
 
@@ -20606,7 +41206,31 @@ window.openAnalyticsReport = async () => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -20630,6 +41254,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     windowCurrentDashIndex = windowDashItems.findIndex(x => x.품번 === code);
 
 
@@ -20638,7 +41270,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     const p = windowDashItems[windowCurrentDashIndex];
+
+
+
+
+
+
+
+
 
 
 
@@ -20662,7 +41310,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
+
+
+
+
+
+
+
+
 
 
 
@@ -20678,7 +41350,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         const parts = periodParam.split("_"); cutoffDate = parts[1]; endDate = parts[2];
+
+
+
+
+
+
+
+
 
 
 
@@ -20694,6 +41382,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         const d = new Date(Date.now() - Number(periodParam) * 86400000); cutoffDate = d.toISOString().split('T')[0];
 
 
@@ -20702,7 +41398,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -20726,7 +41446,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     if (SALES_HISTORY.items && SALES_HISTORY.items[code]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -20742,7 +41478,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         for (let date in history) {
+
+
+
+
+
+
+
+
 
 
 
@@ -20758,7 +41510,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 const dayData = history[date];
+
+
+
+
+
+
+
+
 
 
 
@@ -20774,7 +41542,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 else if (typeof dayData === 'object') {
+
+
+
+
+
+
+
+
 
 
 
@@ -20790,7 +41574,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                         if (typeof dayData[size] === 'object') {
+
+
+
+
+
+
+
+
 
 
 
@@ -20806,7 +41606,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                             // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+
+
+
+
+
+
+
+
 
 
 
@@ -20822,7 +41638,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                             if (bq > 0) sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + bq;
+
+
+
+
+
+
+
+
 
 
 
@@ -20838,7 +41670,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 const qty = sd[mgr];
+
+
+
+
+
+
+
+
 
 
 
@@ -20854,7 +41702,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 else if (!mgr.includes("김종훈") && !mgr.includes("부산")) sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
+
+
+
+
+
+
+
+
 
 
 
@@ -20870,7 +41734,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                         } else { sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + dayData[size]; }
+
+
+
+
+
+
+
+
 
 
 
@@ -20886,7 +41766,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -20902,6 +41798,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         }
 
 
@@ -20910,7 +41814,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -20934,7 +41862,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     let modal = $("#dashDetailModal");
+
+
+
+
+
+
+
+
 
 
 
@@ -20950,7 +41894,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         modal = document.createElement("div"); modal.id = "dashDetailModal";
+
+
+
+
+
+
+
+
 
 
 
@@ -20966,7 +41926,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -20982,7 +41958,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         document.body.appendChild(modal);
+
+
+
+
+
+
+
+
 
 
 
@@ -20998,7 +41990,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         let touchstartX = 0; let touchendX = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -21014,7 +42022,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         contentWrap.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive:true});
+
+
+
+
+
+
+
+
 
 
 
@@ -21030,7 +42054,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             touchendX = e.changedTouches[0].screenX;
+
+
+
+
+
+
+
+
 
 
 
@@ -21046,7 +42086,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             if (touchendX > touchstartX + 60) $("#prevDashBtn")?.click();
+
+
+
+
+
+
+
+
 
 
 
@@ -21062,7 +42118,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -21086,7 +42166,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         .sort((a,b) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -21102,7 +42198,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             const order = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
+
+
+
+
+
+
+
+
 
 
 
@@ -21118,7 +42230,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             return a.localeCompare(b);
+
+
+
+
+
+
+
+
 
 
 
@@ -21142,7 +42270,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const chartLabels = allUniqueSizes.filter(s => s !== "알수없음");
+
+
+
+
+
+
+
+
 
 
 
@@ -21158,7 +42310,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     const chartDataSinsa = chartLabels.map(s => sizeSalesMapSinsa[s] || 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -21174,7 +42342,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -21190,7 +42374,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     chartLabels.forEach(s => {
+
+
+
+
+
+
+
+
 
 
 
@@ -21206,7 +42406,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         if(qty > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -21222,7 +42438,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             if((p.성별==='W'||p.gender==='W') && parseInt(s) >= 250) largeSizeSales += qty;
+
+
+
+
+
+
+
+
 
 
 
@@ -21238,7 +42470,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -21262,7 +42510,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     let insightHtml = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -21278,6 +42550,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         insightHtml = `<div class="mt-4 bg-purple-50 text-purple-700 p-4 rounded-xl text-sm font-black border border-purple-100 flex items-center gap-3 shadow-sm"><i data-lucide="trending-up" class="w-6 h-6 shrink-0"></i> 비주류/빅사이즈 (290+, 250+, XL 등) 에서 ${largeSizeSales}개의 틈새 판매량 포착!</div>`;
 
 
@@ -21286,7 +42566,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -21310,7 +42614,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         const soldBusan = sizeSalesMapBusan[size] || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -21326,7 +42646,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         const soldCenter = sizeSalesMapCenter[size] || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -21342,7 +42678,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         
+
+
+
+
+
+
+
+
 
 
 
@@ -21358,6 +42710,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         let needed = Math.max(0, soldBusan - sObj.busan);
 
 
@@ -21366,7 +42726,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         let takeCenter = Math.min(sObj.center, needed);
+
+
+
+
+
+
+
+
 
 
 
@@ -21390,7 +42766,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let badges = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -21406,6 +42806,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             let defaultVal = takeCenter > 0 ? takeCenter : 1;
 
 
@@ -21414,7 +42822,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             badges.push(`
+
+
+
+
+
+
+
+
 
 
 
@@ -21430,7 +42854,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     <span class="text-[10px] font-bold text-gray-500 w-6 text-center shrink-0">물류</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -21446,7 +42886,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     <button onclick="quickRT('${p.품번}','${size}','물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-700 hover:bg-black text-white px-1.5 py-0.5 rounded text-[10px] font-bold flex-1 transition-colors">↔RT</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -21462,6 +42918,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             `);
 
 
@@ -21470,7 +42934,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -21486,7 +42966,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             let defaultVal = takeSinsa > 0 ? takeSinsa : 1;
+
+
+
+
+
+
+
+
 
 
 
@@ -21502,7 +42998,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 <div class="flex items-center gap-1 bg-orange-50 border border-orange-200 px-1.5 py-1 rounded w-full">
+
+
+
+
+
+
+
+
 
 
 
@@ -21518,7 +43030,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-xs font-black bg-white border border-orange-200 rounded outline-none h-6 text-orange-700">
+
+
+
+
+
+
+
+
 
 
 
@@ -21534,7 +43062,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -21550,7 +43094,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -21574,7 +43142,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         else if (badges.length > 0 && needed <= 0) suggestHtml = `<div class="flex flex-col gap-1 items-stretch w-full opacity-30 hover:opacity-100 transition-opacity">${badges.join("")}</div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -21598,7 +43182,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         let rowClass = "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors";
+
+
+
+
+
+
+
+
 
 
 
@@ -21622,7 +43230,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         return `<tr class="${rowClass}">
+
+
+
+
+
+
+
+
 
 
 
@@ -21638,7 +43270,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             <td class="py-1.5 text-blue-600 font-black text-sm bg-blue-50/20">${soldBusan > 0 ? soldBusan : '-'}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -21654,7 +43302,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             <td class="py-1.5 text-orange-600 font-bold text-xs bg-orange-50/20">${soldSinsa > 0 ? soldSinsa : '-'}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -21670,7 +43334,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             <td class="py-1.5 text-gray-600 font-bold text-xs bg-gray-50/40">${soldCenter > 0 ? soldCenter : '-'}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -21686,6 +43366,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             <td class="py-1.5 align-middle px-2">${suggestHtml}</td>
 
 
@@ -21694,7 +43382,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         </tr>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -21718,7 +43422,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     let gLabel = p.성별 || p.gender || "U";
+
+
+
+
+
+
+
+
 
 
 
@@ -21734,6 +43462,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     let gColorClass = "ui-badge unisex";
 
 
@@ -21742,7 +43478,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     if(gLabel === "남성") gColorClass = "ui-badge men";
+
+
+
+
+
+
+
+
 
 
 
@@ -21766,7 +43518,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const prevDisabled = windowCurrentDashIndex === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
+
+
+
+
+
+
+
+
 
 
 
@@ -21790,7 +43566,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     modal.querySelector("#ddContentWrap").innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -21806,7 +43606,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             <div class="flex items-center gap-3">
+
+
+
+
+
+
+
+
 
 
 
@@ -21822,7 +43638,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 <div class="flex gap-4 items-center ml-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -21838,7 +43670,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     <div>
+
+
+
+
+
+
+
+
 
 
 
@@ -21854,7 +43702,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                             <span class="${gColorClass}">${escapeHtml(gLabel)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -21870,7 +43734,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -21886,7 +43766,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="text-sm font-bold text-gray-400 mt-0.5">${p.품번}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -21902,6 +43798,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
 
 
@@ -21910,7 +43814,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -21926,7 +43846,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 <button id="nextDashBtn" class="p-2.5 bg-gray-100 rounded-full transition-colors ${nextDisabled}" ${windowCurrentDashIndex === windowDashItems.length - 1 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex+1].품번}', '${periodParam}')"`}><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+
+
+
+
+
+
+
+
 
 
 
@@ -21942,6 +43878,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
 
 
@@ -21950,7 +43894,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -21966,7 +43926,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         <div class="flex flex-col lg:flex-row h-full lg:h-[75vh] overflow-y-auto lg:overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -21982,7 +43958,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 <h3 class="font-black text-base text-gray-800 mb-5 flex items-center gap-2"><i data-lucide="line-chart" class="w-6 h-6 text-blue-500"></i> 지점별 사이즈 판매 추이</h3>
+
+
+
+
+
+
+
+
 
 
 
@@ -21998,6 +43990,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 ${insightHtml}
 
 
@@ -22006,7 +44006,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22022,7 +44038,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
+
+
+
+
+
+
+
+
 
 
 
@@ -22038,7 +44070,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     <table class="w-full min-w-[480px] text-xs border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+
+
+
+
+
+
+
+
 
 
 
@@ -22054,7 +44102,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                             <tr class="text-center bg-gray-50">
+
+
+
+
+
+
+
+
 
 
 
@@ -22070,7 +44134,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <th class="py-1.5 border-b border-r border-gray-200 bg-blue-100 text-blue-800" colspan="2">부산</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -22086,7 +44166,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <th class="py-1.5 border-b border-r border-gray-200 bg-gray-200 text-gray-700" colspan="2">물류</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -22102,7 +44198,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                             </tr>
+
+
+
+
+
+
+
+
 
 
 
@@ -22118,7 +44230,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <th class="py-1 bg-blue-50/50 text-blue-700 border-r border-gray-100">판매</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -22134,7 +44262,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <th class="py-1 bg-orange-50/50 text-orange-700 border-r border-gray-100">판매</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -22150,7 +44294,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <th class="py-1 bg-gray-50 text-gray-600 border-r border-gray-100">판매</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -22166,7 +44326,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                             </tr>
+
+
+
+
+
+
+
+
 
 
 
@@ -22182,7 +44358,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                         <tbody id="ddTableBody" class="text-center">${tableHtml}</tbody>
+
+
+
+
+
+
+
+
 
 
 
@@ -22198,7 +44390,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22214,7 +44422,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22238,6 +44462,22 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     modal.classList.remove("hidden");
 
 
@@ -22246,7 +44486,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -22270,7 +44534,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
         const ctx = document.getElementById('ddSizeChart');
+
+
+
+
+
+
+
+
 
 
 
@@ -22286,7 +44566,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             new Chart(ctx, {
+
+
+
+
+
+
+
+
 
 
 
@@ -22302,7 +44598,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 data: { 
+
+
+
+
+
+
+
+
 
 
 
@@ -22318,7 +44630,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     datasets: [
+
+
+
+
+
+
+
+
 
 
 
@@ -22334,7 +44662,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                         { label: '신사점', data: chartDataSinsa, borderColor: '#f97316', backgroundColor: '#f97316', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 },
+
+
+
+
+
+
+
+
 
 
 
@@ -22350,7 +44694,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     ] 
+
+
+
+
+
+
+
+
 
 
 
@@ -22366,7 +44726,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                 options: {
+
+
+
+
+
+
+
+
 
 
 
@@ -22382,7 +44758,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     interaction: { mode: 'index', intersect: false },
+
+
+
+
+
+
+
+
 
 
 
@@ -22398,7 +44790,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
                     scales: { x: { grid: { display: true, color: '#f3f4f6' }, ticks: { font: { size: 11, weight: 'bold' }, color: '#6b7280' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11, weight: 'bold' } } } }
+
+
+
+
+
+
+
+
 
 
 
@@ -22414,7 +44822,23 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
             });
+
+
+
+
+
+
+
+
 
 
 
@@ -22430,6 +44854,14 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
     }, 150);
 
 
@@ -22438,7 +44870,31 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -22462,6 +44918,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     const guide = SALES_GUIDES[code];
 
 
@@ -22470,7 +44934,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     const p = PRODUCTS.find(x => x.품번 === code);
+
+
+
+
+
+
+
+
 
 
 
@@ -22494,7 +44974,31 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     let modal = $("#salesGuideModal");
+
+
+
+
+
+
+
+
 
 
 
@@ -22510,7 +45014,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
         modal = document.createElement("div");
+
+
+
+
+
+
+
+
 
 
 
@@ -22526,7 +45046,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
         modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-3";
+
+
+
+
+
+
+
+
 
 
 
@@ -22542,7 +45078,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
             <div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22558,7 +45110,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                 <!-- 헤더 -->
+
+
+
+
+
+
+
+
 
 
 
@@ -22574,7 +45142,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="flex-1 min-w-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -22590,7 +45174,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <span class="bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-widest uppercase">AI SALES GUIDE</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -22606,7 +45206,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22622,7 +45238,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <h2 id="sgTitle" class="font-black text-xl text-white leading-tight truncate"></h2>
+
+
+
+
+
+
+
+
 
 
 
@@ -22638,6 +45270,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
 
 
@@ -22646,7 +45286,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22662,7 +45318,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22678,7 +45350,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                 <div id="sgDashboard" class="flex-1 overflow-hidden p-3">
+
+
+
+
+
+
+
+
 
 
 
@@ -22694,6 +45382,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         <!-- Col 1: 핵심 스펙 -->
 
 
@@ -22702,7 +45398,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -22718,6 +45430,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <div id="sgMetrics" class="shrink-0">
 
 
@@ -22726,7 +45446,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+
+
+
+
+
+
+
+
 
 
 
@@ -22742,7 +45478,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                     <span id="sgWeight" class="text-[12px] font-black text-slate-800"></span>
+
+
+
+
+
+
+
+
 
 
 
@@ -22758,7 +45510,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+
+
+
+
+
+
+
+
 
 
 
@@ -22774,6 +45542,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                     <span id="sgHeel" class="text-[12px] font-black text-slate-800"></span>
 
 
@@ -22782,7 +45558,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22798,7 +45590,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                     <span class="text-[10px] font-bold text-slate-400">포어풋 스택</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -22814,7 +45622,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22830,7 +45654,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                     <span class="text-[10px] font-bold text-slate-400">드롭</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -22846,6 +45686,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 </div>
 
 
@@ -22854,7 +45702,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22870,7 +45734,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="flex-1 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -22886,7 +45766,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div id="sgFeatures" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22902,7 +45798,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22918,7 +45830,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -22934,7 +45862,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="bg-slate-50 rounded-lg p-2 shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -22950,6 +45894,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div id="sgVsPrev" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
 
 
@@ -22958,7 +45910,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -22974,7 +45942,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <span class="text-[9px] font-black text-red-400 uppercase tracking-widest block mb-1">⚠ 알려진 이슈 / 단점</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -22990,7 +45974,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23006,7 +46006,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest block mb-1">VS 경쟁 모델</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -23022,6 +46038,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
 
 
@@ -23030,7 +46054,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="flex-1 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -23046,7 +46086,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div id="sgWhy" class="text-[12px] font-black text-indigo-700 italic leading-snug"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23062,7 +46118,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23078,7 +46150,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -23094,7 +46182,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="bg-amber-50 border border-amber-100 rounded-lg p-2 shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -23110,7 +46214,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div id="sgBrandFocus" class="text-[11px] text-amber-800 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23126,7 +46246,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -23142,6 +46278,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <div id="sgTarget" class="text-[11px] text-slate-700 font-medium leading-snug bg-slate-50 rounded-lg p-2"></div>
 
 
@@ -23150,7 +46294,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23166,7 +46326,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Best For</h4>
+
+
+
+
+
+
+
+
 
 
 
@@ -23182,7 +46358,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23198,7 +46390,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                                 <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">클로징 멘트</h4>
+
+
+
+
+
+
+
+
 
 
 
@@ -23214,7 +46422,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23230,7 +46454,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23246,7 +46486,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -23262,7 +46518,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
         document.body.appendChild(modal);
+
+
+
+
+
+
+
+
 
 
 
@@ -23278,7 +46550,31 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -23302,7 +46598,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgBrand").textContent  = p ? p.브랜드 : "";
+
+
+
+
+
+
+
+
 
 
 
@@ -23318,7 +46630,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
         `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">#${escapeHtml(kw)}</span>`).join('');
+
+
+
+
+
+
+
+
 
 
 
@@ -23334,7 +46662,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     const _isWomens = p && (p.gender === "W" || p.성별 === "여성" || p.성별 === "여");
+
+
+
+
+
+
+
+
 
 
 
@@ -23350,7 +46694,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     const _weightVal = guide.weight || "";
+
+
+
+
+
+
+
+
 
 
 
@@ -23366,7 +46726,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgWeightLabel").textContent = `무게 (한쪽, ${_isWomens ? "여 US7" : "남 US9"} 기준)`;
+
+
+
+
+
+
+
+
 
 
 
@@ -23382,7 +46758,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgHeel").textContent     = guide.heelStack   || guide.heel_stack  || "—";
+
+
+
+
+
+
+
+
 
 
 
@@ -23398,7 +46790,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgDrop").textContent     = guide.drop        || "—";
+
+
+
+
+
+
+
+
 
 
 
@@ -23414,7 +46822,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgFeatures").textContent = guide.features    || "—";
+
+
+
+
+
+
+
+
 
 
 
@@ -23430,7 +46854,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     // ①②③ 항목을 줄바꿈으로 분리하는 헬퍼
+
+
+
+
+
+
+
+
 
 
 
@@ -23446,6 +46886,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
       if (!text) return fallback || "—";
 
 
@@ -23454,7 +46902,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
       const escaped = escapeHtml(text);
+
+
+
+
+
+
+
+
 
 
 
@@ -23470,6 +46934,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
       return escaped.replace(/\s*([②③④⑤⑥⑦⑧⑨])/g, '<br>$1');
 
 
@@ -23478,7 +46950,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -23494,7 +46982,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     function fmtVp(text) {
+
+
+
+
+
+
+
+
 
 
 
@@ -23510,7 +47014,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
       const escaped = escapeHtml(text);
+
+
+
+
+
+
+
+
 
 
 
@@ -23526,7 +47046,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
       return escaped
+
+
+
+
+
+
+
+
 
 
 
@@ -23542,7 +47078,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
         .replace(/,\s+(?=[^\s])/g, ',<br>');
+
+
+
+
+
+
+
+
 
 
 
@@ -23558,7 +47110,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgVsPrev").innerHTML    = fmtVp(guide.verDiff || guide.vs_prev || guide.features);
+
+
+
+
+
+
+
+
 
 
 
@@ -23574,7 +47142,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgVsOthers").textContent = guide.vsComp      || guide.vs_others || "—";
+
+
+
+
+
+
+
+
 
 
 
@@ -23590,7 +47174,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     // 전략 (V2 필드명 매핑)
+
+
+
+
+
+
+
+
 
 
 
@@ -23606,6 +47206,14 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgTarget").textContent   = guide.target      || "—";
 
 
@@ -23614,7 +47222,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     modal.querySelector("#sgBestFor").textContent  = guide.bestFor     || guide.best_for || guide.target   || "—";
+
+
+
+
+
+
+
+
 
 
 
@@ -23638,6 +47262,22 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     modal.classList.remove("hidden");
 
 
@@ -23646,7 +47286,23 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
     if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -23670,7 +47326,31 @@ window.openSalesGuide = (code) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function card(p){
+
+
+
+
+
+
+
+
 
 
 
@@ -23686,7 +47366,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   el.className = "card card-hover p-3.5 flex flex-col h-full";
+
+
+
+
+
+
+
+
 
 
 
@@ -23702,7 +47398,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     const copyBtn = e.target.closest('[data-copy]');
+
+
+
+
+
+
+
+
 
 
 
@@ -23718,7 +47430,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     if(e.target.closest('.btn-sales')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -23734,7 +47462,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -23750,6 +47494,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   };
 
 
@@ -23758,7 +47510,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   
+
+
+
+
+
+
+
+
 
 
 
@@ -23774,7 +47542,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   
+
+
+
+
+
+
+
+
 
 
 
@@ -23790,7 +47574,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -23814,7 +47614,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   let busanOnlyBadge = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -23830,6 +47654,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       busanOnlyBadge = `<span class="bg-blue-800 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
 
 
@@ -23838,7 +47670,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -23854,7 +47702,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if (p.busanTotal === 0 && (p.sinsaTotal > 0 || p.centerTotal > 0)) {
+
+
+
+
+
+
+
+
 
 
 
@@ -23870,7 +47734,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -23894,7 +47782,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   const _cardSales = getSalesSummary(p.품번);
+
+
+
+
+
+
+
+
 
 
 
@@ -23910,7 +47814,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if(_cardSales.d7 >= 3)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -23934,7 +47854,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
+
+
+
+
+
+
+
+
 
 
 
@@ -23950,7 +47894,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if(_cardSales.d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0)) {
+
+
+
+
+
+
+
+
 
 
 
@@ -23966,7 +47926,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -23990,7 +47974,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   let todaySoldBadge = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -24006,6 +48006,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     todaySoldBadge = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded font-black text-[10px]">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
 
 
@@ -24014,7 +48022,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24038,7 +48070,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   let dpBadge = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -24054,7 +48102,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if (_dpSizes.length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -24070,7 +48134,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     const _dpSizeLabel = _dpSizes.join('·');
+
+
+
+
+
+
+
+
 
 
 
@@ -24086,7 +48166,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       dpBadge = `<span class="bg-orange-100 text-orange-700 border border-orange-300 px-2 py-0.5 rounded font-black text-[10px]">⚠️ 품절DP ${_dpSizeLabel}</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24102,7 +48198,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       dpBadge = `<span class="bg-violet-100 text-violet-700 border border-violet-300 px-2 py-0.5 rounded font-black text-[10px]">🏷️ DP ${_dpSizeLabel}</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24118,7 +48230,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24142,7 +48278,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   const _noImgBadge = !IMAGES[p.shopNo || p.품번] ? `<span class="bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded font-black text-[10px]">📷 이미지없음</span>` : "";
+
+
+
+
+
+
+
+
 
 
 
@@ -24154,7 +48306,15 @@ function card(p){
 
 
 
+
+
+
+
   const _hasStale = p._hasOverride && p.sizes.some(s => s._override && s._overrideStale);
+
+
+
+
 
 
 
@@ -24162,11 +48322,35 @@ function card(p){
 
 
 
+
+
+
+
     ? `<span class="bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded font-black text-[10px]">✏️ 재고보정${_hasStale?' ⚠️':''}</span>`
 
 
 
+
+
+
+
     : "";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24190,7 +48374,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   let memoHtml = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -24206,7 +48406,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       memoHtml = `<div class="showroom-hide mt-1.5 mb-2.5 space-y-1.5">`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24222,7 +48438,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           memoHtml += `
+
+
+
+
+
+
+
+
 
 
 
@@ -24238,7 +48470,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
              <div class="flex items-center justify-between mb-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -24254,7 +48502,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
                  <span class="text-[11px] text-yellow-600">${escapeHtml(m.date)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -24270,7 +48534,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
              <div class="text-yellow-900 line-clamp-2">${escapeHtml(m.text)}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -24286,7 +48566,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       });
+
+
+
+
+
+
+
+
 
 
 
@@ -24302,7 +48598,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24326,7 +48646,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   const guide = SALES_GUIDES[p.품번];
+
+
+
+
+
+
+
+
 
 
 
@@ -24342,7 +48678,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       salesHtml = `<div class="flex flex-wrap gap-1 mt-2 mb-1.5">` + 
+
+
+
+
+
+
+
+
 
 
 
@@ -24358,6 +48710,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       `</div>`;
 
 
@@ -24366,7 +48726,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24398,11 +48782,39 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   let promoBadge = "";
 
 
 
+
+
+
+
   let promoRateFlow = "";  // 하단 가격행 중간에 표시할 할인 플로우
+
+
+
+
+
+
+
+
 
 
 
@@ -24426,7 +48838,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
+
+
+
+
+
+
+
+
 
 
 
@@ -24442,7 +48878,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
+
+
+
+
+
+
+
+
 
 
 
@@ -24454,7 +48906,19 @@ function card(p){
 
 
 
+
+
+
+
       const _previewLabel = p.promoIsPreview ? `<span class="text-[9px] font-bold text-gray-400 ml-0.5">📅미리보기</span>` : '';
+
+
+
+
+
+
+
+
 
 
 
@@ -24470,7 +48934,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-400' : 'bg-red-600'} text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24486,6 +48966,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             <div class="flex flex-col items-end leading-tight">
 
 
@@ -24494,7 +48982,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -24510,7 +49014,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             </div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24526,11 +49046,27 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           const _erInt = Math.round((p.promoEventRate||0)*100);
 
 
 
+
+
+
+
           const _crInt = Math.round((p.promoCouponRate||0)*100);
+
+
+
+
 
 
 
@@ -24542,7 +49078,19 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           // 상단 배지: 기획전명만
+
+
+
+
 
 
 
@@ -24554,7 +49102,19 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           // 할인 칩 전용 행 — 2줄 (할인율 위 / 할인가 아래)
+
+
+
+
 
 
 
@@ -24562,7 +49122,15 @@ function card(p){
 
 
 
+
+
+
+
             const priceRow = price
+
+
+
+
 
 
 
@@ -24570,7 +49138,15 @@ function card(p){
 
 
 
+
+
+
+
               : '';
+
+
+
+
 
 
 
@@ -24578,11 +49154,23 @@ function card(p){
 
 
 
+
+
+
+
               `<span class="text-[11px]">${rateLabel}</span>${priceRow}</span>`;
 
 
 
+
+
+
+
           };
+
+
+
+
 
 
 
@@ -24594,7 +49182,19 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           let _chips = '';
+
+
+
+
 
 
 
@@ -24602,7 +49202,15 @@ function card(p){
 
 
 
+
+
+
+
           if(_crInt > 0) _chips += _chip('bg-blue-50','border-blue-300','text-blue-700', `🎟️ 쿠폰 ▼${_crInt}%`, null) + _arrow;
+
+
+
+
 
 
 
@@ -24610,11 +49218,27 @@ function card(p){
 
 
 
+
+
+
+
           if(p.promoEndDate) _chips += `<span class="text-[11px] text-gray-400 font-bold self-center ml-1">(~${p.promoEndDate})</span>`;
 
 
 
+
+
+
+
           if(_isGray) _chips += `<span class="text-[10px] text-gray-400 font-bold self-center">📅미리보기</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24630,7 +49254,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
           priceDisplay = `
+
+
+
+
+
+
+
+
 
 
 
@@ -24646,7 +49286,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
                 <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -24662,7 +49318,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             </div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -24678,7 +49350,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24702,7 +49398,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if(gLabel === "M" || gLabel === "남성" || gLabel === "남") gLabel = "남성"; else if(gLabel === "W" || gLabel === "여성" || gLabel === "여") gLabel = "여성"; else gLabel = "공용";
+
+
+
+
+
+
+
+
 
 
 
@@ -24718,6 +49430,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   let gBadgeClass = "ui-badge unisex";
 
 
@@ -24726,7 +49446,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   if(gLabel === "남성") gBadgeClass = "ui-badge men";
+
+
+
+
+
+
+
+
 
 
 
@@ -24750,7 +49486,27 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 상단 상태 배지: 중요도 순으로 최대 3개만 노출, 나머지는 +N 축약 (품명이 밀리지 않게)
+
+
+
+
 
 
 
@@ -24758,7 +49514,15 @@ function card(p){
 
 
 
+
+
+
+
   const _MAX_BADGES = 3;
+
+
+
+
 
 
 
@@ -24766,7 +49530,15 @@ function card(p){
 
 
 
+
+
+
+
   if (_statusBadges.length > _MAX_BADGES) {
+
+
+
+
 
 
 
@@ -24774,7 +49546,19 @@ function card(p){
 
 
 
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -24790,7 +49574,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     <div class="flex flex-col flex-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -24806,7 +49606,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             ${_badgesHtml}
+
+
+
+
+
+
+
+
 
 
 
@@ -24822,7 +49638,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             <span class="hidden sm:inline bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${escapeHtml(p.브랜드||"-")}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -24838,6 +49670,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             ${deltaHtml}
 
 
@@ -24846,7 +49686,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24870,7 +49734,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
            <div class="flex-1 min-w-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -24894,7 +49774,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <div class="copyable text-[11px] font-bold text-gray-400 mb-1.5 text-left w-full hover:text-blue-600 flex items-center gap-1 overflow-hidden" data-copy="${escapeHtml(p.품번)}">
+
+
+
+
+
+
+
+
 
 
 
@@ -24910,7 +49814,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
               </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -24926,7 +49846,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
            </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -24942,7 +49878,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
            <div class="card-img-wrap">
+
+
+
+
+
+
+
+
 
 
 
@@ -24958,7 +49910,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
                <button class="fav-btn bookmark-overlay text-gray-400 hover:text-yellow-500 outline-none" data-active="${isFav?'1':'0'}">
+
+
+
+
+
+
+
+
 
 
 
@@ -24974,7 +49942,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
                </button>
+
+
+
+
+
+
+
+
 
 
 
@@ -24990,6 +49974,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
 
 
@@ -24998,7 +49990,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         
+
+
+
+
+
+
+
+
 
 
 
@@ -25022,7 +50030,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <div class="size-scroll-wrap no-scrollbar">
+
+
+
+
+
+
+
+
 
 
 
@@ -25038,7 +50070,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
               const q = s.busan||0;
+
+
+
+
+
+
+
+
 
 
 
@@ -25054,7 +50102,19 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
               const _szLabel = convertSizeLabel(s.size, p.gender||p.성별||'', p.브랜드||'');
+
+
+
+
 
 
 
@@ -25062,7 +50122,19 @@ function card(p){
 
 
 
+
+
+
+
               let cls = "size-cell tnum shrink-0 " + (_szWide ? "w-[52px] " : "w-[46px] ");
+
+
+
+
+
+
+
+
 
 
 
@@ -25078,7 +50150,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
               const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:9px;margin-top:1px">↓${soldToday}판매</span>` : '';
+
+
+
+
+
+
+
+
 
 
 
@@ -25094,7 +50182,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
               return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -25110,6 +50214,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
 
 
@@ -25118,7 +50230,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -25142,7 +50278,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         <div class="flex items-center justify-between text-[11px] font-bold text-gray-400">
+
+
+
+
+
+
+
+
 
 
 
@@ -25158,6 +50310,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             <span class="shrink-0">부산 <b class="text-blue-600">${p.busanTotal}</b> · 신사 ${p.sinsaTotal} · 물류 ${p.centerTotal}</span>
 
 
@@ -25166,7 +50326,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -25182,7 +50358,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
         <div class="flex items-center justify-between">
+
+
+
+
+
+
+
+
 
 
 
@@ -25198,7 +50390,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
             ${priceDisplay}
+
+
+
+
+
+
+
+
 
 
 
@@ -25214,7 +50422,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -25230,7 +50454,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   
+
+
+
+
+
+
+
+
 
 
 
@@ -25246,7 +50486,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -25262,7 +50518,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       if(FAVS.includes(p.품번)) FAVS=FAVS.filter(id=>id!==p.품번); 
+
+
+
+
+
+
+
+
 
 
 
@@ -25278,7 +50550,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       localStorage.setItem('FAVS', JSON.stringify(FAVS));
+
+
+
+
+
+
+
+
 
 
 
@@ -25294,7 +50582,23 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
       render(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -25310,6 +50614,14 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
   return el;
 
 
@@ -25318,7 +50630,31 @@ function card(p){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -25342,7 +50678,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
   const promoBtn = $('button[data-promo]');
+
+
+
+
+
+
+
+
 
 
 
@@ -25366,7 +50718,31 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return {
+
+
+
+
+
+
+
+
 
 
 
@@ -25382,7 +50758,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
+
+
+
+
+
+
+
+
 
 
 
@@ -25398,7 +50790,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     salesSpeed: ($$('button.chip[data-salesspeed]').find(b=>b.dataset.active==="1")||{}).dataset?.salesspeed || "ALL",
+
+
+
+
+
+
+
+
 
 
 
@@ -25414,7 +50822,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     q: $("#q").value.trim().toLowerCase(),
+
+
+
+
+
+
+
+
 
 
 
@@ -25430,7 +50854,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     favOnly: !!$$('button.chip[data-fav]').find(b=>b.dataset.active==="1"),
+
+
+
+
+
+
+
+
 
 
 
@@ -25446,7 +50886,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     busanOnly: !!$$('button.chip[data-busanonly]').find(b=>b.dataset.active==="1"),
+
+
+
+
+
+
+
+
 
 
 
@@ -25462,7 +50918,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     todaySoldOnly: !!$$('button.chip[data-todaysold]').find(b=>b.dataset.active==="1"),
+
+
+
+
+
+
+
+
 
 
 
@@ -25478,7 +50950,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     noImage: !!$$('button.chip[data-noimage]').find(b=>b.dataset.active==="1"),
+
+
+
+
+
+
+
+
 
 
 
@@ -25494,7 +50982,25 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     overrideOnly: !!$$('button.chip[data-override]').find(b=>b.dataset.active==="1"),
+
+    noLocation: !!$$('button.chip[data-noloc]').find(b=>b.dataset.active==="1"),
+
+
+
+
+
+
+
+
 
 
 
@@ -25510,7 +51016,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
+
+
+
+
+
+
+
+
 
 
 
@@ -25526,7 +51048,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     promoOnly: promoOnly,
+
+
+
+
+
+
+
+
 
 
 
@@ -25542,7 +51080,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
     promoRate: promoOnly && $("#promoRateSel") && $("#promoRateSel").value !== "" ? Number($("#promoRateSel").value) : 0,
+
+
+
+
+
+
+
+
 
 
 
@@ -25558,7 +51112,23 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
 
 
 
@@ -25582,7 +51152,31 @@ function getFilters(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ── 판매 현황 요약 패널 (카테고리별 핫셀러/보통/저조) ───────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -25598,6 +51192,14 @@ window._salesSummaryDismissed = true; // 처음엔 숨김, 버튼 클릭 시에�
 
 
 
+
+
+
+
+
+
+
+
 function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (전체 PRODUCTS 기준)
 
 
@@ -25606,7 +51208,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
   const panel = $("#salesSummaryPanel");
+
+
+
+
+
+
+
+
 
 
 
@@ -25630,7 +51248,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const cats = ['신발', '의류', '용품'];
+
+
+
+
+
+
+
+
 
 
 
@@ -25654,6 +51296,22 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 카테고리별로 hot/normal/slow 분류
 
 
@@ -25662,7 +51320,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
   const grouped = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -25686,7 +51360,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   PRODUCTS.forEach(p => {
+
+
+
+
+
+
+
+
 
 
 
@@ -25702,7 +51400,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     if (!grouped[cat]) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -25718,7 +51432,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     if (s.d7 >= 3) grouped[cat].hot.push({ p, d7: s.d7 });
+
+
+
+
+
+
+
+
 
 
 
@@ -25734,6 +51464,14 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     else if (s.all > 0) grouped[cat].slow.push({ p, d7: s.d7 });
 
 
@@ -25742,7 +51480,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -25766,7 +51528,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
   cats.forEach(c => {
+
+
+
+
+
+
+
+
 
 
 
@@ -25782,7 +51560,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     grouped[c].normal.sort((a, b) => b.d7 - a.d7);
+
+
+
+
+
+
+
+
 
 
 
@@ -25806,7 +51600,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const totalHot = cats.reduce((s, c) => s + grouped[c].hot.length, 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -25830,7 +51648,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (totalHot + totalNormal === 0) { panel.classList.add("hidden"); return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -25854,7 +51696,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 각 카테고리 칼럼 HTML 생성
+
+
+
+
+
+
+
+
 
 
 
@@ -25870,7 +51736,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     const g = grouped[cat];
+
+
+
+
+
+
+
+
 
 
 
@@ -25886,7 +51768,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
+
+
+
+
+
+
+
+
 
 
 
@@ -25902,7 +51800,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
         <span class="text-[9px] text-gray-400 font-mono shrink-0 mr-0.5">${escapeHtml(String(p.품번))}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -25918,6 +51832,14 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       </div>`
 
 
@@ -25926,7 +51848,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     ).join('');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -25958,7 +51904,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     return `
+
+
+
+
+
+
+
+
 
 
 
@@ -25974,7 +51944,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       <div class="flex items-center justify-between mb-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -25990,7 +51976,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
         <div class="flex gap-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -26006,7 +52008,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
           <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','normal')">📈 ${g.normal.length}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -26022,7 +52040,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -26038,6 +52072,14 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       ${g.hot.length > 0 ? `<div class="space-y-0.5">${hotItems}${remainHot}</div>` : `<div class="text-[10px] text-gray-300 font-bold text-center py-2">핫셀러 없음</div>`}
 
 
@@ -26046,7 +52088,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
     </div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -26070,7 +52128,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   panel.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -26086,7 +52168,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       <div class="flex items-center justify-between px-3 py-2 bg-white border-b border-gray-100">
+
+
+
+
+
+
+
+
 
 
 
@@ -26102,7 +52200,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
           <span class="text-xs font-black text-gray-800">📊 판매 현황 요약</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -26118,7 +52232,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
           <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-50 text-red-500">🔥 핫셀러 ${totalHot}개</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -26134,7 +52264,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -26150,6 +52296,14 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       </div>
 
 
@@ -26158,7 +52312,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
       <div class="flex gap-2 p-2">${colHtml}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -26182,6 +52352,22 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (window.lucide) lucide.createIcons();
 
 
@@ -26190,7 +52376,31 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -26214,7 +52424,23 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
+
+
+
+
+
+
+
+
 window._quickFilter = (cat, speed) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -26230,7 +52456,23 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
   // 패널은 닫지 않고 유지
+
+
+
+
+
+
+
+
 
 
 
@@ -26246,7 +52488,23 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
   _clearAllFilterChips();
+
+
+
+
+
+
+
+
 
 
 
@@ -26262,7 +52520,23 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
   // 핫셀러/보통 필터 시 판매량 내림차순 정렬
+
+
+
+
+
+
+
+
 
 
 
@@ -26278,7 +52552,23 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
   visibleCount = 120; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -26294,6 +52584,14 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
   setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
 
 
@@ -26302,7 +52600,31 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -26326,7 +52648,23 @@ window._quickFilter = (cat, speed) => {
 
 
 
+
+
+
+
+
+
+
+
 window._quickFilterProduct = (code) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -26342,7 +52680,23 @@ window._quickFilterProduct = (code) => {
 
 
 
+
+
+
+
+
+
+
+
   // 패널은 닫지 않고 유지
+
+
+
+
+
+
+
+
 
 
 
@@ -26358,7 +52712,23 @@ window._quickFilterProduct = (code) => {
 
 
 
+
+
+
+
+
+
+
+
   $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === 'ALL' ? '1' : '0'));
+
+
+
+
+
+
+
+
 
 
 
@@ -26374,7 +52744,23 @@ window._quickFilterProduct = (code) => {
 
 
 
+
+
+
+
+
+
+
+
   const qEl = $("#q");
+
+
+
+
+
+
+
+
 
 
 
@@ -26390,6 +52776,14 @@ window._quickFilterProduct = (code) => {
 
 
 
+
+
+
+
+
+
+
+
   visibleCount = 120; render();
 
 
@@ -26398,7 +52792,23 @@ window._quickFilterProduct = (code) => {
 
 
 
+
+
+
+
+
+
+
+
   setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+
+
+
+
+
+
+
+
 
 
 
@@ -26422,7 +52832,31 @@ window._quickFilterProduct = (code) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function render(){
+
+
+
+
+
+
+
+
 
 
 
@@ -26446,7 +52880,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if(!RAW.length) {
+
+
+
+
+
+
+
+
 
 
 
@@ -26462,7 +52920,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       $("#emptyState").classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -26478,7 +52952,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       return;
+
+
+
+
+
+
+
+
 
 
 
@@ -26494,11 +52984,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   // RAW는 있는데 PRODUCTS가 0개면 파싱 실패(예: 엑셀 헤더행 밀림) — "결과 없음"과 구분되는 명확한 경고 표시
 
 
 
+
+
+
+
   if(!PRODUCTS.length) {
+
+
+
+
+
+
+
+
 
 
 
@@ -26514,7 +53024,19 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       grid.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 gap-3 text-center">
+
+
+
+
 
 
 
@@ -26522,7 +53044,15 @@ function render(){
 
 
 
+
+
+
+
           <div class="text-lg font-black text-gray-700">재고 데이터 처리 실패</div>
+
+
+
+
 
 
 
@@ -26530,7 +53060,19 @@ function render(){
 
 
 
+
+
+
+
       </div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -26546,7 +53088,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       $("#results").classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -26562,6 +53120,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       return;
 
 
@@ -26570,7 +53136,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -26594,7 +53184,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   $("#results").classList.remove("hidden");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -26618,7 +53232,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   const activeSizeFilter = [f.sizeFw, f.sizeAp, f.sizeGear].find(s => s !== "ALL") || "ALL";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -26642,7 +53280,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   PRODUCTS.forEach(p => {
+
+
+
+
+
+
+
+
 
 
 
@@ -26658,7 +53312,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       p.todaySold = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -26674,7 +53344,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -26690,7 +53376,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
               const dayData = SALES_HISTORY.items[p.품번][date];
+
+
+
+
+
+
+
+
 
 
 
@@ -26706,7 +53408,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                   for (let size in dayData) {
+
+
+
+
+
+
+
+
 
 
 
@@ -26722,7 +53440,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                           const sd = dayData[size];
+
+
+
+
+
+
+
+
 
 
 
@@ -26738,7 +53472,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                           const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -26754,7 +53504,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                               p.periodSales += bq;
+
+
+
+
+
+
+
+
 
 
 
@@ -26770,7 +53536,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                                   p.todaySold += bq;
+
+
+
+
+
+
+
+
 
 
 
@@ -26786,7 +53568,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                               }
+
+
+
+
+
+
+
+
 
 
 
@@ -26802,7 +53600,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
                       }
+
+
+
+
+
+
+
+
 
 
 
@@ -26818,7 +53632,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
               }
+
+
+
+
+
+
+
+
 
 
 
@@ -26834,6 +53664,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       }
 
 
@@ -26842,7 +53680,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -26866,7 +53728,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -26882,7 +53760,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(g === "M" || g === "남성" || g === "남") g = "남성"; else if(g === "W" || g === "여성" || g === "여") g = "여성"; else g = "공용";
+
+
+
+
+
+
+
+
 
 
 
@@ -26898,7 +53792,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -26914,7 +53824,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.rtChance && !(getSalesSummary(p.품번).d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0))) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -26930,7 +53856,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.memoOnly && !p.hasMemo) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -26946,7 +53888,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.otherOnly && !(p.busanTotal === 0 && (p.sinsaTotal > 0 || p.centerTotal > 0))) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -26962,7 +53920,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.dpFilters.length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -26978,7 +53952,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       const match = f.dpFilters.some(filter => {
+
+
+
+
+
+
+
+
 
 
 
@@ -26994,7 +53984,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(filter === "nodp")   return dpSt === 'none' && p.busanTotal > 0; // 미DP이면서 재고있는 것만
+
+
+
+
+
+
+
+
 
 
 
@@ -27010,7 +54016,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -27026,7 +54048,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       if(!match) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -27042,7 +54080,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -27058,7 +54112,35 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(f.overrideOnly && !p._hasOverride) return false;
+
+
+
+    if(f.noLocation && LOCATIONS.assignments[p.품번]) return false;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27082,7 +54164,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(!p.currentPromoPrice) return false; 
+
+
+
+
+
+
+
+
 
 
 
@@ -27098,7 +54196,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -27114,7 +54228,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27138,7 +54276,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         const sizeObj = p.sizes.find(s => String(s.size).trim() === activeSizeFilter);
+
+
+
+
+
+
+
+
 
 
 
@@ -27154,7 +54308,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(f.stock && sizeObj.busan <= 0) return false; 
+
+
+
+
+
+
+
+
 
 
 
@@ -27170,6 +54340,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(f.stock && p.busanTotal <= 0) return false; 
 
 
@@ -27178,7 +54356,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27202,7 +54404,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         const tokens = f.q.split(/\s+/).filter(Boolean);
+
+
+
+
+
+
+
+
 
 
 
@@ -27218,7 +54436,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         for(const t of tokens){
+
+
+
+
+
+
+
+
 
 
 
@@ -27234,7 +54468,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
             if(isAllChosung(cleanT)){ 
+
+
+
+
+
+
+
+
 
 
 
@@ -27250,7 +54500,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
             } else { 
+
+
+
+
+
+
+
+
 
 
 
@@ -27266,7 +54532,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -27282,7 +54564,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(!matchAll) return false;
+
+
+
+
+
+
+
+
 
 
 
@@ -27298,6 +54596,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     return true;
 
 
@@ -27306,7 +54612,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27330,7 +54660,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "salesDesc" : $("#sortSel").value;
+
+
+
+
+
+
+
+
 
 
 
@@ -27346,7 +54692,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(sortMode === "todayDesc") return (b.todaySold||0) - (a.todaySold||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+
+
+
+
+
+
+
+
 
 
 
@@ -27362,7 +54724,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -27378,7 +54756,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         const ca = CAT_ORDER[a.카테고리] ?? 9; 
+
+
+
+
+
+
+
+
 
 
 
@@ -27394,7 +54788,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(ca!==cb) return ca-cb;
+
+
+
+
+
+
+
+
 
 
 
@@ -27410,7 +54820,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         if(sa!==sb) return sa-sb;
+
+
+
+
+
+
+
+
 
 
 
@@ -27426,7 +54852,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -27442,6 +54884,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(sortMode==="name") return String(a.품명).localeCompare(String(b.품명),"ko");
 
 
@@ -27450,7 +54900,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -27466,7 +54932,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     const priceB = b.currentPromoPrice || b.소비자가 || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -27482,7 +54964,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(sortMode==="priceDesc") return priceB - priceA;
+
+
+
+
+
+
+
+
 
 
 
@@ -27498,7 +54996,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     if(sortMode==="promoEventRateDesc") return (b.promoEventRate||0) - (a.promoEventRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+
+
+
+
+
+
+
+
 
 
 
@@ -27514,7 +55028,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -27530,7 +55060,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
     return String(a.품명).localeCompare(String(b.품명),"ko");
+
+
+
+
+
+
+
+
 
 
 
@@ -27554,7 +55100,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   grid.innerHTML = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -27570,7 +55140,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       const f2 = getFilters();
+
+
+
+
+
+
+
+
 
 
 
@@ -27586,7 +55172,23 @@ function render(){
 
 
 
-      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.favOnly || f2.memoOnly || f2.noBarcode || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
+
+
+
+
+
+
+
+
+      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.favOnly || f2.memoOnly || f2.noBarcode || f2.noLocation || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -27602,7 +55204,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       if(nm) nm.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -27618,7 +55236,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         <div class="text-xl font-black mb-1">결과 없음</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -27634,7 +55268,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
         ${(hasQuery || hasFilters) ? `<button onclick="document.getElementById('resetAll').click()" class="brutal px-5 py-2 bg-black text-white font-black text-sm">↺ 필터 전체 초기화</button>` : ''}
+
+
+
+
+
+
+
+
 
 
 
@@ -27650,6 +55300,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       nm.classList.remove("hidden");
 
 
@@ -27658,7 +55316,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       $("#grid").parentElement.classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -27674,7 +55348,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -27690,6 +55380,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       $("#grid").parentElement.classList.remove("hidden");
 
 
@@ -27698,7 +55396,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       
+
+
+
+
+
+
+
+
 
 
 
@@ -27714,7 +55428,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       const slice = filteredList.slice(0, visibleCount);
+
+
+
+
+
+
+
+
 
 
 
@@ -27730,7 +55460,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       grid.appendChild(fragment);
+
+
+
+
+
+
+
+
 
 
 
@@ -27746,7 +55492,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       if(filteredList.length > visibleCount) {
+
+
+
+
+
+
+
+
 
 
 
@@ -27762,7 +55524,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
           $("#moreBtn").textContent = `더 보기 (+${Math.min(60, filteredList.length - visibleCount)})`;
+
+
+
+
+
+
+
+
 
 
 
@@ -27778,6 +55556,14 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
           $("#moreWrap").classList.add("hidden");
 
 
@@ -27786,7 +55572,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -27810,7 +55612,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // 판매 현황 요약 패널 갱신
+
+
+
+
+
+
+
+
 
 
 
@@ -27826,7 +55652,23 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
   // 적용된 필터 요약 칩 갱신
+
+
+
+
+
+
+
+
 
 
 
@@ -27850,6 +55692,22 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if(window.lucide) lucide.createIcons();
 
 
@@ -27858,7 +55716,31 @@ function render(){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27890,7 +55772,39 @@ $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 let currentMemoDate = ""; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27914,7 +55828,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     const listEl = $("#allMemosList");
+
+
+
+
+
+
+
+
 
 
 
@@ -27930,7 +55860,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
         const [am, ad] = a.split('/').map(Number);
+
+
+
+
+
+
+
+
 
 
 
@@ -27946,7 +55892,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
         return (bm - am) || (bd - ad);
+
+
+
+
+
+
+
+
 
 
 
@@ -27962,7 +55924,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -27986,7 +55964,31 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     let html = `
+
+
+
+
+
+
+
+
 
 
 
@@ -28002,7 +56004,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             <select id="memoDateSelect" class="ipt flex-1 text-sm font-bold bg-white border-gray-300 py-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -28018,7 +56036,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
                 ${availableDates.map(d => `<option value="${d}" ${d===currentMemoDate?'selected':''}>${d} 메모</option>`).join('')}
+
+
+
+
+
+
+
+
 
 
 
@@ -28034,7 +56068,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             <button id="bulkDeleteMemosBtn" class="px-4 py-2 bg-red-50 text-red-600 border border-red-200 font-bold rounded-lg text-sm hover:bg-red-500 hover:text-white transition-colors">일괄 삭제</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -28050,7 +56100,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     `;
+
+
+
+
+
+
+
+
 
 
 
@@ -28066,7 +56132,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     let filtered = currentMemoDate === "ALL" ? MEMOS.slice().reverse() : MEMOS.filter(m => m.date.startsWith(currentMemoDate + " ")).slice().reverse();
+
+
+
+
+
+
+
+
 
 
 
@@ -28082,7 +56164,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     else {
+
+
+
+
+
+
+
+
 
 
 
@@ -28098,7 +56196,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             html += `
+
+
+
+
+
+
+
+
 
 
 
@@ -28114,7 +56228,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
                 <button onclick="deleteMemo('${m.id}')" class="absolute top-4 right-4 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+
+
+
+
+
+
+
+
 
 
 
@@ -28130,7 +56260,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
                     <span class="font-black text-yellow-700">[${escapeHtml(m.tag)}] ${escapeHtml(m.staff)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -28146,7 +56292,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -28162,7 +56324,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
                 <div class="text-gray-600">${escapeHtml(m.text)}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -28178,7 +56356,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
         });
+
+
+
+
+
+
+
+
 
 
 
@@ -28194,7 +56388,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     html += "</div>";
+
+
+
+
+
+
+
+
 
 
 
@@ -28210,7 +56420,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
 
 
 
@@ -28226,7 +56452,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     $("#bulkDeleteMemosBtn").onclick = async () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -28242,7 +56484,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
         const targetText = currentMemoDate === 'ALL' ? '전체' : `${currentMemoDate} 일자`;
+
+
+
+
+
+
+
+
 
 
 
@@ -28258,7 +56516,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
         try {
+
+
+
+
+
+
+
+
 
 
 
@@ -28274,7 +56548,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+
+
+
+
+
+
+
+
 
 
 
@@ -28290,7 +56580,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             const j = await r.json(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -28306,7 +56612,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             if(currentMemoDate === "ALL") oldData = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -28322,7 +56644,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             const body = { message:"bulk delete memos", content: utf8ToB64(JSON.stringify(oldData, null, 2)), branch: GH.branch, sha: j.sha };
+
+
+
+
+
+
+
+
 
 
 
@@ -28338,7 +56676,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             MEMOS = oldData; alert("🗑️ 일괄 삭제가 완료되었습니다.");
+
+
+
+
+
+
+
+
 
 
 
@@ -28354,7 +56708,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
             render(); currentMemoDate = "ALL"; renderAllMemos();
+
+
+
+
+
+
+
+
 
 
 
@@ -28370,7 +56740,23 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
     };
+
+
+
+
+
+
+
+
 
 
 
@@ -28394,7 +56780,31 @@ function renderAllMemos() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 $("#allMemosBtn").onclick = () => { const _td = new Date(); currentMemoDate = `${_td.getMonth()+1}/${_td.getDate()}`; renderAllMemos(); $("#allMemosModal").classList.remove("hidden"); };
+
+
+
+
+
+
+
+
 
 
 
@@ -28410,7 +56820,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
     if(!checkPat()) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -28426,7 +56852,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -28442,7 +56884,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
         const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+
+
+
+
+
+
+
+
 
 
 
@@ -28458,7 +56916,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
         const j = await r.json(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -28474,7 +56948,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
         oldData = oldData.filter(m => m.id !== memoId);
+
+
+
+
+
+
+
+
 
 
 
@@ -28490,7 +56980,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
         await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -28506,7 +57012,23 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
         if(CURRENT_PRODUCT) { CURRENT_PRODUCT.hasMemo = MEMOS.some(m => m.code === CURRENT_PRODUCT.품번); openDetail(CURRENT_PRODUCT); }
+
+
+
+
+
+
+
+
 
 
 
@@ -28522,6 +57044,14 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
     } catch(e) { alert("메모 삭제 실패"); }
 
 
@@ -28530,7 +57060,31 @@ window.deleteMemo = async (memoId) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28554,7 +57108,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
     if(!checkPat()) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -28570,7 +57140,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
     try {
+
+
+
+
+
+
+
+
 
 
 
@@ -28586,7 +57172,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); 
+
+
+
+
+
+
+
+
 
 
 
@@ -28602,7 +57204,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         const j = await r.json(); 
+
+
+
+
+
+
+
+
 
 
 
@@ -28618,7 +57236,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         oldData = oldData.filter(m => m.id !== trId);
+
+
+
+
+
+
+
+
 
 
 
@@ -28634,7 +57268,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -28650,7 +57300,23 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) window.renderTransfersList();
+
+
+
+
+
+
+
+
 
 
 
@@ -28666,6 +57332,14 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
     } catch(e) { alert("삭제 실패"); }
 
 
@@ -28674,7 +57348,31 @@ window.deleteTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28706,7 +57404,31 @@ window._trFilter = window._trFilter || 'unconfirmed';
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 window.renderTransfers = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -28722,7 +57444,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
     if(!listEl) {
+
+
+
+
+
+
+
+
 
 
 
@@ -28738,7 +57476,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
         modal.id = "transfersModal";
+
+
+
+
+
+
+
+
 
 
 
@@ -28754,7 +57508,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
         modal.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -28770,7 +57540,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
             <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10" style="max-height:90vh">
+
+
+
+
+
+
+
+
 
 
 
@@ -28786,7 +57572,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                     <h2 class="font-black text-lg text-blue-800">🚚 RT 이동요청 목록</h2>
+
+
+
+
+
+
+
+
 
 
 
@@ -28802,7 +57604,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                         <button onclick="exportTransfersToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> 엑셀</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -28818,7 +57636,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                         <button id="closeTransfers" class="p-1.5 hover:bg-gray-100 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+
+
+
+
+
+
+
+
 
 
 
@@ -28834,7 +57668,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -28850,7 +57700,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                     <button onclick="window._trFilter='unconfirmed';window.renderTransfersList()" id="trFilterUnconfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">미확인목록</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -28866,7 +57732,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                     <button onclick="window._trFilter='all';window.renderTransfersList()" id="trFilterAll" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">전체</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -28882,7 +57764,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
                 <div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -28898,7 +57796,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
         document.body.appendChild(modal);
+
+
+
+
+
+
+
+
 
 
 
@@ -28914,7 +57828,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
         listEl = $("#transfersList");
+
+
+
+
+
+
+
+
 
 
 
@@ -28930,7 +57860,23 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
     $("#transfersModal").classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -28946,7 +57892,31 @@ window.renderTransfers = () => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28970,7 +57940,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     const listEl = $("#transfersList");
+
+
+
+
+
+
+
+
 
 
 
@@ -28986,7 +57972,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     // 필터 버튼 스타일
+
+
+
+
+
+
+
+
 
 
 
@@ -29002,7 +58004,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
         const btn = document.getElementById(id);
+
+
+
+
+
+
+
+
 
 
 
@@ -29018,7 +58036,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
         btn.className = window._trFilter === val
+
+
+
+
+
+
+
+
 
 
 
@@ -29034,6 +58068,14 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
             : "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
 
 
@@ -29042,7 +58084,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     });
+
+
+
+
+
+
+
+
 
 
 
@@ -29058,7 +58116,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     if(window._trFilter === 'unconfirmed') filtered = filtered.filter(t => !t.confirmed);
+
+
+
+
+
+
+
+
 
 
 
@@ -29074,7 +58148,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     if(filtered.length === 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -29090,7 +58180,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
                   : window._trFilter === 'confirmed' ? '확인된 이동 요청이 없습니다.'
+
+
+
+
+
+
+
+
 
 
 
@@ -29106,7 +58212,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
         listEl.innerHTML = `<div class='text-center py-10 text-gray-400 font-bold text-sm'>${msg}</div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -29122,7 +58244,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -29138,7 +58276,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     filtered.forEach(t => {
+
+
+
+
+
+
+
+
 
 
 
@@ -29154,7 +58308,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
         html += `
+
+
+
+
+
+
+
+
 
 
 
@@ -29170,7 +58340,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
             <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+
+
+
+
+
+
+
+
 
 
 
@@ -29186,7 +58372,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
                 <span class="font-black text-blue-700 text-base">${escapeHtml(t.code)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -29202,7 +58404,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -29218,7 +58436,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
             <div class="flex flex-wrap gap-2 text-xs font-bold text-gray-600 mb-2.5">
+
+
+
+
+
+
+
+
 
 
 
@@ -29234,7 +58468,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
                 <span class="bg-gray-100 px-2.5 py-1 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+
+
+
+
+
+
+
+
 
 
 
@@ -29250,7 +58500,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -29266,7 +58532,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
             ${!confirmed ? `<button onclick="confirmTransfer('${t.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-black text-sm transition-colors">✅ 확인</button>` : ''}
+
+
+
+
+
+
+
+
 
 
 
@@ -29282,7 +58564,23 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     });
+
+
+
+
+
+
+
+
 
 
 
@@ -29298,6 +58596,14 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
     if(window.lucide) lucide.createIcons();
 
 
@@ -29306,7 +58612,31 @@ window.renderTransfersList = () => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29330,7 +58660,23 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
     if(!checkPat()) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -29346,7 +58692,23 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -29362,7 +58724,23 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         const j = await r.json();
+
+
+
+
+
+
+
+
 
 
 
@@ -29378,7 +58756,23 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         const idx = data.findIndex(m => m.id === trId);
+
+
+
+
+
+
+
+
 
 
 
@@ -29394,7 +58788,23 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         const body = { message:"confirm transfer", content: utf8ToB64(JSON.stringify(data, null, 2)), branch: GH.branch, sha: j.sha };
+
+
+
+
+
+
+
+
 
 
 
@@ -29410,7 +58820,23 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
         TRANSFERS = data;
+
+
+
+
+
+
+
+
 
 
 
@@ -29426,6 +58852,14 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
     } catch(e) { alert("처리 실패: " + e.message); }
 
 
@@ -29434,7 +58868,31 @@ window.confirmTransfer = async (trId) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29458,7 +58916,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
     if(!checkPat()) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -29474,7 +58948,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
     const confirmedCount = TRANSFERS.filter(t => !!t.confirmed).length;
+
+
+
+
+
+
+
+
 
 
 
@@ -29490,7 +58980,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
     if(!confirm(msg)) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -29506,7 +59012,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
         const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -29522,7 +59044,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
         const j = await r.json();
+
+
+
+
+
+
+
+
 
 
 
@@ -29538,7 +59076,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
         await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -29554,7 +59108,23 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
         window.renderTransfersList();
+
+
+
+
+
+
+
+
 
 
 
@@ -29570,7 +59140,31 @@ window.deleteAllTransfers = async () => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29594,7 +59188,23 @@ const _salesCache = new Map();
 
 
 
+
+
+
+
+
+
+
+
 // SALES_HISTORY 로드 후 캐시 초기화용
+
+
+
+
+
+
+
+
 
 
 
@@ -29610,7 +59220,23 @@ function clearSalesCache() { _salesCache.clear(); }
 
 
 
+
+
+
+
+
+
+
+
 function getSalesSummary(code) {
+
+
+
+
+
+
+
+
 
 
 
@@ -29626,7 +59252,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -29642,6 +59284,14 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
     _salesCache.set(code, empty); return empty;
 
 
@@ -29650,7 +59300,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -29666,7 +59332,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   const today = new Date(); today.setHours(0,0,0,0);
+
+
+
+
+
+
+
+
 
 
 
@@ -29682,7 +59364,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   for(let date in history) {
+
+
+
+
+
+
+
+
 
 
 
@@ -29698,7 +59396,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
     const dayData = history[date];
+
+
+
+
+
+
+
+
 
 
 
@@ -29714,7 +59428,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
     if(typeof dayData === 'number') { qty = dayData; }
+
+
+
+
+
+
+
+
 
 
 
@@ -29730,7 +59460,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
       for(let size in dayData) {
+
+
+
+
+
+
+
+
 
 
 
@@ -29746,7 +59492,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
           // 부산점 카운팅: '부산(김종훈)'과 '부산' 키가 동시에 있으면 최대값만 (중복 방지)
+
+
+
+
+
+
+
+
 
 
 
@@ -29762,7 +59524,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
           const busanKJ = sd['부산(김종훈)'] || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -29778,7 +59556,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
           qty += Math.max(busanKJ, busanPOS);
+
+
+
+
+
+
+
+
 
 
 
@@ -29794,7 +59588,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -29810,7 +59620,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
     all += qty;
+
+
+
+
+
+
+
+
 
 
 
@@ -29826,7 +59652,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
     if(diffDays <= 7) d7 += qty;
+
+
+
+
+
+
+
+
 
 
 
@@ -29842,7 +59684,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   const avgDay = Math.round((d30/30)*10)/10;
+
+
+
+
+
+
+
+
 
 
 
@@ -29858,7 +59716,23 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   const result = { d7, d30, all, avgDay, speed };
+
+
+
+
+
+
+
+
 
 
 
@@ -29874,6 +59748,14 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
   return result;
 
 
@@ -29882,7 +59764,31 @@ function getSalesSummary(code) {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -29906,7 +59812,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   CURRENT_PRODUCT = p;
+
+
+
+
+
+
+
+
 
 
 
@@ -29922,7 +59844,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   
+
+
+
+
+
+
+
+
 
 
 
@@ -29938,7 +59876,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     <div class="flex gap-3 sm:gap-4 items-center">
+
+
+
+
+
+
+
+
 
 
 
@@ -29954,7 +59908,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         <div class="min-w-0 flex-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -29970,7 +59940,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <div class="text-[17px] sm:text-[20px] font-black text-gray-900 leading-tight line-clamp-2 break-keep">${escapeHtml(p.품명)}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -29986,7 +59972,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30002,7 +60004,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   `;
+
+
+
+
+
+
+
+
 
 
 
@@ -30018,7 +60036,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const productMemos = MEMOS.filter(m => m.code === p.품번);
+
+
+
+
+
+
+
+
 
 
 
@@ -30034,7 +60068,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   if(productMemos.length > 0) {
+
+
+
+
+
+
+
+
 
 
 
@@ -30050,7 +60100,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           detailMemoHtml += `
+
+
+
+
+
+
+
+
 
 
 
@@ -30066,7 +60132,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
              <button onclick="deleteMemo('${m.id}')" class="absolute top-2.5 right-2.5 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+
+
+
+
+
+
+
+
 
 
 
@@ -30082,7 +60164,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
              <div class="text-yellow-900 pr-6">${escapeHtml(m.text)}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30098,6 +60196,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       });
 
 
@@ -30106,7 +60212,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
 
 
 
@@ -30130,7 +60252,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   $("#detailBody").innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -30146,7 +60292,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         <table class="w-full min-w-[500px] text-sm sm:text-base bg-white rounded-xl border-hidden shadow-sm">
+
+
+
+
+
+
+
+
 
 
 
@@ -30162,7 +60324,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <tr>
+
+
+
+
+
+
+
+
 
 
 
@@ -30178,7 +60356,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <th class="py-3 px-2 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -30194,7 +60388,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">물류 RT</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -30210,7 +60420,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <th class="py-3 px-2 text-center w-[20%]">신사 RT</th>
+
+
+
+
+
+
+
+
 
 
 
@@ -30226,7 +60452,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </thead>
+
+
+
+
+
+
+
+
 
 
 
@@ -30242,7 +60484,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
+
+
+
+
+
+
+
+
 
 
 
@@ -30258,6 +60516,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
 
 
@@ -30266,7 +60532,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30290,6 +60580,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
 
 
@@ -30298,7 +60596,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30322,7 +60644,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -30338,7 +60676,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.center}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -30354,7 +60708,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.sinsa}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -30370,7 +60740,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             </tr>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -30386,6 +60772,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </tbody>
 
 
@@ -30394,7 +60788,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </table>
+
+
+
+
+
+
+
+
 
 
 
@@ -30418,7 +60828,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   `;
+
+
+
+
+
+
+
+
 
 
 
@@ -30434,11 +60868,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _memoStaffList = ["김종훈","김기태","김민정","임경준","박서영"];
 
 
 
+
+
+
+
   const _lastStaff = localStorage.getItem('rcm_last_memo_staff') || "";
+
+
+
+
+
+
+
+
 
 
 
@@ -30454,7 +60908,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       <div class="flex gap-1.5 items-center">
+
+
+
+
+
+
+
+
 
 
 
@@ -30470,7 +60940,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <option value="" disabled ${_lastStaff ? '' : 'selected'}>작성자</option>
+
+
+
+
+
+
+
+
 
 
 
@@ -30486,7 +60972,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           </select>
+
+
+
+
+
+
+
+
 
 
 
@@ -30502,7 +61004,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <option value="고객요청">고객요청</option>
+
+
+
+
+
+
+
+
 
 
 
@@ -30518,7 +61036,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <option value="기타">기타</option>
+
+
+
+
+
+
+
+
 
 
 
@@ -30534,7 +61068,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           <input type="text" id="memoText" class="ipt flex-1 text-xs px-3 py-1.5 rounded-lg border border-gray-200 min-w-0" placeholder="메모 내용">
+
+
+
+
+
+
+
+
 
 
 
@@ -30550,7 +61100,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30566,7 +61132,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   `;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30590,7 +61180,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const targetUrl = p.shopNo ? `https://racement.co.kr/product-detail?productNo=${p.shopNo}` : "";
+
+
+
+
+
+
+
+
 
 
 
@@ -30606,7 +61212,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       stickyFooterHtml += `
+
+
+
+
+
+
+
+
 
 
 
@@ -30622,7 +61244,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <span class="text-[11px] font-bold text-gray-400 shrink-0">🖼️</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -30638,7 +61276,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||''))}" target="_blank" class="px-2 py-1.5 text-xs font-black bg-green-50 hover:bg-green-100 text-green-600 rounded-lg shrink-0 no-underline" title="네이버쇼핑 검색">🔍N</a>
+
+
+
+
+
+
+
+
 
 
 
@@ -30654,7 +61308,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <label class="px-2 py-1.5 text-xs font-black bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg shrink-0 cursor-pointer" title="파일 선택">📁<input type="file" id="quickImgFile" accept="image/*" class="hidden"></label>
+
+
+
+
+
+
+
+
 
 
 
@@ -30670,7 +61340,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <button id="quickImgSave" class="px-3 py-1.5 text-xs font-black bg-gray-700 hover:bg-black text-white rounded-lg shrink-0">저장</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -30686,7 +61372,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30702,7 +61404,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           <div id="quickImgMsg" class="text-[11px] font-bold h-3 mt-0.5"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30718,7 +61436,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30742,7 +61484,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   if(!modalContentWrap) {
+
+
+
+
+
+
+
+
 
 
 
@@ -30758,7 +61516,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       modalContentWrap.className = "modal-content relative bg-white w-[96%] max-w-2xl mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 max-h-[88vh]";
+
+
+
+
+
+
+
+
 
 
 
@@ -30774,7 +61548,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       $("#detailModal").innerHTML = `<div class="modal-outer absolute inset-0 cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden');document.body.style.overflow=''"></div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -30790,7 +61580,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -30814,7 +61628,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white shrink-0 shadow-sm z-10">
+
+
+
+
+
+
+
+
 
 
 
@@ -30830,6 +61660,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           <button id="closeDetail" class="p-1.5 text-gray-400 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-full shrink-0 transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden');document.body.style.overflow=''"><i data-lucide="x" class="w-5 h-5"></i></button>
 
 
@@ -30838,7 +61676,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30854,7 +61708,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           <div id="detailBody" class="p-3 pb-1"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30870,7 +61740,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30886,7 +61772,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           ${stickyFooterHtml}
+
+
+
+
+
+
+
+
 
 
 
@@ -30902,7 +61804,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   `;
+
+
+
+
+
+
+
+
 
 
 
@@ -30918,7 +61836,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _priceHtml = p.currentPromoPrice
+
+
+
+
+
+
+
+
 
 
 
@@ -30934,7 +61868,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     : `<span class="font-black text-sm text-gray-800">${krw(p.소비자가)}</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -30950,7 +61900,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     <div class="flex gap-3 items-center">
+
+
+
+
+
+
+
+
 
 
 
@@ -30966,7 +61932,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         <div class="min-w-0 flex-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -30982,7 +61964,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <div class="text-[16px] sm:text-[18px] font-black text-gray-900 leading-tight break-keep">${escapeHtml(p.품명)}</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -30998,7 +61996,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <span class="text-blue-600 font-bold text-xs">${escapeHtml(p.품번)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -31014,7 +62028,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -31030,6 +62060,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     </div>
 
 
@@ -31038,7 +62076,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   `;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -31062,7 +62124,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _sizeSales30Busan = {};  // 부산 전용
+
+
+
+
+
+
+
+
 
 
 
@@ -31078,7 +62156,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _sizeSalesToday = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -31094,7 +62188,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     const _sh = SALES_HISTORY.items[p.품번];
+
+
+
+
+
+
+
+
 
 
 
@@ -31110,7 +62220,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     const _todayKey = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -31126,7 +62252,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const diffDays = Math.floor((_today - new Date(date)) / 86400000);
+
+
+
+
+
+
+
+
 
 
 
@@ -31142,7 +62284,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const dayData = _sh[date];
+
+
+
+
+
+
+
+
 
 
 
@@ -31158,7 +62316,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         for (let size in dayData) {
+
+
+
+
+
+
+
+
 
 
 
@@ -31174,7 +62348,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             const sd = dayData[size];
+
+
+
+
+
+
+
+
 
 
 
@@ -31190,7 +62380,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -31206,7 +62412,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               _sizeSales30Busan[size] = (_sizeSales30Busan[size] || 0) + bq;
+
+
+
+
+
+
+
+
 
 
 
@@ -31222,7 +62444,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + bq;
+
+
+
+
+
+
+
+
 
 
 
@@ -31238,7 +62476,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -31254,7 +62508,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               const qty = sd[mgr] || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -31270,7 +62540,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 // 부산 제외 (신사, 물류 등)
+
+
+
+
+
+
+
+
 
 
 
@@ -31286,7 +62572,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               }
+
+
+
+
+
+
+
+
 
 
 
@@ -31302,7 +62604,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -31318,7 +62636,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             const qty = dayData[size] || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -31334,7 +62668,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           }
+
+
+
+
+
+
+
+
 
 
 
@@ -31350,7 +62700,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -31366,7 +62732,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -31390,7 +62780,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     <div class="mb-2 flex gap-4 text-xs font-bold text-gray-500 px-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -31406,7 +62812,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         <span>물류 <b class="text-gray-700 text-sm">${p.centerTotal}</b></span>
+
+
+
+
+
+
+
+
 
 
 
@@ -31422,7 +62844,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -31438,7 +62876,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         <table class="w-full text-sm bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+
+
+
+
+
+
+
+
 
 
 
@@ -31454,7 +62908,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <tr>
+
+
+
+
+
+
+
+
 
 
 
@@ -31470,7 +62940,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">🏪 부산<br><span class="font-normal text-[10px] text-blue-400">30일</span></th>
+
+
+
+
+
+
+
+
 
 
 
@@ -31486,7 +62972,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
+
+
+
+
+
+
+
+
 
 
 
@@ -31502,7 +63004,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-400 font-normal">(${p.sinsaTotal})</span></th>
+
+
+
+
+
+
+
+
 
 
 
@@ -31518,7 +63036,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </thead>
+
+
+
+
+
+
+
+
 
 
 
@@ -31534,7 +63068,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
+
+
+
+
+
+
+
+
 
 
 
@@ -31550,7 +63100,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             const _s30a = _sizeSales30Etc[s.size] || 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -31566,6 +63132,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
 
 
@@ -31574,7 +63148,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 : `<span class="text-gray-300 text-sm">-</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -31590,7 +63180,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
+
+
+
+
+
+
+
+
 
 
 
@@ -31606,7 +63212,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-amber-50/60':''}">
+
+
+
+
+
+
+
+
 
 
 
@@ -31622,7 +63244,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-300'}">${_s30b>0?_s30b:'-'}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -31638,7 +63276,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <td class="py-1 px-1 text-center bg-blue-50/30 border-r border-gray-100">
+
+
+
+
+
+
+
+
 
 
 
@@ -31654,7 +63308,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                         <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -31670,7 +63340,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -31686,7 +63372,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <td class="py-1.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
+
+
+
+
+
+
+
+
 
 
 
@@ -31702,7 +63404,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             </tr>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -31718,7 +63436,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </tbody>
+
+
+
+
+
+
+
+
 
 
 
@@ -31734,7 +63468,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -31758,7 +63508,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // ── 판매 현황 패널 (detailBody 아래에 append) ──────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -31774,7 +63548,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _totalStock = p.sizes.reduce((s, sz) => s + (sz.busan||0) + (sz.center||0) + (sz.sinsa||0), 0);
+
+
+
+
+
+
+
+
 
 
 
@@ -31790,7 +63580,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _hasData = _sales.all > 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -31806,7 +63612,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 3 ? 'text-red-500' : _sales.d7 >= 1 ? 'text-blue-500' : 'text-gray-400';
+
+
+
+
+
+
+
+
 
 
 
@@ -31822,7 +63644,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _maxSales = Math.max(_sales.all, 1);
+
+
+
+
+
+
+
+
 
 
 
@@ -31838,7 +63676,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _bar30 = Math.min(100, Math.round((_sales.d30 / _maxSales) * 100));
+
+
+
+
+
+
+
+
 
 
 
@@ -31862,7 +63716,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const _salesDiv = document.createElement("div");
+
+
+
+
+
+
+
+
 
 
 
@@ -31878,7 +63756,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   _salesDiv.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -31894,7 +63788,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       <div class="flex justify-between items-center mb-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -31910,7 +63820,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -31926,7 +63852,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -31942,7 +63884,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -31958,7 +63916,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         ? `<div class="text-[11px] text-gray-400 font-bold text-center py-1.5">판매 이력 없음</div>`
+
+
+
+
+
+
+
+
 
 
 
@@ -31974,7 +63948,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <div class="flex items-center gap-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -31990,7 +63980,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -32006,7 +64012,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -32022,7 +64044,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -32038,7 +64076,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">30일</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -32054,7 +64108,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
                 <div class="h-2 rounded-full bg-blue-400" style="width:${_bar30}%"></div>
+
+
+
+
+
+
+
+
 
 
 
@@ -32070,6 +64140,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <span class="text-[12px] font-black text-blue-700 w-9 text-right shrink-0">${_sales.d30}개</span>
 
 
@@ -32078,7 +64156,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -32094,7 +64188,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               <span class="text-[10px] text-gray-500 font-bold">일평균 <strong class="text-gray-800">${_sales.avgDay}개</strong></span>
+
+
+
+
+
+
+
+
 
 
 
@@ -32110,7 +64220,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               ${_daysLeft !== null ? `<span class="text-[10px] font-black ${_daysColor}">소진까지 약 <strong>${_daysLeft}일</strong></span>` : ''}
+
+
+
+
+
+
+
+
 
 
 
@@ -32126,7 +64252,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           </div>`
+
+
+
+
+
+
+
+
 
 
 
@@ -32142,7 +64284,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     </div>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -32166,7 +64324,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // ── DP 관리 패널 ────────────────────────────────────────────────────
+
+
+
+
+
+
+
+
 
 
 
@@ -32182,7 +64364,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   const _dpDiv = document.createElement("div");
+
+
+
+
+
+
+
+
 
 
 
@@ -32198,7 +64396,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   _dpDiv.id = "dpPanel";
+
+
+
+
+
+
+
+
 
 
 
@@ -32214,7 +64428,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     const dpSizes = getDPSizes(p.품번);
+
+
+
+
+
+
+
+
 
 
 
@@ -32230,7 +64460,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const sz = String(s.size).trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -32246,7 +64492,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const isSoldOut = s.busan <= 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -32262,7 +64524,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         ? (isSoldOut ? "bg-orange-100 border-orange-400 text-orange-700" : "bg-violet-600 border-violet-600 text-white")
+
+
+
+
+
+
+
+
 
 
 
@@ -32278,7 +64556,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const icon = isDPed ? (isSoldOut ? "⚠️" : "🏷️") : "□";
+
+
+
+
+
+
+
+
 
 
 
@@ -32294,7 +64588,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       return `<button onclick="window._toggleDPBtn(this,'${p.품번}','${sz}')"
+
+
+
+
+
+
+
+
 
 
 
@@ -32310,7 +64620,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         data-dp-size="${sz}" data-code="${p.품번}" data-active="${isDPed?'1':'0'}">
+
+
+
+
+
+
+
+
 
 
 
@@ -32326,7 +64652,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       </button>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -32342,7 +64684,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     _dpDiv.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -32358,7 +64716,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         <div class="flex items-center justify-between mb-2.5">
+
+
+
+
+
+
+
+
 
 
 
@@ -32374,6 +64748,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             <span class="text-[10px] font-normal text-violet-400">눌러서 등록/해제</span>
 
 
@@ -32382,7 +64764,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           </span>
+
+
+
+
+
+
+
+
 
 
 
@@ -32398,7 +64796,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
             ${dpSizes.length > 0 ? `🏷️ DP 중: ${dpSizes.join('·')}` : '미DP'}
+
+
+
+
+
+
+
+
 
 
 
@@ -32414,7 +64828,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -32430,6 +64860,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       </div>`;
 
 
@@ -32438,7 +64876,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   };
+
+
+
+
+
+
+
+
 
 
 
@@ -32454,7 +64908,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   window._dpRenderFn = _renderDPPanel;
+
+
+
+
+
+
+
+
 
 
 
@@ -32470,7 +64940,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   // ── 위치찾기: 상품 위치(도서관식) 표시 + (ADMIN) 배정 ────────────────────
+
+
+
+
 
 
 
@@ -32478,7 +64960,15 @@ function openDetail(p){
 
 
 
+
+
+
+
   _locDiv.className = "px-3 pb-3";
+
+
+
+
 
 
 
@@ -32486,11 +64976,23 @@ function openDetail(p){
 
 
 
+
+
+
+
     const asn = LOCATIONS.assignments[p.품번];
 
 
 
+
+
+
+
     const zone = asn ? LOCATIONS.zones.find(z => z.id === asn.zoneId) : null;
+
+
+
+
 
 
 
@@ -32502,7 +65004,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     const zoneOptionsHtml = () => {
+
+
+
+
 
 
 
@@ -32510,7 +65024,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         LOCATIONS.zones.forEach(z => { (groups[z.group||'기타'] = groups[z.group||'기타']||[]).push(z); });
+
+
+
+
 
 
 
@@ -32518,7 +65040,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         for(const g in groups){
+
+
+
+
 
 
 
@@ -32526,7 +65056,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                 `<option value="${z.id}" ${asn && asn.zoneId===z.id ? 'selected':''}>${escapeHtml(z.label)}</option>`).join('') + `</optgroup>`;
+
+
+
+
 
 
 
@@ -32534,7 +65072,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         return html;
+
+
+
+
 
 
 
@@ -32546,7 +65092,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
+
+
+
+
 
 
 
@@ -32554,11 +65112,23 @@ function openDetail(p){
 
 
 
+
+
+
+
         <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치</span>
 
 
 
+
+
+
+
         ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-400 hover:text-gray-700">구역 관리</button>` : ''}
+
+
+
+
 
 
 
@@ -32570,7 +65140,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
     if(zone){
+
+
+
+
 
 
 
@@ -32578,7 +65160,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             <div style="width:64px;height:55px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;position:relative;flex-shrink:0;background:#fff;">
+
+
+
+
 
 
 
@@ -32586,11 +65176,23 @@ function openDetail(p){
 
 
 
+
+
+
+
                 <div style="position:absolute;left:${zone.x}%;top:${zone.y}%;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#ff5a1f;border:1.5px solid #fff;"></div>
 
 
 
+
+
+
+
             </div>
+
+
+
+
 
 
 
@@ -32598,7 +65200,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                 <div class="font-black text-sm text-gray-800 group-hover:underline">${escapeHtml(zone.label)}</div>
+
+
+
+
 
 
 
@@ -32606,7 +65216,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                 <div class="text-[10px] text-gray-400 mt-0.5">탭하면 도면에서 크게 보기</div>
+
+
+
+
 
 
 
@@ -32614,7 +65232,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         </div>`;
+
+
+
+
 
 
 
@@ -32622,11 +65248,27 @@ function openDetail(p){
 
 
 
+
+
+
+
         html += `<div class="text-xs text-gray-400 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -32638,7 +65280,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         html += `<div class="flex items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
+
+
+
+
 
 
 
@@ -32646,7 +65296,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             <select id="locSlotSel" class="ipt text-xs py-1.5 px-2 ${zone && zone.slots && zone.slots.length ? '' : 'hidden'}" style="max-width:110px;">
+
+
+
+
 
 
 
@@ -32654,7 +65312,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             </select>
+
+
+
+
 
 
 
@@ -32662,11 +65328,27 @@ function openDetail(p){
 
 
 
+
+
+
+
         </div>`;
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -32678,7 +65360,19 @@ function openDetail(p){
 
 
 
+
+
+
+
     _locDiv.innerHTML = html;
+
+
+
+
+
+
+
+
 
 
 
@@ -32690,7 +65384,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         // _locDiv가 아직 문서에 붙기 전(최초 렌더)일 수 있어 document 전역 $() 대신 _locDiv 안에서만 탐색
+
+
+
+
 
 
 
@@ -32698,7 +65400,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         const slotSel0 = _locDiv.querySelector("#locSlotSel");
+
+
+
+
 
 
 
@@ -32706,7 +65416,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         zoneSel.onchange = () => {
+
+
+
+
 
 
 
@@ -32714,7 +65432,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             if(z && z.slots && z.slots.length){
+
+
+
+
 
 
 
@@ -32722,7 +65448,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                 slotSel0.classList.remove('hidden');
+
+
+
+
 
 
 
@@ -32730,7 +65464,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         };
+
+
+
+
 
 
 
@@ -32738,7 +65480,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             if(!checkPat()) return;
+
+
+
+
 
 
 
@@ -32746,7 +65496,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             const slot = slotSel0.classList.contains('hidden') ? null : slotSel0.value;
+
+
+
+
 
 
 
@@ -32754,7 +65512,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             const ok = await saveLocations(server => {
+
+
+
+
 
 
 
@@ -32762,7 +65528,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                 if(zoneId) assignments[p.품번] = slot ? { zoneId, slot } : { zoneId };
+
+
+
+
 
 
 
@@ -32770,7 +65544,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                 return { zones: server.zones, assignments };
+
+
+
+
 
 
 
@@ -32778,7 +65560,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             btn.disabled = false; btn.textContent = '저장';
+
+
+
+
 
 
 
@@ -32786,7 +65576,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         };
+
+
+
+
 
 
 
@@ -32794,7 +65592,15 @@ function openDetail(p){
 
 
 
+
+
+
+
   };
+
+
+
+
 
 
 
@@ -32802,7 +65608,15 @@ function openDetail(p){
 
 
 
+
+
+
+
   window._locRenderFn = _renderLocPanel;
+
+
+
+
 
 
 
@@ -32814,7 +65628,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
   // ── 실재고 보정 패널 (ADMIN 전용, 전체 사이즈) ─────────────────────────
+
+
+
+
 
 
 
@@ -32822,7 +65648,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       const _soDiv = document.createElement("div");
+
+
+
+
 
 
 
@@ -32830,7 +65664,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       const _soBtns = p.sizes.map(s => {
+
+
+
+
 
 
 
@@ -32838,7 +65680,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const ov = s._override;
+
+
+
+
 
 
 
@@ -32846,7 +65696,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             ? (s._overrideStale ? "bg-amber-100 border-amber-400 text-amber-800" : "bg-emerald-50 border-emerald-500 text-emerald-700")
+
+
+
+
 
 
 
@@ -32854,7 +65712,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const label = ov
+
+
+
+
 
 
 
@@ -32862,7 +65728,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             : `${sz}<span class="block text-[10px] text-gray-400 leading-tight">${s.busan}</span>`;
+
+
+
+
 
 
 
@@ -32870,7 +65744,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       }).join('');
+
+
+
+
 
 
 
@@ -32878,7 +65760,15 @@ function openDetail(p){
 
 
 
+
+
+
+
         <div class="rounded-xl border border-blue-200 bg-blue-50/40 p-3">
+
+
+
+
 
 
 
@@ -32886,7 +65776,15 @@ function openDetail(p){
 
 
 
+
+
+
+
             <span class="text-xs font-black text-blue-700 flex items-center gap-1.5">📦 실재고 보정 <span class="text-[10px] font-normal text-blue-400">시스템과 실제가 다르면 눌러서 수정</span></span>
+
+
+
+
 
 
 
@@ -32894,7 +65792,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           </div>
+
+
+
+
 
 
 
@@ -32902,7 +65808,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           <div class="text-[10px] text-gray-400 mt-2">⚠️ = 보정 후 시스템값이 바뀜(재확인) · 입력창 빈칸 저장 시 보정 해제</div>
+
+
+
+
 
 
 
@@ -32910,11 +65824,35 @@ function openDetail(p){
 
 
 
+
+
+
+
       $("#detailBody").appendChild(_soDiv);
 
 
 
+
+
+
+
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -32946,7 +65884,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   $("#addMemoBtn").onclick = async () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -32962,7 +65924,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const staff = $("#memoStaff").value; 
+
+
+
+
+
+
+
+
 
 
 
@@ -32978,7 +65956,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const text = $("#memoText").value.trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -32994,6 +65988,14 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       if(!staff) { msg.style.color="red"; msg.textContent="작성자를 선택하세요."; return; }
 
 
@@ -33002,7 +66004,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       if(!text) { msg.style.color="red"; msg.textContent="내용을 입력하세요."; return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -33026,7 +66044,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       try {
+
+
+
+
+
+
+
+
 
 
 
@@ -33042,7 +66084,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           const d = new Date();
+
+
+
+
+
+
+
+
 
 
 
@@ -33058,7 +66116,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           const newMemo = { id: "memo_" + Date.now(), code: p.품번, date: shortDate, product: p.품명, shopNo: p.shopNo, staff, tag, text };
+
+
+
+
+
+
+
+
 
 
 
@@ -33070,7 +66144,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           // 로드 실패 시 저장 중단(빈 배열로 기존 메모 전체 덮어쓰기 방지),
+
+
+
+
 
 
 
@@ -33078,7 +66160,19 @@ function openDetail(p){
 
 
 
+
+
+
+
           let oldData = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -33094,7 +66188,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+
+
+
+
+
+
+
+
 
 
 
@@ -33110,7 +66220,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               let serverData = [], sha;
+
+
+
+
+
+
+
+
 
 
 
@@ -33122,7 +66248,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   const j = await r.json(); sha = j.sha;
+
+
+
+
 
 
 
@@ -33130,7 +66264,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g,''))))); _ok = true; } catch(e2) {}
+
+
+
+
 
 
 
@@ -33138,7 +66280,19 @@ function openDetail(p){
 
 
 
+
+
+
+
               }
+
+
+
+
+
+
+
+
 
 
 
@@ -33154,7 +66308,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               const body = { message:"add memo", content: utf8ToB64(JSON.stringify(serverData, null, 2)), branch: GH.branch, ...(sha && {sha}) };
+
+
+
+
+
+
+
+
 
 
 
@@ -33170,7 +66340,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               if(put.status === 409 || put.status === 422) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -33186,7 +66372,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
               oldData = serverData; break;
+
+
+
+
+
+
+
+
 
 
 
@@ -33202,7 +66404,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           if(!oldData) throw new Error('저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
+
+
+
+
+
+
+
+
 
 
 
@@ -33218,7 +66436,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
           localStorage.setItem('rcm_last_memo_staff', staff);
+
+
+
+
+
+
+
+
 
 
 
@@ -33234,7 +66468,23 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       } catch(e) { msg.style.color="red"; msg.textContent = (e && e.message && e.message.indexOf("덮어쓰기")>=0) ? e.message : "메모 저장 실패!"; }
+
+
+
+
+
+
+
+
 
 
 
@@ -33258,7 +66508,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if ($("#quickImgSave")) {
+
+
+
+
+
+
+
+
 
 
 
@@ -33270,7 +66544,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       const imgKey = p.shopNo || p.품번;
+
+
+
+
 
 
 
@@ -33278,11 +66560,23 @@ function openDetail(p){
 
 
 
+
+
+
+
       const pat = getPat();
 
 
 
+
+
+
+
       const ghBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
+
+
+
+
 
 
 
@@ -33294,7 +66588,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       async function uploadAndSave(imgB64, ext, tempUrl) {
+
+
+
+
 
 
 
@@ -33302,7 +66608,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const imgPath = `product-images/${safeKey}.${ext}`;
+
+
+
+
 
 
 
@@ -33310,7 +66624,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const existRes = await fetch(imgFileApi + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+
+
+
+
 
 
 
@@ -33318,7 +66640,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const imgPutRes = await fetch(imgFileApi, {
+
+
+
+
 
 
 
@@ -33326,7 +66656,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+
+
+
+
 
 
 
@@ -33334,7 +66672,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           });
+
+
+
+
 
 
 
@@ -33342,7 +66688,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const finalUrl = `${pagesBase}/${safeKey}.${ext}`;
+
+
+
+
 
 
 
@@ -33350,7 +66704,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const apiBase = `${ghBase}/contents/images.json`;
+
+
+
+
 
 
 
@@ -33358,7 +66720,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           let latestImages = null;
+
+
+
+
 
 
 
@@ -33366,7 +66736,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+
+
+
+
 
 
 
@@ -33374,7 +66752,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               const meta = await metaRes.json();
+
+
+
+
 
 
 
@@ -33382,7 +66768,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               // UTF-8(한글 키) 안전 디코딩 — bare atob는 한글에서 깨져 전체 유실의 원인이 됨
+
+
+
+
 
 
 
@@ -33390,7 +66784,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               // 기존 목록을 못 읽으면 빈 맵으로 덮어써 전체가 날아가므로 저장 중단
+
+
+
+
 
 
 
@@ -33398,7 +66800,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+
+
+
+
 
 
 
@@ -33406,7 +66816,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               parsed[imgKey] = finalUrl;
+
+
+
+
 
 
 
@@ -33414,7 +66832,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   method:"PUT",
+
+
+
+
 
 
 
@@ -33422,7 +66848,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
+
+
+
+
 
 
 
@@ -33430,7 +66864,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
+
+
+
+
 
 
 
@@ -33438,7 +66880,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               latestImages = parsed; break;
+
+
+
+
 
 
 
@@ -33446,7 +66896,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           if(!latestImages) throw new Error('images.json 저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
+
+
+
+
 
 
 
@@ -33454,7 +66912,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           // GitHub Pages 서빙 딜레이 동안 blob URL로 즉시 표시
+
+
+
+
 
 
 
@@ -33462,7 +66928,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           sessionStorage.removeItem(CACHE_KEY);
+
+
+
+
 
 
 
@@ -33470,7 +66944,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           msgEl.textContent = "✓ 저장 완료! (GitHub Pages에 영구 보관)";
+
+
+
+
 
 
 
@@ -33478,11 +66960,27 @@ function openDetail(p){
 
 
 
+
+
+
+
           setTimeout(()=>{ openDetail(p); }, 600);
 
 
 
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -33494,7 +66992,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           return new Promise((resolve, reject) => {
+
+
+
+
 
 
 
@@ -33502,7 +67008,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               const reader = new FileReader();
+
+
+
+
 
 
 
@@ -33510,7 +67024,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               reader.onerror = reject;
+
+
+
+
 
 
 
@@ -33518,11 +67040,27 @@ function openDetail(p){
 
 
 
+
+
+
+
           });
 
 
 
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -33534,7 +67072,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           if(!file || !file.type.startsWith('image/')) return;
+
+
+
+
 
 
 
@@ -33542,7 +67088,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           msgEl.style.color = ""; msgEl.textContent = "파일 읽는 중...";
+
+
+
+
 
 
 
@@ -33550,7 +67104,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               const {b64, ext} = await fileToB64(file);
+
+
+
+
 
 
 
@@ -33558,7 +67120,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               await uploadAndSave(b64, ext, tempUrl);
+
+
+
+
 
 
 
@@ -33566,7 +67136,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               delete IMAGES[p.shopNo || p.품번];
+
+
+
+
 
 
 
@@ -33574,11 +67152,27 @@ function openDetail(p){
 
 
 
+
+
+
+
           }
 
 
 
+
+
+
+
       }
+
+
+
+
+
+
+
+
 
 
 
@@ -33590,7 +67184,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       $("#quickImgSave").onclick = async () => {
+
+
+
+
 
 
 
@@ -33598,7 +67200,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           const inputUrl = $("#quickImgUrl").value.trim(); if (!inputUrl) return;
+
+
+
+
 
 
 
@@ -33606,7 +67216,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           try {
+
+
+
+
 
 
 
@@ -33614,7 +67232,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               try {
+
+
+
+
 
 
 
@@ -33622,7 +67248,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   if(imgResp.ok) {
+
+
+
+
 
 
 
@@ -33630,7 +67264,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : ct.includes('gif') ? 'gif' : 'jpg';
+
+
+
+
 
 
 
@@ -33638,7 +67280,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       const bytes = new Uint8Array(buf);
+
+
+
+
 
 
 
@@ -33646,7 +67296,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       for(let i=0;i<bytes.byteLength;i++) binary += String.fromCharCode(bytes[i]);
+
+
+
+
 
 
 
@@ -33654,7 +67312,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   }
+
+
+
+
 
 
 
@@ -33662,7 +67328,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               if(imgB64) {
+
+
+
+
 
 
 
@@ -33670,7 +67344,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               } else {
+
+
+
+
 
 
 
@@ -33678,7 +67360,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   const apiBase = `${ghBase}/contents/images.json`;
+
+
+
+
 
 
 
@@ -33686,7 +67376,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   let latestImages = null;
+
+
+
+
 
 
 
@@ -33694,7 +67392,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+
+
+
+
 
 
 
@@ -33702,7 +67408,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       const meta = await metaRes.json();
+
+
+
+
 
 
 
@@ -33710,7 +67424,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+
+
+
+
 
 
 
@@ -33718,7 +67440,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                           throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+
+
+
+
 
 
 
@@ -33726,7 +67456,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       parsed[imgKey] = inputUrl;
+
+
+
+
 
 
 
@@ -33734,7 +67472,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                           method:"PUT",
+
+
+
+
 
 
 
@@ -33742,7 +67488,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                           body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
+
+
+
+
 
 
 
@@ -33750,7 +67504,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
+
+
+
+
 
 
 
@@ -33758,7 +67520,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                       latestImages = parsed; break;
+
+
+
+
 
 
 
@@ -33766,7 +67536,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   if(!latestImages) throw new Error('images.json 저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
+
+
+
+
 
 
 
@@ -33774,7 +67552,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   sessionStorage.removeItem(CACHE_KEY);
+
+
+
+
 
 
 
@@ -33782,7 +67568,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   msgEl.textContent = "✓ 저장 완료! (URL 저장 — CORS 제한)";
+
+
+
+
 
 
 
@@ -33790,7 +67584,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   setTimeout(()=>{ openDetail(p); }, 600);
+
+
+
+
 
 
 
@@ -33798,7 +67600,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           } catch(err) {
+
+
+
+
 
 
 
@@ -33806,11 +67616,23 @@ function openDetail(p){
 
 
 
+
+
+
+
               msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
 
 
 
+
+
+
+
           }
+
+
+
+
 
 
 
@@ -33822,11 +67644,27 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       // 파일 선택 버튼
 
 
 
+
+
+
+
       const fileInput = $("#quickImgFile");
+
+
+
+
 
 
 
@@ -33838,7 +67676,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       const cameraInput = $("#quickImgCamera");
+
+
+
+
 
 
 
@@ -33850,7 +67700,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       // 드래그 앤 드롭 + 클릭
+
+
+
+
 
 
 
@@ -33858,7 +67720,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       if(dropZone) {
+
+
+
+
 
 
 
@@ -33866,7 +67736,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           dropZone.ondragleave = () => dropZone.classList.remove('!border-blue-400','!text-blue-500','bg-blue-50');
+
+
+
+
 
 
 
@@ -33874,7 +67752,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               e.preventDefault();
+
+
+
+
 
 
 
@@ -33882,7 +67768,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               handleFile(e.dataTransfer.files[0]);
+
+
+
+
 
 
 
@@ -33890,7 +67784,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           dropZone.onclick = () => { if(fileInput) fileInput.click(); };
+
+
+
+
 
 
 
@@ -33902,7 +67804,19 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
       // Ctrl+V 클립보드 붙여넣기 (이미지인 경우)
+
+
+
+
 
 
 
@@ -33910,7 +67824,15 @@ function openDetail(p){
 
 
 
+
+
+
+
       if(urlInput) urlInput.addEventListener('paste', (e) => {
+
+
+
+
 
 
 
@@ -33918,7 +67840,15 @@ function openDetail(p){
 
 
 
+
+
+
+
           if(!items) return;
+
+
+
+
 
 
 
@@ -33926,7 +67856,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               if(item.type.startsWith('image/')) {
+
+
+
+
 
 
 
@@ -33934,7 +67872,15 @@ function openDetail(p){
 
 
 
+
+
+
+
                   handleFile(item.getAsFile());
+
+
+
+
 
 
 
@@ -33942,7 +67888,15 @@ function openDetail(p){
 
 
 
+
+
+
+
               }
+
+
+
+
 
 
 
@@ -33950,7 +67904,19 @@ function openDetail(p){
 
 
 
+
+
+
+
       });
+
+
+
+
+
+
+
+
 
 
 
@@ -33974,7 +67940,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   $("#detailModal").classList.remove("hidden"); document.body.style.overflow="hidden";
+
+
+
+
+
+
+
+
 
 
 
@@ -33990,7 +67980,31 @@ function openDetail(p){
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34014,6 +68028,14 @@ document.addEventListener("click", (e) => {
 
 
 
+
+
+
+
+
+
+
+
     if (e.target.classList.contains("modal-outer")) e.target.closest('.modal-backdrop').classList.add("hidden");
 
 
@@ -34022,7 +68044,31 @@ document.addEventListener("click", (e) => {
 
 
 
+
+
+
+
+
+
+
+
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34046,7 +68092,23 @@ $$('button[id^="close"]').forEach(btn => {
 
 
 
+
+
+
+
+
+
+
+
     btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
+
+
+
+
+
+
+
+
 
 
 
@@ -34070,7 +68132,27 @@ $$('button[id^="close"]').forEach(btn => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 적용된 필터 요약 칩 바 — 켜진 필터를 한눈에 보여주고 ✕로 개별 해제
+
+
+
+
 
 
 
@@ -34078,11 +68160,27 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     const bar = $("#activeFilterBar");
 
 
 
+
+
+
+
     if (!bar) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -34098,7 +68196,19 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
+
+
+
+
     // 카테고리 (전체 제외)
+
+
+
+
 
 
 
@@ -34106,7 +68216,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     if (catBtn && catBtn.dataset.cat !== "ALL") {
+
+
+
+
 
 
 
@@ -34114,7 +68232,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
             $$('button.chip[data-cat]').forEach(x => x.dataset.active = (x.dataset.cat === "ALL" ? "1" : "0"));
+
+
+
+
 
 
 
@@ -34122,7 +68248,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -34130,7 +68264,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     const genBtn = $$('button.chip[data-gender]').find(b => b.dataset.active === "1");
+
+
+
+
 
 
 
@@ -34138,7 +68280,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         items.push({ label: genBtn.textContent.trim(), onClear: () => {
+
+
+
+
 
 
 
@@ -34146,11 +68296,23 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         }});
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -34158,7 +68320,15 @@ function renderActiveFilterBar() {
 
 
 
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-otherbranch], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override]').forEach(btn => {
+
+
+
+
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-otherbranch], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc]').forEach(btn => {
+
+
+
+
 
 
 
@@ -34166,7 +68336,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
             items.push({ label: btn.textContent.trim(), onClear: () => {
+
+
+
+
 
 
 
@@ -34174,7 +68352,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
                 btn.classList.remove('ring-2', 'ring-blue-400', 'ring-orange-400', 'ring-violet-400', 'ring-gray-400', 'ring-amber-400', 'ring-teal-400');
+
+
+
+
 
 
 
@@ -34182,11 +68368,23 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         }
 
 
 
+
+
+
+
     });
+
+
+
+
 
 
 
@@ -34194,7 +68392,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     if (window._activeBrands && window._activeBrands.size > 0) {
+
+
+
+
 
 
 
@@ -34202,7 +68408,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
             items.push({ label: brand, onClear: () => {
+
+
+
+
 
 
 
@@ -34210,7 +68424,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
                 if (window._renderBrandChips) window._renderBrandChips();
+
+
+
+
 
 
 
@@ -34218,11 +68440,23 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         });
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -34230,7 +68464,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     [["sizeSelFw", "신발"], ["sizeSelAp", "의류"], ["sizeSelGear", "용품"]].forEach(([id]) => {
+
+
+
+
 
 
 
@@ -34238,7 +68480,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         if (sel && sel.value !== "ALL") {
+
+
+
+
 
 
 
@@ -34246,7 +68496,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         }
+
+
+
+
 
 
 
@@ -34254,7 +68512,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     // 검색어
+
+
+
+
 
 
 
@@ -34262,7 +68528,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     if (qEl && qEl.value.trim()) {
+
+
+
+
 
 
 
@@ -34270,7 +68544,19 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -34286,7 +68572,19 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
+
+
+
+
     bar.classList.remove("hidden");
+
+
+
+
 
 
 
@@ -34298,7 +68596,19 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
+
+
+
+
     const lead = document.createElement("span");
+
+
+
+
 
 
 
@@ -34306,7 +68616,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     lead.textContent = "적용된 필터";
+
+
+
+
 
 
 
@@ -34318,7 +68636,19 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
+
+
+
+
     items.forEach(it => {
+
+
+
+
 
 
 
@@ -34326,7 +68656,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         chip.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold shrink-0 hover:bg-blue-100 transition-colors";
+
+
+
+
 
 
 
@@ -34334,11 +68672,23 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         chip.onclick = () => { saveHistoryState(); it.onClear(); visibleCount = 60; render(); };
 
 
 
+
+
+
+
         bar.appendChild(chip);
+
+
+
+
 
 
 
@@ -34350,7 +68700,19 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
+
+
+
+
     if (items.length >= 2) {
+
+
+
+
 
 
 
@@ -34358,7 +68720,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         clearAll.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-800 text-white text-[11px] font-bold shrink-0 hover:bg-black transition-colors ml-1";
+
+
+
+
 
 
 
@@ -34366,7 +68736,15 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
         clearAll.onclick = () => { const r = $("#resetAll"); if (r) r.click(); };
+
+
+
+
 
 
 
@@ -34374,11 +68752,31 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
     }
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34398,7 +68796,23 @@ function renderActiveFilterBar() {
 
 
 
+
+
+
+
+
+
+
+
 function _clearAllFilterChips() {
+
+
+
+
+
+
+
+
 
 
 
@@ -34414,7 +68828,23 @@ function _clearAllFilterChips() {
 
 
 
+
+
+
+
+
+
+
+
     const bb = $('button.chip[data-busanonly]');
+
+
+
+
+
+
+
+
 
 
 
@@ -34430,7 +68860,23 @@ function _clearAllFilterChips() {
 
 
 
+
+
+
+
+
+
+
+
     const ob = $('button.chip[data-otherbranch]');
+
+
+
+
+
+
+
+
 
 
 
@@ -34446,7 +68892,23 @@ function _clearAllFilterChips() {
 
 
 
+
+
+
+
+
+
+
+
     const tb = $('button.chip[data-todaysold]');
+
+
+
+
+
+
+
+
 
 
 
@@ -34462,7 +68924,31 @@ function _clearAllFilterChips() {
 
 
 
+
+
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34486,7 +68972,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
     saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -34502,7 +69004,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
         // 카테고리: 단일선택 (성별과 조합 가능)
+
+
+
+
+
+
+
+
 
 
 
@@ -34518,7 +69036,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
     } else if(b.dataset.gender) {
+
+
+
+
+
+
+
+
 
 
 
@@ -34534,7 +69068,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
         $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0"));
+
+
+
+
+
+
+
+
 
 
 
@@ -34550,7 +69100,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
         // 나머지 필터칩: 단일선택 (하나만 활성화)
+
+
+
+
+
+
+
+
 
 
 
@@ -34566,7 +69132,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
         _clearAllFilterChips();
+
+
+
+
+
+
+
+
 
 
 
@@ -34582,7 +69164,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
             b.dataset.active = "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -34598,7 +69196,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
 
 
 
@@ -34614,7 +69228,23 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
     visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -34638,7 +69268,31 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-fav], butt
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 $("#resetAll").onclick=()=>{
+
+
+
+
+
+
+
+
 
 
 
@@ -34654,7 +69308,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
+
+
+
+
+
+
+
+
 
 
 
@@ -34670,7 +69340,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.dataset.active="0");
+
+
+
+
+
+
+
+
 
 
 
@@ -34686,6 +69372,14 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if(window._renderBrandChips) window._renderBrandChips();
 
 
@@ -34694,7 +69388,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if($("#brandSearch")) { $("#brandSearch").value = ""; }
+
+
+
+
+
+
+
+
 
 
 
@@ -34718,7 +69428,31 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const busanOnlyBtn = $('button.chip[data-busanonly]');
+
+
+
+
+
+
+
+
 
 
 
@@ -34734,7 +69468,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     const otherBranchBtn = $('button.chip[data-otherbranch]');
+
+
+
+
+
+
+
+
 
 
 
@@ -34750,7 +69500,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     const todaySoldBtn = $('button.chip[data-todaysold]');
+
+
+
+
+
+
+
+
 
 
 
@@ -34766,7 +69532,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     $$('button.chip[data-dp]').forEach(b => { b.dataset.active = "0"; b.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
+
+
+
+
+
+
+
+
 
 
 
@@ -34782,7 +69564,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if(noImgBtn) { noImgBtn.dataset.active = "0"; noImgBtn.classList.remove('ring-2','ring-gray-400'); }
+
+
+
+
+
+
+
+
 
 
 
@@ -34798,7 +69596,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if(noBarcodeBtn) { noBarcodeBtn.dataset.active = "0"; noBarcodeBtn.classList.remove('ring-2','ring-amber-400'); }
+
+
+
+
+
+
+
+
 
 
 
@@ -34814,7 +69628,37 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if(ovBtn) { ovBtn.dataset.active = "0"; ovBtn.classList.remove('ring-2','ring-amber-400'); }
+
+
+
+    const noLocBtn = $('button.chip[data-noloc]');
+
+    if(noLocBtn) { noLocBtn.dataset.active = "0"; noLocBtn.classList.remove('ring-2','ring-sky-400'); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34838,7 +69682,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -34854,7 +69714,23 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
     if($("#sizeSelGear")) $("#sizeSelGear").value="ALL";
+
+
+
+
+
+
+
+
 
 
 
@@ -34870,7 +69746,31 @@ $("#resetAll").onclick=()=>{
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -34894,7 +69794,23 @@ $("#sortSel").onchange=()=> { saveHistoryState(); visibleCount=60; render(); };
 
 
 
+
+
+
+
+
+
+
+
 let qTimer;
+
+
+
+
+
+
+
+
 
 
 
@@ -34910,7 +69826,23 @@ $("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount
 
 
 
+
+
+
+
+
+
+
+
 $("#clearQ").onclick=()=>{ saveHistoryState(); $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
+
+
+
+
+
+
+
+
 
 
 
@@ -34926,7 +69858,23 @@ $("#refreshBtn").onclick=()=>loadData(true);
 
 
 
+
+
+
+
+
+
+
+
 $("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
+
+
+
+
+
+
+
+
 
 
 
@@ -34950,7 +69898,31 @@ $("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode");
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 $("#file").onchange = async (e) => { 
+
+
+
+
+
+
+
+
 
 
 
@@ -34966,7 +69938,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
     const f = e.target.files[0]; if(!f) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -34982,7 +69970,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
     const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -34998,7 +70002,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
     const reader = new FileReader();
+
+
+
+
+
+
+
+
 
 
 
@@ -35014,7 +70034,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
         const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+
+
+
+
+
+
+
+
 
 
 
@@ -35030,7 +70066,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
         const meta = { fileName:f.name, uploadedAt: dateStr };
+
+
+
+
+
+
+
+
 
 
 
@@ -35046,7 +70098,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
             await commitInventoryToGitHub(rows, meta); 
+
+
+
+
+
+
+
+
 
 
 
@@ -35062,7 +70130,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
             _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
+
+
+
+
+
+
+
+
 
 
 
@@ -35078,7 +70162,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
             alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+
+
+
+
+
+
+
+
 
 
 
@@ -35094,7 +70194,23 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
         $("#file").value = ""; 
+
+
+
+
+
+
+
+
 
 
 
@@ -35110,6 +70226,14 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
     reader.readAsArrayBuffer(f);
 
 
@@ -35118,7 +70242,31 @@ $("#file").onchange = async (e) => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -35142,7 +70290,23 @@ $("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $(
 
 
 
+
+
+
+
+
+
+
+
 $("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -35158,7 +70322,23 @@ $("#drop").onclick=()=>$("#file").click();
 
 
 
+
+
+
+
+
+
+
+
 $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); };
+
+
+
+
+
+
+
+
 
 
 
@@ -35170,11 +70350,23 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 
 
 
+
+
+
+
 // GH.owner/repo(로컬 설정값)에 기대지 않고 고정 URL 사용 — 일부 기기에서 이미지가 안 뜨는 문제 방어.
 
 
 
+
+
+
+
 // 파일명 자체를 floorplan-map.png로 바꿔 통신사/기기 프록시의 쿼리스트링 무시 캐시도 우회.
+
+
+
+
 
 
 
@@ -35186,7 +70378,19 @@ function floorplanUrl(){ return `https://kimchic1212-sudo.github.io/stock-rcm-x9
 
 
 
+
+
+
+
+
+
+
+
 function _uniqueZoneId(label){
+
+
+
+
 
 
 
@@ -35194,7 +70398,15 @@ function _uniqueZoneId(label){
 
 
 
+
+
+
+
     let id = base, n = 1;
+
+
+
+
 
 
 
@@ -35202,7 +70414,15 @@ function _uniqueZoneId(label){
 
 
 
+
+
+
+
     while (exists(id)) { id = `${base}-${++n}`; }
+
+
+
+
 
 
 
@@ -35210,7 +70430,19 @@ function _uniqueZoneId(label){
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -35226,7 +70458,19 @@ let _zmAddMode = false;
 
 
 
+
+
+
+
+
+
+
+
 function renderZonePins(){
+
+
+
+
 
 
 
@@ -35234,7 +70478,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
     wrap.innerHTML = LOCATIONS.zones.map(z => `
+
+
+
+
 
 
 
@@ -35242,7 +70494,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
             <div style="width:16px;height:16px;border-radius:50%;background:#ff5a1f;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>
+
+
+
+
 
 
 
@@ -35250,7 +70510,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
         </div>`).join('');
+
+
+
+
 
 
 
@@ -35258,7 +70526,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
         el.onclick = (e) => {
+
+
+
+
 
 
 
@@ -35266,7 +70542,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
             const z = LOCATIONS.zones.find(zz => zz.id === el.dataset.zone);
+
+
+
+
 
 
 
@@ -35274,7 +70558,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
             const action = prompt(`구역: ${z.label}\n\n· 이름을 바꾸려면 새 이름 입력 후 확인\n· 삭제하려면 DELETE 입력\n· 그대로 두려면 취소`, z.label);
+
+
+
+
 
 
 
@@ -35282,7 +70574,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
             const trimmed = action.trim();
+
+
+
+
 
 
 
@@ -35290,11 +70590,23 @@ function renderZonePins(){
 
 
 
+
+
+
+
                 if(!confirm(`"${z.label}" 구역을 삭제할까요? 배정된 상품의 위치 정보도 사라집니다.`)) return;
 
 
 
+
+
+
+
                 saveLocations(server => {
+
+
+
+
 
 
 
@@ -35302,7 +70614,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
                     const assignments = {...server.assignments};
+
+
+
+
 
 
 
@@ -35310,7 +70630,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
                     return { zones, assignments };
+
+
+
+
 
 
 
@@ -35318,11 +70646,23 @@ function renderZonePins(){
 
 
 
+
+
+
+
                 return;
 
 
 
+
+
+
+
             }
+
+
+
+
 
 
 
@@ -35330,7 +70670,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
                 const slotsStr = prompt('세부 칸 목록 (쉼표로 구분, 없으면 빈칸으로 확인)\n예: 1단-좌, 1단-우, 2단-좌, 2단-우', (z.slots||[]).join(', '));
+
+
+
+
 
 
 
@@ -35338,7 +70686,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
                 const slots = slotsStr.split(',').map(s=>s.trim()).filter(Boolean);
+
+
+
+
 
 
 
@@ -35346,7 +70702,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
                     const zones = server.zones.map(zz => zz.id === z.id ? {...zz, label: trimmed, slots} : zz);
+
+
+
+
 
 
 
@@ -35354,7 +70718,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
                 }).then(ok => { if(ok){ renderZonePins(); showToast('구역 수정됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+
+
+
+
 
 
 
@@ -35362,7 +70734,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
         };
+
+
+
+
 
 
 
@@ -35370,7 +70750,19 @@ function renderZonePins(){
 
 
 
+
+
+
+
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -35382,7 +70774,15 @@ function renderZonePins(){
 
 
 
+
+
+
+
 function loadFloorImg(imgId, errId){
+
+
+
+
 
 
 
@@ -35390,7 +70790,15 @@ function loadFloorImg(imgId, errId){
 
 
 
+
+
+
+
     if(!img) return;
+
+
+
+
 
 
 
@@ -35398,7 +70806,15 @@ function loadFloorImg(imgId, errId){
 
 
 
+
+
+
+
     const showErr = (on) => { if(err) err.style.display = on ? "flex" : "none"; };
+
+
+
+
 
 
 
@@ -35406,7 +70822,15 @@ function loadFloorImg(imgId, errId){
 
 
 
+
+
+
+
     img.style.display = "block";
+
+
+
+
 
 
 
@@ -35414,11 +70838,23 @@ function loadFloorImg(imgId, errId){
 
 
 
+
+
+
+
     img.onload  = () => { img.style.display = "block"; showErr(false); };
 
 
 
+
+
+
+
     img.src = floorplanUrl();
+
+
+
+
 
 
 
@@ -35430,7 +70866,19 @@ function loadFloorImg(imgId, errId){
 
 
 
+
+
+
+
+
+
+
+
 window.openZoneManager = () => {
+
+
+
+
 
 
 
@@ -35438,7 +70886,15 @@ window.openZoneManager = () => {
 
 
 
+
+
+
+
     renderZonePins();
+
+
+
+
 
 
 
@@ -35446,7 +70902,15 @@ window.openZoneManager = () => {
 
 
 
+
+
+
+
     $("#zoneManagerModal").classList.remove("hidden");
+
+
+
+
 
 
 
@@ -35454,7 +70918,15 @@ window.openZoneManager = () => {
 
 
 
+
+
+
+
 $("#openZoneManager").onclick = window.openZoneManager;
+
+
+
+
 
 
 
@@ -35466,7 +70938,19 @@ $("#closeZoneManager").onclick = () => $("#zoneManagerModal").classList.add("hid
 
 
 
+
+
+
+
+
+
+
+
 $("#zmAddModeBtn").onclick = () => {
+
+
+
+
 
 
 
@@ -35474,7 +70958,15 @@ $("#zmAddModeBtn").onclick = () => {
 
 
 
+
+
+
+
     $("#zmAddModeHint").classList.toggle("hidden", !_zmAddMode);
+
+
+
+
 
 
 
@@ -35482,7 +70974,19 @@ $("#zmAddModeBtn").onclick = () => {
 
 
 
+
+
+
+
 };
+
+
+
+
+
+
+
+
 
 
 
@@ -35494,7 +70998,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
     if(!_zmAddMode) return;
+
+
+
+
 
 
 
@@ -35502,7 +71014,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
     const rect = $("#zmImgWrap").getBoundingClientRect();
+
+
+
+
 
 
 
@@ -35510,7 +71030,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 1000) / 10;
+
+
+
+
 
 
 
@@ -35518,7 +71046,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
     if(!label || !label.trim()) return;
+
+
+
+
 
 
 
@@ -35526,7 +71062,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
     const slotsStr = prompt('세부 칸 목록 (쉼표로 구분, 선택사항)\n예: 1단-좌, 1단-우, 2단-좌, 2단-우', '') || '';
+
+
+
+
 
 
 
@@ -35534,7 +71078,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
     const newZone = { id: _uniqueZoneId(label), group: group.trim(), label: label.trim(), x, y, slots };
+
+
+
+
 
 
 
@@ -35542,7 +71094,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
         .then(ok => {
+
+
+
+
 
 
 
@@ -35550,7 +71110,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
             _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
+
+
+
+
 
 
 
@@ -35558,7 +71126,19 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
 };
+
+
+
+
+
+
+
+
 
 
 
@@ -35570,7 +71150,15 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 
+
+
+
+
 window.openFloorPlanView = (zoneId, extraLabel) => {
+
+
+
+
 
 
 
@@ -35578,7 +71166,15 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
 
 
 
+
+
+
+
     if(!z) return;
+
+
+
+
 
 
 
@@ -35586,7 +71182,15 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
 
 
 
+
+
+
+
     $("#fpvTitle").textContent = `📍 ${z.label}${extraLabel ? ' · ' + extraLabel : ''}`;
+
+
+
+
 
 
 
@@ -35594,7 +71198,15 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
 
 
 
+
+
+
+
     $("#fpvPin").style.top = z.y + '%';
+
+
+
+
 
 
 
@@ -35602,7 +71214,15 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
 
 
 
+
+
+
+
 };
+
+
+
+
 
 
 
@@ -35618,7 +71238,27 @@ $("#closeFloorPlanView").onclick = () => $("#floorPlanViewModal").classList.add(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 $("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ setAdminSession(); applyDefaultPatIfNeeded($("#pwd").value); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+
+
+
+
+
+
+
+
 
 
 
@@ -35642,7 +71282,31 @@ $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghR
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 window.renderSalesHistoryAdmin = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -35658,7 +71322,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     const countEl = document.getElementById("shCount");
+
+
+
+
+
+
+
+
 
 
 
@@ -35682,7 +71362,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const clearBtn = document.getElementById("shClearBtn");
+
+
+
+
+
+
+
+
 
 
 
@@ -35698,7 +71402,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         clearBtn.onclick = async (e) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -35714,7 +71434,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             if(!checkPat()) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -35730,7 +71466,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             try {
+
+
+
+
+
+
+
+
 
 
 
@@ -35746,7 +71498,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let sha = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -35762,7 +71530,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const emptyData = { meta: { name: "초기화됨", lastUpdated: new Date().toISOString() }, items: {} };
+
+
+
+
+
+
+
+
 
 
 
@@ -35778,7 +71562,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(sha) body.sha = sha;
+
+
+
+
+
+
+
+
 
 
 
@@ -35794,7 +71594,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY); 
+
+
+
+
+
+
+
+
 
 
 
@@ -35810,7 +71626,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
+
+
+
+
+
+
+
+
 
 
 
@@ -35826,6 +71658,14 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         };
 
 
@@ -35834,7 +71674,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -35858,7 +71722,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     const fileInput = document.getElementById("shFile");
+
+
+
+
+
+
+
+
 
 
 
@@ -35874,7 +71754,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         trigger.onclick = () => fileInput.click();
+
+
+
+
+
+
+
+
 
 
 
@@ -35890,7 +71786,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             if(!checkPat()) { e.target.value = ""; return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -35906,7 +71818,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 전체점 실적", f.name);
+
+
+
+
+
+
+
+
 
 
 
@@ -35922,7 +71850,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             const reader = new FileReader();
+
+
+
+
+
+
+
+
 
 
 
@@ -35938,7 +71882,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+
+
+
+
+
+
+
+
 
 
 
@@ -35954,7 +71914,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""}); 
+
+
+
+
+
+
+
+
 
 
 
@@ -35970,7 +71946,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -35986,7 +71978,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const headers = rows[headerRowIdx].map(h => String(h||"").trim());
+
+
+
+
+
+
+
+
 
 
 
@@ -36002,7 +72010,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let qtyIdx = headers.findIndex(h => h === '수량' || h.includes('판매수량'));
+
+
+
+
+
+
+
+
 
 
 
@@ -36018,7 +72042,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let sizeIdx = headers.findIndex(h => h.includes('규격') || h.includes('사이즈') || h.includes('옵션'));
+
+
+
+
+
+
+
+
 
 
 
@@ -36034,6 +72074,14 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let typeIdx = headers.findIndex(h => h.includes('수주구분') || h.includes('판매구분'));
 
 
@@ -36042,7 +72090,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let whIdx = headers.findIndex(h => h === '창고' || h.includes('창고'));
+
+
+
+
+
+
+
+
 
 
 
@@ -36066,7 +72130,27 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 // 필수 컬럼(품번·일자·수량)을 못 찾으면 중단 — 못 찾으면 인덱스가 -1이 되어
+
+
+
+
 
 
 
@@ -36074,7 +72158,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                 if(codeIdx < 0 || dateIdx < 0 || qtyIdx < 0) {
+
+
+
+
 
 
 
@@ -36082,7 +72174,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                     alert(`❌ 판매 엑셀에서 필수 컬럼을 찾지 못했습니다: ${_missing}\n\n인식된 헤더: ${headers.filter(Boolean).slice(0,15).join(' | ')}\n\n올바른 판매 엑셀인지 확인해주세요.`);
+
+
+
+
 
 
 
@@ -36090,7 +72190,19 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -36106,7 +72218,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let _skippedBad = 0;
+
+
+
+
+
+
+
+
 
 
 
@@ -36118,7 +72246,19 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                 const _isValidDate = (s) => /\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/.test(s) || /^\d{8}$/.test(s);
+
+
+
+
+
+
+
+
 
 
 
@@ -36130,11 +72270,27 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                 // 같은 (거래명세서번호+품번+규격+수량) 조합은 한 번만 반영
 
 
 
+
+
+
+
                 const _seenLines = new Set();
+
+
+
+
+
+
+
+
 
 
 
@@ -36150,7 +72306,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const r = rows[i];
+
+
+
+
+
+
+
+
 
 
 
@@ -36166,7 +72338,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const date = String(r[dateIdx]||"").trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -36190,7 +72378,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     if(!code || !date) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -36202,7 +72414,19 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                     if(!_isValidDate(date) || qty === 0) { _skippedBad++; continue; }
+
+
+
+
+
+
+
+
 
 
 
@@ -36214,7 +72438,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                         const lineKey = String(r[invoiceIdx]||"") + "|" + code + "|" + String(r[sizeIdx>-1?sizeIdx:-1]||"") + "|" + qty;
+
+
+
+
 
 
 
@@ -36222,11 +72454,35 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                         _seenLines.add(lineKey);
 
 
 
+
+
+
+
                     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -36250,6 +72506,14 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
 
 
@@ -36258,7 +72522,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈";
+
+
+
+
+
+
+
+
 
 
 
@@ -36282,7 +72562,27 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     // 창고(매장) 컬럼이 있으면 이걸로 지점 판정 (담당자명은 매장 소속과 무관할 수 있어 부정확)
+
+
+
+
 
 
 
@@ -36290,7 +72590,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                     if(whStr) {
+
+
+
+
 
 
 
@@ -36298,7 +72606,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                         else if(whStr.includes("신사")) locationGroup = "신사(승호강)";
+
+
+
+
 
 
 
@@ -36306,7 +72622,19 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                     } else if(typeStr === "매장" || typeStr.includes("오프라인")) {
+
+
+
+
+
+
+
+
 
 
 
@@ -36322,7 +72650,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         else if(rawManager.includes("승호") || rawManager.includes("강") || rawManager.includes("신사")) locationGroup = "신사(승호강)";
+
+
+
+
+
+
+
+
 
 
 
@@ -36346,7 +72690,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     if(!sessionData[code]) sessionData[code] = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -36362,7 +72730,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     if(!sessionData[code][date][size]) sessionData[code][date][size] = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -36374,6 +72758,10 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                     sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
 
 
@@ -36382,7 +72770,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -36402,7 +72814,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                 for(let code in sessionData) {
+
+
+
+
 
 
 
@@ -36410,7 +72830,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                         for(let size in sessionData[code][date]) {
+
+
+
+
 
 
 
@@ -36418,7 +72846,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                                 if(sessionData[code][date][size][mgr] <= 0) delete sessionData[code][date][size][mgr];
+
+
+
+
 
 
 
@@ -36426,7 +72862,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                             if(Object.keys(sessionData[code][date][size]).length === 0) delete sessionData[code][date][size];
+
+
+
+
 
 
 
@@ -36434,7 +72878,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                         if(Object.keys(sessionData[code][date]).length === 0) delete sessionData[code][date];
+
+
+
+
 
 
 
@@ -36442,11 +72894,27 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                     if(Object.keys(sessionData[code]).length === 0) delete sessionData[code];
 
 
 
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -36462,7 +72930,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
+
+
+
+
+
+
+
+
 
 
 
@@ -36478,7 +72962,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 for(let code in sessionData) {
+
+
+
+
+
+
+
+
 
 
 
@@ -36494,7 +72994,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     for(let date in sessionData[code]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -36510,7 +73026,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                             let oldQty = newItems[code][date];
+
+
+
+
+
+
+
+
 
 
 
@@ -36526,7 +73058,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -36542,7 +73090,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         for(let size in sessionData[code][date]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -36558,7 +73122,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                             for(let mgr in sessionData[code][date][size]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -36574,7 +73154,19 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                                 if(date === _todayStr) {
+
+
+
+
 
 
 
@@ -36582,7 +73174,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                                     // 엑셀 업로드 시점의 부분적인 스냅샷으로 낮춰지지 않도록 더 큰 값 유지
+
+
+
+
 
 
 
@@ -36590,7 +73190,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                                     newItems[code][date][size][mgr] = Math.max(existing, incoming);
+
+
+
+
 
 
 
@@ -36598,7 +73206,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                                     // 과거 날짜는 이 엑셀(전체 기간 재집계본)을 최신 정답으로 간주해 덮어씀
+
+
+
+
 
 
 
@@ -36606,11 +73222,27 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
                                     newItems[code][date][size][mgr] = incoming;
 
 
 
+
+
+
+
                                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -36626,7 +73258,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -36642,7 +73290,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -36666,7 +73330,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 try {
+
+
+
+
+
+
+
+
 
 
 
@@ -36682,7 +73370,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     let sha = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -36698,7 +73402,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const body = { message:"update sales history", content: utf8ToB64(JSON.stringify(newHistory, null, 2)), branch: GH.branch };
+
+
+
+
+
+
+
+
 
 
 
@@ -36714,7 +73434,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -36730,7 +73466,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     _recomputeStock(); render(); window.renderSalesHistoryAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -36746,7 +73498,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 } catch(err) { alert("업로드 실패: " + err.message); }
+
+
+
+
+
+
+
+
 
 
 
@@ -36762,7 +73530,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             };
+
+
+
+
+
+
+
+
 
 
 
@@ -36778,7 +73562,23 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -36794,7 +73594,31 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -36818,7 +73642,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     const card = $("#promoUploadTrigger");
+
+
+
+
+
+
+
+
 
 
 
@@ -36842,7 +73682,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const _promoList = getPromoList();
+
+
+
+
+
+
+
+
 
 
 
@@ -36866,7 +73730,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 기획전 목록 렌더
+
+
+
+
+
+
+
+
 
 
 
@@ -36882,7 +73770,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         `<div class="flex items-center gap-2 py-1.5 border-b border-gray-100 last:border-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -36898,7 +73802,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 <span class="font-bold text-gray-900 text-[13px]">🎁 ${escapeHtml(pr.meta?.name||'기획전')}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -36914,7 +73834,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 <span class="text-[11px] text-gray-400 ml-1">(${Object.keys(pr.items||{}).length}품번)</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -36930,6 +73866,14 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             <span class="end-promo-btn shrink-0 text-[11px] font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded cursor-pointer hover:bg-pink-100 transition-colors" data-promoidx="${idx}">종료</span>
 
 
@@ -36938,7 +73882,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         </div>`
+
+
+
+
+
+
+
+
 
 
 
@@ -36962,7 +73922,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     card.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -36978,7 +73962,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             <div class="flex items-center justify-between mb-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -36994,7 +73994,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 <label for="promoFile" class="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded cursor-pointer hover:bg-purple-100 transition-colors shrink-0">+ 기획전 추가</label>
+
+
+
+
+
+
+
+
 
 
 
@@ -37010,7 +74026,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -37026,7 +74058,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -37050,7 +74098,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 종료 버튼 이벤트
+
+
+
+
+
+
+
+
 
 
 
@@ -37066,7 +74138,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         btn.onclick = async (e) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -37082,7 +74170,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             if(!checkPat()) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -37098,7 +74202,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             const pName = _promoList[idx]?.meta?.name || '기획전';
+
+
+
+
+
+
+
+
 
 
 
@@ -37114,7 +74234,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             try {
+
+
+
+
+
+
+
+
 
 
 
@@ -37130,7 +74266,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+
+
+
+
+
+
+
+
 
 
 
@@ -37146,7 +74298,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const j = await r.json();
+
+
+
+
+
+
+
+
 
 
 
@@ -37162,7 +74330,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 try { data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, ''))))); }
+
+
+
+
+
+
+
+
 
 
 
@@ -37178,7 +74362,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let list = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
+
+
+
+
+
+
+
+
 
 
 
@@ -37194,7 +74394,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 list.splice(idx, 1);
+
+
+
+
+
+
+
+
 
 
 
@@ -37210,7 +74426,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const body = { message:`end promotion: ${pName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch, sha: j.sha };
+
+
+
+
+
+
+
+
 
 
 
@@ -37226,7 +74458,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(!endRes.ok) { const errJ = await endRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${endRes.status}): ${errJ.message||''}`); }
+
+
+
+
+
+
+
+
 
 
 
@@ -37242,7 +74490,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -37258,6 +74522,14 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             } catch(e) { alert("종료 실패: " + e.message); }
 
 
@@ -37266,7 +74538,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -37290,7 +74578,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // 파일 업로드 (기존 기획전에 추가)
+
+
+
+
+
+
+
+
 
 
 
@@ -37306,7 +74618,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         if(!checkPat()) { e.target.value = ""; return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -37322,7 +74650,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         const reader = new FileReader();
+
+
+
+
+
+
+
+
 
 
 
@@ -37338,7 +74682,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+
+
+
+
+
+
+
+
 
 
 
@@ -37350,7 +74710,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
             const _PROMO_COLS = ['최종할인가','기획전 할인가','최종 할인율','특가할인가','위클리특가'];
+
+
+
+
 
 
 
@@ -37358,7 +74726,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
             for(const sn of wb.SheetNames) {
+
+
+
+
 
 
 
@@ -37366,7 +74742,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                 const _hasCode = _rr.some(r => r.some(c => String(c||"").trim()==='품번'));
+
+
+
+
 
 
 
@@ -37374,7 +74758,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                 if(_hasCode && _hasDisc) { sheet = wb.Sheets[sn]; break; }
+
+
+
+
 
 
 
@@ -37382,7 +74774,19 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
             if(!sheet) sheet = wb.Sheets[wb.SheetNames[0]];
+
+
+
+
+
+
+
+
 
 
 
@@ -37398,7 +74802,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             // ① 기획전명 기본값: 파일명 (확장자 제거)
+
+
+
+
+
+
+
+
 
 
 
@@ -37414,7 +74834,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             let promoPeriod = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -37430,7 +74866,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(!rows[i]) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -37442,7 +74894,19 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                 for(const _cell of rows[i]) {
+
+
+
+
+
+
+
+
 
 
 
@@ -37458,7 +74922,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     if(!col0) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -37474,7 +74954,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -37490,7 +74986,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     if(/기간/.test(col0)) {
+
+
+
+
+
+
+
+
 
 
 
@@ -37506,7 +75018,19 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         if(pm) {
+
+
+
+
 
 
 
@@ -37514,7 +75038,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                             const e = pm[2].replace('.','/');
+
+
+
+
 
 
 
@@ -37522,7 +75054,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                         } else {
+
+
+
+
 
 
 
@@ -37530,7 +75070,19 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -37546,7 +75098,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -37562,7 +75130,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             let items = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -37578,7 +75162,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             if(headerRowIdx > -1) {
+
+
+
+
+
+
+
+
 
 
 
@@ -37594,7 +75194,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const codeIdx = headers.indexOf('품번');
+
+
+
+
+
+
+
+
 
 
 
@@ -37610,11 +75226,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let wpIdx = headers.indexOf('위클리특가');
 
 
 
+
+
+
+
                 if(wpIdx === -1) wpIdx = headers.indexOf('특가할인가');
+
+
+
+
+
+
+
+
 
 
 
@@ -37630,7 +75266,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const fpIdx   = headers.indexOf('최종할인가');
+
+
+
+
+
+
+
+
 
 
 
@@ -37642,7 +75294,15 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                 const epIdx   = headers.indexOf('기획전 할인가');
+
+
+
+
 
 
 
@@ -37650,7 +75310,19 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                 const crIdx   = headers.indexOf('쿠폰 할인율');
+
+
+
+
+
+
+
+
 
 
 
@@ -37666,7 +75338,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let frIdx = headers.indexOf('최종 할인율');
+
+
+
+
+
+
+
+
 
 
 
@@ -37682,7 +75370,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(frIdx === -1) frIdx = headers.indexOf('할인율');
+
+
+
+
+
+
+
+
 
 
 
@@ -37706,7 +75410,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 for(let i=headerRowIdx+1; i<rows.length; i++) {
+
+
+
+
+
+
+
+
 
 
 
@@ -37722,7 +75450,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const code = String(r[codeIdx]||"").trim(); if(!code) continue;
+
+
+
+
+
+
+
+
 
 
 
@@ -37738,7 +75482,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     let fRate = parseFloat(r[frIdx])||0; if(fRate>1) fRate/=100;
+
+
+
+
+
+
+
+
 
 
 
@@ -37754,7 +75514,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     let cRate = parseFloat(r[crIdx])||0; if(cRate>1) cRate/=100;
+
+
+
+
+
+
+
+
 
 
 
@@ -37770,7 +75546,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const ep = Number(String(r[epIdx]||"").replace(/,/g,''))||null;
+
+
+
+
+
+
+
+
 
 
 
@@ -37786,7 +75578,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         targetCat: String(r[catIdx]||"").trim().toUpperCase(),
+
+
+
+
+
+
+
+
 
 
 
@@ -37802,7 +75610,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         weeklyRate: wRate,
+
+
+
+
+
+
+
+
 
 
 
@@ -37818,7 +75642,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         finalRate: fRate,   // 가격 없을 때는 rate로 계산
+
+
+
+
+
+
+
+
 
 
 
@@ -37834,7 +75674,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         eventRate: eRate,   // 기획전 할인율
+
+
+
+
+
+
+
+
 
 
 
@@ -37850,7 +75706,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     };
+
+
+
+
+
+
+
+
 
 
 
@@ -37866,7 +75738,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -37882,7 +75770,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             try {
+
+
+
+
+
+
+
+
 
 
 
@@ -37898,7 +75802,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let sha = null, existingList = [];
+
+
+
+
+
+
+
+
 
 
 
@@ -37910,7 +75830,19 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
                 const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+
+
+
+
+
+
+
+
 
 
 
@@ -37926,7 +75858,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const j = await r.json(); sha = j.sha;
+
+
+
+
+
+
+
+
 
 
 
@@ -37942,7 +75890,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         const data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+
+
+
+
+
+
+
+
 
 
 
@@ -37958,7 +75922,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     } catch(e) { throw new Error('기존 기획전 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.'); }
+
+
+
+
+
+
+
+
 
 
 
@@ -37974,7 +75954,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 existingList.push(newPromo);
+
+
+
+
+
+
+
+
 
 
 
@@ -37990,7 +75986,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const body = { message:`add promotion: ${promoName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch };
+
+
+
+
+
+
+
+
 
 
 
@@ -38006,7 +76018,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const saveRes = await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -38022,7 +76050,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
+
+
+
+
+
+
+
+
 
 
 
@@ -38038,7 +76082,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 alert(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
+
+
+
+
+
+
+
+
 
 
 
@@ -38054,7 +76114,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("promoFile").value = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -38070,7 +76146,23 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         reader.readAsArrayBuffer(f);
+
+
+
+
+
+
+
+
 
 
 
@@ -38086,7 +76178,31 @@ window.renderPromoAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38110,7 +76226,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     const countEl = document.getElementById("sgCount");
+
+
+
+
+
+
+
+
 
 
 
@@ -38134,7 +76266,31 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const trigger = document.getElementById("salesUploadTrigger");
+
+
+
+
+
+
+
+
 
 
 
@@ -38150,7 +76306,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     if(trigger && fileInput) {
+
+
+
+
+
+
+
+
 
 
 
@@ -38166,7 +76338,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
         fileInput.onchange = async (e) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -38182,7 +76370,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             const f = e.target.files[0]; if(!f) return;
+
+
+
+
+
+
+
+
 
 
 
@@ -38198,7 +76402,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             reader.onload = async (ev) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -38214,7 +76434,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 const sheet = wb.Sheets[wb.SheetNames[0]];
+
+
+
+
+
+
+
+
 
 
 
@@ -38230,7 +76466,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 let newGuides = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -38246,7 +76498,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const code = String(r["품번"] || r["상품코드"] || "").trim();
+
+
+
+
+
+
+
+
 
 
 
@@ -38262,7 +76530,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const rawKw = String(r["키워드"] || r["핵심키워드"] || "");
+
+
+
+
+
+
+
+
 
 
 
@@ -38278,7 +76562,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     newGuides[code] = {
+
+
+
+
+
+
+
+
 
 
 
@@ -38294,7 +76594,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                         target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
+
+
+
+
+
+
+
+
 
 
 
@@ -38310,7 +76626,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 });
+
+
+
+
+
+
+
+
 
 
 
@@ -38326,7 +76658,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -38342,7 +76690,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+
+
+
+
+
+
+
+
 
 
 
@@ -38358,7 +76722,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     if(sha) body.sha = sha;
+
+
+
+
+
+
+
+
 
 
 
@@ -38374,7 +76754,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY); 
+
+
+
+
+
+
+
+
 
 
 
@@ -38390,7 +76786,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                     alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
+
+
+
+
+
+
+
+
 
 
 
@@ -38406,7 +76818,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
                 fileInput.value = "";
+
+
+
+
+
+
+
+
 
 
 
@@ -38422,7 +76850,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
             reader.readAsArrayBuffer(f);
+
+
+
+
+
+
+
+
 
 
 
@@ -38438,7 +76882,23 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -38462,7 +76922,31 @@ window.renderSalesAdmin = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 window.addEventListener('DOMContentLoaded', () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -38478,7 +76962,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark-mode");
+
+
+
+
+
+
+
+
 
 
 
@@ -38490,7 +76990,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
     window.setSizeUnit(window.sizeUnit);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38514,7 +77034,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if ($("#allMemosBtn") && !$("#allTransfersBtn")) {
+
+
+
+
+
+
+
+
 
 
 
@@ -38530,7 +77066,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         trBtn.id = "allTransfersBtn";
+
+
+
+
+
+
+
+
 
 
 
@@ -38546,7 +77098,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         trBtn.innerHTML = `🚚<span class="hidden sm:inline"> 이동요청 목록</span>`;
+
+
+
+
+
+
+
+
 
 
 
@@ -38562,6 +77130,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         $("#allMemosBtn").parentNode.insertBefore(trBtn, $("#allMemosBtn").nextSibling);
 
 
@@ -38570,7 +77146,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -38586,7 +77178,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     const stockBtn = $('button.chip[data-stock]');
+
+
+
+
+
+
+
+
 
 
 
@@ -38602,7 +77210,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const busanOnlyBtn = document.createElement("button");
+
+
+
+
+
+
+
+
 
 
 
@@ -38618,7 +77242,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         busanOnlyBtn.dataset.busanonly = "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -38634,7 +77274,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         busanOnlyBtn.innerHTML = "🌊 부산점 ONLY";
+
+
+
+
+
+
+
+
 
 
 
@@ -38650,6 +77306,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         busanOnlyBtn.addEventListener("click", () => {
 
 
@@ -38658,7 +77322,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -38674,7 +77354,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -38690,7 +77386,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -38706,7 +77418,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -38722,7 +77450,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(stockBtn && !$('button.chip[data-otherbranch]')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -38738,7 +77482,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         otherBranchBtn.className = "chip !bg-teal-50 !text-teal-700 !border-teal-200 font-black";
+
+
+
+
+
+
+
+
 
 
 
@@ -38754,7 +77514,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         otherBranchBtn.dataset.active = "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -38770,7 +77546,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const _busanOnlyRef = $('button.chip[data-busanonly]');
+
+
+
+
+
+
+
+
 
 
 
@@ -38786,6 +77578,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         otherBranchBtn.addEventListener("click", () => {
 
 
@@ -38794,7 +77594,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -38810,7 +77626,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(otherBranchBtn.dataset.active === "1") otherBranchBtn.classList.add('ring-2', 'ring-teal-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -38826,7 +77658,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -38842,7 +77690,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -38858,7 +77722,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(stockBtn && !$('button.chip[data-todaysold]')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -38874,7 +77754,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         todayBtn.className = "chip !bg-orange-50 !text-orange-600 !border-orange-300 font-black";
+
+
+
+
+
+
+
+
 
 
 
@@ -38890,7 +77786,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         todayBtn.dataset.active = "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -38906,7 +77818,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         stockBtn.parentNode.insertBefore(todayBtn, stockBtn.nextSibling);
+
+
+
+
+
+
+
+
 
 
 
@@ -38922,7 +77850,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -38938,7 +77882,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(todayBtn.dataset.active === "1") todayBtn.classList.add('ring-2', 'ring-orange-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -38954,7 +77914,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -38970,7 +77946,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38994,7 +77994,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     const dpFilterRow = $("#dpFilterRow");
+
+
+
+
+
+
+
+
 
 
 
@@ -39010,7 +78026,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         dpFilterRow.classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -39026,7 +78058,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             { key: 'dp',     label: '🏷️ DP 중',   cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
+
+
+
+
+
+
+
+
 
 
 
@@ -39042,7 +78090,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             { key: 'soldDP', label: '⚠️ 품절DP',   cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
+
+
+
+
+
+
+
+
 
 
 
@@ -39058,7 +78122,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         dpGroup.forEach(({ key, label, cls }) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -39074,7 +78154,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             btn.className = `chip ${cls} font-black`;
+
+
+
+
+
+
+
+
 
 
 
@@ -39090,7 +78186,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             btn.dataset.active = "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -39106,7 +78218,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             dpFilterRow.appendChild(btn);
+
+
+
+
+
+
+
+
 
 
 
@@ -39122,7 +78250,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -39138,7 +78282,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 if (alreadyActive) {
+
+
+
+
+
+
+
+
 
 
 
@@ -39154,7 +78314,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     btn.classList.remove('ring-2','ring-violet-400','ring-orange-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -39170,7 +78346,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     // DP 칩: 완전 단일선택 (3개 모두 상호 배타)
+
+
+
+
+
+
+
+
 
 
 
@@ -39186,7 +78378,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     btn.dataset.active = "1";
+
+
+
+
+
+
+
+
 
 
 
@@ -39202,7 +78410,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -39218,7 +78442,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             });
+
+
+
+
+
+
+
+
 
 
 
@@ -39234,7 +78474,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -39258,7 +78522,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(dpFilterRow && !$('button.chip[data-noimage]')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -39274,7 +78554,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         noImgBtn.className = "chip !bg-gray-50 !text-gray-500 !border-gray-300 font-black";
+
+
+
+
+
+
+
+
 
 
 
@@ -39290,7 +78586,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         noImgBtn.dataset.active = "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -39306,7 +78618,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         dpFilterRow.appendChild(noImgBtn);
+
+
+
+
+
+
+
+
 
 
 
@@ -39322,7 +78650,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -39338,7 +78682,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(noImgBtn.dataset.active === "1") noImgBtn.classList.add('ring-2','ring-gray-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -39354,7 +78714,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -39370,7 +78746,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -39394,7 +78794,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(dpFilterRow && !$('button.chip[data-nobarcode]')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -39410,7 +78826,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         noBarcodeBtn.className = "chip !bg-amber-50 !text-amber-600 !border-amber-300 font-black";
+
+
+
+
+
+
+
+
 
 
 
@@ -39426,7 +78858,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         noBarcodeBtn.dataset.active = "0";
+
+
+
+
+
+
+
+
 
 
 
@@ -39442,7 +78890,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         noBarcodeBtn.innerHTML = `🔖 바코드누락${_nbCount > 0 ? ` <span class="ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]">${_nbCount}</span>` : ''}`;
+
+
+
+
+
+
+
+
 
 
 
@@ -39458,6 +78922,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         noBarcodeBtn.addEventListener("click", () => {
 
 
@@ -39466,7 +78938,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             saveHistoryState();
+
+
+
+
+
+
+
+
 
 
 
@@ -39482,7 +78970,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(noBarcodeBtn.dataset.active === "1") noBarcodeBtn.classList.add('ring-2','ring-amber-400');
+
+
+
+
+
+
+
+
 
 
 
@@ -39498,7 +79002,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             visibleCount=60; render();
+
+
+
+
+
+
+
+
 
 
 
@@ -39514,7 +79034,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
 
 
 
@@ -39526,7 +79062,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
     if(dpFilterRow && !$('button.chip[data-override]')) {
+
+
+
+
 
 
 
@@ -39534,7 +79078,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
         ovBtn.className = "chip !bg-amber-50 !text-amber-700 !border-amber-400 font-black";
+
+
+
+
 
 
 
@@ -39542,7 +79094,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
         ovBtn.dataset.active = "0";
+
+
+
+
 
 
 
@@ -39550,7 +79110,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
         ovBtn.innerHTML = `✏️ 재고보정${_ovCount > 0 ? ` <span class="ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]">${_ovCount}</span>` : ''}`;
+
+
+
+
 
 
 
@@ -39558,7 +79126,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
         ovBtn.addEventListener("click", () => {
+
+
+
+
 
 
 
@@ -39566,7 +79142,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
             ovBtn.dataset.active = ovBtn.dataset.active === "1" ? "0" : "1";
+
+
+
+
 
 
 
@@ -39574,7 +79158,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
             else ovBtn.classList.remove('ring-2','ring-amber-400');
+
+
+
+
 
 
 
@@ -39582,11 +79174,70 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
         });
 
 
 
+
+
+
+
     }
+
+
+    // ── 위치입력 필터 칩 (부산재고 있는데 창고 위치 미배정) ─────────────────────
+
+    if(dpFilterRow && !$('button.chip[data-noloc]')) {
+
+        const noLocBtn = document.createElement("button");
+
+        noLocBtn.className = "chip !bg-sky-50 !text-sky-700 !border-sky-400 font-black";
+
+        noLocBtn.dataset.noloc = "1";
+
+        noLocBtn.dataset.active = "0";
+
+        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번]).length;
+
+        noLocBtn.innerHTML = `📍 위치입력${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
+
+        dpFilterRow.appendChild(noLocBtn);
+
+        noLocBtn.addEventListener("click", () => {
+
+            saveHistoryState();
+
+            noLocBtn.dataset.active = noLocBtn.dataset.active === "1" ? "0" : "1";
+
+            if(noLocBtn.dataset.active === "1") noLocBtn.classList.add('ring-2','ring-sky-400');
+
+            else noLocBtn.classList.remove('ring-2','ring-sky-400');
+
+            visibleCount=60; render();
+
+        });
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -39610,7 +79261,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     const adminModal = document.getElementById("adminModal");
+
+
+
+
+
+
+
+
 
 
 
@@ -39626,7 +79293,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         adminModal.className = "hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm transition-opacity";
+
+
+
+
+
+
+
+
 
 
 
@@ -39642,7 +79325,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         // 설정 패널 렌더링을 위해 현재 GH 값 로드
+
+
+
+
+
+
+
+
 
 
 
@@ -39658,6 +79357,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const ghRepo = GH.repo || "";
 
 
@@ -39666,7 +79373,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const ghBranch = GH.branch || "main";
+
+
+
+
+
+
+
+
 
 
 
@@ -39690,7 +79413,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         adminModal.innerHTML = `
+
+
+
+
+
+
+
+
 
 
 
@@ -39706,7 +79453,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             
+
+
+
+
+
+
+
+
 
 
 
@@ -39722,7 +79485,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 
+
+
+
+
+
+
+
+
 
 
 
@@ -39738,7 +79517,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 
+
+
+
+
+
+
+
+
 
 
 
@@ -39754,7 +79549,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="w-20 h-20 bg-white/60 rounded-full flex items-center justify-center mb-5 shadow-sm border border-white/80">
+
+
+
+
+
+
+
+
 
 
 
@@ -39770,7 +79581,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -39786,7 +79613,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <h2 class="text-[28px] font-black tracking-tight text-gray-900 leading-tight mb-2">RACEMENT<br>ADMIN</h2>
+
+
+
+
+
+
+
+
 
 
 
@@ -39802,7 +79645,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -39818,7 +79677,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition-all placeholder:text-gray-400">
+
+
+
+
+
+
+
+
 
 
 
@@ -39834,6 +79709,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
 
 
@@ -39842,7 +79725,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -39866,7 +79773,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="flex-1 flex flex-col">
+
+
+
+
+
+
+
+
 
 
 
@@ -39882,6 +79805,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <h2 class="m-0 text-[22px] font-extrabold tracking-wide text-gray-900 leading-tight">RACEMENT<br>ADMIN PANEL</h2>
 
 
@@ -39890,7 +79821,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -39906,7 +79853,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <div class="text-5xl mb-4">☁️</div>
+
+
+
+
+
+
+
+
 
 
 
@@ -39922,7 +79885,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <p class="m-0 text-gray-500 text-[13px] font-bold">업로드 시 창고/매장 재고 자동 갱신</p>
+
+
+
+
+
+
+
+
 
 
 
@@ -39938,7 +79917,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -39962,7 +79965,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div id="shAdminWrapper" class="setting-card card-orange">
+
+
+
+
+
+
+
+
 
 
 
@@ -39978,7 +79997,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">POS 판매 실적 DB</h4>
+
+
+
+
+
+
+
+
 
 
 
@@ -39994,7 +80029,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40010,7 +80061,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 6px; cursor: pointer; z-index: 10;">DB 초기화</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -40026,7 +80093,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40042,7 +80125,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40066,7 +80173,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40090,7 +80221,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <div id="salesUploadTrigger" class="flex-1">
+
+
+
+
+
+
+
+
 
 
 
@@ -40106,6 +80253,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <span style="font-size: 11px; color: #666; font-weight: bold;">특징 및 추천고객 업데이트</span>
 
 
@@ -40114,7 +80269,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40130,7 +80301,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;"></span>
+
+
+
+
+
+
+
+
 
 
 
@@ -40146,7 +80333,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40162,7 +80365,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40178,7 +80397,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-200/40">
+
+
+
+
+
+
+
+
 
 
 
@@ -40194,7 +80429,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <button class="px-6 py-2.5 rounded-xl bg-gray-900 text-white border-none text-[13px] font-bold cursor-pointer hover:bg-gray-800 transition-all shadow-sm" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -40210,6 +80461,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
 
 
@@ -40218,7 +80477,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40242,7 +80525,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     <h2 class="text-xl font-black text-gray-900 mb-5 flex items-center gap-2"><i data-lucide="github" class="w-5 h-5"></i> GitHub API 연동 설정</h2>
+
+
+
+
+
+
+
+
 
 
 
@@ -40258,7 +80557,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40274,7 +80589,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <input type="text" id="ghOwner" value="${ghOwner}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+
+
+
+
+
+
+
+
 
 
 
@@ -40290,7 +80621,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40306,7 +80653,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <input type="text" id="ghRepo" value="${ghRepo}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+
+
+
+
+
+
+
+
 
 
 
@@ -40322,7 +80685,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40338,6 +80717,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <input type="text" id="ghBranch" value="${ghBranch}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
 
 
@@ -40346,7 +80733,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40362,7 +80765,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <label class="block text-xs font-bold text-gray-500 mb-1">Personal Access Token (PAT)</label>
+
+
+
+
+
+
+
+
 
 
 
@@ -40378,7 +80797,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40394,7 +80829,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Groq API Key (AI 세일즈 가이드 자동생성)</label>
+
+
+
+
+
+
+
+
 
 
 
@@ -40410,7 +80861,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://console.groq.com" target="_blank" class="text-purple-400 underline">console.groq.com</a> → 무료 (하루 14,400회) / AI 세일즈 가이드 자동생성에 사용</p>
+
+
+
+
+
+
+
+
 
 
 
@@ -40426,7 +80893,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40442,7 +80925,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-white/60 border border-white text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">돌아가기</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -40458,6 +80957,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
 
 
@@ -40466,7 +80973,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40490,7 +81021,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="flex items-center gap-3 px-6 pt-6 pb-3">
+
+
+
+
+
+
+
+
 
 
 
@@ -40506,7 +81053,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <span id="missCount" class="px-2.5 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black"></span>
+
+
+
+
+
+
+
+
 
 
 
@@ -40522,7 +81085,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40538,7 +81117,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="flex justify-between items-center px-6 pb-6 pt-3 border-t border-gray-200/40 mt-2 shrink-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -40554,6 +81149,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         <button id="saveMissGuides" class="px-6 py-2.5 rounded-xl bg-green-700 text-white text-[13px] font-black hover:bg-green-800 transition-colors shadow-sm">✅ 선택 항목 저장</button>
 
 
@@ -40562,7 +81165,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -40586,7 +81205,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <input type="file" id="file" accept=".xlsx, .xls, .csv" class="hidden">
+
+
+
+
+
+
+
+
 
 
 
@@ -40602,7 +81245,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         `;
+
+
+
+
+
+
+
+
 
 
 
@@ -40618,7 +81277,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         // 아이콘 리렌더링
+
+
+
+
+
+
+
+
 
 
 
@@ -40642,7 +81317,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // ==========================================
+
+
+
+
+
+
+
+
 
 
 
@@ -40658,7 +81357,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         // ==========================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40682,7 +81405,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const pwdInput = document.getElementById("pwd");
+
+
+
+
+
+
+
+
 
 
 
@@ -40698,7 +81437,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         
+
+
+
+
+
+
+
+
 
 
 
@@ -40714,7 +81469,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(pwdInput.value === ADMIN_PWD) {
+
+
+
+
+
+
+
+
 
 
 
@@ -40730,7 +81501,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 applyDefaultPatIfNeeded(pwdInput.value);
+
+
+
+
+
+
+
+
 
 
 
@@ -40746,7 +81533,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 document.getElementById("uploadPanel").classList.remove("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -40762,7 +81565,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             } else {
+
+
+
+
+
+
+
+
 
 
 
@@ -40778,7 +81597,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             }
+
+
+
+
+
+
+
+
 
 
 
@@ -40794,7 +81629,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         pwdGo.onclick = checkPwd;
+
+
+
+
+
+
+
+
 
 
 
@@ -40818,7 +81669,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // 세션 유지 시 자동 패스
+
+
+
+
+
+
+
+
 
 
 
@@ -40834,7 +81709,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("authPanel").classList.add("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -40850,6 +81741,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("uploadPanel").classList.add("flex");
 
 
@@ -40858,7 +81757,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40882,7 +81805,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         document.getElementById("openSettings").onclick = () => { 
+
+
+
+
+
+
+
+
 
 
 
@@ -40898,7 +81837,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("uploadPanel").classList.remove("flex");
+
+
+
+
+
+
+
+
 
 
 
@@ -40914,6 +81869,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("settingsPanel").classList.add("flex");
 
 
@@ -40922,7 +81885,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -40938,7 +81917,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("settingsPanel").classList.add("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -40954,7 +81949,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("uploadPanel").classList.remove("hidden"); 
+
+
+
+
+
+
+
+
 
 
 
@@ -40970,7 +81981,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -40994,7 +82029,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         document.getElementById("ghSave").onclick = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -41010,7 +82061,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 owner: document.getElementById("ghOwner").value.trim(),
+
+
+
+
+
+
+
+
 
 
 
@@ -41026,7 +82093,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 branch: document.getElementById("ghBranch").value.trim() || "main"
+
+
+
+
+
+
+
+
 
 
 
@@ -41042,7 +82125,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             saveGhConfig();
+
+
+
+
+
+
+
+
 
 
 
@@ -41058,7 +82157,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             setAnthKey(document.getElementById("anthKeyInput").value.trim());
+
+
+
+
+
+
+
+
 
 
 
@@ -41074,6 +82189,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             document.getElementById("backToUpload").click();
 
 
@@ -41082,7 +82205,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -41106,6 +82253,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const missDetectBtn = document.getElementById("missDetectBtn");
 
 
@@ -41114,7 +82269,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const backFromMiss  = document.getElementById("backToUploadFromMiss");
+
+
+
+
+
+
+
+
 
 
 
@@ -41138,7 +82309,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         const showPanel = (id) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -41154,7 +82349,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 const el = document.getElementById(pid);
+
+
+
+
+
+
+
+
 
 
 
@@ -41170,7 +82381,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(pid === id){ el.classList.remove("hidden"); el.classList.add("flex"); }
+
+
+
+
+
+
+
+
 
 
 
@@ -41186,7 +82413,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             });
+
+
+
+
+
+
+
+
 
 
 
@@ -41210,6 +82453,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if(missDetectBtn) {
 
 
@@ -41218,7 +82477,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             missDetectBtn.onclick = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -41242,7 +82517,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 // 신발만, 유니크 품번 기준으로 가이드 없는 상품 추출
+
+
+
+
+
+
+
+
 
 
 
@@ -41258,7 +82557,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 const missing = PRODUCTS.filter(p => {
+
+
+
+
+
+
+
+
 
 
 
@@ -41274,7 +82589,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     seen.add(p.품번);
+
+
+
+
+
+
+
+
 
 
 
@@ -41290,7 +82621,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     return !SALES_GUIDES[p.품번];
+
+
+
+
+
+
+
+
 
 
 
@@ -41314,7 +82661,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 const countEl = document.getElementById("missCount");
+
+
+
+
+
+
+
+
 
 
 
@@ -41338,7 +82709,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 const listEl = document.getElementById("missList");
+
+
+
+
+
+
+
+
 
 
 
@@ -41362,7 +82757,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 if(missing.length === 0){
+
+
+
+
+
+
+
+
 
 
 
@@ -41378,6 +82797,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     return;
 
 
@@ -41386,7 +82813,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -41410,7 +82861,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     <div class="bg-white/70 border border-gray-200 rounded-xl p-3 space-y-2">
+
+
+
+
+
+
+
+
 
 
 
@@ -41426,7 +82893,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <label class="flex items-center gap-2 cursor-pointer min-w-0">
+
+
+
+
+
+
+
+
 
 
 
@@ -41442,7 +82925,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <span class="text-[11px] font-black text-gray-500 shrink-0">${escapeHtml(p.브랜드||'')} · ${escapeHtml(p.품번)}</span>
+
+
+
+
+
+
+
+
 
 
 
@@ -41458,7 +82957,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             </label>
+
+
+
+
+
+
+
+
 
 
 
@@ -41474,7 +82989,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -41490,7 +83021,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <button class="ai-gen-btn w-full py-2 rounded-lg bg-purple-600 text-white text-[12px] font-black hover:bg-purple-700 transition-colors shadow-sm" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ ${escapeHtml(p.품명||'')} 가이드 자동 생성</button>
+
+
+
+
+
+
+
+
 
 
 
@@ -41506,7 +83053,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <summary class="text-purple-400 font-bold cursor-pointer hover:text-purple-600 select-none">📋 RunRepeat 스펙 추가 (선택 — 정확도 향상)</summary>
+
+
+
+
+
+
+
+
 
 
 
@@ -41522,7 +83085,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                                 <textarea class="ai-review-text w-full px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="4" placeholder="Terrain: Road&#10;Drop: 8mm&#10;Weight: 198g&#10;Features: Carbon plate | Cushioned&#10;..." data-code="${p.품번}"></textarea>
+
+
+
+
+
+
+
+
 
 
 
@@ -41538,7 +83117,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -41554,7 +83149,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+
+
+
+
+
+
+
+
 
 
 
@@ -41570,7 +83181,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             <input type="text" placeholder="추천 고객" class="miss-tg ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+
+
+
+
+
+
+
+
 
 
 
@@ -41586,6 +83213,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         </div>
 
 
@@ -41594,7 +83229,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -41618,7 +83269,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 // AI 버튼 이벤트 위임
+
+
+
+
+
+
+
+
 
 
 
@@ -41634,7 +83309,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     // 🤖 AI 생성 토글
+
+
+
+
+
+
+
+
 
 
 
@@ -41650,7 +83341,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         const code = e.target.dataset.code;
+
+
+
+
+
+
+
+
 
 
 
@@ -41666,7 +83373,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         if (box) box.classList.toggle('hidden');
+
+
+
+
+
+
+
+
 
 
 
@@ -41682,7 +83405,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     }
+
+
+
+
+
+
+
+
 
 
 
@@ -41698,7 +83437,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     if (e.target.classList.contains('ai-gen-btn')) {
+
+
+
+
+
+
+
+
 
 
 
@@ -41714,7 +83469,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             alert("⚠️ Admin > API 설정에서 Anthropic API Key를 먼저 등록해주세요.\n\nsk-ant-api03-... 형식의 키입니다.");
+
+
+
+
+
+
+
+
 
 
 
@@ -41730,7 +83501,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -41746,6 +83533,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         const brand = e.target.dataset.brand;
 
 
@@ -41754,7 +83549,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         const name  = e.target.dataset.name;
+
+
+
+
+
+
+
+
 
 
 
@@ -41778,6 +83589,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         const orig = e.target.textContent;
 
 
@@ -41786,7 +83613,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         e.target.textContent = "⏳ AI 분석 중...";
+
+
+
+
+
+
+
+
 
 
 
@@ -41810,6 +83653,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         try {
 
 
@@ -41818,7 +83677,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             const rawText = await callAIGuide(brand, name, reviewText);
+
+
+
+
+
+
+
+
 
 
 
@@ -41842,6 +83717,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             // 전체 결과 저장
 
 
@@ -41850,7 +83741,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             window._missGuideData = window._missGuideData || {};
+
+
+
+
+
+
+
+
 
 
 
@@ -41874,7 +83781,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             // 필드 자동 채우기
+
+
+
+
+
+
+
+
 
 
 
@@ -41890,7 +83821,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
+
+
+
+
+
+
+
+
 
 
 
@@ -41906,7 +83853,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
+
+
+
+
+
+
+
+
 
 
 
@@ -41922,6 +83885,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             if (ftEl) ftEl.value = parsed.features;
 
 
@@ -41930,7 +83901,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             if (tgEl) tgEl.value = parsed.target;
+
+
+
+
+
+
+
+
 
 
 
@@ -41954,7 +83941,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             // 자동 체크 + AI 박스 닫기
+
+
+
+
+
+
+
+
 
 
 
@@ -41970,7 +83981,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             if (chk) chk.checked = true;
+
+
+
+
+
+
+
+
 
 
 
@@ -41994,7 +84021,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             e.target.textContent = "✅ 생성 완료";
+
+
+
+
+
+
+
+
 
 
 
@@ -42010,7 +84061,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             alert("AI 생성 실패: " + err.message);
+
+
+
+
+
+
+
+
 
 
 
@@ -42026,7 +84093,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         } finally {
+
+
+
+
+
+
+
+
 
 
 
@@ -42042,7 +84125,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -42058,7 +84157,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 }, { once: false });
+
+
+
+
+
+
+
+
 
 
 
@@ -42074,7 +84189,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -42098,7 +84237,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         const bulkAiBtn = document.getElementById("bulkAiBtn");
+
+
+
+
+
+
+
+
 
 
 
@@ -42114,7 +84269,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             bulkAiBtn.onclick = async () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -42130,7 +84301,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     alert("⚠️ Admin > API 설정에서 Groq API Key를 먼저 등록해주세요.\n발급: console.groq.com (무료)");
+
+
+
+
+
+
+
+
 
 
 
@@ -42146,7 +84333,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -42162,7 +84365,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(items.length === 0) { alert("미등록 신발이 없습니다."); return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -42186,7 +84405,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 bulkAiBtn.disabled = true;
+
+
+
+
+
+
+
+
 
 
 
@@ -42210,7 +84453,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 for(const btn of items) {
+
+
+
+
+
+
+
+
 
 
 
@@ -42226,7 +84493,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     const brand = btn.dataset.brand;
+
+
+
+
+
+
+
+
 
 
 
@@ -42242,7 +84525,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
+
+
+
+
+
+
+
+
 
 
 
@@ -42258,7 +84557,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         const rawText = await callAIGuide(brand, name, "");
+
+
+
+
+
+
+
+
 
 
 
@@ -42274,7 +84589,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         window._missGuideData = window._missGuideData || {};
+
+
+
+
+
+
+
+
 
 
 
@@ -42290,7 +84621,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         const listEl  = document.getElementById("missList");
+
+
+
+
+
+
+
+
 
 
 
@@ -42306,7 +84653,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
+
+
+
+
+
+
+
+
 
 
 
@@ -42322,7 +84685,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
+
+
+
+
+
+
+
+
 
 
 
@@ -42338,7 +84717,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             if(kwEl) kwEl.value = parsed.keywords.join(", ");
+
+
+
+
+
+
+
+
 
 
 
@@ -42354,7 +84749,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             if(tgEl) tgEl.value = parsed.target;
+
+
+
+
+
+
+
+
 
 
 
@@ -42370,7 +84781,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                             const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
+
+
+
+
+
+
+
+
 
 
 
@@ -42386,7 +84813,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         }
+
+
+
+
+
+
+
+
 
 
 
@@ -42402,7 +84845,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     } catch(err) {
+
+
+
+
+
+
+
+
 
 
 
@@ -42418,7 +84877,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         console.warn(`[AI 일괄생성] ${name} 실패:`, err.message);
+
+
+
+
+
+
+
+
 
 
 
@@ -42434,7 +84909,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     // API 레이트리밋 방지 딜레이
+
+
+
+
+
+
+
+
 
 
 
@@ -42450,7 +84941,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -42474,7 +84989,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 bulkAiBtn.disabled = false;
+
+
+
+
+
+
+
+
 
 
 
@@ -42490,7 +85021,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     alert(`✅ AI 가이드 ${done}개 생성 완료!\n이제 "선택 항목 저장" 버튼을 눌러 GitHub에 저장하세요.`);
+
+
+
+
+
+
+
+
 
 
 
@@ -42506,6 +85053,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             };
 
 
@@ -42514,7 +85069,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -42546,7 +85125,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         if(saveMissBtn) {
+
+
+
+
+
+
+
+
 
 
 
@@ -42562,6 +85165,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(!checkPat()) return;
 
 
@@ -42570,7 +85181,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 const checked = document.querySelectorAll(".miss-chk:checked");
+
+
+
+
+
+
+
+
 
 
 
@@ -42594,7 +85221,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 const newEntries = {};
+
+
+
+
+
+
+
+
 
 
 
@@ -42610,7 +85261,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     const code = chk.dataset.code;
+
+
+
+
+
+
+
+
 
 
 
@@ -42626,7 +85293,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     const ft = document.querySelector(`.miss-ft[data-code="${code}"]`)?.value || "";
+
+
+
+
+
+
+
+
 
 
 
@@ -42642,7 +85325,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     const pt = document.querySelector(`.miss-pt[data-code="${code}"]`)?.value || "";
+
+
+
+
+
+
+
+
 
 
 
@@ -42658,7 +85357,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     newEntries[code] = {
+
+
+
+
+
+
+
+
 
 
 
@@ -42674,7 +85389,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         features: ft||ai.features||"", target: tg||ai.target||"", pitch: pt||ai.closing||ai.pitch||"",
+
+
+
+
+
+
+
+
 
 
 
@@ -42690,7 +85421,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         drop: ai.drop||"", spec_analysis: ai.spec_analysis||"",
+
+
+
+
+
+
+
+
 
 
 
@@ -42706,6 +85453,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                         why: ai.why||"", best_for: ai.best_for||"", closing: ai.closing||pt||""
 
 
@@ -42714,7 +85469,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     };
+
+
+
+
+
+
+
+
 
 
 
@@ -42738,7 +85509,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 const merged = Object.assign({}, SALES_GUIDES, newEntries);
+
+
+
+
+
+
+
+
 
 
 
@@ -42754,7 +85549,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 saveMissBtn.textContent = "⏳ 저장 중...";
+
+
+
+
+
+
+
+
 
 
 
@@ -42778,7 +85589,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 try {
+
+
+
+
+
+
+
+
 
 
 
@@ -42794,7 +85629,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     let sha = null;
+
+
+
+
+
+
+
+
 
 
 
@@ -42810,7 +85661,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     const body = { message:`update: sales guide +${Object.keys(newEntries).length}개 추가`, content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch };
+
+
+
+
+
+
+
+
 
 
 
@@ -42826,7 +85693,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     const res = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+
+
+
+
+
+
+
 
 
 
@@ -42850,7 +85733,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     SALES_GUIDES = merged;
+
+
+
+
+
+
+
+
 
 
 
@@ -42866,7 +85773,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     _recomputeStock(); render(); window.renderSalesAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -42882,7 +85805,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     showPanel("uploadPanel");
+
+
+
+
+
+
+
+
 
 
 
@@ -42898,7 +85837,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     alert("저장 실패: " + err.message);
+
+
+
+
+
+
+
+
 
 
 
@@ -42914,7 +85869,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     saveMissBtn.textContent = origText;
+
+
+
+
+
+
+
+
 
 
 
@@ -42930,7 +85901,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 }
+
+
+
+
+
+
+
+
 
 
 
@@ -42946,7 +85933,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -42970,7 +85981,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         document.getElementById('mainUploadTrigger').onclick = () => {
+
+
+
+
+
+
+
+
 
 
 
@@ -42986,6 +86013,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(mainFileInput) mainFileInput.click();
 
 
@@ -42994,7 +86029,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         };
+
+
+
+
+
+
+
+
 
 
 
@@ -43010,7 +86061,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         // 💡 작동 안 하던 기존 파일 변경 감지 이벤트 복구
+
+
+
+
+
+
+
+
 
 
 
@@ -43026,7 +86093,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             if(!checkPat()) { e.target.value = ""; return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -43042,7 +86125,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             const d = new Date();
+
+
+
+
+
+
+
+
 
 
 
@@ -43058,7 +86157,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             localStorage.setItem('PREV_RAW', JSON.stringify(RAW)); 
+
+
+
+
+
+
+
+
 
 
 
@@ -43074,7 +86189,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             reader.onload = async (ev) => {
+
+
+
+
+
+
+
+
 
 
 
@@ -43090,7 +86221,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 if(!window.XLSX) { alert("엑셀 파서 로딩 중입니다. 잠시 후 시도해주세요."); return; }
+
+
+
+
+
+
+
+
 
 
 
@@ -43106,7 +86253,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], window.XLSX);
+
+
+
+
+
+
+
+
 
 
 
@@ -43122,7 +86285,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 try { 
+
+
+
+
+
+
+
+
 
 
 
@@ -43138,7 +86317,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     await window.commitInventoryToGitHub(rows, meta); 
+
+
+
+
+
+
+
+
 
 
 
@@ -43154,7 +86349,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     _safeSessionCache({rows, meta, images:IMAGES, memos:MEMOS, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, salesDeductions:SALES_DEDUCTIONS, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
+
+
+
+
+
+
+
+
 
 
 
@@ -43170,7 +86381,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                     document.getElementById("adminModal").classList.add("hidden");
+
+
+
+
+
+
+
+
 
 
 
@@ -43186,7 +86413,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
                 } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰과 저장소 정보를 확인하세요."); console.error("Upload error:", err); }
+
+
+
+
+
+
+
+
 
 
 
@@ -43202,7 +86445,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
             };
+
+
+
+
+
+
+
+
 
 
 
@@ -43218,6 +86477,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
         };
 
 
@@ -43226,7 +86493,31 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -43250,7 +86541,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -43266,7 +86573,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
     if(window.renderSalesAdmin) window.renderSalesAdmin();
+
+
+
+
+
+
+
+
 
 
 
@@ -43290,7 +86613,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function _revealDashOnlyUI() {
+
+
+
+
 
 
 
@@ -43298,11 +86641,23 @@ function _revealDashOnlyUI() {
 
 
 
+
+
+
+
     const ld = document.getElementById('dashOnlyLoading');
 
 
 
+
+
+
+
     if (ld) ld.remove();
+
+
+
+
 
 
 
@@ -43314,7 +86669,19 @@ function _revealDashOnlyUI() {
 
 
 
+
+
+
+
+
+
+
+
 loadGhConfig(); loadData().then(async () => {
+
+
+
+
 
 
 
@@ -43322,7 +86689,15 @@ loadGhConfig(); loadData().then(async () => {
 
 
 
+
+
+
+
         try { await window.openAnalyticsReport(); }
+
+
+
+
 
 
 
@@ -43330,7 +86705,15 @@ loadGhConfig(); loadData().then(async () => {
 
 
 
+
+
+
+
     }
+
+
+
+
 
 
 
@@ -43342,7 +86725,19 @@ loadGhConfig(); loadData().then(async () => {
 
 
 
+
+
+
+
+
+
+
+
 // 대시보드 열기 실패 등 만약을 대비한 안전장치 — 15초 뒤에도 로딩화면이면 강제로 재고앱 노출
+
+
+
+
 
 
 
@@ -43362,7 +86757,27 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ── 공용 비밀번호 게이트 (허브 서버 검증 · 90일 기기 기억) ─────────────
+
+
+
+
 
 
 
@@ -43370,7 +86785,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
 (function(){
+
+
+
+
 
 
 
@@ -43378,7 +86801,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
     const GATE_API = 'https://racement-hub.vercel.app/api/inv-gate';
+
+
+
+
 
 
 
@@ -43390,7 +86821,19 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
+
+
+
+
     function showGate(){
+
+
+
+
 
 
 
@@ -43398,7 +86841,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
         ov.id = 'rcGateOverlay';
+
+
+
+
 
 
 
@@ -43406,7 +86857,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
         ov.innerHTML =
+
+
+
+
 
 
 
@@ -43414,7 +86873,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             + '<div style="font-size:34px;margin-bottom:10px;">🔐</div>'
+
+
+
+
 
 
 
@@ -43422,7 +86889,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             + '<div style="font-size:13px;color:#8A8A8A;margin:6px 0 18px;">매장 공용 비밀번호를 입력하세요</div>'
+
+
+
+
 
 
 
@@ -43430,7 +86905,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             + '<div id="rcGateErr" style="display:none;color:#E11D48;font-size:13px;font-weight:700;margin-top:10px;">비밀번호가 틀렸습니다</div>'
+
+
+
+
 
 
 
@@ -43438,7 +86921,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             + '</div>';
+
+
+
+
 
 
 
@@ -43446,7 +86937,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
         const pw = document.getElementById('rcGatePw');
+
+
+
+
 
 
 
@@ -43454,7 +86953,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
         const err = document.getElementById('rcGateErr');
+
+
+
+
 
 
 
@@ -43462,7 +86969,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
         async function verify(){
+
+
+
+
 
 
 
@@ -43470,7 +86985,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             go.textContent = '확인 중…'; go.disabled = true; err.style.display = 'none';
+
+
+
+
 
 
 
@@ -43478,7 +87001,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
                 const r = await fetch(GATE_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw.value }) });
+
+
+
+
 
 
 
@@ -43486,7 +87017,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
                     localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000));
+
+
+
+
 
 
 
@@ -43494,7 +87033,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
                     return;
+
+
+
+
 
 
 
@@ -43502,7 +87049,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             } catch(e) {}
+
+
+
+
 
 
 
@@ -43510,7 +87065,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
             go.textContent = '입장'; go.disabled = false;
+
+
+
+
 
 
 
@@ -43518,11 +87081,23 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
         go.onclick = verify;
 
 
 
+
+
+
+
         pw.onkeydown = e => { if (e.key === 'Enter') verify(); };
+
+
+
+
 
 
 
@@ -43534,7 +87109,19 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
+
+
+
+
     if (document.body) showGate();
+
+
+
+
 
 
 
@@ -43542,7 +87129,15 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
+
+
+
+
 })();
+
+
+
+
 
 
 
