@@ -1,7 +1,7 @@
-시작: 2026-07-28T03:58:49.547Z
+시작: 2026-07-28T04:07:17.621Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17852111404471403.014866897524
+[RES] 200 login.xml&postfix=17852116491758000.526182208436
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,14 +12,18 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 2건
+selTodaySalesList: 3건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":124000,"ITEM_CD":"28809","ITEM_NM":"스위프트 리펠 재킷 NV [IM9481-010, S]","SALES_AMT":111600,"NET_SALES_AMT":1
   파싱 성공: 3건
-메뉴 클릭 후 거래: 2건
+메뉴 클릭 후 거래: 3건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29376","ITEM_NM":"클라우드몬스터 3 [3WG10031043, 245]","SALES_AMT":206100,"NET_SALES_AMT":18
   파싱 성공: 2건
-완료: 품번 5개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":179000,"ITEM_CD":"30698","ITEM_NM":"라이드 19 [S21055-172, 265]","SALES_AMT":152150,"NET_SALES_AMT":138318
+  파싱 성공: 2건
+완료: 품번 7개
