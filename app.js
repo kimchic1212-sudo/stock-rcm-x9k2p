@@ -8839,8 +8839,19 @@ function renderZonePins(){
     });
 }
 
+// 도면 이미지 로딩 + 실패 시에만 에러문구 표시 (src 주입 시점에 핸들러를 걸어야 정확)
+function loadFloorImg(imgId, errId){
+    const img = $("#" + imgId), err = $("#" + errId);
+    if(!img) return;
+    if(err) err.classList.add("hidden");
+    img.style.display = "block";
+    img.onerror = () => { img.style.display = "none"; if(err) err.classList.remove("hidden"); };
+    img.onload  = () => { img.style.display = "block"; if(err) err.classList.add("hidden"); };
+    img.src = floorplanUrl();
+}
+
 window.openZoneManager = () => {
-    $("#zmFloorImg").src = floorplanUrl();
+    loadFloorImg("zmFloorImg", "zmImgErr");
     renderZonePins();
     _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
     $("#zoneManagerModal").classList.remove("hidden");
@@ -8877,7 +8888,7 @@ $("#zmImgWrap").onclick = (e) => {
 window.openFloorPlanView = (zoneId, extraLabel) => {
     const z = LOCATIONS.zones.find(zz => zz.id === zoneId);
     if(!z) return;
-    $("#fpvFloorImg").src = floorplanUrl();
+    loadFloorImg("fpvFloorImg", "fpvImgErr");
     $("#fpvTitle").textContent = `📍 ${z.label}${extraLabel ? ' · ' + extraLabel : ''}`;
     $("#fpvPin").style.left = z.x + '%';
     $("#fpvPin").style.top = z.y + '%';
