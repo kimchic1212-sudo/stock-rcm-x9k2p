@@ -2,7 +2,15 @@
 
 
 
+
+
+
+
 <html lang="ko">
+
+
+
+
 
 
 
@@ -10,7 +18,15 @@
 
 
 
+
+
+
+
 <meta charset="utf-8" />
+
+
+
+
 
 
 
@@ -18,7 +34,15 @@
 
 
 
+
+
+
+
 <title>RACEMENT 해운대 · 재고조회시스템</title>
+
+
+
+
 
 
 
@@ -26,7 +50,15 @@
 
 
 
+
+
+
+
 <script src="./libs/tailwind.js"></script>
+
+
+
+
 
 
 
@@ -34,7 +66,15 @@
 
 
 
+
+
+
+
 <script src="./libs/lucide.min.js"></script>
+
+
+
+
 
 
 
@@ -42,7 +82,15 @@
 
 
 
+
+
+
+
   :root{
+
+
+
+
 
 
 
@@ -50,7 +98,15 @@
 
 
 
+
+
+
+
     --ink:#0A0A0A; --ink-2:#3D3D3D; --muted:#8A8A8A;
+
+
+
+
 
 
 
@@ -58,7 +114,15 @@
 
 
 
+
+
+
+
   }
+
+
+
+
 
 
 
@@ -66,7 +130,15 @@
 
 
 
+
+
+
+
     --bg: #121212; --surface: #1E1E1E; --ink: #F3F4F6; --ink-2: #9CA3AF; --muted: #6B7280; --line: #374151; --accent:#ff5a1f;
+
+
+
+
 
 
 
@@ -74,7 +146,15 @@
 
 
 
+
+
+
+
   *{ -webkit-tap-highlight-color: transparent; }
+
+
+
+
 
 
 
@@ -82,7 +162,15 @@
 
 
 
+
+
+
+
   body{ font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif; }
+
+
+
+
 
 
 
@@ -90,11 +178,23 @@
 
 
 
+
+
+
+
   .tnum{ font-variant-numeric:tabular-nums; }
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -102,11 +202,23 @@
 
 
 
+
+
+
+
   .card-hover:hover{ border-color:#0A0A0A; }
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -114,7 +226,15 @@
 
 
 
+
+
+
+
   .brutal{ border:2px solid var(--ink); border-radius:10px; box-shadow:3px 3px 0 0 var(--ink); }
+
+
+
+
 
 
 
@@ -122,11 +242,23 @@
 
 
 
+
+
+
+
   .chip[data-active="1"]{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -134,7 +266,15 @@
 
 
 
+
+
+
+
   .loc-simple b { font-weight: 700; color: var(--ink); }
+
+
+
+
 
 
 
@@ -142,7 +282,15 @@
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -150,7 +298,15 @@
 
 
 
+
+
+
+
   body.dark-mode .size-cell { background: #1E1E1E; border-color: #374151; color: #F3F4F6; }
+
+
+
+
 
 
 
@@ -158,7 +314,15 @@
 
 
 
+
+
+
+
   body.dark-mode .size-cell .sz { color: #9CA3AF; }
+
+
+
+
 
 
 
@@ -166,7 +330,15 @@
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -174,7 +346,15 @@
 
 
 
+
+
+
+
   body.dark-mode .size-cell.zero { background: #121212; border-color: #1F2937; color: #4B5563; }
+
+
+
+
 
 
 
@@ -182,7 +362,15 @@
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -190,7 +378,15 @@
 
 
 
+
+
+
+
   body.dark-mode .size-cell.danger { background: #4c0519; border-color: #881337; color: #fecdd3; }
+
+
+
+
 
 
 
@@ -202,11 +398,27 @@
 
 
 
+
+
+
+
+
+
+
+
   .size-cell.warn { background: #FFF7ED; border-color: #FED7AA; color: #D97706; }
 
 
 
+
+
+
+
   body.dark-mode .size-cell.warn { background: #451a03; border-color: #78350f; color: #fde68a; }
+
+
+
+
 
 
 
@@ -218,7 +430,19 @@
 
 
 
+
+
+
+
+
+
+
+
   .copyable { cursor: pointer; transition: opacity 0.1s; display:inline-flex; align-items:center; gap:4px; padding: 2px 6px -ml-1; border-radius: 6px; }
+
+
+
+
 
 
 
@@ -226,11 +450,23 @@
 
 
 
+
+
+
+
   .copyable:hover { color: #c2410c; background: #fff0e9; }
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -238,7 +474,15 @@
 
 
 
+
+
+
+
   .fav-btn { padding: 8px; border-radius: 8px; color: #A1A1AA; transition: all 0.2s; cursor:pointer; }
+
+
+
+
 
 
 
@@ -246,11 +490,23 @@
 
 
 
+
+
+
+
   .fav-btn[data-active="1"] { color: var(--ink); fill: var(--ink); }
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -258,7 +514,15 @@
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -266,7 +530,15 @@
 
 
 
+
+
+
+
   body.showroom-mode .real-qty { display: none !important; }
+
+
+
+
 
 
 
@@ -274,7 +546,15 @@
 
 
 
+
+
+
+
   body.showroom-mode .loc-simple { display: none !important; }
+
+
+
+
 
 
 
@@ -282,7 +562,15 @@
 
 
 
+
+
+
+
   body.showroom-mode .detail-grid table th:nth-child(3),
+
+
+
+
 
 
 
@@ -290,7 +578,15 @@
 
 
 
+
+
+
+
   body.showroom-mode .detail-grid table th:nth-child(4),
+
+
+
+
 
 
 
@@ -302,7 +598,19 @@
 
 
 
+
+
+
+
+
+
+
+
   .logo-symbol{ display:block; height:38px; width:auto; }
+
+
+
+
 
 
 
@@ -314,7 +622,19 @@
 
 
 
+
+
+
+
+
+
+
+
   /* #dashboard 팝업 모드 — 재고앱 본체를 숨기고 로딩화면만 보여줘 대시보드로 바로 전환되게 함 */
+
+
+
+
 
 
 
@@ -322,7 +642,15 @@
 
 
 
+
+
+
+
   body.dashboard-only-mode > section,
+
+
+
+
 
 
 
@@ -330,7 +658,15 @@
 
 
 
+
+
+
+
   #dashOnlyLoading { position: fixed; inset: 0; z-index: 104; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; }
+
+
+
+
 
 
 
@@ -338,7 +674,15 @@
 
 
 
+
+
+
+
   #dashOnlyLoading span { font-size: 13px; font-weight: 700; color: var(--muted); }
+
+
+
+
 
 
 
@@ -346,7 +690,15 @@
 
 
 
+
+
+
+
 </style>
+
+
+
+
 
 
 
@@ -354,7 +706,15 @@
 
 
 
+
+
+
+
 <body class="min-h-screen pb-20">
+
+
+
+
 
 
 
@@ -362,7 +722,15 @@
 
 
 
+
+
+
+
   // #dashboard로 들어오면 즉시(본문 렌더 전) 재고앱 UI를 숨기고 로딩화면만 표시 —
+
+
+
+
 
 
 
@@ -370,7 +738,15 @@
 
 
 
+
+
+
+
   if (location.hash === '#dashboard') {
+
+
+
+
 
 
 
@@ -378,7 +754,15 @@
 
 
 
+
+
+
+
     document.write('<div id="dashOnlyLoading"><div class="spin"></div><span>판매 데이터 불러오는 중...</span></div>');
+
+
+
+
 
 
 
@@ -386,7 +770,19 @@
 
 
 
+
+
+
+
 </script>
+
+
+
+
+
+
+
+
 
 
 
@@ -402,7 +798,19 @@
 
 
 
+
+
+
+
+
+
+
+
 <header class="sticky top-0 z-30 no-print" style="background:var(--bg); border-bottom:1px solid var(--line);">
+
+
+
+
 
 
 
@@ -410,7 +818,15 @@
 
 
 
+
+
+
+
     <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+
+
+
+
 
 
 
@@ -418,7 +834,15 @@
 
 
 
+
+
+
+
       <div class="min-w-0 leading-tight">
+
+
+
+
 
 
 
@@ -426,7 +850,15 @@
 
 
 
+
+
+
+
           HAEUNDAE · INVENTORY
+
+
+
+
 
 
 
@@ -434,7 +866,15 @@
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -442,11 +882,23 @@
 
 
 
+
+
+
+
       </div>
 
 
 
+
+
+
+
     </div>
+
+
+
+
 
 
 
@@ -454,7 +906,15 @@
 
 
 
+
+
+
+
       <button id="allMemosBtn" class="chip mono text-[11px] bg-yellow-50 text-yellow-700 border-yellow-200"><i data-lucide="bell-ring" class="w-3.5 h-3.5"></i><span class="hidden sm:inline"> 오늘의 메모</span></button>
+
+
+
+
 
 
 
@@ -462,7 +922,15 @@
 
 
 
+
+
+
+
       <button id="darkModeBtn" class="chip mono text-[11px]">🌙</button>
+
+
+
+
 
 
 
@@ -470,7 +938,15 @@
 
 
 
+
+
+
+
       <button id="refreshBtn" class="chip mono text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
+
+
+
+
 
 
 
@@ -478,11 +954,23 @@
 
 
 
+
+
+
+
     </div>
 
 
 
+
+
+
+
   </div>
+
+
+
+
 
 
 
@@ -494,11 +982,27 @@
 
 
 
+
+
+
+
+
+
+
+
 <section class="mx-auto max-w-7xl px-4 sm:px-6 mt-3 flex flex-col md:flex-row gap-3 w-full">
 
 
 
+
+
+
+
     <div class="card p-3 flex flex-col justify-center min-w-[110px] shrink-0">
+
+
+
+
 
 
 
@@ -506,11 +1010,23 @@
 
 
 
+
+
+
+
         <div id="statItems" class="text-2xl font-black tnum">0</div>
 
 
 
+
+
+
+
     </div>
+
+
+
+
 
 
 
@@ -518,7 +1034,15 @@
 
 
 
+
+
+
+
     <div class="card p-3 flex flex-col justify-center min-w-[110px] shrink-0">
+
+
+
+
 
 
 
@@ -526,11 +1050,27 @@
 
 
 
+
+
+
+
         <div id="statBusan" class="text-2xl font-black tnum" style="color:var(--accent)">0</div>
 
 
 
+
+
+
+
     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -542,7 +1082,15 @@
 
 
 
+
+
+
+
         <div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)] mb-1">CATEGORY</div>
+
+
+
+
 
 
 
@@ -550,7 +1098,19 @@
 
 
 
+
+
+
+
     </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -562,7 +1122,15 @@
 
 
 
+
+
+
+
         <div class="mono text-[10px] tracking-[.16em] text-[color:var(--muted)] mb-1.5">DATA SOURCE</div>
+
+
+
+
 
 
 
@@ -570,7 +1138,15 @@
 
 
 
+
+
+
+
             <span class="text-xs font-bold text-gray-400">데이터 로딩중...</span>
+
+
+
+
 
 
 
@@ -578,11 +1154,27 @@
 
 
 
+
+
+
+
     </div>
 
 
 
+
+
+
+
 </section>
+
+
+
+
+
+
+
+
 
 
 
@@ -594,7 +1186,15 @@
 
 
 
+
+
+
+
   <div class="card p-3">
+
+
+
+
 
 
 
@@ -602,7 +1202,15 @@
 
 
 
+
+
+
+
     <div class="flex gap-2 items-center">
+
+
+
+
 
 
 
@@ -610,7 +1218,15 @@
 
 
 
+
+
+
+
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--muted)]"></i>
+
+
+
+
 
 
 
@@ -618,7 +1234,15 @@
 
 
 
+
+
+
+
         <button id="clearQ" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-[color:var(--muted)]"><i data-lucide="x" class="w-4 h-4"></i></button>
+
+
+
+
 
 
 
@@ -626,7 +1250,15 @@
 
 
 
+
+
+
+
       <!-- 액션버튼 (JS가 채움) -->
+
+
+
+
 
 
 
@@ -634,11 +1266,23 @@
 
 
 
+
+
+
+
     </div>
 
 
 
+
+
+
+
     <div id="recentSearches" class="hidden flex gap-1.5 mt-1.5 overflow-x-auto pb-1 items-center no-scrollbar"></div>
+
+
+
+
 
 
 
@@ -650,7 +1294,19 @@
 
 
 
+
+
+
+
+
+
+
+
     <!-- 필터 접기/펼치기 토글 (스크롤 시 자동 접힘) -->
+
+
+
+
 
 
 
@@ -658,7 +1314,15 @@
 
 
 
+
+
+
+
       <span id="filterToggleLabel">▼ 필터 펼치기</span>
+
+
+
+
 
 
 
@@ -670,7 +1334,19 @@
 
 
 
+
+
+
+
+
+
+
+
     <div id="filterDetails" class="mt-2 flex flex-col gap-1.5">
+
+
+
+
 
 
 
@@ -678,7 +1354,15 @@
 
 
 
+
+
+
+
       <div class="flex flex-wrap gap-1.5 items-center">
+
+
+
+
 
 
 
@@ -686,7 +1370,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-cat="ALL" data-active="1">전체</button>
+
+
+
+
 
 
 
@@ -694,7 +1386,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-cat="의류">의류</button>
+
+
+
+
 
 
 
@@ -702,7 +1402,15 @@
 
 
 
+
+
+
+
         <span class="text-[10px] font-bold text-[color:var(--muted)] ml-2 shrink-0">성별</span>
+
+
+
+
 
 
 
@@ -710,7 +1418,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-gender="M">남성</button>
+
+
+
+
 
 
 
@@ -718,11 +1434,23 @@
 
 
 
+
+
+
+
         <button class="chip" data-gender="U">공용</button>
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -730,7 +1458,15 @@
 
 
 
+
+
+
+
       <div class="flex flex-wrap gap-1.5 items-center">
+
+
+
+
 
 
 
@@ -738,7 +1474,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-fav="1">🔖 즐겨찾기</button>
+
+
+
+
 
 
 
@@ -746,7 +1490,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-memo="1">📝 메모있음</button>
+
+
+
+
 
 
 
@@ -754,7 +1506,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-salesspeed="normal">📈 보통</button>
+
+
+
+
 
 
 
@@ -762,7 +1522,15 @@
 
 
 
+
+
+
+
         <button class="chip" data-rtchance="1">🔄 RT 추천</button>
+
+
+
+
 
 
 
@@ -770,7 +1538,15 @@
 
 
 
+
+
+
+
           <option value="default">기본 정렬 (분류·재고순)</option>
+
+
+
+
 
 
 
@@ -778,7 +1554,15 @@
 
 
 
+
+
+
+
           <option value="name">품명순</option>
+
+
+
+
 
 
 
@@ -786,7 +1570,15 @@
 
 
 
+
+
+
+
           <option value="priceAsc">가격 낮은 순</option>
+
+
+
+
 
 
 
@@ -794,7 +1586,15 @@
 
 
 
+
+
+
+
           <option value="promoRateDesc">🎟️ 최종 할인율 높은 순</option>
+
+
+
+
 
 
 
@@ -802,7 +1602,15 @@
 
 
 
+
+
+
+
           <option value="promoCouponRateDesc">🏷️ 쿠폰 할인율 높은 순</option>
+
+
+
+
 
 
 
@@ -810,7 +1618,15 @@
 
 
 
+
+
+
+
         <div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-1">
+
+
+
+
 
 
 
@@ -818,7 +1634,15 @@
 
 
 
+
+
+
+
           <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
+
+
+
+
 
 
 
@@ -826,7 +1650,15 @@
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -834,7 +1666,15 @@
 
 
 
+
+
+
+
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+
+
+
+
 
 
 
@@ -842,7 +1682,15 @@
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -850,7 +1698,15 @@
 
 
 
+
+
+
+
       <div id="dpFilterRow" class="flex flex-wrap gap-1.5 items-center hidden">
+
+
+
+
 
 
 
@@ -858,7 +1714,15 @@
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -866,7 +1730,15 @@
 
 
 
+
+
+
+
       <div id="brandRow" class="flex gap-2 items-center">
+
+
+
+
 
 
 
@@ -874,7 +1746,15 @@
 
 
 
+
+
+
+
           <span>브랜드</span>
+
+
+
+
 
 
 
@@ -882,7 +1762,15 @@
 
 
 
+
+
+
+
         </button>
+
+
+
+
 
 
 
@@ -890,7 +1778,15 @@
 
 
 
+
+
+
+
         <div id="brandCollapsedPreview" class="flex gap-1 flex-wrap flex-1 min-w-0 items-center"></div>
+
+
+
+
 
 
 
@@ -898,7 +1794,15 @@
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -906,7 +1810,15 @@
 
 
 
+
+
+
+
       <div id="brandExpandedPanel" class="hidden flex-col gap-1.5">
+
+
+
+
 
 
 
@@ -914,7 +1826,15 @@
 
 
 
+
+
+
+
         <div id="brandChips" class="flex flex-wrap gap-1 pl-[2.875rem]">
+
+
+
+
 
 
 
@@ -922,7 +1842,15 @@
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -930,7 +1858,15 @@
 
 
 
+
+
+
+
         <div class="flex gap-1.5 items-center pl-[2.875rem]">
+
+
+
+
 
 
 
@@ -938,7 +1874,15 @@
 
 
 
+
+
+
+
             <i data-lucide="search" class="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-[color:var(--muted)] pointer-events-none"></i>
+
+
+
+
 
 
 
@@ -946,7 +1890,15 @@
 
 
 
+
+
+
+
           </div>
+
+
+
+
 
 
 
@@ -954,7 +1906,15 @@
 
 
 
+
+
+
+
             <button id="brandSortPop" class="brand-sort-btn px-2.5 py-1.5 transition-colors" data-active="1">인기순</button>
+
+
+
+
 
 
 
@@ -962,7 +1922,15 @@
 
 
 
+
+
+
+
           </div>
+
+
+
+
 
 
 
@@ -970,7 +1938,15 @@
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -978,7 +1954,15 @@
 
 
 
+
+
+
+
   </div>
+
+
+
+
 
 
 
@@ -990,11 +1974,27 @@
 
 
 
+
+
+
+
+
+
+
+
 <main id="results" class="mx-auto max-w-7xl px-4 sm:px-6 mt-4 mb-6">
 
 
 
+
+
+
+
   <!-- 판매 현황 요약 패널 (JS가 채움) -->
+
+
+
+
 
 
 
@@ -1006,7 +2006,19 @@
 
 
 
+
+
+
+
+
+
+
+
   <div id="emptyState" class="card p-12 text-center hidden">
+
+
+
+
 
 
 
@@ -1014,7 +2026,15 @@
 
 
 
+
+
+
+
     <div class="text-sm text-gray-500">우측 상단 ADMIN에서 엑셀을 업로드해주세요.</div>
+
+
+
+
 
 
 
@@ -1022,7 +2042,15 @@
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -1030,7 +2058,15 @@
 
 
 
+
+
+
+
       <div class="text-xl font-black">NO MATCH</div>
+
+
+
+
 
 
 
@@ -1038,11 +2074,23 @@
 
 
 
+
+
+
+
   </div>
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -1050,7 +2098,15 @@
 
 
 
+
+
+
+
   
+
+
+
+
 
 
 
@@ -1058,11 +2114,23 @@
 
 
 
+
+
+
+
       <button id="moreBtn" class="brutal px-6 py-2.5 font-black bg-[color:var(--surface)] text-[color:var(--ink)]">더 보기 (+60)</button>
 
 
 
+
+
+
+
   </div>
+
+
+
+
 
 
 
@@ -1074,7 +2142,19 @@
 
 
 
+
+
+
+
+
+
+
+
 <div id="allMemosModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+
+
+
+
 
 
 
@@ -1082,7 +2162,15 @@
 
 
 
+
+
+
+
     <div class="card w-full max-w-2xl p-5 sm:p-6 max-h-[80vh] flex flex-col relative bg-[color:var(--surface)]">
+
+
+
+
 
 
 
@@ -1090,7 +2178,15 @@
 
 
 
+
+
+
+
       <h3 class="text-xl font-black mb-1">🔔 오늘의 직원 메모 모아보기</h3>
+
+
+
+
 
 
 
@@ -1098,7 +2194,15 @@
 
 
 
+
+
+
+
       <div id="allMemosList" class="flex-1 overflow-y-auto border-y py-2 mb-2 space-y-2"></div>
+
+
+
+
 
 
 
@@ -1106,11 +2210,27 @@
 
 
 
+
+
+
+
   </div>
 
 
 
+
+
+
+
 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -1122,7 +2242,15 @@
 
 
 
+
+
+
+
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
+
+
+
+
 
 
 
@@ -1130,7 +2258,15 @@
 
 
 
+
+
+
+
       <button id="closeDetail" class="absolute top-4 right-4 p-2 z-10"><i data-lucide="x"></i></button>
+
+
+
+
 
 
 
@@ -1138,7 +2274,15 @@
 
 
 
+
+
+
+
       
+
+
+
+
 
 
 
@@ -1150,7 +2294,19 @@
 
 
 
+
+
+
+
+
+
+
+
       <div id="detailBody"></div>
+
+
+
+
 
 
 
@@ -1158,11 +2314,27 @@
 
 
 
+
+
+
+
   </div>
 
 
 
+
+
+
+
 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -1174,7 +2346,15 @@
 
 
 
+
+
+
+
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-3">
+
+
+
+
 
 
 
@@ -1182,7 +2362,15 @@
 
 
 
+
+
+
+
       <button id="closeAdmin" class="absolute top-4 right-4 p-2 z-10"><i data-lucide="x"></i></button>
+
+
+
+
 
 
 
@@ -1190,11 +2378,23 @@
 
 
 
+
+
+
+
       <h3 class="text-xl font-black mb-4 text-center">ADMIN PANEL</h3>
 
 
 
+
+
+
+
       
+
+
+
+
 
 
 
@@ -1202,7 +2402,15 @@
 
 
 
+
+
+
+
         <input id="pwd" type="password" class="ipt w-full mb-2 text-center tracking-widest" placeholder="비밀번호 입력" />
+
+
+
+
 
 
 
@@ -1210,7 +2418,15 @@
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -1218,7 +2434,15 @@
 
 
 
+
+
+
+
       <div id="uploadPanel" class="hidden">
+
+
+
+
 
 
 
@@ -1226,7 +2450,15 @@
 
 
 
+
+
+
+
         <button id="openZoneManager" class="text-xs mb-3 ml-1.5 border px-2 py-1 rounded" style="background:#fff0e9;color:#c2410c;border-color:#ffd8c4;">📍 창고 위치 관리</button>
+
+
+
+
 
 
 
@@ -1234,7 +2466,15 @@
 
 
 
+
+
+
+
             <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400 mb-2"></i>
+
+
+
+
 
 
 
@@ -1242,7 +2482,15 @@
 
 
 
+
+
+
+
             <div class="text-xs text-gray-500 mt-1">업로드 시 재고 변동량 자동 계산</div>
+
+
+
+
 
 
 
@@ -1250,11 +2498,27 @@
 
 
 
+
+
+
+
         <input id="file" type="file" class="hidden" accept=".xlsx,.xls,.csv" />
 
 
 
+
+
+
+
       </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -1266,7 +2530,15 @@
 
 
 
+
+
+
+
         <button id="backToUpload" class="text-xs mb-3 border px-2 py-1 text-gray-600 hover:bg-gray-100">← 이전 화면으로</button>
+
+
+
+
 
 
 
@@ -1274,7 +2546,15 @@
 
 
 
+
+
+
+
         <input id="ghRepo" class="ipt w-full mb-2" placeholder="저장소 이름" />
+
+
+
+
 
 
 
@@ -1282,7 +2562,15 @@
 
 
 
+
+
+
+
         <button id="ghSave" class="brutal w-full py-2 bg-black text-white font-black">설정 저장</button>
+
+
+
+
 
 
 
@@ -1290,7 +2578,15 @@
 
 
 
+
+
+
+
     </div>
+
+
+
+
 
 
 
@@ -1298,7 +2594,19 @@
 
 
 
+
+
+
+
 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -1310,7 +2618,15 @@
 
 
 
+
+
+
+
 <div id="zoneManagerModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+
+
+
+
 
 
 
@@ -1318,7 +2634,15 @@
 
 
 
+
+
+
+
     <div class="card w-full max-w-4xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
+
+
+
+
 
 
 
@@ -1326,7 +2650,15 @@
 
 
 
+
+
+
+
       <h3 class="text-lg font-black mb-1">📍 창고 위치 관리</h3>
+
+
+
+
 
 
 
@@ -1334,7 +2666,15 @@
 
 
 
+
+
+
+
       <div class="flex items-center gap-2 mb-3">
+
+
+
+
 
 
 
@@ -1342,11 +2682,23 @@
 
 
 
+
+
+
+
         <span id="zmAddModeHint" class="hidden text-xs font-bold" style="color:#c2410c;">도면을 클릭해 새 구역 위치를 지정하세요</span>
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -1354,7 +2706,15 @@
 
 
 
+
+
+
+
         <!-- src는 JS(openZoneManager)에서 주입. 빈 src="" 를 두면 브라우저가 현재 페이지 URL로 해석해
+
+
+
+
 
 
 
@@ -1362,7 +2722,15 @@
 
 
 
+
+
+
+
         <img id="zmFloorImg" class="floorplan-img" style="width:100%; height:100%; object-fit:contain; display:block; filter:contrast(1.15) saturate(0.9);" draggable="false">
+
+
+
+
 
 
 
@@ -1370,7 +2738,15 @@
 
 
 
+
+
+
+
         <div id="zmImgErr" style="position:absolute; inset:0; display:none; align-items:center; justify-content:center; text-align:center; padding:20px; font-size:12px; font-weight:700; color:#c2410c;">
+
+
+
+
 
 
 
@@ -1378,7 +2754,15 @@
 
 
 
+
+
+
+
         </div>
+
+
+
+
 
 
 
@@ -1386,7 +2770,15 @@
 
 
 
+
+
+
+
       </div>
+
+
+
+
 
 
 
@@ -1394,11 +2786,27 @@
 
 
 
+
+
+
+
   </div>
 
 
 
+
+
+
+
 </div>
+
+
+
+
+
+
+
+
 
 
 
@@ -1410,7 +2818,15 @@
 
 
 
+
+
+
+
 <div id="floorPlanViewModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+
+
+
+
 
 
 
@@ -1418,7 +2834,15 @@
 
 
 
+
+
+
+
     <div class="card w-full max-w-3xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
+
+
+
+
 
 
 
@@ -1426,7 +2850,15 @@
 
 
 
+
+
+
+
       <h3 id="fpvTitle" class="text-lg font-black mb-3">📍 위치</h3>
+
+
+
+
 
 
 
@@ -1434,7 +2866,15 @@
 
 
 
+
+
+
+
         <!-- src는 JS(openFloorPlanView)에서 주입 — 빈 src="" 금지 (위 zmFloorImg 주석 참고) -->
+
+
+
+
 
 
 
@@ -1442,7 +2882,15 @@
 
 
 
+
+
+
+
         <!-- display는 JS에서만 제어 (위 zmImgErr 주석 참고) -->
+
+
+
+
 
 
 
@@ -1450,7 +2898,15 @@
 
 
 
+
+
+
+
           도면 이미지를 불러오지 못했습니다.<br>새로고침 후 다시 시도해주세요.
+
+
+
+
 
 
 
@@ -1458,7 +2914,15 @@
 
 
 
+
+
+
+
         <div id="fpvPin" style="position:absolute; width:22px; height:22px; margin-left:-11px; margin-top:-11px; border-radius:50%; background:#ff5a1f; box-shadow:0 0 0 4px rgba(255,90,31,.35); animation:fpv-pulse 1.4s ease-in-out infinite;"></div>
+
+
+
+
 
 
 
@@ -1466,7 +2930,15 @@
 
 
 
+
+
+
+
     </div>
+
+
+
+
 
 
 
@@ -1474,7 +2946,15 @@
 
 
 
+
+
+
+
 </div>
+
+
+
+
 
 
 
@@ -1482,7 +2962,15 @@
 
 
 
+
+
+
+
 @keyframes fpv-pulse { 0%,100%{ box-shadow:0 0 0 4px rgba(255,90,31,.35);} 50%{ box-shadow:0 0 0 10px rgba(255,90,31,.12);} }
+
+
+
+
 
 
 
@@ -1494,7 +2982,23 @@
 
 
 
-<script src="./app.js?v=26072816"></script>
+
+
+
+
+
+
+
+
+<script src="./app.js?v=26072817"></script>
+
+
+
+
+
+
+
+
 
 
 
@@ -1506,7 +3010,15 @@
 
 
 
+
+
+
+
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+
+
+
+
 
 
 
@@ -1514,7 +3026,15 @@
 
 
 
+
+
+
+
          width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+
+
+
+
 
 
 
@@ -1522,7 +3042,15 @@
 
 
 
+
+
+
+
          align-items:center;justify-content:center;transition:opacity .2s;">
+
+
+
+
 
 
 
@@ -1530,7 +3058,15 @@
 
 
 
+
+
+
+
 </button>
+
+
+
+
 
 
 
@@ -1538,7 +3074,15 @@
 
 
 
+
+
+
+
   (function(){
+
+
+
+
 
 
 
@@ -1546,7 +3090,15 @@
 
 
 
+
+
+
+
     const filterEl    = document.getElementById('filterDetails');
+
+
+
+
 
 
 
@@ -1554,11 +3106,23 @@
 
 
 
+
+
+
+
     const toggleLabel = document.getElementById('filterToggleLabel');
 
 
 
+
+
+
+
     let   isCollapsed = false;
+
+
+
+
 
 
 
@@ -1570,7 +3134,19 @@
 
 
 
+
+
+
+
+
+
+
+
     window._toggleFilter = function() {
+
+
+
+
 
 
 
@@ -1578,11 +3154,23 @@
 
 
 
+
+
+
+
       userToggled = !isCollapsed; // 펼쳤으면 userToggled=true, 접으면 false
 
 
 
+
+
+
+
       applyState();
+
+
+
+
 
 
 
@@ -1594,7 +3182,19 @@
 
 
 
+
+
+
+
+
+
+
+
     function applyState() {
+
+
+
+
 
 
 
@@ -1602,7 +3202,15 @@
 
 
 
+
+
+
+
         filterEl.style.display = 'none';
+
+
+
+
 
 
 
@@ -1610,7 +3218,15 @@
 
 
 
+
+
+
+
         toggleLabel.textContent = '▼ 필터 펼치기';
+
+
+
+
 
 
 
@@ -1618,7 +3234,15 @@
 
 
 
+
+
+
+
         filterEl.style.display = '';
+
+
+
+
 
 
 
@@ -1626,11 +3250,23 @@
 
 
 
+
+
+
+
         toggleLabel.textContent = '▲ 필터 접기';
 
 
 
+
+
+
+
       }
+
+
+
+
 
 
 
@@ -1642,7 +3278,19 @@
 
 
 
+
+
+
+
+
+
+
+
     window.addEventListener('scroll', function(){
+
+
+
+
 
 
 
@@ -1650,7 +3298,15 @@
 
 
 
+
+
+
+
       const atTop    = window.scrollY < 10;   // 진짜 최상단에 있을 때만
+
+
+
+
 
 
 
@@ -1658,7 +3314,15 @@
 
 
 
+
+
+
+
       const hasEnoughContent = (document.documentElement.scrollHeight - window.innerHeight) > 300;
+
+
+
+
 
 
 
@@ -1666,7 +3330,15 @@
 
 
 
+
+
+
+
         isCollapsed = true;
+
+
+
+
 
 
 
@@ -1674,7 +3346,15 @@
 
 
 
+
+
+
+
       }
+
+
+
+
 
 
 
@@ -1682,7 +3362,15 @@
 
 
 
+
+
+
+
       // scrollY < 120 조건 사용 시: 필터 접힘→페이지 짧아짐→scrollY 강제하강→재펼침 루프 발생
+
+
+
+
 
 
 
@@ -1690,7 +3378,15 @@
 
 
 
+
+
+
+
         isCollapsed = false;
+
+
+
+
 
 
 
@@ -1698,7 +3394,15 @@
 
 
 
+
+
+
+
         applyState();
+
+
+
+
 
 
 
@@ -1706,7 +3410,15 @@
 
 
 
+
+
+
+
       // 맨 위로 버튼
+
+
+
+
 
 
 
@@ -1714,7 +3426,15 @@
 
 
 
+
+
+
+
     }, {passive:true});
+
+
+
+
 
 
 
@@ -1722,7 +3442,15 @@
 
 
 
+
+
+
+
 </script>
+
+
+
+
 
 
 
@@ -1730,7 +3458,15 @@
 
 
 
+
+
+
+
 </html>
+
+
+
+
 
 
 
