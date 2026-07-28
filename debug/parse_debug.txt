@@ -1,7 +1,7 @@
-시작: 2026-07-28T08:41:50.388Z
+시작: 2026-07-28T08:50:16.546Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17852281246735507.152717492994
+[RES] 200 login.xml&postfix=17852286274146975.755491021186
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 34건
+selTodaySalesList: 35건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":124000,"ITEM_CD":"28809","ITEM_NM":"스위프트 리펠 재킷 NV [IM9481-010, S]","SALES_AMT":111600,"NET_SALES_AMT":1
   파싱 성공: 3건
-메뉴 클릭 후 거래: 34건
+메뉴 클릭 후 거래: 35건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29376","ITEM_NM":"클라우드몬스터 3 [3WG10031043, 245]","SALES_AMT":206100,"NET_SALES_AMT":18
@@ -149,5 +149,9 @@ selTodaySalesList: 34건
 [RES] 200 selItemSalesList
   items: 11개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":-1,"NSALES_YN":"N","TOT_SALES_AMT":-200000,"ITEM_CD":"32293","ITEM_NM":"오라라이트 티셔츠 [11000-00001, L]","SALES_AMT":-140000,"NET_SALES_AMT":-
+  파싱 성공: 11건
+[RES] 200 selItemSalesList
+  items: 11개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":45000,"ITEM_CD":"24289","ITEM_NM":"코어 런 미드컷 삭스 V5 [WP8C5R, 4]","SALES_AMT":45000,"NET_SALES_AMT":40909,
   파싱 성공: 11건
 완료: 품번 58개
