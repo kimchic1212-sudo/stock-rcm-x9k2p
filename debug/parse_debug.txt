@@ -1,7 +1,7 @@
-시작: 2026-07-28T14:49:00.912Z
+시작: 2026-07-28T14:57:33.163Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17852501528492502.629733788654
+[RES] 200 login.xml&postfix=17852506667203695.8648744391176
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -167,19 +167,6 @@ selTodaySalesList: 42건
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":189000,"ITEM_CD":"37690","ITEM_NM":"엔돌핀 아주라 [S101348-1032, 250]","SALES_AMT":160650,"NET_SALES_AMT":146
   파싱 성공: 4건
 [RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":29000,"ITEM_CD":"23530","ITEM_NM":"퍼포먼스 런 삭 로우 [2UF10060813, M]","SALES_AMT":27550,"NET_SALES_AMT":2504
-  파싱 성공: 3건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":85000,"ITEM_CD":"37015","ITEM_NM":"코어 티 [1WE10580553, M]","SALES_AMT":79250,"NET_SALES_AMT":72045,"VAT_
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":105000,"ITEM_CD":"39425","ITEM_NM":"드라이핏 ADV 에이로스위프트 미드라이즈 브리프 라인드 3인치 쇼츠 [FN2329-468, M]","SALES_AMT":
-  파싱 성공: 1건
-[RES] 200 selItemSalesList
-  items: 1개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":116350,"ITEM_CD":"24718","ITEM_NM":"후디니 자켓 [24147-SRPO, L]","SALES_AMT":116350,"NET_SALES_AMT":105773,"
-  파싱 성공: 1건
-완료: 품번 70개
+  items: 0개 / keys: rsMsg
+  파싱 성공: 0건
+완료: 품번 64개
