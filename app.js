@@ -60,9 +60,12 @@ style.innerHTML = `
 
     #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
 
-    .card img { opacity: 0; transition: opacity 0.3s ease-in-out; }
+    /* 상품 이미지 페이드인 — 단, 도면(.floorplan-img)은 loaded 클래스를 붙여주는 로직이 없으므로 제외 */
+    .card img:not(.floorplan-img) { opacity: 0; transition: opacity 0.3s ease-in-out; }
 
     .card img.loaded { opacity: 1 !important; }
+
+    .card img.floorplan-img { opacity: 1 !important; }
 
     .chip { background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; transition: all 0.2s ease-in-out; cursor: pointer; }
 
@@ -8140,7 +8143,7 @@ function openDetail(p){
     if(zone){
         html += `<div onclick="window.openFloorPlanView('${zone.id}'${asn.slot?`,'${escapeHtml(asn.slot)}'`:''})" class="flex items-center gap-2.5 cursor-pointer group">
             <div style="width:64px;height:55px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;position:relative;flex-shrink:0;background:#fff;">
-                <img src="${floorplanUrl()}" style="width:100%;height:100%;object-fit:cover;">
+                <img src="${floorplanUrl()}" class="floorplan-img" style="width:100%;height:100%;object-fit:cover;">
                 <div style="position:absolute;left:${zone.x}%;top:${zone.y}%;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#ff5a1f;border:1.5px solid #fff;"></div>
             </div>
             <div class="min-w-0">
