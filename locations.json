@@ -161,6 +161,10 @@
     "28818R5-BOB": {
       "zoneId": "accC1",
       "slot": "뒤-2단"
+    },
+    "JD1160": {
+      "zoneId": "accC2",
+      "slot": "뒤-2단"
     }
   }
 }
