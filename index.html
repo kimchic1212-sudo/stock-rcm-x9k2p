@@ -5631,6 +5631,36 @@
 
 
 </div>
+
+<!-- 여러 상품 위치 일괄 지정 (ADMIN) -->
+<div id="bulkLocModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
+  <div class="modal-outer absolute inset-0 flex items-center justify-center p-2 sm:p-4">
+    <div class="card w-full max-w-3xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
+      <button id="closeBulkLoc" class="absolute top-3 right-3 p-2 z-10"><i data-lucide="x"></i></button>
+      <h3 class="text-lg font-black mb-1">📍 위치 일괄 지정</h3>
+      <div id="bulkLocCount" class="text-xs font-bold mb-3" style="color:#c2410c;"></div>
+      <div class="text-xs text-gray-500 mb-2">지도에서 구역을 클릭해 선택하세요.</div>
+      <div id="bulkLocMap" style="width:100%; aspect-ratio:1000/640; background:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid var(--line); user-select:none;"></div>
+      <div class="flex flex-wrap items-center gap-2 mt-3">
+        <span id="bulkLocPick" class="text-sm font-black" style="color:#c2410c;">구역 미선택</span>
+        <select id="bulkLocSlot" class="ipt text-xs py-1.5 px-2 hidden" style="max-width:150px;"></select>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-4">
+        <button id="bulkLocSave" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]">선택한 상품에 지정</button>
+        <button id="bulkLocClear" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]">위치 해제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 선택 모드 하단 바 -->
+<div id="bulkBar" class="hidden no-print" style="position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:9995; background:#0f172a; color:#fff; border-radius:14px; box-shadow:0 10px 30px -5px rgba(0,0,0,.45); padding:10px 14px; display:flex; align-items:center; gap:10px; max-width:94vw;">
+  <span id="bulkBarCount" style="font-size:13px; font-weight:900; white-space:nowrap;">0개 선택</span>
+  <button id="bulkBarAll" style="font-size:11px; font-weight:900; background:#1e293b; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">전체선택</button>
+  <button id="bulkBarAssign" style="font-size:11px; font-weight:900; background:#ff5a1f; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">📍 위치 지정</button>
+  <button id="bulkBarExit" style="font-size:11px; font-weight:900; background:#334155; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">종료</button>
+</div>
+
 
 
 
@@ -5710,7 +5740,7 @@
 
 
 
-<script src="./app.js?v=26072922"></script>
+<script src="./app.js?v=26072923"></script>
 
 
 
