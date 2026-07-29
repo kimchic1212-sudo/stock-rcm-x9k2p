@@ -1,7 +1,7 @@
-시작: 2026-07-29T04:51:50.951Z
+시작: 2026-07-29T04:52:46.909Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853007241825434.5421087418945
+[RES] 200 login.xml&postfix=17853007800518119.598805464212
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 10건
+selTodaySalesList: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21389","ITEM_NM":"보메로 플러스 [HV8150-102, 220]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-메뉴 클릭 후 거래: 10건
+메뉴 클릭 후 거래: 11건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37055","ITEM_NM":"퍼포먼스 티 [1ME10234958, L]","SALES_AMT":115000,"NET_SALES_AMT":104545,
@@ -47,6 +47,15 @@ selTodaySalesList: 10건
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"29982","ITEM_NM":"마파테 X [1161990-BCMN, 255]","SALES_AMT":254150,"NET_SALES_AMT":23104
   파싱 성공: 1건
 [RES] 200 selItemSalesList
-  items: 0개 / keys: rsMsg
-  파싱 성공: 0건
-완료: 품번 10개
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"39227","ITEM_NM":"에어로핏 스트라이드 숏슬리브 탑 [IH0746-010, M]","SALES_AMT":35000,"NET_SALES_AMT"
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":89000,"ITEM_CD":"39328","ITEM_NM":"에어로핏 스위프트 탱크 [IM5149-011, S]","SALES_AMT":0,"NET_SALES_AMT":0,"VAT_A
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":2,"NSALES_YN":"N","TOT_SALES_AMT":24000,"ITEM_CD":"10259","ITEM_NM":"아미노샷 퍼펙트 에너지 [AMINOSHOT4, 1SIZE]","SALES_AMT":20400,"NET_SALES_AMT":
+  파싱 성공: 2건
+완료: 품번 12개
