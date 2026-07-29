@@ -149,6 +149,10 @@
     "WP7C0R": {
       "zoneId": "accC2",
       "slot": "앞-1단"
+    },
+    "010-02863-AC": {
+      "zoneId": "accC2",
+      "slot": "뒤-1단"
     }
   }
 }
