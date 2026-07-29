@@ -70815,11 +70815,9 @@ function _bulkUpdateBar(){
     bar.classList.toggle("hidden", !BULK_LOC_MODE);
     const cnt = $("#bulkBarCount");
     if(cnt) cnt.textContent = `${BULK_LOC_SEL.size}개 선택`;
+    // 고른 게 없으면 '위치 지정'은 아예 감춘다 (0개일 때 누를 일이 없음)
     const assign = $("#bulkBarAssign");
-    if(assign){
-        assign.disabled = BULK_LOC_SEL.size === 0;
-        assign.style.opacity = BULK_LOC_SEL.size === 0 ? '.45' : '1';
-    }
+    if(assign) assign.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
 }
 
 // 카드 DOM에 선택 상태만 반영 (전체 재렌더 없이 즉각 반응)
