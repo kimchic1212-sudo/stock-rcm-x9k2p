@@ -1,38 +1,6 @@
 {
   "zones": [
     {
-      "id": "accL1",
-      "group": "매장",
-      "label": "모션랩 앞 1",
-      "x": 21,
-      "y": 69.25,
-      "slots": [
-        "1단-좌",
-        "1단-우",
-        "2단-좌",
-        "2단-우"
-      ],
-      "code": "C1",
-      "w": 8,
-      "h": 12
-    },
-    {
-      "id": "accL2",
-      "group": "매장",
-      "label": "모션랩 앞 2",
-      "x": 31,
-      "y": 70,
-      "slots": [
-        "1단-좌",
-        "1단-우",
-        "2단-좌",
-        "2단-우"
-      ],
-      "code": "C2",
-      "w": 8,
-      "h": 12
-    },
-    {
       "id": "storage1",
       "group": "창고",
       "label": "앞쪽창고(F) — 랙 미지정",
@@ -164,6 +132,62 @@
         "1단",
         "2단"
       ]
+    },
+    {
+      "id": "accL1",
+      "code": "C1",
+      "group": "매장",
+      "label": "모션랩 앞 1",
+      "x": 20.0,
+      "y": 70,
+      "w": 4.7,
+      "h": 12,
+      "slots": [
+        "1단",
+        "2단"
+      ]
+    },
+    {
+      "id": "accL1b",
+      "code": "C2",
+      "group": "매장",
+      "label": "모션랩 앞 2",
+      "x": 25.1,
+      "y": 70,
+      "w": 4.7,
+      "h": 12,
+      "slots": [
+        "1단",
+        "2단"
+      ]
+    },
+    {
+      "id": "accL2",
+      "code": "C3",
+      "group": "매장",
+      "label": "모션랩 앞 3",
+      "x": 30.2,
+      "y": 70,
+      "w": 4.7,
+      "h": 12,
+      "slots": [
+        "1단",
+        "2단"
+      ]
+    },
+    {
+      "id": "accL2b",
+      "code": "C4",
+      "group": "매장",
+      "label": "모션랩 앞 4",
+      "x": 35.3,
+      "y": 70,
+      "w": 4.7,
+      "h": 12,
+      "slots": [
+        "1단",
+        "2단"
+      ]
     }
   ],
   "assignments": {
@@ -171,40 +195,40 @@
       "zoneId": "mainzone-stool-3"
     },
     "94310360": {
-      "zoneId": "accC3",
+      "zoneId": "accC1",
       "slot": "1단"
     },
     "WP7C0R": {
-      "zoneId": "accC4",
+      "zoneId": "accC2",
       "slot": "1단"
     },
     "010-02863-AC": {
-      "zoneId": "accC2",
+      "zoneId": "accC4",
       "slot": "1단"
     },
     "FB5682-010": {
-      "zoneId": "accC1",
+      "zoneId": "accC3",
       "slot": "1단"
     },
     "28818R5-BOB": {
-      "zoneId": "accC1",
+      "zoneId": "accC3",
       "slot": "2단"
     },
     "JD1160": {
-      "zoneId": "accC2",
+      "zoneId": "accC4",
       "slot": "2단"
     },
     "IF2089-010": {
       "zoneId": "accL2",
-      "slot": "1단-좌"
+      "slot": "1단"
     },
     "IF2017-010": {
-      "zoneId": "accL2",
-      "slot": "1단-우"
+      "zoneId": "accL2b",
+      "slot": "1단"
     },
     "FN2329-468": {
-      "zoneId": "accL2",
-      "slot": "2단-우"
+      "zoneId": "accL2b",
+      "slot": "2단"
     }
   }
 }
