@@ -65060,7 +65060,7 @@ function openDetail(p){
 
 
 
-                `<option value="${z.id}" ${asn && asn.zoneId===z.id ? 'selected':''}>${escapeHtml(z.label)}</option>`).join('') + `</optgroup>`;
+                `<option value="${z.id}" ${asn && asn.zoneId===z.id ? 'selected':''}>${escapeHtml((z.code ? z.code + ' · ' : '') + z.label)}</option>`).join('') + `</optgroup>`;
 
 
 
@@ -65156,86 +65156,15 @@ function openDetail(p){
 
 
 
-        html += `<div onclick="window.openFloorPlanView('${zone.id}'${asn.slot?`,'${escapeHtml(asn.slot)}'`:''})" class="flex items-center gap-2.5 cursor-pointer group">
-
-
-
-
-
-
-
-            <div style="width:64px;height:55px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;position:relative;flex-shrink:0;background:#fff;">
-
-
-
-
-
-
-
-                <img src="${floorplanUrl()}" class="floorplan-img" style="width:100%;height:100%;object-fit:cover;">
-
-
-
-
-
-
-
-                <div style="position:absolute;left:${zone.x}%;top:${zone.y}%;width:7px;height:7px;margin-left:-3.5px;margin-top:-3.5px;border-radius:50%;background:#ff5a1f;border:1.5px solid #fff;"></div>
-
-
-
-
-
-
-
+        html += `<div onclick="window.openFloorPlanView('${zone.id}'${asn.slot?`,'${escapeHtml(asn.slot)}'`:''})" class="flex items-center gap-3 cursor-pointer group">
+            <div style="width:74px;height:52px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;flex-shrink:0;background:#fff;">
+                ${storeMapSvg({ highlightZoneId: zone.id, compact: true })}
             </div>
-
-
-
-
-
-
-
-            <div class="min-w-0">
-
-
-
-
-
-
-
-                <div class="font-black text-sm text-gray-800 group-hover:underline">${escapeHtml(zone.label)}</div>
-
-
-
-
-
-
-
-                ${asn.slot ? `<div class="text-xs font-bold text-gray-500">${escapeHtml(asn.slot)}</div>` : ''}
-
-
-
-
-
-
-
-                <div class="text-[10px] text-gray-400 mt-0.5">탭하면 도면에서 크게 보기</div>
-
-
-
-
-
-
-
+            <div class="min-w-0 flex-1">
+                <div class="group-hover:underline" style="font-size:23px;line-height:1.15;font-weight:900;color:#c2410c;letter-spacing:-0.6px;">${escapeHtml(zoneAddress(zone, asn.slot))}</div>
+                <div class="text-xs font-bold text-gray-500 mt-0.5">${escapeHtml(zone.label)}</div>
+                <div class="text-[10px] text-gray-400 mt-0.5">탭하면 지도에서 크게 보기</div>
             </div>
-
-
-
-
-
-
-
         </div>`;
 
 
@@ -70346,7 +70275,7 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 
 
 
-// ── 위치찾기: 창고 위치 관리(구역 핀 추가/수정/삭제) ─────────────────────
+// ── 위치찾기: 창고 위치 관리(구역 블록 추가/이동/수정/삭제) ─────────────────
 
 
 
@@ -70354,23 +70283,6 @@ $("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#
 
 
 
-// GH.owner/repo(로컬 설정값)에 기대지 않고 고정 URL 사용 — 일부 기기에서 이미지가 안 뜨는 문제 방어.
-
-
-
-
-
-
-
-// 파일명 자체를 floorplan-map.png로 바꿔 통신사/기기 프록시의 쿼리스트링 무시 캐시도 우회.
-
-
-
-
-
-
-
-function floorplanUrl(){ return `https://kimchic1212-sudo.github.io/stock-rcm-x9k2p/floorplan-map.png`; }
 
 
 
@@ -70466,294 +70378,226 @@ let _zmAddMode = false;
 
 
 
-function renderZonePins(){
-
-
-
-
-
-
-
-    const wrap = $("#zmPins"); if(!wrap) return;
-
-
-
-
-
-
-
-    wrap.innerHTML = LOCATIONS.zones.map(z => `
-
-
-
-
-
-
-
-        <div class="zm-pin" data-zone="${z.id}" style="position:absolute; left:${z.x}%; top:${z.y}%; transform:translate(-50%,-50%); cursor:pointer;">
-
-
-
-
-
-
-
-            <div style="width:16px;height:16px;border-radius:50%;background:#ff5a1f;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>
-
-
-
-
-
-
-
-            <div style="position:absolute; top:18px; left:50%; transform:translateX(-50%); white-space:nowrap; background:#111; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:5px; pointer-events:none;">${escapeHtml(z.label)}</div>
-
-
-
-
-
-
-
-        </div>`).join('');
-
-
-
-
-
-
-
-    wrap.querySelectorAll('.zm-pin').forEach(el=>{
-
-
-
-
-
-
-
-        el.onclick = (e) => {
-
-
-
-
-
-
-
-            e.stopPropagation();
-
-
-
-
-
-
-
-            const z = LOCATIONS.zones.find(zz => zz.id === el.dataset.zone);
-
-
-
-
-
-
-
-            if(!z) return;
-
-
-
-
-
-
-
-            const action = prompt(`구역: ${z.label}\n\n· 이름을 바꾸려면 새 이름 입력 후 확인\n· 삭제하려면 DELETE 입력\n· 그대로 두려면 취소`, z.label);
-
-
-
-
-
-
-
-            if(action === null) return;
-
-
-
-
-
-
-
-            const trimmed = action.trim();
-
-
-
-
-
-
-
-            if(trimmed.toUpperCase() === 'DELETE'){
-
-
-
-
-
-
-
-                if(!confirm(`"${z.label}" 구역을 삭제할까요? 배정된 상품의 위치 정보도 사라집니다.`)) return;
-
-
-
-
-
-
-
-                saveLocations(server => {
-
-
-
-
-
-
-
-                    const zones = server.zones.filter(zz => zz.id !== z.id);
-
-
-
-
-
-
-
-                    const assignments = {...server.assignments};
-
-
-
-
-
-
-
-                    for(const code in assignments) if(assignments[code].zoneId === z.id) delete assignments[code];
-
-
-
-
-
-
-
-                    return { zones, assignments };
-
-
-
-
-
-
-
-                }).then(ok => { if(ok){ renderZonePins(); showToast('구역 삭제됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
-
-
-
-
-
-
-
-                return;
-
-
-
-
-
-
-
-            }
-
-
-
-
-
-
-
-            if(trimmed && trimmed !== z.label){
-
-
-
-
-
-
-
-                const slotsStr = prompt('세부 칸 목록 (쉼표로 구분, 없으면 빈칸으로 확인)\n예: 1단-좌, 1단-우, 2단-좌, 2단-우', (z.slots||[]).join(', '));
-
-
-
-
-
-
-
-                if(slotsStr === null) return;
-
-
-
-
-
-
-
-                const slots = slotsStr.split(',').map(s=>s.trim()).filter(Boolean);
-
-
-
-
-
-
-
-                saveLocations(server => {
-
-
-
-
-
-
-
-                    const zones = server.zones.map(zz => zz.id === z.id ? {...zz, label: trimmed, slots} : zz);
-
-
-
-
-
-
-
-                    return { zones, assignments: server.assignments };
-
-
-
-
-
-
-
-                }).then(ok => { if(ok){ renderZonePins(); showToast('구역 수정됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
-
-
-
-
-
-
-
-            }
-
-
-
-
-
-
-
-        };
-
-
-
-
-
-
-
+// ── 매장 도식 지도 (SVG) ──────────────────────────────────────────────
+// 좌표계: zone의 x·y·w·h는 모두 % (x·w는 가로 기준, y·h는 세로 기준) — 기존 핀 좌표 규약과 동일.
+// viewBox 1000×640 이므로 px = x*10 (가로), y*6.4 (세로).
+const MAP_VB_W = 1000, MAP_VB_H = 640;
+
+// 매장 외곽선(부산점 ㅗ자 형태): 위쪽 블록 + 아래쪽 가로 스트립
+const MAP_SHELL = "M375,87 H691 V364 H926 V560 H74 V364 H375 Z";
+
+// 방향을 잡아주는 고정 랜드마크 — 구역이 아니라 배경 안내용(편집 불가)
+const MAP_LANDMARKS = [
+    { label: "벽면",      x: 38.5, y: 16, w: 6.5, h: 38 },
+    { label: "의류 벽면",  x: 9,    y: 59, w: 27,  h: 6  },
+    { label: "모션랩",     x: 9,    y: 70, w: 11,  h: 13 },
+    { label: "카운터",     x: 78,   y: 74, w: 10,  h: 9  }
+];
+
+// 출입구 표시 (viewBox px 단위로 직접 지정)
+const MAP_ENTRANCES = [
+    { px: 68,  py: 470, w: 12, h: 60, lx: 62,  ly: 505, anchor: "end"    },
+    { px: 420, py: 554, w: 80, h: 12, lx: 460, ly: 596, anchor: "middle" }
+];
+
+// 레거시(점 좌표) 구역도 안전하게 사각형으로 환산
+function _mapZoneRect(z){
+    const hasRect = typeof z.w === 'number' && typeof z.h === 'number' && z.w > 0 && z.h > 0;
+    const w = hasRect ? z.w : 7, h = hasRect ? z.h : 10;
+    return { x: hasRect ? z.x : (z.x - w/2), y: hasRect ? z.y : (z.y - h/2), w, h };
+}
+
+function _zoneIsStorage(z){
+    return /창고|storage/i.test(String(z.group||'') + ' ' + String(z.id||'')) || /^S/i.test(String(z.code||''));
+}
+
+// 직원이 부르는 주소 문자열 — "D3 · 2단 좌" (코드가 없으면 이름으로 대체)
+function zoneAddress(z, slot){
+    if(!z) return '';
+    const head = z.code ? z.code : z.label;
+    return slot ? `${head} · ${slot}` : head;
+}
+
+function _renderStoreMapSvg(opts){
+    opts = opts || {};
+    const hiId = opts.highlightZoneId || null;
+    const compact = !!opts.compact;
+    const editable = !!opts.editable;
+    const PX = v => (v * MAP_VB_W / 100).toFixed(1);
+    const PY = v => (v * MAP_VB_H / 100).toFixed(1);
+
+    let out = `<path d="${MAP_SHELL}" fill="#ffffff" stroke="#334155" stroke-width="${compact ? 8 : 3}" stroke-linejoin="round"/>`;
+
+    if(!compact){
+        MAP_LANDMARKS.forEach(l => {
+            out += `<rect x="${PX(l.x)}" y="${PY(l.y)}" width="${PX(l.w)}" height="${PY(l.h)}" rx="6" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5"/>`;
+            out += `<text x="${PX(l.x + l.w/2)}" y="${PY(l.y + l.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#94a3b8">${escapeHtml(l.label)}</text>`;
+        });
+        MAP_ENTRANCES.forEach(e => {
+            out += `<rect x="${e.px}" y="${e.py}" width="${e.w}" height="${e.h}" rx="3" fill="#ff5a1f"/>`;
+            out += `<text x="${e.lx}" y="${e.ly}" text-anchor="${e.anchor}" dominant-baseline="central" font-size="16" font-weight="800" fill="#c2410c">${escapeHtml(e.label)}</text>`;
+        });
+    }
+
+    (LOCATIONS.zones || []).forEach(z => {
+        const r = _mapZoneRect(z);
+        const isHi = hiId && z.id === hiId;
+        const store = _zoneIsStorage(z);
+        let fill = store ? '#e2e8f0' : '#f1f5f9';
+        let stroke = store ? '#64748b' : '#94a3b8';
+        let textCol = '#334155';
+        if(isHi){ fill = '#ff5a1f'; stroke = '#9a3412'; textCol = '#ffffff'; }
+        const cx = PX(r.x + r.w/2);
+
+        out += `<g class="zmap-zone" data-zone="${escapeHtml(z.id)}"${editable ? ' style="cursor:move;"' : ''}>`;
+        out += `<title>${escapeHtml(zoneAddress(z) + ' · ' + (z.label||''))}</title>`;
+        out += `<rect x="${PX(r.x)}" y="${PY(r.y)}" width="${PX(r.w)}" height="${PY(r.h)}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isHi ? 5 : 2.5}"/>`;
+        if(!compact){
+            const codeTxt = z.code || z.label || '';
+            const fs = r.w >= 11 ? 30 : (r.w >= 7.5 ? 26 : 22);
+            out += `<text x="${cx}" y="${PY(r.y + r.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="${textCol}" style="pointer-events:none;">${escapeHtml(codeTxt)}</text>`;
+        }
+        out += `</g>`;
+
+        if(isHi && !compact){
+            out += `<text x="${cx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
+        }
+        if(editable){
+            out += `<rect class="zmap-handle" data-zone="${escapeHtml(z.id)}" x="${Number(PX(r.x + r.w)) - 9}" y="${Number(PY(r.y + r.h)) - 9}" width="18" height="18" rx="4" fill="#ffffff" stroke="#ff5a1f" stroke-width="2.5" style="cursor:nwse-resize;"/>`;
+        }
     });
 
+    return out;
+}
 
+function storeMapSvg(opts){
+    opts = opts || {};
+    return `<svg viewBox="0 0 ${MAP_VB_W} ${MAP_VB_H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">${_renderStoreMapSvg(opts)}</svg>`;
+}
 
+// ── 구역 관리(ADMIN): 블록 드래그 이동 / 모서리 리사이즈 / 클릭 편집 ──────
+let _zmDrag = null;
 
+function _zmSvgPct(svg, clientX, clientY){
+    const b = svg.getBoundingClientRect();
+    const vbAR = MAP_VB_W / MAP_VB_H, boxAR = b.width / b.height;
+    let dw = b.width, dh = b.height, ox = 0, oy = 0;
+    if(boxAR > vbAR){ dw = b.height * vbAR; ox = (b.width - dw) / 2; }
+    else { dh = b.width / vbAR; oy = (b.height - dh) / 2; }
+    return { x: (clientX - b.left - ox) / dw * 100, y: (clientY - b.top - oy) / dh * 100 };
+}
 
+function renderZonePins(){
+    const host = $("#zmMap"); if(!host) return;
+    host.innerHTML = storeMapSvg({ editable: true });
+    const svg = host.querySelector('svg'); if(!svg) return;
+    svg.style.touchAction = 'none';
 
+    svg.addEventListener('pointerdown', (e) => {
+        const handle = e.target.closest('.zmap-handle');
+        const zoneG = e.target.closest('.zmap-zone');
+        if(!handle && !zoneG){
+            if(_zmAddMode) _zmAddZoneAt(_zmSvgPct(svg, e.clientX, e.clientY));
+            return;
+        }
+        const id = (handle || zoneG).dataset.zone;
+        const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
+        _zmDrag = { id, mode: handle ? 'resize' : 'move', start: _zmSvgPct(svg, e.clientX, e.clientY), orig: _mapZoneRect(z), moved: false };
+        try { svg.setPointerCapture(e.pointerId); } catch(_){}
+        e.preventDefault();
+    });
 
+    svg.addEventListener('pointermove', (e) => {
+        if(!_zmDrag) return;
+        const p = _zmSvgPct(svg, e.clientX, e.clientY);
+        const dx = p.x - _zmDrag.start.x, dy = p.y - _zmDrag.start.y;
+        if(Math.abs(dx) > 0.4 || Math.abs(dy) > 0.4) _zmDrag.moved = true;
+        const z = (LOCATIONS.zones||[]).find(zz => zz.id === _zmDrag.id); if(!z) return;
+        const o = _zmDrag.orig, snap = v => Math.round(v * 4) / 4;
+        if(_zmDrag.mode === 'move'){
+            z.x = snap(Math.min(99 - o.w, Math.max(0, o.x + dx)));
+            z.y = snap(Math.min(99 - o.h, Math.max(0, o.y + dy)));
+        } else {
+            z.w = snap(Math.min(50, Math.max(3, o.w + dx)));
+            z.h = snap(Math.min(50, Math.max(4, o.h + dy)));
+        }
+        svg.innerHTML = _renderStoreMapSvg({ editable: true });
+    });
+
+    const endDrag = (e) => {
+        if(!_zmDrag) return;
+        const d = _zmDrag; _zmDrag = null;
+        try { svg.releasePointerCapture(e.pointerId); } catch(_){}
+        if(d.moved) _zmPersistRect(d.id); else _zmEditZone(d.id);
+    };
+    svg.addEventListener('pointerup', endDrag);
+    svg.addEventListener('pointercancel', endDrag);
+}
+
+function _zmPersistRect(id){
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
+    const r = { x: z.x, y: z.y, w: z.w, h: z.h };
+    saveLocations(server => ({
+        zones: server.zones.map(zz => zz.id === id ? { ...zz, x: r.x, y: r.y, w: r.w, h: r.h } : zz),
+        assignments: server.assignments
+    })).then(ok => {
+        if(ok){ renderZonePins(); showToast('구역 배치 저장됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); }
+        else renderZonePins();
+    });
+}
+
+function _zmEditZone(id){
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
+    const cur = `${z.code || ''} | ${z.label || ''} | ${(z.slots||[]).join(', ')}`;
+    const input = prompt(`구역 편집 — ${z.label}\n\n형식:  코드 | 이름 | 칸목록(쉼표)\n예:  D3 | 메인존 스툴 3 | 1단 좌, 1단 우, 2단 좌, 2단 우\n\n· 삭제하려면 DELETE 만 입력\n· 그대로 두려면 취소`, cur);
+    if(input === null) return;
+    const t = String(input).trim();
+
+    if(t.toUpperCase() === 'DELETE'){
+        if(!confirm(`"${z.label}" 구역을 삭제할까요? 배정된 상품의 위치 정보도 사라집니다.`)) return;
+        saveLocations(server => {
+            const zones = server.zones.filter(zz => zz.id !== z.id);
+            const assignments = { ...server.assignments };
+            for(const code in assignments) if(assignments[code].zoneId === z.id) delete assignments[code];
+            return { zones, assignments };
+        }).then(ok => { if(ok){ renderZonePins(); showToast('구역 삭제됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+        return;
+    }
+
+    const parts = t.split('|');
+    const code = (parts[0] || '').trim();
+    const label = (parts[1] || '').trim() || z.label;
+    const slots = (parts[2] || '').split(',').map(s => s.trim()).filter(Boolean);
+    saveLocations(server => ({
+        zones: server.zones.map(zz => zz.id === z.id ? { ...zz, code, label, slots } : zz),
+        assignments: server.assignments
+    })).then(ok => { if(ok){ renderZonePins(); showToast('구역 수정됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+}
+
+function _zmAddZoneAt(p){
+    const input = prompt('새 구역 추가\n\n형식:  코드 | 이름 | 칸목록(쉼표)\n예:  S1-3 | 앞쪽창고 3번랙 | 1단, 2단, 3단', '');
+    if(input === null) return;
+    const parts = String(input).split('|');
+    const code = (parts[0] || '').trim();
+    const label = (parts[1] || '').trim() || code;
+    if(!code && !label) return;
+    const slots = (parts[2] || '').split(',').map(s => s.trim()).filter(Boolean);
+    const snap = v => Math.round(v * 4) / 4;
+    const newZone = {
+        id: _uniqueZoneId(label || code),
+        code, label,
+        group: /^S/i.test(code) ? '창고' : '매장',
+        x: snap(Math.min(91, Math.max(0, p.x - 4))),
+        y: snap(Math.min(89, Math.max(0, p.y - 5))),
+        w: 8, h: 10, slots
+    };
+    saveLocations(server => ({ zones: [...server.zones, newZone], assignments: server.assignments }))
+        .then(ok => {
+            if(ok){ renderZonePins(); showToast('구역 추가됨: ' + (label || code)); }
+            _zmAddMode = false;
+            $("#zmAddModeHint").classList.add("hidden");
+            $("#zmAddModeBtn").style.background = '';
+        });
 }
 
 
@@ -70770,95 +70614,6 @@ function renderZonePins(){
 
 
 
-// 도면 이미지 로딩 + 실패 시에만 에러문구 표시 (src 주입 시점에 핸들러를 걸어야 정확)
-
-
-
-
-
-
-
-function loadFloorImg(imgId, errId){
-
-
-
-
-
-
-
-    const img = $("#" + imgId), err = $("#" + errId);
-
-
-
-
-
-
-
-    if(!img) return;
-
-
-
-
-
-
-
-    // 에러 표시는 style.display로만 제어 — .hidden 클래스는 인라인 display에 밀려 무시됨
-
-
-
-
-
-
-
-    const showErr = (on) => { if(err) err.style.display = on ? "flex" : "none"; };
-
-
-
-
-
-
-
-    showErr(false);
-
-
-
-
-
-
-
-    img.style.display = "block";
-
-
-
-
-
-
-
-    img.onerror = () => { img.style.display = "none"; showErr(true); };
-
-
-
-
-
-
-
-    img.onload  = () => { img.style.display = "block"; showErr(false); };
-
-
-
-
-
-
-
-    img.src = floorplanUrl();
-
-
-
-
-
-
-
-}
 
 
 
@@ -70875,45 +70630,9 @@ function loadFloorImg(imgId, errId){
 
 
 window.openZoneManager = () => {
-
-
-
-
-
-
-
-    loadFloorImg("zmFloorImg", "zmImgErr");
-
-
-
-
-
-
-
     renderZonePins();
-
-
-
-
-
-
-
     _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
-
-
-
-
-
-
-
     $("#zoneManagerModal").classList.remove("hidden");
-
-
-
-
-
-
-
 };
 
 
@@ -70994,143 +70713,8 @@ $("#zmAddModeBtn").onclick = () => {
 
 
 
-$("#zmImgWrap").onclick = (e) => {
-
-
-
-
-
-
-
-    if(!_zmAddMode) return;
-
-
-
-
-
-
-
-    if(e.target.closest('.zm-pin')) return;
-
-
-
-
-
-
-
-    const rect = $("#zmImgWrap").getBoundingClientRect();
-
-
-
-
-
-
-
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * 1000) / 10;
-
-
-
-
-
-
-
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * 1000) / 10;
-
-
-
-
-
-
-
-    const label = prompt('새 구역 이름 (예: 스토리지1 랙3, ACC DP 좌측1)');
-
-
-
-
-
-
-
-    if(!label || !label.trim()) return;
-
-
-
-
-
-
-
-    const group = prompt('그룹명 (선택, 예: 스토리지 / ACC DP 좌측)', '') || '';
-
-
-
-
-
-
-
-    const slotsStr = prompt('세부 칸 목록 (쉼표로 구분, 선택사항)\n예: 1단-좌, 1단-우, 2단-좌, 2단-우', '') || '';
-
-
-
-
-
-
-
-    const slots = slotsStr.split(',').map(s=>s.trim()).filter(Boolean);
-
-
-
-
-
-
-
-    const newZone = { id: _uniqueZoneId(label), group: group.trim(), label: label.trim(), x, y, slots };
-
-
-
-
-
-
-
-    saveLocations(server => ({ zones: [...server.zones, newZone], assignments: server.assignments }))
-
-
-
-
-
-
-
-        .then(ok => {
-
-
-
-
-
-
-
-            if(ok){ renderZonePins(); showToast('구역 추가됨: ' + newZone.label); }
-
-
-
-
-
-
-
-            _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
-
-
-
-
-
-
-
-        });
-
-
-
-
-
-
-
-};
+// 구역 추가는 renderZonePins() 안의 SVG pointerdown 핸들러가 처리한다
+// (예전 도면 이미지 위 클릭 방식 #zmImgWrap 은 SVG 도식 지도로 대체되어 제거됨)
 
 
 
@@ -71155,69 +70739,13 @@ $("#zmImgWrap").onclick = (e) => {
 
 
 window.openFloorPlanView = (zoneId, extraLabel) => {
-
-
-
-
-
-
-
-    const z = LOCATIONS.zones.find(zz => zz.id === zoneId);
-
-
-
-
-
-
-
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
     if(!z) return;
-
-
-
-
-
-
-
-    loadFloorImg("fpvFloorImg", "fpvImgErr");
-
-
-
-
-
-
-
-    $("#fpvTitle").textContent = `📍 ${z.label}${extraLabel ? ' · ' + extraLabel : ''}`;
-
-
-
-
-
-
-
-    $("#fpvPin").style.left = z.x + '%';
-
-
-
-
-
-
-
-    $("#fpvPin").style.top = z.y + '%';
-
-
-
-
-
-
-
+    const addr = zoneAddress(z, extraLabel);
+    $("#fpvTitle").innerHTML = `<span style="display:inline-block;background:#ff5a1f;color:#fff;font-size:20px;font-weight:900;padding:4px 12px;border-radius:9px;letter-spacing:-0.4px;">${escapeHtml(addr)}</span>`
+        + `<span style="margin-left:10px;font-size:14px;font-weight:800;color:#64748b;">${escapeHtml(z.label || '')}</span>`;
+    $("#fpvMap").innerHTML = storeMapSvg({ highlightZoneId: zoneId });
     $("#floorPlanViewModal").classList.remove("hidden");
-
-
-
-
-
-
-
 };
 
 
