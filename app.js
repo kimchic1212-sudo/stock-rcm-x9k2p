@@ -70812,7 +70812,9 @@ let _bulkPickZoneId = null;
 
 function _bulkUpdateBar(){
     const bar = $("#bulkBar"); if(!bar) return;
+    // 인라인 display 로만 제어 — .hidden 클래스는 인라인 스타일에 밀려 무시됨
     bar.classList.toggle("hidden", !BULK_LOC_MODE);
+    bar.style.display = BULK_LOC_MODE ? 'flex' : 'none';
     const cnt = $("#bulkBarCount");
     if(cnt) cnt.textContent = `${BULK_LOC_SEL.size}개 선택`;
     // 고른 게 없으면 '위치 지정'은 아예 감춘다 (0개일 때 누를 일이 없음)
