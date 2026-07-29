@@ -70426,97 +70426,111 @@ let _zmAddMode = false;
 
 
 
-// ── 매장 도식 지도 (SVG) ──────────────────────────────────────────────
-// 좌표계: zone의 x·y·w·h는 모두 % (x·w는 가로 기준, y·h는 세로 기준) — 기존 핀 좌표 규약과 동일.
-// viewBox 1000×640 이므로 px = x*10 (가로), y*6.4 (세로).
-const MAP_VB_W = 1000, MAP_VB_H = 640;
-
-// 매장 외곽선(부산점 ㅗ자 형태): 위쪽 블록 + 아래쪽 가로 스트립
-const MAP_SHELL = "M375,87 H691 V364 H926 V560 H74 V364 H375 Z";
-
-// 방향을 잡아주는 고정 랜드마크 — 구역이 아니라 배경 안내용(편집 불가)
-const MAP_LANDMARKS = [
-    { label: "벽면",      x: 38.5, y: 16, w: 6.5, h: 38 },
-    { label: "의류 벽면",  x: 9,    y: 59, w: 27,  h: 6  },
-    { label: "모션랩",     x: 9,    y: 70, w: 11,  h: 13 },
-    { label: "카운터",     x: 78,   y: 74, w: 10,  h: 9  }
-];
-
-// 출입구 표시 (viewBox px 단위로 직접 지정)
-const MAP_ENTRANCES = [
-    { label: "입구", px: 68,  py: 470, w: 12, h: 60, lx: 62,  ly: 505, anchor: "end"    },
-    { label: "입구", px: 420, py: 554, w: 80, h: 12, lx: 460, ly: 596, anchor: "middle" }
-];
-
-// 레거시(점 좌표) 구역도 안전하게 사각형으로 환산
-function _mapZoneRect(z){
-    const hasRect = typeof z.w === 'number' && typeof z.h === 'number' && z.w > 0 && z.h > 0;
-    const w = hasRect ? z.w : 7, h = hasRect ? z.h : 10;
-    return { x: hasRect ? z.x : (z.x - w/2), y: hasRect ? z.y : (z.y - h/2), w, h };
-}
-
-function _zoneIsStorage(z){
-    return /창고|storage/i.test(String(z.group||'') + ' ' + String(z.id||'')) || /^S/i.test(String(z.code||''));
-}
-
-// 직원이 부르는 주소 문자열 — "D3 · 2단 좌" (코드가 없으면 이름으로 대체)
-function zoneAddress(z, slot){
-    if(!z) return '';
-    const head = z.code ? z.code : z.label;
-    return slot ? `${head} · ${slot}` : head;
-}
-
-function _renderStoreMapSvg(opts){
-    opts = opts || {};
-    const hiId = opts.highlightZoneId || null;
-    const compact = !!opts.compact;
-    const editable = !!opts.editable;
-    const PX = v => (v * MAP_VB_W / 100).toFixed(1);
-    const PY = v => (v * MAP_VB_H / 100).toFixed(1);
-
-    let out = `<path d="${MAP_SHELL}" fill="#ffffff" stroke="#334155" stroke-width="${compact ? 8 : 3}" stroke-linejoin="round"/>`;
-
-    if(!compact){
-        MAP_LANDMARKS.forEach(l => {
-            out += `<rect x="${PX(l.x)}" y="${PY(l.y)}" width="${PX(l.w)}" height="${PY(l.h)}" rx="6" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5"/>`;
-            out += `<text x="${PX(l.x + l.w/2)}" y="${PY(l.y + l.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#94a3b8">${escapeHtml(l.label)}</text>`;
-        });
-        MAP_ENTRANCES.forEach(e => {
-            out += `<rect x="${e.px}" y="${e.py}" width="${e.w}" height="${e.h}" rx="3" fill="#ff5a1f"/>`;
-            out += `<text x="${e.lx}" y="${e.ly}" text-anchor="${e.anchor}" dominant-baseline="central" font-size="16" font-weight="800" fill="#c2410c">${escapeHtml(e.label)}</text>`;
-        });
-    }
-
-    (LOCATIONS.zones || []).forEach(z => {
-        const r = _mapZoneRect(z);
-        const isHi = hiId && z.id === hiId;
-        const store = _zoneIsStorage(z);
-        let fill = store ? '#e2e8f0' : '#f1f5f9';
-        let stroke = store ? '#64748b' : '#94a3b8';
-        let textCol = '#334155';
-        if(isHi){ fill = '#ff5a1f'; stroke = '#9a3412'; textCol = '#ffffff'; }
-        const cx = PX(r.x + r.w/2);
-
-        out += `<g class="zmap-zone" data-zone="${escapeHtml(z.id)}"${editable ? ' style="cursor:move;"' : ''}>`;
-        out += `<title>${escapeHtml(zoneAddress(z) + ' · ' + (z.label||''))}</title>`;
-        out += `<rect x="${PX(r.x)}" y="${PY(r.y)}" width="${PX(r.w)}" height="${PY(r.h)}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isHi ? 5 : 2.5}"/>`;
-        if(!compact){
-            const codeTxt = z.code || z.label || '';
-            const fs = r.w >= 11 ? 30 : (r.w >= 7.5 ? 26 : 22);
-            out += `<text x="${cx}" y="${PY(r.y + r.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="${textCol}" style="pointer-events:none;">${escapeHtml(codeTxt)}</text>`;
-        }
-        out += `</g>`;
-
-        if(isHi && !compact){
-            out += `<text x="${cx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
-        }
-        if(editable){
-            out += `<rect class="zmap-handle" data-zone="${escapeHtml(z.id)}" x="${Number(PX(r.x + r.w)) - 9}" y="${Number(PY(r.y + r.h)) - 9}" width="18" height="18" rx="4" fill="#ffffff" stroke="#ff5a1f" stroke-width="2.5" style="cursor:nwse-resize;"/>`;
-        }
-    });
-
-    return out;
-}
+// ── 매장 도식 지도 (SVG) ──────────────────────────────────────────────
+// 좌표계: zone의 x·y·w·h는 모두 % (x·w는 가로 기준, y·h는 세로 기준) — 기존 핀 좌표 규약과 동일.
+// viewBox 1000×720 이므로 px = x*10 (가로), y*7.2 (세로).
+// 외곽선·랜드마크·구역 좌표는 부산점 CAD 평면도(floorplan 원본)를 실측해 환산한 값.
+const MAP_VB_W = 1000, MAP_VB_H = 720;
+
+// 매장 외곽선 — 위쪽 블록 + 아래쪽 가로 스트립(왼쪽이 오른쪽보다 위에서 시작하는 계단형)
+const MAP_SHELL = "M292,30 H592 V476 H940 V660 H60 V359 H292 Z";
+
+// 방향을 잡아주는 고정 랜드마크 — 구역이 아니라 배경 안내용(편집 불가)
+const MAP_LANDMARKS = [
+    { label: "벽면",      x: 33.3, y: 11.9, w: 4.2,  h: 30.4 },
+    { label: "의류 벽면",  x: 6.6,  y: 50.6, w: 19.8, h: 3.9  },
+    { label: "모션랩",     x: 8.5,  y: 79.4, w: 16.5, h: 11.1 },
+    { label: "카운터",     x: 70.5, y: 82.6, w: 7.0,  h: 8.1  }
+];
+
+// 출입구 표시 (viewBox px 단위로 직접 지정)
+const MAP_ENTRANCES = [
+    { label: "입구", px: 54,  py: 450, w: 12, h: 50, lx: 48,  ly: 475, anchor: "end"    },
+    { label: "입구", px: 418, py: 654, w: 60, h: 12, lx: 448, ly: 688, anchor: "middle" }
+];
+
+// 레거시(점 좌표)·폴리곤 구역 모두 안전하게 사각형(바운딩박스)으로 환산
+function _mapZoneRect(z){
+    if(Array.isArray(z.poly) && z.poly.length >= 3){
+        const xs = z.poly.map(p => p[0]), ys = z.poly.map(p => p[1]);
+        const x = Math.min(...xs), y = Math.min(...ys);
+        return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+    }
+    const hasRect = typeof z.w === 'number' && typeof z.h === 'number' && z.w > 0 && z.h > 0;
+    const w = hasRect ? z.w : 7, h = hasRect ? z.h : 10;
+    return { x: hasRect ? z.x : (z.x - w/2), y: hasRect ? z.y : (z.y - h/2), w, h };
+}
+
+function _zoneIsStorage(z){
+    return /창고|storage/i.test(String(z.group||'') + ' ' + String(z.id||'')) || /^S/i.test(String(z.code||''));
+}
+
+// 직원이 부르는 주소 문자열 — "D3 · 2단" (코드가 없으면 이름으로 대체)
+function zoneAddress(z, slot){
+    if(!z) return '';
+    const head = z.code ? z.code : z.label;
+    return slot ? `${head} · ${slot}` : head;
+}
+
+function _renderStoreMapSvg(opts){
+    opts = opts || {};
+    const hiId = opts.highlightZoneId || null;
+    const compact = !!opts.compact;
+    const editable = !!opts.editable;
+    const PX = v => (v * MAP_VB_W / 100).toFixed(1);
+    const PY = v => (v * MAP_VB_H / 100).toFixed(1);
+
+    let out = `<path d="${MAP_SHELL}" fill="#ffffff" stroke="#334155" stroke-width="${compact ? 8 : 3}" stroke-linejoin="round"/>`;
+
+    if(!compact){
+        MAP_LANDMARKS.forEach(l => {
+            out += `<rect x="${PX(l.x)}" y="${PY(l.y)}" width="${PX(l.w)}" height="${PY(l.h)}" rx="6" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5"/>`;
+            out += `<text x="${PX(l.x + l.w/2)}" y="${PY(l.y + l.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#94a3b8">${escapeHtml(l.label)}</text>`;
+        });
+        MAP_ENTRANCES.forEach(e => {
+            out += `<rect x="${e.px}" y="${e.py}" width="${e.w}" height="${e.h}" rx="3" fill="#ff5a1f"/>`;
+            out += `<text x="${e.lx}" y="${e.ly}" text-anchor="${e.anchor}" dominant-baseline="central" font-size="16" font-weight="800" fill="#c2410c">${escapeHtml(e.label)}</text>`;
+        });
+    }
+
+    (LOCATIONS.zones || []).forEach(z => {
+        const r = _mapZoneRect(z);
+        const isPoly = Array.isArray(z.poly) && z.poly.length >= 3;
+        const isHi = hiId && z.id === hiId;
+        const store = _zoneIsStorage(z);
+        let fill = store ? '#e2e8f0' : '#f1f5f9';
+        let stroke = store ? '#64748b' : '#94a3b8';
+        let textCol = '#334155';
+        if(isHi){ fill = '#ff5a1f'; stroke = '#9a3412'; textCol = '#ffffff'; }
+        // 폴리곤(ㄱ자 등)은 바운딩박스 중심이 빈 곳일 수 있어 라벨 위치를 따로 지정 가능
+        const lx = PX(typeof z.lx === 'number' ? z.lx : r.x + r.w/2);
+        const ly = PY(typeof z.ly === 'number' ? z.ly : r.y + r.h/2);
+
+        out += `<g class="zmap-zone" data-zone="${escapeHtml(z.id)}"${editable ? ' style="cursor:move;"' : ''}>`;
+        out += `<title>${escapeHtml(zoneAddress(z) + ' · ' + (z.label||''))}</title>`;
+        if(isPoly){
+            out += `<polygon points="${z.poly.map(p => PX(p[0]) + ',' + PY(p[1])).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${isHi ? 5 : 2.5}" stroke-linejoin="round"/>`;
+        } else {
+            out += `<rect x="${PX(r.x)}" y="${PY(r.y)}" width="${PX(r.w)}" height="${PY(r.h)}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isHi ? 5 : 2.5}"/>`;
+        }
+        if(!compact){
+            const codeTxt = z.code || z.label || '';
+            const fs = r.w >= 11 ? 30 : (r.w >= 7.5 ? 26 : 22);
+            out += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="${textCol}" style="pointer-events:none;">${escapeHtml(codeTxt)}</text>`;
+        }
+        out += `</g>`;
+
+        if(isHi && !compact){
+            out += `<text x="${lx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
+        }
+        // 폴리곤은 리사이즈 정의가 모호해 이동만 허용 (핸들 없음)
+        if(editable && !isPoly){
+            out += `<rect class="zmap-handle" data-zone="${escapeHtml(z.id)}" x="${Number(PX(r.x + r.w)) - 9}" y="${Number(PY(r.y + r.h)) - 9}" width="18" height="18" rx="4" fill="#ffffff" stroke="#ff5a1f" stroke-width="2.5" style="cursor:nwse-resize;"/>`;
+        }
+    });
+
+    return out;
+}
 
 function storeMapSvg(opts){
     opts = opts || {};
@@ -70550,7 +70564,7 @@ function renderZonePins(){
         }
         const id = (handle || zoneG).dataset.zone;
         const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
-        _zmDrag = { id, mode: handle ? 'resize' : 'move', start: _zmSvgPct(svg, e.clientX, e.clientY), orig: _mapZoneRect(z), moved: false };
+        _zmDrag = { id, mode: handle ? 'resize' : 'move', start: _zmSvgPct(svg, e.clientX, e.clientY), orig: _mapZoneRect(z), origPoly: Array.isArray(z.poly) ? z.poly.map(p => [p[0], p[1]]) : null, moved: false };
         try { svg.setPointerCapture(e.pointerId); } catch(_){}
         e.preventDefault();
     });
@@ -70563,8 +70577,11 @@ function renderZonePins(){
         const z = (LOCATIONS.zones||[]).find(zz => zz.id === _zmDrag.id); if(!z) return;
         const o = _zmDrag.orig, snap = v => Math.round(v * 4) / 4;
         if(_zmDrag.mode === 'move'){
-            z.x = snap(Math.min(99 - o.w, Math.max(0, o.x + dx)));
-            z.y = snap(Math.min(99 - o.h, Math.max(0, o.y + dy)));
+            const nx = snap(Math.min(99 - o.w, Math.max(0, o.x + dx)));
+            const ny = snap(Math.min(99 - o.h, Math.max(0, o.y + dy)));
+            if(_zmDrag.origPoly) z.poly = _zmDrag.origPoly.map(p => [p[0] + (nx - o.x), p[1] + (ny - o.y)]);
+            if(typeof z.lx === 'number'){ z.lx += (nx - z.x); z.ly += (ny - z.y); }
+            z.x = nx; z.y = ny;
         } else {
             z.w = snap(Math.min(50, Math.max(3, o.w + dx)));
             z.h = snap(Math.min(50, Math.max(4, o.h + dy)));
@@ -70584,9 +70601,9 @@ function renderZonePins(){
 
 function _zmPersistRect(id){
     const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
-    const r = { x: z.x, y: z.y, w: z.w, h: z.h };
+    const r = { x: z.x, y: z.y, w: z.w, h: z.h, poly: z.poly, lx: z.lx, ly: z.ly };
     saveLocations(server => ({
-        zones: server.zones.map(zz => zz.id === id ? { ...zz, x: r.x, y: r.y, w: r.w, h: r.h } : zz),
+        zones: server.zones.map(zz => zz.id === id ? { ...zz, x: r.x, y: r.y, w: r.w, h: r.h, ...(r.poly ? { poly: r.poly } : {}), ...(typeof r.lx === 'number' ? { lx: r.lx, ly: r.ly } : {}) } : zz),
         assignments: server.assignments
     })).then(ok => {
         if(ok){ renderZonePins(); showToast('구역 배치 저장됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); }
