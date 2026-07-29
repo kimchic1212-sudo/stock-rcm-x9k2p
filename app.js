@@ -47380,7 +47380,11 @@ function card(p){
 
 
 
-  el.className = "card card-hover p-3.5 flex flex-col h-full";
+  el.className = "card card-hover p-3.5 flex flex-col h-full";
+
+  el.dataset.code = p.품번;
+
+  if(BULK_LOC_MODE && BULK_LOC_SEL.has(p.품번)){ el.style.outline = "3px solid #ff5a1f"; el.style.outlineOffset = "-3px"; el.dataset.bulkSel = "1"; }
 
 
 
@@ -47412,6 +47416,15 @@ function card(p){
 
 
 
+    if(BULK_LOC_MODE){
+      e.preventDefault(); e.stopPropagation();
+      const on = !BULK_LOC_SEL.has(p.품번);
+      if(on) BULK_LOC_SEL.add(p.품번); else BULK_LOC_SEL.delete(p.품번);
+      _bulkPaintCard(el, on);
+      _bulkUpdateBar();
+      return;
+    }
+
     const copyBtn = e.target.closest('[data-copy]');
 
 
@@ -49936,6 +49949,8 @@ function card(p){
 
 
 
+               ${BULK_LOC_MODE ? `<div class="bulk-check" style="position:absolute;top:6px;left:6px;z-index:25;width:22px;height:22px;border-radius:50%;border:2px solid ${BULK_LOC_SEL.has(p.품번)?'#ff5a1f':'#cbd5e1'};background:${BULK_LOC_SEL.has(p.품번)?'#ff5a1f':'rgba(255,255,255,.9)'};color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;">${BULK_LOC_SEL.has(p.품번)?'✓':''}</div>` : ''}
+
                <button class="fav-btn bookmark-overlay text-gray-400 hover:text-yellow-500 outline-none" data-active="${isFav?'1':'0'}">
 
 
@@ -51010,7 +51025,9 @@ function getFilters(){
 
     overrideOnly: !!$$('button.chip[data-override]').find(b=>b.dataset.active==="1"),
 
-    noLocation: !!$$('button.chip[data-noloc]').find(b=>b.dataset.active==="1"),
+    noLocation: !!$$('button.chip[data-noloc]').find(b=>b.dataset.active==="1"),
+
+    hasLocation: !!$$('button.chip[data-hasloc]').find(b=>b.dataset.active==="1"),
 
 
 
@@ -54142,7 +54159,11 @@ function render(){
 
 
 
-    if(f.noLocation && LOCATIONS.assignments[p.품번]) return false;
+    if(f.noLocation && LOCATIONS.assignments[p.품번]) return false;
+
+
+
+    if(f.hasLocation && !LOCATIONS.assignments[p.품번]) return false;
 
 
 
@@ -55198,7 +55219,7 @@ function render(){
 
 
 
-      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.favOnly || f2.memoOnly || f2.noBarcode || f2.noLocation || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
+      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.favOnly || f2.memoOnly || f2.noBarcode || f2.noLocation || f2.hasLocation || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
 
 
 
@@ -68271,7 +68292,7 @@ function renderActiveFilterBar() {
 
 
 
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-otherbranch], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc]').forEach(btn => {
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-otherbranch], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-hasloc]').forEach(btn => {
 
 
 
@@ -69589,7 +69610,13 @@ $("#resetAll").onclick=()=>{
 
     const noLocBtn = $('button.chip[data-noloc]');
 
-    if(noLocBtn) { noLocBtn.dataset.active = "0"; noLocBtn.classList.remove('ring-2','ring-sky-400'); }
+    if(noLocBtn) { noLocBtn.dataset.active = "0"; noLocBtn.classList.remove('ring-2','ring-sky-400'); }
+
+
+
+    const hasLocBtn = $('button.chip[data-hasloc]');
+
+    if(hasLocBtn) { hasLocBtn.dataset.active = "0"; hasLocBtn.classList.remove('ring-2','ring-emerald-400'); }
 
 
 
@@ -70756,7 +70783,8 @@ $("#zmAddModeBtn").onclick = () => {
 
 
 
-window.openFloorPlanView = (zoneId, extraLabel) => {
+window.openFloorPlanView = (zoneId, extraLabel) => {
+    if(typeof BULK_LOC_MODE !== "undefined" && BULK_LOC_MODE) return;
     const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
     if(!z) return;
     const addr = zoneAddress(z, extraLabel);
@@ -70773,6 +70801,150 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
 
 
 $("#closeFloorPlanView").onclick = () => $("#floorPlanViewModal").classList.add("hidden");
+
+// ── 여러 상품 위치 일괄 지정 (사진앨범식 다중선택) ────────────────────────
+let BULK_LOC_MODE = false;
+let BULK_LOC_SEL = new Set();
+let _bulkPickZoneId = null;
+
+function _bulkUpdateBar(){
+    const bar = $("#bulkBar"); if(!bar) return;
+    bar.classList.toggle("hidden", !BULK_LOC_MODE);
+    const cnt = $("#bulkBarCount");
+    if(cnt) cnt.textContent = `${BULK_LOC_SEL.size}개 선택`;
+    const assign = $("#bulkBarAssign");
+    if(assign){
+        assign.disabled = BULK_LOC_SEL.size === 0;
+        assign.style.opacity = BULK_LOC_SEL.size === 0 ? '.45' : '1';
+    }
+}
+
+// 카드 DOM에 선택 상태만 반영 (전체 재렌더 없이 즉각 반응)
+function _bulkPaintCard(el, on){
+    el.dataset.bulkSel = on ? "1" : "0";
+    el.style.outline = on ? '3px solid #ff5a1f' : '';
+    el.style.outlineOffset = on ? '-3px' : '';
+    const mark = el.querySelector('.bulk-check');
+    if(mark){
+        mark.style.background = on ? '#ff5a1f' : 'rgba(255,255,255,.9)';
+        mark.style.borderColor = on ? '#ff5a1f' : '#cbd5e1';
+        mark.textContent = on ? '✓' : '';
+    }
+}
+
+window.enterBulkLocMode = () => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return; }
+    BULK_LOC_MODE = true;
+    BULK_LOC_SEL.clear();
+    _bulkUpdateBar();
+    render();
+    showToast('상품 카드를 눌러 선택하세요');
+};
+
+window.exitBulkLocMode = () => {
+    BULK_LOC_MODE = false;
+    BULK_LOC_SEL.clear();
+    _bulkUpdateBar();
+    render();
+};
+
+// 현재 화면(필터 적용)에 보이는 카드 전체 선택 / 전체 해제
+function _bulkToggleAll(){
+    const cards = [...document.querySelectorAll('article.card[data-code]')];
+    const allOn = cards.length > 0 && cards.every(el => BULK_LOC_SEL.has(el.dataset.code));
+    cards.forEach(el => {
+        if(allOn) BULK_LOC_SEL.delete(el.dataset.code);
+        else BULK_LOC_SEL.add(el.dataset.code);
+        _bulkPaintCard(el, !allOn);
+    });
+    _bulkUpdateBar();
+}
+
+// ── 일괄 지정 모달 ──────────────────────────────────────────────────────
+function _bulkRenderPickMap(){
+    const host = $("#bulkLocMap"); if(!host) return;
+    host.innerHTML = storeMapSvg({ highlightZoneId: _bulkPickZoneId });
+    const svg = host.querySelector('svg'); if(!svg) return;
+    svg.style.cursor = 'pointer';
+    svg.addEventListener('click', (e) => {
+        const g = e.target.closest('.zmap-zone'); if(!g) return;
+        _bulkPickZoneId = g.dataset.zone;
+        _bulkRenderPickMap();
+        _bulkSyncPick();
+    });
+}
+
+function _bulkSyncPick(){
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === _bulkPickZoneId);
+    const pick = $("#bulkLocPick"), slotSel = $("#bulkLocSlot");
+    if(!pick || !slotSel) return;
+    if(!z){ pick.textContent = '구역 미선택'; slotSel.classList.add('hidden'); slotSel.innerHTML = ''; return; }
+    pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
+    const slots = z.slots || [];
+    if(slots.length){
+        slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+        slotSel.classList.remove('hidden');
+    } else { slotSel.innerHTML = ''; slotSel.classList.add('hidden'); }
+}
+
+window.openBulkLocModal = () => {
+    if(BULK_LOC_SEL.size === 0) return;
+    if(!checkPat()) return;
+    _bulkPickZoneId = null;
+    $("#bulkLocCount").textContent = `선택한 상품 ${BULK_LOC_SEL.size}개`;
+    _bulkRenderPickMap();
+    _bulkSyncPick();
+    $("#bulkLocModal").classList.remove("hidden");
+};
+
+// mode: 'assign' | 'clear'
+async function _bulkApply(mode){
+    const codes = [...BULK_LOC_SEL];
+    if(codes.length === 0) return;
+
+    let zoneId = null, slot = null;
+    if(mode === 'assign'){
+        if(!_bulkPickZoneId){ alert('지도에서 구역을 먼저 선택해주세요.'); return; }
+        zoneId = _bulkPickZoneId;
+        const sv = $("#bulkLocSlot");
+        slot = (sv && !sv.classList.contains('hidden') && sv.value) ? sv.value : null;
+    } else {
+        if(!confirm(`선택한 ${codes.length}개 상품의 위치를 해제할까요?`)) return;
+    }
+
+    const saveBtn = $("#bulkLocSave"), clearBtn = $("#bulkLocClear");
+    [saveBtn, clearBtn].forEach(b => { if(b) b.disabled = true; });
+    if(saveBtn) saveBtn.textContent = '저장 중…';
+
+    const ok = await saveLocations(server => {
+        const assignments = { ...server.assignments };
+        codes.forEach(code => {
+            if(mode === 'assign') assignments[code] = slot ? { zoneId, slot } : { zoneId };
+            else delete assignments[code];
+        });
+        return { zones: server.zones, assignments };
+    });
+
+    [saveBtn, clearBtn].forEach(b => { if(b) b.disabled = false; });
+    if(saveBtn) saveBtn.textContent = '선택한 상품에 지정';
+
+    if(ok){
+        $("#bulkLocModal").classList.add("hidden");
+        const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
+        showToast(mode === 'assign'
+            ? `✓ ${codes.length}개 상품을 ${zoneAddress(z, slot)} 에 지정했습니다`
+            : `✓ ${codes.length}개 상품의 위치를 해제했습니다`);
+        window.exitBulkLocMode();
+    }
+}
+
+$("#closeBulkLoc").onclick = () => $("#bulkLocModal").classList.add("hidden");
+$("#bulkLocSave").onclick = () => _bulkApply('assign');
+$("#bulkLocClear").onclick = () => _bulkApply('clear');
+$("#bulkBarAssign").onclick = () => window.openBulkLocModal();
+$("#bulkBarExit").onclick = () => window.exitBulkLocMode();
+$("#bulkBarAll").onclick = () => _bulkToggleAll();
+
 
 
 
@@ -78768,6 +78940,57 @@ window.addEventListener('DOMContentLoaded', () => {
         });
 
     }
+
+    // ── 위치있음 필터 칩 (창고 위치가 지정된 상품만) ────────────────────────
+    if(dpFilterRow && !$('button.chip[data-hasloc]')) {
+
+        const hasLocBtn = document.createElement("button");
+
+        hasLocBtn.className = "chip !bg-emerald-50 !text-emerald-700 !border-emerald-400 font-black";
+
+        hasLocBtn.dataset.hasloc = "1";
+
+        hasLocBtn.dataset.active = "0";
+
+        const _hlCount = Object.keys(LOCATIONS.assignments || {}).length;
+
+        hasLocBtn.innerHTML = `📌 위치있음${_hlCount > 0 ? ` <span class="ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]">${_hlCount}</span>` : ''}`;
+
+        dpFilterRow.appendChild(hasLocBtn);
+
+        hasLocBtn.addEventListener("click", () => {
+
+            saveHistoryState();
+
+            hasLocBtn.dataset.active = hasLocBtn.dataset.active === "1" ? "0" : "1";
+
+            if(hasLocBtn.dataset.active === "1") hasLocBtn.classList.add('ring-2','ring-emerald-400');
+
+            else hasLocBtn.classList.remove('ring-2','ring-emerald-400');
+
+            visibleCount=60; render();
+
+        });
+
+    }
+
+    // ── 여러개 선택 모드 진입 칩 (ADMIN 전용) ──────────────────────────────
+    if(dpFilterRow && checkAdminSession() && !$('button.chip[data-bulkloc]')) {
+
+        const bulkBtn = document.createElement("button");
+
+        bulkBtn.className = "chip !bg-slate-800 !text-white !border-slate-800 font-black";
+
+        bulkBtn.dataset.bulkloc = "1";
+
+        bulkBtn.innerHTML = `☑️ 여러개 선택`;
+
+        dpFilterRow.appendChild(bulkBtn);
+
+        bulkBtn.addEventListener("click", () => window.enterBulkLocMode());
+
+    }
+
 
 
 
