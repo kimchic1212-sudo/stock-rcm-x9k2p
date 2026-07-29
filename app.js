@@ -52899,6 +52899,9 @@ function render(){
 
 
 
+  const _bulkChip = $('button.chip[data-bulkloc]');
+  if(_bulkChip) _bulkChip.style.display = checkAdminSession() ? '' : 'none';
+
   const grid = $("#grid");
 
 
@@ -78975,7 +78978,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── 여러개 선택 모드 진입 칩 (ADMIN 전용) ──────────────────────────────
-    if(dpFilterRow && checkAdminSession() && !$('button.chip[data-bulkloc]')) {
+    if(dpFilterRow && !$('button.chip[data-bulkloc]')) {
 
         const bulkBtn = document.createElement("button");
 
@@ -78984,6 +78987,8 @@ window.addEventListener('DOMContentLoaded', () => {
         bulkBtn.dataset.bulkloc = "1";
 
         bulkBtn.innerHTML = `☑️ 여러개 선택`;
+
+        bulkBtn.style.display = checkAdminSession() ? '' : 'none';
 
         dpFilterRow.appendChild(bulkBtn);
 
