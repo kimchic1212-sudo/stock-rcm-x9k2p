@@ -142,5 +142,9 @@
       "h": 8
     }
   ],
-  "assignments": {}
+  "assignments": {
+    "65625841": {
+      "zoneId": "mainzone-stool-3"
+    }
+  }
 }
