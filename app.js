@@ -70396,8 +70396,8 @@ const MAP_LANDMARKS = [
 
 // 출입구 표시 (viewBox px 단위로 직접 지정)
 const MAP_ENTRANCES = [
-    { px: 68,  py: 470, w: 12, h: 60, lx: 62,  ly: 505, anchor: "end"    },
-    { px: 420, py: 554, w: 80, h: 12, lx: 460, ly: 596, anchor: "middle" }
+    { label: "입구", px: 68,  py: 470, w: 12, h: 60, lx: 62,  ly: 505, anchor: "end"    },
+    { label: "입구", px: 420, py: 554, w: 80, h: 12, lx: 460, ly: 596, anchor: "middle" }
 ];
 
 // 레거시(점 좌표) 구역도 안전하게 사각형으로 환산
