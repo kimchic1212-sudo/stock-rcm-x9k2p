@@ -1,7 +1,7 @@
-시작: 2026-07-29T05:16:53.831Z
+시작: 2026-07-29T05:21:51.611Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853022245858117.432964841493
+[RES] 200 login.xml&postfix=17853025208016822.243715669968
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 14건
+selTodaySalesList: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21389","ITEM_NM":"보메로 플러스 [HV8150-102, 220]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-메뉴 클릭 후 거래: 14건
+메뉴 클릭 후 거래: 15건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37055","ITEM_NM":"퍼포먼스 티 [1ME10234958, L]","SALES_AMT":115000,"NET_SALES_AMT":104545,
@@ -70,4 +70,8 @@ selTodaySalesList: 14건
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"39265","ITEM_NM":"에어로핏 스위프트 숏슬리브 탑 [IH8115-014, S]","SALES_AMT":57000,"NET_SALES_AMT":
   파싱 성공: 3건
-완료: 품번 15개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":22000,"ITEM_CD":"20709","ITEM_NM":"라이트웨이트 크루 삭스 1팩 [HV6919-100, L]","SALES_AMT":13200,"NET_SALES_AMT":1
+  파싱 성공: 2건
+완료: 품번 17개
