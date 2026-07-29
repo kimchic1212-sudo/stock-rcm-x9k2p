@@ -1,7 +1,7 @@
-시작: 2026-07-29T07:31:52.684Z
+시작: 2026-07-29T07:34:40.098Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853103259145575.331253090742
+[RES] 200 login.xml&postfix=17853104901483071.5222252619787
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 20건
+selTodaySalesList: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21389","ITEM_NM":"보메로 플러스 [HV8150-102, 220]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-메뉴 클릭 후 거래: 20건
+메뉴 클릭 후 거래: 21건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37055","ITEM_NM":"퍼포먼스 티 [1ME10234958, L]","SALES_AMT":115000,"NET_SALES_AMT":104545,
@@ -93,5 +93,9 @@ selTodaySalesList: 20건
 [RES] 200 selItemSalesList
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":23100,"ITEM_CD":"18201","ITEM_NM":"프로 마라톤 삭스 V2.0 [PRO MARATHON SOCKS V2.0-BLACK.WHITE, T3]","SALES_AMT
+  파싱 성공: 2건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":95000,"ITEM_CD":"39229","ITEM_NM":"에어로핏 스트라이드 숏슬리브 탑 [IH0746-010, XL]","SALES_AMT":66500,"NET_SALES_AMT
   파싱 성공: 2건
 완료: 품번 20개
