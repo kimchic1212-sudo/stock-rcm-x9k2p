@@ -1,7 +1,7 @@
-시작: 2026-07-29T10:21:58.557Z
+시작: 2026-07-29T10:28:51.120Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853205323777131.292450235926
+[RES] 200 login.xml&postfix=17853209408704498.799708948911
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 30건
+selTodaySalesList: 31건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21389","ITEM_NM":"보메로 플러스 [HV8150-102, 220]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-메뉴 클릭 후 거래: 30건
+메뉴 클릭 후 거래: 31건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37055","ITEM_NM":"퍼포먼스 티 [1ME10234958, L]","SALES_AMT":115000,"NET_SALES_AMT":104545,
@@ -134,4 +134,8 @@ selTodaySalesList: 30건
   items: 2개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":159000,"ITEM_CD":"37689","ITEM_NM":"엔돌핀 아주라 [S101348-1032, 245]","SALES_AMT":135150,"NET_SALES_AMT":122
   파싱 성공: 2건
-완료: 품번 27개
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"38577","ITEM_NM":"보메로 플러스 ESS [IO9916-101, 240]","SALES_AMT":125400,"NET_SALES_AMT":1
+  파싱 성공: 2건
+완료: 품번 29개
