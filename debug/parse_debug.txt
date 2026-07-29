@@ -1,7 +1,7 @@
-시작: 2026-07-29T08:22:25.740Z
+시작: 2026-07-29T08:30:07.703Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853133555761221.5178181264287
+[RES] 200 login.xml&postfix=17853138210703303.730231294296
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 25건
+selTodaySalesList: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":219000,"ITEM_CD":"21389","ITEM_NM":"보메로 플러스 [HV8150-102, 220]","SALES_AMT":197100,"NET_SALES_AMT":17918
   파싱 성공: 1건
-메뉴 클릭 후 거래: 25건
+메뉴 클릭 후 거래: 26건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":115000,"ITEM_CD":"37055","ITEM_NM":"퍼포먼스 티 [1ME10234958, L]","SALES_AMT":115000,"NET_SALES_AMT":104545,
@@ -114,4 +114,8 @@ selTodaySalesList: 25건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":197100,"ITEM_CD":"21417","ITEM_NM":"보메로 플러스 [HV8150-003, 255]","SALES_AMT":177390,"NET_SALES_AMT":16126
   파싱 성공: 1건
-완료: 품번 23개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"34105","ITEM_NM":"V-RUN [26W7001, 235]","SALES_AMT":206100,"NET_SALES_AMT":187364,"VA
+  파싱 성공: 1건
+완료: 품번 24개
