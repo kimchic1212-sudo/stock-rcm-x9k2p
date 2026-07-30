@@ -1,7 +1,7 @@
-시작: 2026-07-30T03:41:52.618Z
+시작: 2026-07-30T03:42:37.867Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853829276419134.256319007498
+[RES] 200 login.xml&postfix=1785382968242647.4159347598385
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -19,6 +19,7 @@ selTodaySalesList: 2건
   파싱 성공: 3건
 메뉴 클릭 후 거래: 2건
 [RES] 200 selItemSalesList
-  items: 0개 / keys: rsMsg
-  파싱 성공: 0건
-완료: 품번 3개
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29254","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 265]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+완료: 품번 4개
