@@ -1,7 +1,7 @@
-시작: 2026-07-30T06:27:25.673Z
+시작: 2026-07-30T06:27:59.626Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853928586392560.6234509891947
+[RES] 200 login.xml&postfix=17853928926518205.208339275116
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -19,6 +19,43 @@ selTodaySalesList: 11건
   파싱 성공: 3건
 메뉴 클릭 후 거래: 11건
 [RES] 200 selItemSalesList
-  items: 0개 / keys: rsMsg
-  파싱 성공: 0건
-완료: 품번 3개
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29254","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 265]","SALES_AMT":206100,"NET_SALES_AMT":18
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"32790","ITEM_NM":"아디제로 아디오스 프로 4 [JR1094, 270]","SALES_AMT":209300,"NET_SALES_AMT":19
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26777","ITEM_NM":"아디제로 EVO SL [JH6208, 235]","SALES_AMT":167200,"NET_SALES_AMT":15200
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"34951","ITEM_NM":"아디제로 EVO SL EXO [KJ0440, 245]","SALES_AMT":188100,"NET_SALES_AMT":1
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":46750,"ITEM_CD":"28895","ITEM_NM":"프로 드라이 핏 언스트럭처드 스우시 러닝 캡 [IO8269-009, M/L]","SALES_AMT":46750,"NET_S
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"23618","ITEM_NM":"3km 힙 색 [25SS-HIP-GRY, 1SIZE]","SALES_AMT":53100,"NET_SALES_AMT":482
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"23618","ITEM_NM":"3km 힙 색 [25SS-HIP-GRY, 1SIZE]","SALES_AMT":53100,"NET_SALES_AMT":482
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37555","ITEM_NM":"엔돌핀 프로 5 [S101308-1006, 235]","SALES_AMT":254150,"NET_SALES_AMT":23
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39498","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, L/XL]","SALES_AMT":59000,"NET_SALES_
+  파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":209000,"ITEM_CD":"26781","ITEM_NM":"아디제로 EVO SL [JH6208, 255]","SALES_AMT":167200,"NET_SALES_AMT":15200
+  파싱 성공: 1건
+완료: 품번 11개
