@@ -70437,10 +70437,10 @@ const MAP_SHELL = "M292,30 H592 V476 H940 V660 H60 V359 H292 Z";
 
 // 방향을 잡아주는 고정 랜드마크 — 구역이 아니라 배경 안내용(편집 불가)
 const MAP_LANDMARKS = [
-    { label: "벽면",      x: 33.3, y: 22.22, w: 4.2,  h: 33.33 },
-    { label: "의류 벽면",  x: 6.6,  y: 50.6, w: 19.8, h: 3.9  },
-    { label: "모션랩",     x: 8.5,  y: 79.4, w: 16.5, h: 11.1 },
-    { label: "카운터",     x: 70.5, y: 82.6, w: 7.0,  h: 8.1  }
+    { label: "벽면",      short: "벽",   x: 33.3, y: 22.22, w: 4.2,  h: 33.33 },
+    { label: "의류 벽면",  short: "의류", x: 6.6,  y: 50.56, w: 19.8, h: 3.89  },
+    { label: "모션랩",     short: "모션", x: 8.5,  y: 79.44, w: 16.5, h: 11.11 },
+    { label: "카운터",     short: "POS",  x: 70.5, y: 82.64, w: 7.0,  h: 8.06  }
 ];
 
 // 출입구 표시 (viewBox px 단위로 직접 지정)
@@ -70477,6 +70477,12 @@ function _renderStoreMapSvg(opts){
     const hiId = opts.highlightZoneId || null;
     const compact = !!opts.compact;
     const editable = !!opts.editable;
+    // 지도가 작게 렌더될수록(모바일) 글자를 키워 화면상 실제 크기를 유지
+    const fs = (base, minPx) => {
+        const hostW = opts.hostW || MAP_VB_W;
+        return Math.round(Math.max(base, (minPx || 14) * MAP_VB_W / hostW));
+    };
+    const tiny = (opts.hostW || MAP_VB_W) < 520;
     const PX = v => (v * MAP_VB_W / 100).toFixed(1);
     const PY = v => (v * MAP_VB_H / 100).toFixed(1);
 
@@ -70485,11 +70491,11 @@ function _renderStoreMapSvg(opts){
     if(!compact){
         MAP_LANDMARKS.forEach(l => {
             out += `<rect x="${PX(l.x)}" y="${PY(l.y)}" width="${PX(l.w)}" height="${PY(l.h)}" rx="6" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5"/>`;
-            out += `<text x="${PX(l.x + l.w/2)}" y="${PY(l.y + l.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="700" fill="#94a3b8">${escapeHtml(l.label)}</text>`;
+            out += `<text x="${PX(l.x + l.w/2)}" y="${PY(l.y + l.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="${fs(17, 12)}" font-weight="700" fill="#94a3b8">${escapeHtml(tiny && l.short ? l.short : l.label)}</text>`;
         });
         MAP_ENTRANCES.forEach(e => {
             out += `<rect x="${e.px}" y="${e.py}" width="${e.w}" height="${e.h}" rx="3" fill="#ff5a1f"/>`;
-            out += `<text x="${e.lx}" y="${e.ly}" text-anchor="${e.anchor}" dominant-baseline="central" font-size="16" font-weight="800" fill="#c2410c">${escapeHtml(e.label)}</text>`;
+            out += `<text x="${e.lx}" y="${e.ly}" text-anchor="${e.anchor}" dominant-baseline="central" font-size="${fs(16, 12)}" font-weight="800" fill="#c2410c">${escapeHtml(e.label)}</text>`;
         });
     }
 
@@ -70515,13 +70521,16 @@ function _renderStoreMapSvg(opts){
         }
         if(!compact){
             const codeTxt = z.code || z.label || '';
-            const fs = r.w >= 11 ? 30 : (r.w >= 7.5 ? 26 : 22);
-            out += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="${textCol}" style="pointer-events:none;">${escapeHtml(codeTxt)}</text>`;
+            const baseFs = r.w >= 11 ? 30 : (r.w >= 7.5 ? 26 : 22);
+            // 블록 밖으로 넘치지 않도록 글자 폭(코드길이×0.62) 기준 상한
+            const capFs = (r.w * MAP_VB_W / 100) * 0.86 / Math.max(1, (z.code || '').length * 0.62);
+            const codeFs = Math.round(Math.min(Math.max(baseFs, fs(baseFs, 15)), capFs));
+            out += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="${codeFs}" font-weight="900" fill="${textCol}" style="pointer-events:none;">${escapeHtml(codeTxt)}</text>`;
         }
         out += `</g>`;
 
         if(isHi && !compact){
-            out += `<text x="${lx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="17" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
+            out += `<text x="${lx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="${fs(17, 13)}" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
         }
         // 폴리곤은 리사이즈 정의가 모호해 이동만 허용 (핸들 없음)
         if(editable && !isPoly){
@@ -70532,10 +70541,28 @@ function _renderStoreMapSvg(opts){
     return out;
 }
 
-function storeMapSvg(opts){
-    opts = opts || {};
-    return `<svg viewBox="0 0 ${MAP_VB_W} ${MAP_VB_H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">${_renderStoreMapSvg(opts)}</svg>`;
-}
+function storeMapSvg(opts){
+    opts = opts || {};
+    return `<svg viewBox="0 0 ${MAP_VB_W} ${MAP_VB_H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">${_renderStoreMapSvg(opts)}</svg>`;
+}
+
+// 컨테이너 실제 폭을 재서 글자 크기를 맞춘 뒤 지도를 심는다 (모달이 보이는 상태여야 폭이 잡힘)
+function paintMap(hostId, opts){
+    const host = $("#" + hostId); if(!host) return;
+    const w = Math.round(host.getBoundingClientRect().width) || MAP_VB_W;
+    host.innerHTML = storeMapSvg({ ...(opts || {}), hostW: w });
+    host.dataset.mapOpts = JSON.stringify(opts || {});
+    return host.querySelector("svg");
+}
+
+// 화면 회전·창 크기 변경 시 열려 있는 지도만 다시 그려 글자 크기를 재조정
+window.addEventListener("resize", () => {
+    ["zmMap", "fpvMap", "bulkLocMap"].forEach(id => {
+        const host = $("#" + id);
+        if(!host || !host.dataset.mapOpts || host.offsetParent === null) return;
+        if(id === "zmMap") renderZonePins(); else paintMap(id, JSON.parse(host.dataset.mapOpts));
+    });
+});
 
 // ── 구역 관리(ADMIN): 블록 드래그 이동 / 모서리 리사이즈 / 클릭 편집 ──────
 let _zmDrag = null;
@@ -70550,9 +70577,9 @@ function _zmSvgPct(svg, clientX, clientY){
 }
 
 function renderZonePins(){
-    const host = $("#zmMap"); if(!host) return;
-    host.innerHTML = storeMapSvg({ editable: true });
-    const svg = host.querySelector('svg'); if(!svg) return;
+    const host = $("#zmMap"); if(!host) return;
+    const svgEl = paintMap("zmMap", { editable: true });
+    const svg = svgEl; if(!svg) return;
     svg.style.touchAction = 'none';
 
     svg.addEventListener('pointerdown', (e) => {
@@ -70586,7 +70613,7 @@ function renderZonePins(){
             z.w = snap(Math.min(50, Math.max(3, o.w + dx)));
             z.h = snap(Math.min(50, Math.max(4, o.h + dy)));
         }
-        svg.innerHTML = _renderStoreMapSvg({ editable: true });
+        svg.innerHTML = _renderStoreMapSvg({ editable: true, hostW: Math.round(svg.getBoundingClientRect().width) });
     });
 
     const endDrag = (e) => {
@@ -70695,9 +70722,9 @@ function _zmAddZoneAt(p){
 
 
 window.openZoneManager = () => {
-    renderZonePins();
     _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
-    $("#zoneManagerModal").classList.remove("hidden");
+    $("#zoneManagerModal").classList.remove("hidden");
+    renderZonePins();
 };
 
 
@@ -70810,8 +70837,8 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
     const addr = zoneAddress(z, extraLabel);
     $("#fpvTitle").innerHTML = `<span style="display:inline-block;background:#ff5a1f;color:#fff;font-size:20px;font-weight:900;padding:4px 12px;border-radius:9px;letter-spacing:-0.4px;">${escapeHtml(addr)}</span>`
         + `<span style="margin-left:10px;font-size:14px;font-weight:800;color:#64748b;">${escapeHtml(z.label || '')}</span>`;
-    $("#fpvMap").innerHTML = storeMapSvg({ highlightZoneId: zoneId });
-    $("#floorPlanViewModal").classList.remove("hidden");
+    $("#floorPlanViewModal").classList.remove("hidden");
+    paintMap("fpvMap", { highlightZoneId: zoneId });
 };
 
 
@@ -70883,7 +70910,7 @@ function _bulkToggleAll(){
 // ── 일괄 지정 모달 ──────────────────────────────────────────────────────
 function _bulkRenderPickMap(){
     const host = $("#bulkLocMap"); if(!host) return;
-    host.innerHTML = storeMapSvg({ highlightZoneId: _bulkPickZoneId });
+    paintMap("bulkLocMap", { highlightZoneId: _bulkPickZoneId });
     const svg = host.querySelector('svg'); if(!svg) return;
     svg.style.cursor = 'pointer';
     svg.addEventListener('click', (e) => {
