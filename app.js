@@ -3501,6 +3501,28 @@ const DEFAULT_GH = {
 
 
 const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
+
+// ── 데이터 게이트웨이 ────────────────────────────────────────────────
+// 재고·판매 JSON이 GitHub Pages 로 그대로 공개되지 않도록, 허브의 인증 API를 통해 읽는다.
+// 게이트(공용비번) 통과 시 받은 서명 토큰을 Authorization 헤더로 보낸다.
+// 아직 Pages 에 파일이 남아있는 이전 기간에는 실패 시 기존 경로로 폴백한다.
+const HUB_DATA_API = 'https://racement-hub.vercel.app/api/inv-data';
+const INV_PASS_KEY = 'racement_inv_pass_v1';
+
+async function dataFetch(path){
+    const pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e){ return null; } })();
+    if(pass){
+        try {
+            const r = await fetch(`${HUB_DATA_API}?f=${encodeURIComponent(path)}`, {
+                headers: { Authorization: 'Bearer ' + pass }, cache: 'no-store'
+            });
+            if(r.ok) return r;
+            // 토큰이 만료/무효면 지우고 다음 진입 때 게이트를 다시 통과하게 한다
+            if(r.status === 401) { try { localStorage.removeItem(INV_PASS_KEY); } catch(e){} }
+        } catch(e) {}
+    }
+    return fetch('./' + path + '?t=' + Date.now());
+}
 
 
 
@@ -12036,7 +12058,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + DATA_PATH + "?t=" + Date.now()),
+          dataFetch(DATA_PATH),
 
 
 
@@ -12052,7 +12074,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./images.json?t=" + Date.now()).catch(()=>null),
+          dataFetch("images.json").catch(()=>null),
 
 
 
@@ -12068,7 +12090,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + REQUESTS_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(REQUESTS_PATH).catch(()=>null),
 
 
 
@@ -12084,7 +12106,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + TRANSFERS_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(TRANSFERS_PATH).catch(()=>null),
 
 
 
@@ -12100,7 +12122,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + PROMOTIONS_PATH + "?t=" + Date.now()).catch(()=>null),  // 아래서 API로 덮어씀
+          dataFetch(PROMOTIONS_PATH).catch(()=>null),  // 아래서 API로 덮어씀
 
 
 
@@ -12116,7 +12138,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + SALES_GUIDE_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(SALES_GUIDE_PATH).catch(()=>null),
 
 
 
@@ -12132,7 +12154,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(SALES_HISTORY_PATH).catch(()=>null),
 
 
 
@@ -12148,7 +12170,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + SALES_DEDUCT_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(SALES_DEDUCT_PATH).catch(()=>null),
 
 
 
@@ -12164,7 +12186,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + DISPLAY_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(DISPLAY_PATH).catch(()=>null),
 
 
 
@@ -12180,7 +12202,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + STOCK_OVERRIDES_PATH + "?t=" + Date.now()).catch(()=>null),
+          dataFetch(STOCK_OVERRIDES_PATH).catch(()=>null),
 
 
 
@@ -12196,7 +12218,7 @@ async function loadData(force = false){
 
 
 
-          fetch("./" + LOCATIONS_PATH + "?t=" + Date.now()).catch(()=>null)
+          dataFetch(LOCATIONS_PATH).catch(()=>null)
 
 
 
@@ -15076,7 +15098,7 @@ async function loadSalesOnly() {
 
 
 
-    const res = await fetch("./" + SALES_HISTORY_PATH + "?t=" + Date.now());
+    const res = await dataFetch(SALES_HISTORY_PATH);
 
 
 
@@ -86839,7 +86861,9 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
-                    localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000));
+                    localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000));
+                    // 데이터 게이트웨이 조회용 서명 토큰 보관
+                    try { const j = await r.json(); if(j && j.pass) localStorage.setItem(INV_PASS_KEY, j.pass); } catch(e){}
 
 
 
