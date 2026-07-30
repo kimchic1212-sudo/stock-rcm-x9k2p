@@ -1,7 +1,7 @@
-시작: 2026-07-30T10:12:24.709Z
+시작: 2026-07-30T10:14:42.953Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17854063546822046.6979596730173
+[RES] 200 login.xml&postfix=17854064965294767.88694735489
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 23건
+selTodaySalesList: 24건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":12,"NSALES_YN":"N","TOT_SALES_AMT":216000,"ITEM_CD":"31978","ITEM_NM":"러닝에너지젤 [UT-01, 1SIZE]","SALES_AMT":151200,"NET_SALES_AMT":137455,"
   파싱 성공: 3건
-메뉴 클릭 후 거래: 23건
+메뉴 클릭 후 거래: 24건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29254","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 265]","SALES_AMT":206100,"NET_SALES_AMT":18
@@ -106,4 +106,8 @@ selTodaySalesList: 23건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":50000,"ITEM_CD":"17441","ITEM_NM":"펄사 벨트 [LC2179800, M]","SALES_AMT":45000,"NET_SALES_AMT":40909,"VAT_A
   파싱 성공: 1건
+[RES] 200 selItemSalesList
+  items: 2개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":39000,"ITEM_CD":"27521","ITEM_NM":"러닝 X 아디제로 클라이마쿨 캡 [JD1160, M]","SALES_AMT":35100,"NET_SALES_AMT":319
+  파싱 성공: 2건
 완료: 품번 28개
