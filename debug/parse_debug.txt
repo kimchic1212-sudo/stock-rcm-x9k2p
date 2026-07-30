@@ -1,7 +1,7 @@
-시작: 2026-07-30T05:32:23.293Z
+시작: 2026-07-30T05:37:37.444Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853895564936966.269173863133
+[RES] 200 login.xml&postfix=17853898682657820.896212384173
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -12,12 +12,12 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업속보 클릭
 [] 클릭OK(ID)
 [RES] 200 selTodaySalesList
-selTodaySalesList: 9건
+selTodaySalesList: 10건
 [RES] 200 selItemSalesList
   items: 3개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":12,"NSALES_YN":"N","TOT_SALES_AMT":216000,"ITEM_CD":"31978","ITEM_NM":"러닝에너지젤 [UT-01, 1SIZE]","SALES_AMT":151200,"NET_SALES_AMT":137455,"
   파싱 성공: 3건
-메뉴 클릭 후 거래: 9건
+메뉴 클릭 후 거래: 10건
 [RES] 200 selItemSalesList
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":229000,"ITEM_CD":"29254","ITEM_NM":"클라우드몬스터 3 [3MG10051200, 265]","SALES_AMT":206100,"NET_SALES_AMT":18
@@ -50,4 +50,8 @@ selTodaySalesList: 9건
   items: 1개 / keys: dlt_item,rsMsg
   첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":299000,"ITEM_CD":"37555","ITEM_NM":"엔돌핀 프로 5 [S101308-1006, 235]","SALES_AMT":254150,"NET_SALES_AMT":23
   파싱 성공: 1건
-완료: 품번 10개
+[RES] 200 selItemSalesList
+  items: 1개 / keys: dlt_item,rsMsg
+  첫아이템: {"SALES_QTY":1,"NSALES_YN":"N","TOT_SALES_AMT":59000,"ITEM_CD":"39498","ITEM_NM":"ACG 래디컬 에어플로 플라이 캡 [IX1854-060, L/XL]","SALES_AMT":59000,"NET_SALES_
+  파싱 성공: 1건
+완료: 품번 11개
