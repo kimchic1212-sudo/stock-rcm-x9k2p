@@ -1,7 +1,7 @@
-시작: 2026-07-30T09:02:02.180Z
+시작: 2026-07-30T09:02:17.058Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17854021337112939.3554646185016
+[RES] 200 login.xml&postfix=17854021483376204.6133014954485
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -9,5 +9,7 @@ goto OK: https://cloudposoffice.shinsegae.com/
 스크린샷 업로드
 자동 로드 없음 → 메뉴 클릭 시도
 영업 클릭
+영업속보 클릭
+[] 클릭OK(ID)
 메뉴 클릭 후 거래: 0건
 완료: 품번 0개
