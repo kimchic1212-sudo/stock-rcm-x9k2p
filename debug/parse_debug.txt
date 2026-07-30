@@ -1,7 +1,7 @@
-시작: 2026-07-30T08:15:56.144Z
+시작: 2026-07-30T08:21:52.444Z
 브라우저 OK
 goto OK: https://cloudposoffice.shinsegae.com/
-[RES] 200 login.xml&postfix=17853993682822487.162698334825
+[RES] 200 login.xml&postfix=17853997260523226.1036898788266
 폼 입력 완료
 [RES] 200 login
 [RES] 200 init
@@ -11,14 +11,5 @@ goto OK: https://cloudposoffice.shinsegae.com/
 영업 클릭
 영업속보 클릭
 [] 클릭OK(ID)
-[RES] 200 selTodaySalesList
-selTodaySalesList: 18건
-[RES] 200 selItemSalesList
-  items: 3개 / keys: dlt_item,rsMsg
-  첫아이템: {"SALES_QTY":12,"NSALES_YN":"N","TOT_SALES_AMT":216000,"ITEM_CD":"31978","ITEM_NM":"러닝에너지젤 [UT-01, 1SIZE]","SALES_AMT":151200,"NET_SALES_AMT":137455,"
-  파싱 성공: 3건
-메뉴 클릭 후 거래: 18건
-[RES] 200 selItemSalesList
-  items: 0개 / keys: rsMsg
-  파싱 성공: 0건
-완료: 품번 3개
+메뉴 클릭 후 거래: 0건
+완료: 품번 0개
