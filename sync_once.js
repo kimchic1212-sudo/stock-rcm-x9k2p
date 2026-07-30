@@ -9,9 +9,11 @@ const CONFIG = {
   posUrl:   'https://cloudposoffice.shinsegae.com/',
   posId:    process.env.POS_ID    || '001001',
   posPw:    process.env.POS_PW    || '',
-  ghToken:  process.env.GITHUB_TOKEN || '',
+  // 2026-07-29: 판매데이터가 비공개 저장소로 이전됨 — 기본 github.token은 자기 저장소(공개)만 쓸 수 있어
+  // 별도 시크릿(DATA_REPO_PAT, stock-rcm-data 쓰기 권한 포함)을 사용
+  ghToken:  process.env.DATA_REPO_PAT || process.env.GITHUB_TOKEN || '',
   ghOwner:  'kimchic1212-sudo',
-  ghRepo:   'stock-rcm-x9k2p',
+  ghRepo:   'stock-rcm-data',
   ghBranch: 'main',
   salesFile:'sales_history.json',
 };
