@@ -3452,7 +3452,7 @@ const DEFAULT_GH = {
 
 
 
-  repo:   'stock-rcm-x9k2p',
+  repo:   'stock-rcm-data',  // 2026-07-29: 데이터를 비공개 저장소로 이전 (앱코드는 stock-rcm-x9k2p 에 그대로)
 
 
 
@@ -5106,7 +5106,10 @@ function loadGhConfig(){
 
 
 
-    if(!GH.owner) { GH.owner = DEFAULT_GH.owner; GH.repo = DEFAULT_GH.repo; GH.branch = DEFAULT_GH.branch; saveGhConfig(); }
+    if(!GH.owner) { GH.owner = DEFAULT_GH.owner; GH.repo = DEFAULT_GH.repo; GH.branch = DEFAULT_GH.branch; saveGhConfig(); }
+
+    // 2026-07-29: 데이터가 비공개 저장소로 이전됨 — 예전 기기에 캐시된 공개 저장소 설정을 자동 승격
+    if(GH.repo === 'stock-rcm-x9k2p') { GH.repo = DEFAULT_GH.repo; saveGhConfig(); }
 
 
 
