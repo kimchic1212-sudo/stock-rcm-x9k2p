@@ -644,6 +644,40 @@ style.innerHTML = `
 
     .loc-pill > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
+    .shelf-view { display:flex; flex-direction:column; gap:8px; }
+
+    .shelf-tier { display:flex; align-items:stretch; border:2px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
+
+    .shelf-tier-label { flex:0 0 52px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#64748b; background:#f8fafc; border-right:1px solid #e2e8f0; }
+
+    .shelf-tier-body { flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:9px 10px; min-height:24px; }
+
+    .shelf-chip { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800; background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; border-radius:8px; padding:4px 8px; cursor:pointer; }
+
+    .shelf-chip:hover { background:#e2e8f0; }
+
+    .shelf-chip em { font-style:normal; font-weight:700; color:#94a3b8; }
+
+    .shelf-empty { font-size:11px; font-weight:700; color:#cbd5e1; }
+
+    .shelf-tier-summary { cursor:pointer; }
+
+    .shelf-tier-summary .shelf-tier-body { flex-direction:column; align-items:flex-start; gap:2px; }
+
+    .shelf-tier-summary:hover { border-color:#ffbf9e; }
+
+    .shelf-tier-summary.shelf-tier-open { border-color:#ff5a1f; background:#fff8f5; }
+
+    .shelf-count-row { display:flex; align-items:center; gap:8px; width:100%; }
+
+    .shelf-count { font-size:13px; font-weight:900; color:#1e293b; }
+
+    .shelf-go { font-size:10px; font-weight:800; color:#c2410c; margin-left:auto; }
+
+    .shelf-sum { font-size:11px; font-weight:700; color:#64748b; }
+
+    .shelf-item-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; }
+
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
 
 
@@ -70571,6 +70605,86 @@ function storeMapSvg(opts){
     return `<svg viewBox="0 0 ${MAP_VB_W} ${MAP_VB_H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">${_renderStoreMapSvg(opts)}</svg>`;
 }
 
+// ── 선반 정면도(단별 상세) ────────────────────────────────────────────
+// 방침: 칸(slot)당 품목이 적으면(≤6) 품번 칩을 바로 보여주고, 많으면
+// 개수 + 브랜드 구성 요약만 보여준 뒤 탭하면 아래에 카드 목록을 펼친다.
+const SHELF_CHIP_MAX = 6;
+
+function _zoneAssignedCodes(zoneId, slot){
+    const out = [];
+    for(const code in LOCATIONS.assignments){
+        const a = LOCATIONS.assignments[code];
+        if(a.zoneId !== zoneId) continue;
+        if(slot !== undefined && (a.slot || null) !== (slot || null)) continue;
+        out.push(code);
+    }
+    return out;
+}
+
+function _productByCode(code){ return PRODUCTS.find(p => p.품번 === code); }
+
+function _shelfTierSummary(codes){
+    const items = codes.map(_productByCode).filter(Boolean);
+    const totalQty = items.reduce((s, p) => s + (p.busanTotal || 0), 0);
+    const brandCount = {};
+    items.forEach(p => { const b = p.브랜드 || '기타'; brandCount[b] = (brandCount[b] || 0) + 1; });
+    const topBrands = Object.entries(brandCount).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    return { items, totalQty, topBrands };
+}
+
+function _shelfChip(p){
+    const qty = p.busanTotal || 0;
+    return `<button type="button" class="shelf-chip" onclick="event.stopPropagation(); openDetail(_productByCode('${escapeHtml(p.품번)}'))">`
+        + `<span>${escapeHtml(p.품번)}</span><em>${qty}</em></button>`;
+}
+
+function _shelfTierRow(label, codes, zoneId, slot){
+    const { items, topBrands } = _shelfTierSummary(codes);
+    if(items.length === 0){
+        return `<div class="shelf-tier"><div class="shelf-tier-label">${escapeHtml(label)}</div><div class="shelf-tier-body"><span class="shelf-empty">비어 있음</span></div></div>`;
+    }
+    if(items.length <= SHELF_CHIP_MAX){
+        return `<div class="shelf-tier"><div class="shelf-tier-label">${escapeHtml(label)}</div>`
+            + `<div class="shelf-tier-body">${items.map(_shelfChip).join('')}</div></div>`;
+    }
+    const brandTxt = topBrands.map(([b, n]) => `${escapeHtml(b)} ${n}`).join(' · ');
+    return `<div class="shelf-tier shelf-tier-summary" onclick="_toggleShelfList('${escapeHtml(zoneId)}', ${slot ? `'${escapeHtml(slot)}'` : 'null'}, this)">`
+        + `<div class="shelf-tier-label">${escapeHtml(label)}</div>`
+        + `<div class="shelf-tier-body"><div class="shelf-count-row"><span class="shelf-count">${items.length}개 품목</span><span class="shelf-go">탭하면 목록에서 보기</span></div>`
+        + `<div class="shelf-sum">${brandTxt}</div></div></div>`;
+}
+
+function _renderShelfView(zoneId){
+    const host = $("#fpvShelf"); if(!host) return;
+    const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
+    if(!z){ host.innerHTML = ''; return; }
+    const slots = z.slots || [];
+    let rows;
+    if(slots.length === 0){
+        rows = _shelfTierRow('전체', _zoneAssignedCodes(zoneId), zoneId, null);
+    } else {
+        // 물리적으로 위에 있는 칸(번호가 큰 단)부터 위에서 아래로 표시
+        rows = [...slots].reverse().map(s => _shelfTierRow(s, _zoneAssignedCodes(zoneId, s), zoneId, s)).join('');
+    }
+    host.innerHTML = `<div class="shelf-view">${rows}</div><div id="fpvItemList" class="mt-3"></div>`;
+}
+
+window._toggleShelfList = (zoneId, slot, el) => {
+    const listHost = $("#fpvItemList"); if(!listHost) return;
+    const isOpen = el.classList.contains('shelf-tier-open');
+    $$('.shelf-tier-summary').forEach(t => t.classList.remove('shelf-tier-open'));
+    if(isOpen){ listHost.innerHTML = ''; return; }
+    el.classList.add('shelf-tier-open');
+    const codes = _zoneAssignedCodes(zoneId, slot);
+    const items = codes.map(_productByCode).filter(Boolean);
+    listHost.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'shelf-item-grid';
+    items.forEach(p => grid.appendChild(card(p)));
+    listHost.appendChild(grid);
+    listHost.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
 // 컨테이너 실제 폭을 재서 글자 크기를 맞춘 뒤 지도를 심는다 (모달이 보이는 상태여야 폭이 잡힘)
 function paintMap(hostId, opts){
     const host = $("#" + hostId); if(!host) return;
@@ -70864,6 +70978,7 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
         + `<span style="margin-left:10px;font-size:14px;font-weight:800;color:#64748b;">${escapeHtml(z.label || '')}</span>`;
     $("#floorPlanViewModal").classList.remove("hidden");
     paintMap("fpvMap", { highlightZoneId: zoneId });
+    _renderShelfView(zoneId);
 };
 
 
