@@ -86656,7 +86656,9 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
-    if (parseInt(localStorage.getItem(GATE_KEY) || '0') > Date.now()) return;
+    // 2026-07-30: 데이터 조회에 pass 토큰이 필수가 됨 — 예전에 게이트만 통과하고
+    // 토큰을 못 받은 기존 기기(90일 이내 재방문)도 다시 게이트를 보게 함
+    if (parseInt(localStorage.getItem(GATE_KEY) || '0') > Date.now() && localStorage.getItem(INV_PASS_KEY)) return;
 
 
 
@@ -86874,14 +86876,9 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
-                    ov.remove();
-
-
-
-
-
-
-
+                    // 데이터가 이제 인증 필요라 게이트 통과 전 loadData()가 비어있는 채로 끝났을 수 있음 —
+                    // 새로 받은 토큰으로 다시 로드되도록 새로고침
+                    location.reload();
                     return;
 
 
