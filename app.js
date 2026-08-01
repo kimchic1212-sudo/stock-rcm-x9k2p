@@ -49669,7 +49669,8 @@ function card(p){
     const _asn = (LOCATIONS.assignments || {})[p.품번];
     const _zone = _asn ? (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId) : null;
     if(_zone){
-      locHtml = `<button type="button" class="loc-pill mb-1.5" title="${escapeHtml(_zone.label || '')}" onclick="window.openFloorPlanView('${_zone.id}'${_asn.slot ? `,'${escapeHtml(_asn.slot)}'` : ''})">📍 <span>${escapeHtml(zoneAddress(_zone, _asn.slot))}</span></button>`;
+      const _locText = (_zone.label || zoneAddress(_zone)) + (_asn.slot ? ` · ${_asn.slot}` : '');
+      locHtml = `<button type="button" class="loc-pill mb-1.5" title="${escapeHtml(zoneAddress(_zone, _asn.slot))}" onclick="window.openFloorPlanView('${_zone.id}'${_asn.slot ? `,'${escapeHtml(_asn.slot)}'` : ''})">📍 <span>${escapeHtml(_locText)}</span></button>`;
     }
   }
 
