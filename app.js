@@ -70362,6 +70362,7 @@ function _renderStoreMapSvg(opts){
         });
     }
 
+    let hiLabel = '';
     (LOCATIONS.zones || []).forEach(z => {
         const r = _mapZoneRect(z);
         const isPoly = Array.isArray(z.poly) && z.poly.length >= 3;
@@ -70393,13 +70394,15 @@ function _renderStoreMapSvg(opts){
         out += `</g>`;
 
         if(isHi && !compact){
-            out += `<text x="${lx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="${fs(17, 13)}" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
+            // 인접 구역 박스에 가려지지 않도록 라벨은 루프 끝난 뒤 맨 위(최상단 z-order)에 그린다
+            hiLabel = `<text x="${lx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="${fs(17, 13)}" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
         }
         // 폴리곤은 리사이즈 정의가 모호해 이동만 허용 (핸들 없음)
         if(editable && !isPoly){
             out += `<rect class="zmap-handle" data-zone="${escapeHtml(z.id)}" x="${Number(PX(r.x + r.w)) - 9}" y="${Number(PY(r.y + r.h)) - 9}" width="18" height="18" rx="4" fill="#ffffff" stroke="#ff5a1f" stroke-width="2.5" style="cursor:nwse-resize;"/>`;
         }
     });
+    out += hiLabel;
 
     return out;
 }
