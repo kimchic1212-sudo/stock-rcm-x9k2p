@@ -39,3 +39,8 @@ jobs:
           git config user.name "GitHub Action"
           git add prices.json
           git diff --staged --quiet || (git commit -m "prices: $(date -u +%Y-%m-%d\ %H:%M)" && git pull --rebase && git push)
+
+      - name: Sync discounted prices into promotions (재고조회시스템 자동 할인가 반영)
+        env:
+          DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
+        run: node price_sync.js
