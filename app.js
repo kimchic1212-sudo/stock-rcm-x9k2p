@@ -422,7 +422,9 @@ style.innerHTML = `
 
 
 
-    #zoneManagerModal, #floorPlanViewModal { z-index: 10001 !important; }
+    #zoneManagerModal, #floorPlanViewModal, #bulkLocModal { z-index: 10001 !important; }
+
+    #bulkBar { z-index: 10002 !important; }
 
 
 
