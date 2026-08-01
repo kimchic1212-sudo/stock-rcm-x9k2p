@@ -690,6 +690,8 @@ style.innerHTML = `
 
     .shelf-rack.shelf-tier-open rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
 
+    .shelf-rack.shelf-rack-picked rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
+
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
 
 
@@ -70435,7 +70437,8 @@ const WAREHOUSE_LAYOUTS = {
     },
 };
 
-function _renderWarehouseRackMap(zoneId, layout){
+function _renderWarehouseRackMap(zoneId, layout, opts){
+    const pickMode = !!(opts && opts.pickMode);
     const [vbw, vbh] = layout.vb;
     let svg = `<svg viewBox="0 0 ${vbw} ${vbh}" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">`;
     svg += `<rect x="1.5" y="1.5" width="${vbw - 3}" height="${vbh - 3}" fill="#f8fafc" stroke="#334155" stroke-width="3"/>`;
@@ -70449,7 +70452,10 @@ function _renderWarehouseRackMap(zoneId, layout){
         const stroke = n > 0 ? '#ff5a1f' : '#94a3b8';
         const fs = Math.min(w, h) > 55 ? 20 : 15;
         const cy = n > 0 ? y + h / 2 - 7 : y + h / 2;
-        svg += `<g class="shelf-rack" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="_toggleShelfList('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)">`;
+        const onclick = pickMode
+            ? `_bulkPickRackSlot('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`
+            : `_toggleShelfList('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`;
+        svg += `<g class="shelf-rack" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="${onclick}">`;
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
         svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(slot)}</text>`;
         if(n > 0) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
@@ -70919,16 +70925,51 @@ function _bulkRenderPickMap(){
 
 function _bulkSyncPick(){
     const z = (LOCATIONS.zones||[]).find(zz => zz.id === _bulkPickZoneId);
-    const pick = $("#bulkLocPick"), slotSel = $("#bulkLocSlot");
+    const pick = $("#bulkLocPick"), slotSel = $("#bulkLocSlot"), rackHost = $("#bulkLocRackMap");
     if(!pick || !slotSel) return;
-    if(!z){ pick.textContent = '구역 미선택'; slotSel.classList.add('hidden'); slotSel.innerHTML = ''; return; }
+    if(!z){
+        pick.textContent = '구역 미선택'; slotSel.classList.add('hidden'); slotSel.innerHTML = '';
+        if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
+        return;
+    }
     pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
     const slots = z.slots || [];
-    if(slots.length){
+    const layout = WAREHOUSE_LAYOUTS[z.id];
+    if(layout && rackHost){
+        slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+        slotSel.classList.add('hidden');
+        rackHost.classList.remove('hidden');
+        rackHost.innerHTML = `<div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">랙을 클릭해 칸을 선택하세요</span><button type="button" class="text-xs underline" onclick="_bulkClearRackPick()">칸 미지정으로</button></div><div class="shelf-rackmap" style="max-width:340px;">${_renderWarehouseRackMap(z.id, layout, {pickMode:true})}</div>`;
+        _bulkHighlightRackPick(slotSel.value);
+    } else if(slots.length){
         slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
         slotSel.classList.remove('hidden');
-    } else { slotSel.innerHTML = ''; slotSel.classList.add('hidden'); }
+        if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
+    } else {
+        slotSel.innerHTML = ''; slotSel.classList.add('hidden');
+        if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
+    }
 }
+
+function _bulkHighlightRackPick(slot){
+    const rackHost = $("#bulkLocRackMap"); if(!rackHost) return;
+    rackHost.querySelectorAll('.shelf-rack').forEach(g => g.classList.remove('shelf-rack-picked'));
+    if(!slot) return;
+    const g = rackHost.querySelector(`.shelf-rack[data-slot="${CSS.escape(slot)}"]`);
+    if(g) g.classList.add('shelf-rack-picked');
+}
+
+window._bulkPickRackSlot = (zoneId, slot, el) => {
+    const sv = $("#bulkLocSlot");
+    if(sv) sv.value = slot;
+    _bulkHighlightRackPick(slot);
+};
+
+window._bulkClearRackPick = () => {
+    const sv = $("#bulkLocSlot");
+    if(sv) sv.value = '';
+    _bulkHighlightRackPick(null);
+};
 
 let _bulkSingleMode = false;
 
@@ -70952,7 +70993,8 @@ window.openSingleLocModal = (code) => {
     if(asn && asn.slot){
         requestAnimationFrame(() => {
             const sv = $("#bulkLocSlot");
-            if(sv && !sv.classList.contains('hidden')) sv.value = asn.slot;
+            if(sv) sv.value = asn.slot;
+            _bulkHighlightRackPick(asn.slot);
         });
     }
 };
@@ -70967,7 +71009,7 @@ async function _bulkApply(mode){
         if(!_bulkPickZoneId){ alert('지도에서 구역을 먼저 선택해주세요.'); return; }
         zoneId = _bulkPickZoneId;
         const sv = $("#bulkLocSlot");
-        slot = (sv && !sv.classList.contains('hidden') && sv.value) ? sv.value : null;
+        slot = (sv && sv.value) ? sv.value : null;
     } else {
         if(!confirm(`선택한 ${codes.length}개 상품의 위치를 해제할까요?`)) return;
     }
