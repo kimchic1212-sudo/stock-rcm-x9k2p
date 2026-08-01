@@ -680,6 +680,16 @@ style.innerHTML = `
 
     .shelf-item-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; }
 
+    .shelf-rackmap { border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; background:#f8fafc; max-width:420px; margin:0 auto; }
+
+    .shelf-rack { cursor:pointer; }
+
+    .shelf-rack rect { transition:stroke-width .1s; }
+
+    .shelf-rack:hover rect { stroke-width:3; }
+
+    .shelf-rack.shelf-tier-open rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
+
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
 
 
@@ -70396,6 +70406,59 @@ function storeMapSvg(opts){
 // 방침: 칸(slot)당 품목이 적으면(≤6) 품번 칩을 바로 보여주고, 많으면
 // 개수 + 브랜드 구성 요약만 보여준 뒤 탭하면 아래에 카드 목록을 펼친다.
 const SHELF_CHIP_MAX = 6;
+// ── 창고(S1·S2) 랙 배치도 ────────────────────────────────────────────
+// 실측 CAD 도면을 기준으로 눈대중 비율만 맞춘 스키마틱 배치 — 물리적 mm 정밀도 아님.
+// S1(앞쪽창고)의 "6"은 실제로 두 자리(위쪽 벽면 선반 하나 + 오른쪽 벽면 아래쪽 하나)에 걸쳐 있는데,
+// 둘 다 같은 slot "6"이라 어느 쪽을 눌러도 같은 배정 목록이 뜬다(의도된 동작).
+const WAREHOUSE_LAYOUTS = {
+    'storage1': {
+        vb: [380, 420],
+        racks: [
+            ['4', 20, 20, 100, 60], ['5', 130, 20, 100, 60], ['6', 240, 20, 100, 60],
+            ['3', 20, 90, 50, 170],
+            ['2', 140, 90, 50, 85], ['12', 195, 90, 50, 85],
+            ['1', 140, 180, 50, 85], ['11', 195, 180, 50, 85],
+            ['10', 140, 275, 105, 65],
+            ['7', 270, 90, 70, 85], ['8', 270, 180, 70, 85], ['6', 270, 270, 70, 85],
+        ],
+        fixtures: [['카운터', 20, 270, 110, 125]],
+    },
+    'storage2': {
+        vb: [420, 340],
+        racks: [
+            ['7', 20, 20, 60, 70],
+            ['6', 110, 20, 80, 55], ['5', 200, 20, 80, 55], ['4', 310, 20, 80, 55],
+            ['1', 110, 200, 80, 55], ['2', 200, 200, 80, 55], ['3', 310, 200, 80, 55],
+            ['8', 20, 100, 60, 50], ['9', 20, 155, 60, 50], ['10', 20, 210, 60, 50], ['11', 20, 265, 60, 50],
+        ],
+        fixtures: [],
+    },
+};
+
+function _renderWarehouseRackMap(zoneId, layout){
+    const [vbw, vbh] = layout.vb;
+    let svg = `<svg viewBox="0 0 ${vbw} ${vbh}" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<rect x="1.5" y="1.5" width="${vbw - 3}" height="${vbh - 3}" fill="#f8fafc" stroke="#334155" stroke-width="3"/>`;
+    (layout.fixtures || []).forEach(([label, x, y, w, h]) => {
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#e5e7eb" stroke="#94a3b8" stroke-width="2"/>`;
+        svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#94a3b8">${escapeHtml(label)}</text>`;
+    });
+    layout.racks.forEach(([slot, x, y, w, h]) => {
+        const n = _zoneAssignedCodes(zoneId, slot).length;
+        const fill = n > 0 ? '#fff0e9' : '#f1f5f9';
+        const stroke = n > 0 ? '#ff5a1f' : '#94a3b8';
+        const fs = Math.min(w, h) > 55 ? 20 : 15;
+        const cy = n > 0 ? y + h / 2 - 7 : y + h / 2;
+        svg += `<g class="shelf-rack" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="_toggleShelfList('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)">`;
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+        svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(slot)}</text>`;
+        if(n > 0) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
+        svg += `</g>`;
+    });
+    svg += `</svg>`;
+    return svg;
+}
+
 
 function _zoneAssignedCodes(zoneId, slot){
     const out = [];
@@ -70445,6 +70508,11 @@ function _renderShelfView(zoneId){
     const host = $("#fpvShelf"); if(!host) return;
     const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
     if(!z){ host.innerHTML = ''; return; }
+    const layout = WAREHOUSE_LAYOUTS[zoneId];
+    if(layout){
+        host.innerHTML = `<div class="shelf-rackmap">${_renderWarehouseRackMap(zoneId, layout)}</div><div id="fpvItemList" class="mt-3"></div>`;
+        return;
+    }
     const slots = z.slots || [];
     let rows;
     if(slots.length === 0){
@@ -70459,7 +70527,8 @@ function _renderShelfView(zoneId){
 window._toggleShelfList = (zoneId, slot, el) => {
     const listHost = $("#fpvItemList"); if(!listHost) return;
     const isOpen = el.classList.contains('shelf-tier-open');
-    $$('.shelf-tier-summary').forEach(t => t.classList.remove('shelf-tier-open'));
+    // 예전 단(tier) 목록형과 새 랙 배치도형 둘 다 같은 토글을 쓰므로 클래스만 기준으로 초기화
+    $$('.shelf-tier-open').forEach(t => t.classList.remove('shelf-tier-open'));
     if(isOpen){ listHost.innerHTML = ''; return; }
     el.classList.add('shelf-tier-open');
     const codes = _zoneAssignedCodes(zoneId, slot);
