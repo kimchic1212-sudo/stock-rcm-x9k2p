@@ -5637,17 +5637,21 @@
 <!-- 여러 상품 위치 일괄 지정 (ADMIN) -->
 <div id="bulkLocModal" class="hidden fixed inset-0 z-50 modal-backdrop no-print">
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-2 sm:p-4">
-    <div class="card w-full max-w-3xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
+    <div class="card w-full max-w-3xl lg:max-w-5xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
       <button id="closeBulkLoc" class="absolute top-3 right-3 p-2 z-10"><i data-lucide="x"></i></button>
       <h3 class="text-lg font-black mb-1">📍 위치 일괄 지정</h3>
       <div id="bulkLocCount" class="text-xs font-bold mb-3" style="color:#c2410c;"></div>
       <div class="text-xs text-gray-500 mb-2">지도에서 구역을 클릭해 선택하세요.</div>
-      <div id="bulkLocMap" style="width:min(100%, 74vh); aspect-ratio:1000/720; margin:0 auto; background:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid var(--line); user-select:none;"></div>
-      <div class="flex flex-wrap items-center gap-2 mt-3">
-        <span id="bulkLocPick" class="text-sm font-black" style="color:#c2410c;">구역 미선택</span>
-        <select id="bulkLocSlot" class="ipt text-xs py-1.5 px-2 hidden" style="max-width:150px;"></select>
+      <div class="flex flex-col lg:flex-row gap-4 items-start">
+        <div id="bulkLocMap" style="width:min(100%, 74vh); aspect-ratio:1000/720; margin:0 auto; background:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid var(--line); user-select:none; flex:0 0 auto;"></div>
+        <div class="flex-1 min-w-0 w-full">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="bulkLocPick" class="text-sm font-black" style="color:#c2410c;">구역 미선택</span>
+            <select id="bulkLocSlot" class="ipt text-xs py-1.5 px-2 hidden" style="max-width:150px;"></select>
+          </div>
+          <div id="bulkLocRackMap" class="hidden mt-2"></div>
+        </div>
       </div>
-      <div id="bulkLocRackMap" class="hidden mt-2"></div>
       <div class="flex flex-wrap gap-2 mt-4">
         <button id="bulkLocSave" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]">선택한 상품에 지정</button>
         <button id="bulkLocClear" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]">위치 해제</button>
@@ -5743,7 +5747,7 @@
 
 
 
-<script src="./app.js?v=26080104"></script>
+<script src="./app.js?v=26080105"></script>
 
 
 
