@@ -70422,16 +70422,20 @@ const SHELF_CHIP_MAX = 6;
 // 둘 다 같은 slot "6"이라 어느 쪽을 눌러도 같은 배정 목록이 뜬다(의도된 동작).
 const WAREHOUSE_LAYOUTS = {
     'storage1': {
-        vb: [380, 420],
+        vb: [340, 380],
         racks: [
-            ['4', 20, 20, 100, 60], ['5', 130, 20, 100, 60], ['6', 240, 20, 100, 60],
-            ['3', 20, 90, 50, 170],
-            ['2', 140, 90, 50, 85], ['12', 195, 90, 50, 85],
-            ['1', 140, 180, 50, 85], ['11', 195, 180, 50, 85],
-            ['10', 140, 275, 105, 65],
-            ['7', 270, 90, 70, 85], ['8', 270, 180, 70, 85], ['6', 270, 270, 70, 85],
+            ['3', 20, 20, 100, 40], ['4', 120, 20, 100, 40], ['5', 220, 20, 100, 40],
+            ['6', 270, 60, 50, 40],
+            ['7', 270, 100, 50, 77], ['8', 270, 177, 50, 77], ['9', 270, 254, 50, 76],
+            ['2', 135, 90, 40, 80], ['12', 175, 90, 40, 80],
+            ['1', 135, 170, 40, 80], ['11', 175, 170, 40, 80],
+            ['10', 135, 250, 40, 80],
         ],
-        fixtures: [['카운터', 20, 270, 110, 125]],
+        // 실사용 안 하는 자리 — 클릭 불가, 점선으로만 표시
+        emptyRacks: [[20, 70, 50, 80, '0']],
+        // 문 위치: [x,y,w,h,라벨x,라벨y,라벨텍스트?] — 10번 옆(바닥벽), 기둥 위 카운터로 나가는 문
+        doors: [[185, 315, 35, 15, 202.5, 305], [16, 155, 10, 85, 55, 198, '문(카운터)']],
+        fixtures: [['기둥', 20, 250, 115, 80]],
     },
     'storage2': {
         vb: [420, 340],
@@ -70456,9 +70460,13 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#e5e7eb" stroke="#94a3b8" stroke-width="2"/>`;
         svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#94a3b8">${escapeHtml(label)}</text>`;
     });
-    (layout.doors || []).forEach(([x, y, w, h, lx, ly]) => {
+    (layout.doors || []).forEach(([x, y, w, h, lx, ly, label]) => {
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ff5a1f"/>`;
-        if(lx != null) svg += `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" font-weight="800" fill="#c2410c">문</text>`;
+        if(lx != null) svg += `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="${label ? 10 : 12}" font-weight="800" fill="#c2410c">${escapeHtml(label || '문')}</text>`;
+    });
+    (layout.emptyRacks || []).forEach(([x, y, w, h, label]) => {
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="5 4"/>`;
+        svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="900" fill="#94a3b8">${escapeHtml(label)}</text>`;
     });
     layout.racks.forEach(([slot, x, y, w, h]) => {
         const n = _zoneAssignedCodes(zoneId, slot).length;
