@@ -16,8 +16,29 @@ const DATA_BRANCH = 'main';
 const GH_TOKEN = process.env.DATA_REPO_PAT || process.env.GITHUB_TOKEN || '';
 const AUTO_PROMO_ID = 'auto-price-sync';
 const AUTO_PROMO_NAME = '공홈 가격 자동반영';
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const CHAT_ID = process.env.CHAT_ID;
+// 이전 대비 매칭 개수가 이 비율 밑으로 떨어지면 "스크래핑 실패"로 간주하고 저장을 건너뜀
+// (예전 항목이 적으면 오탐 나기 쉬우니 최소 개수 이상일 때만 이 안전장치 적용)
+const DROP_GUARD_RATIO = 0.5;
+const DROP_GUARD_MIN_PREV = 20;
 
 function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+function sendTelegram(text) {
+  return new Promise((resolve) => {
+    if (!BOT_TOKEN || !CHAT_ID) { log('[Telegram skip] BOT_TOKEN/CHAT_ID 미설정'); resolve(); return; }
+    const body = JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' });
+    const req = https.request({
+      hostname: 'api.telegram.org',
+      path: `/bot${BOT_TOKEN}/sendMessage`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+    }, res => { res.resume(); resolve(); });
+    req.on('error', e => { console.error('[Telegram error]', e.message); resolve(); });
+    req.write(body); req.end();
+  });
+}
 
 function ghRequest(method, path, body) {
   return new Promise((resolve, reject) => {
@@ -150,6 +171,22 @@ async function main() {
   }
   log(`재고 매칭 성공: ${matched}개 품번 → 자동 기획전 반영`);
 
+  log('promotions.json 로드 중 (이전 결과와 비교용)...');
+  const { data: promoData } = await loadJsonFile('promotions.json');
+  const promotions = (promoData && Array.isArray(promoData.promotions)) ? promoData.promotions : [];
+  const prevAuto = promotions.find(pr => pr.id === AUTO_PROMO_ID);
+  const prevCount = prevAuto ? Object.keys(prevAuto.items || {}).length : 0;
+  log(`이전 자동반영 품번 수: ${prevCount}개`);
+
+  // ── 안전장치: 스크래핑이 일부만 되거나 실패해서 매칭 개수가 급감하면,
+  //    잘 반영되던 할인가들이 전부 정가로 되돌아가는 "역행"을 막기 위해 저장을 건너뜀 ──
+  if (prevCount >= DROP_GUARD_MIN_PREV && matched < prevCount * DROP_GUARD_RATIO) {
+    const warnMsg = `⚠️ <b>가격 자동동기화 건너뜀</b>\n이전 ${prevCount}개 → 이번 ${matched}개로 급감 (공홈 스크래핑 실패 의심)\n기존 할인가는 그대로 유지했습니다. 확인이 필요합니다.`;
+    log(`[SKIP] 이전(${prevCount}) 대비 급감(${matched}) — 저장 건너뜀, 기존 데이터 유지`);
+    await sendTelegram(warnMsg);
+    process.exit(1);
+  }
+
   if (process.env.DRY_RUN) {
     log('[DRY_RUN] 저장 생략. 계산된 항목 일부:');
     console.log(JSON.stringify(Object.fromEntries(Object.entries(items).slice(0, 5)), null, 2));
@@ -157,8 +194,6 @@ async function main() {
   }
 
   log('promotions.json 갱신 중...');
-  const { data: promoData } = await loadJsonFile('promotions.json');
-  const promotions = (promoData && Array.isArray(promoData.promotions)) ? promoData.promotions : [];
   const withoutAuto = promotions.filter(pr => pr.id !== AUTO_PROMO_ID);
   const autoPromo = {
     id: AUTO_PROMO_ID,
