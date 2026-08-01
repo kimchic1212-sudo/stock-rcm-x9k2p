@@ -693,8 +693,8 @@ style.innerHTML = `
     .shelf-rack.shelf-rack-picked rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
 
     @media (min-width: 1024px) {
-        #bulkLocMap { width: 340px !important; }
-        #bulkLocRackMap .shelf-rackmap { max-width: 360px; margin: 0; }
+        #bulkLocMap { width: 600px !important; }
+        #bulkLocRackMap .shelf-rackmap { max-width: none; margin: 0; }
     }
 
     .bookmark-overlay { position: absolute; top: 6px; right: 6px; z-index: 20; background: rgba(255,255,255,0.85); border-radius: 50%; padding: 6px; backdrop-filter: blur(2px); transition: all 0.2s; }
