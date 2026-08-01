@@ -43,4 +43,6 @@ jobs:
       - name: Sync discounted prices into promotions (재고조회시스템 자동 할인가 반영)
         env:
           DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node price_sync.js
