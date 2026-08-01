@@ -70437,10 +70437,12 @@ const WAREHOUSE_LAYOUTS = {
         vb: [420, 340],
         racks: [
             ['7', 20, 20, 60, 70],
-            ['6', 110, 20, 80, 55], ['5', 200, 20, 80, 55], ['4', 310, 20, 80, 55],
-            ['1', 110, 200, 80, 55], ['2', 200, 200, 80, 55], ['3', 310, 200, 80, 55],
-            ['8', 20, 100, 60, 50], ['9', 20, 155, 60, 50], ['10', 20, 210, 60, 50], ['11', 20, 265, 60, 50],
+            ['6', 110, 20, 80, 55], ['5', 198, 20, 80, 55], ['4', 286, 20, 80, 55],
+            ['1', 110, 135, 80, 55], ['2', 198, 135, 80, 55], ['3', 286, 135, 80, 55],
+            ['8', 40, 140, 60, 45], ['9', 40, 190, 60, 45], ['10', 40, 240, 60, 45], ['11', 40, 290, 60, 45],
         ],
+        // 문 위치: [x,y,w,h,라벨x,라벨y] — 6↔7 사이(상단 벽), 8↔1 사이
+        doors: [[75, 0, 40, 6, 95, 20], [98, 132, 14, 20, 105, 122]],
         fixtures: [],
     },
 };
@@ -70453,6 +70455,10 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
     (layout.fixtures || []).forEach(([label, x, y, w, h]) => {
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#e5e7eb" stroke="#94a3b8" stroke-width="2"/>`;
         svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#94a3b8">${escapeHtml(label)}</text>`;
+    });
+    (layout.doors || []).forEach(([x, y, w, h, lx, ly]) => {
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ff5a1f"/>`;
+        if(lx != null) svg += `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" font-weight="800" fill="#c2410c">문</text>`;
     });
     layout.racks.forEach(([slot, x, y, w, h]) => {
         const n = _zoneAssignedCodes(zoneId, slot).length;
