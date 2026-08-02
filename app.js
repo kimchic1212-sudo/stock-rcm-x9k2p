@@ -294,7 +294,7 @@ style.innerHTML = `
 
 
 
-      .chip { min-height: 32px; }
+      .chip { min-height: 34px; }
 
 
 
@@ -302,7 +302,7 @@ style.innerHTML = `
 
 
 
-      #sut-KR, #sut-EU, #sut-US { padding: 5px 10px !important; }
+      #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
 
 
 
@@ -11762,7 +11762,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
 
 
 
@@ -11827,6 +11827,7 @@ async function loadData(force = false){
 
 
               DISPLAY_ITEMS = d;
+              autoRemoveSoldDP().catch(()=>{}); // DP 목록이 이제 막 로드됐으니, 이미 품절인 DP 사이즈가 있는지 바로 체크
 
 
 
@@ -12674,7 +12675,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete();
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
 
 
 
@@ -21290,12 +21291,7 @@ function rebuildIndex(){
 
 
 
-          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear)) +
-          `<div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-auto">
-            <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#fff0e9;color:#c2410c;font-weight:700;border:none;cursor:pointer;">KR</button>
-            <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
-            <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
-          </div>`;
+          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear));
 
 
 
