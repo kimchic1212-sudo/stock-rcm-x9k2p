@@ -70568,11 +70568,11 @@ function _renderShelfView(zoneId, targetSlot){
 // 상품 카드의 📍 배지로 들어온 경우, 해당 칸을 자동으로 펼쳐서 바로 보여준다
 function _autoOpenTargetSlot(targetSlot){
     if(targetSlot == null) return;
-    requestAnimationFrame(() => {
+    setTimeout(() => {
         const sel = `#fpvShelf .shelf-rack[data-slot="${CSS.escape(String(targetSlot))}"], #fpvShelf .shelf-tier-summary[data-slot="${CSS.escape(String(targetSlot))}"]`;
         const el = document.querySelector(sel);
         if(el) el.click();
-    });
+    }, 0);
 }
 
 window._toggleShelfList = (zoneId, slot, el) => {
