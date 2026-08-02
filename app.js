@@ -13748,7 +13748,55 @@ async function autoRemoveSoldDP() {
     _autoDpRemoving = false;
   }
 }
-function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); autoRemoveSoldDP().then(() => render()).catch(() => {}); }
+// DP/이미지/바코드/재고보정/위치 필터 칩의 숫자 배지를 최신 상태로 갱신.
+// 버튼 생성 시 한 번만 계산하던 걸 데이터·위치가 바뀔 때마다 다시 불러 항상 정확하게 유지.
+function _refreshDpFilterCounts(){
+    const dpBtn = $('button.chip[data-dp=\"dp\"]'), nodpBtn = $('button.chip[data-dp=\"nodp\"]'), soldDpBtn = $('button.chip[data-dp=\"soldDP\"]');
+    if(dpBtn || nodpBtn || soldDpBtn){
+        const cnt = { dp: 0, nodp: 0, soldDP: 0 };
+        PRODUCTS.forEach(p => {
+            const st = getDPStatus(p);
+            if(st === 'dp') cnt.dp++;
+            else if(st === 'soldDP') cnt.soldDP++;
+            else cnt.nodp++;
+        });
+        if(dpBtn) dpBtn.innerHTML = `🏷️ DP 중${cnt.dp > 0 ? ` <span class=\"ml-0.5 bg-violet-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.dp}</span>` : ''}`;
+        if(nodpBtn) nodpBtn.innerHTML = `🔲 미DP${cnt.nodp > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${cnt.nodp}</span>` : ''}`;
+        if(soldDpBtn) soldDpBtn.innerHTML = `⚠️ 품절DP${cnt.soldDP > 0 ? ` <span class=\"ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.soldDP}</span>` : ''}`;
+    }
+
+    const noImgBtn = $('button.chip[data-noimage]');
+    if(noImgBtn){
+        const n = PRODUCTS.filter(p => !IMAGES[p.shopNo || p.품번]).length;
+        noImgBtn.innerHTML = `📷 이미지없음${n > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const noBarcodeBtn = $('button.chip[data-nobarcode]');
+    if(noBarcodeBtn){
+        const n = PRODUCTS.filter(p => p.noBarcodeBusan).length;
+        noBarcodeBtn.innerHTML = `🔖 바코드누락${n > 0 ? ` <span class=\"ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const ovBtn = $('button.chip[data-override]');
+    if(ovBtn){
+        const n = PRODUCTS.filter(p => p._hasOverride).length;
+        ovBtn.innerHTML = `✏️ 재고보정${n > 0 ? ` <span class=\"ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const noLocBtn = $('button.chip[data-noloc]');
+    if(noLocBtn){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번]).length;
+        noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const hasLocBtn = $('button.chip[data-hasloc]');
+    if(hasLocBtn){
+        const n = Object.keys(LOCATIONS.assignments || {}).length;
+        hasLocBtn.innerHTML = `📌 위치있음${n > 0 ? ` <span class=\"ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+}
+
+function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); }
 
 
 
@@ -65244,7 +65292,7 @@ function openDetail(p){
                     return { zones: server.zones, assignments };
                 });
                 btn.disabled = false;
-                if(ok){ showToast('✓ 위치 삭제됨'); _renderLocPanel(); render(); }
+                if(ok){ showToast('✓ 위치 삭제됨'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
             };
         });
 
@@ -65259,7 +65307,7 @@ function openDetail(p){
                 return { zones: server.zones, assignments };
             });
             clearAllBtn.disabled = false;
-            if(ok){ showToast('✓ 위치 전체 해제됨'); _renderLocPanel(); render(); }
+            if(ok){ showToast('✓ 위치 전체 해제됨'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
         };
     }
   };
@@ -70937,6 +70985,7 @@ async function _bulkApply(mode){
         showToast(mode === 'assign'
             ? `✓ ${wasSingle ? (editIndex != null ? '' : '') : codes.length + '개 상품을 '}${zoneAddress(z, slot)}${wasSingle ? (editIndex != null ? '으로 이동했습니다' : ' 에 추가했습니다') : ' 에 지정했습니다'}`
             : `✓ 위치를 해제했습니다`);
+        _refreshDpFilterCounts();
         if(wasSingle){
             _bulkSingleMode = false;
             _bulkEditIndex = null;
@@ -77786,7 +77835,20 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-        const dpGroup = [
+        const dpGroup = (() => {
+            const cnt = { dp: 0, nodp: 0, soldDP: 0 };
+            PRODUCTS.forEach(p => {
+                const st = getDPStatus(p);
+                if(st === 'dp') cnt.dp++;
+                else if(st === 'soldDP') cnt.soldDP++;
+                else cnt.nodp++;
+            });
+            return [
+                { key: 'dp',     label: '🏷️ DP 중',   cls: '!bg-violet-50 !text-violet-700 !border-violet-300', badge: 'bg-violet-500', n: cnt.dp },
+                { key: 'nodp',   label: '🔲 미DP',      cls: '!bg-gray-50 !text-gray-600 !border-gray-300', badge: 'bg-gray-400', n: cnt.nodp },
+                { key: 'soldDP', label: '⚠️ 품절DP',   cls: '!bg-orange-50 !text-orange-600 !border-orange-300', badge: 'bg-orange-500', n: cnt.soldDP },
+            ];
+        })();
 
 
 
@@ -77802,71 +77864,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-            { key: 'dp',     label: '🏷️ DP 중',   cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            { key: 'nodp',   label: '🔲 미DP',      cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            { key: 'soldDP', label: '⚠️ 품절DP',   cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        ];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        dpGroup.forEach(({ key, label, cls }) => {
+        dpGroup.forEach(({ key, label, cls, badge, n }) => {
 
 
 
@@ -77946,7 +77944,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-            btn.innerHTML = label;
+            btn.innerHTML = `${label}${n > 0 ? ` <span class="ml-0.5 ${badge} text-white rounded-full px-1.5 text-[10px]">${n}</span>` : ''}`;
 
 
 
@@ -78346,7 +78344,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-        noImgBtn.innerHTML = "📷 이미지없음";
+        const _niCount = PRODUCTS.filter(p => !IMAGES[p.shopNo || p.품번]).length;
+        noImgBtn.innerHTML = `📷 이미지없음${_niCount > 0 ? ` <span class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">${_niCount}</span>` : ''}`;
 
 
 
@@ -78925,7 +78924,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // ── 위치입력 필터 칩 (부산재고 있는데 창고 위치 미배정) ─────────────────────
+    // ── 위치없음 필터 칩 (부산재고 있는데 창고 위치 미배정) ─────────────────────
 
     if(dpFilterRow && !$('button.chip[data-noloc]')) {
 
@@ -78939,7 +78938,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번]).length;
 
-        noLocBtn.innerHTML = `📍 위치입력${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
+        noLocBtn.innerHTML = `📍 위치없음${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
 
         dpFilterRow.appendChild(noLocBtn);
 
