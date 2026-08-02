@@ -670,7 +670,7 @@ style.innerHTML = `
 
     .shelf-tier-summary.shelf-tier-open { border-color:#ff5a1f; background:#fff8f5; }
 
-    .shelf-tier.shelf-tier-target { border-color:#2563eb; background:#eff6ff; }
+    .shelf-tier.shelf-tier-target { border-color:#7c3aed !important; background:#f3e8ff !important; box-shadow:0 0 0 2px #ddd6fe; }
 
     .shelf-count-row { display:flex; align-items:center; gap:8px; width:100%; }
 
@@ -693,6 +693,10 @@ style.innerHTML = `
     .shelf-rack.shelf-tier-open rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
 
     .shelf-rack.shelf-rack-picked rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
+
+    .shelf-rack.shelf-rack-target rect { stroke:#7c3aed !important; stroke-width:5 !important; fill:#f3e8ff !important; animation:shelf-target-pulse 1.4s ease-in-out infinite; }
+
+    @keyframes shelf-target-pulse { 0%,100% { stroke-width:5; } 50% { stroke-width:8; } }
 
     @media (min-width: 1024px) {
         #bulkLocMap { width: 600px !important; }
@@ -70474,12 +70478,13 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="5 4"/>`;
         svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="900" fill="#94a3b8">${escapeHtml(label)}</text>`;
     });
+    let targetPinSvg = '';
     layout.racks.forEach(([slot, x, y, w, h]) => {
         const n = _zoneAssignedCodes(zoneId, slot).length;
         const isTarget = targetSlot != null && String(slot) === targetSlot;
-        const fill = isTarget ? '#eff6ff' : (n > 0 ? '#fff0e9' : '#f1f5f9');
-        const stroke = isTarget ? '#2563eb' : (n > 0 ? '#ff5a1f' : '#94a3b8');
-        const strokeWidth = isTarget ? 3 : 2;
+        const fill = isTarget ? '#f3e8ff' : (n > 0 ? '#fff0e9' : '#f1f5f9');
+        const stroke = isTarget ? '#7c3aed' : (n > 0 ? '#ff5a1f' : '#94a3b8');
+        const strokeWidth = isTarget ? 5 : 2;
         const fs = Math.min(w, h) > 55 ? 20 : 15;
         const cy = n > 0 ? y + h / 2 - 7 : y + h / 2;
         const onclick = pickMode
@@ -70489,9 +70494,15 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
         svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(slot)}</text>`;
         if(n > 0) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
-        if(isTarget) svg += `<text x="${x + w - 3}" y="${y + 3}" text-anchor="end" dominant-baseline="hanging" font-size="16" style="pointer-events:none;">⭐</text>`;
         svg += `</g>`;
+        // 이웃 랙에 가려지지 않도록 핀 배지는 전부 그린 뒤 맨 위에 별도로 그린다
+        if(isTarget){
+            const pinX = x + w / 2, pinY = y;
+            targetPinSvg = `<g style="pointer-events:none;"><circle cx="${pinX}" cy="${pinY}" r="16" fill="#7c3aed" stroke="#ffffff" stroke-width="3"/>`
+                + `<text x="${pinX}" y="${pinY + 1}" text-anchor="middle" dominant-baseline="central" font-size="18">⭐</text></g>`;
+        }
     });
+    svg += targetPinSvg;
     svg += `</svg>`;
     return svg;
 }
@@ -70550,7 +70561,6 @@ function _renderShelfView(zoneId, targetSlot){
     const layout = WAREHOUSE_LAYOUTS[zoneId];
     if(layout){
         host.innerHTML = `<div class="shelf-rackmap">${_renderWarehouseRackMap(zoneId, layout, {targetSlot})}</div><div id="fpvItemList" class="mt-3"></div>`;
-        _autoOpenTargetSlot(targetSlot);
         return;
     }
     const slots = z.slots || [];
@@ -70562,17 +70572,6 @@ function _renderShelfView(zoneId, targetSlot){
         rows = [...slots].reverse().map(s => _shelfTierRow(s, _zoneAssignedCodes(zoneId, s), zoneId, s, targetSlot != null && String(s) === String(targetSlot))).join('');
     }
     host.innerHTML = `<div class="shelf-view">${rows}</div><div id="fpvItemList" class="mt-3"></div>`;
-    _autoOpenTargetSlot(targetSlot);
-}
-
-// 상품 카드의 📍 배지로 들어온 경우, 해당 칸을 자동으로 펼쳐서 바로 보여준다
-function _autoOpenTargetSlot(targetSlot){
-    if(targetSlot == null) return;
-    setTimeout(() => {
-        const sel = `#fpvShelf .shelf-rack[data-slot="${CSS.escape(String(targetSlot))}"], #fpvShelf .shelf-tier-summary[data-slot="${CSS.escape(String(targetSlot))}"]`;
-        const el = document.querySelector(sel);
-        if(el) el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    }, 0);
 }
 
 window._toggleShelfList = (zoneId, slot, el) => {
