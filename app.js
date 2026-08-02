@@ -294,7 +294,7 @@ style.innerHTML = `
 
 
 
-      .chip { min-height: 32px; }
+      .chip { min-height: 34px; }
 
 
 
@@ -302,7 +302,7 @@ style.innerHTML = `
 
 
 
-      #sut-KR, #sut-EU, #sut-US { padding: 5px 10px !important; }
+      #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
 
 
 
@@ -13682,7 +13682,63 @@ async function saveStockOverrides() {
 
 
 
-function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); }
+// 부산 재고가 0이 된 DP 사이즈를 자동으로 DP 목록에서 제외 (품절DP로 방치되지 않도록)
+let _autoDpRemoving = false;
+async function autoRemoveSoldDP() {
+  if (!PRODUCTS || !PRODUCTS.length) return;
+  if (_autoDpRemoving) return; // 동시 중복 실행 방지
+  const toRemove = []; // [[code, size], ...]
+  PRODUCTS.forEach(p => {
+    const dpSizes = getDPSizes(p.품번);
+    if (!dpSizes.length) return;
+    dpSizes.forEach(sz => {
+      const sObj = p.sizes.find(s => String(s.size).trim() === sz);
+      if (sObj && sObj.busan <= 0) toRemove.push([p.품번, sz]);
+    });
+  });
+  if (!toRemove.length) return;
+  if (!getPat()) return; // 쓰기 권한(ADMIN 세션) 없는 기기에서는 건드리지 않음
+
+  _autoDpRemoving = true;
+  try {
+    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      let server = {}, sha = null;
+      const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } });
+      if (r.ok) {
+        const j = await r.json(); sha = j.sha;
+        let parsed = null;
+        try { parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e) {}
+        if (!parsed || typeof parsed !== 'object') return; // 읽기 실패 시 조용히 포기 (덮어쓰기 방지, 다음 주기에 재시도됨)
+        server = parsed;
+      } else if (r.status !== 404) {
+        return; // 조용히 포기 — 다음 재계산 주기에 다시 시도됨
+      }
+      let changed = false;
+      toRemove.forEach(([code, sz]) => {
+        if (server[code] && server[code][sz]) {
+          delete server[code][sz];
+          if (!Object.keys(server[code]).length) delete server[code];
+          changed = true;
+        }
+      });
+      if (!changed) { DISPLAY_ITEMS = server; return; } // 이미 다른 기기가 제거함
+
+      const body = { message: "dp: auto-remove sold-out (" + toRemove.length + ")", content: utf8ToB64(JSON.stringify(server, null, 2)), branch: GH.branch };
+      if (sha) body.sha = sha;
+      const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }
+      if (!put.ok) return; // 조용히 포기 — 다음 재계산 주기에 다시 시도됨
+
+      DISPLAY_ITEMS = server;
+      try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+      return;
+    }
+  } finally {
+    _autoDpRemoving = false;
+  }
+}
+function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); autoRemoveSoldDP().then(() => render()).catch(() => {}); }
 
 
 
@@ -21234,12 +21290,7 @@ function rebuildIndex(){
 
 
 
-          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear)) +
-          `<div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-auto">
-            <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#fff0e9;color:#c2410c;font-weight:700;border:none;cursor:pointer;">KR</button>
-            <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
-            <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
-          </div>`;
+          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear));
 
 
 
