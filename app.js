@@ -294,7 +294,7 @@ style.innerHTML = `
 
 
 
-      .chip { min-height: 34px; }
+      .chip { min-height: 32px; }
 
 
 
@@ -302,7 +302,7 @@ style.innerHTML = `
 
 
 
-      #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
+      #sut-KR, #sut-EU, #sut-US { padding: 5px 10px !important; }
 
 
 
@@ -21300,7 +21300,12 @@ function rebuildIndex(){
 
 
 
-          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear));
+          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear)) +
+          `<div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-auto">
+            <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#fff0e9;color:#c2410c;font-weight:700;border:none;cursor:pointer;">KR</button>
+            <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
+            <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
+          </div>`;
 
 
 
@@ -49737,15 +49742,18 @@ function card(p){
 
 
 
-  // 창고 위치 배지 — 배정된 상품만. button 이라 카드 클릭(상세 열기)과 분리됨
+  // 창고 위치 배지 — 배정된 상품만. button 이라 카드 클릭(상세 열기)과 분리됨.
+  // 신발처럼 SKU가 랙 여러 곳에 나뉘어 놓이는 경우가 있어 위치마다 배지 하나씩.
   let locHtml = "";
   {
-    const _asn = (LOCATIONS.assignments || {})[p.품번];
-    const _zone = _asn ? (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId) : null;
-    if(_zone){
+    const _locs = _locArr(p.품번);
+    const _pills = _locs.map(_asn => {
+      const _zone = (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId);
+      if(!_zone) return '';
       const _locText = (_zone.label || zoneAddress(_zone)) + (_asn.slot ? ` · ${_asn.slot}` : '');
-      locHtml = `<button type="button" class="loc-pill mb-1.5" title="${escapeHtml(zoneAddress(_zone, _asn.slot))}" onclick="window.openFloorPlanView('${_zone.id}'${_asn.slot ? `,'${escapeHtml(_asn.slot)}'` : ''})">📍 <span>${escapeHtml(_locText)}</span></button>`;
-    }
+      return `<button type="button" class="loc-pill" title="${escapeHtml(zoneAddress(_zone, _asn.slot))}" onclick="event.stopPropagation(); window.openFloorPlanView('${_zone.id}'${_asn.slot ? `,'${escapeHtml(_asn.slot)}'` : ''})">📍 <span>${escapeHtml(_locText)}</span></button>`;
+    }).filter(Boolean).join('');
+    if(_pills) locHtml = `<div class="flex flex-wrap gap-1 mb-1.5">${_pills}</div>`;
   }
 
   el.innerHTML = `
@@ -65168,352 +65176,96 @@ function openDetail(p){
 
 
   const _renderLocPanel = () => {
-
-
-
-
-
-
-
-    const asn = LOCATIONS.assignments[p.품번];
-
-
-
-
-
-
-
-    const zone = asn ? LOCATIONS.zones.find(z => z.id === asn.zoneId) : null;
-
-
-
-
-
-
-
+    const locs = _locArr(p.품번);
     const isAdmin = checkAdminSession();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const zoneOptionsHtml = () => {
-
-
-
-
-
-
-
-        const groups = {};
-
-
-
-
-
-
-
-        LOCATIONS.zones.forEach(z => { (groups[z.group||'기타'] = groups[z.group||'기타']||[]).push(z); });
-
-
-
-
-
-
-
-        let html = `<option value="">위치 미지정</option>`;
-
-
-
-
-
-
-
-        for(const g in groups){
-
-
-
-
-
-
-
-            html += `<optgroup label="${escapeHtml(g)}">` + groups[g].map(z =>
-
-
-
-
-
-
-
-                `<option value="${z.id}" ${asn && asn.zoneId===z.id ? 'selected':''}>${escapeHtml((z.code ? z.code + ' · ' : '') + z.label)}</option>`).join('') + `</optgroup>`;
-
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-        return html;
-
-
-
-
-
-
-
-    };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
-
-
-
-
-
-
-
       <div class="flex items-center justify-between mb-2">
-
-
-
-
-
-
-
-        <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치</span>
-
-
-
-
-
-
-
+        <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치${locs.length > 1 ? ` (${locs.length})` : ''}</span>
         ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-400 hover:text-gray-700">구역 관리</button>` : ''}
-
-
-
-
-
-
-
       </div>`;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if(zone){
-
-
-
-
-
-
-
-        html += `<div onclick="window.openFloorPlanView('${zone.id}'${asn.slot?`,'${escapeHtml(asn.slot)}'`:''})" class="flex items-center gap-3 cursor-pointer group">
-            <div style="width:74px;height:52px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;flex-shrink:0;background:#fff;">
-                ${storeMapSvg({ highlightZoneId: zone.id, compact: true })}
-            </div>
-            <div class="min-w-0 flex-1">
-                <div class="group-hover:underline" style="font-size:23px;line-height:1.15;font-weight:900;color:#c2410c;letter-spacing:-0.6px;">${escapeHtml(zoneAddress(zone, asn.slot))}</div>
-                <div class="text-xs font-bold text-gray-500 mt-0.5">${escapeHtml(zone.label)}</div>
-                <div class="text-[10px] text-gray-400 mt-0.5">탭하면 지도에서 크게 보기</div>
-            </div>
-        </div>`;
-
-
-
-
-
-
-
+    if(locs.length){
+        html += locs.map((asn, i) => {
+            const zone = LOCATIONS.zones.find(z => z.id === asn.zoneId);
+            if(!zone) return '';
+            return `<div class="flex items-center gap-2 ${i > 0 ? 'mt-2 pt-2' : ''}" style="${i > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
+                <div onclick="window.openFloorPlanView('${zone.id}'${asn.slot ? `,'${escapeHtml(asn.slot)}'` : ''})" class="flex items-center gap-3 cursor-pointer group flex-1 min-w-0">
+                    <div style="width:64px;height:46px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;flex-shrink:0;background:#fff;">
+                        ${storeMapSvg({ highlightZoneId: zone.id, compact: true })}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="group-hover:underline truncate" style="font-size:18px;line-height:1.2;font-weight:900;color:#c2410c;letter-spacing:-0.5px;">${escapeHtml(zoneAddress(zone, asn.slot))}</div>
+                        <div class="text-xs font-bold text-gray-500 mt-0.5 truncate">${escapeHtml(zone.label)}</div>
+                    </div>
+                </div>
+                ${isAdmin ? `<div class="flex items-center gap-1 shrink-0">
+                    <button class="loc-move-btn text-[10px] font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded border border-gray-200" data-idx="${i}">이동</button>
+                    <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-100" data-idx="${i}">삭제</button>
+                </div>` : ''}
+            </div>`;
+        }).join('');
     } else if(!isAdmin){
-
-
-
-
-
-
-
         html += `<div class="text-xs text-gray-400 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     if(isAdmin){
-
-
-
-
-
-
-
         html += `<div class="flex items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
-            <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 지도에서 위치 지정</button>
-            ${asn ? `<button id="locClearBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">해제</button>` : ''}
+            <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${locs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
+            ${locs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
         </div>`;
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     html += `</div>`;
 
-
-
-
-
-
-
     _locDiv.innerHTML = html;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     if(isAdmin){
-
-
-
-
-
-
-
         // _locDiv가 아직 문서에 붙기 전(최초 렌더)일 수 있어 document 전역 $() 대신 _locDiv 안에서만 탐색
-
-
-
-
-
-
-
         const pickBtn = _locDiv.querySelector("#locPickBtn");
         if(pickBtn) pickBtn.onclick = () => window.openSingleLocModal(p.품번);
-        const clearBtn = _locDiv.querySelector("#locClearBtn");
-        if(clearBtn) clearBtn.onclick = async () => {
+
+        _locDiv.querySelectorAll(".loc-move-btn").forEach(btn => {
+            btn.onclick = (e) => { e.stopPropagation(); window.openSingleLocModal(p.품번, parseInt(btn.dataset.idx, 10)); };
+        });
+
+        _locDiv.querySelectorAll(".loc-del-btn").forEach(btn => {
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                if(!checkPat()) return;
+                if(!confirm('이 위치를 삭제할까요?')) return;
+                const idx = parseInt(btn.dataset.idx, 10);
+                btn.disabled = true;
+                const ok = await saveLocations(server => {
+                    const assignments = {...server.assignments};
+                    const arr = (Array.isArray(assignments[p.품번]) ? assignments[p.품번] : (assignments[p.품번] ? [assignments[p.품번]] : [])).slice();
+                    arr.splice(idx, 1);
+                    if(arr.length) assignments[p.품번] = arr; else delete assignments[p.품번];
+                    return { zones: server.zones, assignments };
+                });
+                btn.disabled = false;
+                if(ok){ showToast('✓ 위치 삭제됨'); _renderLocPanel(); render(); }
+            };
+        });
+
+        const clearAllBtn = _locDiv.querySelector("#locClearAllBtn");
+        if(clearAllBtn) clearAllBtn.onclick = async () => {
             if(!checkPat()) return;
-            if(!confirm('위치를 해제할까요?')) return;
-            clearBtn.disabled = true;
+            if(!confirm(`위치 ${locs.length}곳을 모두 해제할까요?`)) return;
+            clearAllBtn.disabled = true;
             const ok = await saveLocations(server => {
                 const assignments = {...server.assignments};
                 delete assignments[p.품번];
                 return { zones: server.zones, assignments };
             });
-            clearBtn.disabled = false;
-            if(ok){ showToast('✓ 위치 해제됨'); _renderLocPanel(); render(); }
+            clearAllBtn.disabled = false;
+            if(ok){ showToast('✓ 위치 전체 해제됨'); _renderLocPanel(); render(); }
         };
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
   };
 
-
-
-
-
-
-
   _renderLocPanel();
+
 
 
 
@@ -70574,13 +70326,20 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
 }
 
 
+// 품번 하나가 랙 여러 군데(신발 SKU 분산 등)에 놓일 수 있어 항상 배열로 다룬다.
+// 예전 데이터({zoneId,slot} 단일 객체)가 남아있어도 안전하게 배열로 변환해서 반환.
+function _locArr(code){
+    const v = LOCATIONS.assignments ? LOCATIONS.assignments[code] : null;
+    if(!v) return [];
+    return Array.isArray(v) ? v : [v];
+}
+
 function _zoneAssignedCodes(zoneId, slot){
     const out = [];
     for(const code in LOCATIONS.assignments){
-        const a = LOCATIONS.assignments[code];
-        if(a.zoneId !== zoneId) continue;
-        if(slot !== undefined && (a.slot || null) !== (slot || null)) continue;
-        out.push(code);
+        const locs = _locArr(code);
+        const hit = locs.some(a => a.zoneId === zoneId && (slot === undefined || (a.slot || null) === (slot || null)));
+        if(hit) out.push(code);
     }
     return out;
 }
@@ -70767,7 +70526,11 @@ function _zmEditZone(id){
         saveLocations(server => {
             const zones = server.zones.filter(zz => zz.id !== z.id);
             const assignments = { ...server.assignments };
-            for(const code in assignments) if(assignments[code].zoneId === z.id) delete assignments[code];
+            for(const code in assignments){
+                const arr = Array.isArray(assignments[code]) ? assignments[code] : [assignments[code]];
+                const kept = arr.filter(a => a.zoneId !== z.id);
+                if(kept.length) assignments[code] = kept; else delete assignments[code];
+            }
             return { zones, assignments };
         }).then(ok => { if(ok){ renderZonePins(); showToast('구역 삭제됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
         return;
@@ -71084,6 +70847,13 @@ window._bulkClearRackPick = () => {
 };
 
 let _bulkSingleMode = false;
+// null이면 새 위치 추가, 숫자면 그 인덱스의 기존 위치를 다른 랙으로 이동(교체)
+let _bulkEditIndex = null;
+
+function _bulkSaveLabel(){
+    if(!_bulkSingleMode) return '선택한 상품에 지정';
+    return _bulkEditIndex != null ? '이 위치로 이동' : '+ 이 위치 추가';
+}
 
 window.openBulkLocModal = (presetZoneId) => {
     if(BULK_LOC_SEL.size === 0) return;
@@ -71092,15 +70862,20 @@ window.openBulkLocModal = (presetZoneId) => {
     $("#bulkLocCount").textContent = `선택한 상품 ${BULK_LOC_SEL.size}개`;
     _bulkRenderPickMap();
     _bulkSyncPick();
+    const saveBtn = $("#bulkLocSave");
+    if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
     $("#bulkLocModal").classList.remove("hidden");
 };
 
-// 상품 상세에서 상품 1개만 바로 지도로 위치 지정 — 여러개 선택 모드를 거치지 않는다
-window.openSingleLocModal = (code) => {
+// 상품 상세에서 상품 1개만 바로 지도로 위치 지정 — 여러개 선택 모드를 거치지 않는다.
+// editIndex 없으면 새 위치 추가, 있으면 그 인덱스의 기존 위치를 이동(교체)
+window.openSingleLocModal = (code, editIndex) => {
     if(!checkPat()) return;
     BULK_LOC_SEL = new Set([code]);
     _bulkSingleMode = true;
-    const asn = LOCATIONS.assignments[code];
+    _bulkEditIndex = (editIndex !== undefined && editIndex !== null) ? editIndex : null;
+    const locs = _locArr(code);
+    const asn = _bulkEditIndex != null ? locs[_bulkEditIndex] : null;
     window.openBulkLocModal(asn ? asn.zoneId : null);
     if(asn && asn.slot){
         requestAnimationFrame(() => {
@@ -71123,34 +70898,48 @@ async function _bulkApply(mode){
         const sv = $("#bulkLocSlot");
         slot = (sv && sv.value) ? sv.value : null;
     } else {
-        if(!confirm(`선택한 ${codes.length}개 상품의 위치를 해제할까요?`)) return;
+        const msg = _bulkSingleMode ? '이 상품의 위치를 모두 해제할까요?' : `선택한 ${codes.length}개 상품의 위치를 모두 해제할까요?`;
+        if(!confirm(msg)) return;
     }
 
     const saveBtn = $("#bulkLocSave"), clearBtn = $("#bulkLocClear");
     [saveBtn, clearBtn].forEach(b => { if(b) b.disabled = true; });
     if(saveBtn) saveBtn.textContent = '저장 중…';
 
+    const editIndex = _bulkEditIndex;
     const ok = await saveLocations(server => {
         const assignments = { ...server.assignments };
         codes.forEach(code => {
-            if(mode === 'assign') assignments[code] = slot ? { zoneId, slot } : { zoneId };
-            else delete assignments[code];
+            if(mode === 'assign'){
+                const newLoc = slot ? { zoneId, slot } : { zoneId };
+                const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
+                if(_bulkSingleMode && editIndex != null && arr[editIndex]){
+                    arr[editIndex] = newLoc; // 이동: 그 자리 위치를 교체
+                } else {
+                    const dup = arr.some(a => a.zoneId === newLoc.zoneId && (a.slot || null) === (newLoc.slot || null));
+                    if(!dup) arr.push(newLoc); // 추가: 이미 같은 자리가 없으면 더함
+                }
+                assignments[code] = arr;
+            } else {
+                delete assignments[code]; // 전체 해제
+            }
         });
         return { zones: server.zones, assignments };
     });
 
     [saveBtn, clearBtn].forEach(b => { if(b) b.disabled = false; });
-    if(saveBtn) saveBtn.textContent = '선택한 상품에 지정';
+    if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
 
     if(ok){
         $("#bulkLocModal").classList.add("hidden");
         const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
         const wasSingle = _bulkSingleMode;
         showToast(mode === 'assign'
-            ? `✓ ${wasSingle ? '' : codes.length + '개 상품을 '}${zoneAddress(z, slot)} 에 지정했습니다`
+            ? `✓ ${wasSingle ? (editIndex != null ? '' : '') : codes.length + '개 상품을 '}${zoneAddress(z, slot)}${wasSingle ? (editIndex != null ? '으로 이동했습니다' : ' 에 추가했습니다') : ' 에 지정했습니다'}`
             : `✓ 위치를 해제했습니다`);
         if(wasSingle){
             _bulkSingleMode = false;
+            _bulkEditIndex = null;
             BULK_LOC_SEL.clear();
             if(window._locRenderFn) window._locRenderFn();
             render();
@@ -71160,7 +70949,14 @@ async function _bulkApply(mode){
     }
 }
 
-$("#closeBulkLoc").onclick = () => $("#bulkLocModal").classList.add("hidden");
+$("#closeBulkLoc").onclick = () => {
+    $("#bulkLocModal").classList.add("hidden");
+    if(_bulkSingleMode){
+        _bulkSingleMode = false;
+        _bulkEditIndex = null;
+        BULK_LOC_SEL.clear();
+    }
+};
 $("#bulkLocSave").onclick = () => _bulkApply('assign');
 $("#bulkLocClear").onclick = () => _bulkApply('clear');
 $("#bulkBarAssign").onclick = () => window.openBulkLocModal();
