@@ -670,6 +670,8 @@ style.innerHTML = `
 
     .shelf-tier-summary.shelf-tier-open { border-color:#ff5a1f; background:#fff8f5; }
 
+    .shelf-tier.shelf-tier-target { border-color:#2563eb; background:#eff6ff; }
+
     .shelf-count-row { display:flex; align-items:center; gap:8px; width:100%; }
 
     .shelf-count { font-size:13px; font-weight:900; color:#1e293b; }
@@ -70456,6 +70458,7 @@ const WAREHOUSE_LAYOUTS = {
 
 function _renderWarehouseRackMap(zoneId, layout, opts){
     const pickMode = !!(opts && opts.pickMode);
+    const targetSlot = opts && opts.targetSlot != null ? String(opts.targetSlot) : null;
     const [vbw, vbh] = layout.vb;
     let svg = `<svg viewBox="0 0 ${vbw} ${vbh}" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">`;
     svg += `<rect x="1.5" y="1.5" width="${vbw - 3}" height="${vbh - 3}" fill="#f8fafc" stroke="#334155" stroke-width="3"/>`;
@@ -70473,17 +70476,20 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
     });
     layout.racks.forEach(([slot, x, y, w, h]) => {
         const n = _zoneAssignedCodes(zoneId, slot).length;
-        const fill = n > 0 ? '#fff0e9' : '#f1f5f9';
-        const stroke = n > 0 ? '#ff5a1f' : '#94a3b8';
+        const isTarget = targetSlot != null && String(slot) === targetSlot;
+        const fill = isTarget ? '#eff6ff' : (n > 0 ? '#fff0e9' : '#f1f5f9');
+        const stroke = isTarget ? '#2563eb' : (n > 0 ? '#ff5a1f' : '#94a3b8');
+        const strokeWidth = isTarget ? 3 : 2;
         const fs = Math.min(w, h) > 55 ? 20 : 15;
         const cy = n > 0 ? y + h / 2 - 7 : y + h / 2;
         const onclick = pickMode
             ? `_bulkPickRackSlot('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`
             : `_toggleShelfList('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`;
-        svg += `<g class="shelf-rack" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="${onclick}">`;
-        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+        svg += `<g class="shelf-rack${isTarget ? ' shelf-rack-target' : ''}" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="${onclick}">`;
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
         svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(slot)}</text>`;
         if(n > 0) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
+        if(isTarget) svg += `<text x="${x + w - 3}" y="${y + 3}" text-anchor="end" dominant-baseline="hanging" font-size="16" style="pointer-events:none;">⭐</text>`;
         svg += `</g>`;
     });
     svg += `</svg>`;
@@ -70519,40 +70525,54 @@ function _shelfChip(p){
         + `<span>${escapeHtml(p.품번)}</span><em>${qty}</em></button>`;
 }
 
-function _shelfTierRow(label, codes, zoneId, slot){
+function _shelfTierRow(label, codes, zoneId, slot, isTarget){
     const { items, topBrands } = _shelfTierSummary(codes);
+    const star = isTarget ? ' <span style="color:#2563eb;">⭐</span>' : '';
+    const targetCls = isTarget ? ' shelf-tier-target' : '';
     if(items.length === 0){
-        return `<div class="shelf-tier"><div class="shelf-tier-label">${escapeHtml(label)}</div><div class="shelf-tier-body"><span class="shelf-empty">비어 있음</span></div></div>`;
+        return `<div class="shelf-tier${targetCls}"><div class="shelf-tier-label">${escapeHtml(label)}${star}</div><div class="shelf-tier-body"><span class="shelf-empty">비어 있음</span></div></div>`;
     }
     if(items.length <= SHELF_CHIP_MAX){
-        return `<div class="shelf-tier"><div class="shelf-tier-label">${escapeHtml(label)}</div>`
+        return `<div class="shelf-tier${targetCls}"><div class="shelf-tier-label">${escapeHtml(label)}${star}</div>`
             + `<div class="shelf-tier-body">${items.map(_shelfChip).join('')}</div></div>`;
     }
     const brandTxt = topBrands.map(([b, n]) => `${escapeHtml(b)} ${n}`).join(' · ');
-    return `<div class="shelf-tier shelf-tier-summary" onclick="_toggleShelfList('${escapeHtml(zoneId)}', ${slot ? `'${escapeHtml(slot)}'` : 'null'}, this)">`
-        + `<div class="shelf-tier-label">${escapeHtml(label)}</div>`
+    return `<div class="shelf-tier shelf-tier-summary${targetCls}" data-slot="${slot != null ? escapeHtml(String(slot)) : ''}" onclick="_toggleShelfList('${escapeHtml(zoneId)}', ${slot ? `'${escapeHtml(slot)}'` : 'null'}, this)">`
+        + `<div class="shelf-tier-label">${escapeHtml(label)}${star}</div>`
         + `<div class="shelf-tier-body"><div class="shelf-count-row"><span class="shelf-count">${items.length}개 품목</span><span class="shelf-go">탭하면 목록에서 보기</span></div>`
         + `<div class="shelf-sum">${brandTxt}</div></div></div>`;
 }
 
-function _renderShelfView(zoneId){
+function _renderShelfView(zoneId, targetSlot){
     const host = $("#fpvShelf"); if(!host) return;
     const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
     if(!z){ host.innerHTML = ''; return; }
     const layout = WAREHOUSE_LAYOUTS[zoneId];
     if(layout){
-        host.innerHTML = `<div class="shelf-rackmap">${_renderWarehouseRackMap(zoneId, layout)}</div><div id="fpvItemList" class="mt-3"></div>`;
+        host.innerHTML = `<div class="shelf-rackmap">${_renderWarehouseRackMap(zoneId, layout, {targetSlot})}</div><div id="fpvItemList" class="mt-3"></div>`;
+        _autoOpenTargetSlot(targetSlot);
         return;
     }
     const slots = z.slots || [];
     let rows;
     if(slots.length === 0){
-        rows = _shelfTierRow('전체', _zoneAssignedCodes(zoneId), zoneId, null);
+        rows = _shelfTierRow('전체', _zoneAssignedCodes(zoneId), zoneId, null, false);
     } else {
         // 물리적으로 위에 있는 칸(번호가 큰 단)부터 위에서 아래로 표시
-        rows = [...slots].reverse().map(s => _shelfTierRow(s, _zoneAssignedCodes(zoneId, s), zoneId, s)).join('');
+        rows = [...slots].reverse().map(s => _shelfTierRow(s, _zoneAssignedCodes(zoneId, s), zoneId, s, targetSlot != null && String(s) === String(targetSlot))).join('');
     }
     host.innerHTML = `<div class="shelf-view">${rows}</div><div id="fpvItemList" class="mt-3"></div>`;
+    _autoOpenTargetSlot(targetSlot);
+}
+
+// 상품 카드의 📍 배지로 들어온 경우, 해당 칸을 자동으로 펼쳐서 바로 보여준다
+function _autoOpenTargetSlot(targetSlot){
+    if(targetSlot == null) return;
+    requestAnimationFrame(() => {
+        const sel = `#fpvShelf .shelf-rack[data-slot="${CSS.escape(String(targetSlot))}"], #fpvShelf .shelf-tier-summary[data-slot="${CSS.escape(String(targetSlot))}"]`;
+        const el = document.querySelector(sel);
+        if(el) el.click();
+    });
 }
 
 window._toggleShelfList = (zoneId, slot, el) => {
@@ -70865,7 +70885,7 @@ window.openFloorPlanView = (zoneId, extraLabel) => {
         + `<span style="margin-left:10px;font-size:14px;font-weight:800;color:#64748b;">${escapeHtml(z.label || '')}</span>`;
     $("#floorPlanViewModal").classList.remove("hidden");
     paintMap("fpvMap", { highlightZoneId: zoneId });
-    _renderShelfView(zoneId);
+    _renderShelfView(zoneId, extraLabel);
 };
 
 
