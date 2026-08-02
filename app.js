@@ -70554,23 +70554,29 @@ function _shelfTierRow(label, codes, zoneId, slot, isTarget){
         + `<div class="shelf-sum">${brandTxt}</div></div></div>`;
 }
 
+// S1/S2처럼 실측 도면은 없지만 칸(slots)이 있는 구역(서랍 1단/2단 등) — 세로 서랍 모양으로 자동 생성
+function _genericSlotLayout(z){
+    const slots = z.slots || [];
+    if(!slots.length) return null;
+    const w = 260, h = 90, gap = 10, margin = 20;
+    const rows = [...slots].reverse(); // 물리적으로 위에 있는 칸(번호가 큰 단)부터 위에서 아래로
+    return {
+        vb: [w + margin * 2, rows.length * (h + gap) - gap + margin * 2],
+        racks: rows.map((s, i) => [s, margin, margin + i * (h + gap), w, h]),
+        fixtures: [],
+    };
+}
+
 function _renderShelfView(zoneId, targetSlot){
     const host = $("#fpvShelf"); if(!host) return;
     const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
     if(!z){ host.innerHTML = ''; return; }
-    const layout = WAREHOUSE_LAYOUTS[zoneId];
+    const layout = WAREHOUSE_LAYOUTS[zoneId] || _genericSlotLayout(z);
     if(layout){
         host.innerHTML = `<div class="shelf-rackmap">${_renderWarehouseRackMap(zoneId, layout, {targetSlot})}</div><div id="fpvItemList" class="mt-3"></div>`;
         return;
     }
-    const slots = z.slots || [];
-    let rows;
-    if(slots.length === 0){
-        rows = _shelfTierRow('전체', _zoneAssignedCodes(zoneId), zoneId, null, false);
-    } else {
-        // 물리적으로 위에 있는 칸(번호가 큰 단)부터 위에서 아래로 표시
-        rows = [...slots].reverse().map(s => _shelfTierRow(s, _zoneAssignedCodes(zoneId, s), zoneId, s, targetSlot != null && String(s) === String(targetSlot))).join('');
-    }
+    const rows = _shelfTierRow('전체', _zoneAssignedCodes(zoneId), zoneId, null, false);
     host.innerHTML = `<div class="shelf-view">${rows}</div><div id="fpvItemList" class="mt-3"></div>`;
 }
 
@@ -70978,17 +70984,13 @@ function _bulkSyncPick(){
     }
     pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
     const slots = z.slots || [];
-    const layout = WAREHOUSE_LAYOUTS[z.id];
+    const layout = WAREHOUSE_LAYOUTS[z.id] || _genericSlotLayout(z);
     if(layout && rackHost){
         slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
         slotSel.classList.add('hidden');
         rackHost.classList.remove('hidden');
-        rackHost.innerHTML = `<div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">랙을 클릭해 칸을 선택하세요</span><button type="button" class="text-xs underline" onclick="_bulkClearRackPick()">칸 미지정으로</button></div><div class="shelf-rackmap" style="max-width:340px;">${_renderWarehouseRackMap(z.id, layout, {pickMode:true})}</div>`;
+        rackHost.innerHTML = `<div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">칸을 클릭해 선택하세요</span><button type="button" class="text-xs underline" onclick="_bulkClearRackPick()">칸 미지정으로</button></div><div class="shelf-rackmap" style="max-width:340px;">${_renderWarehouseRackMap(z.id, layout, {pickMode:true})}</div>`;
         _bulkHighlightRackPick(slotSel.value);
-    } else if(slots.length){
-        slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-        slotSel.classList.remove('hidden');
-        if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
     } else {
         slotSel.innerHTML = ''; slotSel.classList.add('hidden');
         if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
