@@ -9074,7 +9074,7 @@ function applyMeta(meta){
 
 
 
-            ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-100 flex items-center gap-1 shrink-0">
+            ? `<div class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-100 flex items-center gap-1 shrink-0" style="max-width:180px;" title="${escapeHtml(SALES_HISTORY.meta.name)}">
 
 
 
@@ -9090,7 +9090,7 @@ function applyMeta(meta){
 
 
 
-                  📊 ${escapeHtml(SALES_HISTORY.meta.name)}
+                  📊 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(SALES_HISTORY.meta.name)}</span>
 
 
 
@@ -9202,7 +9202,7 @@ function applyMeta(meta){
 
 
 
-            `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0">🎁 ${escapeHtml(pr.meta?.name||'기획전')}</div>`
+            `<div class="bg-purple-50 text-purple-700 px-2 py-1 rounded-lg text-[11px] font-black border border-purple-100 flex items-center gap-1 shrink-0" style="max-width:180px;" title="${escapeHtml(pr.meta?.name||'기획전')}">🎁 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(pr.meta?.name||'기획전')}</span></div>`
 
 
 
