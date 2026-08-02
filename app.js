@@ -294,7 +294,7 @@ style.innerHTML = `
 
 
 
-      .chip { min-height: 34px; }
+      .chip { min-height: 32px; }
 
 
 
@@ -302,7 +302,7 @@ style.innerHTML = `
 
 
 
-      #sut-KR, #sut-EU, #sut-US { padding: 7px 12px !important; }
+      #sut-KR, #sut-EU, #sut-US { padding: 5px 10px !important; }
 
 
 
@@ -21290,7 +21290,12 @@ function rebuildIndex(){
 
 
 
-          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear));
+          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear)) +
+          `<div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-auto">
+            <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#fff0e9;color:#c2410c;font-weight:700;border:none;cursor:pointer;">KR</button>
+            <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
+            <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
+          </div>`;
 
 
 
