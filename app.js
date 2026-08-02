@@ -3573,14 +3573,22 @@ const INV_PASS_KEY = 'racement_inv_pass_v1';
 async function dataFetch(path){
     const pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e){ return null; } })();
     if(pass){
-        try {
-            const r = await fetch(`${HUB_DATA_API}?f=${encodeURIComponent(path)}`, {
-                headers: { Authorization: 'Bearer ' + pass }, cache: 'no-store'
-            });
-            if(r.ok) return r;
-            // 토큰이 만료/무효면 지우고 다음 진입 때 게이트를 다시 통과하게 한다
-            if(r.status === 401) { try { localStorage.removeItem(INV_PASS_KEY); } catch(e){} }
-        } catch(e) {}
+        // 게이트웨이가 콜드스타트 등으로 일시적으로 실패할 수 있어 짧게 재시도.
+        // 재시도 없이 바로 옛 공개경로(./*.json)로 폴백하면 그 파일들은 이미 삭제돼 있어
+        // 항상 404 → "Unexpected token '<'" 같은 알아보기 힘든 에러로 이어졌었다.
+        for(let attempt = 0; attempt < 3; attempt++){
+            try {
+                const r = await fetch(`${HUB_DATA_API}?f=${encodeURIComponent(path)}`, {
+                    headers: { Authorization: 'Bearer ' + pass }, cache: 'no-store'
+                });
+                if(r.ok) return r;
+                // 토큰이 만료/무효면 지우고 다음 진입 때 게이트를 다시 통과하게 한다 — 재시도 의미 없으니 즉시 중단
+                if(r.status === 401) { try { localStorage.removeItem(INV_PASS_KEY); } catch(e){} break; }
+                if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+            } catch(e) {
+                if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+            }
+        }
     }
     return fetch('./' + path + '?t=' + Date.now());
 }
