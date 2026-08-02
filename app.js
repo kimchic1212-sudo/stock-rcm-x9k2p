@@ -49800,10 +49800,12 @@ function card(p){
 
   // 창고 위치 배지 — 배정된 상품만. button 이라 카드 클릭(상세 열기)과 분리됨.
   // 신발처럼 SKU가 랙 여러 곳에 나뉘어 놓이는 경우가 있어 위치마다 배지 하나씩.
+  // DP만 있고(창고/서랍 없이) 진열중인 경우는 랙 좌표가 없어 별도 배지로 표시.
   let locHtml = "";
   {
     const _locs = _locArr(p.품번);
     const _pills = _locs.map(_asn => {
+      if(_asn.dp) return `<span class="loc-pill" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;cursor:default;" title="랙/서랍 없이 DP 진열중">📺 <span>DP 진열중</span></span>`;
       const _zone = (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId);
       if(!_zone) return '';
       const _locText = (_zone.label || zoneAddress(_zone)) + (_asn.slot ? ` · ${_asn.slot}` : '');
@@ -65234,6 +65236,7 @@ function openDetail(p){
   const _renderLocPanel = () => {
     const locs = _locArr(p.품번);
     const isAdmin = checkAdminSession();
+    const hasDP = locs.some(l => l.dp);
 
     let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
       <div class="flex items-center justify-between mb-2">
@@ -65243,6 +65246,20 @@ function openDetail(p){
 
     if(locs.length){
         html += locs.map((asn, i) => {
+            if(asn.dp){
+                return `<div class="flex items-center gap-2 ${i > 0 ? 'mt-2 pt-2' : ''}" style="${i > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div style="width:64px;height:46px;border-radius:9px;flex-shrink:0;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:22px;">📺</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="truncate" style="font-size:18px;line-height:1.2;font-weight:900;color:#4338ca;letter-spacing:-0.5px;">DP 진열중</div>
+                            <div class="text-xs font-bold text-gray-500 mt-0.5 truncate">랙/서랍 없이 매장에 진열되어 있음</div>
+                        </div>
+                    </div>
+                    ${isAdmin ? `<div class="flex items-center gap-1 shrink-0">
+                        <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-100" data-idx="${i}">삭제</button>
+                    </div>` : ''}
+                </div>`;
+            }
             const zone = LOCATIONS.zones.find(z => z.id === asn.zoneId);
             if(!zone) return '';
             return `<div class="flex items-center gap-2 ${i > 0 ? 'mt-2 pt-2' : ''}" style="${i > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
@@ -65266,8 +65283,9 @@ function openDetail(p){
     }
 
     if(isAdmin){
-        html += `<div class="flex items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
+        html += `<div class="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
             <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${locs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
+            ${!hasDP ? `<button id="locDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#4338ca;">📺 DP 진열 표시</button>` : ''}
             ${locs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
         </div>`;
     }
@@ -65280,6 +65298,9 @@ function openDetail(p){
         // _locDiv가 아직 문서에 붙기 전(최초 렌더)일 수 있어 document 전역 $() 대신 _locDiv 안에서만 탐색
         const pickBtn = _locDiv.querySelector("#locPickBtn");
         if(pickBtn) pickBtn.onclick = () => window.openSingleLocModal(p.품번);
+
+        const dpBtn = _locDiv.querySelector("#locDpBtn");
+        if(dpBtn) dpBtn.onclick = () => window.markAsDP(p.품번);
 
         _locDiv.querySelectorAll(".loc-move-btn").forEach(btn => {
             btn.onclick = (e) => { e.stopPropagation(); window.openSingleLocModal(p.품번, parseInt(btn.dataset.idx, 10)); };
@@ -65321,6 +65342,7 @@ function openDetail(p){
   };
 
   _renderLocPanel();
+
 
 
 
@@ -70939,6 +70961,25 @@ window.openSingleLocModal = (code, editIndex) => {
             if(sv) sv.value = asn.slot;
             _bulkHighlightRackPick(asn.slot);
         });
+    }
+};
+
+// 랙/서랍 없이 매장에 그냥 진열중인 상품(주로 1개짜리 용품) — 자리 없이 "DP 진열중"만 표시.
+// 지도/랙 선택 없이 바로 저장되는 원클릭 액션.
+window.markAsDP = async (code) => {
+    if(!checkPat()) return;
+    const ok = await saveLocations(server => {
+        const assignments = { ...server.assignments };
+        const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
+        if(!arr.some(a => a.dp)) arr.push({ dp: true });
+        assignments[code] = arr;
+        return { zones: server.zones, assignments };
+    });
+    if(ok){
+        showToast('✓ DP 진열중으로 표시했습니다');
+        _refreshDpFilterCounts();
+        if(window._locRenderFn) window._locRenderFn();
+        render();
     }
 };
 
