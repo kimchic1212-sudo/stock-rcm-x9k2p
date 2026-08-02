@@ -12691,6 +12691,15 @@ async function loadData(force = false){
 
 
 
+      // DP 데이터가 허브의 60초 캐시를 거쳐 온 경우를 대비해, GitHub 원본으로 한 번 더 직접 확인 (다른 기기가 방금 바꾼 것 반영)
+      fetchGithubJson(DISPLAY_PATH).then(d=>{
+        if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(DISPLAY_ITEMS)) {
+          DISPLAY_ITEMS = d;
+          try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+          autoRemoveSoldDP().catch(()=>{});
+          render();
+        }
+      }).catch(()=>{});
       const _bar2 = $("#actionBtnsWrap"); if(_bar2) _bar2.dataset.setup = "0";
 
 
