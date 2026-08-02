@@ -13686,6 +13686,7 @@ async function saveStockOverrides() {
 // 부산 재고가 0이 된 DP 사이즈를 자동으로 DP 목록에서 제외 (품절DP로 방치되지 않도록)
 let _autoDpRemoving = false;
 async function autoRemoveSoldDP() {
+  console.log('[DIAG-DP] called. PRODUCTS.length=', PRODUCTS ? PRODUCTS.length : 'null', '_autoDpRemoving=', _autoDpRemoving, 'DISPLAY_ITEMS keys=', Object.keys(DISPLAY_ITEMS||{}).length);
   if (!PRODUCTS || !PRODUCTS.length) return;
   if (_autoDpRemoving) return; // 동시 중복 실행 방지
   const toRemove = []; // [[code, size], ...]
@@ -13697,6 +13698,7 @@ async function autoRemoveSoldDP() {
       if (sObj && sObj.busan <= 0) toRemove.push([p.품번, sz]);
     });
   });
+  console.log('[DIAG-DP] toRemove=', JSON.stringify(toRemove), 'hasPat=', !!getPat());
   if (!toRemove.length) return;
   if (!getPat()) return; // 쓰기 권한(ADMIN 세션) 없는 기기에서는 건드리지 않음
 
@@ -13723,11 +13725,13 @@ async function autoRemoveSoldDP() {
           changed = true;
         }
       });
+      console.log('[DIAG-DP] attempt', attempt, 'r.status=', r.status, 'changed=', changed);
       if (!changed) { DISPLAY_ITEMS = server; return; } // 이미 다른 기기가 제거함
 
       const body = { message: "dp: auto-remove sold-out (" + toRemove.length + ")", content: utf8ToB64(JSON.stringify(server, null, 2)), branch: GH.branch };
       if (sha) body.sha = sha;
       const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      console.log('[DIAG-DP] put.status=', put.status);
       if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }
       if (!put.ok) return; // 조용히 포기 — 다음 재계산 주기에 다시 시도됨
 
