@@ -70571,7 +70571,7 @@ function _autoOpenTargetSlot(targetSlot){
     setTimeout(() => {
         const sel = `#fpvShelf .shelf-rack[data-slot="${CSS.escape(String(targetSlot))}"], #fpvShelf .shelf-tier-summary[data-slot="${CSS.escape(String(targetSlot))}"]`;
         const el = document.querySelector(sel);
-        if(el) el.click();
+        if(el) el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     }, 0);
 }
 
