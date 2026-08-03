@@ -11770,7 +11770,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
 
 
 
@@ -12683,7 +12683,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
 
 
 
@@ -13763,6 +13763,7 @@ function _refreshDpFilterCounts(){
     if(dpBtn || nodpBtn || soldDpBtn){
         const cnt = { dp: 0, nodp: 0, soldDP: 0 };
         PRODUCTS.forEach(p => {
+            if(!(p.busanTotal > 0)) return; // 부산점 재고 있는 상품만 집계
             const st = getDPStatus(p);
             if(st === 'dp') cnt.dp++;
             else if(st === 'soldDP') cnt.soldDP++;
@@ -13775,7 +13776,7 @@ function _refreshDpFilterCounts(){
 
     const noImgBtn = $('button.chip[data-noimage]');
     if(noImgBtn){
-        const n = PRODUCTS.filter(p => !IMAGES[p.shopNo || p.품번]).length;
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length;
         noImgBtn.innerHTML = `📷 이미지없음${n > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
@@ -13799,12 +13800,12 @@ function _refreshDpFilterCounts(){
 
     const hasLocBtn = $('button.chip[data-hasloc]');
     if(hasLocBtn){
-        const n = Object.keys(LOCATIONS.assignments || {}).length;
+        const n = Object.keys(LOCATIONS.assignments || {}).filter(code => { const pp = _productByCode(code); return pp && pp.busanTotal > 0; }).length;
         hasLocBtn.innerHTML = `📌 위치있음${n > 0 ? ` <span class=\"ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 }
 
-function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); }
+function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); _refreshDpFilterCounts(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); }
 
 
 
@@ -70820,9 +70821,11 @@ function _bulkUpdateBar(){
     bar.style.display = BULK_LOC_MODE ? 'flex' : 'none';
     const cnt = $("#bulkBarCount");
     if(cnt) cnt.textContent = `${BULK_LOC_SEL.size}개 선택`;
-    // 고른 게 없으면 '위치 지정'은 아예 감춘다 (0개일 때 누를 일이 없음)
+    // 고른 게 없으면 '위치 지정'/'DP로 표시'는 아예 감춘다 (0개일 때 누를 일이 없음)
     const assign = $("#bulkBarAssign");
     if(assign) assign.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
+    const dpBtn = $("#bulkBarDp");
+    if(dpBtn) dpBtn.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
 }
 
 // 카드 DOM에 선택 상태만 반영 (전체 재렌더 없이 즉각 반응)
@@ -70983,6 +70986,30 @@ window.markAsDP = async (code) => {
     }
 };
 
+// 여러개 선택 모드에서 한번에 "DP 진열중"으로 표시 — 각 상품의 기존 위치는 그대로 두고 DP만 추가
+window.markMultipleAsDP = async () => {
+    const codes = [...BULK_LOC_SEL];
+    if(codes.length === 0) return;
+    if(!checkPat()) return;
+    const btn = $("#bulkBarDp");
+    if(btn) btn.disabled = true;
+    const ok = await saveLocations(server => {
+        const assignments = { ...server.assignments };
+        codes.forEach(code => {
+            const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
+            if(!arr.some(a => a.dp)) arr.push({ dp: true });
+            assignments[code] = arr;
+        });
+        return { zones: server.zones, assignments };
+    });
+    if(btn) btn.disabled = false;
+    if(ok){
+        showToast(`✓ ${codes.length}개 상품을 DP 진열중으로 표시했습니다`);
+        _refreshDpFilterCounts();
+        window.exitBulkLocMode();
+    }
+};
+
 // mode: 'assign' | 'clear'
 async function _bulkApply(mode){
     const codes = [...BULK_LOC_SEL];
@@ -71058,6 +71085,7 @@ $("#closeBulkLoc").onclick = () => {
 $("#bulkLocSave").onclick = () => _bulkApply('assign');
 $("#bulkLocClear").onclick = () => _bulkApply('clear');
 $("#bulkBarAssign").onclick = () => window.openBulkLocModal();
+$("#bulkBarDp").onclick = () => window.markMultipleAsDP();
 $("#bulkBarExit").onclick = () => window.exitBulkLocMode();
 $("#bulkBarAll").onclick = () => _bulkToggleAll();
 
@@ -77887,6 +77915,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const dpGroup = (() => {
             const cnt = { dp: 0, nodp: 0, soldDP: 0 };
             PRODUCTS.forEach(p => {
+                if(!(p.busanTotal > 0)) return; // 부산점 재고 있는 상품만 집계
                 const st = getDPStatus(p);
                 if(st === 'dp') cnt.dp++;
                 else if(st === 'soldDP') cnt.soldDP++;
@@ -78393,7 +78422,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-        const _niCount = PRODUCTS.filter(p => !IMAGES[p.shopNo || p.품번]).length;
+        const _niCount = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length;
         noImgBtn.innerHTML = `📷 이미지없음${_niCount > 0 ? ` <span class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">${_niCount}</span>` : ''}`;
 
 
