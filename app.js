@@ -33060,6 +33060,1201 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
 };
 
+window.quickRTOut = async (code, size, qty, btn) => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(!checkPat()) return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const p = PRODUCTS.find(x => x.품번 === code);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(!p) return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // iPad/iOS Safari 대응
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(!btn || !btn.tagName) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        catch(e) { btn = document.createElement('button'); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const finalMemo = `[부산점 ➡️ 물류센터] 부진재고 반납요청`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const existing = TRANSFERS.find(t => t.code === code && t.size === size && t.memo === finalMemo);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if (existing) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        existing.qty += 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // 버튼: 수량 표시 유지 (계속 클릭 가능)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // debounce 저장 (800ms 내 추가 클릭이 없을 때 저장)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        clearTimeout(window._rtSaveTimer);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        showToast(`📦 부산 → 물류 ${size} | ${existing.qty}개로 업데이트`, async () => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // 실행취소: 방금 올린 1개만 되돌림 (대기 중 저장 취소 후 정리)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            clearTimeout(window._rtSaveTimer);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            existing.qty -= 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            if (existing.qty <= 0) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                TRANSFERS = TRANSFERS.filter(t => t.id !== existing.id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                await _removeTransferFromGH(existing.id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            } else {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                await _saveTransfersToGH();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ── 신규 이동요청 추가 ──
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const origHtml = btn.innerHTML;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const origClass = btn.className;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>1개`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const trId = "tr_" + Date.now();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const d = new Date();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
+
+
+
+
+
+
+
+    const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
+
+
+
+
+
+
+
+    const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: _trItemCode, date: shortDate, size, qty: 1, memo: finalMemo });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
+
+
+
+
+
+
+
+    const _saveOk = await _saveTransfersToGH();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(!_saveOk) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    showToast(`📦 부산 → 물류 ${size} 1개 반납요청 (한 번 더 누르면 +1개)`, async () => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        await _removeTransferFromGH(trId);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        if(window.lucide) lucide.createIcons();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+};
+
+
 
 
 
@@ -60610,7 +61805,7 @@ function openDetail(p){
 
 
 
-            <th class="py-3 px-2 text-center w-[16%] border-r border-white">사이즈</th>
+            <th class="py-3 px-2 text-center w-[13%] border-r border-white">사이즈</th>
 
 
 
@@ -60626,7 +61821,8 @@ function openDetail(p){
 
 
 
-            <th class="py-3 px-2 text-center w-[14%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
+            <th class="py-3 px-2 text-center w-[12%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
+            <th class="py-3 px-2 text-center w-[16%] border-r border-gray-100">부산→물류</th>
 
 
 
@@ -60642,7 +61838,7 @@ function openDetail(p){
 
 
 
-            <th class="py-3 px-2 text-center w-[15%]">물류</th>
+            <th class="py-3 px-2 text-center w-[12%]">물류</th>
 
 
 
@@ -60658,7 +61854,7 @@ function openDetail(p){
 
 
 
-            <th class="py-3 px-2 text-center w-[20%] border-r border-gray-100">물류 RT</th>
+            <th class="py-3 px-2 text-center w-[16%] border-r border-gray-100">물류 RT</th>
 
 
 
@@ -60674,7 +61870,7 @@ function openDetail(p){
 
 
 
-            <th class="py-3 px-2 text-center w-[15%]">신사</th>
+            <th class="py-3 px-2 text-center w-[12%]">신사</th>
 
 
 
@@ -60690,7 +61886,7 @@ function openDetail(p){
 
 
 
-            <th class="py-3 px-2 text-center w-[20%]">신사 RT</th>
+            <th class="py-3 px-2 text-center w-[16%]">신사 RT</th>
 
 
 
@@ -60769,6 +61965,10 @@ function openDetail(p){
 
 
 
+
+            let busanOutBtn = s.busan > 0
+                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 rounded-lg flex items-center justify-center w-full transition-colors" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
+                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             let centerRtBtn = s.center > 0
 
@@ -60931,6 +62131,7 @@ function openDetail(p){
 
 
                 <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</td>
+                <td class="py-2.5 px-2 text-center border-r border-gray-100">${busanOutBtn}</td>
 
 
 
@@ -63243,6 +64444,7 @@ function openDetail(p){
 
 
             <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
+            <th class="py-2 px-2 text-center border-r border-gray-100">부산→물류</th>
 
 
 
@@ -63385,6 +64587,10 @@ function openDetail(p){
 
 
 
+
+            let busanOutBtn = s.busan > 0
+                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.busan}</button>`
+                : `<span class="text-gray-300 text-sm">-</span>`;
 
             let centerRtBtn = s.center > 0
 
@@ -63642,6 +64848,7 @@ function openDetail(p){
 
 
 
+                <td class="py-1.5 px-2 text-center border-r border-gray-100">${busanOutBtn}</td>
                 <td class="py-1.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
 
 
