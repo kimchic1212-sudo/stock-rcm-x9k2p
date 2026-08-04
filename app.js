@@ -4319,102 +4319,28 @@ function isPromoActive(pr) {
 
 
 
-function findPromoForCode(code) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  for(const pr of getPromoList()) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if(!window.promoPreviewMode && !isPromoActive(pr)) continue; // 기간 범위 밖이면 스킵 (미리보기 모드 제외)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if(pr.items && pr.items[code]) return { promo: pr, item: pr.items[code], isPreview: !isPromoActive(pr) };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function findPromoForCode(code, consumerPrice) {
+  let best = null;
+  let bestPrice = Infinity;
+  for (const pr of getPromoList()) {
+    if (!window.promoPreviewMode && !isPromoActive(pr)) continue;
+    const item = pr.items && pr.items[code];
+    if (!item) continue;
+    let price = null;
+    if (item.targetCat === activeWeeklyCat && item.weeklyPrice && consumerPrice > 0 && item.weeklyPrice < consumerPrice) {
+      price = item.weeklyPrice;
+    } else if (item.finalPrice && consumerPrice > 0 && item.finalPrice < consumerPrice) {
+      price = item.finalPrice;
+    } else if (item.finalRate > 0 && consumerPrice > 0) {
+      const computed = Math.round(consumerPrice * (1 - item.finalRate) / 10) * 10;
+      if (computed < consumerPrice) price = computed;
+    }
+    if (price !== null && price < bestPrice) {
+      bestPrice = price;
+      best = { promo: pr, item, isPreview: !isPromoActive(pr) };
+    }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  return null;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  return best;
 }
 
 
@@ -4479,7 +4405,7 @@ function reapplyPromoData() {
 
 
 
-    const _pm = findPromoForCode(p.품번);
+    const _pm = findPromoForCode(p.품번, p.소비자가);
 
 
 
@@ -20669,7 +20595,7 @@ function rebuildIndex(){
 
 
 
-    const _pm = findPromoForCode(p.품번);
+    const _pm = findPromoForCode(p.품번, p.소비자가);
 
 
 
