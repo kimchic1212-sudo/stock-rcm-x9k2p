@@ -34509,7 +34509,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-    // Row2: 타이틀 (B2, B2:L2 병합)
+    // Row2: 타이틀 (B2, B2:M2 병합)
 
 
 
@@ -34525,7 +34525,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '']);
+    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '', '']);
 
 
 
@@ -34573,7 +34573,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '카테고리', '품명', '규격', '요청수량', '물류센터재고', '매장재고', '단위이상']);
+    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '브랜드', '카테고리', '품명', '규격', '요청수량', '물류센터재고', '매장재고', '단위이상']);
 
 
 
@@ -35205,7 +35205,8 @@ window.exportTransfersToExcel = () => {
 
 
 
-            prod?.카테고리 || '',                    // F: 카테고리 (신발/의류/용품 — 대분류)
+            prod?.브랜드 || '',                      // F: 브랜드
+            prod?.카테고리 || '',                    // G: 카테고리 (신발/의류/용품 — 대분류)
 
 
 
@@ -35221,7 +35222,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-            t.product,                             // G: 품명
+            t.product,                             // H: 품명
 
 
 
@@ -35237,7 +35238,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-            t.size,                                // H: 규격
+            t.size,                                // I: 규격
 
 
 
@@ -35253,7 +35254,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-            t.qty,                                 // I: 요청수량
+            t.qty,                                 // J: 요청수량
 
 
 
@@ -35269,7 +35270,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-            wms,                                   // J: 물류센터재고
+            wms,                                   // K: 물류센터재고
 
 
 
@@ -35285,7 +35286,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-            store,                                 // K: 매장재고(부산)
+            store,                                 // L: 매장재고(부산)
 
 
 
@@ -35301,7 +35302,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-            diff,                                  // L: 단위이상
+            diff,                                  // M: 단위이상
 
 
 
@@ -35397,7 +35398,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-    // B2:L2 병합
+    // B2:M2 병합
 
 
 
@@ -35413,7 +35414,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 11 } }];
+    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 12 } }];
 
 
 
@@ -35461,7 +35462,7 @@ window.exportTransfersToExcel = () => {
 
 
 
-    const colCount = 12;
+    const colCount = 13;
 
 
 
