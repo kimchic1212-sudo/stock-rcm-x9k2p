@@ -4327,7 +4327,7 @@ function findPromoForCode(code, consumerPrice) {
     const item = pr.items && pr.items[code];
     if (!item) continue;
     let price = null;
-    if (item.targetCat === activeWeeklyCat && item.weeklyPrice && consumerPrice > 0 && item.weeklyPrice < consumerPrice) {
+    if (item.targetCat === getActiveWeeklyCategory() && item.weeklyPrice && consumerPrice > 0 && item.weeklyPrice < consumerPrice) {
       price = item.weeklyPrice;
     } else if (item.finalPrice && consumerPrice > 0 && item.finalPrice < consumerPrice) {
       price = item.finalPrice;
