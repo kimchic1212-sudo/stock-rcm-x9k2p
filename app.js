@@ -4322,6 +4322,7 @@ function isPromoActive(pr) {
 function findPromoForCode(code, consumerPrice) {
   let best = null;
   let bestPrice = Infinity;
+  let bestId = -Infinity;
   for (const pr of getPromoList()) {
     if (!window.promoPreviewMode && !isPromoActive(pr)) continue;
     const item = pr.items && pr.items[code];
@@ -4335,8 +4336,12 @@ function findPromoForCode(code, consumerPrice) {
       const computed = Math.round(consumerPrice * (1 - item.finalRate) / 10) * 10;
       if (computed < consumerPrice) price = computed;
     }
-    if (price !== null && price < bestPrice) {
+    if (price === null) continue;
+    const prId = parseInt(pr.id, 10) || 0;
+    const better = price < bestPrice || (price === bestPrice && prId > bestId);
+    if (better) {
       bestPrice = price;
+      bestId = prId;
       best = { promo: pr, item, isPreview: !isPromoActive(pr) };
     }
   }
