@@ -36723,6 +36723,8 @@ window.openAnalyticsReport = async () => {
 
             let busanSales = 0; let sinsaSales = 0; let centerSales = 0;
 
+            let busanRealRev = 0; let busanEstQty = 0; let sizeRealRevMap = {}; let sizeEstQtyMap = {};
+
 
 
 
@@ -36851,6 +36853,8 @@ window.openAnalyticsReport = async () => {
 
                             busanSales += dayData; sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
 
+                            busanEstQty += dayData; sizeEstQtyMap["알수없음"] = (sizeEstQtyMap["알수없음"] || 0) + dayData;
+
 
 
 
@@ -36961,7 +36965,20 @@ window.openAnalyticsReport = async () => {
 
 
 
-                                    if (bq > 0) { busanSales += bq; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + bq; }
+                                    
+
+                                    if (bq > 0) {
+                                        busanSales += bq; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + bq;
+                                        const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[p.품번] && SALES_HISTORY.rev[p.품번][date] ? SALES_HISTORY.rev[p.품번][date][size] : null;
+                                        if (rd) {
+                                            const brqRev = Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0);
+                                            busanRealRev += brqRev;
+                                            sizeRealRevMap[size] = (sizeRealRevMap[size] || 0) + brqRev;
+                                        } else {
+                                            busanEstQty += bq;
+                                            sizeEstQtyMap[size] = (sizeEstQtyMap[size] || 0) + bq;
+                                        }
+                                    }
 
 
 
@@ -37074,6 +37091,8 @@ window.openAnalyticsReport = async () => {
 
 
                                     busanSales += dayData[size]; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + dayData[size];
+
+                                    busanEstQty += dayData[size]; sizeEstQtyMap[size] = (sizeEstQtyMap[size] || 0) + dayData[size];
 
 
 
@@ -37251,6 +37270,9 @@ window.openAnalyticsReport = async () => {
 
             let finalSales = activeSizeFilter === "ALL" ? busanSales : (sizeSalesMap[activeSizeFilter] || 0);
 
+            const finalRealRev = activeSizeFilter === "ALL" ? busanRealRev : (sizeRealRevMap[activeSizeFilter] || 0);
+            const finalEstQty = activeSizeFilter === "ALL" ? busanEstQty : (sizeEstQtyMap[activeSizeFilter] || 0);
+            const finalRev = finalRealRev + finalEstQty * (p.currentPromoPrice || p.소비자가 || 0);
 
 
 
@@ -37265,7 +37287,8 @@ window.openAnalyticsReport = async () => {
 
 
 
-            if(finalSales > 0) items.push({ ...p, dashSales: finalSales, dashRev: finalSales * (p.currentPromoPrice || p.소비자가 || 0) });
+
+            if(finalSales > 0) items.push({ ...p, dashSales: finalSales, dashRev: finalRev });
 
 
 
@@ -73021,6 +73044,8 @@ window.renderSalesHistoryAdmin = () => {
 
                 let qtyIdx = headers.findIndex(h => h === '수량' || h.includes('판매수량'));
 
+                let revIdx = headers.findIndex(h => h === '판매금액계' || h.includes('판매금액계'));
+
 
 
 
@@ -73213,6 +73238,8 @@ window.renderSalesHistoryAdmin = () => {
 
                 let sessionData = {};
 
+                let sessionRevData = {};
+
 
 
 
@@ -73364,6 +73391,8 @@ window.renderSalesHistoryAdmin = () => {
 
 
                     const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
+
+                    const revAmt = revIdx > -1 ? (Number(String(r[revIdx]||"").replace(/,/g,'')) || 0) : 0;
 
 
 
@@ -73765,6 +73794,11 @@ window.renderSalesHistoryAdmin = () => {
 
                     sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
 
+                    if(!sessionRevData[code]) sessionRevData[code] = {};
+                    if(!sessionRevData[code][date]) sessionRevData[code][date] = {};
+                    if(!sessionRevData[code][date][size]) sessionRevData[code][date][size] = {};
+                    sessionRevData[code][date][size][locationGroup] = (sessionRevData[code][date][size][locationGroup] || 0) + revAmt;
+
 
 
 
@@ -73940,6 +73974,8 @@ window.renderSalesHistoryAdmin = () => {
 
 
                 let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
+
+                let newRevItems = JSON.parse(JSON.stringify(SALES_HISTORY.rev || {}));
 
 
 
@@ -74315,7 +74351,26 @@ window.renderSalesHistoryAdmin = () => {
 
 
 
-                const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems };
+                                for(let code in sessionRevData) {
+                    if(!newRevItems[code]) newRevItems[code] = {};
+                    for(let date in sessionRevData[code]) {
+                        if(!newRevItems[code][date]) newRevItems[code][date] = {};
+                        for(let size in sessionRevData[code][date]) {
+                            if(!newRevItems[code][date][size]) newRevItems[code][date][size] = {};
+                            for(let mgr in sessionRevData[code][date][size]) {
+                                const incomingRev = sessionRevData[code][date][size][mgr];
+                                if(date === _todayStr) {
+                                    const existingRev = newRevItems[code][date][size][mgr] || 0;
+                                    newRevItems[code][date][size][mgr] = Math.max(existingRev, incomingRev);
+                                } else {
+                                    newRevItems[code][date][size][mgr] = incomingRev;
+                                }
+                            }
+                        }
+                    }
+                }
+
+const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems, rev: newRevItems };
 
 
 
