@@ -37353,7 +37353,7 @@ window.openAnalyticsReport = async () => {
             const meta = (SALES_HISTORY.codeMeta && SALES_HISTORY.codeMeta[code]) || {};
             items.push({
                 품번: code,
-                품명: (meta.품명 || code) + ' (단종/삭제)',
+                품명: meta.품명 || code,
                 브랜드: meta.브랜드 || '단종상품',
                 카테고리: meta.카테고리 || '기타',
                 성별: meta.성별 || 'U',
@@ -40085,7 +40085,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-            const key = (p.브랜드 || '') + '||' + (p.품명 || '');
+            const key = (p.브랜드 || '') + '||' + (p.품명 || '').replace(/\s*(와이드|WIDE|Wide)\s*$/, '').trim();
 
 
 
