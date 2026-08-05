@@ -37320,35 +37320,49 @@ window.openAnalyticsReport = async () => {
 
 
 
-                const catalogCodes = new Set(PRODUCTS.map(pp => pp.품번));
-        let discQty = 0, discRealRev = 0;
+                                const catalogCodes = new Set(PRODUCTS.map(pp => pp.품번));
+        const discByCode = {};
         for (const code in (SALES_HISTORY.items || {})) {
             if (catalogCodes.has(code)) continue;
             const codeHist = SALES_HISTORY.items[code];
+            let qty = 0, realRev = 0;
             for (const date in codeHist) {
                 if (!(period === "ALL" || (date >= cutoffDate && date <= endDate))) continue;
                 const dayData = codeHist[date];
                 if (typeof dayData === 'number') {
-                    discQty += dayData;
+                    qty += dayData;
                 } else if (typeof dayData === 'object') {
                     for (const size in dayData) {
                         if (typeof dayData[size] === 'object') {
                             const sd = dayData[size];
                             const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
                             if (bq > 0) {
-                                discQty += bq;
+                                qty += bq;
                                 const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[code] && SALES_HISTORY.rev[code][date] ? SALES_HISTORY.rev[code][date][size] : null;
-                                if (rd) { discRealRev += Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0); }
+                                if (rd) { realRev += Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0); }
                             }
                         } else {
-                            discQty += dayData[size];
+                            qty += dayData[size];
                         }
                     }
                 }
             }
+            if (qty > 0) { discByCode[code] = { qty, realRev }; }
         }
-        if (discQty > 0) {
-            items.push({ 품번: '단종상품', 품명: '단종/삭제된 상품 합계', 브랜드: '단종상품', 카테고리: '기타', 성별: 'U', shopNo: '', currentPromoPrice: null, 소비자가: 0, dashSales: discQty, dashRev: discRealRev });
+        for (const code in discByCode) {
+            const meta = (SALES_HISTORY.codeMeta && SALES_HISTORY.codeMeta[code]) || {};
+            items.push({
+                품번: code,
+                품명: (meta.품명 || code) + ' (단종/삭제)',
+                브랜드: meta.브랜드 || '단종상품',
+                카테고리: meta.카테고리 || '기타',
+                성별: meta.성별 || 'U',
+                shopNo: code,
+                currentPromoPrice: null,
+                소비자가: 0,
+                dashSales: discByCode[code].qty,
+                dashRev: discByCode[code].realRev,
+            });
         }
 
 return items.sort((a, b) => b.dashSales - a.dashSales);
@@ -73157,6 +73171,11 @@ window.renderSalesHistoryAdmin = () => {
 
                 let whIdx = headers.findIndex(h => h === '창고' || h.includes('창고'));
 
+                let nameIdx = headers.findIndex(h => h === '품명');
+                let brandIdx = headers.findIndex(h => h === '브랜드');
+                let catIdx2 = headers.findIndex(h => h === '카테고리2' || h.includes('카테고리'));
+                let genderIdx = headers.findIndex(h => h === '성별');
+
 
 
 
@@ -73270,6 +73289,8 @@ window.renderSalesHistoryAdmin = () => {
                 let sessionData = {};
 
                 let sessionRevData = {};
+
+                let sessionCodeMeta = {};
 
 
 
@@ -73390,6 +73411,15 @@ window.renderSalesHistoryAdmin = () => {
 
 
                     const code = String(r[codeIdx]||"").trim();
+
+                    if (!sessionCodeMeta[code]) {
+                        sessionCodeMeta[code] = {
+                            브랜드: brandIdx > -1 ? String(r[brandIdx]||"").trim() : "",
+                            카테고리: catIdx2 > -1 ? String(r[catIdx2]||"").trim() : "",
+                            성별: genderIdx > -1 ? String(r[genderIdx]||"").trim() : "",
+                            품명: nameIdx > -1 ? String(r[nameIdx]||"").trim() : "",
+                        };
+                    }
 
 
 
@@ -74008,6 +74038,8 @@ window.renderSalesHistoryAdmin = () => {
 
                 let newRevItems = JSON.parse(JSON.stringify(SALES_HISTORY.rev || {}));
 
+                let newCodeMeta = Object.assign({}, SALES_HISTORY.codeMeta || {});
+
 
 
 
@@ -74401,7 +74433,9 @@ window.renderSalesHistoryAdmin = () => {
                     }
                 }
 
-const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems, rev: newRevItems };
+Object.assign(newCodeMeta, sessionCodeMeta);
+
+const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems, rev: newRevItems, codeMeta: newCodeMeta };
 
 
 
