@@ -35665,6 +35665,52 @@ window.exportTransfersToExcel = () => {
 
 
 
+window.exportDashboardImage = async () => {
+    const modal = document.querySelector('#analyticsDashboard');
+    if (!modal) return;
+    const btn = document.querySelector('#dashShareBtn');
+    const origBtnHtml = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '⏳ 저장 중...'; btn.disabled = true; }
+    let clone = null;
+    try {
+        clone = modal.cloneNode(true);
+        clone.id = 'analyticsDashboardClone';
+        clone.style.position = 'absolute';
+        clone.style.top = '0';
+        clone.style.left = '-9999px';
+        clone.style.height = 'auto';
+        clone.style.maxHeight = 'none';
+        clone.style.overflow = 'visible';
+        clone.style.zIndex = '-1';
+        const cloneScroll = clone.querySelector('main.dash-scroll');
+        if (cloneScroll) { cloneScroll.style.overflow = 'visible'; cloneScroll.style.maxHeight = 'none'; cloneScroll.style.height = 'auto'; }
+        const origCanvases = modal.querySelectorAll('canvas');
+        const cloneCanvases = clone.querySelectorAll('canvas');
+        origCanvases.forEach((oc, i) => {
+            const cc = cloneCanvases[i];
+            if (cc && oc.width > 0 && oc.height > 0) {
+                cc.width = oc.width; cc.height = oc.height;
+                const cctx = cc.getContext('2d');
+                if (cctx) cctx.drawImage(oc, 0, 0);
+            }
+        });
+        document.body.appendChild(clone);
+        await new Promise(r => setTimeout(r, 80));
+        const canvas = await html2canvas(clone, { backgroundColor: '#f9fafb', scale: 2, useCORS: true });
+        const link = document.createElement('a');
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        link.download = `부산점_판매리포트_${dateStr}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch(e) {
+        alert('이미지 저장에 실패했습니다: ' + (e && e.message ? e.message : e));
+    } finally {
+        if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+        if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
+    }
+};
+
 window.openAnalyticsReport = async () => {
 
 
@@ -37957,7 +38003,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <button id="closeDashboardBtn" class="p-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-1 shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+                        <button id="dashShareBtn" class="px-2.5 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-1 shrink-0 text-xs font-bold flex items-center gap-1">📸 이미지 저장</button><button id="closeDashboardBtn" class="p-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-1 shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
 
 
 
@@ -39652,6 +39698,8 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
+
+        $("#dashShareBtn").onclick = () => window.exportDashboardImage();
 
         $("#closeDashboardBtn").onclick = () => {
 
