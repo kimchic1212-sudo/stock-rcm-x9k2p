@@ -37320,7 +37320,38 @@ window.openAnalyticsReport = async () => {
 
 
 
-        return items.sort((a, b) => b.dashSales - a.dashSales);
+                const catalogCodes = new Set(PRODUCTS.map(pp => pp.품번));
+        let discQty = 0, discRealRev = 0;
+        for (const code in (SALES_HISTORY.items || {})) {
+            if (catalogCodes.has(code)) continue;
+            const codeHist = SALES_HISTORY.items[code];
+            for (const date in codeHist) {
+                if (!(period === "ALL" || (date >= cutoffDate && date <= endDate))) continue;
+                const dayData = codeHist[date];
+                if (typeof dayData === 'number') {
+                    discQty += dayData;
+                } else if (typeof dayData === 'object') {
+                    for (const size in dayData) {
+                        if (typeof dayData[size] === 'object') {
+                            const sd = dayData[size];
+                            const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                            if (bq > 0) {
+                                discQty += bq;
+                                const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[code] && SALES_HISTORY.rev[code][date] ? SALES_HISTORY.rev[code][date][size] : null;
+                                if (rd) { discRealRev += Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0); }
+                            }
+                        } else {
+                            discQty += dayData[size];
+                        }
+                    }
+                }
+            }
+        }
+        if (discQty > 0) {
+            items.push({ 품번: '단종상품', 품명: '단종/삭제된 상품 합계', 브랜드: '단종상품', 카테고리: '기타', 성별: 'U', shopNo: '', currentPromoPrice: null, 소비자가: 0, dashSales: discQty, dashRev: discRealRev });
+        }
+
+return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
