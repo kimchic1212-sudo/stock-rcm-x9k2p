@@ -36971,7 +36971,7 @@ window.openAnalyticsReport = async () => {
                                         busanSales += bq; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + bq;
                                         const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[p.품번] && SALES_HISTORY.rev[p.품번][date] ? SALES_HISTORY.rev[p.품번][date][size] : null;
                                         if (rd) {
-                                            const brqRev = Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0);
+                                            const brqRev = typeof rd === 'object' ? Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0) : rd;
                                             busanRealRev += brqRev;
                                             sizeRealRevMap[size] = (sizeRealRevMap[size] || 0) + brqRev;
                                         } else {
@@ -37339,7 +37339,7 @@ window.openAnalyticsReport = async () => {
                             if (bq > 0) {
                                 qty += bq;
                                 const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[code] && SALES_HISTORY.rev[code][date] ? SALES_HISTORY.rev[code][date][size] : null;
-                                if (rd) { realRev += Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0); }
+                                if (rd) { realRev += (typeof rd === 'object' ? Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0) : rd); }
                             }
                         } else {
                             qty += dayData[size];
@@ -73855,10 +73855,11 @@ window.renderSalesHistoryAdmin = () => {
 
                     sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
 
-                    if(!sessionRevData[code]) sessionRevData[code] = {};
-                    if(!sessionRevData[code][date]) sessionRevData[code][date] = {};
-                    if(!sessionRevData[code][date][size]) sessionRevData[code][date][size] = {};
-                    sessionRevData[code][date][size][locationGroup] = (sessionRevData[code][date][size][locationGroup] || 0) + revAmt;
+                    if (locationGroup === '부산(김종훈)') {
+                        if(!sessionRevData[code]) sessionRevData[code] = {};
+                        if(!sessionRevData[code][date]) sessionRevData[code][date] = {};
+                        sessionRevData[code][date][size] = (sessionRevData[code][date][size] || 0) + revAmt;
+                    }
 
 
 
@@ -74419,15 +74420,12 @@ window.renderSalesHistoryAdmin = () => {
                     for(let date in sessionRevData[code]) {
                         if(!newRevItems[code][date]) newRevItems[code][date] = {};
                         for(let size in sessionRevData[code][date]) {
-                            if(!newRevItems[code][date][size]) newRevItems[code][date][size] = {};
-                            for(let mgr in sessionRevData[code][date][size]) {
-                                const incomingRev = sessionRevData[code][date][size][mgr];
-                                if(date === _todayStr) {
-                                    const existingRev = newRevItems[code][date][size][mgr] || 0;
-                                    newRevItems[code][date][size][mgr] = Math.max(existingRev, incomingRev);
-                                } else {
-                                    newRevItems[code][date][size][mgr] = incomingRev;
-                                }
+                            const incomingRev = sessionRevData[code][date][size];
+                            if(date === _todayStr) {
+                                const existingRev = newRevItems[code][date][size] || 0;
+                                newRevItems[code][date][size] = Math.max(existingRev, incomingRev);
+                            } else {
+                                newRevItems[code][date][size] = incomingRev;
                             }
                         }
                     }
