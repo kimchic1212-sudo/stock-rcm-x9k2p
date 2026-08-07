@@ -11597,7 +11597,7 @@ async function loadData(force = false){
 
 
 
-  if (!force && cached && (Date.now() - (cached._timestamp||0) < 60000)) {
+  if (!force && cached && (Date.now() - (cached._timestamp||0) < 180000)) {
 
 
 
