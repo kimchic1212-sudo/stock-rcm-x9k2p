@@ -67598,7 +67598,9 @@ function openDetail(p){
 
 
 
-      const pagesBase = `https://${GH.owner}.github.io/${GH.repo}/product-images`;
+      const IMG_REPO = 'stock-rcm-x9k2p'; // 상품 사진은 Pages로 공개 서빙해야 하므로 항상 공개 저장소에 저장 (비공개 데이터 저장소로는 Pages 접근 불가)
+      const imgGhBase = `https://api.github.com/repos/${GH.owner}/${IMG_REPO}`;
+      const pagesBase = `https://${GH.owner}.github.io/${IMG_REPO}/product-images`;
 
 
 
@@ -67638,7 +67640,7 @@ function openDetail(p){
 
 
 
-          const imgFileApi = `${ghBase}/contents/${imgPath}`;
+          const imgFileApi = `${imgGhBase}/contents/${imgPath}`;
 
 
 
