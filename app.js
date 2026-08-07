@@ -71613,8 +71613,8 @@ const WAREHOUSE_LAYOUTS = {
             ['3', 20, 20, 100, 40], ['4', 120, 20, 100, 40], ['5', 220, 20, 100, 40],
             ['6', 270, 60, 50, 40],
             ['7', 270, 100, 50, 77], ['8', 270, 177, 50, 77], ['9', 270, 254, 50, 76],
-            ['2', 135, 90, 40, 80], ['12', 175, 90, 40, 80],
-            ['1', 135, 170, 40, 80], ['11', 175, 170, 40, 80],
+            ['2-루프탑', 135, 90, 40, 16], ['2-4단', 135, 106, 40, 16], ['2-3단', 135, 122, 40, 16], ['2-2단', 135, 138, 40, 16], ['2-1단', 135, 154, 40, 16], ['12', 175, 90, 40, 80],
+            ['1-루프탑', 135, 170, 40, 16], ['1-4단', 135, 186, 40, 16], ['1-3단', 135, 202, 40, 16], ['1-2단', 135, 218, 40, 16], ['1-1단', 135, 234, 40, 16], ['11', 175, 170, 40, 80],
             ['10', 135, 250, 40, 80],
         ],
         // 실사용 안 하는 자리 — 클릭 불가, 점선으로만 표시
@@ -71656,21 +71656,23 @@ function _renderWarehouseRackMap(zoneId, layout, opts){
         svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="900" fill="#94a3b8">${escapeHtml(label)}</text>`;
     });
     let targetPinSvg = '';
-    layout.racks.forEach(([slot, x, y, w, h]) => {
+    layout.racks.forEach(([slot, x, y, w, h, label]) => {
+        const dispLabel = label || slot;
         const n = _zoneAssignedCodes(zoneId, slot).length;
         const isTarget = targetSlot != null && String(slot) === targetSlot;
         const fill = isTarget ? '#f3e8ff' : (n > 0 ? '#fff0e9' : '#f1f5f9');
         const stroke = isTarget ? '#7c3aed' : (n > 0 ? '#ff5a1f' : '#94a3b8');
         const strokeWidth = isTarget ? 5 : 2;
-        const fs = Math.min(w, h) > 55 ? 20 : 15;
-        const cy = n > 0 ? y + h / 2 - 7 : y + h / 2;
+        const thin = h < 24;
+        const fs = thin ? 11 : (Math.min(w, h) > 55 ? 20 : 15);
+        const cy = thin ? (y + h / 2) : (n > 0 ? y + h / 2 - 7 : y + h / 2);
         const onclick = pickMode
             ? `_bulkPickRackSlot('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`
             : `_toggleShelfList('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`;
         svg += `<g class="shelf-rack${isTarget ? ' shelf-rack-target' : ''}" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="${onclick}">`;
         svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
-        svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(slot)}</text>`;
-        if(n > 0) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
+        svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(dispLabel)}${thin && n>0 ? ` (${n})` : ''}</text>`;
+        if(n > 0 && !thin) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
         svg += `</g>`;
         // 이웃 랙에 가려지지 않도록 핀 배지는 전부 그린 뒤 맨 위에 별도로 그린다
         if(isTarget){
