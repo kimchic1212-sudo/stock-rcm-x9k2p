@@ -35696,13 +35696,36 @@ window.exportDashboardImage = async () => {
         });
         document.body.appendChild(clone);
         await new Promise(r => setTimeout(r, 80));
-        const canvas = await html2canvas(clone, { backgroundColor: '#f9fafb', scale: 2, useCORS: true });
-        const link = document.createElement('a');
+        const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        const canvas = await html2canvas(clone, { backgroundColor: '#f9fafb', scale: isMobile ? 1.5 : 2, useCORS: true });
         const now = new Date();
         const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-        link.download = `부산점_판매리포트_${dateStr}.png`;
-        link.href = canvas.toDataURL('image/png');
+        const fileName = `부산점_판매리포트_${dateStr}.png`;
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('이미지 생성 실패');
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({ files: [file], title: '부산점 판매 리포트' });
+                if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+                if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
+                return;
+            } catch (shareErr) {
+                if (shareErr && shareErr.name === 'AbortError') {
+                    if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+                    if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
+                    return;
+                }
+            }
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = url;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch(e) {
         alert('이미지 저장에 실패했습니다: ' + (e && e.message ? e.message : e));
     } finally {
