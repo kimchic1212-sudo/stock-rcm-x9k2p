@@ -1,6 +1,7 @@
 /**
  * RACEMENT POS Sync - GitHub Actions용
  * 로그인 후 스크린샷 + 패시브 리스너 + 메뉴 폴백
+ * 로그인 연속 실패 감지 시 자동으로 스스로 멈춤 (계정 잠김 방지)
  */
 const { chromium } = require('playwright');
 const https = require('https');
@@ -16,6 +17,13 @@ const CONFIG = {
   ghRepo:   'stock-rcm-data',
   ghBranch: 'main',
   salesFile:'sales_history.json',
+  statusFile:'sync_status.json',
+  // 워크플로우 자체(공개 저장소)를 끄려면 그 저장소 권한이 필요 — github.token으로 충분(같은 저장소)
+  wfOwner:  'kimchic1212-sudo',
+  wfRepo:   'stock-rcm-x9k2p',
+  wfToken:  process.env.GITHUB_TOKEN || '',
+  wfFile:   'pos_sync.yml',
+  maxConsecutiveFailures: 3,
 };
 
 function todayKey() {
@@ -24,13 +32,13 @@ function todayKey() {
 }
 function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
 
-function ghRequest(method, path, body) {
+function ghRequest(method, path, body, token) {
   return new Promise((resolve, reject) => {
     const bodyStr = body ? JSON.stringify(body) : null;
     const req = https.request({
       hostname: 'api.github.com', path, method,
       headers: {
-        Authorization: `Bearer ${CONFIG.ghToken}`,
+        Authorization: `Bearer ${token || CONFIG.ghToken}`,
         'Content-Type': 'application/json',
         'User-Agent': 'RACEMENT-GHA',
         ...(bodyStr && { 'Content-Length': Buffer.byteLength(bodyStr) })
@@ -64,6 +72,39 @@ async function uploadSalesHistory(data, sha) {
   if (res.status !== 200 && res.status !== 201) throw new Error(`GitHub 실패: ${res.status}`);
 }
 
+async function loadSyncStatus() {
+  const res = await ghRequest('GET', `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/${CONFIG.statusFile}`);
+  if (res.status !== 200) return { data: { consecutiveFailures: 0, locked: false }, sha: null };
+  try {
+    return { data: JSON.parse(Buffer.from(res.body.content, 'base64').toString('utf8')), sha: res.body.sha };
+  } catch(e) {
+    return { data: { consecutiveFailures: 0, locked: false }, sha: res.body.sha };
+  }
+}
+
+async function saveSyncStatus(data, sha) {
+  const res = await ghRequest('PUT', `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/${CONFIG.statusFile}`, {
+    message: `sync-status: ${new Date().toLocaleString()}`,
+    content: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'),
+    branch: CONFIG.ghBranch, ...(sha && { sha })
+  });
+  if (res.status !== 200 && res.status !== 201) log(`상태 저장 실패: ${res.status}`);
+}
+
+async function disableSyncWorkflow(reason) {
+  try {
+    const wfRes = await ghRequest('GET', `/repos/${CONFIG.wfOwner}/${CONFIG.wfRepo}/actions/workflows/${CONFIG.wfFile}`, null, CONFIG.wfToken);
+    const wfId = wfRes.body && wfRes.body.id;
+    if (!wfId) { log(`워크플로우 ID 조회 실패: ${JSON.stringify(wfRes.body).slice(0,150)}`); return false; }
+    const disRes = await ghRequest('PUT', `/repos/${CONFIG.wfOwner}/${CONFIG.wfRepo}/actions/workflows/${wfId}/disable`, null, CONFIG.wfToken);
+    log(`워크플로우 자동 비활성화 (${reason}): status=${disRes.status}`);
+    return disRes.status === 204;
+  } catch(e) {
+    log(`워크플로우 비활성화 실패: ${e.message}`);
+    return false;
+  }
+}
+
 async function uploadDebugFile(name, content) {
   const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
   const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
@@ -79,8 +120,6 @@ async function uploadDebugFile(name, content) {
 async function uploadScreenshot(name, page) {
   try {
     const buf = await page.screenshot({ fullPage: false });
-    await uploadDebugFile(name, buf.toString('base64'));
-    // base64이므로 별도 처리 필요 없음 (uploadDebugFile이 다시 base64 encode함 → 이중 인코딩 방지)
     const path = `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/debug/${name}`;
     const cur = await ghRequest('GET', path).catch(() => ({ status: 404 }));
     const sha = cur.status === 200 ? cur.body.sha : undefined;
@@ -122,6 +161,7 @@ async function fetchPOSSales() {
   let tradeNos = [];
   let itemCallCount = 0;
   const itemPromises = [];
+  let dialogMsg = null;
 
   const browser = await chromium.launch({
     headless: true,
@@ -136,6 +176,13 @@ async function fetchPOSSales() {
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     });
     const page = await context.newPage();
+
+    // 네이티브 alert/confirm 창 — 메시지만 기록하고 자동으로 닫아서 스크립트가 멈추지 않게 함
+    page.on('dialog', async (dialog) => {
+      dialogMsg = dialog.message();
+      debugLog.push(`[DIALOG] ${dialogMsg}`);
+      await dialog.accept().catch(() => {});
+    });
 
     // ── 패시브 리스너 (body 없이 URL + 상태만 기록) ──
     page.on('response', response => {
@@ -195,6 +242,18 @@ async function fetchPOSSales() {
     // 스크린샷 (로그인 직후)
     await uploadScreenshot('after_login.png', page);
     debugLog.push('스크린샷 업로드');
+
+    // ── 로그인 실패 판정: 알림창 메시지 또는 비밀번호 입력칸이 여전히 보이면 실패 ──
+    const pwStillVisible = await page.locator('input[type="password"]').first().isVisible().catch(() => false);
+    const bodyText = await page.evaluate(() => document.body.innerText).catch(() => '');
+    const lockKeywords = ['차단', '잠금', '연속 실패', '비밀번호가 일치하지'];
+    const lockHit = lockKeywords.find(k => (dialogMsg || '').includes(k) || bodyText.includes(k));
+    const loginFailed = pwStillVisible || !!lockHit;
+
+    if (loginFailed) {
+      debugLog.push(`로그인 실패 감지 — dialog:"${dialogMsg||''}" pwVisible:${pwStillVisible} keyword:"${lockHit||''}"`);
+      return { todayItems: {}, loginFailed: true, failReason: dialogMsg || lockHit || '비밀번호 입력칸이 로그인 시도 후에도 그대로 남아있음' };
+    }
 
     // ── selTodaySalesList가 안 왔으면 메뉴 직접 클릭 시도 ──
     if (tradeNos.length === 0) {
@@ -264,13 +323,47 @@ async function fetchPOSSales() {
     await uploadDebugFile('parse_debug.txt', debugLog.join('\n'));
     await browser.close();
   }
-  return todayItems;
+  return { todayItems, loginFailed: false };
 }
 
 (async () => {
   log('=== POS 동기화 시작 ===');
+  const { data: status, sha: statusSha } = await loadSyncStatus();
+
   try {
-    const todayItems = await fetchPOSSales();
+    const { todayItems, loginFailed, failReason } = await fetchPOSSales();
+
+    if (loginFailed) {
+      const failCount = (status.consecutiveFailures || 0) + 1;
+      log(`로그인 실패 (연속 ${failCount}회): ${failReason}`);
+
+      if (failCount >= CONFIG.maxConsecutiveFailures) {
+        await disableSyncWorkflow(`로그인 ${failCount}회 연속 실패`);
+        await saveSyncStatus({
+          consecutiveFailures: failCount,
+          locked: true,
+          lockedAt: new Date().toISOString(),
+          reason: failReason,
+          message: `POS 자동 로그인이 ${failCount}회 연속 실패해서 동기화를 자동으로 멈췄습니다. 비밀번호를 확인하고 GitHub에서 워크플로우를 다시 켜주세요.`,
+        }, statusSha);
+        log('연속 실패 한도 도달 — 워크플로우 정지, 상태 기록 완료');
+      } else {
+        await saveSyncStatus({
+          ...status,
+          consecutiveFailures: failCount,
+          locked: false,
+          lastFailAt: new Date().toISOString(),
+          reason: failReason,
+        }, statusSha);
+      }
+      process.exit(0); // 실패를 GHA 자체 실패로 만들지 않음 — 별도 상태 파일로만 추적
+    }
+
+    // 로그인 성공 — 실패 카운터 리셋
+    if ((status.consecutiveFailures || 0) > 0 || status.locked) {
+      await saveSyncStatus({ consecutiveFailures: 0, locked: false, recoveredAt: new Date().toISOString() }, statusSha);
+    }
+
     const codes = Object.keys(todayItems);
     if (codes.length === 0) { log('판매 없음'); process.exit(0); }
 
