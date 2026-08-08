@@ -51697,6 +51697,7 @@ function card(p){
 
               const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:9px;margin-top:1px" title="시스템 ${s._override.sysNow}→실재고 ${s._override.actual}">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
 
+              const _noBcTag = (q > 0 && !s.barcode) ? `<span class="block text-center text-rose-600 font-black leading-none" style="font-size:9px;margin-top:1px">🔖누락</span>` : '';
 
 
 
@@ -51711,7 +51712,8 @@ function card(p){
 
 
 
-              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+
+              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''} ${(q>0 && !s.barcode)?'!border-rose-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}${_noBcTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
 
 
 
