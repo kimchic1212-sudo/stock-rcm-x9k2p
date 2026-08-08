@@ -11701,7 +11701,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{});
 
 
 
@@ -12614,7 +12614,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{});
 
 
 
