@@ -62189,7 +62189,7 @@ function openDetail(p){
 
 
 
-                <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}</td>
+                <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:10px;margin-left:2px;">🔖</span>` : ''}</td>
 
 
 
@@ -64779,7 +64779,7 @@ function openDetail(p){
 
 
 
-                <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}</td>
+                <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:9px;margin-left:2px;">🔖</span>` : ''}</td>
 
 
 
