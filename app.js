@@ -13725,7 +13725,7 @@ function _refreshDpFilterCounts(){
 
     const noLocBtn = $('button.chip[data-noloc]');
     if(noLocBtn){
-        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번]).length;
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && !['dp','soldDP'].includes(getDPStatus(p))).length;
         noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
@@ -51071,7 +51071,9 @@ function card(p){
   let locHtml = "";
   {
     const _locs = _locArr(p.품번);
-    const _pills = _locs.map(_asn => {
+    const _locsDpSt = getDPStatus(p);
+    const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt)) ? [{ dp: true }] : _locs;
+    const _pills = _locsEff.map(_asn => {
       if(_asn.dp) return `<span class="loc-pill" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;cursor:default;" title="랙/서랍 없이 DP 진열중">📺 <span>DP 진열중</span></span>`;
       const _zone = (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId);
       if(!_zone) return '';
@@ -55648,7 +55650,7 @@ function render(){
 
 
 
-    if(f.noLocation && LOCATIONS.assignments[p.품번]) return false;
+    if(f.noLocation && (LOCATIONS.assignments[p.품번] || ['dp','soldDP'].includes(getDPStatus(p)))) return false;
 
 
 
@@ -80346,7 +80348,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         noLocBtn.dataset.active = "0";
 
-        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번]).length;
+        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && !['dp','soldDP'].includes(getDPStatus(p))).length;
 
         noLocBtn.innerHTML = `📍 위치없음${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
 
