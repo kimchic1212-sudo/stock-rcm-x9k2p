@@ -75248,18 +75248,7 @@ window.renderPromoAdmin = () => {
 
 
 
-                        <div class="mt-1 mb-3 p-2.5 bg-indigo-50 border border-indigo-200 rounded-lg">
-                <div class="text-[11px] font-bold text-indigo-700 mb-1.5">🏷️ 브랜드별 기본 할인율 (8월 프라이빗세일에 반영)</div>
-                <div class="flex items-center gap-1.5">
-                    <select id="brandRateSel" class="ipt text-xs flex-1 border border-gray-200 rounded px-2 py-1.5 bg-white">
-                        ${[...new Set(PRODUCTS.map(p=>p.브랜드))].filter(Boolean).sort().map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("")}
-                    </select>
-                    <input type="number" id="brandRateInput" placeholder="%" min="1" max="90" class="ipt text-xs w-16 border border-gray-200 rounded px-2 py-1.5 text-center">
-                    <button id="brandRateApplyBtn" type="button" class="text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1.5 rounded shrink-0">적용</button>
-                </div>
-                <div id="brandRateMsg" class="text-[10px] text-gray-500 mt-1"></div>
-            </div>
-${_listHtml}
+                        ${_listHtml}
 
 
 
@@ -75819,63 +75808,7 @@ ${_listHtml}
 
 
 
-        const _brandRateBtn = document.getElementById("brandRateApplyBtn");
-    if (_brandRateBtn) _brandRateBtn.onclick = async () => {
-        const brand = document.getElementById("brandRateSel").value;
-        const ratePct = parseFloat(document.getElementById("brandRateInput").value);
-        const msgEl = document.getElementById("brandRateMsg");
-        if (!brand) { msgEl.textContent = "브랜드를 선택하세요"; return; }
-        if (!(ratePct > 0 && ratePct < 100)) { msgEl.textContent = "할인율을 확인하세요 (1~99)"; return; }
-        const rate = ratePct / 100;
-        msgEl.textContent = "적용 중...";
-        _brandRateBtn.disabled = true;
-        try {
-            const codes = [...new Set(PRODUCTS.filter(p => p.브랜드 === brand).map(p => p.품번))];
-            if (codes.length === 0) throw new Error("해당 브랜드 상품이 없습니다");
-            const pat = getPat();
-            const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/promotions.json`;
-            let added = 0, updated = 0;
-            for (let attempt = 0; attempt < 5; attempt++) {
-                const metaRes = await fetch(apiBase + `?t=${Date.now()}`, { headers: { Authorization: "Bearer " + pat } });
-                if (!metaRes.ok) throw new Error(`기획전 조회 실패 (${metaRes.status})`);
-                const meta = await metaRes.json();
-                let parsed;
-                try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,""))))); } catch(e) { throw new Error("기존 기획전 목록을 읽지 못했습니다"); }
-                const list = Array.isArray(parsed.promotions) ? parsed.promotions : [];
-                let target = list.find(p => (p.meta && p.meta.name || "").includes("프라이빗세일"));
-                if (!target) {
-                    target = { id: Date.now().toString(), meta: { name: "8월 프라이빗세일", period: "" }, items: {} };
-                    list.push(target);
-                }
-                added = 0; updated = 0;
-                for (const code of codes) {
-                    if (!target.items[code]) {
-                        target.items[code] = { targetCat: "", weeklyPrice: null, weeklyRate: 0, finalPrice: null, finalRate: rate, eventPrice: null, eventRate: 0, couponRate: 0 };
-                        added++;
-                    } else if ((target.items[code].finalRate || 0) < rate && !target.items[code].finalPrice) {
-                        target.items[code].finalRate = rate;
-                        updated++;
-                    }
-                }
-                const newData = { promotions: list };
-                const putRes = await fetch(apiBase, {
-                    method: "PUT",
-                    headers: { Authorization: "Bearer " + pat, "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: `brand-rate: ${brand} ${ratePct}%`, content: utf8ToB64(JSON.stringify(newData)), branch: GH.branch, sha: meta.sha })
-                });
-                if (putRes.status === 409 || putRes.status === 422) { await new Promise(r=>setTimeout(r, 400*(attempt+1))); continue; }
-                if (!putRes.ok) throw new Error(`저장 실패 (${putRes.status})`);
-                break;
-            }
-            msgEl.textContent = `✓ ${brand} ${ratePct}% 적용 완료 (신규 ${added} · 갱신 ${updated} / 전체 ${codes.length}개)`;
-        } catch(e) {
-            msgEl.textContent = "오류: " + e.message;
-        } finally {
-            _brandRateBtn.disabled = false;
-        }
-    };
-
-document.getElementById("promoFile").onchange = async (e) => {
+        document.getElementById("promoFile").onchange = async (e) => {
 
 
 
