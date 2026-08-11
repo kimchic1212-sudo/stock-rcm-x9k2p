@@ -87881,14 +87881,23 @@ function _revealDashOnlyUI() {
 
 async function checkSyncLockStatus() {
     try {
-        const r = await dataFetch('sync_status.json');
-        if (!r.ok) return;
-        const status = await r.json();
-        if (status && status.locked && !document.getElementById('syncLockBanner')) {
+        const sources = ['sync_status.json', 'possync_status.json'];
+        const messages = [];
+        for (const f of sources) {
+            try {
+                const r = await dataFetch(f);
+                if (!r.ok) continue;
+                const status = await r.json();
+                if (status && status.locked) {
+                    messages.push(status.message || 'POS 자동 동기화가 중단되었습니다. 확인이 필요합니다.');
+                }
+            } catch(e) {}
+        }
+        if (messages.length && !document.getElementById('syncLockBanner')) {
             const bar = document.createElement('div');
             bar.id = 'syncLockBanner';
-            bar.style.cssText = 'position:sticky;top:0;z-index:200;background:#dc2626;color:#fff;padding:10px 16px;text-align:center;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;';
-            bar.innerHTML = `<span>🔒 ${escapeHtml(status.message || 'POS 자동 동기화가 중단되었습니다. 확인이 필요합니다.')}</span><button onclick="this.parentElement.remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;font-weight:800;cursor:pointer;">닫기</button>`;
+            bar.style.cssText = 'position:sticky;top:0;z-index:200;background:#dc2626;color:#fff;padding:10px 16px;text-align:center;font-weight:800;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;';
+            bar.innerHTML = messages.map(m => `<span>🔒 ${escapeHtml(m)}</span>`).join('') + `<button onclick="this.parentElement.remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;font-weight:800;cursor:pointer;margin-top:2px;">닫기</button>`;
             document.body.prepend(bar);
         }
     } catch(e) {}
