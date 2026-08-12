@@ -10645,7 +10645,8 @@ window.triggerPosSync = async () => {
 
 
 
-            `https://api.github.com/repos/${GH.owner}/${GH.repo}/actions/workflows/pos_sync.yml/dispatches`,
+            // pos_sync.yml 워크플로우는 앱 코드 저장소(stock-rcm-x9k2p)에 있음 — GH.repo(데이터 저장소)와 다름
+            `https://api.github.com/repos/${GH.owner}/stock-rcm-x9k2p/actions/workflows/pos_sync.yml/dispatches`,
 
 
 
@@ -15792,7 +15793,8 @@ async function autoTriggerPosSync() {
 
 
 
-            `https://api.github.com/repos/${GH.owner}/${GH.repo}/actions/workflows/pos_sync.yml/dispatches`,
+            // pos_sync.yml 워크플로우는 앱 코드 저장소(stock-rcm-x9k2p)에 있음 — GH.repo(데이터 저장소)와 다름
+            `https://api.github.com/repos/${GH.owner}/stock-rcm-x9k2p/actions/workflows/pos_sync.yml/dispatches`,
 
 
 
