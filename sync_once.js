@@ -57,9 +57,31 @@ function ghRequest(method, path, body, token) {
   });
 }
 
+// GitHub Contents API는 응답 본문이 1MB 넘으면 content를 비워서 돌려줌(encoding:"none")
+// → download_url(인증 필요, private repo)로 원문을 직접 받아옴
+function fetchRawUrl(url, token) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request({
+      hostname: u.hostname, path: u.pathname + u.search, method: 'GET',
+      headers: { Authorization: `Bearer ${token || CONFIG.ghToken}`, 'User-Agent': 'RACEMENT-GHA' }
+    }, res => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
 async function loadSalesHistory() {
   const res = await ghRequest('GET', `/repos/${CONFIG.ghOwner}/${CONFIG.ghRepo}/contents/${CONFIG.salesFile}`);
   if (res.status !== 200) return { data: { meta: {}, items: {} }, sha: null };
+  if (!res.body.content && res.body.download_url) {
+    const raw = await fetchRawUrl(res.body.download_url);
+    return { data: JSON.parse(raw), sha: res.body.sha };
+  }
   return { data: JSON.parse(Buffer.from(res.body.content, 'base64').toString('utf8')), sha: res.body.sha };
 }
 
