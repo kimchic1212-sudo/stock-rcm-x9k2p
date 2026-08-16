@@ -13481,7 +13481,7 @@ function applyStockOverrides() {
 
 
         p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
-
+        p.noBarcodeBusan = p.sizes.some(s => s.busan > 0 && !s.barcode);
 
 
 
