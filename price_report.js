@@ -5,6 +5,8 @@ const { chromium } = require('playwright');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
+const SLACK_CHANNEL = 'C0BQF5VJJ3V'; // #가격-재고알림
 const MODE = process.env.REPORT_MODE || 'summary'; // 'summary' | 'changes'
 const PRICES_FILE = 'prices.json';
 const PRODUCT_MAP_FILE = 'product_map.json';
@@ -74,6 +76,41 @@ async function sendTelegram(text) {
     });
     await new Promise(r => setTimeout(r, 300));
   }
+}
+
+// 텔레그램 HTML(<b>,<i>) → 슬랙 mrkdwn(*,_)
+function toSlackText(html) {
+  return html.replace(/<b>(.*?)<\/b>/gs, '*$1*').replace(/<i>(.*?)<\/i>/gs, '_$1_').replace(/<\/?[^>]+>/g, '');
+}
+
+// ── 슬랙 발송 (4000자 제한 없음 — 슬랙은 40000자까지 허용되므로 분할 불필요) ──
+async function sendSlack(text) {
+  if (!SLACK_BOT_TOKEN) { console.log('[Slack skip] SLACK_BOT_TOKEN 미설정'); return; }
+  return new Promise(resolve => {
+    const body = JSON.stringify({ channel: SLACK_CHANNEL, text: toSlackText(text), mrkdwn: true });
+    const req = https.request({
+      hostname: 'slack.com',
+      path: '/api/chat.postMessage',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Length': Buffer.byteLength(body) }
+    }, res => {
+      let raw = ''; res.on('data', c => raw += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(raw);
+          if (j.ok) console.log('[Slack OK]');
+          else console.error('[Slack ERROR]', j.error);
+        } catch (e) { console.error('[Slack parse error]', raw.slice(0, 200)); }
+        resolve();
+      });
+    });
+    req.on('error', e => { console.error('[Slack network error]', e.message); resolve(); });
+    req.write(body); req.end();
+  });
+}
+
+async function broadcast(text) {
+  await Promise.all([sendTelegram(text), sendSlack(text)]);
 }
 
 // ── CHAT_ID 자동 조회 (처음 설정 시 도움용) ──────────────────
@@ -162,7 +199,7 @@ async function sendSummaryReport(products) {
   console.log(`Unique products: ${unique.length} | Discounted: ${discounted.length}`);
 
   if (discounted.length === 0) {
-    await sendTelegram('ℹ️ 현재 할인 중인 상품이 없습니다.');
+    await broadcast('ℹ️ 현재 할인 중인 상품이 없습니다.');
     return;
   }
 
@@ -197,7 +234,7 @@ async function sendSummaryReport(products) {
     }
   }
 
-  await sendTelegram(msg);
+  await broadcast(msg);
   console.log('Summary sent!');
 }
 
@@ -276,7 +313,7 @@ async function sendChangesReport(products) {
     });
   }
 
-  await sendTelegram(msg);
+  await broadcast(msg);
   console.log(`Changes report sent: ${total} changes`);
 }
 
