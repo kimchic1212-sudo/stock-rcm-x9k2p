@@ -62,8 +62,9 @@ function sendSlack(html) {
   });
 }
 
+// 텔레그램은 계정 삭제 예정으로 발송 정지 (2026-08-17) — sendTelegram은 필요시 재사용할 수 있도록 남겨둠
 async function broadcast(text) {
-  await Promise.all([sendTelegram(text), sendSlack(text)]);
+  await sendSlack(text);
 }
 
 function ghRequest(method, path, body) {
