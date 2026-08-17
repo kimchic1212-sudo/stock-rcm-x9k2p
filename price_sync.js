@@ -18,12 +18,19 @@ const AUTO_PROMO_ID = 'auto-price-sync';
 const AUTO_PROMO_NAME = '공홈 가격 자동반영';
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
+const SLACK_CHANNEL = 'C0BQF5VJJ3V'; // #가격-재고알림
 // 이전 대비 매칭 개수가 이 비율 밑으로 떨어지면 "스크래핑 실패"로 간주하고 저장을 건너뜀
 // (예전 항목이 적으면 오탐 나기 쉬우니 최소 개수 이상일 때만 이 안전장치 적용)
 const DROP_GUARD_RATIO = 0.5;
 const DROP_GUARD_MIN_PREV = 20;
 
 function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+// 텔레그램 HTML(<b>,<i>) → 슬랙 mrkdwn(*,_)
+function toSlackText(html) {
+  return html.replace(/<b>(.*?)<\/b>/gs, '*$1*').replace(/<i>(.*?)<\/i>/gs, '_$1_').replace(/<\/?[^>]+>/g, '');
+}
 
 function sendTelegram(text) {
   return new Promise((resolve) => {
@@ -38,6 +45,25 @@ function sendTelegram(text) {
     req.on('error', e => { console.error('[Telegram error]', e.message); resolve(); });
     req.write(body); req.end();
   });
+}
+
+function sendSlack(html) {
+  return new Promise((resolve) => {
+    if (!SLACK_BOT_TOKEN) { log('[Slack skip] SLACK_BOT_TOKEN 미설정'); resolve(); return; }
+    const body = JSON.stringify({ channel: SLACK_CHANNEL, text: toSlackText(html), mrkdwn: true });
+    const req = https.request({
+      hostname: 'slack.com',
+      path: '/api/chat.postMessage',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Length': Buffer.byteLength(body) }
+    }, res => { res.resume(); resolve(); });
+    req.on('error', e => { console.error('[Slack error]', e.message); resolve(); });
+    req.write(body); req.end();
+  });
+}
+
+async function broadcast(text) {
+  await Promise.all([sendTelegram(text), sendSlack(text)]);
 }
 
 function ghRequest(method, path, body) {
@@ -183,7 +209,7 @@ async function main() {
   if (prevCount >= DROP_GUARD_MIN_PREV && matched < prevCount * DROP_GUARD_RATIO) {
     const warnMsg = `⚠️ <b>가격 자동동기화 건너뜀</b>\n이전 ${prevCount}개 → 이번 ${matched}개로 급감 (공홈 스크래핑 실패 의심)\n기존 할인가는 그대로 유지했습니다. 확인이 필요합니다.`;
     log(`[SKIP] 이전(${prevCount}) 대비 급감(${matched}) — 저장 건너뜀, 기존 데이터 유지`);
-    await sendTelegram(warnMsg);
+    await broadcast(warnMsg);
     process.exit(1);
   }
 
