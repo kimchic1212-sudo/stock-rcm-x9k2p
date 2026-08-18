@@ -11702,7 +11702,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{}); autoRemoveSoldOutLocations().then(() => render()).catch(()=>{});
 
 
 
@@ -11768,6 +11768,7 @@ async function loadData(force = false){
 
               DISPLAY_ITEMS = d;
               autoRemoveSoldDP().catch(()=>{}); // DP 목록이 이제 막 로드됐으니, 이미 품절인 DP 사이즈가 있는지 바로 체크
+              autoRemoveSoldOutLocations().catch(()=>{});
 
 
 
@@ -12615,7 +12616,7 @@ async function loadData(force = false){
 
 
 
-      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{}); autoRemoveSoldOutLocations().then(() => render()).catch(()=>{});
 
 
 
@@ -12637,6 +12638,7 @@ async function loadData(force = false){
           DISPLAY_ITEMS = d;
           try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
           autoRemoveSoldDP().catch(()=>{});
+          autoRemoveSoldOutLocations().catch(()=>{});
           render();
         }
       }).catch(()=>{});
@@ -13688,6 +13690,36 @@ async function autoRemoveSoldDP() {
     _autoDpRemoving = false;
   }
 }
+// 재고가 다 팔린 상품, 또는 마지막 1개가 DP 진열 중인 상품의 실제 랙 위치를 자동 해제.
+// (DP 진열 중이면 화면에 DP 가상위치가 대신 표시되므로 실제 위치 정보는 더 이상 유효하지 않음)
+let _autoLocRemoving = false;
+async function autoRemoveSoldOutLocations() {
+  if (!PRODUCTS || !PRODUCTS.length) return;
+  if (_autoLocRemoving) return;
+  if (!getPat()) return; // 쓰기 권한(ADMIN 세션) 없는 기기에서는 건드리지 않음
+  const toRemove = [];
+  PRODUCTS.forEach(p => {
+    if (!LOCATIONS.assignments[p.품번]) return;
+    if (p.busanTotal <= 0) { toRemove.push(p.품번); return; }
+    if (p.busanTotal === 1) {
+      const dpSizes = getDPSizes(p.품번);
+      if (!dpSizes.length) return;
+      const lastSize = p.sizes.find(s => s.busan === 1);
+      if (lastSize && dpSizes.includes(String(lastSize.size).trim())) toRemove.push(p.품번);
+    }
+  });
+  if (!toRemove.length) return;
+
+  _autoLocRemoving = true;
+  try {
+    await saveLocations(server => {
+      toRemove.forEach(code => { delete server.assignments[code]; });
+      return server;
+    });
+  } finally {
+    _autoLocRemoving = false;
+  }
+}
 // DP/이미지/바코드/재고보정/위치 필터 칩의 숫자 배지를 최신 상태로 갱신.
 // 버튼 생성 시 한 번만 계산하던 걸 데이터·위치가 바뀔 때마다 다시 불러 항상 정확하게 유지.
 function _refreshDpFilterCounts(){
@@ -13737,7 +13769,7 @@ function _refreshDpFilterCounts(){
     }
 }
 
-function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); _refreshDpFilterCounts(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); }
+function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); _refreshDpFilterCounts(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); autoRemoveSoldOutLocations().then(() => render()).catch(() => {}); }
 
 
 
