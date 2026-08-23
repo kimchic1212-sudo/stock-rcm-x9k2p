@@ -13442,7 +13442,11 @@ function applyStockOverrides() {
 
 
 
-            s._override = { actual, system: o.system, by: o.by, at: o.at, sysNow };
+            // 보정은 "그 시점의 실재고" 스냅샷 — 이후 판매/반품으로 시스템값이 움직인 만큼 그대로 반영
+            const soldSinceCorrection = (typeof o.system === 'number' && Number.isFinite(o.system)) ? (o.system - sysNow) : 0;
+            const effective = Math.max(0, actual - soldSinceCorrection);
+            s._override = { actual, system: o.system, by: o.by, at: o.at, sysNow, effective };
+            s._rawBusan = sysNow; // 보정 적용 전의 순수 시스템값 — 재보정 시 기준점으로 사용
 
 
 
@@ -13458,7 +13462,7 @@ function applyStockOverrides() {
 
 
 
-            s.busan = actual;
+            s.busan = effective;
 
 
 
@@ -13849,7 +13853,7 @@ window._promptStockOverride = (code, size) => {
 
 
 
-    const existing = s._override ? String(s._override.actual) : '';
+    const existing = s._override ? String(s._override.effective) : '';
 
 
 
@@ -13977,7 +13981,7 @@ window._setStockOverride = async (code, size, actual) => {
 
 
 
-    const sysNow = s ? s.busan : null;
+    const sysNow = s ? (s._rawBusan ?? s.busan) : null;   // 이전 보정이 있어도 순수 시스템값을 기준으로 저장
 
 
 
@@ -51729,7 +51733,7 @@ function card(p){
 
 
 
-              const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:9px;margin-top:1px" title="시스템 ${s._override.sysNow}→실재고 ${s._override.actual}">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
+              const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:9px;margin-top:1px" title="보정값 ${s._override.actual}개(${s._override.at||''}) · 이후 판매 반영해 현재 ${s._override.effective}개">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
 
               const _noBcTag = (q > 0 && !s.barcode) ? `<span class="block text-center text-rose-600 font-black leading-none" style="font-size:9px;margin-top:1px">🔖누락</span>` : '';
 
@@ -66780,7 +66784,7 @@ function openDetail(p){
 
 
 
-            ? `✏️ ${sz}<span class="block text-[10px] font-bold leading-tight">시스템 ${ov.sysNow}→<b>${ov.actual}</b>${s._overrideStale?' ⚠️':''}</span>`
+            ? `✏️ ${sz}<span class="block text-[10px] font-bold leading-tight">보정 ${ov.actual} → 현재 <b>${ov.effective}</b>${s._overrideStale?' (판매 반영됨)':''}</span>`
 
 
 
