@@ -52558,6 +52558,8 @@ function getFilters(){
 
     hasLocation: !!$$('button.chip[data-hasloc]').find(b=>b.dataset.active==="1"),
 
+    locationZone: ($('#locZoneSelect') || {}).value || '',
+
 
 
 
@@ -55696,6 +55698,13 @@ function render(){
 
 
     if(f.hasLocation && !LOCATIONS.assignments[p.품번]) return false;
+
+    if(f.locationZone) {
+        const [_fz, _fs] = f.locationZone.split('::');
+        const _arr = LOCATIONS.assignments[p.품번];
+        const _items = Array.isArray(_arr) ? _arr : (_arr ? [_arr] : []);
+        if(!_items.some(a => a.zoneId === _fz && (!_fs || String(a.slot||'') === _fs))) return false;
+    }
 
 
 
@@ -80442,6 +80451,35 @@ window.addEventListener('DOMContentLoaded', () => {
 
         });
 
+    }
+
+    // ── 위치별 검색 (배정된 위치 목록에서 골라 그 자리 상품만 보기) ──────────
+    if(dpFilterRow && !$('#locZoneSelect')) {
+        const _zoneOpts = new Map(); // value("zoneId::slot") -> 라벨
+        Object.values(LOCATIONS.assignments || {}).forEach(arr => {
+            const items = Array.isArray(arr) ? arr : (arr ? [arr] : []);
+            items.forEach(a => {
+                if(!a || !a.zoneId) return;
+                const z = (LOCATIONS.zones || []).find(zz => zz.id === a.zoneId);
+                if(!z) return;
+                const val = `${a.zoneId}::${a.slot || ''}`;
+                if(!_zoneOpts.has(val)) _zoneOpts.set(val, zoneAddress(z, a.slot));
+            });
+        });
+        const _sorted = [..._zoneOpts.entries()].sort((a,b) => a[1].localeCompare(b[1], 'ko'));
+        if(_sorted.length) {
+            const sel = document.createElement("select");
+            sel.id = "locZoneSelect";
+            sel.className = "chip !bg-white !text-gray-700 !border-gray-300 font-black";
+            sel.innerHTML = `<option value="">📍 위치로 찾기</option>` + _sorted.map(([val,label]) => `<option value="${escapeHtml(val)}">${escapeHtml(label)}</option>`).join('');
+            dpFilterRow.appendChild(sel);
+            sel.addEventListener("change", () => {
+                saveHistoryState();
+                sel.classList.toggle('ring-2', !!sel.value);
+                sel.classList.toggle('ring-sky-400', !!sel.value);
+                visibleCount=60; render();
+            });
+        }
     }
 
     // ── 여러개 선택 모드 진입 칩 (ADMIN 전용) ──────────────────────────────
