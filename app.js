@@ -13649,7 +13649,8 @@ async function autoRemoveSoldDP() {
     if (!dpSizes.length) return;
     dpSizes.forEach(sz => {
       const sObj = p.sizes.find(s => String(s.size).trim() === sz);
-      if (sObj && sObj.busan <= 0) toRemove.push([p.품번, sz]);
+      // sObj가 없다는 건 그 사이즈가 재고표에서 아예 사라졌다는 뜻 — 품절보다 더 확실한 "더 이상 없음"
+      if (!sObj || sObj.busan <= 0) toRemove.push([p.품번, sz]);
     });
   });
   if (!toRemove.length) return;
