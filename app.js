@@ -55290,6 +55290,8 @@ function render(){
 
 
   let filteredList = PRODUCTS.filter(p=>{
+    // 부산·신사·물류 전부 0개면 필터 상태와 무관하게 항상 숨김(완전 품절/무재고)
+    if(p.busanTotal <= 0 && p.sinsaTotal <= 0 && p.centerTotal <= 0) return false;
 
 
 
