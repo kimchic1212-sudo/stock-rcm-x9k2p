@@ -71500,6 +71500,7 @@ function _renderStoreMapSvg(opts){
 
     let hiLabel = '';
     (LOCATIONS.zones || []).forEach(z => {
+        if(z.hideFromMap) return; // 지도에 안 그리는 비공개 구역(예: 비밀창고)
         const r = _mapZoneRect(z);
         const isPoly = Array.isArray(z.poly) && z.poly.length >= 3;
         const isHi = hiId && z.id === hiId;
@@ -72105,14 +72106,31 @@ function _bulkToggleAll(){
 function _bulkRenderPickMap(){
     const host = $("#bulkLocMap"); if(!host) return;
     paintMap("bulkLocMap", { highlightZoneId: _bulkPickZoneId });
-    const svg = host.querySelector('svg'); if(!svg) return;
-    svg.style.cursor = 'pointer';
-    svg.addEventListener('click', (e) => {
-        const g = e.target.closest('.zmap-zone'); if(!g) return;
-        _bulkPickZoneId = g.dataset.zone;
-        _bulkRenderPickMap();
-        _bulkSyncPick();
-    });
+    const svg = host.querySelector('svg');
+    if(svg){
+        svg.style.cursor = 'pointer';
+        svg.addEventListener('click', (e) => {
+            const g = e.target.closest('.zmap-zone'); if(!g) return;
+            _bulkPickZoneId = g.dataset.zone;
+            _bulkRenderPickMap();
+            _bulkSyncPick();
+        });
+    }
+    const hiddenHost = $("#bulkLocHiddenZones");
+    if(hiddenHost){
+        const hiddenZones = (LOCATIONS.zones || []).filter(z => z.hideFromMap);
+        hiddenHost.innerHTML = hiddenZones.map(z => {
+            const active = _bulkPickZoneId === z.id;
+            return `<button type="button" class="chip !text-[11px] ${active ? '!bg-orange-500 !text-white !border-orange-500' : '!bg-gray-50 !text-gray-600 !border-gray-300'}" data-hidden-zone="${escapeHtml(z.id)}">🔒 ${escapeHtml(z.label || z.code || z.id)}</button>`;
+        }).join('');
+        hiddenHost.querySelectorAll('[data-hidden-zone]').forEach(btn => {
+            btn.onclick = () => {
+                _bulkPickZoneId = btn.dataset.hiddenZone;
+                _bulkRenderPickMap();
+                _bulkSyncPick();
+            };
+        });
+    }
 }
 
 function _bulkSyncPick(){
