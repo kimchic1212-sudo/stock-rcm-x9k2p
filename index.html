@@ -5580,7 +5580,10 @@
       <div id="bulkLocCount" class="text-xs font-bold mb-3" style="color:#c2410c;"></div>
       <div class="text-xs text-gray-500 mb-2">지도에서 구역을 클릭해 선택하세요.</div>
       <div class="flex flex-col lg:flex-row gap-4 items-start">
-        <div id="bulkLocMap" style="width:min(100%, 74vh); aspect-ratio:1000/720; margin:0 auto; background:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid var(--line); user-select:none; flex:0 0 auto;"></div>
+        <div class="flex-0 0 auto" style="flex:0 0 auto;">
+          <div id="bulkLocMap" style="width:min(100%, 74vh); aspect-ratio:1000/720; margin:0 auto; background:#f8fafc; border-radius:12px; overflow:hidden; border:1px solid var(--line); user-select:none;"></div>
+          <div id="bulkLocHiddenZones" class="flex flex-wrap gap-1.5 mt-2"></div>
+        </div>
         <div class="flex-1 min-w-0 w-full">
           <div class="flex flex-wrap items-center gap-2">
             <span id="bulkLocPick" class="text-sm font-black" style="color:#c2410c;">구역 미선택</span>
@@ -5685,7 +5688,7 @@
 
 
 
-<script src="./app.js?v=26080161"></script>
+<script src="./app.js?v=26080162"></script>
 
 
 
