@@ -6853,7 +6853,8 @@ function getCurrentFilterState() {
 
 
 
-        otherOnly: ($('button.chip[data-otherbranch]')?.dataset.active === "1"),
+        sinsaOnly: ($('button.chip[data-sinsaonly]')?.dataset.active === "1"),
+        centerOnly: ($('button.chip[data-centeronly]')?.dataset.active === "1"),
 
 
 
@@ -7541,70 +7542,15 @@ function restoreHistoryState() {
 
 
 
-    if($('button.chip[data-otherbranch]')) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        $('button.chip[data-otherbranch]').dataset.active = state.otherOnly ? "1" : "0";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        if(state.otherOnly) $('button.chip[data-otherbranch]').classList.add('ring-2', 'ring-teal-400');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        else $('button.chip[data-otherbranch]').classList.remove('ring-2', 'ring-teal-400');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if($('button.chip[data-sinsaonly]')) {
+        $('button.chip[data-sinsaonly]').dataset.active = state.sinsaOnly ? "1" : "0";
+        if(state.sinsaOnly) $('button.chip[data-sinsaonly]').classList.add('ring-2', 'ring-indigo-400');
+        else $('button.chip[data-sinsaonly]').classList.remove('ring-2', 'ring-indigo-400');
+    }
+    if($('button.chip[data-centeronly]')) {
+        $('button.chip[data-centeronly]').dataset.active = state.centerOnly ? "1" : "0";
+        if(state.centerOnly) $('button.chip[data-centeronly]').classList.add('ring-2', 'ring-teal-400');
+        else $('button.chip[data-centeronly]').classList.remove('ring-2', 'ring-teal-400');
     }
 
 
@@ -49248,38 +49194,12 @@ function card(p){
 
 
 
-  if (p.busanTotal === 0 && (p.sinsaTotal > 0 || p.centerTotal > 0)) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      otherBranchOnlyBadge = `<span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 타지점 ONLY</span>`;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  if (p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal === 0) {
+      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span>`;
+  } else if (p.busanTotal === 0 && p.centerTotal > 0 && p.sinsaTotal === 0) {
+      otherBranchOnlyBadge = `<span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
+  } else if (p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal > 0) {
+      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span><span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
   }
 
 
@@ -52472,7 +52392,8 @@ function getFilters(){
 
 
 
-    otherOnly: !!$$('button.chip[data-otherbranch]').find(b=>b.dataset.active==="1"),
+    sinsaOnly: !!$$('button.chip[data-sinsaonly]').find(b=>b.dataset.active==="1"),
+    centerOnly: !!$$('button.chip[data-centeronly]').find(b=>b.dataset.active==="1"),
 
 
 
@@ -55467,7 +55388,8 @@ function render(){
 
 
 
-    if(f.otherOnly && !(p.busanTotal === 0 && (p.sinsaTotal > 0 || p.centerTotal > 0))) return false;
+    if(f.sinsaOnly && !(p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal === 0)) return false;
+    if(f.centerOnly && !(p.busanTotal === 0 && p.centerTotal > 0 && p.sinsaTotal === 0)) return false;
 
 
 
@@ -69398,7 +69320,7 @@ function renderActiveFilterBar() {
 
 
 
-    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-otherbranch], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-hasloc]').forEach(btn => {
+    $$('button.chip[data-fav], button.chip[data-stock], button.chip[data-memo], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-sinsaonly], button.chip[data-centeronly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-hasloc]').forEach(btn => {
 
 
 
@@ -69942,23 +69864,10 @@ function _clearAllFilterChips() {
 
 
 
-    const ob = $('button.chip[data-otherbranch]');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if (ob) { ob.dataset.active = "0"; ob.classList.remove('ring-2','ring-teal-400'); }
+    const sinsaOb = $('button.chip[data-sinsaonly]');
+    const centerOb = $('button.chip[data-centeronly]');
+    if (sinsaOb) { sinsaOb.dataset.active = "0"; sinsaOb.classList.remove('ring-2','ring-indigo-400'); }
+    if (centerOb) { centerOb.dataset.active = "0"; centerOb.classList.remove('ring-2','ring-teal-400'); }
 
 
 
@@ -70550,23 +70459,10 @@ $("#resetAll").onclick=()=>{
 
 
 
-    const otherBranchBtn = $('button.chip[data-otherbranch]');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if(otherBranchBtn) { otherBranchBtn.dataset.active = "0"; otherBranchBtn.classList.remove('ring-2', 'ring-teal-400'); }
+    const sinsaOnlyBtn2 = $('button.chip[data-sinsaonly]');
+    const centerOnlyBtn2 = $('button.chip[data-centeronly]');
+    if(sinsaOnlyBtn2) { sinsaOnlyBtn2.dataset.active = "0"; sinsaOnlyBtn2.classList.remove('ring-2', 'ring-indigo-400'); }
+    if(centerOnlyBtn2) { centerOnlyBtn2.dataset.active = "0"; centerOnlyBtn2.classList.remove('ring-2', 'ring-teal-400'); }
 
 
 
@@ -78706,7 +78602,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-    if(stockBtn && !$('button.chip[data-otherbranch]')) {
+    if(stockBtn && !$('button.chip[data-sinsaonly]')) {
 
 
 
@@ -78723,6 +78619,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
         const otherBranchBtn = document.createElement("button");
+        const centerOnlyBtn = document.createElement("button");
 
 
 
@@ -78738,7 +78635,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-        otherBranchBtn.className = "chip !bg-teal-50 !text-teal-700 !border-teal-200 font-black";
+        otherBranchBtn.className = "chip !bg-indigo-50 !text-indigo-700 !border-indigo-200 font-black";
+        centerOnlyBtn.className = "chip !bg-teal-50 !text-teal-700 !border-teal-200 font-black";
 
 
 
@@ -78754,7 +78652,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-        otherBranchBtn.dataset.otherbranch = "1";
+        otherBranchBtn.dataset.sinsaonly = "1";
+        centerOnlyBtn.dataset.centeronly = "1";
 
 
 
@@ -78771,6 +78670,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
         otherBranchBtn.dataset.active = "0";
+        centerOnlyBtn.dataset.active = "0";
 
 
 
@@ -78786,7 +78686,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-        otherBranchBtn.innerHTML = "🚚 타지점 ONLY";
+        otherBranchBtn.innerHTML = "🏢 신사점 ONLY";
+        centerOnlyBtn.innerHTML = "🚚 물류 ONLY";
 
 
 
@@ -78819,6 +78720,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
         (_busanOnlyRef || stockBtn).parentNode.insertBefore(otherBranchBtn, (_busanOnlyRef || stockBtn).nextSibling);
+        otherBranchBtn.parentNode.insertBefore(centerOnlyBtn, otherBranchBtn.nextSibling);
 
 
 
@@ -78835,101 +78737,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
         otherBranchBtn.addEventListener("click", () => {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             saveHistoryState();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             otherBranchBtn.dataset.active = otherBranchBtn.dataset.active === "1" ? "0" : "1";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            if(otherBranchBtn.dataset.active === "1") otherBranchBtn.classList.add('ring-2', 'ring-teal-400');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            else otherBranchBtn.classList.remove('ring-2', 'ring-teal-400');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if(otherBranchBtn.dataset.active === "1") otherBranchBtn.classList.add('ring-2', 'ring-indigo-400');
+            else otherBranchBtn.classList.remove('ring-2', 'ring-indigo-400');
             visibleCount=60; render();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        });
+        centerOnlyBtn.addEventListener("click", () => {
+            saveHistoryState();
+            centerOnlyBtn.dataset.active = centerOnlyBtn.dataset.active === "1" ? "0" : "1";
+            if(centerOnlyBtn.dataset.active === "1") centerOnlyBtn.classList.add('ring-2', 'ring-teal-400');
+            else centerOnlyBtn.classList.remove('ring-2', 'ring-teal-400');
+            visibleCount=60; render();
         });
 
 
