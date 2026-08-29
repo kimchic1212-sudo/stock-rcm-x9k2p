@@ -13601,6 +13601,9 @@ async function saveStockOverrides() {
 // 부산 재고가 0이 된 DP 사이즈를 자동으로 DP 목록에서 제외 (품절DP로 방치되지 않도록)
 let _autoDpRemoving = false;
 async function autoRemoveSoldDP() {
+  // 2026-08-29: 원인 조사 중 반복적으로 정상 재고가 있는 DP 항목을 잘못 지우는 사고가 계속 발생해
+  // 임시로 완전히 비활성화함. 원인 확인 후 재활성화할 것.
+  return;
   if (!PRODUCTS || !PRODUCTS.length) return;
   if (_autoDpRemoving) return; // 동시 중복 실행 방지
   const toRemove = []; // [[code, size], ...]
