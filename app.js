@@ -12574,7 +12574,9 @@ async function loadData(force = false){
           if(sgRes2 && sgRes2.ok) SALES_GUIDES = await sgRes2.json();
           if(shRes2 && shRes2.ok) SALES_HISTORY = await shRes2.json();
           try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.salesGuides = SALES_GUIDES; c.salesHistory = SALES_HISTORY; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
-          render();
+          // 판매이력이 이제 막 채워졌으니 오늘 판매분 재고 차감을 다시 계산해야 함
+          // (첫 렌더 때는 SALES_HISTORY가 비어있어서 applyPosSalesDeductions가 아무것도 못 뺐음)
+          rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts();
       }).catch(()=>{});
 
 
