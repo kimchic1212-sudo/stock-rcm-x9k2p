@@ -13709,7 +13709,7 @@ function _refreshDpFilterCounts(){
 
     const noLocBtn = $('button.chip[data-noloc]');
     if(noLocBtn){
-        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && !['dp','soldDP'].includes(getDPStatus(p))).length;
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && _needsRealLocation(p)).length;
         noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
@@ -14800,6 +14800,12 @@ function getDPSizes(code) { return Object.keys(DISPLAY_ITEMS[code] || {}); }
 
 
 
+// 재고 있는 사이즈 중 DP로 표시 안 된 게 하나라도 있으면, 그 재고는 실제 위치가 필요함.
+// (예: 3사이즈 각 1개씩 있는데 그중 1개만 DP면 → 나머지 2개는 여전히 랙에 있어야 하니 위치 필요)
+function _needsRealLocation(p) {
+  const dpSizes = getDPSizes(p.품번);
+  return p.sizes.some(s => s.busan > 0 && !dpSizes.includes(String(s.size).trim()));
+}
 function getDPStatus(p) {
 
 
@@ -51031,7 +51037,7 @@ function card(p){
   {
     const _locs = _locArr(p.품번);
     const _locsDpSt = getDPStatus(p);
-    const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt)) ? [{ dp: true }] : _locs;
+    const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt) && !_needsRealLocation(p)) ? [{ dp: true }] : _locs;
     const _pills = _locsEff.map(_asn => {
       if(_asn.dp) return `<span class="loc-pill" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;cursor:default;" title="랙/서랍 없이 DP 진열중">📺 <span>DP 진열중</span></span>`;
       const _zone = (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId);
@@ -55617,7 +55623,7 @@ function render(){
 
 
 
-    if(f.noLocation && (LOCATIONS.assignments[p.품번] || ['dp','soldDP'].includes(getDPStatus(p)))) return false;
+    if(f.noLocation && (LOCATIONS.assignments[p.품번] || !_needsRealLocation(p))) return false;
 
 
 
@@ -80237,7 +80243,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         noLocBtn.dataset.active = "0";
 
-        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && !['dp','soldDP'].includes(getDPStatus(p))).length;
+        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && _needsRealLocation(p)).length;
 
         noLocBtn.innerHTML = `📍 위치없음${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
 
