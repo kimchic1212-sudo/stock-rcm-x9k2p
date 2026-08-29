@@ -15164,7 +15164,10 @@ async function loadSalesOnly() {
 
 
 
-        _recomputeStock();
+        // _recomputeStock() 대신 안전한 부분만 직접 호출 — 이 5분 주기 타이머는 재고(inventory)를
+        // 새로 안 받아오는데, _recomputeStock()의 품절 자동정리까지 돌리면 탭을 오래 켜둘수록
+        // 오래된 재고 기준으로 방금 마크한 DP가 계속 잘못 지워짐(실제 발생한 반복 버그, 5분마다 재현됨).
+        rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); _refreshDpFilterCounts();
 
 
 
