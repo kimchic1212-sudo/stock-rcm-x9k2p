@@ -11713,8 +11713,10 @@ async function loadData(force = false){
 
 
               DISPLAY_ITEMS = d;
-              autoRemoveSoldDP().catch(()=>{}); // DP 목록이 이제 막 로드됐으니, 이미 품절인 DP 사이즈가 있는지 바로 체크
-              autoRemoveSoldOutLocations().catch(()=>{});
+              // 품절 자동정리는 여기서 하지 않음 — 이 경로는 다른 기기의 DP 변경만 빠르게 반영하는 background poll이라
+              // 이 기기의 재고(PRODUCTS)가 최신이 아닐 수 있어, 여기서 자동정리를 돌리면 방금 마크한 DP가
+              // 오래된 재고 스냅샷 기준으로 잘못 "품절"로 판단돼 지워질 수 있음(실제 발생한 버그).
+              // 품절 정리는 재고까지 같이 새로 불러오는 전체 새로고침 시점에만 수행.
 
 
 
@@ -11994,7 +11996,7 @@ async function loadData(force = false){
 
 
 
-      const [invRes, imgRes, memoRes, trRes, promoRes, sgRes, shRes, sdRes, diRes, soRes, locRes] = await Promise.all([
+      const [invRes, imgRes, memoRes, trRes, promoRes, sdRes, diRes, soRes, locRes] = await Promise.all([
 
 
 
@@ -12090,7 +12092,8 @@ async function loadData(force = false){
 
 
 
-          dataFetch(SALES_GUIDE_PATH).catch(()=>null),
+          // sales_guide/sales_history는 용량이 커서(약 1MB+1.5MB) 초기 로딩을 늦추므로
+          // 여기서 같이 기다리지 않고, 첫 렌더 이후 별도로 백그라운드에서 받아옴(아래 참고).
 
 
 
@@ -12106,7 +12109,6 @@ async function loadData(force = false){
 
 
 
-          dataFetch(SALES_HISTORY_PATH).catch(()=>null),
 
 
 
@@ -12418,7 +12420,7 @@ async function loadData(force = false){
 
 
 
-      if(sgRes && sgRes.ok) SALES_GUIDES = await sgRes.json(); else SALES_GUIDES = {};
+      SALES_GUIDES = {}; // 첫 렌더 이후 백그라운드에서 채워짐
 
 
 
@@ -12434,7 +12436,7 @@ async function loadData(force = false){
 
 
 
-      if(shRes && shRes.ok) SALES_HISTORY = await shRes.json(); else SALES_HISTORY = { meta: {}, items: {} };
+      SALES_HISTORY = { meta: {}, items: {} }; // 첫 렌더 이후 백그라운드에서 채워짐
 
 
 
@@ -12564,6 +12566,17 @@ async function loadData(force = false){
 
       applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{}); autoRemoveSoldOutLocations().then(() => render()).catch(()=>{});
 
+      // 판매 가이드/판매 이력(용량 큰 파일) — 첫 화면을 먼저 그린 뒤 백그라운드로 받아서 핫셀러/RT추천 배지에 반영
+      Promise.all([
+          dataFetch(SALES_GUIDE_PATH).catch(()=>null),
+          dataFetch(SALES_HISTORY_PATH).catch(()=>null),
+      ]).then(async ([sgRes2, shRes2]) => {
+          if(sgRes2 && sgRes2.ok) SALES_GUIDES = await sgRes2.json();
+          if(shRes2 && shRes2.ok) SALES_HISTORY = await shRes2.json();
+          try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.salesGuides = SALES_GUIDES; c.salesHistory = SALES_HISTORY; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+          render();
+      }).catch(()=>{});
+
 
 
 
@@ -12583,8 +12596,7 @@ async function loadData(force = false){
         if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(DISPLAY_ITEMS)) {
           DISPLAY_ITEMS = d;
           try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
-          autoRemoveSoldDP().catch(()=>{});
-          autoRemoveSoldOutLocations().catch(()=>{});
+          // 품절 자동정리는 여기서 하지 않음 — 재고가 최신이 아닐 수 있는 background poll이라 오판 위험(실제 발생한 버그)
           render();
         }
       }).catch(()=>{});
