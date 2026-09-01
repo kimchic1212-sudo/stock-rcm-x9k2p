@@ -72195,12 +72195,19 @@ window._bulkPickRackSlot = (zoneId, slot, el) => {
     const sv = $("#bulkLocSlot");
     if(sv) sv.value = slot;
     _bulkHighlightRackPick(slot);
+    // 칸까지 골랐으면 상단 표시 텍스트에도 반영 (그동안 구역 이름까지만 보이고 칸은 안 보이던 버그)
+    const pick = $("#bulkLocPick");
+    const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
+    if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''} · ${slot}`;
 };
 
 window._bulkClearRackPick = () => {
     const sv = $("#bulkLocSlot");
     if(sv) sv.value = '';
     _bulkHighlightRackPick(null);
+    const pick = $("#bulkLocPick");
+    const z = (LOCATIONS.zones || []).find(zz => zz.id === _bulkPickZoneId);
+    if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
 };
 
 let _bulkSingleMode = false;
@@ -72239,6 +72246,9 @@ window.openSingleLocModal = (code, editIndex) => {
             const sv = $("#bulkLocSlot");
             if(sv) sv.value = asn.slot;
             _bulkHighlightRackPick(asn.slot);
+            const pick = $("#bulkLocPick");
+            const z = (LOCATIONS.zones || []).find(zz => zz.id === asn.zoneId);
+            if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''} · ${asn.slot}`;
         });
     }
 };
