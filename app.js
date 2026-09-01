@@ -2473,7 +2473,7 @@ const SESSION_FLAG = "racement_admin_session";
 
 
 
-function setAdminSession() { localStorage.setItem(SESSION_FLAG, String(Date.now() + 8 * 3600 * 1000)); }
+function setAdminSession() { try { localStorage.setItem(SESSION_FLAG, String(Date.now() + 8 * 3600 * 1000)); } catch(e) { console.warn('세션 저장 실패(storage 제한):', e); } }
 
 
 
@@ -5173,7 +5173,7 @@ function loadGhConfig(){
 
 
 
-function saveGhConfig(){ localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); }
+function saveGhConfig(){ try { localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); } catch(e) { console.warn('설정 저장 실패(storage 제한):', e); } }
 
 
 
@@ -5205,7 +5205,7 @@ function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 
 
 
-function setPat(v){ if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); }
+function setPat(v){ try { if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); } catch(e) { console.warn('로그인 토큰 저장 실패(storage 제한) — 이 기기/브라우저에서는 새로고침 시 ADMIN이 풀릴 수 있음:', e); } }
 
 
 
@@ -5253,7 +5253,7 @@ function getAnthKey(){ return localStorage.getItem(ANTH_KEY) || ""; }
 
 
 
-function setAnthKey(v){ if(v) localStorage.setItem(ANTH_KEY, v); else localStorage.removeItem(ANTH_KEY); }
+function setAnthKey(v){ try { if(v) localStorage.setItem(ANTH_KEY, v); else localStorage.removeItem(ANTH_KEY); } catch(e) { console.warn('키 저장 실패(storage 제한):', e); } }
 
 
 
@@ -87855,6 +87855,48 @@ async function checkSyncLockStatus() {
     } catch(e) {}
 }
 
+// ── 필터 영역 접기/펼치기 (스크롤 시 자동 접힘) ──────────────────────────
+// 검색창+적용된필터는 항상 보이고, 카테고리~브랜드까지(filterDetails)는
+// 스크롤을 조금만 내려도 자동으로 접혀서 상품 목록이 화면을 더 넓게 씀.
+// 접힌 상태에서도 토글 버튼으로 언제든 다시 펼칠 수 있음(수동 펼침은 다음 스크롤까지 유지).
+(function setupFilterCollapse(){
+    let _filterManuallyOpen = false; // 사용자가 직접 펼친 상태(다음 스크롤 전까지 유지)
+    let _filterCollapsed = false;
+
+    function applyState(collapsed){
+        const details = document.getElementById('filterDetails');
+        const toggleBtn = document.getElementById('filterToggleBtn');
+        const label = document.getElementById('filterToggleLabel');
+        if(!details || !toggleBtn || !label) return;
+        _filterCollapsed = collapsed;
+        details.classList.toggle('hidden', collapsed);
+        toggleBtn.classList.toggle('hidden', !collapsed && window.scrollY < 80);
+        label.textContent = collapsed ? '▼ 필터 펼치기' : '▲ 필터 접기';
+    }
+
+    window._toggleFilter = () => {
+        const nowCollapsed = !_filterCollapsed;
+        _filterManuallyOpen = !nowCollapsed; // 펼치는 쪽으로 누르면 다음 스크롤까지 유지
+        applyState(nowCollapsed);
+    };
+
+    let _ticking = false;
+    window.addEventListener('scroll', () => {
+        if(_ticking) return;
+        _ticking = true;
+        requestAnimationFrame(() => {
+            _ticking = false;
+            const scrolled = window.scrollY > 80;
+            if(!scrolled){
+                _filterManuallyOpen = false; // 맨 위로 오면 다시 기본(펼침) 상태로 리셋
+                applyState(false);
+            } else if(!_filterManuallyOpen){
+                applyState(true);
+            }
+        });
+    }, { passive: true });
+})();
+
 loadGhConfig(); loadData().then(async () => {
     checkSyncLockStatus();
 
@@ -88203,7 +88245,7 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
 
 
 
-                    localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000));
+                    try { localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000)); } catch(e) { console.warn('게이트 통과 기록 저장 실패(storage 제한) — 다음에 다시 비밀번호를 물어볼 수 있음:', e); }
                     // 데이터 게이트웨이 조회용 서명 토큰 보관
                     try { const j = await r.json(); if(j && j.pass) localStorage.setItem(INV_PASS_KEY, j.pass); } catch(e){}
 
