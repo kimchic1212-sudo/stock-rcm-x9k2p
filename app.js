@@ -87863,14 +87863,8 @@ async function checkSyncLockStatus() {
     let _filterManuallyOpen = false; // 사용자가 직접 펼친 상태(다음 스크롤 전까지 유지)
     let _filterCollapsed = false;
     let _cooldownUntil = 0; // 접기/펼치기 직후 레이아웃 변화로 인한 재트리거 방지
-    let _filterExpandedH = 150; // 필터 펼쳤을 때 높이 캐시(접혀있는 동안엔 offsetHeight가 0이라 직접 못 재므로 보관해둠)
-    const SCROLL_THRESHOLD = 80; // 이 값 이상 스크롤해야 "내렸다"로 판단(접기 트리거 기준)
-    function getFilterExpandedH(details){
-        if(details && !details.classList.contains('hidden') && details.offsetHeight > 0){
-            _filterExpandedH = details.offsetHeight; // 펼쳐져 있을 때마다 최신값으로 갱신
-        }
-        return _filterExpandedH;
-    }
+    const COLLAPSE_AT = 80; // 이만큼 내려야 "펼침→접힘" 트리거
+    const EXPAND_AT = 5;    // 이 아래여야 "진짜 맨 위로 돌아왔다"고 보고 "접힘→펼침" 트리거
 
     function applyState(collapsed){
         const details = document.getElementById('filterDetails');
@@ -87880,7 +87874,7 @@ async function checkSyncLockStatus() {
         if(collapsed === _filterCollapsed) return; // 상태 변화 없으면 DOM/쿨다운 건드리지 않음
         _filterCollapsed = collapsed;
         details.classList.toggle('hidden', collapsed);
-        toggleBtn.classList.toggle('hidden', !collapsed && window.scrollY < SCROLL_THRESHOLD);
+        toggleBtn.classList.toggle('hidden', !collapsed && window.scrollY < COLLAPSE_AT);
         label.textContent = collapsed ? '▼ 필터 펼치기' : '▲ 필터 접기';
         _cooldownUntil = Date.now() + 350; // 접기/펼치기로 페이지 높이가 바뀌는 동안 스크롤 이벤트 재평가 잠시 무시
     }
@@ -87899,23 +87893,22 @@ async function checkSyncLockStatus() {
             _ticking = false;
             if(Date.now() < _cooldownUntil) return; // 방금 레이아웃이 바뀐 직후의 스크롤 이벤트는 무시(위아래 반복 방지)
 
-            // 검색결과가 적어 페이지 자체가 짧으면 접기 기능을 아예 개입시키지 않음.
-            // 접었을 때 남는 스크롤 여유(maxScroll-filterH)가 SCROLL_THRESHOLD에 못 미치면,
-            // 접자마자 scrollY가 다시 "안 내린" 상태로 강제 클램프되어 즉시 재펼침 → 무한 위아래 반복이 발생했음.
-            const details = document.getElementById('filterDetails');
-            const filterH = getFilterExpandedH(details);
-            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-            if(maxScroll < filterH + SCROLL_THRESHOLD){
-                if(_filterCollapsed){ _filterManuallyOpen = false; applyState(false); }
-                return;
-            }
-
-            const scrolled = window.scrollY > SCROLL_THRESHOLD;
-            if(!scrolled){
-                _filterManuallyOpen = false; // 맨 위로 오면 다시 기본(펼침) 상태로 리셋
-                applyState(false);
-            } else if(!_filterManuallyOpen){
-                applyState(true);
+            // 검색결과가 적어서 접었을 때 페이지가 짧아지면, 브라우저가 스크롤 위치를 강제로 위로 밀어버릴 수 있음.
+            // 그 강제 클램프를 "사용자가 맨 위로 스크롤함"으로 착각해 즉시 재펼침하면 접힘↔펼침이 무한 반복됨(위아래 튐 버그).
+            // 그래서 접기 기준(COLLAPSE_AT=80)과 펼치기 기준(EXPAND_AT=5)을 다르게 둬서, "80을 넘겨 접혔다가
+            // 강제로 몇십px 밀린 것"과 "사용자가 실제로 맨 꼭대기까지 스크롤을 되돌린 것"을 구분한다.
+            if(_filterCollapsed){
+                if(window.scrollY <= EXPAND_AT){
+                    _filterManuallyOpen = false;
+                    applyState(false);
+                }
+            } else {
+                const scrolled = window.scrollY > COLLAPSE_AT;
+                if(!scrolled){
+                    _filterManuallyOpen = false; // 맨 위 근처면 다음 스크롤 때 자동접기 다시 허용
+                } else if(!_filterManuallyOpen){
+                    applyState(true);
+                }
             }
         });
     }, { passive: true });
