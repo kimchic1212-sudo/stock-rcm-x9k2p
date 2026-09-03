@@ -55237,8 +55237,11 @@ function render(){
 
 
   let filteredList = PRODUCTS.filter(p=>{
-    // 부산·신사·물류 전부 0개면 필터 상태와 무관하게 항상 숨김(완전 품절/무재고)
-    if(p.busanTotal <= 0 && p.sinsaTotal <= 0 && p.centerTotal <= 0) return false;
+    // 부산·신사·물류 전부 0개면 기본적으로 숨김(완전 품절/무재고).
+    // 단, "재고보정" 리뷰 필터를 켰거나 검색어로 특정 상품을 찾는 중이면 예외로 보여준다 —
+    // 안 그러면 재고보정 때문에 0개가 된 상품은 그 보정을 검토하려고 필터를 켜도 안 보이고,
+    // 품번을 정확히 검색해도 "결과 없음"으로 나와 마치 그 상품이 아예 없는 것처럼 보이는 문제가 있었음.
+    if(p.busanTotal <= 0 && p.sinsaTotal <= 0 && p.centerTotal <= 0 && !f.overrideOnly && !f.q) return false;
 
 
 
