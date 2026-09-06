@@ -13737,7 +13737,7 @@ function _refreshDpFilterCounts(){
     }
 }
 
-function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); _refreshDpFilterCounts(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); autoRemoveSoldOutLocations().then(() => render()).catch(() => {}); }
+function _recomputeStock() { rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); clearSalesCache(); /* 재고가 바뀌면 RT 추천(결품·소진임박 판정)도 다시 계산해야 함 */ _refreshDpFilterCounts(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); autoRemoveSoldOutLocations().then(() => render()).catch(() => {}); }
 
 
 
@@ -43111,7 +43111,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                            // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+                            // 지점 판정은 _rtStoreOf로 통일 — 깨진 매장 키까지 살려서 집계한다
 
 
 
@@ -43127,7 +43127,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                            const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                            let bq = 0; for (const _m in sd) { if (_rtStoreOf(_m) === 'busan') bq += (sd[_m] || 0); }
 
 
 
@@ -43191,7 +43191,8 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                                if (mgr.includes("승호")||mgr.includes("강")||mgr.includes("신사")) sizeSalesMapSinsa[size] = (sizeSalesMapSinsa[size]||0) + qty;
+                                const _st = _rtStoreOf(mgr);
+                                if (_st === 'sinsa') sizeSalesMapSinsa[size] = (sizeSalesMapSinsa[size]||0) + qty;
 
 
 
@@ -43207,7 +43208,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                                else if (!mgr.includes("김종훈") && !mgr.includes("부산")) sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
+                                else if (_st === 'center') sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
 
 
 
@@ -49386,7 +49387,8 @@ function card(p){
 
 
 
-  if(_cardSales.d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0)) {
+  const _rtNeed = getRTNeed(p);
+  if(_rtNeed.score > 0) {
 
 
 
@@ -49402,7 +49404,10 @@ function card(p){
 
 
 
-    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT추천</span>`;
+    const _rtTop = _rtNeed.items[0];
+    const _rtMore = _rtNeed.items.length > 1 ? ` +${_rtNeed.items.length - 1}` : '';
+    const _rtLabel = _rtTop.kind === 'low' ? '부족' : '결품';
+    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT ${escapeHtml(_rtTop.size)} ${_rtLabel}${_rtMore}</span>`;
 
 
 
@@ -55353,7 +55358,7 @@ function render(){
 
 
 
-    if(f.rtChance && !(getSalesSummary(p.품번).d30 > 0 && (p.centerTotal > 0 || p.sinsaTotal > 0))) return false;
+    if(f.rtChance && getRTNeed(p).score <= 0) return false;   // 사이즈 단위로 결품/소진임박이면서 가져올 재고가 있는 것만
 
 
 
@@ -56201,7 +56206,7 @@ function render(){
 
 
 
-  const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "salesDesc" : $("#sortSel").value;
+  const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "rtDesc" : $("#sortSel").value;
 
 
 
@@ -56250,6 +56255,8 @@ function render(){
 
 
     if(sortMode === "salesDesc") return (getSalesSummary(b.품번).d30||0) - (getSalesSummary(a.품번).d30||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    // RT추천은 판매량이 아니라 "지금 얼마나 급한지"(결품·소진임박 + 최근 판매 가중) 순으로 정렬한다
+    if(sortMode === "rtDesc") return (getRTNeed(b).score||0) - (getRTNeed(a).score||0) || String(a.품명).localeCompare(String(b.품명),"ko");
 
 
 
@@ -60745,7 +60752,123 @@ const _salesCache = new Map();
 
 
 
-function clearSalesCache() { _salesCache.clear(); }
+
+// ── 판매이력 매장 키 판정 ────────────────────────────────────────────────
+// 매장 키는 원래 '부산(김종훈)'·'신사(승호강)'·'본사물류' 3가지뿐이다(업로드 코드가 직접 넣는 리터럴).
+// 그런데 과거 bare atob 인코딩 버그 때문에 한글이 부분적으로 깨진 변형이 475종 남아 있어서,
+// 정확일치로만 세면 부산 최근 30일 판매의 40%가 통째로 누락되고 일부는 물류 판매로 잘못 잡힌다.
+// 괄호는 ASCII라 깨지지 않으므로 '매장(담당자)' vs '본사물류' 구분에 쓸 수 있고,
+// 살아남은 글자(김/종/훈, 승/호/강)로 지점을 판정한다.
+function _rtStoreOf(key){
+    const k = String(key || '');
+    if(/[김종훈]/.test(k)) return 'busan';
+    if(/[승호강]/.test(k)) return 'sinsa';
+    if(k.includes('(') || k.includes(')')){
+        if(/[부산]/.test(k)) return 'busan';
+        if(/[신사]/.test(k)) return 'sinsa';
+        return 'unknown';   // 전부 깨져 식별 불가 — 어느 쪽에도 넣지 않는다(왜곡 방지)
+    }
+    return 'center';        // 괄호 없는 키는 본사물류뿐
+}
+
+// ── RT(재고이동) 추천 ────────────────────────────────────────────────────
+// 기존 기준은 "30일 판매 1개 이상 + 타지점에 재고 있음"이 전부였다. 그래서 부산에 재고가
+// 넉넉한 상품도 똑같이 추천됐고, 정렬도 판매량순이라 "많이 팔린 것"이 위로 올 뿐
+// "지금 없어서 못 파는 것"은 아래로 묻혔다. 실제로 요청해야 하는 건 사이즈 단위 결품/부족이라
+// 사이즈별로 판정하고 긴급도로 점수를 매긴다.
+const _rtCache = new Map();
+const RT_RECENT_REQ_DAYS = 14;   // 이 기간 안에 이미 요청한 사이즈는 다시 추천하지 않는다
+
+function _rtParseTrDate(s){
+    const m = String(s || '').match(/^(\d{2})\/(\d{1,2})\/(\d{1,2})/);   // '26/09/03 17:08'
+    if(!m) return null;
+    return new Date(2000 + (+m[1]), (+m[2]) - 1, +m[3]).getTime();
+}
+function _rtRecentlyRequested(code, size){
+    if(typeof TRANSFERS === 'undefined' || !Array.isArray(TRANSFERS)) return false;
+    const limit = Date.now() - RT_RECENT_REQ_DAYS * 86400000;
+    return TRANSFERS.some(t => {
+        if(String(t.code) !== String(code)) return false;
+        if(String(t.size || '').trim() !== String(size).trim()) return false;
+        const ts = _rtParseTrDate(t.date);
+        return ts === null ? true : ts >= limit;   // 날짜를 못 읽으면 보수적으로 '이미 요청함' 취급
+    });
+}
+
+// 반환: { score, items:[{size, kind:'out'|'gap'|'low', stock, sold7, sold30, need, fromCenter, fromSinsa}] }
+function getRTNeed(p){
+    if(!p || !p.품번) return { score:0, items:[] };
+    if(_rtCache.has(p.품번)) return _rtCache.get(p.품번);
+
+    const d7 = {}, d30 = {}, dAll = {};
+    const hist = (typeof SALES_HISTORY !== 'undefined' && SALES_HISTORY && SALES_HISTORY.items) ? SALES_HISTORY.items[p.품번] : null;
+    if(hist){
+        const today = new Date(); today.setHours(0,0,0,0);
+        for(const date in hist){
+            const day = hist[date];
+            if(typeof day !== 'object' || day === null) continue;
+            const diff = Math.floor((today - new Date(date)) / 86400000);
+            for(const size in day){
+                const sd = day[size];
+                let q = 0;
+                if(typeof sd === 'object' && sd !== null){
+                    for(const mgr in sd){ if(_rtStoreOf(mgr) === 'busan') q += (sd[mgr] || 0); }
+                } else { q = sd || 0; }   // 담당자 구분 없는 구형 데이터는 기존대로 부산 판매로 본다
+                if(q <= 0) continue;
+                const key = String(size).trim();
+                dAll[key] = (dAll[key] || 0) + q;
+                if(diff >= 0 && diff <= 30){
+                    d30[key] = (d30[key] || 0) + q;
+                    if(diff <= 7) d7[key] = (d7[key] || 0) + q;
+                }
+            }
+        }
+    }
+    let prodD30 = 0; for(const k in d30) prodD30 += d30[k];
+
+    const items = [];
+    let score = 0;
+    for(const s of (p.sizes || [])){
+        const size = String(s.size).trim();
+        if(!size || size === '알수없음') continue;
+        const stock  = Number(s.busan)  || 0;
+        const center = Number(s.center) || 0;
+        const sinsa  = Number(s.sinsa)  || 0;
+        if(center + sinsa <= 0) continue;                   // 가져올 데가 없으면 추천해도 의미 없음
+        if(_rtRecentlyRequested(p.품번, size)) continue;     // 이미 요청해 둔 사이즈
+
+        const sold30 = d30[size] || 0, sold7 = d7[size] || 0, soldAll = dAll[size] || 0;
+        const weekly = sold30 / 30 * 7;
+
+        let kind = null;
+        if(stock <= 0 && sold30 > 0) kind = 'out';                             // 팔리는데 지금 없음(기회손실 진행 중)
+        else if(stock <= 0 && soldAll > 0 && prodD30 > 0) kind = 'gap';        // 모델은 계속 팔리는데 이 사이즈만 비었음
+        else if(stock > 0 && sold30 > 0 && stock < weekly * 1.5) kind = 'low'; // 1.5주치 미만으로 곧 소진
+        if(!kind) continue;
+
+        // 최근 7일에 3배 가중 — 한 달 전 한 번 팔린 것보다 이번 주 팔린 게 훨씬 급하다
+        const demand = sold7 * 3 + (sold30 - sold7);
+        let sizeScore;
+        if(kind === 'out')      sizeScore = demand * 2 + 10;
+        else if(kind === 'gap') sizeScore = Math.min(soldAll, 6) * 0.8;   // 과거 이력만 있는 경우는 낮게
+        else                    sizeScore = demand * Math.max(0, 1 - stock / (weekly * 1.5 + 1));
+        if(center <= 0) sizeScore *= 0.85;   // 물류엔 없고 신사 재고뿐 — 타 매장 물건을 빼오는 셈이라 소폭 감점
+        if(sizeScore <= 0) continue;
+
+        const need = Math.max(1, Math.ceil(weekly) - stock);
+        const fromCenter = Math.min(center, need);
+        items.push({ size, kind, stock, sold7, sold30, need, fromCenter,
+                     fromSinsa: Math.max(0, Math.min(sinsa, need - fromCenter)),
+                     score: sizeScore });
+        score += sizeScore;
+    }
+    items.sort((a,b) => b.score - a.score);
+    const result = { score: Math.round(score * 10) / 10, items };
+    _rtCache.set(p.품번, result);
+    return result;
+}
+
+function clearSalesCache() { _salesCache.clear(); _rtCache.clear(); }
 
 
 
@@ -61033,7 +61156,7 @@ function getSalesSummary(code) {
 
 
 
-          // 부산점 카운팅: '부산(김종훈)'과 '부산' 키가 동시에 있으면 최대값만 (중복 방지)
+          // 부산점 카운팅 — 매장 키가 깨진 데이터까지 _rtStoreOf로 판정해 합산한다.
 
 
 
@@ -61065,7 +61188,6 @@ function getSalesSummary(code) {
 
 
 
-          const busanKJ = sd['부산(김종훈)'] || 0;
 
 
 
@@ -61081,7 +61203,6 @@ function getSalesSummary(code) {
 
 
 
-          const busanPOS = sd['부산'] || 0;
 
 
 
@@ -61097,7 +61218,9 @@ function getSalesSummary(code) {
 
 
 
-          qty += Math.max(busanKJ, busanPOS);
+
+
+          for(const _mgr in sd){ if(_rtStoreOf(_mgr) === 'busan') qty += (sd[_mgr] || 0); }
 
 
 
