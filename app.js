@@ -72341,21 +72341,39 @@ window._bulkClearRackPick = () => {
 let _bulkSingleMode = false;
 // null이면 새 위치 추가, 숫자면 그 인덱스의 기존 위치를 다른 랙으로 이동(교체)
 let _bulkEditIndex = null;
+// 여러개 선택 모드 전용: 'add'=기존 위치 유지하고 새 위치 추가(중복지정), 'move'=기존 위치 지우고 이 위치로 교체
+// (1개 선택일 땐 editIndex 유무로 이미 지정/이동이 구분되므로 이 값은 안 씀)
+let _bulkAssignMode = 'add';
 
 function _bulkSaveLabel(){
-    if(!_bulkSingleMode) return '선택한 상품에 지정';
+    if(!_bulkSingleMode) return _bulkAssignMode === 'move' ? '선택한 상품 위치로 이동' : '선택한 상품에 지정';
     return _bulkEditIndex != null ? '이 위치로 이동' : '+ 이 위치 추가';
+}
+
+window._bulkSetMode = (mode) => {
+    _bulkAssignMode = (mode === 'move') ? 'move' : 'add';
+    _bulkSyncModeButtons();
+};
+
+function _bulkSyncModeButtons(){
+    const row = $("#bulkLocModeRow");
+    if(row) row.classList.toggle('hidden', _bulkSingleMode); // 1개 선택 모드에선 이미 add/move가 자동 결정되므로 숨김
+    const addBtn = $("#bulkModeAdd"), moveBtn = $("#bulkModeMove");
+    if(addBtn) addBtn.dataset.active = (_bulkAssignMode === 'add') ? '1' : '0';
+    if(moveBtn) moveBtn.dataset.active = (_bulkAssignMode === 'move') ? '1' : '0';
+    const saveBtn = $("#bulkLocSave");
+    if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
 }
 
 window.openBulkLocModal = (presetZoneId) => {
     if(BULK_LOC_SEL.size === 0) return;
     if(!checkPat()) return;
     _bulkPickZoneId = presetZoneId || null;
+    if(!_bulkSingleMode) _bulkAssignMode = 'add'; // 열 때마다 기본값(기존 위치 유지)으로 초기화
     $("#bulkLocCount").textContent = `선택한 상품 ${BULK_LOC_SEL.size}개`;
     _bulkRenderPickMap();
     _bulkSyncPick();
-    const saveBtn = $("#bulkLocSave");
-    if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
+    _bulkSyncModeButtons();
     $("#bulkLocModal").classList.remove("hidden");
 };
 
@@ -72452,7 +72470,14 @@ async function _bulkApply(mode){
                 const newLoc = slot ? { zoneId, slot } : { zoneId };
                 const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
                 if(_bulkSingleMode && editIndex != null && arr[editIndex]){
-                    arr[editIndex] = newLoc; // 이동: 그 자리 위치를 교체
+                    arr[editIndex] = newLoc; // 1개 선택 + 특정 위치 수정: 그 자리만 교체
+                } else if(!_bulkSingleMode && _bulkAssignMode === 'move'){
+                    // 여러개 선택 + 위치이동: 실제 랙 위치(zoneId 있는 항목)는 전부 지우고 새 위치 하나로 교체.
+                    // DP 진열 표시({dp:true}, zoneId 없음)는 위치가 아니라 별개 상태라 건드리지 않고 남겨둠.
+                    const kept = arr.filter(a => !a.zoneId);
+                    kept.push(newLoc);
+                    assignments[code] = kept;
+                    return; // 아래 공통 assignments[code]=arr 대입을 건너뜀(이미 위에서 지정함)
                 } else {
                     const dup = arr.some(a => a.zoneId === newLoc.zoneId && (a.slot || null) === (newLoc.slot || null));
                     if(!dup) arr.push(newLoc); // 추가: 이미 같은 자리가 없으면 더함
@@ -72472,9 +72497,19 @@ async function _bulkApply(mode){
         $("#bulkLocModal").classList.add("hidden");
         const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
         const wasSingle = _bulkSingleMode;
-        showToast(mode === 'assign'
-            ? `✓ ${wasSingle ? (editIndex != null ? '' : '') : codes.length + '개 상품을 '}${zoneAddress(z, slot)}${wasSingle ? (editIndex != null ? '으로 이동했습니다' : ' 에 추가했습니다') : ' 에 지정했습니다'}`
-            : `✓ 위치를 해제했습니다`);
+        let msg;
+        if(mode !== 'assign'){
+            msg = `✓ 위치를 해제했습니다`;
+        } else if(wasSingle){
+            msg = editIndex != null
+                ? `✓ ${zoneAddress(z, slot)}으로 이동했습니다`
+                : `✓ ${zoneAddress(z, slot)} 에 추가했습니다`;
+        } else if(_bulkAssignMode === 'move'){
+            msg = `✓ ${codes.length}개 상품 위치를 ${zoneAddress(z, slot)}(으)로 이동했습니다`;
+        } else {
+            msg = `✓ ${codes.length}개 상품을 ${zoneAddress(z, slot)} 에 지정했습니다`;
+        }
+        showToast(msg);
         _refreshDpFilterCounts();
         if(wasSingle){
             _bulkSingleMode = false;
@@ -72483,6 +72518,7 @@ async function _bulkApply(mode){
             if(window._locRenderFn) window._locRenderFn();
             render();
         } else {
+            _bulkAssignMode = 'add';
             window.exitBulkLocMode();
         }
     }
@@ -72490,6 +72526,7 @@ async function _bulkApply(mode){
 
 $("#closeBulkLoc").onclick = () => {
     $("#bulkLocModal").classList.add("hidden");
+    _bulkAssignMode = 'add';
     if(_bulkSingleMode){
         _bulkSingleMode = false;
         _bulkEditIndex = null;
