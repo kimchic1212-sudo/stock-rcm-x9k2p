@@ -5573,11 +5573,10 @@
   <div class="modal-outer absolute inset-0 flex items-center justify-center p-2 sm:p-4">
     <div class="card w-full max-w-3xl lg:max-w-6xl p-4 sm:p-5 relative bg-[color:var(--surface)]" style="max-height:94vh; overflow:auto;">
       <button id="closeBulkLoc" class="absolute top-3 right-3 p-2 z-10"><i data-lucide="x"></i></button>
-      <h3 class="text-lg font-black mb-1">📍 위치 일괄 지정</h3>
+      <h3 id="bulkLocTitle" class="text-lg font-black mb-1">📍 위치 일괄 지정</h3>
       <div id="bulkLocCount" class="text-xs font-bold mb-3" style="color:#c2410c;"></div>
-      <div id="bulkLocModeRow" class="flex flex-wrap gap-2 mb-3">
-        <button id="bulkModeAdd" class="chip text-xs font-black" data-active="1" onclick="window._bulkSetMode('add')">📍 위치지정 <span class="font-normal opacity-70">(기존 위치 유지+추가)</span></button>
-        <button id="bulkModeMove" class="chip text-xs font-black" data-active="0" onclick="window._bulkSetMode('move')">🔄 위치이동 <span class="font-normal opacity-70">(기존 위치 지우고 교체)</span></button>
+      <div id="bulkLocModeRow" class="mb-3">
+        <span id="bulkLocModeLabel" class="chip text-xs font-black" data-active="1" style="cursor:default;">📍 위치지정 중 <span class="font-normal opacity-70">(기존 위치 유지+추가)</span></span>
       </div>
       <div class="text-xs text-gray-500 mb-2">지도에서 구역을 클릭해 선택하세요.</div>
       <div class="flex flex-col lg:flex-row gap-4 items-start">
@@ -5605,7 +5604,8 @@
 <div id="bulkBar" class="hidden no-print" style="position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:9995; background:#0f172a; color:#fff; border-radius:14px; box-shadow:0 10px 30px -5px rgba(0,0,0,.45); padding:10px 14px; display:none; align-items:center; gap:10px; max-width:94vw;">
   <span id="bulkBarCount" style="font-size:13px; font-weight:900; white-space:nowrap;">0개 선택</span>
   <button id="bulkBarAll" style="font-size:11px; font-weight:900; background:#1e293b; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">전체선택</button>
-  <button id="bulkBarAssign" style="font-size:11px; font-weight:900; background:#ff5a1f; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">📍 위치 지정/이동</button>
+  <button id="bulkBarAssign" style="font-size:11px; font-weight:900; background:#ff5a1f; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">📍 위치 지정</button>
+  <button id="bulkBarMove" style="font-size:11px; font-weight:900; background:#0891b2; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">🔄 위치 이동</button>
   <button id="bulkBarDp" style="font-size:11px; font-weight:900; background:#4338ca; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">📺 DP로 표시</button>
   <button id="bulkBarExit" style="font-size:11px; font-weight:900; background:#334155; color:#fff; border-radius:8px; padding:6px 10px; white-space:nowrap;">종료</button>
 </div>
@@ -5689,7 +5689,7 @@
 
 
 
-<script src="./app.js?v=2609082004"></script>
+<script src="./app.js?v=2609091859"></script>
 
 
 
