@@ -72211,6 +72211,8 @@ function _bulkUpdateBar(){
     // 고른 게 없으면 '위치 지정'/'DP로 표시'는 아예 감춘다 (0개일 때 누를 일이 없음)
     const assign = $("#bulkBarAssign");
     if(assign) assign.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
+    const moveBtn2 = $("#bulkBarMove");
+    if(moveBtn2) moveBtn2.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
     const dpBtn = $("#bulkBarDp");
     if(dpBtn) dpBtn.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
 }
@@ -72350,26 +72352,34 @@ function _bulkSaveLabel(){
     return _bulkEditIndex != null ? '이 위치로 이동' : '+ 이 위치 추가';
 }
 
-window._bulkSetMode = (mode) => {
-    _bulkAssignMode = (mode === 'move') ? 'move' : 'add';
-    _bulkSyncModeButtons();
-};
-
+// 지정/이동 선택은 이제 하단바 버튼(진입 시점)에서 이미 끝난 상태라, 모달 안쪽은
+// 클릭 토글이 아니라 "지금 어느 모드인지" 보여만 주는 읽기전용 배지로 표시한다.
 function _bulkSyncModeButtons(){
     const row = $("#bulkLocModeRow");
     if(row) row.classList.toggle('hidden', _bulkSingleMode); // 1개 선택 모드에선 이미 add/move가 자동 결정되므로 숨김
-    const addBtn = $("#bulkModeAdd"), moveBtn = $("#bulkModeMove");
-    if(addBtn) addBtn.dataset.active = (_bulkAssignMode === 'add') ? '1' : '0';
-    if(moveBtn) moveBtn.dataset.active = (_bulkAssignMode === 'move') ? '1' : '0';
+    const label = $("#bulkLocModeLabel");
+    const title = $("#bulkLocTitle");
+    const isMove = _bulkAssignMode === 'move';
+    if(label){
+        label.dataset.active = isMove ? '0' : '1'; // 이동은 파란색 계열로 구분
+        label.style.background = isMove ? '#0891b2' : '';
+        label.style.color = isMove ? '#fff' : '';
+        label.style.borderColor = isMove ? '#0891b2' : '';
+        label.innerHTML = isMove
+            ? '🔄 위치이동 중 <span class="font-normal opacity-80">(기존 위치 지우고 교체)</span>'
+            : '📍 위치지정 중 <span class="font-normal opacity-70">(기존 위치 유지+추가)</span>';
+    }
+    if(title) title.textContent = isMove ? '🔄 위치 일괄 이동' : '📍 위치 일괄 지정';
     const saveBtn = $("#bulkLocSave");
     if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
 }
 
-window.openBulkLocModal = (presetZoneId) => {
+// presetMode: 'add'(기본) | 'move' — 하단바에서 어느 버튼을 눌러 들어왔는지로 결정됨(1개 선택 모드에선 무시)
+window.openBulkLocModal = (presetZoneId, presetMode) => {
     if(BULK_LOC_SEL.size === 0) return;
     if(!checkPat()) return;
     _bulkPickZoneId = presetZoneId || null;
-    if(!_bulkSingleMode) _bulkAssignMode = 'add'; // 열 때마다 기본값(기존 위치 유지)으로 초기화
+    if(!_bulkSingleMode) _bulkAssignMode = (presetMode === 'move') ? 'move' : 'add';
     $("#bulkLocCount").textContent = `선택한 상품 ${BULK_LOC_SEL.size}개`;
     _bulkRenderPickMap();
     _bulkSyncPick();
@@ -72535,7 +72545,8 @@ $("#closeBulkLoc").onclick = () => {
 };
 $("#bulkLocSave").onclick = () => _bulkApply('assign');
 $("#bulkLocClear").onclick = () => _bulkApply('clear');
-$("#bulkBarAssign").onclick = () => window.openBulkLocModal();
+$("#bulkBarAssign").onclick = () => window.openBulkLocModal(null, 'add');
+$("#bulkBarMove").onclick = () => window.openBulkLocModal(null, 'move');
 $("#bulkBarDp").onclick = () => window.markMultipleAsDP();
 $("#bulkBarExit").onclick = () => window.exitBulkLocMode();
 $("#bulkBarAll").onclick = () => _bulkToggleAll();
