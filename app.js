@@ -13748,7 +13748,7 @@ function _refreshDpFilterCounts(){
 
     const noLocBtn = $('button.chip[data-noloc]');
     if(noLocBtn){
-        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && _needsRealLocation(p)).length;
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
         noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
@@ -14844,6 +14844,11 @@ function getDPSizes(code) { return Object.keys(DISPLAY_ITEMS[code] || {}); }
 function _needsRealLocation(p) {
   const dpSizes = getDPSizes(p.품번);
   return p.sizes.some(s => s.busan > 0 && !dpSizes.includes(String(s.size).trim()));
+}
+// LOCATIONS.assignments[code]가 있어도 그 안에 zoneId 있는 항목이 하나도 없으면(예: DP 진열 표시만 있고 실제 랙 위치는 없음)
+// "위치가 있다"고 보면 안 됨 — "위치없음"/"위치있음" 필터·카운트 전부 이 함수로 통일해서 체크할 것.
+function _hasRealLoc(code) {
+  return _locArr(code).some(a => a.zoneId);
 }
 function getDPStatus(p) {
 
@@ -55673,11 +55678,11 @@ function render(){
 
 
 
-    if(f.noLocation && (LOCATIONS.assignments[p.품번] || !_needsRealLocation(p))) return false;
+    if(f.noLocation && (_hasRealLoc(p.품번) || !_needsRealLocation(p))) return false;
 
 
 
-    if(f.hasLocation && !LOCATIONS.assignments[p.품번]) return false;
+    if(f.hasLocation && !_hasRealLoc(p.품번)) return false;
 
     if(f.locationZone) {
         const [_fz, _fs] = f.locationZone.split('::');
@@ -80469,7 +80474,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         noLocBtn.dataset.active = "0";
 
-        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !LOCATIONS.assignments[p.품번] && _needsRealLocation(p)).length;
+        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
 
         noLocBtn.innerHTML = `📍 위치없음${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
 
