@@ -12598,7 +12598,9 @@ async function loadData(force = false){
           try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.salesGuides = SALES_GUIDES; c.salesHistory = SALES_HISTORY; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
           // 판매이력이 이제 막 채워졌으니 오늘 판매분 재고 차감을 다시 계산해야 함
           // (첫 렌더 때는 SALES_HISTORY가 비어있어서 applyPosSalesDeductions가 아무것도 못 뺐음)
-          rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts();
+          // applyMeta도 다시 불러야 함 — 안 그러면 DATA SOURCE의 "POS판매" 배지가 첫 렌더 시점(SALES_HISTORY 비어있음)
+          // 값으로 최대 5분(다음 loadSalesOnly 주기)까지 "미연동"으로 멈춰 보임(실제 데이터는 이미 정상 반영된 상태인데도)
+          applyMeta(CURRENT_META); rebuildIndex(); applyErpDeductions(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts();
       }).catch(()=>{});
 
 
