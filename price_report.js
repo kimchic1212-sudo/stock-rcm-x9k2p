@@ -12,6 +12,47 @@ const PRICES_FILE = 'prices.json';
 const PRODUCT_MAP_FILE = 'product_map.json';
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
+// ── 해운대 재고 필터용 (2026-09-18: 해운대에 없는 상품은 알림에서 빼달라는 요청) ──
+const DATA_OWNER = 'kimchic1212-sudo';
+const DATA_REPO  = 'stock-rcm-data';
+const GH_TOKEN = process.env.DATA_REPO_PAT || process.env.GITHUB_TOKEN || '';
+
+function ghRequest(method, path) {
+  return new Promise((resolve, reject) => {
+    const req = require('https').request({
+      hostname: 'api.github.com', path, method,
+      headers: { Authorization: `Bearer ${GH_TOKEN}`, 'User-Agent': 'RACEMENT-price-report' }
+    }, res => {
+      let data = ''; res.on('data', c => data += c);
+      res.on('end', () => { try { resolve({ status: res.statusCode, body: JSON.parse(data) }); } catch (e) { resolve({ status: res.statusCode, body: data }); } });
+    });
+    req.on('error', reject); req.end();
+  });
+}
+
+// 큰 파일(Contents API 1MB 인라인 한도 초과)도 안전하게 읽기 위해 Git Blob API 사용 (price_sync.js와 동일 패턴)
+async function loadInventory() {
+  const meta = await ghRequest('GET', `/repos/${DATA_OWNER}/${DATA_REPO}/contents/inventory.json`);
+  if (meta.status !== 200) return null;
+  if (meta.body.content) return JSON.parse(Buffer.from(meta.body.content, 'base64').toString('utf8'));
+  const blob = await ghRequest('GET', `/repos/${DATA_OWNER}/${DATA_REPO}/git/blobs/${meta.body.sha}`);
+  return JSON.parse(Buffer.from(blob.body.content, blob.body.encoding).toString('utf8'));
+}
+
+// 상품번호(샵바이) → 해운대(부산) 매장 재고수량이 1개 이상인지
+async function loadBusanStockSet() {
+  const inv = await loadInventory();
+  if (!inv || !inv.rows) { console.log('[해운대재고필터] inventory.json 로드 실패 — 필터 없이 진행'); return null; }
+  const inStock = new Set();
+  for (const r of inv.rows) {
+    const shopNo = String(r['상품번호(샵바이)'] || '').trim();
+    const stock = Number(r['매장 (부산)']) || 0;
+    if (shopNo && stock > 0) inStock.add(shopNo);
+  }
+  console.log(`[해운대재고필터] 재고 보유 상품번호 ${inStock.size}개`);
+  return inStock;
+}
+
 // ── 품번 매핑 로드 (shopby productNo → {품번, 품명, 브랜드}) ──────────
 const productMap = fs.existsSync(PRODUCT_MAP_FILE)
   ? JSON.parse(fs.readFileSync(PRODUCT_MAP_FILE, 'utf-8'))
@@ -325,7 +366,14 @@ async function main() {
   console.log(`CHAT_ID 설정됨: ${CHAT_ID ? 'YES (길이=' + String(CHAT_ID).length + ')' : '❌ 미설정'}`);
   // 항상 getUpdates 실행 → 실제 수신 chat_id를 로그에 출력 (올바른 ID 확인용)
   if (BOT_TOKEN) await printChatId();
-  const products = await getAllProducts();
+  const allProducts = await getAllProducts();
+
+  const busanStock = await loadBusanStockSet();
+  const products = busanStock
+    ? allProducts.filter(p => busanStock.has(String(p.productNo)))
+    : allProducts;
+  console.log(`해운대 재고 필터: ${allProducts.length}개 → ${products.length}개`);
+
   if (MODE === 'summary') await sendSummaryReport(products);
   else await sendChangesReport(products);
 }
