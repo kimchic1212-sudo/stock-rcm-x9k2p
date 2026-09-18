@@ -2352,25 +2352,27 @@ const INV_PASS_KEY = 'racement_inv_pass_v1';
 
 async function dataFetch(path){
     const pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e){ return null; } })();
-    if(pass){
-        // 게이트웨이가 콜드스타트 등으로 일시적으로 실패할 수 있어 짧게 재시도.
-        // 재시도 없이 바로 옛 공개경로(./*.json)로 폴백하면 그 파일들은 이미 삭제돼 있어
-        // 항상 404 → "Unexpected token '<'" 같은 알아보기 힘든 에러로 이어졌었다.
-        for(let attempt = 0; attempt < 3; attempt++){
-            try {
-                const r = await fetch(`${HUB_DATA_API}?f=${encodeURIComponent(path)}`, {
-                    headers: { Authorization: 'Bearer ' + pass }, cache: 'no-store'
-                });
-                if(r.ok) return r;
-                // 토큰이 만료/무효면 지우고 다음 진입 때 게이트를 다시 통과하게 한다 — 재시도 의미 없으니 즉시 중단
-                if(r.status === 401) { try { localStorage.removeItem(INV_PASS_KEY); } catch(e){} break; }
-                if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
-            } catch(e) {
-                if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+    // 옛 공개경로(./*.json)는 비공개 저장소 이전 때 삭제돼 폴백해도 항상 404 —
+    // 토큰이 없거나 거절되면 공용 비밀번호 화면을 다시 띄우고, 호출부는 .ok로 실패를 판단한다.
+    if(!pass){ window._rcShowGate?.(); return new Response(null, { status: 401 }); }
+    // 게이트웨이가 콜드스타트 등으로 일시적으로 실패할 수 있어 짧게 재시도.
+    for(let attempt = 0; attempt < 3; attempt++){
+        try {
+            const r = await fetch(`${HUB_DATA_API}?f=${encodeURIComponent(path)}`, {
+                headers: { Authorization: 'Bearer ' + pass }, cache: 'no-store'
+            });
+            if(r.ok) return r;
+            if(r.status === 401) {
+                try { localStorage.removeItem(INV_PASS_KEY); } catch(e){}
+                window._rcShowGate?.();
+                return r;
             }
+            if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+        } catch(e) {
+            if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
         }
     }
-    return fetch('./' + path + '?t=' + Date.now());
+    return new Response(null, { status: 503 });
 }
 // Admin 비번 입력 시 허브 서버에서 PAT 발급 (토큰은 소스에 두지 않는다)
 // 성공 시 항상 최신 토큰으로 갱신 → 토큰 교체(rotation) 자동 대응
@@ -2769,6 +2771,11 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
+// 판매 데이터 받기 실패는 loadSalesOnly의 catch에서 조용히 끝나므로, 마지막 성공 시각으로 끊김을 감지한다
+let _lastSalesSync = Date.now();
+let _salesStaleShown = false;
+const SALES_STALE_MS = 10 * 60 * 1000;
+
 function applyMeta(meta){
     if(meta) {
         // 하단에 렌더링되던 불필요한 구역 삭제
@@ -2826,7 +2833,13 @@ function applyMeta(meta){
         // POS 판매 동기화 뱃지
         let posSyncInfo = "";
         const lastSynced = SALES_HISTORY.meta?.lastSynced;
-        if (lastSynced) {
+        const _staleMin = Math.floor((Date.now() - _lastSalesSync) / 60000);
+        _salesStaleShown = Date.now() - _lastSalesSync >= SALES_STALE_MS;
+        if (_salesStaleShown) {
+            posSyncInfo = `<div onclick="location.reload()" title="이 화면이 ${_staleMin}분째 판매 데이터를 못 받고 있어요. 눌러서 새로고침" class="cursor-pointer bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-300 flex items-center gap-1 shrink-0 hover:bg-orange-100 transition-colors">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 shrink-0"></i> POS판매 ${_staleMin}분째 끊김 · 새로고침
+            </div>`;
+        } else if (lastSynced) {
             const d = new Date(lastSynced);
             const now = new Date();
             const isToday = d.getFullYear() === now.getFullYear()
@@ -3573,6 +3586,7 @@ async function loadData(force = false){
           dataFetch(STOCK_OVERRIDES_PATH).catch(()=>null),
           dataFetch(LOCATIONS_PATH).catch(()=>null)
       ]);
+      if(!invRes.ok) throw new Error(invRes.status === 401 ? '공용 비밀번호를 다시 입력해야 합니다' : `재고 데이터를 받지 못했습니다 (${invRes.status})`);
       const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
       if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
       if(locRes && locRes.ok) { try { const _loc = await locRes.json(); if(_loc && Array.isArray(_loc.zones)) LOCATIONS = _loc; } catch(e) {} }
@@ -3611,7 +3625,7 @@ async function loadData(force = false){
           dataFetch(SALES_HISTORY_PATH).catch(()=>null),
       ]).then(async ([sgRes2, shRes2]) => {
           if(sgRes2 && sgRes2.ok) SALES_GUIDES = await sgRes2.json();
-          if(shRes2 && shRes2.ok) SALES_HISTORY = await shRes2.json();
+          if(shRes2 && shRes2.ok) { SALES_HISTORY = await shRes2.json(); _lastSalesSync = Date.now(); }
           try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.salesGuides = SALES_GUIDES; c.salesHistory = SALES_HISTORY; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
           // 판매이력이 이제 막 채워졌으니 오늘 판매분 재고 차감을 다시 계산해야 함
           // (첫 렌더 때는 SALES_HISTORY가 비어있어서 applyPosSalesDeductions가 아무것도 못 뺐음)
@@ -3741,26 +3755,6 @@ async function loadData(force = false){
 }
 
 function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
-
-// ── DP 저장 ──────────────────────────────────────────────────────────
-async function saveDisplayItems() {
-  try {
-    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
-    let sha = null, serverCount = 0;
-    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) { const j = await r.json(); sha = j.sha; try { serverCount = Object.keys(JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))))).length; } catch(e2) {} } } catch(e) {}
-    // 안전장치: 캐시 꼬임 등으로 로컬 DP가 서버보다 비정상적으로 적으면 전체 덮어쓰기 차단 (DP 전체 삭제 사고 방지)
-    const localCount = Object.keys(DISPLAY_ITEMS).length;
-    if (serverCount - localCount > 3) {
-        throw new Error(`DP 데이터가 서버보다 비정상적으로 적습니다 (로컬 ${localCount} / 서버 ${serverCount}). 새로고침(🔄) 후 다시 시도하세요.`);
-    }
-    const body = { message: "dp: update display items", content: utf8ToB64(JSON.stringify(DISPLAY_ITEMS, null, 2)), branch: GH.branch };
-    if (sha) body.sha = sha;
-    const _put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (!_put.ok) throw new Error("DP 저장 실패 (" + _put.status + ")");
-    // 캐시 갱신
-    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
-  } catch(err) { console.error("DP 저장 실패:", err); throw err; }
-}
 
 // ── 실재고 보정(부산) 엔진 ───────────────────────────────────────────
 // 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
@@ -4070,7 +4064,6 @@ function getDPStatus(p) {
 }
 
 // ── 판매 데이터 자동 갱신 (5분마다) ──────────────────────────────────
-let _lastSalesSync = 0;
 async function loadSalesOnly() {
   try {
     // 기획전·DP·재고보정: API에서 직접 읽어 즉시 반영 (앱을 켜둔 기기도 자동 동기화)
@@ -4096,6 +4089,8 @@ async function loadSalesOnly() {
     const res = await dataFetch(SALES_HISTORY_PATH);
     if (!res.ok) return;
     const newHistory = await res.json();
+    _lastSalesSync = Date.now();
+    if (_salesStaleShown) applyMeta(CURRENT_META);
     // 변경된 경우에만 갱신
     const newStr = JSON.stringify(newHistory.meta);
     if (newStr === JSON.stringify(SALES_HISTORY.meta) &&
@@ -4105,7 +4100,6 @@ async function loadSalesOnly() {
     // ERP 원본 재고 복원 후 차감 + 실재고 보정까지 순서대로 재계산
     _recomputeStock();
     render();
-    _lastSalesSync = Date.now();
     // DATA SOURCE POS판매 뱃지 갱신
     applyMeta(CURRENT_META);
     console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
@@ -4113,6 +4107,14 @@ async function loadSalesOnly() {
 }
 // 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
 const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
+// 절전·백그라운드 동안에는 타이머가 멈추므로, 화면이 다시 보이면 다음 주기를 기다리지 않고 바로 받는다
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && Date.now() - _lastSalesSync > 60 * 1000) loadSalesOnly();
+});
+setInterval(() => {
+  const stale = Date.now() - _lastSalesSync >= SALES_STALE_MS;
+  if (stale || stale !== _salesStaleShown) applyMeta(CURRENT_META);
+}, 60 * 1000);
 
 // ── POS 동기화 자동 트리거 ──────────────────────────────────
 // GitHub Actions cron이 throttle 되는 문제 보완:
@@ -4598,403 +4600,6 @@ function applyPosSalesDeductions() {
     }
 }
 
-window.showErpSyncModal = function() {
-    // DOM scraping bookmarklet: reads table visible after user clicks 조회 (supports td/th headers)
-    const BM = `javascript:(async function(){const K='_rcm';let cfg;try{cfg=JSON.parse(localStorage.getItem(K)||'null');}catch(e){}if(!cfg||!cfg.pat){const pat=prompt('GitHub PAT (최초 1회):');if(!pat)return;cfg={pat,ow:'kimchic1212-sudo',re:'stock-rcm-x9k2p',br:'main'};localStorage.setItem(K,JSON.stringify(cfg));alert('저장완료! ERP에서 조회 후 다시 클릭하세요.');return;}function toast(msg,color){const t=document.createElement('div');t.style.cssText='position:fixed;top:20px;right:20px;z-index:99999;background:'+(color||'#1e293b')+';color:#fff;padding:14px 22px;border-radius:12px;font-size:14px;font-family:sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.4)';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),7000);return t;}const d=new Date(),today=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'),todayFmt=today.slice(0,4)+'-'+today.slice(4,6)+'-'+today.slice(6);let bu={},si={},found=0;let hs=null,dataRows=[];function findTable(){const docs=[document];try{for(const f of document.querySelectorAll('iframe,frame')){try{if(f.contentDocument)docs.push(f.contentDocument);}catch(e){}}}catch(e){}console.log('[RCM] 탐색 document 수:',docs.length);for(const doc of docs){for(const tr of doc.querySelectorAll('tr')){const cells=Array.from(tr.querySelectorAll('td,th'));const txts=cells.map(c=>c.textContent.trim());if(txts.includes('상품번호')&&txts.includes('규격')){hs=txts;const parent=tr.parentElement;const allTrs=Array.from(parent.querySelectorAll('tr'));const idx=allTrs.indexOf(tr);dataRows=allTrs.slice(idx+1);if(!dataRows.length){const tbl=tr.closest('table');if(tbl){const nextTbl=tbl.nextElementSibling;if(nextTbl&&nextTbl.tagName==='TABLE')dataRows=Array.from(nextTbl.querySelectorAll('tr'));}}console.log('[RCM] 헤더 발견! 컬럼:',txts);return true;}}}return false;}if(!findTable()){toast('테이블 헤더 없음. POS 조회 클릭 후 다시 시도하세요.','#dc2626');console.log('[RCM] 헤더 tr 못 찾음. 최상위 tr 수:',document.querySelectorAll('tr').length,'iframe 수:',document.querySelectorAll('iframe,frame').length);return;}const iON=hs.indexOf('주문번호'),iPn=hs.indexOf('상품번호'),iSp=hs.indexOf('규격'),iSt=hs.indexOf('주문상태'),iDt=hs.indexOf('주문일'),iGb=hs.indexOf('구분');console.log('[RCM] 컬럼 인덱스: 주문번호='+iON+' 상품번호='+iPn+' 규격='+iSp+' 주문상태='+iSt+' 주문일='+iDt+' 구분='+iGb);console.log('[RCM] 데이터 행 수:',dataRows.length);for(const tr of dataRows){const cells=tr.querySelectorAll('td,th');if(!cells.length)continue;const cell=i=>i>=0&&i<cells.length?cells[i].textContent.trim():'';if(iGb>=0){const gb=cell(iGb);if(gb&&gb!=='POS')continue;}if(iDt>=0){const dt=cell(iDt);if(dt&&!dt.includes(todayFmt))continue;}const st=cell(iSt);if(iSt>=0&&st&&!st.includes('(POS)'))continue;const pn=cell(iPn),sp=cell(iSp);if(!pn||!sp)continue;const key=pn+'|'+sp;const isRet=st.includes('반품');const qty=isRet?-1:1;const on=cell(iON);const isBu=!on||on.charAt(7)==='2';if(isBu)bu[key]=(bu[key]||0)+qty;else si[key]=(si[key]||0)+qty;found++;}console.log('[RCM] found:',found,'busan:',Object.keys(bu).length,'sinsa:',Object.keys(si).length);if(!found){toast('오늘 POS 판매 없음. 구분:POS, 오늘 날짜로 조회 후 다시 클릭하세요.','#f59e0b');return;}const prog=toast('GitHub에 저장 중...');try{const sd={date:today,updatedAt:new Date().toLocaleString('ko-KR',{hour12:false}),busan:bu,sinsa:si};const{pat,ow,re,br}=cfg;const api='https://api.github.com/repos/'+ow+'/'+re+'/contents/sales.json';let sha=null;try{const sr=await fetch(api+'?ref='+br+'&t='+Date.now(),{headers:{Authorization:'Bearer '+pat}});if(sr.ok)sha=(await sr.json()).sha;}catch(e){}const pb={message:'sync: ERP DOM '+today,content:btoa(unescape(encodeURIComponent(JSON.stringify(sd)))),branch:br};if(sha)pb.sha=sha;const pr=await fetch(api,{method:'PUT',headers:{Authorization:'Bearer '+pat,'Content-Type':'application/json'},body:JSON.stringify(pb)});if(!pr.ok)throw new Error('GitHub '+pr.status);const total=new Set([...Object.keys(bu),...Object.keys(si)]).size;prog.remove();toast('✓ 완료 — '+total+'개 품목 반영! 재고앱 새로고침하세요','#15803d');}catch(e){prog.remove();toast('오류: '+e.message,'#dc2626');console.error(e);}})();`;
-
-    const existing = document.getElementById('erpSyncModal');
-    if(existing) existing.remove();
-    const modal = document.createElement('div');
-    modal.id = 'erpSyncModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;';
-    modal.innerHTML = `
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div style="background:#fff;border-radius:20px;padding:28px;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.25);font-family:sans-serif;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <h3 style="margin:0 0 4px;font-size:18px;font-weight:800;color:#0f172a;">ERP 판매 연동</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <p style="margin:0 0 20px;font-size:12px;color:#94a3b8;">오늘 POS 판매분을 재고에서 자동 차감합니다</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:18px;margin-bottom:14px;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#15803d;">① 북마크릿 설치 (최초 1회만)</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <p style="margin:0 0 12px;font-size:12px;color:#166534;">아래 버튼을 북마크 바로 <b>드래그</b>해서 추가하세요</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <a href="${BM}" style="display:inline-flex;align-items:center;gap:6px;background:#16a34a;color:white;padding:10px 18px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;cursor:grab;user-select:none;" onclick="return false;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            📎 ERP 동기화
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          </a>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <p style="margin:10px 0 0;font-size:11px;color:#6b7280;">드래그가 안 되면: 주소창에 북마크 저장 후 북마크 바로 이동</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:14px;padding:18px;margin-bottom:20px;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#1d4ed8;">② 매일 사용 방법 (2단계)</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <ol style="margin:0;padding-left:20px;font-size:12px;color:#1e40af;line-height:2.4;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <li>ERP 주문내역조회 → <b>구분: POS</b>, 오늘 날짜로 <b>조회</b> 클릭</li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <li>데이터 뜨면 <b>[ERP 동기화]</b> 북마크릿 클릭 → 완료!</li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <li>재고앱 새로고침 → 판매차감 자동 반영</li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          </ol>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button onclick="document.getElementById('erpSyncModal').remove()" style="width:100%;padding:12px;background:#0f172a;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">닫기</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      </div>`;
-    modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
-    document.body.appendChild(modal);
-};
 
 async function commitInventoryToGitHub(rows, meta) {
     if(!GH.owner || !GH.repo) throw new Error("저장소 설정 없음 (ADMIN > API 설정 확인)");
@@ -5664,106 +5269,6 @@ function setupQuickActionBar() {
     if(window.lucide) lucide.createIcons();
 }
 
-window.syncErpSales = async function() {
-    const ERP_URL = localStorage.getItem('rcm_erp_url') || 'http://121.156.75.226';
-    const d = new Date();
-    const today = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-
-    const btn = document.getElementById('erpSyncBtn');
-    if(btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i><span>동기화중...</span>'; if(window.lucide) lucide.createIcons(); }
-
-    const payload = {
-        Debug: false, Seq: null, PageToken: null,
-        Action: 228002, ActionType: 0,
-        PgmMethodName: "Query", ServiceSeq: 111220021, MethodSeq: 1,
-        Param: "", SPName: null, SPAlias: null, DBType: null, WFType: null,
-        IsCombo: 0, IsSetCombo: 0, IsRunPgmMethod: 0,
-        IsExcelQuery: false, IsCommonLuaService: false, IsAuthService: false, IsRunService: false,
-        ServiceType: 0,
-        JSonData: {
-            Tables: [{
-                TableName: "DataBlock1",
-                Columns: ["orderNo","orderYmdt","productName","productManagementCd","productNo","Spec","Price","Qty","CurAmt","CurVAT","CurAmtTotal","lastProductCouponDiscountAmt","firstProductCouponDiscountAmt","diffProductCouponDiscountAmtSum","lastCartCouponDiscountAmt","firstCartCouponDiscountAmt","diffCartCouponDiscountAmtSum","lastSubPayAmt","firstSubPayAmt","diffSubPayAmtSum","lastMainPayAmt","UMMemberKindName","ordererName","ordererContact1","receiverContact1","orderStatusType","payType","UMReceiptKind","receiverName","ordererEmail","memberId","MemberNo","GubunName","GubunSeq","WHSeq","WHName","IsReturnOrder","IsOrderProc","ItemNick","lastTotalDiscountAmt","TotAmt2","TotAmt4","TotAmt3","deliveryAmt","additionalDiscountAmt","UMOrderKind","CustSeq","EmpSeq","DeptSeq","UMMemberKindSeq","ItemClassMSeq","ItemClassMName","Category","UMSilSeq","UMSilName","UMStoreName","SumTotAmt1","SumTotAmt2","SumTotAmt3","SumTotAmt4","SumTotAmt5","SumTotAmt6","SumlastTotalDiscountAmt"],
-                ColumnsType: [0,0,0,1,0,0,5,1,5,5,5,5,5,5,5,5,5,5,5,5,5,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,5,5,5,5,1,1,1,1,1,1,1,1,0,0,1,0,0,1,5,5,5,5,1,5],
-                Rows: []
-            }],
-            IsSendXml: true, DataBlock1: "DataBlock1"
-        },
-        callback: null, ToolBarInfo: null, JumpData: null,
-        Option: { PgmSeq: null, PgmId: null, WorkingTag: null, XmlFlags: null, Timeout: 3600, LoginPgmSeq: 0, ExecuteSeq: "0", ServiceLayer: null, PgmMethodSeq: 0, ToDsn: null, IsDebug: null, PgmEventSeq: 0, DebugMode: null, JumpPgmSeq: 0, MenuSeq: 0, IsAsyncService: false, IsUseSendMessage: false, SendDateKey: null },
-        ExeMsg: { ErrorSeq: 0, Message: "", ErrStatus: "", Method: "", IsSystemError: false, InnerMessage: "" },
-        LoginOptionMsg: null,
-        LoginDateOptionMsg: { LoginDate: "", LoginDateYear: "", LoginDateMonth: "", LoginDateDay: "" },
-        AuthOption: { Type: 0, Data: "" }
-    };
-
-    try {
-        const res = await fetch(ERP_URL + '/WebApi', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json, text/javascript, */*; q=0.01' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-
-        const table = data?.JSonData?.Tables?.[0];
-        if(!table?.Rows?.length) { showToast('오늘 ERP 판매 데이터 없음'); return; }
-
-        const cols = table.Columns;
-        const rows = table.Rows;
-        const iNo = cols.indexOf('productNo');
-        const iSpec = cols.indexOf('Spec');
-        const iQty = cols.indexOf('Qty');
-        const iStatus = cols.indexOf('orderStatusType');
-        const iDate = cols.indexOf('orderYmdt');
-        const iWH = cols.indexOf('WHName');
-
-        const busanDed = {}, sinsaDed = {};
-        for(const row of rows) {
-            if(String(row[iDate]) !== today) continue;
-            if(!String(row[iStatus]).includes('(POS)')) continue;
-            const pno = String(row[iNo] || '').trim();
-            const spec = String(row[iSpec] || '').trim();
-            const qty = parseInt(row[iQty]) || 0;
-            const wh = String(row[iWH] || '');
-            if(!pno || !spec) continue;
-            const key = pno + '|' + spec;
-            if(wh.includes('부산')) busanDed[key] = (busanDed[key] || 0) + qty;
-            if(wh.includes('신사')) sinsaDed[key] = (sinsaDed[key] || 0) + qty;
-        }
-
-        const allKeys = new Set([...Object.keys(busanDed), ...Object.keys(sinsaDed)]);
-        if(allKeys.size === 0) { showToast('오늘 POS 판매 내역 없음'); return; }
-
-        for(const p of PRODUCTS) {
-            for(const s of p.sizes) {
-                const key = p.품번 + '|' + String(s.size).trim();
-                if(busanDed[key]) s.busan = Math.max(0, s.busan - busanDed[key]);
-                if(sinsaDed[key]) s.sinsa = Math.max(0, s.sinsa - sinsaDed[key]);
-            }
-            p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan, 0);
-            p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa, 0);
-        }
-
-        window._erpDeductApplied = true;
-        window._erpDeductTime = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
-        wrap.dataset.setup = "0";
-        setupQuickActionBar();
-        updateStats();
-        render();
-        showToast(`ERP 동기화 완료 — 오늘 판매 ${allKeys.size}건 재고 차감 (${window._erpDeductTime})`);
-
-    } catch(e) {
-        if(e.name === 'TypeError' || String(e.message).toLowerCase().includes('fetch') || String(e.message).includes('cors')) {
-            showToast('CORS 차단 — ERP 직접 연동 불가. 북마크릿 방식으로 전환 필요합니다.');
-        } else {
-            showToast('ERP 오류: ' + e.message);
-        }
-        console.error('ERP sync:', e);
-        if(btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>ERP 연동</span>'; if(window.lucide) lucide.createIcons(); }
-    }
-};
 
 // ── 기획전 버튼 상태 동기화 헬퍼 ──────────────────────────────
 function _syncPromoBtn(btn, active, pname) {
@@ -22708,8 +22213,11 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
     const GATE_API = 'https://racement-hub.vercel.app/api/inv-gate';
     // 2026-07-30: 데이터 조회에 pass 토큰이 필수가 됨 — 예전에 게이트만 통과하고
     // 토큰을 못 받은 기존 기기(90일 이내 재방문)도 다시 게이트를 보게 함
+    // 사용 중 토큰이 거절되면 dataFetch가 이 화면을 다시 띄울 수 있게 조기 return 전에 노출
+    window._rcShowGate = () => { if (document.body) showGate(); else document.addEventListener('DOMContentLoaded', showGate); };
     if (parseInt(localStorage.getItem(GATE_KEY) || '0') > Date.now() && localStorage.getItem(INV_PASS_KEY)) return;
     function showGate(){
+        if (document.getElementById('rcGateOverlay')) return;
         const ov = document.createElement('div');
         ov.id = 'rcGateOverlay';
         ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f2f3f5;display:flex;align-items:center;justify-content:center;padding:20px;';
