@@ -154,14 +154,14 @@ async function getAllProducts() {
     });
     await new Promise(resolve => {
       page.on('response', async resp => {
-        if (resp.url().includes('products/search') && resp.url().includes('categoryNos=933747')) {
+        if (resp.url().includes('products/search') && resp.url().includes('categoryNos=933746')) {
           try {
             const j = await resp.json();
             if (j.items) { items = j.items; total = j.totalCount || 0; resolve(); }
           } catch(e) {}
         }
       });
-      page.goto('https://racement.co.kr/products?categoryNo=933747', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
+      page.goto('https://racement.co.kr/products?categoryNo=933746', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
       setTimeout(resolve, 25000);
     });
     await page.close();
