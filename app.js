@@ -3900,7 +3900,7 @@ function _refreshDpFilterCounts(){
             const st = getDPStatus(p);
             if(st === 'dp') cnt.dp++;
             else if(st === 'soldDP') cnt.soldDP++;
-            else cnt.nodp++;
+            else if(!_dpSkipped(p.품번)) cnt.nodp++;
         });
         if(dpBtn) dpBtn.innerHTML = `🏷️ DP 중${cnt.dp > 0 ? ` <span class=\"ml-0.5 bg-violet-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.dp}</span>` : ''}`;
         if(nodpBtn) nodpBtn.innerHTML = `🔲 미DP${cnt.nodp > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${cnt.nodp}</span>` : ''}`;
@@ -3933,7 +3933,7 @@ function _refreshDpFilterCounts(){
 
     const hasLocBtn = $('button.chip[data-hasloc]');
     if(hasLocBtn){
-        const n = Object.keys(LOCATIONS.assignments || {}).filter(code => { const pp = _productByCode(code); return pp && pp.busanTotal > 0; }).length;
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && _hasRealLoc(p.품번)).length;
         hasLocBtn.innerHTML = `📌 위치있음${n > 0 ? ` <span class=\"ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 }
@@ -4052,6 +4052,10 @@ function _needsRealLocation(p) {
 // "위치가 있다"고 보면 안 됨 — "위치없음"/"위치있음" 필터·카운트 전부 이 함수로 통일해서 체크할 것.
 function _hasRealLoc(code) {
   return _locArr(code).some(a => a.zoneId);
+}
+// 남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품 — 위치 배열에 {skipDp:true}로 표시하고 미DP 목록·건수에서 뺀다
+function _dpSkipped(code) {
+  return _locArr(code).some(a => a.skipDp);
 }
 function getDPStatus(p) {
   const dpSizes = getDPSizes(p.품번);
@@ -11493,7 +11497,7 @@ function card(p){
   // DP만 있고(창고/서랍 없이) 진열중인 경우는 랙 좌표가 없어 별도 배지로 표시.
   let locHtml = "";
   {
-    const _locs = _locArr(p.품번);
+    const _locs = _locArr(p.품번).filter(a => !a.skipDp);
     const _locsDpSt = getDPStatus(p);
     const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt) && !_needsRealLocation(p)) ? [{ dp: true }] : _locs;
     const _pills = _locsEff.map(_asn => {
@@ -12931,7 +12935,7 @@ function render(){
       const dpSt = getDPStatus(p);
       const match = f.dpFilters.some(filter => {
         if(filter === "dp")     return dpSt !== 'none';
-        if(filter === "nodp")   return dpSt === 'none' && p.busanTotal > 0; // 미DP이면서 재고있는 것만
+        if(filter === "nodp")   return dpSt === 'none' && p.busanTotal > 0 && !_dpSkipped(p.품번); // 미DP이면서 재고있는 것만 (제외 표시한 상품 빼고)
         if(filter === "soldDP") return dpSt === 'soldDP';
         return false;
       });
@@ -17149,19 +17153,22 @@ function openDetail(p){
   _locDiv.className = "px-3 pb-3";
   const _renderLocPanel = () => {
     const locs = _locArr(p.품번);
+    // skipDp는 위치가 아니라 '미DP 제외' 표시라 목록·개수에서 빼고, 삭제·이동 버튼은 원래 배열 순번(i)을 그대로 쓴다
+    const shownLocs = locs.map((asn, i) => ({ asn, i })).filter(x => !x.asn.skipDp);
+    const dpSkipped = locs.some(l => l.skipDp);
     const isAdmin = checkAdminSession();
     const hasDP = locs.some(l => l.dp);
 
     let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치${locs.length > 1 ? ` (${locs.length})` : ''}</span>
+        <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치${shownLocs.length > 1 ? ` (${shownLocs.length})` : ''}</span>
         ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-400 hover:text-gray-700">구역 관리</button>` : ''}
       </div>`;
 
-    if(locs.length){
-        html += locs.map((asn, i) => {
+    if(shownLocs.length){
+        html += shownLocs.map(({ asn, i }, k) => {
             if(asn.dp){
-                return `<div class="flex items-center gap-2 ${i > 0 ? 'mt-2 pt-2' : ''}" style="${i > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
+                return `<div class="flex items-center gap-2 ${k > 0 ? 'mt-2 pt-2' : ''}" style="${k > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <div style="width:64px;height:46px;border-radius:9px;flex-shrink:0;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:22px;">📺</div>
                         <div class="min-w-0 flex-1">
@@ -17176,7 +17183,7 @@ function openDetail(p){
             }
             const zone = LOCATIONS.zones.find(z => z.id === asn.zoneId);
             if(!zone) return '';
-            return `<div class="flex items-center gap-2 ${i > 0 ? 'mt-2 pt-2' : ''}" style="${i > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
+            return `<div class="flex items-center gap-2 ${k > 0 ? 'mt-2 pt-2' : ''}" style="${k > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
                 <div onclick="window.openFloorPlanView('${zone.id}'${asn.slot ? `,'${escapeHtml(asn.slot)}'` : ''})" class="flex items-center gap-3 cursor-pointer group flex-1 min-w-0">
                     <div style="width:64px;height:46px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;flex-shrink:0;background:#fff;">
                         ${storeMapSvg({ highlightZoneId: zone.id, compact: true })}
@@ -17196,11 +17203,15 @@ function openDetail(p){
         html += `<div class="text-xs text-gray-400 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
     }
 
+    if(isAdmin && dpSkipped){
+        html += `<div class="text-[11px] font-bold text-gray-500 mt-2">🙈 미DP 목록에서 제외된 상품</div>`;
+    }
     if(isAdmin){
         html += `<div class="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
-            <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${locs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
+            <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${shownLocs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
             ${!hasDP ? `<button id="locDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#4338ca;">📺 DP 진열 표시</button>` : ''}
-            ${locs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
+            ${(dpSkipped || getDPStatus(p) === 'none') ? `<button id="locSkipDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] text-gray-600" title="남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품을 미DP 목록에서 뺍니다">${dpSkipped ? '↩ 미DP 목록에 다시 표시' : '🙈 미DP 목록에서 제외'}</button>` : ''}
+            ${shownLocs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
         </div>`;
     }
 
@@ -17215,6 +17226,22 @@ function openDetail(p){
 
         const dpBtn = _locDiv.querySelector("#locDpBtn");
         if(dpBtn) dpBtn.onclick = () => window.markAsDP(p.품번);
+
+        const skipBtn = _locDiv.querySelector("#locSkipDpBtn");
+        if(skipBtn) skipBtn.onclick = async () => {
+            if(!checkPat()) return;
+            skipBtn.disabled = true;
+            const ok = await saveLocations(server => {
+                const assignments = {...server.assignments};
+                const cur = assignments[p.품번];
+                const arr = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => !a.skipDp);
+                if(!dpSkipped) arr.push({ skipDp: true });
+                if(arr.length) assignments[p.품번] = arr; else delete assignments[p.품번];
+                return { zones: server.zones, assignments };
+            });
+            skipBtn.disabled = false;
+            if(ok){ showToast(dpSkipped ? '✓ 미DP 목록에 다시 표시' : '✓ 미DP 목록에서 제외'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
+        };
 
         _locDiv.querySelectorAll(".loc-move-btn").forEach(btn => {
             btn.onclick = (e) => { e.stopPropagation(); window.openSingleLocModal(p.품번, parseInt(btn.dataset.idx, 10)); };
@@ -17242,11 +17269,13 @@ function openDetail(p){
         const clearAllBtn = _locDiv.querySelector("#locClearAllBtn");
         if(clearAllBtn) clearAllBtn.onclick = async () => {
             if(!checkPat()) return;
-            if(!confirm(`위치 ${locs.length}곳을 모두 해제할까요?`)) return;
+            if(!confirm(`위치 ${shownLocs.length}곳을 모두 해제할까요?`)) return;
             clearAllBtn.disabled = true;
             const ok = await saveLocations(server => {
                 const assignments = {...server.assignments};
-                delete assignments[p.품번];
+                const cur = assignments[p.품번];
+                const keep = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => a.skipDp);
+                if(keep.length) assignments[p.품번] = keep; else delete assignments[p.품번];
                 return { zones: server.zones, assignments };
             });
             clearAllBtn.disabled = false;
@@ -19356,27 +19385,18 @@ window.addEventListener('DOMContentLoaded', () => {
     const dpFilterRow = $("#dpFilterRow");
     if(dpFilterRow && !$('button.chip[data-dp="dp"]')) {
         dpFilterRow.classList.remove("hidden");
-        const dpGroup = (() => {
-            const cnt = { dp: 0, nodp: 0, soldDP: 0 };
-            PRODUCTS.forEach(p => {
-                if(!(p.busanTotal > 0)) return; // 부산점 재고 있는 상품만 집계
-                const st = getDPStatus(p);
-                if(st === 'dp') cnt.dp++;
-                else if(st === 'soldDP') cnt.soldDP++;
-                else cnt.nodp++;
-            });
-            return [
-                { key: 'dp',     label: '🏷️ DP 중',   cls: '!bg-violet-50 !text-violet-700 !border-violet-300', badge: 'bg-violet-500', n: cnt.dp },
-                { key: 'nodp',   label: '🔲 미DP',      cls: '!bg-gray-50 !text-gray-600 !border-gray-300', badge: 'bg-gray-400', n: cnt.nodp },
-                { key: 'soldDP', label: '⚠️ 품절DP',   cls: '!bg-orange-50 !text-orange-600 !border-orange-300', badge: 'bg-orange-500', n: cnt.soldDP },
-            ];
-        })();
-        dpGroup.forEach(({ key, label, cls, badge, n }) => {
+        // 숫자 배지는 칩을 다 만든 뒤 _refreshDpFilterCounts()가 한꺼번에 채운다
+        const dpGroup = [
+            { key: 'dp',     label: '🏷️ DP 중', cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
+            { key: 'nodp',   label: '🔲 미DP',    cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
+            { key: 'soldDP', label: '⚠️ 품절DP', cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
+        ];
+        dpGroup.forEach(({ key, label, cls }) => {
             const btn = document.createElement("button");
             btn.className = `chip ${cls} font-black`;
             btn.dataset.dp = key;
             btn.dataset.active = "0";
-            btn.innerHTML = `${label}${n > 0 ? ` <span class="ml-0.5 ${badge} text-white rounded-full px-1.5 text-[10px]">${n}</span>` : ''}`;
+            btn.innerHTML = label;
             dpFilterRow.appendChild(btn);
             btn.addEventListener("click", () => {
                 saveHistoryState();
@@ -19401,8 +19421,7 @@ window.addEventListener('DOMContentLoaded', () => {
         noImgBtn.className = "chip !bg-gray-50 !text-gray-500 !border-gray-300 font-black";
         noImgBtn.dataset.noimage = "1";
         noImgBtn.dataset.active = "0";
-        const _niCount = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length;
-        noImgBtn.innerHTML = `📷 이미지없음${_niCount > 0 ? ` <span class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">${_niCount}</span>` : ''}`;
+        noImgBtn.innerHTML = '📷 이미지없음';
         dpFilterRow.appendChild(noImgBtn);
         noImgBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -19419,8 +19438,7 @@ window.addEventListener('DOMContentLoaded', () => {
         noBarcodeBtn.className = "chip !bg-amber-50 !text-amber-600 !border-amber-300 font-black";
         noBarcodeBtn.dataset.nobarcode = "1";
         noBarcodeBtn.dataset.active = "0";
-        const _nbCount = PRODUCTS.filter(p => p.noBarcodeBusan).length;
-        noBarcodeBtn.innerHTML = `🔖 바코드누락${_nbCount > 0 ? ` <span class="ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]">${_nbCount}</span>` : ''}`;
+        noBarcodeBtn.innerHTML = '🔖 바코드누락';
         dpFilterRow.appendChild(noBarcodeBtn);
         noBarcodeBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -19436,8 +19454,7 @@ window.addEventListener('DOMContentLoaded', () => {
         ovBtn.className = "chip !bg-amber-50 !text-amber-700 !border-amber-400 font-black";
         ovBtn.dataset.override = "1";
         ovBtn.dataset.active = "0";
-        const _ovCount = PRODUCTS.filter(p => p._hasOverride).length;
-        ovBtn.innerHTML = `✏️ 재고보정${_ovCount > 0 ? ` <span class="ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]">${_ovCount}</span>` : ''}`;
+        ovBtn.innerHTML = '✏️ 재고보정';
         dpFilterRow.appendChild(ovBtn);
         ovBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -19459,9 +19476,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         noLocBtn.dataset.active = "0";
 
-        const _nlCount = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
-
-        noLocBtn.innerHTML = `📍 위치없음${_nlCount > 0 ? ` <span class="ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]">${_nlCount}</span>` : ''}`;
+        noLocBtn.innerHTML = '📍 위치없음';
 
         dpFilterRow.appendChild(noLocBtn);
 
@@ -19492,9 +19507,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         hasLocBtn.dataset.active = "0";
 
-        const _hlCount = Object.keys(LOCATIONS.assignments || {}).length;
-
-        hasLocBtn.innerHTML = `📌 위치있음${_hlCount > 0 ? ` <span class="ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]">${_hlCount}</span>` : ''}`;
+        hasLocBtn.innerHTML = '📌 위치있음';
 
         dpFilterRow.appendChild(hasLocBtn);
 
@@ -19513,6 +19526,8 @@ window.addEventListener('DOMContentLoaded', () => {
         });
 
     }
+
+    _refreshDpFilterCounts();
 
     // ── 위치별 검색 (배정된 위치 목록에서 골라 그 자리 상품만 보기) ──────────
     if(dpFilterRow && !$('#locZoneSelect')) {
