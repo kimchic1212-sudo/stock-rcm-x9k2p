@@ -2350,390 +2350,23 @@
 
 
     <div id="filterDetails" class="mt-2 flex flex-col gap-1.5">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <!-- 카테고리 + 성별 한 줄 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div class="flex flex-wrap gap-1.5 items-center">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">카테고리</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-cat="ALL" data-active="1">전체</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-cat="신발">신발</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-cat="의류">의류</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-cat="용품">용품</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <span class="text-[10px] font-bold text-[color:var(--muted)] ml-2 shrink-0">성별</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-gender="ALL" data-active="1">전체</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-gender="M">남성</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-gender="W">여성</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-gender="U">공용</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <!-- 필터 + 정렬 + 초기화 한 줄 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div class="flex flex-wrap gap-1.5 items-center">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">필터</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-fav="1">🔖 즐겨찾기</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-stock="1" data-active="1">재고있음</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-memo="1">📝 메모있음</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-salesspeed="hot">🔥 핫셀러</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-salesspeed="normal">📈 보통</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-salesspeed="slow">📦 저조</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="chip" data-rtchance="1">🔄 RT 추천</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <select id="sortSel" class="ipt py-1 px-2.5 text-xs ml-1 shrink-0 max-w-[140px] sm:max-w-none">
+      <!-- 카테고리·성별 + 결과 개수·정렬·초기화 -->
+      <div class="flex flex-wrap gap-x-3 gap-y-1.5 items-center">
+        <div class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">카테고리</span>
+          <button class="chip" data-cat="ALL" data-active="1">전체</button>
+          <button class="chip" data-cat="신발">신발</button>
+          <button class="chip" data-cat="의류">의류</button>
+          <button class="chip" data-cat="용품">용품</button>
+          <span class="text-[10px] font-bold text-[color:var(--muted)] ml-2 shrink-0">성별</span>
+          <button class="chip" data-gender="ALL" data-active="1">전체</button>
+          <button class="chip" data-gender="M">남성</button>
+          <button class="chip" data-gender="W">여성</button>
+          <button class="chip" data-gender="U">공용</button>
+        </div>
+        <div class="flex flex-wrap gap-1.5 items-center ml-auto">
+          <span id="resultCount" class="text-xs font-bold text-[color:var(--muted)] tnum"></span>
+          <select id="sortSel" class="ipt py-1 px-2.5 text-xs ml-1 shrink-0 max-w-[140px] sm:max-w-none">
 
 
 
@@ -2894,38 +2527,8 @@
 
 
         </select>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <button id="resetAll" class="ml-auto p-1.5 rounded-lg text-[color:var(--accent)] hover:bg-red-50 transition-colors shrink-0" title="전체 초기화">
+          <span id="bulkBtnSlot" class="contents"></span>
+          <button id="resetAll" class="p-1.5 rounded-lg text-[color:var(--accent)] hover:bg-red-50 transition-colors shrink-0" title="전체 초기화">
 
 
 
@@ -2958,118 +2561,30 @@
 
 
         </button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        </div>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <!-- DP / 이미지 필터 행 (JS가 채움) -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div id="dpFilterRow" class="flex flex-wrap gap-1.5 items-center hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">DP</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      <!-- 자주 쓰는 필터 + 더보기 / 점검(ADMIN) -->
+      <div class="flex flex-wrap gap-1.5 items-center">
+        <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">필터</span>
+        <button class="chip" data-stock="1" data-active="1">재고있음</button>
+        <button class="chip" data-rtchance="1">🔄 RT 추천</button>
+        <button id="filterPanelBtn" type="button" class="chip font-black" aria-expanded="false" aria-controls="filterPanel" onclick="window._toggleFilterPanel()">＋ 더보기 <span id="filterPanelCount" class="hidden ml-0.5 rounded-full px-1.5 text-[10px] text-white" style="background:var(--accent)"></span></button>
+        <button id="adminBoardBtn" type="button" class="chip font-black hidden" aria-expanded="false" aria-controls="adminBoard" onclick="window._toggleAdminBoard()">🧰 점검 <span id="adminBoardCount" class="hidden ml-0.5 bg-slate-700 text-white rounded-full px-1.5 text-[10px]"></span></button>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <!-- 브랜드 토글 헤더 (항상 보임) -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div id="brandRow" class="flex gap-2 items-center">
+      <div id="fpPromoSlot"></div>
+      <!-- 더보기 패널 (평소 접힘) -->
+      <div id="filterPanel" class="hidden flex-col gap-1.5 pt-2 border-t border-dashed border-[color:var(--line)]">
+        <div id="fpStockLoc" class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">매장</span>
+      </div>
+        <div class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">판매속도</span>
+          <button class="chip" data-salesspeed="hot">🔥 핫셀러</button>
+          <button class="chip" data-salesspeed="normal">📈 보통</button>
+          <button class="chip" data-salesspeed="slow">📦 저조</button>
+      </div>
+        <div id="fpSizeSlot"></div>
+        <div id="brandRow" class="flex gap-2 items-center">
 
 
 
@@ -3198,38 +2713,7 @@
 
 
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <!-- 브랜드 펼쳐진 영역 (토글) -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div id="brandExpandedPanel" class="hidden flex-col gap-1.5">
+        <div id="brandExpandedPanel" class="hidden flex-col gap-1.5">
 
 
 
@@ -3486,21 +2970,28 @@
 
 
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <div id="dpFilterRow" class="flex flex-wrap gap-1.5 items-center hidden">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">DP</span>
+        </div>
+        <div id="fpLocRow" class="flex flex-wrap gap-1.5 items-center hidden">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">위치별</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">내 표시</span>
+          <button class="chip" data-fav="1">🔖 즐겨찾기</button>
+          <button class="chip" data-memo="1">📝 메모있음</button>
+      </div>
+      </div>
+      <!-- ADMIN 점검 보드 (평소 접힘) -->
+      <div id="adminBoard" class="hidden flex-col gap-1.5 pt-2 border-t border-dashed border-[color:var(--line)]">
+        <div id="adminCheckRow" class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">점검</span>
+      </div>
+        <div class="flex flex-wrap gap-1.5 items-center">
+          <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0"></span>
+          <button id="dpSkipListBtn" type="button" class="chip font-black" onclick="window._openDpSkipList()">🙈 미DP 제외 목록 <span id="dpSkipCount" class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">0</span></button>
+      </div>
+      </div>
     </div>
 
 
@@ -5353,7 +4844,7 @@
 
 
 
-<script src="./app.js?v=2609182215"></script>
+<script src="./app.js?v=2609191230"></script>
 
 
 
