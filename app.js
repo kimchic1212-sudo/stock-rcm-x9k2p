@@ -3896,11 +3896,9 @@ function _refreshDpFilterCounts(){
     if(dpBtn || nodpBtn || soldDpBtn){
         const cnt = { dp: 0, nodp: 0, soldDP: 0 };
         PRODUCTS.forEach(p => {
-            if(!(p.busanTotal > 0)) return; // 부산점 재고 있는 상품만 집계
-            const st = getDPStatus(p);
-            if(st === 'dp') cnt.dp++;
-            else if(st === 'soldDP') cnt.soldDP++;
-            else if(!_dpSkipped(p.품번)) cnt.nodp++;
+            if(_dpFilterMatch('dp', p)) cnt.dp++;
+            if(_dpFilterMatch('nodp', p)) cnt.nodp++;
+            if(_dpFilterMatch('soldDP', p)) cnt.soldDP++;
         });
         if(dpBtn) dpBtn.innerHTML = `🏷️ DP 중${cnt.dp > 0 ? ` <span class=\"ml-0.5 bg-violet-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.dp}</span>` : ''}`;
         if(nodpBtn) nodpBtn.innerHTML = `🔲 미DP${cnt.nodp > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${cnt.nodp}</span>` : ''}`;
@@ -4067,6 +4065,15 @@ function _hasRealLoc(code) {
 // 남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품 — 위치 배열에 {skipDp:true}로 표시하고 미DP 목록·건수에서 뺀다
 function _dpSkipped(code) {
   return _locArr(code).some(a => a.skipDp);
+}
+// DP 칩(DP 중·미DP·품절DP)의 목록 필터와 숫자 배지가 같은 판정을 쓰도록 한 곳에 둔다
+// (건수만 따로 세다가 재고 0인 품절DP가 숫자에서 빠졌던 문제 방지)
+function _dpFilterMatch(kind, p) {
+  const st = getDPStatus(p);
+  if (kind === 'dp') return st !== 'none';
+  if (kind === 'nodp') return st === 'none' && p.busanTotal > 0 && !_dpSkipped(p.품번); // 재고있는 것만, 제외 표시한 상품 빼고
+  if (kind === 'soldDP') return st === 'soldDP';
+  return false;
 }
 function getDPStatus(p) {
   const dpSizes = getDPSizes(p.품번);
@@ -13029,14 +13036,7 @@ function render(){
     if(f.centerOnly && !(p.busanTotal === 0 && p.centerTotal > 0 && p.sinsaTotal === 0)) return false;
     if(f.todaySoldOnly && !(p.todaySold > 0)) return false;
     if(f.dpFilters.length > 0) {
-      const dpSt = getDPStatus(p);
-      const match = f.dpFilters.some(filter => {
-        if(filter === "dp")     return dpSt !== 'none';
-        if(filter === "nodp")   return dpSt === 'none' && p.busanTotal > 0 && !_dpSkipped(p.품번); // 미DP이면서 재고있는 것만 (제외 표시한 상품 빼고)
-        if(filter === "soldDP") return dpSt === 'soldDP';
-        return false;
-      });
-      if(!match) return false;
+      if(!f.dpFilters.some(filter => _dpFilterMatch(filter, p))) return false;
     }
     if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
     if(f.noBarcode && !p.noBarcodeBusan) return false;
