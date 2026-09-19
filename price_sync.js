@@ -162,6 +162,18 @@ async function getDiscountedProducts() {
   return unique.filter(p => p.immediateDiscountAmt > 0);
 }
 
+// 앱(재고조회) 상단 경고 배너·허브 헬스체크가 읽는 실행 상태 — 마지막 성공 시각을 유지한다
+async function writeStatus(ok, message, count) {
+  try {
+    const { data: prev } = await loadJsonFile('price_status.json');
+    const now = new Date().toISOString();
+    await saveJsonFile('price_status.json', {
+      ok, message, count: count ?? null, lastRunAt: now,
+      lastSuccessAt: ok ? now : (prev && prev.lastSuccessAt) || null,
+    }, `price_status: ${ok ? 'ok' : 'FAIL'}`);
+  } catch (e) { console.error('상태 기록 실패:', e.message); }
+}
+
 async function main() {
   if (!GH_TOKEN) throw new Error('DATA_REPO_PAT(또는 GITHUB_TOKEN) 미설정');
 
@@ -211,6 +223,7 @@ async function main() {
     const warnMsg = `⚠️ <b>가격 자동동기화 건너뜀</b>\n이전 ${prevCount}개 → 이번 ${matched}개로 급감 (공홈 스크래핑 실패 의심)\n기존 할인가는 그대로 유지했습니다. 확인이 필요합니다.`;
     log(`[SKIP] 이전(${prevCount}) 대비 급감(${matched}) — 저장 건너뜀, 기존 데이터 유지`);
     await broadcast(warnMsg);
+    await writeStatus(false, `공홈 상품 수 급감 (이전 ${prevCount}개 → ${matched}개)`, matched);
     process.exit(1);
   }
 
@@ -234,6 +247,7 @@ async function main() {
     `price_sync: 공홈 가격 자동반영 (${matched}개, ${new Date().toISOString()})`);
 
   log(`완료! ${matched}개 품번 자동 할인가 반영됨`);
+  await writeStatus(true, `${matched}개 반영`, matched);
 }
 
-main().catch(e => { console.error('Fatal:', e); process.exit(1); });
+main().catch(async e => { console.error('Fatal:', e); if (GH_TOKEN) await writeStatus(false, String(e.message || e).slice(0, 120)); process.exit(1); });
