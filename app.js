@@ -3931,6 +3931,17 @@ function _refreshDpFilterCounts(){
         noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
+    const _boardCount = $("#adminBoardCount");
+    if(_boardCount){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length
+                + PRODUCTS.filter(p => p.noBarcodeBusan).length
+                + PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
+        _boardCount.textContent = n;
+        _boardCount.classList.toggle('hidden', n === 0);
+    }
+    const _skipCount = $("#dpSkipCount");
+    if(_skipCount) _skipCount.textContent = Object.keys(LOCATIONS.assignments || {}).filter(c => _dpSkipped(c)).length;
+
     const hasLocBtn = $('button.chip[data-hasloc]');
     if(hasLocBtn){
         const n = PRODUCTS.filter(p => p.busanTotal > 0 && _hasRealLoc(p.품번)).length;
@@ -4820,7 +4831,9 @@ function rebuildIndex(){
       // 필터 row 다음, 브랜드 행 앞에 삽입
       const filterDetails = $("#filterDetails");
       const brandSearchRow = $("#brandRow") || $("#brandSearch")?.parentNode?.parentNode;
-      if(filterDetails && brandSearchRow && brandSearchRow.parentNode === filterDetails) filterDetails.insertBefore(container, brandSearchRow);
+      const _sizeSlot = $("#fpSizeSlot");
+      if(_sizeSlot) _sizeSlot.appendChild(container);
+      else if(filterDetails && brandSearchRow && brandSearchRow.parentNode === filterDetails) filterDetails.insertBefore(container, brandSearchRow);
       else if(filterDetails) filterDetails.appendChild(container);
 
       const handleSizeChange = (e) => {
@@ -4847,7 +4860,9 @@ function rebuildIndex(){
       promoWrap.className = "flex gap-1.5 items-center overflow-x-auto no-scrollbar pl-[2.875rem]";
       // brandRow 앞에 삽입 (filterDetails 내)
       const _brandRowRef = $("#brandRow");
-      if(_brandRowRef && _brandRowRef.parentNode) _brandRowRef.parentNode.insertBefore(promoWrap, _brandRowRef);
+      const _promoSlot = $("#fpPromoSlot");
+      if(_promoSlot) _promoSlot.appendChild(promoWrap);
+      else if(_brandRowRef && _brandRowRef.parentNode) _brandRowRef.parentNode.insertBefore(promoWrap, _brandRowRef);
       else { const _bc = $("#brandChips"); if(_bc?.parentNode) _bc.parentNode.insertBefore(promoWrap, _bc); }
   }
   if (getPromoList().length > 0) {
@@ -12824,9 +12839,91 @@ window._quickFilterProduct = (code) => {
   setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
 };
 
+// ── 필터 더보기 패널 / ADMIN 점검 보드 ─────────────────────────────
+function _clearStockOnlyChips(except){
+  [['busanonly','ring-blue-400'],['sinsaonly','ring-indigo-400'],['centeronly','ring-teal-400']].forEach(([k, ring]) => {
+    const b = $(`button.chip[data-${k}]`);
+    if(b && b !== except){ b.dataset.active = "0"; b.classList.remove('ring-2', ring); }
+  });
+}
+function _setFoldOpen(panelId, btnId, open){
+  const panel = document.getElementById(panelId), btn = document.getElementById(btnId);
+  if(!panel) return;
+  panel.classList.toggle('hidden', !open);
+  panel.classList.toggle('flex', open);
+  if(btn){ btn.setAttribute('aria-expanded', String(open)); btn.dataset.active = open ? "1" : "0"; }
+}
+window._toggleFilterPanel = () => {
+  const open = $("#filterPanel")?.classList.contains('hidden');
+  _setFoldOpen("filterPanel", "filterPanelBtn", open);
+  try { localStorage.setItem('_rcm_filterPanelOpen', open ? '1' : '0'); } catch(e) {}
+};
+window._toggleAdminBoard = () => {
+  _setFoldOpen("adminBoard", "adminBoardBtn", $("#adminBoard")?.classList.contains('hidden'));
+};
+// 더보기 패널이 접혀 있어도 그 안에 켜진 조건이 몇 개인지 버튼에 표시
+function _updateFilterUi(resultCount){
+  const rc = $("#resultCount");
+  if(rc) rc.textContent = RAW.length ? `${resultCount.toLocaleString()}개 상품` : '';
+  const panel = $("#filterPanel"), badge = $("#filterPanelCount");
+  if(!panel || !badge) return;
+  let n = [...panel.querySelectorAll('button.chip[data-active="1"]')].filter(b => !b.dataset.brand).length;
+  ['sizeSelFw','sizeSelAp','sizeSelGear'].forEach(id => { const s = document.getElementById(id); if(s && s.value !== 'ALL') n++; });
+  if($("#locZoneSelect")?.value) n++;
+  n += (window._activeBrands?.size || 0);
+  badge.textContent = n;
+  badge.classList.toggle('hidden', n === 0);
+}
+window._openDpSkipList = () => {
+  document.getElementById('dpSkipListModal')?.remove();
+  const codes = Object.keys(LOCATIONS.assignments || {}).filter(c => _dpSkipped(c));
+  const rows = codes.map(c => {
+    const p = _productByCode(c);
+    return `<li class="flex items-center gap-2 py-2 border-b border-[color:var(--line)]">
+      <div class="min-w-0 flex-1"><div class="font-black text-sm truncate">${escapeHtml(p ? p.품명 : c)}</div><div class="text-xs text-[color:var(--muted)] font-bold">${escapeHtml(c)}${p ? ' · 부산 ' + p.busanTotal : ''}</div></div>
+      ${p ? `<button class="chip font-black" data-skip-open="${escapeHtml(c)}">보기</button>` : ''}
+      <button class="chip font-black !text-red-600" data-skip-undo="${escapeHtml(c)}">다시 표시</button>
+    </li>`;
+  }).join('');
+  const modal = document.createElement('div');
+  modal.id = 'dpSkipListModal';
+  modal.className = 'fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/30';
+  modal.innerHTML = `<div class="card w-full max-w-md max-h-[80vh] flex flex-col p-4 gap-2" role="dialog" aria-labelledby="dpSkipListTitle">
+      <div class="flex items-center justify-between"><h3 id="dpSkipListTitle" class="font-black">🙈 미DP 제외 목록 (${codes.length})</h3><button class="p-1.5 font-black" data-skip-close aria-label="닫기">✕</button></div>
+      <p class="text-xs font-bold text-[color:var(--muted)]">남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP하지 않아 미DP 목록에서 뺀 상품입니다.</p>
+      ${codes.length ? `<ul class="overflow-y-auto">${rows}</ul>` : '<p class="text-sm font-bold py-6 text-center text-[color:var(--muted)]">제외한 상품이 없습니다</p>'}
+    </div>`;
+  modal.addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-skip-close],[data-skip-open],[data-skip-undo]');
+    if(e.target === modal || (t && t.hasAttribute('data-skip-close'))) { modal.remove(); return; }
+    if(!t) return;
+    if(t.dataset.skipOpen){ const p = _productByCode(t.dataset.skipOpen); modal.remove(); if(p) openDetail(p); return; }
+    const code = t.dataset.skipUndo;
+    if(!checkPat()) return;
+    t.disabled = true;
+    const ok = await saveLocations(server => {
+      const assignments = {...server.assignments};
+      const cur = assignments[code];
+      const arr = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => !a.skipDp);
+      if(arr.length) assignments[code] = arr; else delete assignments[code];
+      return { zones: server.zones, assignments };
+    });
+    if(ok){ showToast('✓ 미DP 목록에 다시 표시'); _refreshDpFilterCounts(); render(); window._openDpSkipList(); }
+    else t.disabled = false;
+  });
+  document.body.appendChild(modal);
+};
+try { if(localStorage.getItem('_rcm_filterPanelOpen') === '1') _setFoldOpen("filterPanel", "filterPanelBtn", true); } catch(e) {}
+
 function render(){
   const _bulkChip = $('button.chip[data-bulkloc]');
-  if(_bulkChip) _bulkChip.style.display = checkAdminSession() ? '' : 'none';
+  const _isAdminNow = checkAdminSession();
+  if(_bulkChip) _bulkChip.style.display = _isAdminNow ? '' : 'none';
+  const _boardBtn = $("#adminBoardBtn");
+  if(_boardBtn) {
+      _boardBtn.classList.toggle('hidden', !_isAdminNow);
+      if(!_isAdminNow) _setFoldOpen("adminBoard", "adminBoardBtn", false);
+  }
 
   const grid = $("#grid");
 
@@ -13127,6 +13224,7 @@ function render(){
   renderSalesSummaryPanel(filteredList);
   // 적용된 필터 요약 칩 갱신
   renderActiveFilterBar();
+  _updateFilterUi(filteredList.length);
 
   if(window.lucide) lucide.createIcons();
 }
@@ -19325,9 +19423,12 @@ window.addEventListener('DOMContentLoaded', () => {
         busanOnlyBtn.dataset.busanonly = "1";
         busanOnlyBtn.dataset.active = "0";
         busanOnlyBtn.innerHTML = "🌊 부산점 ONLY";
-        stockBtn.parentNode.insertBefore(busanOnlyBtn, stockBtn.nextSibling);
+        const _stockLocRow = $("#fpStockLoc");
+        if(_stockLocRow) _stockLocRow.appendChild(busanOnlyBtn);
+        else stockBtn.parentNode.insertBefore(busanOnlyBtn, stockBtn.nextSibling);
         busanOnlyBtn.addEventListener("click", () => {
             saveHistoryState();
+            if(busanOnlyBtn.dataset.active !== "1") _clearStockOnlyChips(busanOnlyBtn);
             busanOnlyBtn.dataset.active = busanOnlyBtn.dataset.active === "1" ? "0" : "1";
             if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
             else busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
@@ -19351,6 +19452,7 @@ window.addEventListener('DOMContentLoaded', () => {
         otherBranchBtn.parentNode.insertBefore(centerOnlyBtn, otherBranchBtn.nextSibling);
         otherBranchBtn.addEventListener("click", () => {
             saveHistoryState();
+            if(otherBranchBtn.dataset.active !== "1") _clearStockOnlyChips(otherBranchBtn);
             otherBranchBtn.dataset.active = otherBranchBtn.dataset.active === "1" ? "0" : "1";
             if(otherBranchBtn.dataset.active === "1") otherBranchBtn.classList.add('ring-2', 'ring-indigo-400');
             else otherBranchBtn.classList.remove('ring-2', 'ring-indigo-400');
@@ -19358,6 +19460,7 @@ window.addEventListener('DOMContentLoaded', () => {
         });
         centerOnlyBtn.addEventListener("click", () => {
             saveHistoryState();
+            if(centerOnlyBtn.dataset.active !== "1") _clearStockOnlyChips(centerOnlyBtn);
             centerOnlyBtn.dataset.active = centerOnlyBtn.dataset.active === "1" ? "0" : "1";
             if(centerOnlyBtn.dataset.active === "1") centerOnlyBtn.classList.add('ring-2', 'ring-teal-400');
             else centerOnlyBtn.classList.remove('ring-2', 'ring-teal-400');
@@ -19383,6 +19486,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // ── DP 필터 칩 그룹 (전용 행에 배치) ─────────────────────────────
     const dpFilterRow = $("#dpFilterRow");
+    const _checkRow = $("#adminCheckRow") || dpFilterRow;
     if(dpFilterRow && !$('button.chip[data-dp="dp"]')) {
         dpFilterRow.classList.remove("hidden");
         // 숫자 배지는 칩을 다 만든 뒤 _refreshDpFilterCounts()가 한꺼번에 채운다
@@ -19422,7 +19526,7 @@ window.addEventListener('DOMContentLoaded', () => {
         noImgBtn.dataset.noimage = "1";
         noImgBtn.dataset.active = "0";
         noImgBtn.innerHTML = '📷 이미지없음';
-        dpFilterRow.appendChild(noImgBtn);
+        _checkRow.appendChild(noImgBtn);
         noImgBtn.addEventListener("click", () => {
             saveHistoryState();
             noImgBtn.dataset.active = noImgBtn.dataset.active === "1" ? "0" : "1";
@@ -19439,7 +19543,7 @@ window.addEventListener('DOMContentLoaded', () => {
         noBarcodeBtn.dataset.nobarcode = "1";
         noBarcodeBtn.dataset.active = "0";
         noBarcodeBtn.innerHTML = '🔖 바코드누락';
-        dpFilterRow.appendChild(noBarcodeBtn);
+        _checkRow.appendChild(noBarcodeBtn);
         noBarcodeBtn.addEventListener("click", () => {
             saveHistoryState();
             noBarcodeBtn.dataset.active = noBarcodeBtn.dataset.active === "1" ? "0" : "1";
@@ -19455,7 +19559,7 @@ window.addEventListener('DOMContentLoaded', () => {
         ovBtn.dataset.override = "1";
         ovBtn.dataset.active = "0";
         ovBtn.innerHTML = '✏️ 재고보정';
-        dpFilterRow.appendChild(ovBtn);
+        _checkRow.appendChild(ovBtn);
         ovBtn.addEventListener("click", () => {
             saveHistoryState();
             ovBtn.dataset.active = ovBtn.dataset.active === "1" ? "0" : "1";
@@ -19478,7 +19582,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         noLocBtn.innerHTML = '📍 위치없음';
 
-        dpFilterRow.appendChild(noLocBtn);
+        _checkRow.appendChild(noLocBtn);
 
         noLocBtn.addEventListener("click", () => {
 
@@ -19509,7 +19613,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         hasLocBtn.innerHTML = '📌 위치있음';
 
-        dpFilterRow.appendChild(hasLocBtn);
+        _checkRow.appendChild(hasLocBtn);
 
         hasLocBtn.addEventListener("click", () => {
 
@@ -19548,7 +19652,9 @@ window.addEventListener('DOMContentLoaded', () => {
             sel.id = "locZoneSelect";
             sel.className = "chip !bg-white !text-gray-700 !border-gray-300 font-black";
             sel.innerHTML = `<option value="">📍 위치로 찾기</option>` + _sorted.map(([val,label]) => `<option value="${escapeHtml(val)}">${escapeHtml(label)}</option>`).join('');
-            dpFilterRow.appendChild(sel);
+            const _locRow = $("#fpLocRow");
+            if(_locRow){ _locRow.appendChild(sel); _locRow.classList.remove("hidden"); }
+            else dpFilterRow.appendChild(sel);
             sel.addEventListener("change", () => {
                 saveHistoryState();
                 sel.classList.toggle('ring-2', !!sel.value);
@@ -19571,7 +19677,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         bulkBtn.style.display = checkAdminSession() ? '' : 'none';
 
-        dpFilterRow.appendChild(bulkBtn);
+        ($("#bulkBtnSlot") || dpFilterRow).appendChild(bulkBtn);
 
         bulkBtn.addEventListener("click", () => window.enterBulkLocMode());
 
@@ -22152,6 +22258,26 @@ async function checkSyncLockStatus() {
     } catch(e) {}
 }
 
+// 공홈 가격 자동반영이 멈췄을 때 관리자에게만 노란 띠로 알림 (price_status.json — price_sync.js가 매 실행마다 기록)
+async function checkPriceSyncStatus() {
+    try {
+        if (!checkAdminSession() || document.getElementById('priceStatusBanner')) return;
+        const r = await dataFetch('price_status.json');
+        if (!r.ok) return;
+        const st = await r.json();
+        const last = st && st.lastSuccessAt ? new Date(st.lastSuccessAt).getTime() : 0;
+        const hours = last ? Math.floor((Date.now() - last) / 3600000) : null;
+        if (st.ok !== false && hours !== null && hours < 30) return;
+        const lastTxt = last ? new Date(last).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '기록 없음';
+        const why = st.ok === false && st.message ? ` · 최근 실패: ${st.message}` : '';
+        const bar = document.createElement('div');
+        bar.id = 'priceStatusBanner';
+        bar.style.cssText = 'position:sticky;top:0;z-index:199;background:#f59e0b;color:#1f1300;padding:10px 16px;text-align:center;font-weight:800;font-size:13px;';
+        bar.innerHTML = `⚠️ 공홈 가격 자동반영이 ${hours === null ? '한 번도 성공하지 못했습니다' : hours + '시간째 안 되고 있습니다'} (마지막 성공 ${escapeHtml(lastTxt)}${escapeHtml(why)}) <button onclick="this.parentElement.remove()" style="background:rgba(0,0,0,.12);border:none;border-radius:6px;padding:2px 8px;font-weight:800;cursor:pointer;margin-left:8px;">닫기</button>`;
+        document.body.prepend(bar);
+    } catch(e) {}
+}
+
 // ── 필터 영역 접기/펼치기 (스크롤 시 자동 접힘) ──────────────────────────
 // 검색창+적용된필터는 항상 보이고, 카테고리~브랜드까지(filterDetails)는
 // 스크롤을 조금만 내려도 자동으로 접혀서 상품 목록이 화면을 더 넓게 씀.
@@ -22213,6 +22339,7 @@ async function checkSyncLockStatus() {
 
 loadGhConfig(); loadData().then(async () => {
     checkSyncLockStatus();
+    checkPriceSyncStatus();
     if (location.hash === '#dashboard' && window.openAnalyticsReport) {
         try { await window.openAnalyticsReport(); }
         finally { const ld = document.getElementById('dashOnlyLoading'); if (ld) ld.remove(); } // 대시보드가 화면을 이미 덮으므로 재고앱 본체는 계속 숨긴 채 둠
