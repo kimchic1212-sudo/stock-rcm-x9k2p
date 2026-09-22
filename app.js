@@ -1,0 +1,21102 @@
+// ── 관리자 GitHub 호출은 허브 프록시로 (2026-09) ─────────────────────
+// 예전엔 관리자 PIN 입력 시 GitHub 쓰기 토큰 원본을 받아 브라우저가 직접 api.github.com을 불렀다.
+// 이제 허브(/api/inv-token)가 서명된 관리자 토큰(adm.*)만 주고, 그 토큰이 실린 GitHub 요청은
+// 여기서 허브 /api/gh 로 돌려 서버가 대신 호출한다 — 기존 저장 코드는 수정 없이 그대로 동작.
+// 옛 토큰 원본(github_pat_/ghp_)이 남은 기기는 지우고 관리자 PIN을 다시 받게 한다.
+(function () {
+    try {
+        const k = 'racement_gh_pat_v1', v = localStorage.getItem(k) || '';
+        if (v && !v.startsWith('adm.')) { localStorage.removeItem(k); localStorage.removeItem('racement_admin_session'); }
+    } catch (e) {}
+    const origFetch = window.fetch.bind(window);
+    const GH = 'https://api.github.com/', HUB = 'https://racement-hub.vercel.app/api/gh/';
+    window.fetch = async function (input, init) {
+        init = init || {};
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        if (url.startsWith(GH)) {
+            const h = new Headers(init.headers || (typeof input !== 'string' ? input.headers : undefined));
+            if ((h.get('Authorization') || '').startsWith('Bearer adm.')) {
+                let body = init.body;
+                // 큰 파일(재고 업로드 등)은 서버 요청 한도(4.5MB)를 넘지 않게 gzip으로 압축해 보낸다
+                if (typeof body === 'string' && body.length > 1000000 && typeof CompressionStream !== 'undefined') {
+                    body = await new Response(new Blob([body]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+                    h.set('x-body-gzip', '1');
+                }
+                return origFetch(HUB + url.slice(GH.length), Object.assign({}, init, { headers: h, body }));
+            }
+        }
+        return origFetch(input, init);
+    };
+})();
+
+// Canonical URL redirect — ?v= 파라미터 자동 제거
+if (location.search) location.replace(location.pathname);
+
+// ── 앱 버전 ──────────────────────────────────────────────────
+const APP_VERSION = "v26.06.06";
+document.addEventListener("DOMContentLoaded", () => {
+    const badge = document.getElementById("appVersionBadge");
+    if(badge) badge.textContent = APP_VERSION;
+});
+
+// 🔥 1. 관리자 팝업창 스크롤, Z-index 및 모바일 최적화 CSS 🔥
+const style = document.createElement('style');
+style.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #uploadPanel, #settingsPanel, .modal-content { max-height: 85vh !important; max-height: 85dvh !important; overflow-y: auto !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* ===== 모바일/패드 개선 ===== */
+
+
+
+
+
+
+
+    @media (max-width: 767px) {
+
+
+
+
+
+
+
+      /* M1: iOS 텍스트 입력 포커스 시 자동 줌인 방지 (입력류만 16px) */
+
+
+
+
+
+
+
+      input[type="text"], input[type="search"], input[type="password"], input[type="email"], input[type="number"], input:not([type]), textarea { font-size: 16px !important; }
+
+
+
+
+
+
+
+      /* M4: 터치 타깃 확대 */
+
+
+
+
+
+
+
+      .chip { min-height: 32px; }
+
+
+
+
+
+
+
+      #sut-KR, #sut-EU, #sut-US { padding: 5px 10px !important; }
+
+
+
+
+
+
+
+      /* 헤더 버튼: 모바일에선 아이콘만 → 패딩 축소해 한 줄 유지 */
+
+
+
+
+
+
+
+      header .chip { padding-left: .4rem; padding-right: .4rem; }
+
+
+
+
+
+
+
+      header #adminBtn { padding-left: .45rem; padding-right: .45rem; }
+
+
+
+
+
+
+
+      /* 로고 축소로 제목 자리 확보 */
+
+
+
+
+
+
+
+      .logo-symbol { height: 28px; }
+
+
+
+
+
+
+
+      /* M5/M2: 가로 스크롤에 얇은 스크롤바 노출(스와이프 단서) */
+
+
+
+
+
+
+
+      .no-scrollbar::-webkit-scrollbar { display: block !important; height: 4px; }
+
+
+
+
+
+
+
+      .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.6); border-radius: 4px; }
+
+
+
+
+
+
+
+      .no-scrollbar { -ms-overflow-style: auto !important; scrollbar-width: thin !important; }
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #detailModal, #dashDetailModal, #salesGuideModal, #transfersModal { z-index: 9999 !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #analyticsDashboard { z-index: 105 !important; }
+
+
+
+
+
+
+
+    #zoneManagerModal, #floorPlanViewModal, #bulkLocModal { z-index: 10001 !important; }
+
+    #bulkBar { z-index: 10002 !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .dash-scroll::-webkit-scrollbar { width: 8px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .dash-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .dash-scroll::-webkit-scrollbar-track { background: transparent; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #searchSuggestions { z-index: 999; max-height: 320px; overflow-y: auto; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 상품 이미지 페이드인 — 단, 도면(.floorplan-img)은 loaded 클래스를 붙여주는 로직이 없으므로 제외 */
+
+
+
+
+
+
+
+    .card img:not(.floorplan-img) { opacity: 0; transition: opacity 0.3s ease-in-out; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .card img.loaded { opacity: 1 !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .card img.floorplan-img { opacity: 1 !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .chip { background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; transition: all 0.2s ease-in-out; cursor: pointer; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .chip:hover { background-color: #f8fafc; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .chip[data-active="1"] { background-color: #0f172a !important; color: #ffffff !important; border-color: #0f172a !important; font-weight: 900 !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .brand-hidden { display: none !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .card-img-wrap { position: relative; width: 88px; height: 88px; flex-shrink: 0; border-radius: 8px; border: 1px solid #f1f5f9; background: #f8fafc; overflow: hidden; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .loc-pill { display:inline-flex; align-items:center; gap:3px; max-width:100%; background:#fff0e9; color:#c2410c; border:1px solid #ffd8c4; border-radius:6px; padding:1px 6px; font-size:11px; font-weight:900; line-height:1.6; cursor:pointer; }
+
+    .loc-pill:hover { background:#ffe0cf; border-color:#ffbf9e; }
+
+    .loc-pill > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    .shelf-view { display:flex; flex-direction:column; gap:8px; }
+
+    .shelf-tier { display:flex; align-items:stretch; border:2px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
+
+    .shelf-tier-label { flex:0 0 52px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#64748b; background:#f8fafc; border-right:1px solid #e2e8f0; }
+
+    .shelf-tier-body { flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:9px 10px; min-height:24px; }
+
+    .shelf-chip { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800; background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; border-radius:8px; padding:4px 8px; cursor:pointer; }
+
+    .shelf-chip:hover { background:#e2e8f0; }
+
+    .shelf-chip em { font-style:normal; font-weight:700; color:#94a3b8; }
+
+    .shelf-empty { font-size:11px; font-weight:700; color:#cbd5e1; }
+
+    .shelf-tier-summary { cursor:pointer; }
+
+    .shelf-tier-summary .shelf-tier-body { flex-direction:column; align-items:flex-start; gap:2px; }
+
+    .shelf-tier-summary:hover { border-color:#ffbf9e; }
+
+    .shelf-tier-summary.shelf-tier-open { border-color:#ff5a1f; background:#fff8f5; }
+
+    .shelf-tier.shelf-tier-target { border-color:#7c3aed !important; background:#f3e8ff !important; box-shadow:0 0 0 2px #ddd6fe; }
+
+    .shelf-count-row { display:flex; align-items:center; gap:8px; width:100%; }
+
+    .shelf-count { font-size:13px; font-weight:900; color:#1e293b; }
+
+    .shelf-go { font-size:10px; font-weight:800; color:#c2410c; margin-left:auto; }
+
+    .shelf-sum { font-size:11px; font-weight:700; color:#64748b; }
+
+    .shelf-item-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; }
+
+    .shelf-rackmap { border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; background:#f8fafc; max-width:420px; margin:0 auto; }
+
+    .shelf-rack { cursor:pointer; }
+
+    .shelf-rack rect { transition:stroke-width .1s; }
+
+    .shelf-rack:hover rect { stroke-width:3; }
+
+    .shelf-rack.shelf-tier-open rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
+
+    .shelf-rack.shelf-rack-picked rect { stroke:#ff5a1f; stroke-width:4; fill:#ffe4d5; }
+
+    .shelf-rack.shelf-rack-target rect { stroke:#7c3aed !important; stroke-width:5 !important; fill:#f3e8ff !important; animation:shelf-target-pulse 1.4s ease-in-out infinite; }
+
+    @keyframes shelf-target-pulse { 0%,100% { stroke-width:5; } 50% { stroke-width:8; } }
+
+    @media (min-width: 1024px) {
+        #bulkLocMap { width: 600px !important; }
+        #bulkLocRackMap .shelf-rackmap { max-width: none; margin: 0; }
+        #fpvMap { width: 600px !important; }
+        #fpvShelf .shelf-rackmap { max-width: none; margin: 0; }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .size-scroll-wrap { display: flex; overflow-x: auto; gap: 5px; padding-bottom: 4px; margin-top: 8px; margin-bottom: 4px; scroll-snap-type: x mandatory; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .size-scroll-wrap::-webkit-scrollbar { height: 5px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .size-scroll-wrap::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .size-scroll-wrap > div { scroll-snap-align: start; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .size-cell.zero { opacity: 0.35; filter: grayscale(100%); text-decoration: line-through; border-color: #e2e8f0; background: #f8fafc; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 12px; width: 90%; max-width: 420px; pointer-events: none; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .toast { background: #1e293b; color: white; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .toast-undo:hover { color: #fef08a; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 🔥 Glassmorphism 모달 컨테이너 🔥 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .glass-modal {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        width: 100%; max-width: 800px; padding: 24px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        background: rgba(255, 255, 255, 0.25);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        border: 1px solid rgba(255, 255, 255, 0.5);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        border-radius: 16px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        position: relative; box-sizing: border-box;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .close-btn {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        position: absolute; top: 24px; right: 24px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333; transition: transform 0.2s ease;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .close-btn:hover { transform: scale(1.1); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .modal-header { margin-bottom: 24px; text-align: center; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .modal-header h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px; color: #1a1a1a; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 가로형 2단 그리드 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @media (max-width: 768px) { .modal-body { grid-template-columns: 1fr; } }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .upload-section {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        background: rgba(255, 255, 255, 0.4); border: 2px dashed rgba(0, 0, 0, 0.15); border-radius: 16px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; transition: background 0.3s ease, border-color 0.3s ease; cursor: pointer;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .upload-section:hover { background: rgba(255, 255, 255, 0.6); border-color: rgba(0, 0, 0, 0.3); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .upload-icon { font-size: 48px; margin-bottom: 16px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .settings-section { display: flex; flex-direction: column; gap: 12px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .setting-card {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        padding: 16px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; cursor: pointer;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .setting-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); background: rgba(255, 255, 255, 0.7); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .card-orange { border-left: 4px solid #ff9a9e; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .card-pink { border-left: 4px solid #fecfef; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .card-blue { border-left: 4px solid #a1c4fd; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 대시보드 리스트 스타일 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .list-item { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px solid #f0f0f0; transition: background-color 0.15s ease; cursor: pointer; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .list-item:last-child { border-bottom: none; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .list-item:hover { background-color: #fafafa; border-radius: 8px; padding-left: 8px; padding-right: 8px; margin-left: -8px; margin-right: -8px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .rank { width: 22px; font-weight: 800; color: #bbb; font-size: 11px; text-align: center; shrink: 0; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .rank.top3 { color: #f97316; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .thumbnail { width: 48px; height: 48px; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; overflow: hidden; border: 1px solid #eee; flex-shrink: 0; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .thumbnail img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .meta { display: flex; align-items: center; gap: 6px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .ui-badge { padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: -0.5px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .ui-badge.women { background: #ffe4e6; color: #e11d48; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .ui-badge.unisex { background: #f3e8ff; color: #9333ea; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .ui-badge.men { background: #e0f2fe; color: #0284c7; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .brand-code { font-size: 11px; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .product-name { font-size: 13px; font-weight: 700; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 브랜드칩 영역 — 여러 줄 wrap */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #brandChips { flex-wrap: wrap; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #brandExpandedPanel { display: none; flex-direction: column; gap: 6px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #brandExpandedPanel.open { display: flex; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 브랜드 정렬 토글 활성 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .brand-sort-btn[data-active="1"] { background: var(--ink) !important; color: #fff !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .brand-sort-btn[data-active="0"] { background: var(--surface) !important; color: var(--muted) !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .dash-view-btn[data-active="1"] { background: #ff5a1f; color: #fff; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .dash-view-btn[data-active="0"] { background: #fff; color: #9ca3af; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .stats { text-align: right; display: flex; flex-direction: column; gap: 1px; margin-left: 10px; flex-shrink: 0; min-width: 68px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .stats .stat-primary { font-size: 15px; font-weight: 900; color: #111; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .stats .stat-secondary { font-size: 11px; font-weight: 500; color: #999; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .stats .stat-primary-rev { font-size: 14px; font-weight: 900; color: #dc2626; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .stats .stat-secondary-rev { font-size: 11px; font-weight: 600; color: #555; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* ── 다크모드 동적 요소 대응 ── */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #searchSuggestions { background:#1E1E1E; border-color:#374151; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #searchSuggestions > div { background:#1E1E1E; color:#9CA3AF; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #searchSuggestions > div:hover { background:#2d2d2d; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .toast { background: #334155; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #analyticsDashboard { background: #121212; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #analyticsDashboard .bg-white,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #analyticsDashboard article { background: #1E1E1E !important; border-color: #374151 !important; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #analyticsDashboard h1, body.dark-mode #analyticsDashboard h2 { color: #F3F4F6; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #erpSyncModal > div,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #posSyncGuideModal > div > div { background: #1E1E1E !important; color: #F3F4F6; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .list-item { border-color: #374151; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .list-item:hover { background-color: #1a1a1a; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .product-name { color: #F3F4F6; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .brand-code { color: #6B7280; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode #detailModal .bg-white, body.dark-mode #detailModal .card { background: #1E1E1E; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode select.ipt, body.dark-mode input.ipt { background: #1E1E1E; color: #F3F4F6; border-color: #374151; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* 스켈레톤 다크모드 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .animate-pulse .bg-gray-200 { background: #374151; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    body.dark-mode .animate-pulse .bg-gray-100 { background: #2d2d2d; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+`;
+document.head.appendChild(style);
+
+const ADMIN_PWD = "1212";
+const SESSION_FLAG = "racement_admin_session";
+// 어드민 세션 helpers — localStorage + 8시간 만료 (iOS Safari 탭 kill 대응)
+function setAdminSession() { try { localStorage.setItem(SESSION_FLAG, String(Date.now() + 8 * 3600 * 1000)); } catch(e) { console.warn('세션 저장 실패(storage 제한):', e); } }
+function checkAdminSession() { return parseInt(localStorage.getItem(SESSION_FLAG) || '0') > Date.now(); }
+const GH_CONFIG_KEY = "racement_gh_config_v1";
+const GH_PAT_KEY = "racement_gh_pat_v1";
+const CACHE_KEY = "racement_inventory_cache_v2";
+// 세션 캐시 저장 (iOS Safari 등 저장공간 한도 초과 시에도 앱이 죽지 않도록 안전 처리)
+function _safeSessionCache(obj) {
+    try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(obj));
+    } catch(e) {
+        // QuotaExceededError 등 → 캐시 생략 (60초 속도 최적화일 뿐, 동작엔 지장 없음)
+        try { sessionStorage.removeItem(CACHE_KEY); } catch(_) {}
+        console.warn('세션 캐시 저장 생략:', e && e.message);
+    }
+}
+const DATA_PATH = "inventory.json";
+const TRANSFERS_PATH = "transfers.json";
+const PROMOTIONS_PATH = "promotions.json";
+const SALES_GUIDE_PATH = "sales_guide_v2.json";
+const SALES_HISTORY_PATH = "sales_history.json";
+const LOCATIONS_PATH = "locations.json"; // 창고/매장 위치찾기 (도면 구역 + 상품 배정)
+const DISPLAY_PATH = "display_items.json";
+const STOCK_OVERRIDES_PATH = "stock_overrides.json";   // 실재고 보정(부산) — ADMIN 전용
+// ── 사이즈 단위 전환 (KR / EU / US) ──────────────────────────
+// 사이즈 단위는 이 탭에서만 유지 — 누가 EU로 바꿔 둬도 새로 열면 KR부터 (예전에 기기에 저장된 값은 지운다)
+try { localStorage.removeItem('_rcm_sizeUnit'); } catch(e) {}
+window.sizeUnit = (() => { try { return sessionStorage.getItem('_rcm_sizeUnit'); } catch(e) { return null; } })() || 'KR';
+// ── 신발 사이즈 변환 (브랜드별) — 실제 매장 박스 라벨 기준 ────────────────
+// 모든 브랜드 US: 10mm=1사이즈(5mm=0.5). anchorMm에서 남성 US = anchorUsm.
+// EU는 브랜드별 체계가 달라(나이키·써코니=0.5단위 / 아디다스·노말=⅔·⅓단위) usm→EU 표로 관리.
+// 여성 US = 남성 US + wOffset (대부분 1.5, 노말은 1). EU는 남녀 공통.
+const _SHOE_BRANDS = {
+  '나이키':   { anchorMm:270, anchorUsm:9, wOffset:1.5, eu:{"4":"36.5","3.5":"36","4.5":"37","5":"37.5","5.5":"38","6":"38.5","6.5":"39","7":"40","7.5":"40.5","8":"41","8.5":"42","9":"42.5","9.5":"43.5","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46","12.5":"47","13":"47.5"} },
+  '아디다스': { anchorMm:270, anchorUsm:9, wOffset:1.5, eu:{"4":"36","3.5":"35⅓","4.5":"36⅔","5":"37⅓","5.5":"38","6":"38⅔","6.5":"39⅓","7":"40","7.5":"40⅔","8":"41⅓","8.5":"42","9":"42⅔","9.5":"43⅓","10":"44","10.5":"44⅔","11":"45⅓","11.5":"46","12":"46⅔","12.5":"47⅓"} },
+  '노말':     { anchorMm:265, anchorUsm:9, wOffset:1,   eu:{"3.5":"35⅓","4":"36","4.5":"36⅔","5":"37⅓","5.5":"38","6":"38⅔","6.5":"39⅓","7":"40","7.5":"40⅔","8":"41⅓","8.5":"42","9":"42⅔","9.5":"43⅓","10":"44","10.5":"44⅔","11":"45⅓","11.5":"46","12":"46⅔"} },
+  // 2026-09-08 박스 라벨 실측 반영(001A-W: US W8.5/M7/EUR39⅓, 001A-M: US M9.5/W11/EUR42⅔) — 이전엔 테이블에 없어 나이키 기본값(EU 표기 불일치)으로 새 나갔음
+  '노다':     { anchorMm:270, anchorUsm:9, wOffset:1.5, eu:{"4":"35⅓","3.5":"34⅔","4.5":"36","5":"36⅔","5.5":"37⅓","6":"38","6.5":"38⅔","7":"39⅓","7.5":"40","8":"40⅔","8.5":"41⅓","9":"42","9.5":"42⅔","10":"43⅓","10.5":"44","11":"44⅔","11.5":"45⅓","12":"46","12.5":"46⅔"} },
+  '써코니':   { anchorMm:270, anchorUsm:9, wOffset:1.5, eu:{"4":"36.5","3.5":"36","4.5":"37","5":"37.5","5.5":"38","6":"38.5","6.5":"39","7":"40","7.5":"40.5","8":"41","8.5":"42","9":"42.5","9.5":"43","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46"} },
+  // 2026-09-09 박스 라벨 실측 반영(Cloudboom Volt 3WF30745531: US W7.5/EU38.5/JP24.5=245mm) — wOffset은 박스에 남성 사이즈 병기가 없어 확인 못해 다른 브랜드와 같은 1.5로 둠(미검증)
+  '온':       { anchorMm:245, anchorUsm:6, wOffset:1.5, eu:{"4":"36.5","3.5":"36","4.5":"37","5":"37.5","5.5":"38","6":"38.5","6.5":"39","7":"39.5","7.5":"40","8":"40.5","8.5":"41","9":"41.5","9.5":"42","10":"42.5","10.5":"43","11":"43.5","11.5":"44","12":"44.5","12.5":"45","13":"45.5"} },
+  // 2026-09-09 박스 라벨 실측 4건 반영(남 US9=270mm/EU42⅔/JP27, 남 US10.5=285mm/EU44⅔/JP28.5,
+  // 여 US7=240mm/EU38⅔/JP24, 여 US6=230mm/EU37⅓/JP23) — 4점 전부 wOffset 1.0·10mm/US 규칙에 정확히 들어맞음(나이키 기본값과 anchor는 같지만 wOffset·EU는 다름)
+  '호카':     { anchorMm:270, anchorUsm:9, wOffset:1.0, eu:{"4":"36","3.5":"35⅓","4.5":"36⅔","5":"37⅓","5.5":"38","6":"38⅔","6.5":"39⅓","7":"40","7.5":"40⅔","8":"41⅓","8.5":"42","9":"42⅔","9.5":"43⅓","10":"44","10.5":"44⅔","11":"45⅓","11.5":"46","12":"46⅔","12.5":"47⅓"} },
+  // 2026-09-09 박스 라벨 실측(남 US9/MEDIUM/EU42.5/UK8/27cm=270mm, 여 US7/MEDIUM/EU38/UK5/24cm=240mm) — wOffset 1.0·anchor 270/9 확인.
+  // EU표는 usm9 지점만 실측 확인(나이키와 정확히 일치)이라 나이키표를 그대로 쓰되, usm6(여성 실측 지점)만 38로 보정. 그 사이 값들은 미검증(나이키표 값 그대로 둠).
+  '브룩스':   { anchorMm:270, anchorUsm:9, wOffset:1.0, eu:{"4":"36.5","3.5":"36","4.5":"37","5":"37.5","5.5":"38","6":"38","6.5":"39","7":"40","7.5":"40.5","8":"41","8.5":"42","9":"42.5","9.5":"43.5","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46","12.5":"47","13":"47.5"} },
+  // 2026-09-09 박스 라벨 실측 4건(유니섹스 US7=250mm/EU40/KR250, 유니섹스 US7.5=255mm/EU40⅔/KR255,
+  // 여 US6.5=235mm/EU38/KR235, 여 US8=250mm/EU40/KR250) — 박스에 KR 사이즈가 직접 찍혀있어 mm과 대조 검증함. wOffset 1.0 확인.
+  '살로몬':   { anchorMm:250, anchorUsm:7, wOffset:1.0, eu:{"4":"36","3.5":"35⅓","4.5":"36⅔","5":"37⅓","5.5":"38","6":"38⅔","6.5":"39⅓","7":"40","7.5":"40⅔","8":"41⅓","8.5":"42","9":"42⅔","9.5":"43⅓","10":"44","10.5":"44⅔","11":"45⅓","11.5":"46","12":"46⅔","12.5":"47⅓"} },
+  // 2026-09-09 박스 라벨 실측 1건(US M10.5=USW11.5=UK10=EU44.5=28.5cm=285mm) — wOffset 1.0 확인, EU는 이 한 점만으로 "EU=usm+34"단순선형 가정(재고 적은 브랜드라 우선순위 낮음, 추가 박스 있으면 더 정확히 맞출 수 있음)
+  '새티스파이': { anchorMm:285, anchorUsm:10.5, wOffset:1.0, eu:{"4":"38","3.5":"37.5","4.5":"38.5","5":"39","5.5":"39.5","6":"40","6.5":"40.5","7":"41","7.5":"41.5","8":"42","8.5":"42.5","9":"43","9.5":"43.5","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46","12.5":"46.5"} },
+  // 2026-09-09 박스 라벨 실측 — 단, 찍힌 두 박스가 서로 다른 스타일(여성 WFCX7ZF / 남성 MFCX4TR)이라
+  // 노다·호카처럼 같은 박스의 남녀 병기로 wOffset을 직접 교차검증하지는 못함. wOffset은 다른 브랜드 다수와 같은
+  // 기본값 1.5 유지, EU만 실측 2점(usm5→37, usm8→41.5, wOffset=1.5 가정 하에 배치) 나이키표에 패치.
+  // 뉴발란스는 라인마다 라스트가 달라 라인별로 실제 오차가 있을 수 있음 — 특정 스타일이 계속 안 맞으면 그 스타일 박스로 다시 확인 필요.
+  '뉴발란스': { anchorMm:240, anchorUsm:5, wOffset:1.5, eu:{"4":"37","3.5":"37","4.5":"37","5":"37","5.5":"38","6":"38.5","6.5":"39","7":"40","7.5":"40.5","8":"41.5","8.5":"42","9":"42.5","9.5":"43.5","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46","12.5":"47","13":"47.5"} },
+  // 2026-09-09 봉투 라벨 실측(같은 봉투에 W11/M9 동시표기, SIZE=270) — wOffset·anchor는 확실, EU 데이터가 없어 나이키표 그대로 사용(미검증, 재고 13개라 우선순위 낮음)
+  '우포스':   { anchorMm:270, anchorUsm:9, wOffset:2.0, eu:{"4":"36.5","3.5":"36","4.5":"37","5":"37.5","5.5":"38","6":"38.5","6.5":"39","7":"40","7.5":"40.5","8":"41","8.5":"42","9":"42.5","9.5":"43.5","10":"44","10.5":"44.5","11":"45","11.5":"45.5","12":"46","12.5":"47","13":"47.5"} },
+};
+const _SHOE_DEFAULT = _SHOE_BRANDS['나이키'];  // 박스 미확보 브랜드는 나이키 표준 사용 (비브람파이브핑거스는 US가 범위(예 9-9.5)로 찍혀 이 표 구조 자체와 안 맞아 보류, 알트라·요넥스·스카르파는 부산 재고 0 — 그 외는 2026-09-09까지 다 확인해서 위에 등록함)
+const _KR_CLOTH_EU = {44:'32',55:'34',66:'36',77:'38',88:'40',95:'42',100:'44',105:'46'};
+const _KR_CLOTH_US = {44:'XS',55:'S',66:'M',77:'L',88:'XL',95:'2XL',100:'3XL',105:'4XL'};
+function convertSizeLabel(sz, gender, brand) {
+    if(window.sizeUnit === 'KR') return String(sz);
+    const n = parseInt(sz);
+    // 신발 (mm 그리드)
+    if(n >= 200 && n <= 320 && n % 5 === 0) {
+        const c = _SHOE_BRANDS[String(brand||'').trim()] || _SHOE_DEFAULT;
+        const usm = c.anchorUsm + (n - c.anchorMm) / 10;   // 남성 US
+        if(window.sizeUnit === 'US') {
+            const isW = (gender === 'W' || gender === '여성' || gender === '여');
+            return String(isW ? usm + c.wOffset : usm);
+        }
+        if(window.sizeUnit === 'EU') {
+            const key = String(usm);
+            if(c.eu[key] !== undefined) return c.eu[key];
+            if(_SHOE_DEFAULT.eu[key] !== undefined) return _SHOE_DEFAULT.eu[key];
+            return String(sz);
+        }
+    }
+    // 의류 (KR 44/55/66…)
+    if(_KR_CLOTH_EU[n] !== undefined) {
+        if(window.sizeUnit === 'EU') return _KR_CLOTH_EU[n];
+        if(window.sizeUnit === 'US') return _KR_CLOTH_US[n];
+    }
+    return String(sz);
+}
+window.setSizeUnit = function(unit) {
+    window.sizeUnit = unit;
+    try { sessionStorage.setItem('_rcm_sizeUnit', unit); } catch(e) {}
+    const isDark = document.documentElement.classList.contains('dark-mode');
+    ['KR','EU','US'].forEach(u => {
+        const btn = document.getElementById('sut-' + u);
+        if(!btn) return;
+        const on = u === unit;
+        btn.style.background = on ? (isDark ? '#3b1a10' : '#fff0e9') : 'transparent';
+        btn.style.color = on ? (isDark ? '#ff8a5c' : '#c2410c') : (isDark ? '#6b7280' : '#9ca3af');
+        btn.style.fontWeight = on ? '700' : '500';
+    });
+    render();
+};
+const CAT_ORDER = { "신발":0, "의류":1, "용품":2 };
+
+// 기본 GitHub 설정 (Admin 비번 입력 시 PAT 자동 저장)
+const DEFAULT_GH = {
+  owner:  'kimchic1212-sudo',
+  repo:   'stock-rcm-data',  // 2026-07-29: 데이터를 비공개 저장소로 이전 (앱코드는 stock-rcm-x9k2p 에 그대로)
+  branch: 'main',
+};
+const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
+
+// ── 데이터 게이트웨이 ────────────────────────────────────────────────
+// 재고·판매 JSON이 GitHub Pages 로 그대로 공개되지 않도록, 허브의 인증 API를 통해 읽는다.
+// 게이트(공용비번) 통과 시 받은 서명 토큰을 Authorization 헤더로 보낸다.
+// 아직 Pages 에 파일이 남아있는 이전 기간에는 실패 시 기존 경로로 폴백한다.
+const HUB_DATA_API = 'https://racement-hub.vercel.app/api/inv-data';
+const INV_PASS_KEY = 'racement_inv_pass_v1';
+
+async function dataFetch(path){
+    const pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e){ return null; } })();
+    // 옛 공개경로(./*.json)는 비공개 저장소 이전 때 삭제돼 폴백해도 항상 404 —
+    // 토큰이 없거나 거절되면 공용 비밀번호 화면을 다시 띄우고, 호출부는 .ok로 실패를 판단한다.
+    if(!pass){ window._rcShowGate?.(); return new Response(null, { status: 401 }); }
+    // 게이트웨이가 콜드스타트 등으로 일시적으로 실패할 수 있어 짧게 재시도.
+    for(let attempt = 0; attempt < 3; attempt++){
+        try {
+            const r = await fetch(`${HUB_DATA_API}?f=${encodeURIComponent(path)}`, {
+                headers: { Authorization: 'Bearer ' + pass }, cache: 'no-store'
+            });
+            if(r.ok) return r;
+            if(r.status === 401) {
+                try { localStorage.removeItem(INV_PASS_KEY); } catch(e){}
+                window._rcShowGate?.();
+                return r;
+            }
+            if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+        } catch(e) {
+            if(attempt < 2) await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+        }
+    }
+    return new Response(null, { status: 503 });
+}
+// Admin 비번 입력 시 허브 서버에서 PAT 발급 (토큰은 소스에 두지 않는다)
+// 성공 시 항상 최신 토큰으로 갱신 → 토큰 교체(rotation) 자동 대응
+async function applyDefaultPatIfNeeded(pwd, silent) {
+    try {
+        const r = await fetch(HUB_TOKEN_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pwd }),
+        });
+        if (r.ok) {
+            const j = await r.json();
+            if (j.pat) setPat(j.pat);
+        } else if (!getPat() && !silent) {
+            alert('저장 토큰 발급 실패 — 저장 기능이 제한될 수 있습니다');
+        }
+    } catch(e) {
+        if (!getPat() && !silent) alert('네트워크 오류 — 저장 토큰 발급 실패');
+    }
+    if (!GH.owner) {
+        GH.owner  = DEFAULT_GH.owner;
+        GH.repo   = DEFAULT_GH.repo;
+        GH.branch = DEFAULT_GH.branch;
+        saveGhConfig();
+    }
+}
+let GH = { owner:"", repo:"", branch:"main" };
+let RAW=[], PRODUCTS=[], filtered=[];
+let IMAGES = {};
+let TRANSFERS = [];
+let PROMOTIONS = {};
+let SALES_GUIDES = {};
+
+// 복수 기획전 헬퍼
+function getPromoList() {
+  if(!PROMOTIONS) return [];
+  if(Array.isArray(PROMOTIONS.promotions)) return PROMOTIONS.promotions;
+  if(PROMOTIONS.meta && PROMOTIONS.items && Object.keys(PROMOTIONS.items||{}).length > 0) return [PROMOTIONS];
+  return [];
+}
+// 기간 문자열 파싱 — 다양한 형식 지원:
+//   "06/19~06/22"  /  "5.25-6.14"  /  "06/19(목) ~ 06/22(일), 4일간"
+function _parsePromoPeriod(period) {
+  // .*? 비탐욕 매칭으로 날짜와 ~ 사이 임의 텍스트 허용
+  const m = (period||'').match(/(\d{1,2}[\/.]\d{1,2}).*?[~～\-].*?(\d{1,2}[\/.]\d{1,2})/);
+  if(!m) return null;
+  const toDate = s => { const [mo,d]=s.replace('.','/').split('/'); const yr=new Date().getFullYear(); return new Date(yr,parseInt(mo)-1,parseInt(d)); };
+  const start = toDate(m[1]);
+  const end   = toDate(m[2]); end.setHours(23,59,59,999);
+  return { start, end };
+}
+function isPromoActive(pr) {
+  const range = _parsePromoPeriod(pr.meta?.period||'');
+  if(!range) return true; // 기간 정보 없으면 항상 활성
+  const now = new Date();
+  return now >= range.start && now <= range.end;
+}
+function findPromoForCode(code, consumerPrice) {
+  let best = null;
+  let bestPrice = Infinity;
+  let bestId = -Infinity;
+  for (const pr of getPromoList()) {
+    if (!window.promoPreviewMode && !isPromoActive(pr)) continue;
+    const item = pr.items && pr.items[code];
+    if (!item) continue;
+    let price = null;
+    if (item.targetCat === getActiveWeeklyCategory() && item.weeklyPrice && consumerPrice > 0 && item.weeklyPrice < consumerPrice) {
+      price = item.weeklyPrice;
+    } else if (item.finalPrice && consumerPrice > 0 && item.finalPrice < consumerPrice) {
+      price = item.finalPrice;
+    } else if (item.finalRate > 0 && consumerPrice > 0) {
+      const computed = Math.round(consumerPrice * (1 - item.finalRate) / 10) * 10;
+      if (computed < consumerPrice) price = computed;
+    }
+    if (price === null) continue;
+    const prId = parseInt(pr.id, 10) || 0;
+    const better = price < bestPrice || (price === bestPrice && prId > bestId);
+    if (better) {
+      bestPrice = price;
+      bestId = prId;
+      best = { promo: pr, item, isPreview: !isPromoActive(pr) };
+    }
+  }
+  return best;
+}
+function reapplyPromoData() {
+  if(!PRODUCTS || !PRODUCTS.length) return;
+  const activeWeeklyCat = getActiveWeeklyCategory();
+  PRODUCTS.forEach(p => {
+    delete p.currentPromoPrice; delete p.promoType; delete p.promoName;
+    delete p.promoRate; delete p.promoEndDate; delete p.promoIsPreview;
+    const _pm = findPromoForCode(p.품번, p.소비자가);
+    if(!_pm) return;
+    const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
+    p.promoIsPreview = !!_isPreview;
+    const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
+    const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+    p.promoEventRate  = _pi.eventRate  || 0;
+    p.promoCouponRate = _pi.couponRate || 0;
+    p.promoEventPrice = _pi.eventPrice || null;
+    if(_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
+      p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
+      p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
+      p.promoEndDate = _endDate;
+    } else if(_pi.finalPrice && _pi.finalPrice < p.소비자가) {
+      p.currentPromoPrice = _pi.finalPrice; Object.assign(p, _promoMeta);
+      p.promoRate = _pi.finalRate || ((p.소비자가 - _pi.finalPrice) / p.소비자가);
+    } else if(_pi.finalRate > 0 && p.소비자가 > 0) {
+      const _computed = Math.round(p.소비자가 * (1 - _pi.finalRate) / 10) * 10;
+      if(_computed < p.소비자가) { p.currentPromoPrice = _computed; Object.assign(p, _promoMeta); p.promoRate = _pi.finalRate; }
+    }
+  });
+}
+let SALES_HISTORY = { meta: {}, items: {} };
+// 실재고 보정(부산): { "품번": { "260": { actual, system, by, at } } }  — 시스템재고 ≠ 실재고일 때 ADMIN이 수동 보정
+let STOCK_OVERRIDES = {};
+// DP(전시) 관리: { "품번": { "260": { since: "2026-05-17" }, "265": { since: "..." } } }
+let DISPLAY_ITEMS = {};
+// 위치찾기: { zones:[{id,group,label,x,y,slots:[]}], assignments:{ "품번": {zoneId, slot} } }
+let LOCATIONS = { zones: [], assignments: {} };
+let visibleCount=60;
+let CURRENT_META = null;
+let CURRENT_PRODUCT = null;
+
+try { localStorage.removeItem('FAVS'); } catch(e) {}   // 즐겨찾기 기능 삭제(2026-09-22) — 기기에 남은 예전 목록 정리
+let RECENT_SEARCHES = JSON.parse(localStorage.getItem('RECENT_SEARCHES_V4') || '[]');
+
+let windowDashItems = [];
+let windowCurrentDashIndex = 0;
+
+let filterHistory = [];
+let isUndoing = false;
+
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+const fmt = n => (n??0).toLocaleString("ko-KR");
+const krw = n => "₩" + fmt(n);
+
+const isFwSize = s => /^\d{3}$/.test(s) && s !== "120" && s !== "130";
+
+function loadGhConfig(){
+  try{
+    const c = localStorage.getItem(GH_CONFIG_KEY);
+    if(c) GH = Object.assign(GH, JSON.parse(c));
+    // 설정이 없으면 기본값으로 자동 설정 (iPad 등 새 기기 대응)
+    if(!GH.owner) { GH.owner = DEFAULT_GH.owner; GH.repo = DEFAULT_GH.repo; GH.branch = DEFAULT_GH.branch; saveGhConfig(); }
+
+    // 2026-07-29: 데이터가 비공개 저장소로 이전됨 — 예전 기기에 캐시된 공개 저장소 설정을 자동 승격
+    if(GH.repo === 'stock-rcm-x9k2p') { GH.repo = DEFAULT_GH.repo; saveGhConfig(); }
+    if(!getPat()) setPat(DEFAULT_GH.pat);
+  }catch(e){}
+}
+function saveGhConfig(){ try { localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); } catch(e) { console.warn('설정 저장 실패(storage 제한):', e); } }
+function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
+function setPat(v){ try { if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); } catch(e) { console.warn('로그인 토큰 저장 실패(storage 제한) — 이 기기/브라우저에서는 새로고침 시 ADMIN이 풀릴 수 있음:', e); } }
+const ANTH_KEY = "racement_anth_key_v1";
+function getAnthKey(){ return localStorage.getItem(ANTH_KEY) || ""; }
+function setAnthKey(v){ try { if(v) localStorage.setItem(ANTH_KEY, v); else localStorage.removeItem(ANTH_KEY); } catch(e) { console.warn('키 저장 실패(storage 제한):', e); } }
+
+function checkPat() {
+    if(!getPat()) {
+        if(checkAdminSession() && !window._patPrompting) {
+            // 어드민인데 토큰 없음 → 비번 재입력으로 자동 재발급 유도 후 재시도 안내
+            window._patPrompting = true;
+            ensurePatForAdmin().then(ok => { if(ok) showToast('✓ 토큰 재발급 완료 — 저장을 한 번 더 눌러주세요.'); })
+                .finally(() => { window._patPrompting = false; });
+        } else if(!checkAdminSession()) {
+            alert("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 입력해주세요.");
+        }
+        return false;
+    }
+    return true;
+}
+// PAT가 없을 때(어드민 세션은 유효) 토큰 자동 재발급
+async function ensurePatForAdmin() {
+    if(getPat()) return true;
+    // 1차: 저장된 관리자 비번으로 허브에서 자동 발급 (프롬프트 없음)
+    try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {}
+    if(getPat()) return true;
+    // 2차: 자동 실패 시에만 수동 입력
+    const pw = prompt('저장하려면 관리자 비밀번호를 입력해주세요.');
+    if(pw === null) return false;
+    try { await applyDefaultPatIfNeeded(String(pw).trim()); } catch(e) {}
+    return !!getPat();
+}
+
+function detectGender(code, sex){
+  const g = String(sex||"").trim();
+  if(g==="남성"||g==="남"||g.toUpperCase()==="M") return "M";
+  if(g==="여성"||g==="여"||g.toUpperCase()==="W") return "W";
+  return "U";
+}
+
+function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+function getChosung(str){
+  let r = ""; const s = String(str||"");
+  for(let i=0;i<s.length;i++){
+    const code = s.charCodeAt(i);
+    if(code >= 0xAC00 && code <= 0xD7A3) r += CHO[Math.floor((code - 0xAC00) / 588)];
+    else r += s[i].toLowerCase();
+  }
+  return r;
+}
+
+function isAllChosung(str) { return /^[ㄱ-ㅎ]+$/.test(str); }
+
+async function copyText(text, btn){
+  try{
+    await navigator.clipboard.writeText(text);
+    if(btn){
+      const orig = btn.innerHTML; btn.classList.add("copied"); btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> 복사됨';
+      if(window.lucide) lucide.createIcons();
+      setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); if(window.lucide) lucide.createIcons(); }, 1200);
+    }
+  }catch(e){ alert("복사 실패"); }
+}
+
+function showToast(message, onUndo, type) {
+    let container = document.getElementById('toast-container');
+    if(!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    const _isErr = type === 'error';
+    toast.innerHTML = `<span class="flex items-center gap-2"><i data-lucide="${_isErr ? 'alert-circle' : 'check-circle'}" class="w-5 h-5 ${_isErr ? 'text-red-400' : 'text-green-400'}"></i> ${escapeHtml(message)}</span>`;
+
+    let timer;
+    if(onUndo) {
+        const undoBtn = document.createElement('span');
+        undoBtn.className = 'toast-undo';
+        undoBtn.innerHTML = '실행 취소 ↺';
+        undoBtn.onclick = () => {
+            clearTimeout(timer);
+            onUndo();
+            toast.style.animation = 'none';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            toast.style.transition = 'all 0.2s';
+            setTimeout(() => toast.remove(), 200);
+        };
+        toast.appendChild(undoBtn);
+    }
+    container.appendChild(toast);
+    if(window.lucide) lucide.createIcons();
+
+    timer = setTimeout(() => {
+        toast.style.animation = 'none';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        toast.style.transition = 'all 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// 켜고 끄는 필터 칩 [상태 키, data 속성, 켜졌을 때 링 색] — getFilters·되돌리기 저장/복원이 모두 이 목록을 쓴다
+const _TOGGLE_CHIPS = [
+  ["rtChance","data-rtchance"],
+  ["stock","data-stock"],
+  
+  
+  ["busanOnly","data-busanonly","ring-blue-400"],
+  ["sinsaOnly","data-sinsaonly","ring-indigo-400"],
+  ["centerOnly","data-centeronly","ring-teal-400"],
+  ["todaySoldOnly","data-todaysold","ring-orange-400"],
+  ["noImage","data-noimage","ring-gray-400"],
+  ["noBarcode","data-nobarcode","ring-amber-400"],
+  ["overrideOnly","data-override","ring-amber-400"],
+  ["noLocation","data-noloc","ring-sky-400"],
+  ["hasLocation","data-hasloc","ring-emerald-400"],
+];
+// 되돌리기용 스냅샷 — 필터가 읽는 모든 조건을 그대로 저장하고, 검색창은 입력한 그대로, 정렬도 함께
+function getCurrentFilterState() {
+    return { ...getFilters(), q: $("#q").value, sort: $("#sortSel")?.value || "default", promoOnly: window.tempPromoFilter === true };
+}
+
+function saveHistoryState() {
+    if(isUndoing) return;
+    const currentState = getCurrentFilterState();
+
+    if(filterHistory.length > 0) {
+        const last = filterHistory[filterHistory.length - 1];
+        if(JSON.stringify(last) === JSON.stringify(currentState)) return;
+    }
+
+    filterHistory.push(currentState);
+    if(filterHistory.length > 20) filterHistory.shift();
+
+    updateUndoBtnUI();
+}
+
+function restoreHistoryState() {
+    if(filterHistory.length === 0) return;
+    isUndoing = true;
+    const state = filterHistory.pop();
+
+    $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === state.cat ? "1" : "0"));
+    $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === state.gender ? "1" : "0"));
+    const _restoredBrands = Array.isArray(state.brand) ? state.brand : (state.brand && state.brand !== "ALL" ? [state.brand] : []);
+    window._activeBrands = new Set(_restoredBrands);
+    if(window._renderBrandChips) window._renderBrandChips();
+
+    // 예전 형태로 저장된 상태에 없는 항목은 건드리지 않는다
+    _TOGGLE_CHIPS.forEach(([key, attr, ring]) => {
+        const b = $(`button.chip[${attr}]`);
+        if(!b || !(key in state)) return;
+        const on = !!state[key];
+        b.dataset.active = on ? "1" : "0";
+        if(ring) { b.classList.toggle('ring-2', on); b.classList.toggle(ring, on); }
+    });
+    if('salesSpeed' in state) $$('button.chip[data-salesspeed]').forEach(b => b.dataset.active = (b.dataset.salesspeed === state.salesSpeed ? "1" : "0"));
+    if(Array.isArray(state.dpFilters)) $$('button.chip[data-dp]').forEach(b => {
+        const on = state.dpFilters.includes(b.dataset.dp);
+        b.dataset.active = on ? "1" : "0";
+        b.classList.remove('ring-2', 'ring-violet-400', 'ring-orange-400');
+        if(on) b.classList.add('ring-2', b.dataset.dp === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400');
+    });
+    const _lz = $('#locZoneSelect');
+    if(_lz && 'locationZone' in state) { _lz.value = state.locationZone || ''; _lz.classList.toggle('ring-2', !!_lz.value); _lz.classList.toggle('ring-sky-400', !!_lz.value); }
+
+    $("#q").value = state.q;
+    if($("#sizeSelFw")) $("#sizeSelFw").value = state.sizeFw;
+    if($("#sizeSelAp")) $("#sizeSelAp").value = state.sizeAp;
+    if($("#sizeSelGear")) $("#sizeSelGear").value = state.sizeGear;
+    if($("#sortSel")) $("#sortSel").value = state.sort;
+
+    // 기획전 필터는 저장된 켜짐/꺼짐을 그대로 되살린다. 예전엔 togglePromoView를 빌려 썼는데, 기획전이 2개 이상이면
+    // 그 함수가 무조건 '켜기'로 동작해서 되돌리기만 눌러도 기획전 필터가 켜지는 버그가 있었음(2026-09-22)
+    window.tempPromoFilter = state.promoOnly === true;
+    window._activePromoName = window.tempPromoFilter ? (state.promoName || "ALL") : "ALL";   // 어느 기획전을 골랐는지도 함께
+    const promoBtn = $('button[onclick^="window.togglePromoView"]');
+    if(promoBtn) _syncPromoBtn(promoBtn, window.tempPromoFilter, window._activePromoName || "ALL");
+    $("#promoTypeSel")?.classList.toggle("hidden", !window.tempPromoFilter);
+    $("#promoRateSel")?.classList.toggle("hidden", !window.tempPromoFilter);
+
+    updateUndoBtnUI();
+    visibleCount = 60;
+    render();
+    isUndoing = false;
+    showToast("이전 상태로 되돌렸습니다.");
+}
+
+function updateUndoBtnUI() {
+    $("#undoFilterBtn")?.classList.toggle("hidden", filterHistory.length === 0);
+    let btn = $("#mobileUndoBtn");
+    if(!btn) {
+        btn = document.createElement("button");
+        btn.id = "mobileUndoBtn";
+        btn.innerHTML = `<i data-lucide="undo-2" class="w-6 h-6"></i>`;
+        btn.style.cssText = "position:fixed; bottom:24px; right:24px; z-index:9990; background:#1e293b; color:white; width:56px; height:56px; border-radius:50%; display:none; align-items:center; justify-content:center; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); cursor:pointer;";
+        btn.onclick = restoreHistoryState;
+        document.body.appendChild(btn);
+        if(window.lucide) lucide.createIcons();
+    }
+    if(filterHistory.length > 0) {
+        btn.style.display = "flex";
+    } else {
+        btn.style.display = "none";
+    }
+}
+
+document.addEventListener("keydown", (e) => {
+    // 💡 수정됨: #adminModal 을 선택자에 추가하여 ESC로 닫히게 복구
+    if(e.key === "Escape") {
+        const modals = $$('#adminModal, #detailModal, #dashDetailModal, #salesGuideModal, #transfersModal, .modal-backdrop');
+        let closedAny = false;
+        modals.forEach(m => {
+            if(m && !m.classList.contains("hidden")) {
+                m.classList.add("hidden");
+                closedAny = true;
+            }
+        });
+        if(closedAny) document.body.style.overflow = '';
+        if(!closedAny) {
+            const dash = document.querySelector("#analyticsDashboard");
+            if(dash && !dash.classList.contains("hidden")) {
+                dash.classList.add("opacity-0");
+                setTimeout(() => dash.classList.add("hidden"), 300);
+                if (document.body.classList.contains('dashboard-only-mode') && typeof _revealDashOnlyUI === 'function') _revealDashOnlyUI(); // 팝업 전용모드에서 ESC로 닫아도 재고앱 화면 노출 (안 하면 화면 먹통됨)
+            }
+        }
+    }
+
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+        e.preventDefault();
+        restoreHistoryState();
+    }
+
+    const dashModal = document.querySelector("#dashDetailModal");
+    if(dashModal && !dashModal.classList.contains("hidden")) {
+        if(e.key === "ArrowLeft") $("#prevDashBtn")?.click();
+        if(e.key === "ArrowRight") $("#nextDashBtn")?.click();
+    }
+});
+
+// 판매 데이터 받기 실패는 loadSalesOnly의 catch에서 조용히 끝나므로, 마지막 성공 시각으로 끊김을 감지한다
+let _lastSalesSync = Date.now();
+let _salesStaleShown = false;
+const SALES_STALE_MS = 10 * 60 * 1000;
+
+function applyMeta(meta){
+    if(meta) {
+        // 하단에 렌더링되던 불필요한 구역 삭제
+        const oldSourceBar = document.getElementById("dataSourceBar");
+        if(oldSourceBar) oldSourceBar.remove();
+        const globalHeader = document.getElementById("globalHeaderData");
+        if(globalHeader) globalHeader.remove();
+
+        const statSrcEl = document.getElementById("statSrc");
+        if(!statSrcEl) return;
+
+        // 판매 DB 라벨
+        let addInfo = SALES_HISTORY.meta?.name
+            ? `<div data-sales-db class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-100 flex items-center gap-1 shrink-0" style="max-width:180px;" title="${escapeHtml(SALES_HISTORY.meta.name)}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  📊 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(SALES_HISTORY.meta.name)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+               </div>`
+            : "";
+
+        // 기획전 라벨 (복수 지원)
+        const _activePromos = getPromoList().filter(isPromoActive);
+        window._activePromoNames = _activePromos.map(pr => pr.meta?.name || '기획전');
+        _refreshPromoBtnIdle();
+
+        // POS 판매 동기화 뱃지
+        let posSyncInfo = "";
+        const lastSynced = SALES_HISTORY.meta?.lastSynced;
+        const _staleMin = Math.floor((Date.now() - _lastSalesSync) / 60000);
+        _salesStaleShown = Date.now() - _lastSalesSync >= SALES_STALE_MS;
+        if (_salesStaleShown) {
+            posSyncInfo = `<div onclick="location.reload()" title="이 화면이 ${_staleMin}분째 판매 데이터를 못 받고 있어요. 눌러서 새로고침" class="cursor-pointer bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-300 flex items-center gap-1 shrink-0 hover:bg-orange-100 transition-colors">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 shrink-0"></i> POS판매 ${_staleMin}분째 끊김 · 새로고침
+            </div>`;
+        } else if (lastSynced) {
+            const d = new Date(lastSynced);
+            const now = new Date();
+            const isToday = d.getFullYear() === now.getFullYear()
+                         && d.getMonth()    === now.getMonth()
+                         && d.getDate()     === now.getDate();
+            const hh = String(d.getHours()).padStart(2,'0');
+            const min = String(d.getMinutes()).padStart(2,'0');
+            if (isToday) {
+                // 오늘 데이터 → 초록 + 시간만
+                posSyncInfo = `<div onclick="showPosSyncGuide('ok')" class="cursor-pointer bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0 hover:bg-emerald-100 transition-colors">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${hh}:${min}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>`;
+            } else if (_posCheckedToday()) {
+                // 동기화는 오늘 정상으로 돌았는데 아직 판매가 없음(영업 전 등) → 노란 경고 대신 회색 안내
+                const _c = new Date(window._posLastCheckedAt);
+                const _ch = String(_c.getHours()).padStart(2,'0'), _cm = String(_c.getMinutes()).padStart(2,'0');
+                posSyncInfo = `<div onclick="showPosSyncGuide('ok')" title="POS 동기화는 정상이고, 오늘 판매가 아직 없어요 (${_ch}:${_cm} 확인)" class="cursor-pointer bg-gray-50 text-gray-600 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: 오늘 판매 없음 · ${_ch}:${_cm} 확인
+                </div>`;
+            } else {
+                // 어제 이전 데이터 → 노란색 경고
+                const mm = String(d.getMonth()+1);
+                const dd = String(d.getDate());
+                posSyncInfo = `<div onclick="showPosSyncGuide('stale')" class="cursor-pointer bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-[11px] font-black border border-yellow-300 flex items-center gap-1 shrink-0 hover:bg-yellow-100 transition-colors">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: ${mm}/${dd} (미갱신)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>`;
+            }
+        } else {
+            posSyncInfo = `<div onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <i data-lucide="zap-off" class="w-3.5 h-3.5 shrink-0"></i> POS판매: 미연동
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>`;
+        }
+
+        // flex-row 와 flex-wrap을 적용해 가로로 나란히, 넘치면 다음 줄로
+        statSrcEl.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex flex-row flex-wrap gap-2 w-full items-center">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg text-[11px] font-black border border-blue-100 flex items-center gap-1 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0"></i> 재고: ${meta.uploadedAt || ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ${posSyncInfo}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ${addInfo}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        `;
+        if(window.lucide) lucide.createIcons();
+    }
+}
+
+function showPosSyncGuide(status) {
+    const colorMap = {
+        emerald: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+        yellow:  'bg-yellow-50 border-yellow-300 text-yellow-900',
+        gray:    'bg-gray-50 border-gray-200 text-gray-700'
+    };
+    const titles = {
+        ok:    '⚡ POS 판매 연동',
+        stale: '⚠️ POS 미갱신',
+        none:  '🔌 POS 판매 없음'
+    };
+    const colors = { ok: 'emerald', stale: 'yellow', none: 'gray' };
+    const g = { title: titles[status], color: colors[status] };
+
+    const existing = document.getElementById('posSyncGuideModal');
+    if (existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'posSyncGuideModal';
+    modal.className = 'fixed inset-0 flex items-center justify-center z-[99999] p-4 bg-black/50';
+    modal.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 relative">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <button onclick="document.getElementById('posSyncGuideModal').remove()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl font-black">✕</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="${colorMap[g.color]} border rounded-xl px-4 py-3 mb-4 text-sm font-black">${g.title}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-sm text-gray-700 leading-relaxed mb-4">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                POS 판매 데이터를 지금 바로 불러옵니다.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-gray-400 text-xs">신세계 스파로스 POS → GitHub 자동 업로드 (약 2~3분 소요)</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <button id="posSyncNowBtn" onclick="window.triggerPosSync()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> 지금 동기화
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div id="posSyncNowResult" class="mt-3 text-xs text-center text-gray-400"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>`;
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+    if (window.lucide) lucide.createIcons();
+}
+
+window.triggerPosSync = async () => {
+    const btn = document.getElementById('posSyncNowBtn');
+    const result = document.getElementById('posSyncNowResult');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> 실행 중...';
+    result.textContent = '';
+    try {
+        const r = await fetch(
+            // pos_sync.yml 워크플로우는 앱 코드 저장소(stock-rcm-x9k2p)에 있음 — GH.repo(데이터 저장소)와 다름
+            `https://api.github.com/repos/${GH.owner}/stock-rcm-x9k2p/actions/workflows/pos_sync.yml/dispatches`,
+            { method: 'POST', headers: { Authorization: 'Bearer ' + getPat(), 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: GH.branch }) }
+        );
+        if (r.status === 204) {
+            btn.innerHTML = '✅ 동기화 요청 완료!';
+            btn.className = btn.className.replace('bg-blue-600 hover:bg-blue-700', 'bg-emerald-500');
+            result.textContent = '약 2~3분 후 판매 데이터가 업데이트됩니다.';
+        } else {
+            throw new Error(`status ${r.status}`);
+        }
+    } catch(e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-4 h-4"></i> 다시 시도';
+        btn.className = btn.className.replace('bg-blue-600 hover:bg-blue-700', 'bg-red-500 hover:bg-red-600');
+        result.textContent = '오류: ' + e.message;
+        if (window.lucide) lucide.createIcons();
+    }
+};
+
+// GitHub Contents API에서 직접 읽기 (Pages 배포 대기 없이 즉시 반영)
+async function fetchGithubJson(path) {
+    const pat = getPat();
+    if(!pat || !GH.owner || !GH.repo) return null;
+    try {
+        const res = await fetch(
+            `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${GH.branch}&t=${Date.now()}`,
+            { headers: { Authorization: "Bearer " + pat, Accept: "application/vnd.github.v3+json" } }
+        );
+        if(!res.ok) return null;
+        const j = await res.json();
+        return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+    } catch(e) { return null; }
+}
+
+function showSkeletonCards(n = 6) {
+    const grid = document.getElementById("grid");
+    const results = document.getElementById("results");
+    const emptyState = document.getElementById("emptyState");
+    if(!grid) return;
+    if(results) results.classList.remove("hidden");
+    if(emptyState) emptyState.classList.add("hidden");
+    const skeletonHtml = Array(n).fill(0).map(() => `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="card p-3.5 flex flex-col gap-2 animate-pulse">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex gap-1"><div class="h-4 w-14 bg-gray-200 rounded-full"></div><div class="h-4 w-18 bg-gray-200 rounded-full"></div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex justify-between gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div class="flex-1 flex flex-col gap-1.5"><div class="h-4 w-3/4 bg-gray-200 rounded"></div><div class="h-3 w-1/2 bg-gray-100 rounded"></div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div class="w-[88px] h-[88px] bg-gray-100 rounded-lg shrink-0"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex gap-2">${Array(5).fill('<div class="w-[46px] h-[44px] bg-gray-100 rounded-lg"></div>').join('')}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="border-t pt-3 flex justify-between"><div class="h-3 w-24 bg-gray-100 rounded"></div><div class="h-5 w-20 bg-gray-200 rounded"></div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>`).join('');
+    grid.innerHTML = skeletonHtml;
+}
+
+async function loadData(force = false){
+  // 어드민 세션이면 로드 시 항상 최신 토큰 재발급 (옛/만료 토큰이 남아있어도 교체 → 401 방지)
+  if(checkAdminSession()) { applyDefaultPatIfNeeded(ADMIN_PWD, true).catch(()=>{}); }
+  // 캐시 없거나 강제 갱신이면 스켈레톤 표시
+  const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+  if(!cached || force) showSkeletonCards();
+  if (!force && cached && (Date.now() - (cached._timestamp||0) < 180000)) {
+      RAW = cached.rows || []; CURRENT_META = cached.meta; IMAGES = cached.images || {}; TRANSFERS = cached.transfers || []; PROMOTIONS = cached.promotions || {}; SALES_GUIDES = cached.salesGuides || {}; SALES_HISTORY = cached.salesHistory || { meta: {}, items: {} }; DISPLAY_ITEMS = cached.displayItems || {}; STOCK_OVERRIDES = cached.stockOverrides || {}; LOCATIONS = cached.locations || { zones: [], assignments: {} };
+      // 위치 데이터 백그라운드 동기화 (다른 기기가 방금 태그한 위치 반영)
+      fetchGithubJson(LOCATIONS_PATH).then(d=>{
+          if(d && typeof d==='object' && Array.isArray(d.zones)) {
+              LOCATIONS = d;
+              try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.locations = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+              if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn();
+          }
+      }).catch(()=>{});
+      applyMeta(CURRENT_META); rebuildIndex(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{}); autoRemoveSoldOutLocations().then(() => render()).catch(()=>{});
+      // DP: 캐시로 먼저 그린 뒤 백그라운드로 최신을 받아 반영 (다른 기기 체크가 60초 캐시에 막히지 않게)
+      fetchGithubJson(DISPLAY_PATH).then(d=>{
+          if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(DISPLAY_ITEMS)) {
+              DISPLAY_ITEMS = d;
+              // 품절 자동정리는 여기서 하지 않음 — 이 경로는 다른 기기의 DP 변경만 빠르게 반영하는 background poll이라
+              // 이 기기의 재고(PRODUCTS)가 최신이 아닐 수 있어, 여기서 자동정리를 돌리면 방금 마크한 DP가
+              // 오래된 재고 스냅샷 기준으로 잘못 "품절"로 판단돼 지워질 수 있음(실제 발생한 버그).
+              // 품절 정리는 재고까지 같이 새로 불러오는 전체 새로고침 시점에만 수행.
+              try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+              if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn();
+              render();
+          }
+      }).catch(()=>{});
+      // 재고보정: 동일하게 백그라운드 동기화
+      fetchGithubJson(STOCK_OVERRIDES_PATH).then(d=>{
+          if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(STOCK_OVERRIDES)) {
+              STOCK_OVERRIDES = d;
+              try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.stockOverrides = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+              _recomputeStock(); render();
+          }
+      }).catch(()=>{});
+      const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
+      setupQuickActionBar();
+      if(window.renderPromoAdmin) window.renderPromoAdmin();
+      if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+      if(window.renderSalesAdmin) window.renderSalesAdmin();
+      return;
+  }
+  try {
+      const [invRes, imgRes, trRes, promoRes, diRes, soRes, locRes] = await Promise.all([
+          dataFetch(DATA_PATH),
+          dataFetch("images.json").catch(()=>null),
+          
+          dataFetch(TRANSFERS_PATH).catch(()=>null),
+          dataFetch(PROMOTIONS_PATH).catch(()=>null),  // 아래서 API로 덮어씀
+          // sales_guide/sales_history는 용량이 커서(약 1MB+1.5MB) 초기 로딩을 늦추므로
+          // 여기서 같이 기다리지 않고, 첫 렌더 이후 별도로 백그라운드에서 받아옴(아래 참고).
+
+          
+          dataFetch(DISPLAY_PATH).catch(()=>null),
+          dataFetch(STOCK_OVERRIDES_PATH).catch(()=>null),
+          dataFetch(LOCATIONS_PATH).catch(()=>null)
+      ]);
+      if(!invRes.ok) throw new Error(invRes.status === 401 ? '공용 비밀번호를 다시 입력해야 합니다' : `재고 데이터를 받지 못했습니다 (${invRes.status})`);
+      const invData = await invRes.json(); RAW = invData.rows || []; CURRENT_META = invData.meta;
+      if(imgRes && imgRes.ok) { const _img = await imgRes.json(); IMAGES = _img.images || _img; } else IMAGES = {};
+      if(locRes && locRes.ok) { try { const _loc = await locRes.json(); if(_loc && Array.isArray(_loc.zones)) LOCATIONS = _loc; } catch(e) {} }
+      // 기기 간 공유되고 자주 바뀌는 데이터(기획전·DP·RT·재고보정)는 GitHub API 우선 읽기.
+      // Pages는 저장 후 1~2분 배포 지연 + CDN 캐시 때문에 다른 기기 변경이 안 보임 → API로 즉시 동기화.
+      // (PAT 없는 기기는 null 반환 → 아래 Pages 응답으로 자동 폴백)
+      const [promoApiData, _diApi, _trApi, _soApi] = await Promise.all([
+          fetchGithubJson(PROMOTIONS_PATH),
+          fetchGithubJson(DISPLAY_PATH),
+          fetchGithubJson(TRANSFERS_PATH),
+          
+          fetchGithubJson(STOCK_OVERRIDES_PATH),
+      ]);
+      
+      
+      if(Array.isArray(_trApi)) TRANSFERS = _trApi;
+      else if(trRes && trRes.ok) TRANSFERS = await trRes.json(); else TRANSFERS = [];
+      if(promoApiData !== null) PROMOTIONS = promoApiData;
+      else if(promoRes && promoRes.ok) PROMOTIONS = await promoRes.json(); else PROMOTIONS = {};
+      SALES_GUIDES = {}; // 첫 렌더 이후 백그라운드에서 채워짐
+      SALES_HISTORY = { meta: {}, items: {} }; // 첫 렌더 이후 백그라운드에서 채워짐
+      
+      if(_diApi && typeof _diApi === 'object') DISPLAY_ITEMS = _diApi;
+      else if(diRes && diRes.ok) { try { DISPLAY_ITEMS = await diRes.json(); } catch(e) { DISPLAY_ITEMS = {}; } }
+      else DISPLAY_ITEMS = {};
+      if(_soApi && typeof _soApi === 'object') STOCK_OVERRIDES = _soApi;
+      else if(soRes && soRes.ok) { try { STOCK_OVERRIDES = await soRes.json(); } catch(e) { STOCK_OVERRIDES = {}; } }
+      else STOCK_OVERRIDES = {};
+
+      _safeSessionCache({ rows: RAW, meta: CURRENT_META, images: IMAGES, transfers: TRANSFERS, promotions: PROMOTIONS, salesGuides: SALES_GUIDES, salesHistory: SALES_HISTORY, displayItems: DISPLAY_ITEMS, stockOverrides: STOCK_OVERRIDES, locations: LOCATIONS, _timestamp: Date.now() });
+      applyMeta(CURRENT_META); rebuildIndex(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts(); setupSearchAutocomplete(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(()=>{}); autoRemoveSoldOutLocations().then(() => render()).catch(()=>{});
+
+      // 판매 가이드/판매 이력(용량 큰 파일) — 첫 화면을 먼저 그린 뒤 백그라운드로 받아서 핫셀러/RT추천 배지에 반영
+      Promise.all([
+          dataFetch(SALES_GUIDE_PATH).catch(()=>null),
+          dataFetch(SALES_HISTORY_PATH).catch(()=>null),
+      ]).then(async ([sgRes2, shRes2]) => {
+          if(sgRes2 && sgRes2.ok) SALES_GUIDES = await sgRes2.json();
+          if(shRes2 && shRes2.ok) { SALES_HISTORY = await shRes2.json(); _lastSalesSync = Date.now(); }
+          try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.salesGuides = SALES_GUIDES; c.salesHistory = SALES_HISTORY; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+          // 판매이력이 이제 막 채워졌으니 오늘 판매분 재고 차감을 다시 계산해야 함
+          // (첫 렌더 때는 SALES_HISTORY가 비어있어서 applyPosSalesDeductions가 아무것도 못 뺐음)
+          // applyMeta도 다시 불러야 함 — 안 그러면 DATA SOURCE의 "POS판매" 배지가 첫 렌더 시점(SALES_HISTORY 비어있음)
+          // 값으로 최대 5분(다음 loadSalesOnly 주기)까지 "미연동"으로 멈춰 보임(실제 데이터는 이미 정상 반영된 상태인데도)
+          applyMeta(CURRENT_META); rebuildIndex(); applyPosSalesDeductions(); applyStockOverrides(); render(); _refreshDpFilterCounts();
+      }).catch(()=>{});
+      // DP 데이터가 허브의 60초 캐시를 거쳐 온 경우를 대비해, GitHub 원본으로 한 번 더 직접 확인 (다른 기기가 방금 바꾼 것 반영)
+      fetchGithubJson(DISPLAY_PATH).then(d=>{
+        if(d && typeof d==='object' && JSON.stringify(d) !== JSON.stringify(DISPLAY_ITEMS)) {
+          DISPLAY_ITEMS = d;
+          try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = d; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+          // 품절 자동정리는 여기서 하지 않음 — 재고가 최신이 아닐 수 있는 background poll이라 오판 위험(실제 발생한 버그)
+          render();
+        }
+      }).catch(()=>{});
+      const _bar2 = $("#actionBtnsWrap"); if(_bar2) _bar2.dataset.setup = "0";
+      setupQuickActionBar();
+      if(window.renderPromoAdmin) window.renderPromoAdmin();
+      if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+      if(window.renderSalesAdmin) window.renderSalesAdmin();
+  } catch(e) {
+    console.error("Data Load Error", e);
+    const grid = document.getElementById("grid");
+    if(grid) grid.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="col-span-3 flex flex-col items-center justify-center py-20 gap-4">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="text-4xl">⚠️</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="text-lg font-black text-gray-700">데이터 로드 실패</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="text-sm text-gray-400 font-bold">${e.message || '네트워크 오류'}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <button onclick="loadData(true)" class="brutal px-5 py-2 bg-black text-white font-black text-sm mt-2">🔄 다시 시도</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>`;
+    const emptyState = document.getElementById("emptyState");
+    if(emptyState) emptyState.classList.add("hidden");
+    const results = document.getElementById("results");
+    if(results) results.classList.remove("hidden");
+  }
+}
+
+function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+
+// 데이터 파일 저장 공통 흐름 — 최신본 읽기 → mutateFn(최신본)으로 변경 → sha 넣어 저장 → 충돌(409/422)이면 최신본부터 다시.
+// 이 기기가 들고 있던 데이터로 통째로 덮어쓰지 않으므로 다른 기기가 방금 저장한 내용이 지워지지 않는다.
+// 파일이 없으면 mutateFn(null). 성공하면 저장된 데이터를, 실패하면 이유가 담긴 Error를 던진다.
+async function ghSaveJson(path, mutateFn, message) {
+    const url = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`;
+    const auth = { Authorization: "Bearer " + getPat() };
+    for (let attempt = 0; attempt < 4; attempt++) {
+        const r = await fetch(url + "?t=" + Date.now(), { headers: auth });
+        let data = null, sha;
+        if (r.ok) {
+            const j = await r.json();
+            sha = j.sha;
+            try {
+                if (j.content) data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                else if (j.download_url) data = await (await fetch(j.download_url, { headers: auth })).json();
+            } catch (e) { data = undefined; }
+            if (data === undefined || data === null) throw new Error("저장된 데이터를 읽지 못해 중단했습니다 (덮어쓰기 방지)");
+        } else if (r.status === 401) {
+            throw new Error("인증 실패 — ADMIN 재로그인 후 다시 시도하세요");
+        } else if (r.status !== 404) {
+            throw new Error("데이터를 읽지 못했습니다 (" + r.status + ")");
+        }
+        const next = mutateFn(data);
+        const body = { message, content: utf8ToB64(JSON.stringify(next, null, 2)), branch: GH.branch };
+        if (sha) body.sha = sha;
+        const put = await fetch(url, { method: "PUT", headers: { ...auth, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (put.ok) return next;
+        if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }
+        throw new Error("저장 실패 (" + put.status + ")");
+    }
+    throw new Error("저장 실패 (충돌 반복) — 잠시 후 다시 시도하세요");
+}
+
+// ── 실재고 보정(부산) 엔진 ───────────────────────────────────────────
+// 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
+// 별도 파일 저장 → 엑셀 재업로드해도 유지. 적용은 판매차감 이후 마지막 단계(항상 우선).
+function applyStockOverrides() {
+    if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object') return;
+    PRODUCTS.forEach(p => {
+        p._hasOverride = false;
+        p.sizes.forEach(s => { delete s._override; delete s._overrideStale; });
+        const ov = STOCK_OVERRIDES[p.품번];
+        if(!ov) return;
+        p.sizes.forEach(s => {
+            const o = ov[String(s.size).trim()];
+            if(!o || o.actual === undefined || o.actual === null) return;
+            const actual = Number(o.actual);
+            if(!Number.isFinite(actual)) return;
+            const sysNow = s.busan;   // 판매차감까지 반영된 현재 시스템값
+            // 보정은 "그 시점의 실재고" 스냅샷 — 이후 판매/반품으로 시스템값이 움직인 만큼 그대로 반영
+            const soldSinceCorrection = (typeof o.system === 'number' && Number.isFinite(o.system)) ? (o.system - sysNow) : 0;
+            const effective = Math.max(0, actual - soldSinceCorrection);
+            s._override = { actual, system: o.system, by: o.by, at: o.at, sysNow, effective };
+            s._rawBusan = sysNow; // 보정 적용 전의 순수 시스템값 — 재보정 시 기준점으로 사용
+            s._overrideStale = (typeof o.system === 'number' && sysNow !== o.system); // 보정 후 시스템값이 바뀜 → 재확인
+            s.busan = effective;
+            p._hasOverride = true;
+        });
+        p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
+        p.noBarcodeBusan = p.sizes.some(s => s.busan > 0 && !s.barcode);
+    });
+}
+// 저장 — DP와 동일한 안전장치(서버보다 비정상 감소 시 차단) + 캐시 갱신
+// value가 undefined면 해당 사이즈 보정을 지운다. 저장 후 STOCK_OVERRIDES는 서버 최신본(다른 기기 변경 포함)으로 맞춘다.
+async function saveStockOverrides(code, sz, value) {
+    const saved = await ghSaveJson(STOCK_OVERRIDES_PATH, d => {
+        const s = (d && typeof d === 'object') ? d : {};
+        if (value === undefined) {
+            if (s[code]) { delete s[code][sz]; if (!Object.keys(s[code]).length) delete s[code]; }
+        } else {
+            if (!s[code]) s[code] = {};
+            s[code][sz] = value;
+        }
+        return s;
+    }, "stock: update overrides");
+    STOCK_OVERRIDES = saved;
+    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.stockOverrides = STOCK_OVERRIDES; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+}
+// 보정 설정/해제 (ADMIN 전용) — 설정 후 base부터 재계산해 일관 상태 유지
+// 부산 재고가 0이 된 DP 사이즈를 자동으로 DP 목록에서 제외 (품절DP로 방치되지 않도록)
+let _autoDpRemoving = false;
+async function autoRemoveSoldDP() {
+  // 2026-08-29: 원인 조사 중 반복적으로 정상 재고가 있는 DP 항목을 잘못 지우는 사고가 계속 발생해
+  // 임시로 완전히 비활성화함. 원인 확인 후 재활성화할 것.
+  return;
+  if (!PRODUCTS || !PRODUCTS.length) return;
+  if (_autoDpRemoving) return; // 동시 중복 실행 방지
+  const toRemove = []; // [[code, size], ...]
+  PRODUCTS.forEach(p => {
+    const dpSizes = getDPSizes(p.품번);
+    if (!dpSizes.length) return;
+    dpSizes.forEach(sz => {
+      const sObj = p.sizes.find(s => String(s.size).trim() === sz);
+      // sObj가 없다는 건 그 사이즈가 재고표에서 아예 사라졌다는 뜻 — 품절보다 더 확실한 "더 이상 없음"
+      if (!sObj || sObj.busan <= 0) toRemove.push([p.품번, sz]);
+    });
+  });
+  if (!toRemove.length) return;
+  if (!getPat()) return; // 쓰기 권한(ADMIN 세션) 없는 기기에서는 건드리지 않음
+
+  _autoDpRemoving = true;
+  try {
+    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      let server = {}, sha = null;
+      const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } });
+      if (r.ok) {
+        const j = await r.json(); sha = j.sha;
+        let parsed = null;
+        try { parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e) {}
+        if (!parsed || typeof parsed !== 'object') return; // 읽기 실패 시 조용히 포기 (덮어쓰기 방지, 다음 주기에 재시도됨)
+        server = parsed;
+      } else if (r.status !== 404) {
+        return; // 조용히 포기 — 다음 재계산 주기에 다시 시도됨
+      }
+      let changed = false;
+      toRemove.forEach(([code, sz]) => {
+        if (server[code] && server[code][sz]) {
+          delete server[code][sz];
+          if (!Object.keys(server[code]).length) delete server[code];
+          changed = true;
+        }
+      });
+      if (!changed) { DISPLAY_ITEMS = server; return; } // 이미 다른 기기가 제거함
+
+      const body = { message: "dp: auto-remove sold-out (" + toRemove.length + ")", content: utf8ToB64(JSON.stringify(server, null, 2)), branch: GH.branch };
+      if (sha) body.sha = sha;
+      const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }
+      if (!put.ok) return; // 조용히 포기 — 다음 재계산 주기에 다시 시도됨
+
+      DISPLAY_ITEMS = server;
+      try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+      return;
+    }
+  } finally {
+    _autoDpRemoving = false;
+  }
+}
+// 재고가 다 팔린 상품, 또는 마지막 1개가 DP 진열 중인 상품의 실제 랙 위치를 자동 해제.
+// (DP 진열 중이면 화면에 DP 가상위치가 대신 표시되므로 실제 위치 정보는 더 이상 유효하지 않음)
+let _autoLocRemoving = false;
+async function autoRemoveSoldOutLocations() {
+  if (!PRODUCTS || !PRODUCTS.length) return;
+  if (_autoLocRemoving) return;
+  if (!getPat()) return; // 쓰기 권한(ADMIN 세션) 없는 기기에서는 건드리지 않음
+  const toRemove = [];
+  PRODUCTS.forEach(p => {
+    if (!LOCATIONS.assignments[p.품번]) return;
+    if (p.busanTotal <= 0) { toRemove.push(p.품번); return; }
+    if (p.busanTotal === 1) {
+      const dpSizes = getDPSizes(p.품번);
+      if (!dpSizes.length) return;
+      const lastSize = p.sizes.find(s => s.busan === 1);
+      if (lastSize && dpSizes.includes(String(lastSize.size).trim())) toRemove.push(p.품번);
+    }
+  });
+  if (!toRemove.length) return;
+
+  _autoLocRemoving = true;
+  try {
+    await saveLocations(server => {
+      toRemove.forEach(code => { delete server.assignments[code]; });
+      return server;
+    });
+  } finally {
+    _autoLocRemoving = false;
+  }
+}
+// DP/이미지/바코드/재고보정/위치 필터 칩의 숫자 배지를 최신 상태로 갱신.
+// 버튼 생성 시 한 번만 계산하던 걸 데이터·위치가 바뀔 때마다 다시 불러 항상 정확하게 유지.
+function _refreshDpFilterCounts(){
+    const dpBtn = $('button.chip[data-dp=\"dp\"]'), nodpBtn = $('button.chip[data-dp=\"nodp\"]'), soldDpBtn = $('button.chip[data-dp=\"soldDP\"]');
+    if(dpBtn || nodpBtn || soldDpBtn){
+        const cnt = { dp: 0, nodp: 0, soldDP: 0 };
+        (_dpFacetFn ? _dpFacetFn() : PRODUCTS).forEach(p => {
+            if(_dpFilterMatch('dp', p)) cnt.dp++;
+            if(_dpFilterMatch('nodp', p)) cnt.nodp++;
+            if(_dpFilterMatch('soldDP', p)) cnt.soldDP++;
+        });
+        if(dpBtn) dpBtn.innerHTML = `🏷️ DP 중${cnt.dp > 0 ? ` <span class=\"ml-0.5 bg-violet-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.dp}</span>` : ''}`;
+        if(nodpBtn) nodpBtn.innerHTML = `🔲 미DP${cnt.nodp > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${cnt.nodp}</span>` : ''}`;
+        if(soldDpBtn) soldDpBtn.innerHTML = `⚠️ 품절DP${cnt.soldDP > 0 ? ` <span class=\"ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.soldDP}</span>` : ''}`;
+    }
+
+    const noImgBtn = $('button.chip[data-noimage]');
+    if(noImgBtn){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length;
+        noImgBtn.innerHTML = `📷 이미지없음${n > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const noBarcodeBtn = $('button.chip[data-nobarcode]');
+    if(noBarcodeBtn){
+        const n = PRODUCTS.filter(p => p.noBarcodeBusan).length;
+        noBarcodeBtn.innerHTML = `🔖 바코드누락${n > 0 ? ` <span class=\"ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const ovBtn = $('button.chip[data-override]');
+    if(ovBtn){
+        const n = PRODUCTS.filter(p => p._hasOverride).length;
+        ovBtn.innerHTML = `✏️ 재고보정${n > 0 ? ` <span class=\"ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const noLocBtn = $('button.chip[data-noloc]');
+    if(noLocBtn){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
+        noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const _boardCount = $("#adminBoardCount");
+    if(_boardCount){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length
+                + PRODUCTS.filter(p => p.noBarcodeBusan).length
+                + PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
+        _boardCount.textContent = n;
+        _boardCount.classList.toggle('hidden', n === 0);
+    }
+    const _sdCount = $("#soldDpCleanCount");
+    if(_sdCount) _sdCount.textContent = _soldOutDpPairs().length;
+    const _skipCount = $("#dpSkipCount");
+    if(_skipCount) _skipCount.textContent = Object.keys(LOCATIONS.assignments || {}).filter(c => _dpSkipped(c)).length;
+
+    const hasLocBtn = $('button.chip[data-hasloc]');
+    if(hasLocBtn){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && _hasRealLoc(p.품번)).length;
+        hasLocBtn.innerHTML = `📌 위치있음${n > 0 ? ` <span class=\"ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+}
+
+function _recomputeStock() { rebuildIndex(); applyPosSalesDeductions(); applyStockOverrides(); clearSalesCache(); /* 재고가 바뀌면 RT 추천(결품·소진임박 판정)도 다시 계산해야 함 */ _refreshDpFilterCounts(); autoRemoveSoldDP().then(() => { _refreshDpFilterCounts(); render(); }).catch(() => {}); autoRemoveSoldOutLocations().then(() => render()).catch(() => {}); }
+function _reopenDetail(code){ const dm=document.getElementById('detailModal'); if(dm && !dm.classList.contains('hidden')){ const np=PRODUCTS.find(x=>x.품번===code); if(np) openDetail(np); } }
+// 실재고 보정 입력 프롬프트 (ADMIN 전용)
+window._promptStockOverride = (code, size) => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return; }
+    const p = PRODUCTS.find(x => x.품번 === code);
+    const s = p && p.sizes.find(x => String(x.size).trim() === String(size).trim());
+    if(!s) return;
+    const sysVal = s._override ? s._override.sysNow : s.busan;   // 시스템값
+    const existing = s._override ? String(s._override.effective) : '';
+    const v = prompt(`[${size}] 실제 부산 재고 수량\n(시스템 표시: ${sysVal}개)\n\n· 숫자 = 그 수량으로 보정\n· 빈칸 후 확인 = 보정 해제(시스템값 복귀)`, existing);
+    if(v === null) return;
+    const t = String(v).trim();
+    if(t === '') { window._clearStockOverride(code, size); return; }
+    const n = parseInt(t, 10);
+    if(!Number.isFinite(n) || n < 0) { showToast('0 이상의 숫자를 입력하세요.', null, 'error'); return; }
+    window._setStockOverride(code, size, n);
+};
+window._setStockOverride = async (code, size, actual) => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
+    if(!getPat() && !(await ensurePatForAdmin())) { showToast('저장 토큰이 없어 저장하지 못했습니다. ADMIN 재로그인 후 다시 시도하세요.', null, 'error'); return false; }
+    const sz = String(size).trim();
+    const p = PRODUCTS.find(x => x.품번 === code);
+    const s = p && p.sizes.find(x => String(x.size).trim() === sz);
+    const sysNow = s ? (s._rawBusan ?? s.busan) : null;   // 이전 보정이 있어도 순수 시스템값을 기준으로 저장
+    const prev = STOCK_OVERRIDES[code] ? STOCK_OVERRIDES[code][sz] : undefined;
+    if(!STOCK_OVERRIDES[code]) STOCK_OVERRIDES[code] = {};
+    STOCK_OVERRIDES[code][sz] = { actual: Number(actual), system: sysNow, by: (localStorage.getItem('rcm_last_memo_staff')||'ADMIN'), at: new Date().toISOString().slice(0,16).replace('T',' ') };
+    try { await saveStockOverrides(code, sz, STOCK_OVERRIDES[code][sz]); } catch(e) { if(prev!==undefined) STOCK_OVERRIDES[code][sz]=prev; else { delete STOCK_OVERRIDES[code][sz]; if(!Object.keys(STOCK_OVERRIDES[code]).length) delete STOCK_OVERRIDES[code]; } showToast('보정 저장 실패: '+e.message, null, 'error'); return false; }
+    _recomputeStock(); render(); _reopenDetail(code);
+    showToast(`✏️ ${size} 실재고 ${actual}개로 보정`);
+    return true;
+};
+window._clearStockOverride = async (code, size) => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return false; }
+    if(!getPat() && !(await ensurePatForAdmin())) { showToast('저장 토큰이 없어 저장하지 못했습니다. ADMIN 재로그인 후 다시 시도하세요.', null, 'error'); return false; }
+    const sz = String(size).trim();
+    if(!STOCK_OVERRIDES[code] || STOCK_OVERRIDES[code][sz]===undefined) return false;
+    const prev = STOCK_OVERRIDES[code][sz];
+    delete STOCK_OVERRIDES[code][sz]; if(!Object.keys(STOCK_OVERRIDES[code]).length) delete STOCK_OVERRIDES[code];
+    try { await saveStockOverrides(code, sz, undefined); } catch(e) { if(!STOCK_OVERRIDES[code]) STOCK_OVERRIDES[code]={}; STOCK_OVERRIDES[code][sz]=prev; showToast('해제 저장 실패: '+e.message, null, 'error'); return false; }
+    _recomputeStock(); render(); _reopenDetail(code);
+    showToast(`↩️ ${size} 보정 해제 (시스템값으로 복귀)`);
+    return true;
+};
+
+// DP 버튼 클릭 핸들러 (모달 내 즉시 UI 반영)
+window._toggleDPBtn = async (btn, code, size) => {
+  // 버튼 비활성화 (중복 클릭 방지)
+  $$('#dpSizeBtns button').forEach(b => b.disabled = true);
+  try {
+    await toggleDP(code, size);
+    // 패널 전체 재렌더링
+    if (window._dpRenderFn) window._dpRenderFn();
+    if (window.lucide) lucide.createIcons();
+  } catch(e) {
+    alert("DP 저장 실패: " + e.message);
+    $$('#dpSizeBtns button').forEach(b => b.disabled = false);
+  }
+};
+
+// DP 등록/해제 토글
+async function toggleDP(code, size) {
+  const sz = String(size).trim();
+  const today = new Date().toISOString().split('T')[0];
+  // 사용자가 화면에서 본 상태 기준 의도 (등록 vs 해제)
+  const wantAdd = !(DISPLAY_ITEMS[code] && DISPLAY_ITEMS[code][sz]);
+  const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    // 1) 서버 최신 상태 읽기 (다른 기기가 방금 바꾼 것 보존)
+    let server = {}, sha = null;
+    const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } });
+    if (r.ok) {
+      const j = await r.json(); sha = j.sha;
+      let parsed = null;
+      try { parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e) {}
+      if (!parsed || typeof parsed !== 'object') throw new Error("기존 DP 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지)");
+      server = parsed;
+    } else if (r.status === 401) {
+      throw new Error("인증 실패 — ADMIN 재로그인 후 다시 시도하세요");
+    } else if (r.status !== 404) {
+      throw new Error("DP 조회 실패 " + r.status);
+    }
+    // 2) 이 토글 하나만 반영
+    if (wantAdd) { if (!server[code]) server[code] = {}; server[code][sz] = { since: today }; }
+    else if (server[code]) { delete server[code][sz]; if (!Object.keys(server[code]).length) delete server[code]; }
+    // 3) 저장 — 반드시 성공 여부 확인 (조용한 실패 방지)
+    const body = { message: "dp: update display items", content: utf8ToB64(JSON.stringify(server, null, 2)), branch: GH.branch };
+    if (sha) body.sha = sha;
+    const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }  // 충돌 → 최신 다시 읽어 재시도
+    if (!put.ok) throw new Error("DP 저장 실패 (" + put.status + ")");
+    // 4) 로컬/캐시 동기화
+    DISPLAY_ITEMS = server;
+    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+    render();
+    return;
+  }
+  throw new Error("DP 저장 실패 (충돌 반복) — 잠시 후 다시 시도하세요");
+}
+
+// 품번의 DP 사이즈 목록
+function getDPSizes(code) { return Object.keys(DISPLAY_ITEMS[code] || {}); }
+// DP 상태: 'dp'=DP중, 'soldDP'=DP+재고0, 'none'=미DP
+// 재고 있는 사이즈 중 DP로 표시 안 된 게 하나라도 있으면, 그 재고는 실제 위치가 필요함.
+// (예: 3사이즈 각 1개씩 있는데 그중 1개만 DP면 → 나머지 2개는 여전히 랙에 있어야 하니 위치 필요)
+function _needsRealLocation(p) {
+  const dpSizes = getDPSizes(p.품번);
+  return p.sizes.some(s => s.busan > 0 && !dpSizes.includes(String(s.size).trim()));
+}
+// LOCATIONS.assignments[code]가 있어도 그 안에 zoneId 있는 항목이 하나도 없으면(예: DP 진열 표시만 있고 실제 랙 위치는 없음)
+// "위치가 있다"고 보면 안 됨 — "위치없음"/"위치있음" 필터·카운트 전부 이 함수로 통일해서 체크할 것.
+function _hasRealLoc(code) {
+  return _locArr(code).some(a => a.zoneId);
+}
+// 부산 재고가 0인 DP 사이즈 목록. getDPStatus의 'soldDP'와 같은 기준 — 재고표에 없는 사이즈는 (일시적 누락일 수 있어) 포함하지 않는다
+function _soldOutDpPairs() {
+  const out = [];
+  PRODUCTS.forEach(p => {
+    getDPSizes(p.품번).forEach(sz => {
+      const sObj = p.sizes.find(s => String(s.size).trim() === sz);
+      if (sObj && sObj.busan <= 0) out.push({ p, size: sz });
+    });
+  });
+  return out;
+}
+// 서버의 최신 DP 목록을 읽어 해당 사이즈만 지운다 (충돌 시 재시도, 읽기 실패 시 아무것도 안 함). 지운 개수를 돌려준다.
+async function _removeDpSizes(pairs) {
+  const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DISPLAY_PATH}`;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } });
+    if (!r.ok) throw new Error(r.status === 401 ? "인증 실패 — ADMIN 재로그인 후 다시 시도하세요" : "DP 목록을 읽지 못했습니다 (" + r.status + ")");
+    const j = await r.json();
+    let server = null;
+    try { server = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, ''))))); } catch (e) {}
+    if (!server || typeof server !== 'object') throw new Error("기존 DP 목록을 읽지 못해 중단했습니다 (덮어쓰기 방지)");
+    let removed = 0;
+    pairs.forEach(({ p, size }) => {
+      if (server[p.품번] && server[p.품번][size]) {
+        delete server[p.품번][size];
+        if (!Object.keys(server[p.품번]).length) delete server[p.품번];
+        removed++;
+      }
+    });
+    if (!removed) { DISPLAY_ITEMS = server; return 0; }
+    const body = { message: "dp: 품절 사이즈 정리 (" + removed + ")", content: utf8ToB64(JSON.stringify(server, null, 2)), branch: GH.branch, sha: j.sha };
+    const put = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (put.status === 409 || put.status === 422) { await new Promise(res => setTimeout(res, 400 * (attempt + 1))); continue; }
+    if (!put.ok) throw new Error("DP 저장 실패 (" + put.status + ")");
+    DISPLAY_ITEMS = server;
+    try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch (e) {}
+    return removed;
+  }
+  throw new Error("DP 저장 실패 (충돌 반복) — 잠시 후 다시 시도하세요");
+}
+// 남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품 — 위치 배열에 {skipDp:true}로 표시하고 미DP 목록·건수에서 뺀다
+function _dpSkipped(code) {
+  return _locArr(code).some(a => a.skipDp);
+}
+// DP 칩(DP 중·미DP·품절DP)의 목록 필터와 숫자 배지가 같은 판정을 쓰도록 한 곳에 둔다
+// (건수만 따로 세다가 재고 0인 품절DP가 숫자에서 빠졌던 문제 방지)
+function _genderLabel(v, other = "공용") {
+  if (v === "M" || v === "남성" || v === "남") return "남성";
+  if (v === "W" || v === "여성" || v === "여") return "여성";
+  return other;
+}
+let _dpFacetFn = null;
+function _dpFilterMatch(kind, p) {
+  const st = getDPStatus(p);
+  if (kind === 'dp') return st !== 'none';
+  if (kind === 'nodp') return st === 'none' && p.busanTotal > 0 && !_dpSkipped(p.품번); // 재고있는 것만, 제외 표시한 상품 빼고
+  if (kind === 'soldDP') return st === 'soldDP';
+  return false;
+}
+function getDPStatus(p) {
+  const dpSizes = getDPSizes(p.품번);
+  if (dpSizes.length === 0) return 'none';
+  const hasSoldDP = dpSizes.some(sz => {
+    const sObj = p.sizes.find(s => String(s.size).trim() === sz);
+    return sObj && sObj.busan <= 0;
+  });
+  return hasSoldDP ? 'soldDP' : 'dp';
+}
+
+// ── 판매 데이터 자동 갱신 (5분마다) ──────────────────────────────────
+async function loadSalesOnly() {
+  try {
+    // 기획전·DP·재고보정: API에서 직접 읽어 즉시 반영 (앱을 켜둔 기기도 자동 동기화)
+    const [promoFresh, _dpFresh, _soFresh] = await Promise.all([
+        fetchGithubJson(PROMOTIONS_PATH),
+        fetchGithubJson(DISPLAY_PATH),
+        fetchGithubJson(STOCK_OVERRIDES_PATH),
+    ]);
+    if(promoFresh !== null) PROMOTIONS = promoFresh;
+    let _syncChanged = false;
+    if(_dpFresh && typeof _dpFresh === 'object' && JSON.stringify(_dpFresh) !== JSON.stringify(DISPLAY_ITEMS)) { DISPLAY_ITEMS = _dpFresh; _syncChanged = true; }
+    if(_soFresh && typeof _soFresh === 'object' && JSON.stringify(_soFresh) !== JSON.stringify(STOCK_OVERRIDES)) { STOCK_OVERRIDES = _soFresh; _syncChanged = true; }
+    if(_syncChanged) {
+        try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.displayItems = DISPLAY_ITEMS; c.stockOverrides = STOCK_OVERRIDES; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+        // _recomputeStock() 대신 안전한 부분만 직접 호출 — 이 5분 주기 타이머는 재고(inventory)를
+        // 새로 안 받아오는데, _recomputeStock()의 품절 자동정리까지 돌리면 탭을 오래 켜둘수록
+        // 오래된 재고 기준으로 방금 마크한 DP가 계속 잘못 지워짐(실제 발생한 반복 버그, 5분마다 재현됨).
+        rebuildIndex(); applyPosSalesDeductions(); applyStockOverrides(); _refreshDpFilterCounts();
+        if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn();
+        render();
+    }
+
+    const res = await dataFetch(SALES_HISTORY_PATH);
+    if (!res.ok) return;
+    const newHistory = await res.json();
+    _lastSalesSync = Date.now();
+    if (_salesStaleShown) applyMeta(CURRENT_META);
+    // 변경된 경우에만 갱신
+    const newStr = JSON.stringify(newHistory.meta);
+    if (newStr === JSON.stringify(SALES_HISTORY.meta) &&
+        newHistory.meta?.lastSynced === SALES_HISTORY.meta?.lastSynced) return;
+    SALES_HISTORY = newHistory;
+    clearSalesCache();
+    // ERP 원본 재고 복원 후 차감 + 실재고 보정까지 순서대로 재계산
+    _recomputeStock();
+    render();
+    // DATA SOURCE POS판매 뱃지 갱신
+    applyMeta(CURRENT_META);
+    console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
+  } catch(e) {}
+}
+// 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
+const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
+setInterval(() => checkSyncLockStatus(), 10 * 60 * 1000);
+// 절전·백그라운드 동안에는 타이머가 멈추므로, 화면이 다시 보이면 다음 주기를 기다리지 않고 바로 받는다
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && Date.now() - _lastSalesSync > 60 * 1000) loadSalesOnly();
+});
+setInterval(() => {
+  const stale = Date.now() - _lastSalesSync >= SALES_STALE_MS;
+  if (stale || stale !== _salesStaleShown) applyMeta(CURRENT_META);
+}, 60 * 1000);
+
+// ── POS 동기화 자동 트리거 ──────────────────────────────────
+// GitHub Actions cron이 throttle 되는 문제 보완:
+// 앱이 열려있는 동안 10분마다 workflow_dispatch로 직접 트리거
+let _lastPosTrigger = 0;
+const _POS_TRIGGER_KEY = 'rcm_pos_last_trigger';
+async function autoTriggerPosSync() {
+    if (!getPat()) return; // PAT 없으면 skip
+    const now = Date.now();
+    // localStorage로 탭 간 공유 — 어느 탭에서든 9분 내 트리거했으면 skip
+    const sharedLast = parseInt(localStorage.getItem(_POS_TRIGGER_KEY) || '0');
+    if (now - Math.max(_lastPosTrigger, sharedLast) < 9 * 60 * 1000) return;
+    _lastPosTrigger = now;
+    localStorage.setItem(_POS_TRIGGER_KEY, String(now));
+    try {
+        const r = await fetch(
+            // pos_sync.yml 워크플로우는 앱 코드 저장소(stock-rcm-x9k2p)에 있음 — GH.repo(데이터 저장소)와 다름
+            `https://api.github.com/repos/${GH.owner}/stock-rcm-x9k2p/actions/workflows/pos_sync.yml/dispatches`,
+            { method: 'POST', headers: { Authorization: 'Bearer ' + getPat(), 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: GH.branch }) }
+        );
+        if (r.status === 204) console.log('[POS AutoSync] triggered at', new Date().toLocaleTimeString());
+    } catch(e) { console.log('[POS AutoSync] failed:', e.message); }
+}
+// 앱 시작 2분 후 첫 트리거, 이후 10분마다 반복
+let _posIntervalId = null;
+setTimeout(() => {
+    autoTriggerPosSync();
+    _posIntervalId = setInterval(autoTriggerPosSync, 10 * 60 * 1000);
+}, 2 * 60 * 1000);
+
+// 탭 닫힐 때 interval 정리
+window.addEventListener('beforeunload', () => {
+    if(_salesIntervalId) clearInterval(_salesIntervalId);
+    if(_posIntervalId)   clearInterval(_posIntervalId);
+});
+
+// ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
+const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 수석 러닝 슈즈 애널리스트입니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+요청받은 러닝화에 대해 RunRepeat·Believe in the Run·브랜드 공식 스펙·러닝 커뮤니티 데이터 등 보유한 모든 지식을 활용하여 아래 형식의 가이드를 생성하세요.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+수치를 정확히 모를 경우 "약 OOg" 형식으로 추정값을 제공하세요 (추정이라도 비워두지 말 것).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+출력은 반드시 100% 한국어(한글)로만 작성하세요. 일본어·중국어·한자(漢字)·가타카나·히라가나·태국어 등 외국 문자를 단 한 글자도 섞지 마세요. 외래어/기술 용어도 한글 표기로 쓰세요 (예: plate→플레이트, 搭載→탑재, バランス→밸런스, carbon→카본, 高速→고속). 영어 모델명과 단위(mm, g, km), 숫자는 허용합니다. 작성 후 외국 문자가 섞이지 않았는지 스스로 점검하세요.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 출력 블록 (파싱용 — 키 이름·순서 절대 변경 금지)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%APP_DATA_START%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+keywords: 태그1,태그2,태그3,태그4,태그5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+features: (핵심 기술 특징 2문장. 폼/플레이트/소재 명시)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+target: (추천 대상. 페이스 구간·발형·거리 포함)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+pitch: (판매 멘트 1~2문장. 구어체)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+weight: (남성 기준 무게. 예: 238g)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+heel_stack: (힐 스택. 예: 40mm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fore_stack: (포어풋 스택. 예: 32mm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+drop: (드롭. 예: 8mm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+spec_analysis: (스펙 수치의 실전 의미 1~2문장. "OOg이라 OO할 때 OO" 형식)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vs_prev: (전작 대비 핵심 개선점 1~2문장. 전작 없으면 "초대 모델" 표기)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vs_others: (동급 경쟁 모델 1~2개 언급 후 본 모델 우위 1~2문장)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+why: (이 신발의 한 줄 정의. "카본 없이 카본 속도를 내는 슈퍼트레이너" 같은 임팩트 있는 문장)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프~풀 준비 중립 발")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%APP_DATA_END%%`;
+
+// Groq API (llama-3.3-70b) 호출 — AI 세일즈 가이드 자동생성
+async function callAIGuide(brand, modelName, reviewText) {
+    const key = getAnthKey();
+    if (!key) throw new Error("Groq API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.\n발급: console.groq.com (무료)");
+    const userContent = reviewText.trim()
+        ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
+        : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
+
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${key}`
+        },
+        body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: SALES_GUIDE_SYSTEM_PROMPT },
+                { role: "user",   content: userContent }
+            ],
+            max_tokens: 1200,
+            temperature: 0.7
+        })
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`Groq API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || "";
+}
+
+function parseGuideResponse(text) {
+    const result = { keywords: [], features: "", target: "", pitch: "",
+                     weight: "", heel_stack: "", fore_stack: "", drop: "",
+                     spec_analysis: "", vs_prev: "", vs_others: "",
+                     why: "", best_for: "", closing: "" };
+    const blockMatch = text.match(/%%APP_DATA_START%%([\s\S]*?)%%APP_DATA_END%%/);
+    if (!blockMatch) return result;
+    const block = blockMatch[1];
+    const field = (key) => { const m = block.match(new RegExp(key + ":\\s*(.+)")); return m ? m[1].trim() : ""; };
+    result.keywords     = field("keywords").split(",").map(k => k.trim()).filter(Boolean);
+    result.features     = field("features");
+    result.target       = field("target");
+    result.pitch        = field("pitch");
+    result.weight       = field("weight");
+    result.heel_stack   = field("heel_stack");
+    result.fore_stack   = field("fore_stack");
+    result.drop         = field("drop");
+    result.spec_analysis= field("spec_analysis");
+    result.vs_prev      = field("vs_prev");
+    result.vs_others    = field("vs_others");
+    result.why          = field("why");
+    result.best_for     = field("best_for");
+    result.closing      = field("closing");
+    return result;
+}
+
+
+// ── POS 오늘 판매 차감 (5분마다 갱신) ─────────────────────────────────
+// 아침 ERP 재고 - 오늘 POS 판매 = 실시간 부산 잔여 재고
+function applyPosSalesDeductions() {
+    if (!SALES_HISTORY || !SALES_HISTORY.items) return;
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    for (const p of PRODUCTS) {
+        const todaySales = SALES_HISTORY.items[p.품번]?.[todayStr];
+        if (!todaySales) continue;
+
+        let changed = false;
+        for (const s of p.sizes) {
+            const sizeKey = String(s.size).trim();
+            const saleEntry = todaySales[sizeKey];
+            if (!saleEntry) continue;
+            // 부산 판매 수량: '부산(김종훈)' 또는 '부산' 키 (중복 방지: 최대값)
+            const sold = Math.max(saleEntry['부산(김종훈)'] || 0, saleEntry['부산'] || 0);
+            if (sold > 0) {
+                s.busan = Math.max(0, s.busan - sold);
+                changed = true;
+            }
+        }
+        if (changed) {
+            p.busanTotal = p.sizes.reduce((a, b) => a + b.busan, 0);
+        }
+    }
+}
+
+
+async function commitInventoryToGitHub(rows, meta) {
+    if(!GH.owner || !GH.repo) throw new Error("저장소 설정 없음 (ADMIN > API 설정 확인)");
+    // 업로드 직전 항상 최신 토큰 확보 (옛/만료 토큰으로 인한 401 방지)
+    if(checkAdminSession()) { try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {} }
+    const pat = getPat();
+    if(!pat) throw new Error("PAT 토큰이 없습니다 (ADMIN > API 설정 확인)");
+    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DATA_PATH}`;
+    const headers = { Authorization: "Bearer " + pat, "Content-Type": "application/json" };
+    let sha = null;
+    try {
+        const r = await fetch(apiBase + "?ref=" + encodeURIComponent(GH.branch) + "&t=" + Date.now(), { headers });
+        if(r.ok) { const j = await r.json(); sha = j.sha; }
+        else if(r.status === 401) throw new Error("PAT 인증 실패 (만료됐거나 권한 부족)");
+        else if(r.status !== 404) throw new Error("파일 조회 실패: " + r.status);
+    } catch(e) { if(e.message.includes("PAT") || e.message.includes("조회")) throw e; }
+    const payload = { message: "update inventory: " + (meta.fileName || "upload") + " by " + (meta.uploadedAt || ""), content: utf8ToB64(JSON.stringify({ meta, rows })), branch: GH.branch };
+    if(sha) payload.sha = sha;
+    // 409/422(SHA 충돌·read-after-write 지연) 시 최신 sha로 재시도 (엑셀은 전체 교체라 재병합 불필요)
+    let r2;
+    for(let attempt = 0; attempt < 4; attempt++) {
+        r2 = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(payload) });
+        if(r2.ok) return await r2.json();
+        if((r2.status === 409 || r2.status === 422) && attempt < 3) {
+            await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
+            try {
+                const rr = await fetch(apiBase + "?ref=" + encodeURIComponent(GH.branch) + "&t=" + Date.now(), { headers });
+                if(rr.ok) { const jj = await rr.json(); payload.sha = jj.sha; }
+                else if(rr.status === 404) { delete payload.sha; }
+            } catch(e) {}
+            continue;
+        }
+        const j = await r2.json().catch(() => ({}));
+        throw new Error((j.message || "commit 실패") + " (status " + r2.status + ")");
+    }
+    const jf = await r2.json().catch(() => ({}));
+    throw new Error((jf.message || "commit 실패(충돌 반복)") + " (status " + (r2 ? r2.status : '?') + ")");
+}
+
+function getActiveWeeklyCategory() {
+    // 하드코딩된 날짜 제거 — 위클리 카테고리는 기획전 데이터에서 읽어야 함
+    // 현재 활성 기획전 중 weeklyCategory 필드가 있으면 그것을 사용
+    for (const pr of getPromoList()) {
+        if (pr.meta?.weeklyCategory) return pr.meta.weeklyCategory;
+    }
+    return null;
+}
+
+function generateSizeOptionsHtml(sizesSet) {
+    const arr = Array.from(sizesSet).map(s => String(s).trim()).filter(Boolean);
+    const apOrder = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
+    arr.sort((a,b) => {
+        if (isFwSize(a) && isFwSize(b)) return parseInt(a) - parseInt(b);
+        return (apOrder[a.toUpperCase()]||99) - (apOrder[b.toUpperCase()]||99);
+    });
+    return arr.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+// 재고 엑셀 시트 파싱 — 맨 위에 제목행(예: "창고별 시즌재고조회_ajl")이 끼어있어도
+// 진짜 헤더 행("품번" 포함)을 자동으로 찾아 그 행부터 파싱한다.
+// (2026-07-24 이런 제목행 때문에 헤더가 한 칸 밀려 전체 재고가 0건으로 로딩된 사고 이후 추가)
+function parseInventorySheet(sheet, XLSXLib) {
+    const X = XLSXLib || window.XLSX;
+    const aoa = X.utils.sheet_to_json(sheet, { header: 1, defval: "", raw: true });
+    let headerRowIdx = aoa.findIndex(row => row.some(cell => String(cell).trim() === "품번"));
+    if (headerRowIdx === -1) headerRowIdx = 0; // 못 찾으면 기존 동작(첫 행) 유지
+    if (headerRowIdx === 0) {
+        return X.utils.sheet_to_json(sheet, { defval: "", raw: true });
+    }
+    // 진짜 헤더가 밀려있던 경우: 그 행을 헤더로 삼아 이후 행만 파싱
+    const headers = aoa[headerRowIdx].map(h => String(h).trim());
+    const rows = [];
+    for (let i = headerRowIdx + 1; i < aoa.length; i++) {
+        const line = aoa[i];
+        if (line.every(c => c === "" || c === undefined || c === null)) continue; // 빈 행 스킵
+        const obj = {};
+        headers.forEach((h, idx) => { if (h) obj[h] = line[idx] !== undefined ? line[idx] : ""; });
+        rows.push(obj);
+    }
+    console.warn(`[재고 업로드] 헤더가 ${headerRowIdx}행 밀려있어 자동 보정함 (제목행 등 추정)`);
+    return rows;
+}
+function rebuildIndex(){
+  const map = new Map();
+  const prevRaw = JSON.parse(localStorage.getItem('PREV_RAW') || '[]');
+  const allSizesFw = new Set();
+  const allSizesAp = new Set();
+  const allSizesGear = new Set();
+  const activeWeeklyCat = getActiveWeeklyCategory();
+
+  if($("#statItems")) $("#statItems").className = ($("#statItems").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
+  if($("#statBusan")) $("#statBusan").className = ($("#statBusan").className || "").replace(/text-(pink|red)-\d+/g, '') + " text-gray-900";
+
+  for(const r of RAW){
+    const code = r["품번"]; if(!code) continue;
+    const size = String(r["규격"]||"").trim();
+    if(size) {
+        if (isFwSize(size)) allSizesFw.add(size);
+        else if (/^[SMLX]+$/i.test(size) || size.toUpperCase()==='FREE' || size.toUpperCase()==='OS' || size.toUpperCase()==='F') allSizesAp.add(size);
+        else allSizesGear.add(size);
+    }
+
+    if(!map.has(code)){
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), itemCode:String(r["품목내부코드"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })(), sizes:[], periodSales: 0 });
+    }
+    const p = map.get(code);
+    // 소비자가가 0이고 현재 행에 가격 있으면 업데이트 (첫 행이 0원인 경우 대비)
+    const rowPrice = Number(r["소비자가"]||0);
+    if(!p.소비자가 && rowPrice > 0) p.소비자가 = rowPrice;
+    const busan = Number(r["매장 (부산)"] ?? r["매장(부산)"] ?? 0);
+    const sinsa = Number(r["매장 (신사동)"] ?? r["매장(신사동)"] ?? 0);
+    const center = Number(r["물류센터"] ?? 0);
+
+    const _sizeBarcode = (()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })();
+    // 사이즈별 품목내부코드 (규격마다 다름 — 품번 레벨 itemCode와 별도 관리)
+    const _sizeItemCode = String(r["품목내부코드"] || "").trim();
+    const found = p.sizes.find(s=>String(s.size)===String(r["규격"]));
+    if(found){ found.busan+=busan; found.sinsa+=sinsa; found.center+=center; if(!found.barcode && _sizeBarcode) found.barcode=_sizeBarcode; if(!found.itemCode && _sizeItemCode) found.itemCode=_sizeItemCode; }
+    else p.sizes.push({ size:r["규격"], busan, sinsa, center, barcode:_sizeBarcode, itemCode:_sizeItemCode });
+  }
+
+  PRODUCTS = Array.from(map.values()).map(p=>{
+    p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
+    p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
+    p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
+    // 부산 재고 있는 사이즈 중 바코드 누락된 것이 하나라도 있는지
+    p.noBarcodeBusan = p.sizes.some(s => s.busan > 0 && !s.barcode);
+
+    const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
+    p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
+    
+
+    const _pm = findPromoForCode(p.품번, p.소비자가);
+    if (_pm) {
+        const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
+        p.promoIsPreview = !!_isPreview;
+        const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
+        const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
+        p.promoEventRate  = _pi.eventRate  || 0;
+        p.promoCouponRate = _pi.couponRate || 0;
+        if (_pi.targetCat === activeWeeklyCat && _pi.weeklyPrice && _pi.weeklyPrice < p.소비자가) {
+            p.currentPromoPrice = _pi.weeklyPrice; p.promoType = 'weekly'; p.promoName = _promoMeta.promoName;
+            p.promoRate = _pi.weeklyRate || ((p.소비자가 - _pi.weeklyPrice) / p.소비자가);
+            p.promoEndDate = _endDate || (_pi.targetCat==='FOOTWEAR'?'5/15':_pi.targetCat==='APPAREL'?'5/22':'5/29');
+        } else if (_pi.finalPrice && _pi.finalPrice < p.소비자가) {
+            p.currentPromoPrice = _pi.finalPrice; Object.assign(p, _promoMeta);
+            p.promoRate = _pi.finalRate || ((p.소비자가 - _pi.finalPrice) / p.소비자가);
+        } else if (_pi.finalRate > 0 && p.소비자가 > 0) {
+            // finalPrice 없을 때 소비자가 × (1-rate) 로 계산
+            const _computed = Math.round(p.소비자가 * (1 - _pi.finalRate) / 10) * 10;
+            if (_computed < p.소비자가) {
+                p.currentPromoPrice = _computed; Object.assign(p, _promoMeta);
+                p.promoRate = _pi.finalRate;
+            }
+        }
+    }
+    p._hay = [p.품번||"", p.품명||"", p.브랜드||"", p.카테고리||"", p.barcode||"", ...(p.sizes||[]).map(s => s.barcode||"")].join(" ").toLowerCase();
+    p._hayClean = p._hay.replace(/[\s\-_]/g, "");
+    p._chosung = getChosung(p._hayClean);
+    return p;
+  });
+
+  if(!$("#sizeSelFw") && $("#sortSel")) {
+      const container = document.createElement("div");
+      container.className = "flex gap-1.5 items-center flex-wrap";
+
+      const createSel = (id, label, optionsHtml) => {
+          return `<select id="${id}" class="ipt text-xs font-bold bg-white border-gray-200 rounded px-2 py-1 outline-none">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                     <option value="ALL">📏 ${label}</option>${optionsHtml}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  </select>`;
+      };
+
+      container.innerHTML =
+          `<span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">사이즈</span>` +
+          createSel("sizeSelFw", "신발", generateSizeOptionsHtml(allSizesFw)) +
+          createSel("sizeSelAp", "의류", generateSizeOptionsHtml(allSizesAp)) +
+          createSel("sizeSelGear", "용품", generateSizeOptionsHtml(allSizesGear)) +
+          `<div class="flex shrink-0 rounded-lg overflow-hidden border border-gray-200 text-[11px] ml-auto">
+            <button id="sut-KR" onclick="window.setSizeUnit('KR')" style="padding:3px 8px;background:#fff0e9;color:#c2410c;font-weight:700;border:none;cursor:pointer;">KR</button>
+            <button id="sut-EU" onclick="window.setSizeUnit('EU')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">EU</button>
+            <button id="sut-US" onclick="window.setSizeUnit('US')" style="padding:3px 8px;background:transparent;color:#9ca3af;font-weight:500;border:none;border-left:1px solid #e5e7eb;cursor:pointer;">US</button>
+          </div>`;
+
+      // 필터 row 다음, 브랜드 행 앞에 삽입
+      const filterDetails = $("#filterDetails");
+      const brandSearchRow = $("#brandRow") || $("#brandSearch")?.parentNode?.parentNode;
+      const _sizeSlot = $("#fpSizeSlot");
+      if(_sizeSlot) _sizeSlot.appendChild(container);
+      else if(filterDetails && brandSearchRow && brandSearchRow.parentNode === filterDetails) filterDetails.insertBefore(container, brandSearchRow);
+      else if(filterDetails) filterDetails.appendChild(container);
+
+      const handleSizeChange = (e) => {
+          saveHistoryState();
+          if(e.target.id === "sizeSelFw") { $("#sizeSelAp").value = "ALL"; $("#sizeSelGear").value = "ALL"; }
+          if(e.target.id === "sizeSelAp") { $("#sizeSelFw").value = "ALL"; $("#sizeSelGear").value = "ALL"; }
+          if(e.target.id === "sizeSelGear") { $("#sizeSelFw").value = "ALL"; $("#sizeSelAp").value = "ALL"; }
+          visibleCount=60; render();
+      };
+
+      $("#sizeSelFw").onchange = handleSizeChange;
+      $("#sizeSelAp").onchange = handleSizeChange;
+      $("#sizeSelGear").onchange = handleSizeChange;
+  }
+
+  if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
+      const opt = document.createElement("option"); opt.value = "salesDesc"; opt.innerHTML = "🔥 전체 판매량순";
+      $("#sortSel").appendChild(opt);
+  }
+
+  let promoWrap = $("#promoFilters");
+  if (!promoWrap && getPromoList().length > 0) {
+      promoWrap = document.createElement("div"); promoWrap.id = "promoFilters";
+      promoWrap.className = "flex gap-1.5 items-center overflow-x-auto no-scrollbar pl-[2.875rem]";
+      // brandRow 앞에 삽입 (filterDetails 내)
+      const _brandRowRef = $("#brandRow");
+      const _promoSlot = $("#fpPromoSlot");
+      if(_promoSlot) _promoSlot.appendChild(promoWrap);
+      else if(_brandRowRef && _brandRowRef.parentNode) _brandRowRef.parentNode.insertBefore(promoWrap, _brandRowRef);
+      else { const _bc = $("#brandChips"); if(_bc?.parentNode) _bc.parentNode.insertBefore(promoWrap, _bc); }
+  }
+  if (getPromoList().length > 0) {
+      if(promoWrap) {
+          const _isPromoActive = window.tempPromoFilter === true;
+          const _showSel = _isPromoActive ? '' : 'hidden';
+          promoWrap.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option><option value="PREVIEW">📅 시작 전 미리보기</option></select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          `;
+          const _ptSel = $("#promoTypeSel"), _prSel = $("#promoRateSel");
+          if(_ptSel) _ptSel.onchange = () => { const _wasPreview = window.promoPreviewMode; window.promoPreviewMode = (_ptSel.value === 'PREVIEW'); if(window.promoPreviewMode !== _wasPreview) reapplyPromoData(); saveHistoryState(); visibleCount=60; render(); };
+          if(_prSel) _prSel.onchange = () => { saveHistoryState(); visibleCount=60; render(); };
+      }
+  } else if (promoWrap) { promoWrap.innerHTML = ""; window._activePromoName = "ALL"; }
+
+  // 브랜드 카운트 계산
+  const brandCounts = {};
+  PRODUCTS.forEach(p => { if(p.브랜드) brandCounts[p.브랜드] = (brandCounts[p.브랜드]||0) + 1; });
+
+  // 최근 브랜드 localStorage
+  const _RECENT_KEY = "rcm_recent_brands";
+  const _getRecentBrands = () => { try { return JSON.parse(localStorage.getItem(_RECENT_KEY)||"[]"); } catch { return []; } };
+  const _addRecentBrand = (b) => {
+      let arr = _getRecentBrands().filter(x => x !== b); arr.unshift(b); arr = arr.slice(0, 5);
+      localStorage.setItem(_RECENT_KEY, JSON.stringify(arr));
+  };
+
+  // 현재 정렬 상태 읽기 (인기순 or 가나다순)
+  const _isAlpha = () => $("#brandSortAlpha")?.dataset.active === "1";
+  const _getSortedBrands = () => {
+      const entries = Object.entries(brandCounts);
+      if(_isAlpha()) return entries.sort((a,b) => a[0].localeCompare(b[0], 'ko')).map(x=>x[0]);
+      return entries.sort((a,b) => b[1]-a[1]).map(x=>x[0]);
+  };
+
+  // 멀티셀렉트 브랜드 Set 초기화
+  if(!window._activeBrands) window._activeBrands = new Set();
+
+  // 브랜드 칩 렌더링 (멀티셀렉트) — 전역 노출로 resetAll 등에서 접근 가능
+  const _renderBrandChips = (filterQ = "") => {
+      const wrap = $("#brandChips");
+      if(!wrap) return;
+      const brands = _getSortedBrands();
+      const q = filterQ.toLowerCase().trim();
+
+      wrap.innerHTML = "";
+      // 전체 칩 (선택된 브랜드 없을 때 활성)
+      const allBtn = document.createElement("button");
+      allBtn.className = "chip shrink-0"; allBtn.dataset.brand = "ALL";
+      allBtn.dataset.active = window._activeBrands.size === 0 ? "1" : "0";
+      allBtn.textContent = "전체";
+      allBtn.onclick = () => {
+          saveHistoryState();
+          window._activeBrands.clear();
+          _renderBrandChips(filterQ);
+          if(window._updateBrandPreview) window._updateBrandPreview();
+          visibleCount = 60; render();
+      };
+      wrap.appendChild(allBtn);
+
+      brands.filter(b => !q || b.toLowerCase().includes(q)).forEach(b => {
+          const btn = document.createElement("button");
+          btn.className = "chip shrink-0"; btn.dataset.brand = b;
+          btn.dataset.active = window._activeBrands.has(b) ? "1" : "0";
+          btn.textContent = b;
+          btn.onclick = () => {
+              saveHistoryState();
+              if(window._activeBrands.has(b)) {
+                  window._activeBrands.delete(b);
+              } else {
+                  window._activeBrands.add(b);
+              }
+              _renderBrandChips(filterQ);
+              if(window._updateBrandPreview) window._updateBrandPreview();
+              visibleCount = 60; render();
+          };
+          wrap.appendChild(btn);
+      });
+  };
+
+  // 최근 브랜드 렌더링
+  const _renderRecentBrands = () => {
+      const rb = $("#recentBrands"); if(!rb) return;
+      const recents = _getRecentBrands().filter(b => brandCounts[b]);
+      if(recents.length === 0) { rb.classList.add("hidden"); return; }
+      rb.classList.remove("hidden");
+      rb.style.display = "flex";
+      rb.innerHTML = '<span class="text-[10px] text-[color:var(--muted)] shrink-0 font-bold">최근:</span>';
+      recents.forEach(b => {
+          const btn = document.createElement("button");
+          btn.className = "chip shrink-0 text-[10px]"; btn.dataset.brand = b; btn.textContent = b;
+          btn.onclick = () => {
+              _addRecentBrand(b);
+              saveHistoryState();
+              $$('#brandChips .chip').forEach(c=>c.dataset.active=(c.dataset.brand===b?"1":"0"));
+              visibleCount=60; render();
+          };
+          rb.appendChild(btn);
+      });
+  };
+  // ── 인기순 top N 브랜드 (항상 인기순, 정렬 토글 무관) ──
+  const _getTopBrands = (n) => Object.entries(brandCounts).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]);
+
+  // ── 브랜드 접힌 상태: 인기 top5 칩 + 선택 표시 ──────────
+  const _updateBrandPreview = () => {
+      const preview = $("#brandCollapsedPreview");
+      const label = $("#brandToggleLabel");
+      if (!preview) return;
+
+      const top5 = _getTopBrands(10);
+      preview.innerHTML = "";
+
+      // top 5 인기 브랜드를 항상 클릭 가능한 칩으로 표시
+      top5.forEach(b => {
+          const btn = document.createElement("button");
+          btn.className = "chip shrink-0 text-[11px]";
+          btn.dataset.brand = b;
+          btn.dataset.active = window._activeBrands.has(b) ? "1" : "0";
+          btn.textContent = b;
+          btn.onclick = () => {
+              saveHistoryState();
+              if (window._activeBrands.has(b)) window._activeBrands.delete(b);
+              else window._activeBrands.add(b);
+              _renderBrandChips();
+              _updateBrandPreview();
+              visibleCount = 60; render();
+          };
+          preview.appendChild(btn);
+      });
+
+      // top5 외에 선택된 브랜드가 있으면 "+N개 선택" 표시
+      const extraSelected = [...window._activeBrands].filter(b => !top5.includes(b));
+      if (extraSelected.length > 0) {
+          const span = document.createElement("span");
+          span.className = "text-[10px] font-black text-blue-600 shrink-0 px-1";
+          span.textContent = `+${extraSelected.length}개 선택`;
+          preview.appendChild(span);
+      }
+
+      // 펼치기/접기 라벨
+      const isOpen = $("#brandExpandedPanel")?.classList.contains("open");
+      if (label) label.textContent = isOpen ? "접기" : "전체보기";
+  };
+
+  window._renderBrandChips = (filterQ = "") => { _renderBrandChips(filterQ); _updateBrandPreview(); };
+  window._updateBrandPreview = _updateBrandPreview;
+
+  // ── 브랜드 패널 토글 ─────────────────────────────────────
+  window._toggleBrandPanel = () => {
+      const panel = $("#brandExpandedPanel");
+      const chevron = $("#brandChevron");
+      const label = $("#brandToggleLabel");
+      if (!panel) return;
+      const isOpen = panel.classList.contains("open");
+      if (isOpen) {
+          panel.classList.remove("open");
+          if (chevron) chevron.style.transform = "";
+          if (label) label.textContent = "펼치기";
+      } else {
+          panel.classList.add("open");
+          if (chevron) chevron.style.transform = "rotate(180deg)";
+          if (label) label.textContent = "접기";
+          // 패널 열릴 때 검색창 포커스
+          setTimeout(() => { const s = $("#brandSearch"); if(s) s.focus(); }, 50);
+      }
+  };
+
+  _renderBrandChips();
+  _updateBrandPreview();
+
+  // 브랜드 검색 이벤트
+  const brandSearchEl = $("#brandSearch");
+  if(brandSearchEl && !brandSearchEl.dataset.setup) {
+      brandSearchEl.dataset.setup = "1";
+      brandSearchEl.addEventListener("input", (e) => _renderBrandChips(e.target.value));
+      brandSearchEl.addEventListener("search", () => _renderBrandChips(""));
+  }
+
+  // 정렬 토글 이벤트
+  const _setupSortToggle = () => {
+      const popBtn = $("#brandSortPop"); const alphaBtn = $("#brandSortAlpha");
+      if(!popBtn || popBtn.dataset.setup) return;
+      popBtn.dataset.setup = "1";
+      popBtn.onclick = () => { popBtn.dataset.active="1"; alphaBtn.dataset.active="0"; _renderBrandChips(brandSearchEl?.value||""); };
+      alphaBtn.onclick = () => { alphaBtn.dataset.active="1"; popBtn.dataset.active="0"; _renderBrandChips(brandSearchEl?.value||""); };
+  };
+  _setupSortToggle();
+
+  if($("#statItems")) $("#statItems").textContent = fmt(PRODUCTS.length);
+  if($("#statBusan")) $("#statBusan").textContent = fmt(PRODUCTS.reduce((a,p)=>a+p.busanTotal,0));
+}
+
+function setupQuickActionBar() {
+    const wrap = $("#actionBtnsWrap");
+    if(!wrap || wrap.dataset.setup === "1") return;
+    wrap.dataset.setup = "1";
+
+    const hasPromo = getPromoList().length > 0;
+    
+    wrap.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<button id="dashBtn" onclick="window.openAnalyticsReport()" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors whitespace-nowrap">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i><span>분석 리포트</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <button id="salesSummaryBtn" onclick="const _sp=document.getElementById('salesSummaryPanel');if(_sp&&!_sp.classList.contains('hidden')){window._salesSummaryDismissed=true;_sp.classList.add('hidden');}else{window._salesSummaryDismissed=false;renderSalesSummaryPanel();if(_sp){_sp.classList.remove('hidden');_sp.scrollIntoView({behavior:'smooth',block:'start'});}}" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-red-600 transition-colors whitespace-nowrap">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <i data-lucide="flame" class="w-3.5 h-3.5"></i><span>핫셀러 현황</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${hasPromo ? `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <button id="promoViewBtn" onclick="window.togglePromoView(this)" class="flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-purple-700 transition-colors whitespace-nowrap" data-active="0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ${_promoBtnIdleHtml()}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </button>` : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    `;
+    if(window.lucide) lucide.createIcons();
+}
+
+
+// ── 기획전 버튼 상태 동기화 헬퍼 ──────────────────────────────
+// 진행 중인 기획전은 상태 줄 대신 기획전 버튼에 개수로 보여 주고, 이름은 버튼 툴팁·드롭다운에서 확인
+function _promoBtnIdleHtml() {
+    const n = (window._activePromoNames || []).length;
+    return `<i data-lucide="gift" class="w-3.5 h-3.5"></i><span>기획전</span>${n ? ` <span class="bg-purple-600 text-white rounded-full px-1.5 text-[10px] font-black">${n}</span>` : ''}`;
+}
+function _refreshPromoBtnIdle() {
+    const btn = document.getElementById('promoViewBtn');
+    if(!btn) return;
+    const names = window._activePromoNames || [];
+    btn.title = names.length ? '진행 중: ' + names.join(', ') : '';
+    if(btn.dataset.active !== "1") { btn.innerHTML = _promoBtnIdleHtml(); if(window.lucide) lucide.createIcons(); }
+}
+function _syncPromoBtn(btn, active, pname) {
+    if(!btn) return;
+    btn.dataset.active = active ? "1" : "0";
+    if(active) {
+        btn.className = btn.className.replace(/bg-purple-50/g,'bg-purple-600').replace(/text-purple-700/g,'text-white').replace(/hover:bg-purple-100/g,'hover:bg-purple-700').replace(/border-purple-200/g,'border-purple-700');
+        const label = (!pname || pname === "ALL") ? "기획전" : (pname.length > 9 ? pname.slice(0,9)+'…' : pname);
+        btn.innerHTML = `<i data-lucide="gift" class="w-3.5 h-3.5"></i><span>${label} ✕</span>`;
+    } else {
+        btn.className = btn.className.replace(/bg-purple-600/g,'bg-purple-50').replace(/text-white/g,'text-purple-700').replace(/hover:bg-purple-700/g,'hover:bg-purple-100').replace(/border-purple-700/g,'border-purple-200');
+        btn.innerHTML = _promoBtnIdleHtml();
+    }
+    if(window.lucide) lucide.createIcons();
+}
+
+window.togglePromoView = (btn, bypassRender = false) => {
+    const _promos = getPromoList();
+    const _isMultiPromo = _promos.length > 1;
+
+    // ── 멀티 기획전: 드롭다운 팝오버 ────────────────────────────
+    if(_isMultiPromo) {
+        if(bypassRender) {
+            // 프로그래밍 방식 호출 (자동 활성화) — 드롭다운 없이 바로 적용
+            window.tempPromoFilter = true;
+            _syncPromoBtn(btn, true, window._activePromoName || "ALL");
+            return;
+        }
+        // 드롭다운 열기/닫기 토글
+        const existingDD = document.getElementById('promoDropdown');
+        if(existingDD) { existingDD.remove(); return; }
+
+        const dd = document.createElement('div');
+        dd.id = 'promoDropdown';
+        dd.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1.5px solid #e9d5ff;border-radius:14px;box-shadow:0 8px 28px rgba(88,28,135,0.18);overflow:hidden;min-width:190px;padding:6px 0;';
+
+        const activePN = window._activePromoName || "ALL";
+        const isFilterOn = window.tempPromoFilter === true;
+
+        // 기획전 목록 아이템
+        const ddItems = [
+            { pname: "ALL", label: "🎁 전체 기획전" },
+            ..._promos.map(pr => ({
+                pname: pr.meta?.name || '기획전',
+                label: `🎪 ${pr.meta?.name || '기획전'}${pr.meta?.period ? '  <span style="opacity:.6;font-size:10px;">'+escapeHtml(pr.meta.period)+'</span>' : ''}`
+            }))
+        ];
+        ddItems.forEach(item => {
+            const iBtn = document.createElement('button');
+            const isSelected = isFilterOn && activePN === item.pname;
+            iBtn.style.cssText = `display:block;width:100%;padding:9px 16px;text-align:left;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:background 0.12s;background:${isSelected?'#7c3aed':'#fff'};color:${isSelected?'#fff':'#6d28d9'};`;
+            iBtn.innerHTML = item.label;
+            iBtn.addEventListener('mouseover', () => { if(!isSelected) iBtn.style.background='#f5f3ff'; });
+            iBtn.addEventListener('mouseout', () => { if(!isSelected) iBtn.style.background='#fff'; });
+            iBtn.addEventListener('click', e => { e.stopPropagation(); window._selectPromoItem(item.pname); dd.remove(); });
+            dd.appendChild(iBtn);
+        });
+
+        // 필터 활성 시 해제 버튼
+        if(isFilterOn) {
+            const sep = document.createElement('div');
+            sep.style.cssText = 'height:1px;background:#f3e8ff;margin:6px 8px;';
+            dd.appendChild(sep);
+            const xBtn = document.createElement('button');
+            xBtn.style.cssText = 'display:block;width:100%;padding:8px 16px;text-align:left;font-size:11px;font-weight:700;color:#a855f7;background:#fff;border:none;cursor:pointer;';
+            xBtn.innerHTML = '✕ 기획전 필터 해제';
+            xBtn.addEventListener('mouseover', () => xBtn.style.background='#fdf4ff');
+            xBtn.addEventListener('mouseout', () => xBtn.style.background='#fff');
+            xBtn.addEventListener('click', e => { e.stopPropagation(); window._deactivatePromo(); dd.remove(); });
+            dd.appendChild(xBtn);
+        }
+
+        document.body.appendChild(dd);
+        const rect = btn.getBoundingClientRect();
+        dd.style.top = (rect.bottom + 6) + 'px';
+        dd.style.left = rect.left + 'px';
+
+        setTimeout(() => {
+            const closeDD = e => {
+                if(!dd.contains(e.target) && !btn.contains(e.target)) { dd.remove(); document.removeEventListener('click', closeDD); }
+            };
+            document.addEventListener('click', closeDD);
+        }, 10);
+        return;
+    }
+
+    // ── 단일 기획전: 기존 토글 ──────────────────────────────────
+    if(!bypassRender) saveHistoryState();
+    const isActive = btn.dataset.active === "1";
+    if(!isActive) {
+        window.tempPromoFilter = true;
+        _syncPromoBtn(btn, true, "ALL");
+        $("#promoTypeSel")?.classList.remove("hidden");
+        $("#promoRateSel")?.classList.remove("hidden");
+    } else {
+        window.tempPromoFilter = false;
+        window._activePromoName = "ALL";
+        _syncPromoBtn(btn, false);
+        $("#promoTypeSel")?.classList.add("hidden");
+        $("#promoRateSel")?.classList.add("hidden");
+    }
+    if(!bypassRender) { visibleCount=60; render(); }
+};
+
+// 기획전 개별 선택
+window._selectPromoItem = (pname) => {
+    saveHistoryState();
+    window._activePromoName = pname;
+    window.tempPromoFilter = true;
+    const btn = document.getElementById('promoViewBtn');
+    _syncPromoBtn(btn, true, pname);
+    $("#promoTypeSel")?.classList.remove("hidden");
+    $("#promoRateSel")?.classList.remove("hidden");
+    visibleCount = 60; render();
+};
+
+// 기획전 필터 해제
+window._deactivatePromo = () => {
+    saveHistoryState();
+    window.tempPromoFilter = false;
+    window._activePromoName = "ALL";
+    const btn = document.getElementById('promoViewBtn');
+    _syncPromoBtn(btn, false);
+    $("#promoTypeSel")?.classList.add("hidden");
+    $("#promoRateSel")?.classList.add("hidden");
+    visibleCount = 60; render();
+};
+
+function setupSearchAutocomplete() {
+    const qEl = document.getElementById("q");
+    if(!qEl || qEl.dataset.acSetup === "1") return;
+    qEl.dataset.acSetup = "1";
+
+    let wrapper = qEl.parentNode;
+    if(!wrapper.classList.contains("relative")) {
+        wrapper.classList.add("relative");
+        const sugg = document.createElement("div");
+        sugg.id = "searchSuggestions";
+        sugg.className = "absolute w-full bg-white border border-gray-200 rounded-xl shadow-2xl hidden top-full mt-2 left-0 flex flex-col z-[999] overflow-hidden";
+        wrapper.appendChild(sugg);
+    }
+
+    const suggBox = document.getElementById("searchSuggestions");
+
+    const showRecent = () => {
+        if(RECENT_SEARCHES.length === 0) { suggBox.classList.add("hidden"); return; }
+        suggBox.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b flex justify-between items-center">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span>🕒 최근 검색어</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="cursor-pointer hover:text-red-500 bg-white px-2 py-1 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ${RECENT_SEARCHES.map(t => `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="p-3.5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="font-bold text-gray-800 text-sm">${escapeHtml(t)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <i data-lucide="search" class="w-4 h-4 text-gray-300 group-hover:text-blue-500"></i>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            `).join('')}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        `;
+        suggBox.classList.remove("hidden");
+        if(window.lucide) lucide.createIcons();
+    };
+
+    qEl.addEventListener("focus", () => { if(!qEl.value.trim()) showRecent(); });
+    document.addEventListener("click", (e) => { if(qEl && suggBox && !qEl.contains(e.target) && !suggBox.contains(e.target)) suggBox.classList.add("hidden"); });
+    qEl.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" && qEl.value.trim()) {
+            saveHistoryState();
+            suggBox.classList.add("hidden");
+            saveRecentSearch(qEl.value.trim());
+            visibleCount=60; render();
+        }
+    });
+
+    let debounceTimer;
+    qEl.addEventListener("input", (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(saveHistoryState, 500);
+
+        const val = e.target.value.trim().toLowerCase();
+        const cleanVal = val.replace(/[\s\-_]/g, "");
+        if(!cleanVal) { showRecent(); return; }
+
+        let matches = PRODUCTS.filter(p => p._hayClean.includes(cleanVal) || p._chosung.includes(cleanVal)).slice(0, 5);
+        if(matches.length === 0) { suggBox.classList.add("hidden"); return; }
+
+        suggBox.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="p-3 bg-gray-50 text-xs font-bold text-gray-500 border-b">✨ 상품 자동완성</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ${matches.map(p => {
+                const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+                return `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="p-3 border-b border-gray-50 hover:bg-blue-50 cursor-pointer flex gap-3 items-center" onclick="applySearch('${p.품번}')">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ${imgSrc ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="flex flex-col min-w-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-xs font-bold text-gray-400 truncate">${p.브랜드} | ${p.품번}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-[15px] font-black text-gray-900 truncate">${p.품명}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>`}).join('')}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        `;
+        suggBox.classList.remove("hidden");
+    });
+}
+
+window.applySearch = (term) => {
+    saveHistoryState();
+    const qEl = document.getElementById("q");
+    qEl.value = term;
+    document.getElementById("searchSuggestions").classList.add("hidden");
+    saveRecentSearch(term);
+    visibleCount=60; render();
+};
+
+window.saveRecentSearch = (term) => {
+    if(!term) return;
+    RECENT_SEARCHES = RECENT_SEARCHES.filter(t => t !== term);
+    RECENT_SEARCHES.unshift(term);
+    if(RECENT_SEARCHES.length > 10) RECENT_SEARCHES.pop();
+    localStorage.setItem('RECENT_SEARCHES_V4', JSON.stringify(RECENT_SEARCHES));
+};
+
+window.clearRecentSearches = (e) => {
+    e.stopPropagation();
+    RECENT_SEARCHES = [];
+    localStorage.removeItem('RECENT_SEARCHES_V4');
+    document.getElementById("searchSuggestions").classList.add("hidden");
+};
+
+async function loadChartJS() {
+    return new Promise((resolve) => {
+        if (window.Chart && window.ChartDataLabels) return resolve();
+        if (!window.Chart) {
+            const script = document.createElement('script'); script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = () => {
+                if (!window.ChartDataLabels) {
+                    const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+                    plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
+                    document.head.appendChild(plugin);
+                } else resolve();
+            };
+            document.head.appendChild(script);
+        } else if (!window.ChartDataLabels) {
+            const plugin = document.createElement('script'); plugin.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0';
+            plugin.onload = () => { Chart.register(ChartDataLabels); resolve(); };
+            document.head.appendChild(plugin);
+        }
+    });
+}
+
+// GitHub transfers 저장 (딜레이 후 저장, 연속 클릭 시 debounce)
+async function _saveTransfersToGH() {
+    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+    // 서버 최신 transfers.json을 읽어 id 기준으로 병합(union) 후 PUT.
+    // 409/422(SHA 충돌) 시 최신 sha로 재병합 후 재시도 — 다른 기기 요청을 덮어쓰지 않음.
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+            if(!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
+            let serverData = [], sha;
+            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {} }
+            // id union: 서버 레코드 보존 + 로컬 레코드 반영(같은 id면 로컬 우선)
+            const byId = new Map();
+            for (const s of serverData) byId.set(s.id, s);
+            for (const loc of TRANSFERS) byId.set(loc.id, loc);
+            const merged = Array.from(byId.values());
+            const body = { message:"update transfers", content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch, ...(sha && {sha}) };
+            const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+            if(put.status === 409 || put.status === 422) continue;   // 최신 sha로 재시도
+            if(!put.ok) throw new Error('PUT ' + put.status);
+            TRANSFERS = merged;
+            return true;
+        } catch(err) { if(attempt === 2) { console.error('transfers save error:', err); showToast('RT 저장 실패. 다시 시도해주세요.', null, 'error'); return false; } }
+    }
+    showToast('RT 저장 실패. 다시 시도해주세요.', null, 'error'); return false;
+}
+
+async function _removeTransferFromGH(trId) {
+    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
+    // 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존), 409/422 시 재시도
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
+            if(!r.ok) throw new Error('fetch ' + r.status);
+            const j = await r.json();
+            let serverData = [];
+            try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {}
+            const filtered = serverData.filter(t => t.id !== trId);
+            const body = { message:"undo transfer", content: utf8ToB64(JSON.stringify(filtered, null, 2)), branch: GH.branch, sha: j.sha };
+            const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+            if(put.status === 409 || put.status === 422) continue;
+            if(!put.ok) throw new Error('PUT ' + put.status);
+            TRANSFERS = filtered;
+            return true;
+        } catch(err) { if(attempt === 2) { console.error('transfer undo error:', err); return false; } }
+    }
+    return false;
+}
+
+// ── 위치찾기: locations.json 안전 저장 ──────────────────────────────
+// 서버 최신본을 읽어 mutateFn으로 변형한 뒤 저장 (다른 기기의 구역/배정 변경을 보존).
+// 로드 실패 시 저장 중단(빈 데이터로 덮어쓰기 방지), 409/422는 최신본 재조회 후 재시도.
+async function saveLocations(mutateFn) {
+    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${LOCATIONS_PATH}`;
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            const r = await fetch(apiUrl + `?t=${Date.now()}`, { headers: { Authorization: "Bearer " + getPat() } });
+            if (!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
+            let serverData = { zones: [], assignments: {} }, sha;
+            if (r.ok) {
+                const j = await r.json(); sha = j.sha;
+                let ok = false;
+                try {
+                    const parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+                    if (parsed && Array.isArray(parsed.zones)) { serverData = parsed; ok = true; }
+                } catch (e2) {}
+                if (!ok) throw new Error('기존 위치 데이터를 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+            }
+            const next = mutateFn(serverData);
+            const body = { message: "update locations", content: utf8ToB64(JSON.stringify(next, null, 2)), branch: GH.branch, ...(sha && { sha }) };
+            const put = await fetch(apiUrl, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            if (put.status === 409 || put.status === 422) continue; // 최신 sha로 재시도
+            if (!put.ok) throw new Error('PUT ' + put.status);
+            LOCATIONS = next;
+            try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.locations = next; sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch (e) {}
+            return true;
+        } catch (err) {
+            if (attempt === 2) { console.error('locations save error:', err); showToast(err.message && err.message.includes('중단') ? err.message : '위치 저장 실패. 다시 시도해주세요.', null, 'error'); return false; }
+        }
+    }
+    return false;
+}
+
+window.quickRT = async (code, size, fromStr, qty, btn) => {
+    if(!checkPat()) return;
+    const p = PRODUCTS.find(x => x.품번 === code);
+    if(!p) return;
+
+    // iPad/iOS Safari 대응
+    if(!btn || !btn.tagName) {
+        try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
+        catch(e) { btn = document.createElement('button'); }
+    }
+
+    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
+
+    // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
+    const existing = TRANSFERS.find(t => t.code === code && t.size === size && t.memo === finalMemo);
+    if (existing) {
+        existing.qty += 1;
+        // 버튼: 수량 표시 유지 (계속 클릭 가능)
+        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+        if(window.lucide) lucide.createIcons();
+        // debounce 저장 (800ms 내 추가 클릭이 없을 때 저장)
+        clearTimeout(window._rtSaveTimer);
+        window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
+        showToast(`📦 ${fromStr} → ${size} | ${existing.qty}개로 업데이트`, async () => {
+            // 실행취소: 방금 올린 1개만 되돌림 (대기 중 저장 취소 후 정리)
+            clearTimeout(window._rtSaveTimer);
+            existing.qty -= 1;
+            if (existing.qty <= 0) {
+                TRANSFERS = TRANSFERS.filter(t => t.id !== existing.id);
+                btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
+                if(window.lucide) lucide.createIcons();
+                await _removeTransferFromGH(existing.id);
+            } else {
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+                if(window.lucide) lucide.createIcons();
+                await _saveTransfersToGH();
+            }
+        });
+        return;
+    }
+
+    // ── 신규 이동요청 추가 ──
+    const origHtml = btn.innerHTML;
+    const origClass = btn.className;
+
+    // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
+    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>1개`;
+    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
+    if(window.lucide) lucide.createIcons();
+
+    const trId = "tr_" + Date.now();
+    const d = new Date();
+    const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+    // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
+    const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
+    const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
+    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: _trItemCode, date: shortDate, size, qty: 1, memo: finalMemo });
+
+    // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
+    const _saveOk = await _saveTransfersToGH();
+    if(!_saveOk) {
+        // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+        if(window.lucide) lucide.createIcons();
+        return;
+    }
+
+    showToast(`📦 ${fromStr} → ${size} 1개 RT요청 (한 번 더 누르면 +1개)`, async () => {
+        // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+        await _removeTransferFromGH(trId);
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+        if(window.lucide) lucide.createIcons();
+    });
+};
+
+window.quickRTOut = async (code, size, qty, btn) => {
+    if(!checkPat()) return;
+    const p = PRODUCTS.find(x => x.품번 === code);
+    if(!p) return;
+
+    // iPad/iOS Safari 대응
+    if(!btn || !btn.tagName) {
+        try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
+        catch(e) { btn = document.createElement('button'); }
+    }
+
+    const finalMemo = `[부산점 ➡️ 물류센터] 부진재고 반납요청`;
+
+    // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
+    const existing = TRANSFERS.find(t => t.code === code && t.size === size && t.memo === finalMemo);
+    if (existing) {
+        existing.qty += 1;
+        // 버튼: 수량 표시 유지 (계속 클릭 가능)
+        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+        if(window.lucide) lucide.createIcons();
+        // debounce 저장 (800ms 내 추가 클릭이 없을 때 저장)
+        clearTimeout(window._rtSaveTimer);
+        window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
+        showToast(`📦 부산 → 물류 ${size} | ${existing.qty}개로 업데이트`, async () => {
+            // 실행취소: 방금 올린 1개만 되돌림 (대기 중 저장 취소 후 정리)
+            clearTimeout(window._rtSaveTimer);
+            existing.qty -= 1;
+            if (existing.qty <= 0) {
+                TRANSFERS = TRANSFERS.filter(t => t.id !== existing.id);
+                btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
+                if(window.lucide) lucide.createIcons();
+                await _removeTransferFromGH(existing.id);
+            } else {
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
+                if(window.lucide) lucide.createIcons();
+                await _saveTransfersToGH();
+            }
+        });
+        return;
+    }
+
+    // ── 신규 이동요청 추가 ──
+    const origHtml = btn.innerHTML;
+    const origClass = btn.className;
+
+    // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
+    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>1개`;
+    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
+    if(window.lucide) lucide.createIcons();
+
+    const trId = "tr_" + Date.now();
+    const d = new Date();
+    const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+    // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
+    const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
+    const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
+    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: _trItemCode, date: shortDate, size, qty: 1, memo: finalMemo });
+
+    // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
+    const _saveOk = await _saveTransfersToGH();
+    if(!_saveOk) {
+        // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+        if(window.lucide) lucide.createIcons();
+        return;
+    }
+
+    showToast(`📦 부산 → 물류 ${size} 1개 반납요청 (한 번 더 누르면 +1개)`, async () => {
+        // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
+        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
+        await _removeTransferFromGH(trId);
+        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
+        if(window.lucide) lucide.createIcons();
+    });
+};
+
+window.exportTransfersToExcel = () => {
+    if(TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return; }
+    if(!window.XLSX || !window.XLSX.writeFile) {
+        alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요.");
+        const s = document.createElement('script'); s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'; document.head.appendChild(s); return;
+    }
+
+    // ── 이동요청리스트 양식에 맞게 출력 ──
+    // 행 구성: A열(빈칸), B~L열 데이터
+    const aoa = [];
+
+    // Row1: 빈 행
+    aoa.push(Array(12).fill(''));
+
+    // Row2: 타이틀 (B2, B2:M2 병합)
+    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '', '']);
+
+    // Row3: 헤더 — 카테고리는 품번 바로 뒤(대분류 위치)에 배치, 중복이던 품명은 하나로 통합
+    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '브랜드', '카테고리', '품명', '규격', '요청수량', '물류센터재고', '매장재고', '단위이상']);
+
+    // ── 품번(규격) → 품목내부코드 룩업 테이블 (RAW 데이터 기반, 사이즈 레벨 정확 매칭) ──
+    // 기존에 itemCode가 잘못 저장된 항목도 이 테이블로 재매핑
+    const _itemCodeMap = {};
+    RAW.forEach(r => {
+        const 품번 = String(r["품번"] || "").trim();
+        const 규격 = String(r["규격"] || "").trim();
+        const 코드 = String(r["품목내부코드"] || "").trim();
+        if(품번 && 규격 && 코드) _itemCodeMap[`${품번}(${규격})`] = 코드;
+    });
+    // Row4+: 데이터 — 카테고리(신발→의류→용품) → 브랜드 가나다순 → 품번(같은 품목끼리 묶임) → 규격 오름차순 정렬
+    const _sortedTransfers = TRANSFERS.map(t => ({ t, prod: PRODUCTS.find(p => p.품번 === t.code) })).sort((a, b) => {
+        const ca = CAT_ORDER[a.prod?.카테고리] ?? 9;
+        const cb = CAT_ORDER[b.prod?.카테고리] ?? 9;
+        if (ca !== cb) return ca - cb;
+        const brandCmp = String(a.prod?.브랜드 || '').localeCompare(String(b.prod?.브랜드 || ''), 'ko');
+        if (brandCmp !== 0) return brandCmp;
+        const codeCmp = String(a.t.code || '').localeCompare(String(b.t.code || ''), 'ko');
+        if (codeCmp !== 0) return codeCmp;
+        // 같은 품번끼리는 규격(사이즈) 오름차순 — 숫자 사이즈면 숫자로 비교
+        const sa = String(a.t.size || ''), sb = String(b.t.size || '');
+        const na = parseFloat(sa), nb = parseFloat(sb);
+        if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+        return sa.localeCompare(sb, 'ko');
+    });
+
+    _sortedTransfers.forEach(({ t, prod }) => {
+        // sizes 배열에서 해당 사이즈의 물류센터 재고 조회 (prod는 위에서 미리 조회)
+        const sizeObj = prod?.sizes?.find(s => String(s.size).trim() === String(t.size || '').trim());
+        const wms   = sizeObj !== undefined ? (sizeObj.center || 0) : '';
+        const store = sizeObj !== undefined ? (sizeObj.busan  || 0) : '';
+        const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
+        // 품목내부코드 우선순위:
+        //   1) RAW 룩업 테이블 [품번(규격)] — 가장 정확 (사이즈 레벨)
+        //   2) sizes[].itemCode — 현재 세션 rebuildIndex 결과
+        //   3) TRANSFERS에 저장된 itemCode — 과거 저장값
+        //   4) 품번 레벨 itemCode
+        //   5) 품번 자체 (최후 fallback)
+        const _lookupKey = `${t.code}(${t.size})`;
+        const itemCode = _itemCodeMap[_lookupKey] || sizeObj?.itemCode || t.itemCode || prod?.itemCode || t.code;
+        aoa.push([
+            '',                                    // A (빈칸)
+            '',                                    // B: ERP이동요청번호 (본사 입력)
+            t.date ? t.date.split(' ')[0] : '',    // C: 요청일 (날짜만, 시간 제거)
+            itemCode,                              // D: 품목내부코드 (ERP 내부코드)
+            t.code,                                // E: 품번
+            prod?.브랜드 || '',                      // F: 브랜드
+            prod?.카테고리 || '',                    // G: 카테고리 (신발/의류/용품 — 대분류)
+            t.product,                             // H: 품명
+            t.size,                                // I: 규격
+            t.qty,                                 // J: 요청수량
+            wms,                                   // K: 물류센터재고
+            store,                                 // L: 매장재고(부산)
+            diff,                                  // M: 단위이상
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // B2:M2 병합
+    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 12 } }];
+
+    // 열 너비 — 각 열의 최대 글자 수 기준 자동 계산
+    const colCount = 13;
+    const colWidths = Array(colCount).fill(4);
+    aoa.forEach(row => {
+        row.forEach((cell, ci) => {
+            const len = String(cell ?? '').length;
+            if (len > colWidths[ci]) colWidths[ci] = len;
+        });
+    });
+    colWidths[0] = 2; // A열 고정
+    ws['!cols'] = colWidths.map(w => ({ wch: Math.min(w + 2, 40) }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "이동요청리스트");
+    const d = new Date();
+    XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
+};
+
+window.exportDashboardImage = async () => {
+    const modal = document.querySelector('#analyticsDashboard');
+    if (!modal) return;
+    const btn = document.querySelector('#dashShareBtn');
+    const origBtnHtml = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '⏳ 저장 중...'; btn.disabled = true; }
+    let clone = null;
+    try {
+        clone = modal.cloneNode(true);
+        clone.id = 'analyticsDashboardClone';
+        clone.style.position = 'absolute';
+        clone.style.top = '0';
+        clone.style.left = '-9999px';
+        clone.style.height = 'auto';
+        clone.style.maxHeight = 'none';
+        clone.style.overflow = 'visible';
+        clone.style.zIndex = '-1';
+        const cloneScroll = clone.querySelector('main.dash-scroll');
+        if (cloneScroll) { cloneScroll.style.overflow = 'visible'; cloneScroll.style.maxHeight = 'none'; cloneScroll.style.height = 'auto'; }
+        const origCanvases = modal.querySelectorAll('canvas');
+        const cloneCanvases = clone.querySelectorAll('canvas');
+        origCanvases.forEach((oc, i) => {
+            const cc = cloneCanvases[i];
+            if (cc && oc.width > 0 && oc.height > 0) {
+                cc.width = oc.width; cc.height = oc.height;
+                const cctx = cc.getContext('2d');
+                if (cctx) cctx.drawImage(oc, 0, 0);
+            }
+        });
+        document.body.appendChild(clone);
+        await new Promise(r => setTimeout(r, 80));
+        const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        const canvas = await html2canvas(clone, { backgroundColor: '#f9fafb', scale: isMobile ? 1.5 : 2, useCORS: true });
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+        const fileName = `부산점_판매리포트_${dateStr}.png`;
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('이미지 생성 실패');
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({ files: [file], title: '부산점 판매 리포트' });
+                if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+                if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
+                return;
+            } catch (shareErr) {
+                if (shareErr && shareErr.name === 'AbortError') {
+                    if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+                    if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
+                    return;
+                }
+            }
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch(e) {
+        alert('이미지 저장에 실패했습니다: ' + (e && e.message ? e.message : e));
+    } finally {
+        if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+        if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
+    }
+};
+
+window.openAnalyticsReport = async () => {
+    await loadChartJS();
+    let dashFilter = { cat: null, brand: null, gender: null };
+    let currentPeriod = "7";
+    let currentCustomStart = "";
+    let currentCustomEnd = "";
+
+    let currentSizeFw = "ALL";
+    let currentSizeAp = "ALL";
+    let currentSizeGear = "ALL";
+
+    let currentDashSort = "qty"; // 판매수량순 or 판매금액순
+    let currentDashView = "sku"; // 'sku'=품번별 / 'model'=품명(모델) 통합
+    let currentDashBrand = "ALL"; // 대시보드 내 브랜드 필터
+
+    const generateDateOptions = () => {
+        const now = new Date(); let html = '';
+        html += '<optgroup label="월간 조회">';
+        for(let i=0; i<4; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2,'0');
+            const lastDay = new Date(y, d.getMonth() + 1, 0).getDate();
+            const val = `EXACT_${y}-${m}-01_${y}-${m}-${lastDay}`;
+            html += `<option value="${val}">${y}년 ${d.getMonth() + 1}월</option>`;
+        }
+        html += '</optgroup><optgroup label="주간 조회">';
+        const curr = new Date(now);
+        const day = curr.getDay(); const diff = curr.getDate() - day + (day === 0 ? -6 : 1);
+        let monday = new Date(curr.setDate(diff));
+
+        for(let i=0; i<5; i++) {
+            let sun = new Date(monday); sun.setDate(monday.getDate() + 6);
+            const y1 = monday.getFullYear(); const m1 = String(monday.getMonth()+1).padStart(2,'0'); const d1 = String(monday.getDate()).padStart(2,'0');
+            const y2 = sun.getFullYear(); const m2 = String(sun.getMonth()+1).padStart(2,'0'); const d2 = String(sun.getDate()).padStart(2,'0');
+            const weekNum = Math.ceil(monday.getDate() / 7);
+            const val = `EXACT_${y1}-${m1}-${d1}_${y2}-${m2}-${d2}`;
+            html += `<option value="${val}">${y1}년 ${monday.getMonth()+1}월 ${weekNum}주차 (${m1}/${d1}~${m2}/${d2})</option>`;
+            monday.setDate(monday.getDate() - 7);
+        }
+        html += '</optgroup>';
+        return html;
+    };
+
+    const allSizesFwSet = new Set();
+    const allSizesApSet = new Set();
+    const allSizesGearSet = new Set();
+    PRODUCTS.forEach(p => {
+        p.sizes.forEach(s => {
+            const size = String(s.size).trim();
+            if (isFwSize(size)) allSizesFwSet.add(size);
+            else if (/^[SMLX]+$/i.test(size) || size.toUpperCase()==='FREE' || size.toUpperCase()==='OS' || size.toUpperCase()==='F') allSizesApSet.add(size);
+            else allSizesGearSet.add(size);
+        });
+    });
+
+    const getPeriodItems = (period, start, end) => {
+        let items = [];
+        let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
+        if (period === "CUSTOM") { cutoffDate = start || "0000-00-00"; endDate = end || "9999-99-99"; }
+        else if (period && period !== "ALL") {
+            const d = new Date(Date.now() - Number(period) * 86400000); cutoffDate = d.toISOString().split('T')[0];
+        }
+
+        const activeSizeFilter = [currentSizeFw, currentSizeAp, currentSizeGear].find(s => s !== "ALL") || "ALL";
+
+        PRODUCTS.forEach(p => {
+            let busanSales = 0; let sinsaSales = 0; let centerSales = 0;
+
+            let busanRealRev = 0; let busanEstQty = 0; let sizeRealRevMap = {}; let sizeEstQtyMap = {};
+            let sizeSalesMap = {};
+
+            if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+                for (let date in SALES_HISTORY.items[p.품번]) {
+                    if (period === "ALL" || (date >= cutoffDate && date <= endDate)) {
+                        const dayData = SALES_HISTORY.items[p.품번][date];
+                        if (typeof dayData === 'number') {
+                            busanSales += dayData; sizeSalesMap["알수없음"] = (sizeSalesMap["알수없음"] || 0) + dayData;
+
+                            busanEstQty += dayData; sizeEstQtyMap["알수없음"] = (sizeEstQtyMap["알수없음"] || 0) + dayData;
+                        } else if (typeof dayData === 'object') {
+                            for (let size in dayData) {
+                                if (typeof dayData[size] === 'object') {
+                                    const sd = dayData[size];
+                                    // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+                                    const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+
+                                    if (bq > 0) {
+                                        busanSales += bq; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + bq;
+                                        const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[p.품번] && SALES_HISTORY.rev[p.품번][date] ? SALES_HISTORY.rev[p.품번][date][size] : null;
+                                        if (rd) {
+                                            const brqRev = typeof rd === 'object' ? Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0) : rd;
+                                            busanRealRev += brqRev;
+                                            sizeRealRevMap[size] = (sizeRealRevMap[size] || 0) + brqRev;
+                                        } else {
+                                            busanEstQty += bq;
+                                            sizeEstQtyMap[size] = (sizeEstQtyMap[size] || 0) + bq;
+                                        }
+                                    }
+                                    for(let mgr in sd) {
+                                        const qty = sd[mgr];
+                                        if(mgr.includes("승호") || mgr.includes("강") || mgr.includes("신사")) { sinsaSales += qty; }
+                                        if(mgr.includes("물류") || mgr.includes("본사") || mgr.includes("온라인")) { centerSales += qty; }
+                                    }
+                                } else {
+                                    busanSales += dayData[size]; sizeSalesMap[size] = (sizeSalesMap[size] || 0) + dayData[size];
+
+                                    busanEstQty += dayData[size]; sizeEstQtyMap[size] = (sizeEstQtyMap[size] || 0) + dayData[size];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            p.dashBusanSalesTotal = busanSales; p.dashSinsaSalesTotal = sinsaSales; p.dashCenterSalesTotal = centerSales;
+            p.dashSizeSalesMap = sizeSalesMap;
+
+            let finalSales = activeSizeFilter === "ALL" ? busanSales : (sizeSalesMap[activeSizeFilter] || 0);
+
+            const finalRealRev = activeSizeFilter === "ALL" ? busanRealRev : (sizeRealRevMap[activeSizeFilter] || 0);
+            const finalEstQty = activeSizeFilter === "ALL" ? busanEstQty : (sizeEstQtyMap[activeSizeFilter] || 0);
+            const finalRev = finalRealRev + finalEstQty * (p.currentPromoPrice || p.소비자가 || 0);
+            if(finalSales > 0) items.push({ ...p, dashSales: finalSales, dashRev: finalRev });
+        });
+                                const catalogCodes = new Set(PRODUCTS.map(pp => pp.품번));
+        const discByCode = {};
+        for (const code in (SALES_HISTORY.items || {})) {
+            if (catalogCodes.has(code)) continue;
+            const codeHist = SALES_HISTORY.items[code];
+            let qty = 0, realRev = 0;
+            for (const date in codeHist) {
+                if (!(period === "ALL" || (date >= cutoffDate && date <= endDate))) continue;
+                const dayData = codeHist[date];
+                if (typeof dayData === 'number') {
+                    qty += dayData;
+                } else if (typeof dayData === 'object') {
+                    for (const size in dayData) {
+                        if (typeof dayData[size] === 'object') {
+                            const sd = dayData[size];
+                            const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                            if (bq > 0) {
+                                qty += bq;
+                                const rd = SALES_HISTORY.rev && SALES_HISTORY.rev[code] && SALES_HISTORY.rev[code][date] ? SALES_HISTORY.rev[code][date][size] : null;
+                                if (rd) { realRev += (typeof rd === 'object' ? Math.max(rd['부산(김종훈)'] || 0, rd['부산'] || 0) : rd); }
+                            }
+                        } else {
+                            qty += dayData[size];
+                        }
+                    }
+                }
+            }
+            if (qty > 0) { discByCode[code] = { qty, realRev }; }
+        }
+        for (const code in discByCode) {
+            const meta = (SALES_HISTORY.codeMeta && SALES_HISTORY.codeMeta[code]) || {};
+            items.push({
+                품번: code,
+                품명: meta.품명 || code,
+                브랜드: meta.브랜드 || '단종상품',
+                카테고리: meta.카테고리 || '기타',
+                성별: meta.성별 || 'U',
+                shopNo: code,
+                currentPromoPrice: null,
+                소비자가: 0,
+                dashSales: discByCode[code].qty,
+                dashRev: discByCode[code].realRev,
+            });
+        }
+
+return items.sort((a, b) => b.dashSales - a.dashSales);
+    };
+
+    let rawSoldItems = [];
+    let catChartInstance = null; let brandChartInstance = null; let genderChartInstance = null;
+
+    const renderDashUI = () => {
+        let modal = $("#analyticsDashboard");
+        if (!modal) {
+            modal = document.createElement("div"); modal.id = "analyticsDashboard";
+            modal.className = "fixed inset-0 z-[105] bg-gray-50 flex flex-col transition-opacity duration-300 opacity-0";
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <header class="bg-white border-b border-gray-100 px-4 py-3 flex flex-col shrink-0 shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="flex flex-wrap items-center justify-between gap-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <h1 class="text-base font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 <span class="text-xs font-bold text-gray-400 hidden sm:inline">(담당: 김종훈)</span></h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <p id="dashTotalLabel" class="text-xs font-bold text-gray-500 mt-0.5"></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex flex-wrap items-center gap-1.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <select id="dashBrandSel" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <option value="ALL">브랜드 전체</option>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <select id="dashSizeFw" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">신발</option>${generateSizeOptionsHtml(allSizesFwSet)}</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <select id="dashSizeAp" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">의류</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <select id="dashSizeGear" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">용품</option>${generateSizeOptionsHtml(allSizesGearSet)}</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="w-px h-5 bg-gray-200 mx-0.5 shrink-0"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <select id="dashPeriodSel" class="ipt text-xs font-black bg-orange-50 border border-orange-200 text-orange-800 rounded px-2.5 py-1.5 outline-none cursor-pointer">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <optgroup label="빠른 기간">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <option value="1">어제/오늘</option><option value="7" selected>최근 7일</option><option value="30">최근 1개월</option>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <option value="90">최근 3개월</option><option value="180">최근 6개월</option><option value="ALL">전체 누적</option>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <option value="CUSTOM_INPUT">📅 직접 지정</option>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </optgroup>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            ${generateDateOptions()}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="dashShareBtn" class="px-2.5 py-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-1 shrink-0 text-xs font-bold flex items-center gap-1">📸 이미지 저장</button><button id="closeDashboardBtn" class="p-1.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors ml-1 shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="dashCustomDateWrap" style="display:none" class="mt-2 flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 flex-wrap">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-xs font-black text-orange-700 shrink-0">📅 기간 직접 지정</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <input type="text" id="dashStart" placeholder="2026-05-01" maxlength="10" class="ipt text-xs px-2 py-1.5 w-[96px] border border-orange-200 rounded bg-white outline-none text-gray-700 font-bold tabular-nums">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-orange-400 font-bold">~</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <input type="text" id="dashEnd" placeholder="2026-05-31" maxlength="10" class="ipt text-xs px-2 py-1.5 w-[96px] border border-orange-200 rounded bg-white outline-none text-gray-700 font-bold tabular-nums">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button id="dashApply" class="px-3 py-1.5 bg-orange-500 text-white rounded text-xs font-black shrink-0 hover:bg-orange-600">적용</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-[10px] text-orange-400 font-bold">YYYY-MM-DD 또는 YYYYMMDD</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </header>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <main class="flex-1 overflow-y-auto dash-scroll p-3 flex flex-col gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="max-w-[1400px] mx-auto w-full flex flex-col gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="pie-chart" class="w-3 h-3 text-blue-400"></i> 카테고리</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="relative w-full" style="height:175px"><canvas id="catChart"></canvas></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </article>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="users" class="w-3 h-3 text-pink-400"></i> 성별</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="relative w-full" style="height:175px"><canvas id="genderChart"></canvas></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </article>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="award" class="w-3 h-3 text-emerald-400"></i> 브랜드 Top5</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="relative w-full" style="height:175px"><canvas id="brandChart"></canvas></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </article>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <section class="flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="px-4 py-2.5 border-b border-gray-100 flex justify-between items-center bg-gray-50/60 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex items-center gap-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h2 class="text-sm font-black text-gray-800 flex items-center gap-1.5"><i data-lucide="list" class="w-4 h-4 text-orange-500"></i> 판매 랭킹</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="activeFilterLabel" class="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-1 rounded-lg hidden cursor-pointer hover:bg-blue-100 transition-colors">차트 필터 ✖</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex items-center gap-1.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div class="flex rounded-lg overflow-hidden border border-gray-200 text-[11px] font-bold shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <button id="dashViewSku" class="dash-view-btn px-2.5 py-1.5 transition-colors" data-view="sku">SKU별</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <button id="dashViewModel" class="dash-view-btn px-2.5 py-1.5 border-l border-gray-200 transition-colors" data-view="model">모델별</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <select id="dashSortSel" class="ipt text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded px-2 py-1.5 outline-none cursor-pointer">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <option value="qty">수량순</option>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <option value="rev">금액순</option>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <button id="dashResetBtn" class="text-[11px] font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap">↩ 필터 초기화</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div id="dashListBody" class="px-3 py-1"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        `;
+
+        $("#dashPeriodSel").value = "7";
+        $("#dashPeriodSel").onchange = (e) => {
+            const val = e.target.value;
+            if(val === "CUSTOM_INPUT") {
+                $("#dashCustomDateWrap").style.display = "flex";
+            } else {
+                $("#dashCustomDateWrap").style.display = "none";
+                if (val.startsWith("EXACT_")) { const parts = val.split('_'); currentPeriod = "CUSTOM"; currentCustomStart = parts[1]; currentCustomEnd = parts[2]; }
+                else { currentPeriod = val; }
+                dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
+            }
+        };
+
+        const handleDashSizeChange = (e) => {
+            if(e.target.id === "dashSizeFw") { $("#dashSizeAp").value = "ALL"; $("#dashSizeGear").value = "ALL"; }
+            if(e.target.id === "dashSizeAp") { $("#dashSizeFw").value = "ALL"; $("#dashSizeGear").value = "ALL"; }
+            if(e.target.id === "dashSizeGear") { $("#dashSizeFw").value = "ALL"; $("#dashSizeAp").value = "ALL"; }
+
+            currentSizeFw = $("#dashSizeFw").value;
+            currentSizeAp = $("#dashSizeAp").value;
+            currentSizeGear = $("#dashSizeGear").value;
+            updateDashData();
+        };
+
+        $("#dashSizeFw").onchange = handleDashSizeChange;
+        $("#dashSizeAp").onchange = handleDashSizeChange;
+        $("#dashSizeGear").onchange = handleDashSizeChange;
+
+        $("#dashBrandSel").onchange = (e) => {
+            currentDashBrand = e.target.value;
+            renderDashState();
+        };
+
+        $("#dashSortSel").onchange = (e) => {
+            currentDashSort = e.target.value;
+            renderDashState();
+        };
+        const _syncDashViewBtns = () => { $$('.dash-view-btn').forEach(b => b.dataset.active = (b.dataset.view === currentDashView ? "1" : "0")); };
+        _syncDashViewBtns();
+        $$('.dash-view-btn').forEach(b => b.onclick = () => { currentDashView = b.dataset.view; _syncDashViewBtns(); renderDashState(); });
+
+        const _parseDate = (s) => {
+            s = (s || "").trim().replace(/[\/\.]/g, '-');
+            if (/^\d{8}$/.test(s)) return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+            return null;
+        };
+        $("#dashApply").onclick = () => {
+            const start = _parseDate($("#dashStart").value);
+            const end = _parseDate($("#dashEnd").value);
+            if(!start || !end) { alert("날짜 형식을 확인하세요.\n예: 2026-05-01 또는 20260501"); return; }
+            currentPeriod = "CUSTOM"; currentCustomStart = start; currentCustomEnd = end;
+            dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
+        };
+
+        $("#dashShareBtn").onclick = () => window.exportDashboardImage();
+
+        $("#closeDashboardBtn").onclick = () => {
+            modal.classList.add("opacity-0");
+            setTimeout(() => modal.classList.add("hidden"), 300);
+            if (document.body.classList.contains('dashboard-only-mode')) _revealDashOnlyUI(); // 팝업 전용모드였으면 닫을 때 재고앱 화면 노출
+        };
+        $("#dashResetBtn").onclick = () => {
+            dashFilter = { cat: null, brand: null, gender: null };
+            currentDashBrand = "ALL";
+            if($("#dashBrandSel")) $("#dashBrandSel").value = "ALL";
+            if($("#dashSizeFw")) { $("#dashSizeFw").value = "ALL"; $("#dashSizeAp").value = "ALL"; $("#dashSizeGear").value = "ALL"; }
+            currentSizeFw = "ALL"; currentSizeAp = "ALL"; currentSizeGear = "ALL";
+            updateDashData();
+        };
+        if(window.lucide) lucide.createIcons();
+    };
+
+    const updateDashData = () => {
+        rawSoldItems = getPeriodItems(currentPeriod, currentCustomStart, currentCustomEnd);
+
+        const brandSet = new Set();
+        rawSoldItems.forEach(p => { if(p.브랜드) brandSet.add(p.브랜드); });
+        const brandOptions = Array.from(brandSet).sort().map(b => `<option value="${b}" ${b===currentDashBrand?'selected':''}>${b}</option>`).join('');
+        $("#dashBrandSel").innerHTML = `<option value="ALL">브랜드 필터</option>${brandOptions}`;
+
+        renderDashState();
+    };
+
+    // 모델(품명) 통합: 색상·성별 SKU를 브랜드+품명 기준으로 합산
+    const _groupByModel = (items) => {
+        const map = new Map();
+        items.forEach(p => {
+            const key = (p.브랜드 || '') + '||' + (p.품명 || '').replace(/\s*(와이드|WIDE|Wide)\s*$/, '').trim();
+            let g = map.get(key);
+            if (!g) { g = { 브랜드: p.브랜드, 품명: p.품명, 품번: p.품번, shopNo: p.shopNo, dashSales: 0, dashRev: 0, skuCount: 0, mSales: 0, wSales: 0, uSales: 0, _maxSku: -1, _skus: [] }; map.set(key, g); }
+            g.dashSales += p.dashSales; g.dashRev += p.dashRev; g.skuCount += 1; g._skus.push(p.품번);
+            let gg = p.성별 || p.gender || 'U';
+            if (gg === 'M' || gg === '남성' || gg === '남') g.mSales += p.dashSales;
+            else if (gg === 'W' || gg === '여성' || gg === '여') g.wSales += p.dashSales;
+            else g.uSales += p.dashSales;
+            if (p.dashSales > g._maxSku) { g._maxSku = p.dashSales; g.품번 = p.품번; g.shopNo = p.shopNo; } // 대표 = 최다판매 SKU
+        });
+        return [...map.values()];
+    };
+    // 모델 통합 리스트 카드 1행
+    const _modelCard = (g, idx, totalRev) => {
+        const imgSrc = IMAGES[g.shopNo || g.품번] || null;
+        const rankClass = idx < 3 ? "rank top3" : "rank";
+        const total = g.dashSales || 1;
+        const mPct = Math.round(g.mSales / total * 100), wPct = Math.round(g.wSales / total * 100), uPct = 100 - mPct - wPct;
+        const seg = (pct, cls) => pct > 0 ? `<div class="${cls}" style="width:${pct}%"></div>` : '';
+        const mixBar = `<div class="flex h-1.5 w-16 rounded-full overflow-hidden bg-gray-100" title="남 ${mPct}% · 여 ${wPct}%">${seg(mPct, 'bg-sky-400')}${seg(wPct, 'bg-pink-400')}${seg(uPct, 'bg-purple-300')}</div>`;
+        const mixTxt = [g.mSales > 0 ? `남 ${mPct}%` : '', g.wSales > 0 ? `여 ${wPct}%` : ''].filter(Boolean).join(' · ');
+        const revPct = totalRev > 0 ? (g.dashRev / totalRev * 100).toFixed(1) : '0.0';
+        const revPctBadge = `<span class="text-[10px] font-black text-red-500">${revPct}%</span>`;
+        const statsHtml = currentDashSort === 'rev'
+            ? `<div class="stats"><div class="stat-primary-rev">${krw(g.dashRev)} ${revPctBadge}</div><div class="stat-secondary-rev">${fmt(g.dashSales)}개</div></div>`
+            : `<div class="stats"><div class="stat-primary">${fmt(g.dashSales)}개</div><div class="stat-secondary">${krw(g.dashRev)} ${revPctBadge}</div></div>`;
+        return `
+
+
+
+
+
+
+
+            <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${g.품번}', '${(currentPeriod === 'CUSTOM' ? `CUSTOM_${currentCustomStart}_${currentCustomEnd}` : currentPeriod)}')">
+
+
+
+
+
+
+
+                <div class="flex items-center w-full">
+
+
+
+
+
+
+
+                    <div class="${rankClass}">${idx + 1}</div>
+
+
+
+
+
+
+
+                    <div class="thumbnail shrink-0">${imgSrc ? `<img src="${imgSrc}" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}</div>
+
+
+
+
+
+
+
+                    <div class="info">
+
+
+
+
+
+
+
+                        <div class="meta">
+
+
+
+
+
+
+
+                            <span class="brand-code">${escapeHtml(g.브랜드)}</span>
+
+
+
+
+
+
+
+                            <span class="text-[10px] font-black text-orange-500 bg-orange-50 border border-orange-200 rounded px-1.5">SKU ${g.skuCount}</span>
+
+
+
+
+
+
+
+                            ${mixBar}<span class="text-[10px] text-gray-400 font-bold">${mixTxt}</span>
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+                        <div class="product-name">${escapeHtml(g.품명)}</div>
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    ${statsHtml}
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+            </div>`;
+    };
+    const renderDashState = () => {
+        let filteredItems = rawSoldItems.filter(p => {
+            if (dashFilter.cat && p.카테고리 !== dashFilter.cat) return false;
+            if (dashFilter.brand && p.브랜드 !== dashFilter.brand) return false;
+            if (currentDashBrand !== "ALL" && p.브랜드 !== currentDashBrand) return false;
+
+            let g = p.성별 || p.gender || "U";
+            g = _genderLabel(g, "공용/기타");
+            if (dashFilter.gender && g !== dashFilter.gender) return false;
+            return true;
+        });
+
+        filteredItems.sort((a, b) => {
+            if(currentDashSort === 'rev') return b.dashRev - a.dashRev;
+            return b.dashSales - a.dashSales;
+        });
+
+        windowDashItems = filteredItems;
+
+        let totalSales = 0; let totalRev = 0;
+        let catData = {}; let brandData = {}; let genderData = {};
+
+        filteredItems.forEach(p => {
+            totalSales += p.dashSales; totalRev += p.dashRev;
+            catData[p.카테고리||"기타"] = (catData[p.카테고리||"기타"] || 0) + p.dashSales;
+            brandData[p.브랜드||"기타"] = (brandData[p.브랜드||"기타"] || 0) + p.dashSales;
+            let g = p.성별 || p.gender || "U";
+            g = _genderLabel(g, "공용/기타");
+            genderData[g] = (genderData[g] || 0) + p.dashSales;
+        });
+
+        const activeSizeFilter = [currentSizeFw, currentSizeAp, currentSizeGear].find(s => s !== "ALL") || "ALL";
+        let sizeText = activeSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${activeSizeFilter} 사이즈 필터됨]</span>`;
+        $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-gray-900 font-black text-base">${fmt(totalSales)}개</span> / <span class="text-gray-800 font-black text-base">${krw(totalRev)}</span> 판매${sizeText}`;
+
+        const filterLabel = $("#activeFilterLabel"); let labelText = [];
+        if (dashFilter.cat) labelText.push(`[${dashFilter.cat}]`);
+        if (dashFilter.brand) labelText.push(`[${dashFilter.brand}]`);
+        if (dashFilter.gender) labelText.push(`[${dashFilter.gender}]`);
+
+        if (labelText.length > 0) {
+            filterLabel.innerHTML = `${labelText.join(' + ')} ✖ 초기화`; filterLabel.classList.remove("hidden");
+            filterLabel.onclick = () => { dashFilter = { cat: null, brand: null, gender: null }; renderDashState(); };
+        } else filterLabel.classList.add("hidden");
+
+        let _listSrc = filteredItems;
+        if (currentDashView === 'model') {
+            _listSrc = _groupByModel(filteredItems);
+            _listSrc.sort((a, b) => currentDashSort === 'rev' ? b.dashRev - a.dashRev : b.dashSales - a.dashSales);
+        }
+        $("#dashListBody").innerHTML = _listSrc.map((p, idx) => {
+            if (currentDashView === 'model') return _modelCard(p, idx, totalRev);
+            const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+            let pParam = currentPeriod; if(currentPeriod === "CUSTOM") pParam = `CUSTOM_${currentCustomStart}_${currentCustomEnd}`;
+
+            let gLabel = p.성별 || p.gender || "U";
+            gLabel = _genderLabel(gLabel);
+
+            let gColorClass = "ui-badge unisex";
+            if(gLabel === "남성") gColorClass = "ui-badge men";
+            if(gLabel === "여성") gColorClass = "ui-badge women";
+
+            const rankClass = idx < 3 ? "rank top3" : "rank";
+            const _revPct = totalRev > 0 ? (p.dashRev / totalRev * 100).toFixed(1) : '0.0';
+            const _revPctBadge = `<span class="text-[10px] font-black text-red-500">${_revPct}%</span>`;
+            const statsHtml = currentDashSort === 'rev'
+                ? `<div class="stats"><div class="stat-primary-rev">${krw(p.dashRev)} ${_revPctBadge}</div><div class="stat-secondary-rev">${fmt(p.dashSales)}개</div></div>`
+                : `<div class="stats"><div class="stat-primary">${fmt(p.dashSales)}개</div><div class="stat-secondary">${krw(p.dashRev)} ${_revPctBadge}</div></div>`;
+            return `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="flex items-center w-full">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="${rankClass}">${idx + 1}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="thumbnail shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        ${imgSrc ? `<img src="${imgSrc}" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="info">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="meta">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <span class="${gColorClass}">${escapeHtml(gLabel)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <span class="brand-code">${escapeHtml(p.브랜드)} · ${escapeHtml(p.품번)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="product-name">${escapeHtml(p.품명)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    ${statsHtml}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            `}).join('');
+
+        if (_listSrc.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+
+        const renderPieChart = (ctxId, dataObj, filterKey, colors) => {
+            const ctx = document.getElementById(ctxId);
+            if(!ctx) return null;
+            const total = Object.values(dataObj).reduce((a,b)=>a+b,0);
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '58%',
+                    layout: { padding: 2 },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyleWidth: 7, padding: 6, boxWidth: 7, font: { weight: '700', size: 9, family: 'Pretendard' } } },
+                        datalabels: { color: '#fff', font: { weight: '900', size: 10 }, formatter: (value) => { if(total === 0) return ''; const pct = Math.round((value / total) * 100); return pct > 6 ? pct + '%' : ''; } }
+                    },
+                    onClick: (e, elements, chart) => {
+                        if (elements[0]) {
+                            const clickedLabel = chart.data.labels[elements[0].index];
+                            if(clickedLabel === '기타브랜드') return;
+                            if(filterKey) {
+                                dashFilter[filterKey] = (dashFilter[filterKey] === clickedLabel) ? null : clickedLabel;
+                                renderDashState();
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        if(catChartInstance) catChartInstance.destroy(); if(brandChartInstance) brandChartInstance.destroy(); if(genderChartInstance) genderChartInstance.destroy();
+
+        const defaultColors = ['#5c6bc0', '#42a5f5', '#66bb6a', '#ffa726', '#ef5350', '#ab47bc', '#ec407a', '#29b6f6', '#f97316'];
+        catChartInstance = renderPieChart('catChart', catData, 'cat', defaultColors);
+
+        let sortedBrands = Object.entries(brandData).sort((a, b) => b[1] - a[1]);
+        let topBrandData = {}; let otherSales = 0;
+        sortedBrands.forEach((b, i) => { if(i < 5) topBrandData[b[0]] = b[1]; else otherSales += b[1]; });
+        if(otherSales > 0) topBrandData['기타브랜드'] = otherSales;
+        brandChartInstance = renderPieChart('brandChart', topBrandData, 'brand', defaultColors);
+
+        const genderColors = Object.keys(genderData).map(k => { if(k==='남성') return '#0284c7'; if(k==='여성') return '#e11d48'; return '#9333ea'; });
+        genderChartInstance = renderPieChart('genderChart', genderData, 'gender', genderColors);
+    };
+
+    if(!$("#analyticsDashboard")) renderDashUI(); else $("#analyticsDashboard").classList.remove("hidden");
+    setTimeout(() => $("#analyticsDashboard").classList.remove("opacity-0"), 10);
+    updateDashData();
+};
+
+window.openDashDetail = (code, periodParam) => {
+    windowCurrentDashIndex = windowDashItems.findIndex(x => x.품번 === code);
+    const p = windowDashItems[windowCurrentDashIndex];
+    if(!p) return;
+
+    let cutoffDate = "0000-00-00"; let endDate = "9999-99-99";
+    if (periodParam.startsWith("CUSTOM_")) {
+        const parts = periodParam.split("_"); cutoffDate = parts[1]; endDate = parts[2];
+    } else if (periodParam !== "ALL") {
+        const d = new Date(Date.now() - Number(periodParam) * 86400000); cutoffDate = d.toISOString().split('T')[0];
+    }
+
+    let sizeSalesMapBusan = {}; let sizeSalesMapSinsa = {}; let sizeSalesMapCenter = {};
+    if (SALES_HISTORY.items && SALES_HISTORY.items[code]) {
+        const history = SALES_HISTORY.items[code];
+        for (let date in history) {
+            if (periodParam === "ALL" || (date >= cutoffDate && date <= endDate)) {
+                const dayData = history[date];
+                if (typeof dayData === 'number') { sizeSalesMapBusan["알수없음"] = (sizeSalesMapBusan["알수없음"] || 0) + dayData; }
+                else if (typeof dayData === 'object') {
+                    for (let size in dayData) {
+                        if (typeof dayData[size] === 'object') {
+                            const sd = dayData[size];
+                            // 지점 판정은 _rtStoreOf로 통일 — 깨진 매장 키까지 살려서 집계한다
+                            let bq = 0; for (const _m in sd) { if (_rtStoreOf(_m) === 'busan') bq += (sd[_m] || 0); }
+                            if (bq > 0) sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + bq;
+                            for (let mgr in sd) {
+                                const qty = sd[mgr];
+                                const _st = _rtStoreOf(mgr);
+                                if (_st === 'sinsa') sizeSalesMapSinsa[size] = (sizeSalesMapSinsa[size]||0) + qty;
+                                else if (_st === 'center') sizeSalesMapCenter[size] = (sizeSalesMapCenter[size]||0) + qty;
+                            }
+                        } else { sizeSalesMapBusan[size] = (sizeSalesMapBusan[size] || 0) + dayData[size]; }
+                    }
+                }
+            }
+        }
+    }
+
+    const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+    let modal = $("#dashDetailModal");
+    if(!modal) {
+        modal = document.createElement("div"); modal.id = "dashDetailModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4";
+        modal.innerHTML = `<div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
+        document.body.appendChild(modal);
+
+        let touchstartX = 0; let touchendX = 0;
+        const contentWrap = modal.querySelector('#ddContentWrap');
+        contentWrap.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive:true});
+        contentWrap.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            if (touchendX < touchstartX - 60) $("#nextDashBtn")?.click();
+            if (touchendX > touchstartX + 60) $("#prevDashBtn")?.click();
+        }, {passive:true});
+    }
+
+    const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMapBusan), ...p.sizes.map(s=>String(s.size).trim())]))
+        .sort((a,b) => {
+            if(isFwSize(a) && isFwSize(b)) return parseInt(a) - parseInt(b);
+            const order = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
+            if(order[a.toUpperCase()] && order[b.toUpperCase()]) return order[a.toUpperCase()] - order[b.toUpperCase()];
+            return a.localeCompare(b);
+        });
+
+    const chartLabels = allUniqueSizes.filter(s => s !== "알수없음");
+    const chartDataBusan = chartLabels.map(s => sizeSalesMapBusan[s] || 0);
+    const chartDataSinsa = chartLabels.map(s => sizeSalesMapSinsa[s] || 0);
+    const chartDataCenter = chartLabels.map(s => sizeSalesMapCenter[s] || 0);
+
+    let largeSizeSales = 0;
+    chartLabels.forEach(s => {
+        const qty = sizeSalesMapBusan[s] || 0;
+        if(qty > 0) {
+            if((p.성별==='M'||p.gender==='M') && parseInt(s) >= 290) largeSizeSales += qty;
+            if((p.성별==='W'||p.gender==='W') && parseInt(s) >= 250) largeSizeSales += qty;
+            if(['XL', 'XXL', '2XL', '3XL'].includes(s.toUpperCase())) largeSizeSales += qty;
+        }
+    });
+
+    let insightHtml = "";
+    if (largeSizeSales > 0) {
+        insightHtml = `<div class="mt-4 bg-purple-50 text-purple-700 p-4 rounded-xl text-sm font-black border border-purple-100 flex items-center gap-3 shadow-sm"><i data-lucide="trending-up" class="w-6 h-6 shrink-0"></i> 비주류/빅사이즈 (290+, 250+, XL 등) 에서 ${largeSizeSales}개의 틈새 판매량 포착!</div>`;
+    }
+
+    const tableHtml = allUniqueSizes.map(size => {
+        const soldBusan = sizeSalesMapBusan[size] || 0;
+        const soldSinsa = sizeSalesMapSinsa[size] || 0;
+        const soldCenter = sizeSalesMapCenter[size] || 0;
+        const sObj = p.sizes.find(s => String(s.size).trim() === String(size)) || { busan: 0, sinsa: 0, center: 0 };
+
+        let suggestHtml = `<span class="text-gray-300">-</span>`;
+        let needed = Math.max(0, soldBusan - sObj.busan);
+        let takeCenter = Math.min(sObj.center, needed);
+        let takeSinsa = Math.min(sObj.sinsa, Math.max(0, needed - takeCenter));
+
+        let badges = [];
+        if(sObj.center > 0) {
+            let defaultVal = takeCenter > 0 ? takeCenter : 1;
+            badges.push(`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 px-1.5 py-1 rounded w-full">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-[10px] font-bold text-gray-500 w-6 text-center shrink-0">물류</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <input type="number" id="rt_c_${size}" value="${defaultVal}" min="1" max="${sObj.center}" class="w-8 text-center text-xs font-black bg-white border border-gray-300 rounded outline-none h-6">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button onclick="quickRT('${p.품번}','${size}','물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-700 hover:bg-black text-white px-1.5 py-0.5 rounded text-[10px] font-bold flex-1 transition-colors">↔RT</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            `);
+        }
+        if(sObj.sinsa > 0) {
+            let defaultVal = takeSinsa > 0 ? takeSinsa : 1;
+            badges.push(`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="flex items-center gap-1 bg-orange-50 border border-orange-200 px-1.5 py-1 rounded w-full">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <span class="text-[10px] font-bold text-orange-600 w-6 text-center shrink-0">신사</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-xs font-black bg-white border border-orange-200 rounded outline-none h-6 text-orange-700">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button onclick="quickRT('${p.품번}','${size}','신사', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold flex-1 transition-colors">↔RT</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            `);
+        }
+
+        if(badges.length > 0 && needed > 0) suggestHtml = `<div class="flex flex-col gap-1 items-stretch w-full">${badges.join("")}</div>`;
+        else if (badges.length > 0 && needed <= 0) suggestHtml = `<div class="flex flex-col gap-1 items-stretch w-full opacity-30 hover:opacity-100 transition-opacity">${badges.join("")}</div>`;
+        else if (needed > 0) suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded text-[10px] font-black block text-center">🚨 전사품절</span>`;
+
+        let rowClass = "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors";
+        if (size === "알수없음") rowClass += " hidden";
+
+        return `<tr class="${rowClass}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 px-2 text-gray-700 font-bold border-r border-gray-100 text-xs">${size}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 text-blue-600 font-black text-sm bg-blue-50/20">${soldBusan > 0 ? soldBusan : '-'}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 bg-blue-50/20 border-r border-gray-100 text-xs ${sObj.busan<=2?'text-red-500 font-black':'text-gray-600 font-bold'}">${sObj.busan}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 text-orange-600 font-bold text-xs bg-orange-50/20">${soldSinsa > 0 ? soldSinsa : '-'}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 text-gray-600 font-bold text-xs bg-orange-50/20 border-r border-gray-100">${sObj.sinsa}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 text-gray-600 font-bold text-xs bg-gray-50/40">${soldCenter > 0 ? soldCenter : '-'}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 text-gray-600 font-bold text-xs bg-gray-50/40 border-r border-gray-100">${sObj.center}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <td class="py-1.5 align-middle px-2">${suggestHtml}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </tr>`;
+    }).join('');
+
+    let gLabel = p.성별 || p.gender || "U";
+    gLabel = _genderLabel(gLabel);
+    let gColorClass = "ui-badge unisex";
+    if(gLabel === "남성") gColorClass = "ui-badge men";
+    if(gLabel === "여성") gColorClass = "ui-badge women";
+
+    const prevDisabled = windowCurrentDashIndex === 0 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
+    const nextDisabled = windowCurrentDashIndex === windowDashItems.length - 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-gray-200";
+
+    modal.querySelector("#ddContentWrap").innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="p-5 border-b flex justify-between items-center bg-white z-10 shadow-sm shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex items-center gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <button id="prevDashBtn" class="p-2.5 bg-gray-100 rounded-full transition-colors ${prevDisabled}" ${windowCurrentDashIndex === 0 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex-1].품번}', '${periodParam}')"`}><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="flex gap-4 items-center ml-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="flex items-center gap-2 mb-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <span class="${gColorClass}">${escapeHtml(gLabel)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="text-[13px] font-black text-gray-500">${p.브랜드}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <h2 class="font-black text-[20px] leading-tight text-gray-900 line-clamp-2 max-w-[300px] sm:max-w-lg">${p.품명}</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="text-sm font-bold text-gray-400 mt-0.5">${p.품번}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex items-center gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <button id="nextDashBtn" class="p-2.5 bg-gray-100 rounded-full transition-colors ${nextDisabled}" ${windowCurrentDashIndex === windowDashItems.length - 1 ? 'disabled' : `onclick="window.openDashDetail('${windowDashItems[windowCurrentDashIndex+1].품번}', '${periodParam}')"`}><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <button class="p-2.5 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white rounded-full transition-colors shrink-0 ml-4" onclick="this.closest('.modal-backdrop').classList.add('hidden')"><i data-lucide="x" class="w-6 h-6"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex flex-col lg:flex-row h-full lg:h-[75vh] overflow-y-auto lg:overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="w-full lg:w-[40%] border-b lg:border-b-0 lg:border-r border-gray-100 p-6 bg-gray-50/50 flex flex-col shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <h3 class="font-black text-base text-gray-800 mb-5 flex items-center gap-2"><i data-lucide="line-chart" class="w-6 h-6 text-blue-500"></i> 지점별 사이즈 판매 추이</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="relative flex-1 w-full min-h-[300px]"><canvas id="ddSizeChart"></canvas></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ${insightHtml}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="w-full lg:w-[60%] p-0 overflow-y-auto dash-scroll bg-white relative">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="p-5 sm:p-6 pb-8 overflow-x-auto">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <table class="w-full min-w-[480px] text-xs border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <thead class="text-gray-600 font-black">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <tr class="text-center bg-gray-50">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-2 w-[10%] border-r border-gray-200 align-middle" rowspan="2">사이즈</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1.5 border-b border-r border-gray-200 bg-blue-100 text-blue-800" colspan="2">부산</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1.5 border-b border-r border-gray-200 bg-orange-100 text-orange-800" colspan="2">신사</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1.5 border-b border-r border-gray-200 bg-gray-200 text-gray-700" colspan="2">물류</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-2 w-[22%] align-middle" rowspan="2">보충제안</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <tr class="text-center text-[10px] bg-white border-b-2 border-gray-200">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1 bg-blue-50/50 text-blue-700 border-r border-gray-100">판매</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1 bg-blue-50/50 text-gray-500 border-r border-gray-200">재고</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1 bg-orange-50/50 text-orange-700 border-r border-gray-100">판매</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1 bg-orange-50/50 text-gray-500 border-r border-gray-200">재고</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1 bg-gray-50 text-gray-600 border-r border-gray-100">판매</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <th class="py-1 bg-gray-50 text-gray-500 border-r border-gray-200">재고</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </thead>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <tbody id="ddTableBody" class="text-center">${tableHtml}</tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    `;
+
+    modal.classList.remove("hidden");
+    if(window.lucide) lucide.createIcons();
+
+    setTimeout(() => {
+        const ctx = document.getElementById('ddSizeChart');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        { label: '부산점', data: chartDataBusan, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 },
+                        { label: '신사점', data: chartDataSinsa, borderColor: '#f97316', backgroundColor: '#f97316', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 },
+                        { label: '물류(본사)', data: chartDataCenter, borderColor: '#9ca3af', backgroundColor: '#9ca3af', tension: 0.3, borderWidth: 3, pointBackgroundColor: '#fff', pointBorderWidth: 2, pointRadius: 5 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { weight: 'bold', size: 12 } } }, datalabels: { display: false } },
+                    scales: { x: { grid: { display: true, color: '#f3f4f6' }, ticks: { font: { size: 11, weight: 'bold' }, color: '#6b7280' } }, y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11, weight: 'bold' } } } }
+                }
+            });
+        }
+    }, 150);
+};
+
+window.openSalesGuide = (code) => {
+    const guide = SALES_GUIDES[code];
+    const p = PRODUCTS.find(x => x.품번 === code);
+    if(!guide) return;
+
+    let modal = $("#salesGuideModal");
+    if(!modal) {
+        modal = document.createElement("div");
+        modal.id = "salesGuideModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-3";
+        modal.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="modal-content relative bg-gradient-to-br from-slate-50 to-slate-100 w-full max-w-5xl mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-slate-200" style="max-height:95vh;height:95vh;">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <!-- 헤더 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="px-5 pt-3 pb-2.5 bg-gradient-to-r from-indigo-900 to-indigo-700 flex justify-between items-center shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex-1 min-w-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <span class="bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-widest uppercase">AI SALES GUIDE</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <span id="sgBrand" class="text-indigo-200 text-[11px] font-bold"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="flex items-center gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h2 id="sgTitle" class="font-black text-xl text-white leading-tight truncate"></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div id="sgKeywords" class="flex flex-wrap gap-1 shrink-0"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button id="closeSalesGuide" class="ml-3 p-1.5 text-white/60 hover:text-white transition-colors bg-white/10 rounded-full shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <!-- 대시보드 3컬럼 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="sgDashboard" class="flex-1 overflow-hidden p-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 h-full">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <!-- Col 1: 핵심 스펙 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="bar-chart-2" class="w-3 h-3"></i> 핵심 스펙</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div id="sgMetrics" class="shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span id="sgWeightLabel" class="text-[10px] font-bold text-slate-400">무게</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span id="sgWeight" class="text-[12px] font-black text-slate-800"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span class="text-[10px] font-bold text-slate-400">힐 스택</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span id="sgHeel" class="text-[12px] font-black text-slate-800"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span class="text-[10px] font-bold text-slate-400">포어풋 스택</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span id="sgFore" class="text-[12px] font-black text-slate-800"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div class="flex justify-between items-center py-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span class="text-[10px] font-bold text-slate-400">드롭</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    <span id="sgDrop" class="text-[12px] font-black text-slate-800"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div id="sgSpecBox" class="bg-amber-50 border border-amber-100 rounded-lg p-2 text-[11px] text-amber-800 font-medium leading-snug shrink-0"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex-1 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">핵심 특징</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgFeatures" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <!-- Col 2: 비교 분석 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="git-compare" class="w-3 h-3"></i> 비교 분석</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="bg-slate-50 rounded-lg p-2 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-1">VS 전작 (수치)</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgVsPrev" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="bg-red-50 border border-red-100 rounded-lg p-2 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span class="text-[9px] font-black text-red-400 uppercase tracking-widest block mb-1">⚠ 알려진 이슈 / 단점</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgIssues" class="text-[11px] text-red-700 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="bg-slate-50 rounded-lg p-2 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest block mb-1">VS 경쟁 모델</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgVsOthers" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex-1 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">한 줄 정의</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgWhy" class="text-[12px] font-black text-indigo-700 italic leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <!-- Col 3: 세일즈 전략 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="target" class="w-3 h-3"></i> 세일즈 전략</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="bg-amber-50 border border-amber-100 rounded-lg p-2 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">🎯 브랜드 강조 포인트</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgBrandFocus" class="text-[11px] text-amber-800 font-medium leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">추천 타겟</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgTarget" class="text-[11px] text-slate-700 font-medium leading-snug bg-slate-50 rounded-lg p-2"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Best For</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgBestFor" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 rounded-lg p-2 leading-snug"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex-1 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">클로징 멘트</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <div id="sgPitch" class="text-[12px] font-bold text-indigo-900 leading-snug bg-indigo-50 border-l-4 border-indigo-500 p-2 rounded-r-lg italic"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        `;
+        document.body.appendChild(modal);
+        $("#closeSalesGuide").onclick = () => modal.classList.add("hidden");
+    }
+
+    modal.querySelector("#sgTitle").textContent  = p ? p.품명 : code;
+    modal.querySelector("#sgBrand").textContent  = p ? p.브랜드 : "";
+    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw =>
+        `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">#${escapeHtml(kw)}</span>`).join('');
+    // 무게 - 성별 기준 사이즈 표기 (p.gender: "M"/"W"/"U", detectGender()로 설정됨)
+    const _isWomens = p && (p.gender === "W" || p.성별 === "여성" || p.성별 === "여");
+    const _sizeRef = _isWomens ? "(여 240mm)" : "(남 270mm)";
+    const _weightVal = guide.weight || "";
+    modal.querySelector("#sgWeight").textContent = _weightVal ? `${_weightVal} ${_sizeRef}` : "—";
+    modal.querySelector("#sgWeightLabel").textContent = `무게 (한쪽, ${_isWomens ? "여 US7" : "남 US9"} 기준)`;
+    // 스펙 (V2 필드명 매핑)
+    modal.querySelector("#sgHeel").textContent     = guide.heelStack   || guide.heel_stack  || "—";
+    modal.querySelector("#sgFore").textContent     = guide.foreStack   || guide.fore_stack  || "—";
+    modal.querySelector("#sgDrop").textContent     = guide.drop        || "—";
+    modal.querySelector("#sgSpecBox").textContent  = guide.specAdv     || guide.spec_analysis || guide.features || "—";
+    modal.querySelector("#sgFeatures").textContent = guide.features    || "—";
+    // 비교 (V2 필드명 매핑)
+    // ①②③ 항목을 줄바꿈으로 분리하는 헬퍼
+    function fmtBullet(text, fallback) {
+      if (!text) return fallback || "—";
+      const escaped = escapeHtml(text);
+      // ② ③ ④ ⑤ 앞에 줄바꿈 삽입 (① 앞은 그대로)
+      return escaped.replace(/\s*([②③④⑤⑥⑦⑧⑨])/g, '<br>$1');
+    }
+    // vp: 콤마+공백 기준으로 줄바꿈 (힐/무게/기타 수치 가독성)
+    function fmtVp(text) {
+      if (!text) return "—";
+      const escaped = escapeHtml(text);
+      // "V14→V15:" 형태 뒤 줄바꿈, 이후 콤마+스페이스 기준 줄바꿈
+      return escaped
+        .replace(/^([^:]+:\s*)/, '<strong>$1</strong><br>')
+        .replace(/,\s+(?=[^\s])/g, ',<br>');
+    }
+    modal.querySelector("#sgVsPrev").innerHTML    = fmtVp(guide.verDiff || guide.vs_prev || guide.features);
+    modal.querySelector("#sgIssues").innerHTML   = fmtBullet(guide.issues, "특별한 이슈 없음");
+    modal.querySelector("#sgVsOthers").textContent = guide.vsComp      || guide.vs_others || "—";
+    modal.querySelector("#sgWhy").textContent      = guide.whyThis     || guide.why      || guide.pitch    || "—";
+    // 전략 (V2 필드명 매핑)
+    modal.querySelector("#sgBrandFocus").innerHTML = fmtBullet(guide.brandFocus, "—");
+    modal.querySelector("#sgTarget").textContent   = guide.target      || "—";
+    modal.querySelector("#sgBestFor").textContent  = guide.bestFor     || guide.best_for || guide.target   || "—";
+    modal.querySelector("#sgPitch").textContent    = guide.closing     || guide.pitch    || "—";
+
+    modal.classList.remove("hidden");
+    if(window.lucide) lucide.createIcons();
+};
+
+function card(p){
+  const el = document.createElement("article");
+  el.className = "card card-hover p-3.5 flex flex-col h-full";
+
+  el.dataset.code = p.품번;
+
+  if(BULK_LOC_MODE && BULK_LOC_SEL.has(p.품번)){ el.style.outline = "3px solid #ff5a1f"; el.style.outlineOffset = "-3px"; el.dataset.bulkSel = "1"; }
+  el.onclick = (e)=>{
+    if(BULK_LOC_MODE){
+      e.preventDefault(); e.stopPropagation();
+      const on = !BULK_LOC_SEL.has(p.품번);
+      if(on) BULK_LOC_SEL.add(p.품번); else BULK_LOC_SEL.delete(p.품번);
+      _bulkPaintCard(el, on);
+      _bulkUpdateBar();
+      return;
+    }
+
+    const copyBtn = e.target.closest('[data-copy]');
+    if(copyBtn) { copyText(copyBtn.dataset.copy, copyBtn); return; }
+    if(e.target.closest('.btn-sales')) {
+        e.stopPropagation(); window.openSalesGuide(p.품번); return;
+    }
+    if(!e.target.closest('button')) openDetail(p);
+  };
+
+  const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+
+  let deltaHtml = "";
+  if (p.delta > 0) deltaHtml = `<span class="text-emerald-600 font-black">▲+${p.delta}</span>`;
+  else if (p.delta < 0) deltaHtml = `<span class="text-red-600 font-black">▼${p.delta}</span>`;
+
+  let busanOnlyBadge = "";
+  if (p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0) {
+      busanOnlyBadge = `<span class="bg-blue-800 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
+  }
+  let otherBranchOnlyBadge = "";
+  if (p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal === 0) {
+      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span>`;
+  } else if (p.busanTotal === 0 && p.centerTotal > 0 && p.sinsaTotal === 0) {
+      otherBranchOnlyBadge = `<span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
+  } else if (p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal > 0) {
+      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span><span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
+  }
+
+  // 판매 속도 뱃지
+  const _cardSales = getSalesSummary(p.품번);
+  let salesSpeedBadge = "";
+  if(_cardSales.d7 >= 3)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
+  else if(_cardSales.d7 >= 1) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
+
+  // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
+  let rtChanceBadge = "";
+  const _rtNeed = getRTNeed(p);
+  if(_rtNeed.score > 0) {
+    const _rtTop = _rtNeed.items[0];
+    const _rtMore = _rtNeed.items.length > 1 ? ` +${_rtNeed.items.length - 1}` : '';
+    const _rtLabel = _rtTop.kind === 'low' ? '부족' : '결품';
+    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT ${escapeHtml(_rtTop.size)} ${_rtLabel}${_rtMore}</span>`;
+  }
+
+  // 오늘 POS 판매 뱃지
+  let todaySoldBadge = "";
+  if ((p.todaySold || 0) > 0) {
+    todaySoldBadge = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded font-black text-[10px]">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
+  }
+
+  // DP 배지
+  let dpBadge = "";
+  const _dpSizes = getDPSizes(p.품번);
+  if (_dpSizes.length > 0) {
+    const _dpSt = getDPStatus(p);
+    const _dpSizeLabel = _dpSizes.join('·');
+    if (_dpSt === 'soldDP') {
+      dpBadge = `<span class="bg-orange-100 text-orange-700 border border-orange-300 px-2 py-0.5 rounded font-black text-[10px]">⚠️ 품절DP ${_dpSizeLabel}</span>`;
+    } else {
+      dpBadge = `<span class="bg-violet-100 text-violet-700 border border-violet-300 px-2 py-0.5 rounded font-black text-[10px]">🏷️ DP ${_dpSizeLabel}</span>`;
+    }
+  }
+
+  // 이미지 없음 배지 (관리자 모드에서만)
+  const _noImgBadge = !IMAGES[p.shopNo || p.품번] ? `<span class="bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded font-black text-[10px]">📷 이미지없음</span>` : "";
+  // 실재고 보정 배지
+  const _hasStale = p._hasOverride && p.sizes.some(s => s._override && s._overrideStale);
+  const overrideBadge = p._hasOverride
+    ? `<span class="bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded font-black text-[10px]">✏️ 재고보정${_hasStale?' ⚠️':''}</span>`
+    : "";
+
+
+  let salesHtml = "";
+  const guide = SALES_GUIDES[p.품번];
+  if (guide && guide.keywords && guide.keywords.length > 0) {
+      // 판매 가이드 키워드는 한 줄로 — 앞 3개만, 나머지는 +N (누르면 판매 가이드가 열림)
+      salesHtml = `<div class="flex items-center gap-1 mt-1 overflow-hidden">` +
+          guide.keywords.slice(0, 3).map(kw => `<span class="btn-sales shrink-0 bg-indigo-50 text-indigo-600 border border-indigo-100 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer hover:bg-indigo-600 hover:text-white transition-colors">#${escapeHtml(kw.trim())}</span>`).join('') +
+          (guide.keywords.length > 3 ? `<span class="btn-sales shrink-0 text-[10px] font-bold text-indigo-400 cursor-pointer">+${guide.keywords.length - 3}</span>` : '') +
+      `</div>`;
+  }
+
+
+  let promoBadge = "";
+  let promoSummary = "";  // 하단 재고 줄 아래 할인 요약 한 줄 (기획전·쿠폰)
+  let priceDisplay = `<div class="text-base sm:text-[17px] font-black">${krw(p.소비자가)}</div>`;
+
+  if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
+      const rateInt = Math.round((p.promoRate || 0) * 100);
+      const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
+      const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${p.promoName}]</span> ` : '';
+      const _previewLabel = p.promoIsPreview ? `<span class="text-[9px] font-bold text-gray-400 ml-0.5">📅미리보기</span>` : '';
+      if (p.promoType === 'weekly') {
+          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-400' : 'bg-red-600'} text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
+          priceDisplay = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex flex-col items-end leading-tight">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-lg sm:text-[20px] font-black ${p.promoIsPreview ? 'text-gray-500' : 'text-red-600'}">${p.promoIsPreview ? '📅' : '🔥'}${krw(p.currentPromoPrice)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>`;
+      } else {
+          const _erInt = Math.round((p.promoEventRate||0)*100);
+          const _crInt = Math.round((p.promoCouponRate||0)*100);
+          const _isGray = p.promoIsPreview;
+          // 기획전·쿠폰은 상단 배지 없이 하단에 한 줄로 — 할인율과 마감일만. 단계별 가격과 기획전 이름은 마우스를 올리면 보인다
+          const _steps = [];
+          // 쿠폰까지 있으면 '쿠폰 없이 살 때 가격'(기획전가)도 같이 — 매장에서 안내할 때 필요
+          if(_erInt > 0) _steps.push(`기획전 ▼${_erInt}%${(_crInt > 0 && p.promoEventPrice) ? ' ' + krw(p.promoEventPrice) : ''}`);
+          if(_crInt > 0) _steps.push(`쿠폰 ▼${_crInt}%`);
+          if(!_steps.length) _steps.push(`할인 ▼${rateInt}%`);
+          if(p.promoEndDate) _steps.push(`~${p.promoEndDate}`);
+          if(_isGray) _steps.push('📅미리보기');
+          _steps[0] = '🎟️ ' + _steps[0];
+          const _tip = (p.promoName ? `[${p.promoName}] ` : '') + [(_erInt > 0 && p.promoEventPrice) ? `기획전가 ${krw(p.promoEventPrice)}` : '', `최종 ▼${rateInt}% ${krw(p.currentPromoPrice)}`].filter(Boolean).join(' → ');
+          // 좁은 카드(태블릿 3열)에서는 '·' 자리에서만 줄이 바뀌게 항목마다 묶는다
+          promoSummary = `<div class="${_isGray ? 'text-gray-400' : 'text-purple-600'}" title="${escapeHtml(_tip)}">${_steps.map(s => `<span class="whitespace-nowrap">${s}</span>`).join(' · ')}</div>`;
+          priceDisplay = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex flex-col items-end leading-tight">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-xs mb-0.5"><b class="${_isGray ? 'text-gray-400' : 'text-purple-600'} mr-1">▼${rateInt}%</b><span class="text-gray-400 line-through">${krw(p.소비자가)}</span></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-[17px] sm:text-lg font-black ${_isGray ? 'text-gray-500' : 'text-purple-700'}">${krw(p.currentPromoPrice)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>`;
+      }
+  }
+
+  let gLabel = p.성별 || p.gender || "U";
+  gLabel = _genderLabel(gLabel);
+
+  let gBadgeClass = "ui-badge unisex";
+  if(gLabel === "남성") gBadgeClass = "ui-badge men";
+  if(gLabel === "여성") gBadgeClass = "ui-badge women";
+
+  // 상단 상태 배지: 중요도 순으로 최대 3개만 노출, 나머지는 +N 축약 (품명이 밀리지 않게)
+  const _statusBadges = [overrideBadge, dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, otherBranchOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
+  const _MAX_BADGES = 3;
+  let _badgesHtml = _statusBadges.slice(0, _MAX_BADGES).join("");
+  if (_statusBadges.length > _MAX_BADGES) {
+      _badgesHtml += `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-1.5 py-0.5 rounded font-black text-[10px]" title="추가 상태 ${_statusBadges.length - _MAX_BADGES}개">+${_statusBadges.length - _MAX_BADGES}</span>`;
+  }
+  // 창고 위치 배지 — 배정된 상품만. button 이라 카드 클릭(상세 열기)과 분리됨.
+  // 신발처럼 SKU가 랙 여러 곳에 나뉘어 놓이는 경우가 있어 위치마다 배지 하나씩.
+  // DP만 있고(창고/서랍 없이) 진열중인 경우는 랙 좌표가 없어 별도 배지로 표시.
+  let locHtml = "";
+  {
+    const _locs = _locArr(p.품번).filter(a => !a.skipDp);
+    const _locsDpSt = getDPStatus(p);
+    const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt) && !_needsRealLocation(p)) ? [{ dp: true }] : _locs;
+    const _pills = _locsEff.map(_asn => {
+      if(_asn.dp) return `<span class="loc-pill" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;cursor:default;" title="랙/서랍 없이 DP 진열중">📺 <span>DP 진열중</span></span>`;
+      const _zone = (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId);
+      if(!_zone) return '';
+      const _locText = (_zone.label || zoneAddress(_zone)) + (_asn.slot ? ` · ${_asn.slot}` : '');
+      return `<button type="button" class="loc-pill" title="${escapeHtml(zoneAddress(_zone, _asn.slot))}" onclick="event.stopPropagation(); window.openFloorPlanView('${_zone.id}'${_asn.slot ? `,'${escapeHtml(_asn.slot)}'` : ''})">📍 <span>${escapeHtml(_locText)}</span></button>`;
+    }).filter(Boolean).join('');
+    if(_pills) locHtml = `<div class="flex flex-wrap gap-1 mb-1.5">${_pills}</div>`;
+  }
+
+  el.innerHTML = `
+    <div class="flex flex-col flex-1">
+        ${_badgesHtml ? `<div class="flex flex-wrap gap-1 text-[10px] font-bold text-gray-500 mb-1.5 items-center">${_badgesHtml}</div>` : ''}
+        <div class="flex justify-between items-start w-full relative gap-3">
+           <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 mb-0.5 min-w-0">
+                  <span class="truncate">${escapeHtml(p.브랜드||"-")}</span>
+                  <span class="${gBadgeClass} shrink-0">${escapeHtml(gLabel)}</span>
+                  ${deltaHtml}
+              </div>
+              <div class="copyable font-extrabold text-[14px] leading-snug mb-0.5 text-left w-full hover:text-blue-600 text-gray-900 line-clamp-2" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
+              <div class="copyable text-[11px] font-bold text-gray-400 mb-1 text-left w-full hover:text-blue-600 flex items-center gap-1 overflow-hidden" data-copy="${escapeHtml(p.품번)}">
+                  <span class="truncate">${escapeHtml(p.품번)}</span><i data-lucide="copy" class="w-4 h-4 opacity-60 shrink-0"></i>
+              </div>
+              ${locHtml}
+              ${salesHtml}
+           </div>
+           <div class="card-img-wrap">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+               ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">` : `<div class="w-full h-full bg-gray-50 flex items-center justify-center flex-col gap-1"><span style="font-size:32px;opacity:.35">${p.카테고리==='신발'?'👟':p.카테고리==='의류'?'👕':'🎒'}</span></div>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+               ${BULK_LOC_MODE ? `<div class="bulk-check" style="position:absolute;top:6px;left:6px;z-index:25;width:22px;height:22px;border-radius:50%;border:2px solid ${BULK_LOC_SEL.has(p.품번)?'#ff5a1f':'#cbd5e1'};background:${BULK_LOC_SEL.has(p.품번)?'#ff5a1f':'rgba(255,255,255,.9)'};color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;">${BULK_LOC_SEL.has(p.품번)?'✓':''}</div>` : ''}
+
+               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+           </div>
+        </div>
+        <div class="size-scroll-wrap no-scrollbar">
+          ${p.sizes.map(s=>{
+              const q = s.busan||0;
+              const soldToday = (p.todaySoldBySize || {})[String(s.size).trim()] || 0;
+              const _szLabel = convertSizeLabel(s.size, p.gender||p.성별||'', p.브랜드||'');
+              const _szWide = window.sizeUnit !== 'KR' && _szLabel.length > 3;
+              let cls = "size-cell tnum shrink-0 " + (_szWide ? "w-[52px] " : "w-[46px] ");
+              if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
+              const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:9px;margin-top:1px">↓${soldToday}판매</span>` : '';
+              const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:9px;margin-top:1px" title="보정값 ${s._override.actual}개(${s._override.at||''}) · 이후 판매 반영해 현재 ${s._override.effective}개">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
+
+              const _noBcTag = (q > 0 && !s.barcode) ? `<span class="block text-center text-rose-600 font-black leading-none" style="font-size:9px;margin-top:1px">🔖누락</span>` : '';
+              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''} ${(q>0 && !s.barcode)?'!border-rose-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}${_noBcTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+          }).join("")}
+        </div>
+    </div>
+    <div class="flex items-end justify-between gap-2 border-t border-gray-100 pt-2 mt-auto shrink-0">
+        <div class="min-w-0 text-[11px] font-bold text-gray-400 leading-snug">
+            <div>부산 <b class="text-blue-600">${p.busanTotal}</b> · 신사 ${p.sinsaTotal} · 물류 ${p.centerTotal}</div>
+            ${promoSummary}
+        </div>
+        <div class="shrink-0">${priceDisplay}</div>
+    </div>
+  `;
+
+  return el;
+}
+
+function getFilters(){
+  const promoBtn = $('button[data-promo]');
+  const promoOnly = window.tempPromoFilter === true || (promoBtn ? promoBtn.dataset.active === "1" : false);
+
+  return {
+    cat: ($$('button.chip[data-cat]').find(b=>b.dataset.active==="1")||{}).dataset?.cat || "ALL",
+    gender: ($$('button.chip[data-gender]').find(b=>b.dataset.active==="1")||{}).dataset?.gender || "ALL",
+    brand: (window._activeBrands && window._activeBrands.size > 0) ? [...window._activeBrands] : "ALL",
+    salesSpeed: ($$('button.chip[data-salesspeed]').find(b=>b.dataset.active==="1")||{}).dataset?.salesspeed || "ALL",
+    q: $("#q").value.trim().toLowerCase(),
+    ...Object.fromEntries(_TOGGLE_CHIPS.map(([key, attr]) => [key, !!$$(`button.chip[${attr}]`).find(b => b.dataset.active === "1")])),
+    dpFilters: $$('button.chip[data-dp]').filter(b=>b.dataset.active==="1").map(b=>b.dataset.dp),
+
+    locationZone: ($('#locZoneSelect') || {}).value || '',
+    sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
+    sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
+    sizeGear: $("#sizeSelGear") ? $("#sizeSelGear").value : "ALL",
+    promoOnly: promoOnly,
+    promoType: promoOnly && $("#promoTypeSel") && $("#promoTypeSel").value !== "" ? $("#promoTypeSel").value : "ALL",
+    promoRate: promoOnly && $("#promoRateSel") && $("#promoRateSel").value !== "" ? Number($("#promoRateSel").value) : 0,
+    promoName: promoOnly ? (window._activePromoName || "ALL") : "ALL"
+  };
+}
+
+// ── 판매 현황 요약 패널 (카테고리별 핫셀러/보통/저조) ───────────────
+window._salesSummaryDismissed = true; // 처음엔 숨김, 버튼 클릭 시에만 표시
+function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (전체 PRODUCTS 기준)
+  const panel = $("#salesSummaryPanel");
+  if (!panel || window._salesSummaryDismissed) return;
+
+  const cats = ['신발', '의류', '용품'];
+  const catEmoji = { '신발': '👟', '의류': '👕', '용품': '🎒' };
+
+  // 카테고리별로 hot/normal/slow 분류
+  const grouped = {};
+  cats.forEach(c => { grouped[c] = { hot: [], normal: [], slow: [] }; });
+
+  PRODUCTS.forEach(p => {
+    const cat = p.카테고리;
+    if (!grouped[cat]) return;
+    const s = getSalesSummary(p.품번);
+    if (s.d7 >= 3) grouped[cat].hot.push({ p, d7: s.d7 });
+    else if (s.d7 >= 1) grouped[cat].normal.push({ p, d7: s.d7 });
+    else if (s.all > 0) grouped[cat].slow.push({ p, d7: s.d7 });
+  });
+
+  // hot 내림차순 정렬
+  cats.forEach(c => {
+    grouped[c].hot.sort((a, b) => b.d7 - a.d7);
+    grouped[c].normal.sort((a, b) => b.d7 - a.d7);
+  });
+
+  const totalHot = cats.reduce((s, c) => s + grouped[c].hot.length, 0);
+  const totalNormal = cats.reduce((s, c) => s + grouped[c].normal.length, 0);
+
+  if (totalHot + totalNormal === 0) { panel.classList.add("hidden"); return; }
+  panel.classList.remove("hidden");
+
+  // 각 카테고리 칼럼 HTML 생성
+  const colHtml = cats.map(cat => {
+    const g = grouped[cat];
+    const hotItems = g.hot.slice(0, 8).map(({ p, d7 }) =>
+      `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span class="font-black text-[11px] text-gray-800 flex-1 truncate">${escapeHtml(p.품명)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span class="text-[9px] text-gray-400 font-mono shrink-0 mr-0.5">${escapeHtml(String(p.품번))}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span class="shrink-0 text-[10px] font-black text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded-full">7일 ${d7}개</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>`
+    ).join('');
+
+    const remainHot = g.hot.length > 8 ? `<div class="text-[10px] text-gray-400 font-bold px-1 pt-0.5 cursor-pointer hover:text-red-500" onclick="window._quickFilter('${cat}','hot')">+ ${g.hot.length - 8}개 더</div>` : '';
+
+    return `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="flex-1 min-w-0 bg-white rounded-xl border border-gray-100 shadow-sm p-2.5 flex flex-col gap-1.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="flex items-center justify-between mb-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span class="text-xs font-black text-gray-700">${catEmoji[cat]} ${cat}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex gap-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','hot')">🔥 ${g.hot.length}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','normal')">📈 ${g.normal.length}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-200 hover:bg-gray-400 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','slow')">📦 ${g.slow.length}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ${g.hot.length > 0 ? `<div class="space-y-0.5">${hotItems}${remainHot}</div>` : `<div class="text-[10px] text-gray-300 font-bold text-center py-2">핫셀러 없음</div>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="rounded-2xl border border-gray-100 shadow-sm overflow-hidden bg-gray-50">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="flex items-center justify-between px-3 py-2 bg-white border-b border-gray-100">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex items-center gap-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-xs font-black text-gray-800">📊 판매 현황 요약</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-[10px] text-gray-400 font-bold">(7일 기준)</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-50 text-red-500">🔥 핫셀러 ${totalHot}개</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-50 text-blue-500">📈 보통 ${totalNormal}개</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <button onclick="window._salesSummaryDismissed=true;document.getElementById('salesSummaryPanel').classList.add('hidden')" class="text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="flex gap-2 p-2">${colHtml}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>`;
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// 카테고리+속도 퀵필터 (패널 유지 + 카드 그리드 필터)
+window._quickFilter = (cat, speed) => {
+  saveHistoryState();
+  // 패널은 닫지 않고 유지
+  $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === cat ? '1' : '0'));
+  _clearAllFilterChips();
+  $$('button.chip[data-salesspeed]').forEach(b => b.dataset.active = (b.dataset.salesspeed === speed ? '1' : '0'));
+  // 핫셀러/보통 필터 시 판매량 내림차순 정렬
+  if (speed === 'hot' || speed === 'normal') { if($("#sortSel")) $("#sortSel").value = "salesDesc"; }
+  visibleCount = 120; render();
+  // 패널 아래 그리드로 스크롤
+  setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+};
+
+// 특정 품번 퀵필터 (패널 품목 클릭 시 → 패널 유지 + 해당 제품만 그리드 표시)
+window._quickFilterProduct = (code) => {
+  saveHistoryState();
+  // 패널은 닫지 않고 유지
+  $$('button.chip[data-cat]').forEach(b => b.dataset.active = (b.dataset.cat === 'ALL' ? '1' : '0'));
+  $$('button.chip[data-gender]').forEach(b => b.dataset.active = (b.dataset.gender === 'ALL' ? '1' : '0'));
+  _clearAllFilterChips();
+  const qEl = $("#q");
+  if (qEl) qEl.value = String(code);
+  visibleCount = 120; render();
+  setTimeout(() => { const g = $("#grid"); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+};
+
+// ── 필터 더보기 패널 / ADMIN 점검 보드 ─────────────────────────────
+function _clearStockOnlyChips(except){
+  [['busanonly','ring-blue-400'],['sinsaonly','ring-indigo-400'],['centeronly','ring-teal-400']].forEach(([k, ring]) => {
+    const b = $(`button.chip[data-${k}]`);
+    if(b && b !== except){ b.dataset.active = "0"; b.classList.remove('ring-2', ring); }
+  });
+}
+function _setFoldOpen(panelId, btnId, open){
+  const panel = document.getElementById(panelId), btn = document.getElementById(btnId);
+  if(!panel) return;
+  panel.classList.toggle('hidden', !open);
+  panel.classList.toggle('flex', open);
+  if(btn){ btn.setAttribute('aria-expanded', String(open)); btn.dataset.active = open ? "1" : "0"; }
+}
+window._toggleFilterPanel = () => {
+  const open = $("#filterPanel")?.classList.contains('hidden');
+  _setFoldOpen("filterPanel", "filterPanelBtn", open);
+  renderActiveFilterBar();
+  try { localStorage.setItem('_rcm_filterPanelOpen', open ? '1' : '0'); } catch(e) {}
+};
+window._onStockLocSel = (v) => {
+  const active = ['busan','sinsa','center'].map(k => $(`button.chip[data-${k}only]`)).find(b => b && b.dataset.active === "1");
+  if(v === 'ALL'){ if(active) active.click(); return; }
+  const target = $(`button.chip[data-${v}only]`);
+  if(target && target.dataset.active !== "1") target.click();
+};
+window._onSalesSpeedSel = (v) => {
+  const active = $$('button.chip[data-salesspeed]').find(b => b.dataset.active === "1");
+  if(v === 'ALL'){ if(active) active.click(); return; }
+  const target = $(`button.chip[data-salesspeed="${v}"]`);
+  if(target && target.dataset.active !== "1") target.click();
+};
+window._toggleAdminBoard = () => {
+  _setFoldOpen("adminBoard", "adminBoardBtn", $("#adminBoard")?.classList.contains('hidden'));
+  renderActiveFilterBar();
+};
+// 더보기 패널이 접혀 있어도 그 안에 켜진 조건이 몇 개인지 버튼에 표시
+function _updateFilterUi(resultCount){
+  const rc = $("#resultCount");
+  if(rc) {
+    // 상태 줄이 헤더로 올라간 넓은 화면에서는 전체·부산 숫자를 결과 개수 옆에 함께 보여 준다
+    const inHeader = document.getElementById('statusCard')?.classList.contains('in-header');
+    const tot = $("#statItems")?.textContent, bs = $("#statBusan")?.textContent;
+    rc.textContent = !RAW.length ? '' : `${resultCount.toLocaleString()}개 상품` + (inHeader ? ` · 전체 ${tot} · 부산 ${bs}` : '');
+  }
+  const sl = $("#stockLocSel");
+  if(sl) sl.value = ['busan','sinsa','center'].find(k => $(`button.chip[data-${k}only]`)?.dataset.active === "1") || 'ALL';
+  const ss = $("#salesSpeedSel");
+  if(ss) ss.value = ($$('button.chip[data-salesspeed]').find(b => b.dataset.active === "1") || {}).dataset?.salesspeed || 'ALL';
+  const panel = $("#filterPanel"), badge = $("#filterPanelCount");
+  if(!panel || !badge) return;
+  let n = [...panel.querySelectorAll('button.chip[data-active="1"]')].filter(b => !b.dataset.brand).length;
+  ['sizeSelFw','sizeSelAp','sizeSelGear'].forEach(id => { const s = document.getElementById(id); if(s && s.value !== 'ALL') n++; });
+  if($("#locZoneSelect")?.value) n++;
+  n += (window._activeBrands?.size || 0);
+  badge.textContent = n;
+  badge.classList.toggle('hidden', n === 0);
+}
+window._openDpSkipList = () => {
+  document.getElementById('dpSkipListModal')?.remove();
+  const codes = Object.keys(LOCATIONS.assignments || {}).filter(c => _dpSkipped(c));
+  const rows = codes.map(c => {
+    const p = _productByCode(c);
+    return `<li class="flex items-center gap-2 py-2 border-b border-[color:var(--line)]">
+      <div class="min-w-0 flex-1"><div class="font-black text-sm truncate">${escapeHtml(p ? p.품명 : c)}</div><div class="text-xs text-[color:var(--muted)] font-bold">${escapeHtml(c)}${p ? ' · 부산 ' + p.busanTotal : ''}</div></div>
+      ${p ? `<button class="chip font-black" data-skip-open="${escapeHtml(c)}">보기</button>` : ''}
+      <button class="chip font-black !text-red-600" data-skip-undo="${escapeHtml(c)}">다시 표시</button>
+    </li>`;
+  }).join('');
+  const modal = document.createElement('div');
+  modal.id = 'dpSkipListModal';
+  modal.className = 'fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/30';
+  modal.innerHTML = `<div class="card w-full max-w-md max-h-[80vh] flex flex-col p-4 gap-2" role="dialog" aria-labelledby="dpSkipListTitle">
+      <div class="flex items-center justify-between"><h3 id="dpSkipListTitle" class="font-black">🙈 미DP 제외 목록 (${codes.length})</h3><button class="p-1.5 font-black" data-skip-close aria-label="닫기">✕</button></div>
+      <p class="text-xs font-bold text-[color:var(--muted)]">남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP하지 않아 미DP 목록에서 뺀 상품입니다.</p>
+      ${codes.length ? `<ul class="overflow-y-auto">${rows}</ul>` : '<p class="text-sm font-bold py-6 text-center text-[color:var(--muted)]">제외한 상품이 없습니다</p>'}
+    </div>`;
+  modal.addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-skip-close],[data-skip-open],[data-skip-undo]');
+    if(e.target === modal || (t && t.hasAttribute('data-skip-close'))) { modal.remove(); return; }
+    if(!t) return;
+    if(t.dataset.skipOpen){ const p = _productByCode(t.dataset.skipOpen); modal.remove(); if(p) openDetail(p); return; }
+    const code = t.dataset.skipUndo;
+    if(!checkPat()) return;
+    t.disabled = true;
+    const ok = await saveLocations(server => {
+      const assignments = {...server.assignments};
+      const cur = assignments[code];
+      const arr = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => !a.skipDp);
+      if(arr.length) assignments[code] = arr; else delete assignments[code];
+      return { zones: server.zones, assignments };
+    });
+    if(ok){ showToast('✓ 미DP 목록에 다시 표시'); _refreshDpFilterCounts(); render(); window._openDpSkipList(); }
+    else t.disabled = false;
+  });
+  document.body.appendChild(modal);
+};
+window._openSoldDpCleanup = () => {
+  document.getElementById('soldDpCleanModal')?.remove();
+  const pairs = _soldOutDpPairs();
+  const byCode = new Map();
+  pairs.forEach(x => { if (!byCode.has(x.p.품번)) byCode.set(x.p.품번, { p: x.p, sizes: [] }); byCode.get(x.p.품번).sizes.push(x.size); });
+  const rows = [...byCode.values()].map(({ p, sizes }) => `<li class="py-2 border-b border-[color:var(--line)]">
+      <div class="font-black text-sm truncate">${escapeHtml(p.품명)}</div>
+      <div class="text-xs text-[color:var(--muted)] font-bold">${escapeHtml(p.품번)} · 부산 재고 ${p.busanTotal}</div>
+      <div class="flex flex-wrap gap-1 mt-1">${sizes.map(s => `<span class="chip !bg-orange-50 !text-orange-700 !border-orange-300 font-black">${escapeHtml(s)} · 재고 0</span>`).join('')}</div>
+    </li>`).join('');
+  const modal = document.createElement('div');
+  modal.id = 'soldDpCleanModal';
+  modal.className = 'fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/30';
+  modal.innerHTML = `<div class="card w-full max-w-md max-h-[85vh] flex flex-col p-4 gap-2" role="dialog" aria-labelledby="soldDpCleanTitle">
+      <div class="flex items-center justify-between"><h3 id="soldDpCleanTitle" class="font-black">🧹 품절 DP 정리</h3><button class="p-1.5 font-black" data-sd-close aria-label="닫기">✕</button></div>
+      <p class="text-xs font-bold text-[color:var(--muted)]">재고가 0인 사이즈의 DP 표시를 해제합니다. 화면 재고 기준: ${escapeHtml((CURRENT_META && CURRENT_META.uploadedAt) || '알 수 없음')}. 오래됐다면 새로고침 후 다시 열어 확인하세요.</p>
+      ${pairs.length ? `<ul class="overflow-y-auto">${rows}</ul>
+      <div class="flex gap-2 pt-2"><button class="chip font-black flex-1 justify-center" data-sd-close>취소</button><button id="soldDpCleanGo" class="chip !bg-slate-800 !text-white !border-slate-800 font-black flex-1 justify-center" data-sd-go>${pairs.length}개 사이즈 DP 해제</button></div>` : '<p class="text-sm font-bold py-6 text-center text-[color:var(--muted)]">정리할 품절 DP가 없습니다</p>'}
+    </div>`;
+  modal.addEventListener('click', async (e) => {
+    const t = e.target.closest('[data-sd-close],[data-sd-go]');
+    if (e.target === modal || (t && t.hasAttribute('data-sd-close'))) { modal.remove(); return; }
+    if (!t) return;
+    if (!checkPat()) return;
+    t.disabled = true; t.textContent = '정리 중…';
+    try {
+      const n = await _removeDpSizes(pairs);
+      modal.remove();
+      showToast(n ? `✓ 품절 DP ${n}개 사이즈 해제` : '이미 정리돼 있습니다');
+      _refreshDpFilterCounts(); render();
+    } catch (err) {
+      t.disabled = false; t.textContent = `${pairs.length}개 사이즈 DP 해제`;
+      showToast('⚠️ ' + err.message);
+    }
+  });
+  document.body.appendChild(modal);
+};
+try { if(localStorage.getItem('_rcm_filterPanelOpen') === '1') _setFoldOpen("filterPanel", "filterPanelBtn", true); } catch(e) {}
+
+// ── 바코드 스캔 ─────────────────────────────────────────────────────
+// 사이즈별 바코드로 상품·사이즈를 찾는다. 숫자 바코드는 앞자리 0을 무시해 UPC-A(12자리)와 EAN-13(0으로 시작)을 같은 것으로 본다.
+function _normBarcode(v) {
+  const s = String(v || '').replace(/\s+/g, '').toUpperCase();
+  return /^\d+$/.test(s) ? s.replace(/^0+/, '') : s;
+}
+function _findByBarcode(code) {
+  const key = _normBarcode(code);
+  const hits = [];
+  if (!key) return hits;
+  PRODUCTS.forEach(p => (p.sizes || []).forEach(s => { if (s.barcode && _normBarcode(s.barcode) === key) hits.push({ p, size: s.size }); }));
+  return hits;
+}
+// 스캔 모듈(ZXing, 362KB)은 스캔 버튼을 눌렀을 때만 불러온다
+let _zxingLoading = null;
+function _loadZxing() {
+  if (window.ZXing) return Promise.resolve(window.ZXing);
+  if (!_zxingLoading) _zxingLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = './libs/zxing.min.js?v=0.23.0';
+    s.onload = () => window.ZXing ? resolve(window.ZXing) : reject(new Error('스캔 모듈을 불러오지 못했어요'));
+    s.onerror = () => { _zxingLoading = null; reject(new Error('스캔 모듈을 불러오지 못했어요 — 인터넷 연결을 확인하세요')); };
+    document.head.appendChild(s);
+  });
+  return _zxingLoading;
+}
+// 찾으면 true (상품 1개면 상세를 열고, 여러 개면 검색 결과로), 못 찾으면 false
+window.handleScannedBarcode = (raw) => {
+  const code = String(raw || '').trim();
+  const hits = _findByBarcode(code);
+  if (!hits.length) return false;
+  closeBarcodeScanner();
+  const codes = new Set(hits.map(h => h.p.품번));
+  if (codes.size === 1) {
+    openDetail(hits[0].p);
+    showToast(`📦 ${hits[0].p.품명} · ${hits[0].size}`);
+  } else {
+    const q = $("#q"); if (q) q.value = code;
+    visibleCount = 60; render();
+    showToast(`바코드 ${code}: 상품 ${codes.size}개`);
+  }
+  return true;
+};
+let _scanReader = null;
+function closeBarcodeScanner() {
+  try { if (_scanReader) _scanReader.reset(); } catch (e) {}
+  _scanReader = null;
+  const m = document.getElementById('scanModal');
+  if (!m) return;
+  m.querySelectorAll('video').forEach(v => { ((v.srcObject && v.srcObject.getTracks && v.srcObject.getTracks()) || []).forEach(t => t.stop()); v.srcObject = null; });
+  m.remove();
+  document.removeEventListener('keydown', _scanEsc);
+}
+function _scanEsc(e) { if (e.key === 'Escape') closeBarcodeScanner(); }
+window.openBarcodeScanner = async () => {
+  closeBarcodeScanner();
+  const modal = document.createElement('div');
+  modal.id = 'scanModal';
+  modal.className = 'fixed inset-0 z-[10002] flex items-center justify-center p-4 bg-black/60';
+  modal.innerHTML = `<div class="card w-full max-w-md p-4 flex flex-col gap-3" role="dialog" aria-labelledby="scanTitle">
+      <div class="flex items-center justify-between"><h3 id="scanTitle" class="font-black">바코드 스캔</h3><button type="button" class="p-1.5 font-black" data-scan-close aria-label="닫기">✕</button></div>
+      <div class="relative rounded-xl overflow-hidden bg-black" style="aspect-ratio:4/3">
+        <video id="scanVideo" class="w-full h-full object-cover" playsinline muted></video>
+        <div class="absolute inset-x-6 top-1/2 -translate-y-1/2 h-24 border-2 border-white/80 rounded-lg pointer-events-none"></div>
+      </div>
+      <p id="scanMsg" class="text-xs font-bold text-[color:var(--muted)]">카메라 준비 중… 상자나 택의 바코드를 네모 안에 맞춰 주세요</p>
+      <form id="scanManual" class="flex gap-2"><input id="scanManualInput" class="ipt flex-1 text-sm py-2" inputmode="numeric" placeholder="번호 직접 입력" autocomplete="off" aria-label="바코드 번호"><button class="chip font-black" type="submit">찾기</button></form>
+    </div>`;
+  document.body.appendChild(modal);
+  document.addEventListener('keydown', _scanEsc);
+  const msg = modal.querySelector('#scanMsg');
+  const say = (text, bad) => { msg.textContent = text; msg.style.color = bad ? '#dc2626' : ''; };
+  const notFound = code => say(`등록되지 않은 바코드예요: ${code}`, true);
+  modal.addEventListener('click', e => { if (e.target === modal || e.target.closest('[data-scan-close]')) closeBarcodeScanner(); });
+  modal.querySelector('#scanManual').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = modal.querySelector('#scanManualInput').value.trim();
+    if (v && !window.handleScannedBarcode(v)) notFound(v);
+  });
+  try {
+    const Z = await _loadZxing();
+    if (!document.getElementById('scanModal')) return;   // 불러오는 사이 닫힘
+    const hints = new Map();
+    hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8, Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.UPC_E, Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39, Z.BarcodeFormat.ITF]);
+    const reader = new Z.BrowserMultiFormatReader(hints);
+    _scanReader = reader;
+    let last = '';
+    await reader.decodeFromConstraints({ video: { facingMode: { ideal: 'environment' } } }, 'scanVideo', (result) => {
+      if (!result) return;
+      const code = result.getText();
+      if (code === last) return;   // 같은 바코드를 연달아 읽는 것 무시
+      last = code;
+      if (!window.handleScannedBarcode(code)) notFound(code);
+    });
+    if (document.getElementById('scanModal')) say('상자나 택의 바코드를 네모 안에 맞춰 주세요');
+  } catch (err) {
+    if (!document.getElementById('scanModal')) return;
+    const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+    say(denied ? '카메라 권한이 없어요. 브라우저 설정에서 카메라를 허용하거나 번호를 직접 입력하세요.' : `카메라를 쓸 수 없어요 (${(err && (err.message || err.name)) || err}). 번호를 직접 입력하세요.`, true);
+  }
+};
+
+// 넓은 화면(1280px+)에서는 상태 줄을 헤더 가운데로 옮겨 한 줄을 아낀다 (판매 실적 기간 라벨은 헤더에서 숨김)
+(function(){
+  const mq = window.matchMedia('(min-width: 1280px)');
+  const place = () => {
+    const card = document.getElementById('statusCard'), slot = document.getElementById('headerStatusSlot'), sec = document.getElementById('statusSection');
+    if(!card || !slot || !sec) return;
+    if(mq.matches){ slot.appendChild(card); card.classList.add('in-header'); sec.classList.add('hidden'); }
+    else { sec.appendChild(card); card.classList.remove('in-header'); sec.classList.remove('hidden'); }
+    if(RAW.length) render();
+  };
+  if(mq.addEventListener) mq.addEventListener('change', place); else mq.addListener(place);
+  place();
+})();
+
+function render(){
+  const _bulkChip = $('button.chip[data-bulkloc]');
+  const _isAdminNow = checkAdminSession();
+  if(_bulkChip) _bulkChip.style.display = _isAdminNow ? '' : 'none';
+  const _boardBtn = $("#adminBoardBtn");
+  if(_boardBtn) {
+      _boardBtn.classList.toggle('hidden', !_isAdminNow);
+      if(!_isAdminNow) _setFoldOpen("adminBoard", "adminBoardBtn", false);
+  }
+
+  const grid = $("#grid");
+
+  if(!RAW.length) {
+      grid.innerHTML = "";
+      $("#emptyState").classList.remove("hidden");
+      $("#results").classList.add("hidden");
+      return;
+  }
+  // RAW는 있는데 PRODUCTS가 0개면 파싱 실패(예: 엑셀 헤더행 밀림) — "결과 없음"과 구분되는 명확한 경고 표시
+  if(!PRODUCTS.length) {
+      console.error(`[재고 파싱 실패] RAW ${RAW.length}건을 읽었으나 상품이 0개로 처리됨. 엑셀 헤더 구조를 확인하세요.`);
+      grid.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 gap-3 text-center">
+
+
+
+
+
+
+
+          <div class="text-4xl">⚠️</div>
+
+
+
+
+
+
+
+          <div class="text-lg font-black text-gray-700">재고 데이터 처리 실패</div>
+
+
+
+
+
+
+
+          <div class="text-sm text-gray-400 max-w-md">엑셀 ${fmt(RAW.length)}건을 불러왔지만 상품으로 변환하지 못했습니다.<br>보통 엑셀 맨 위에 제목행이 끼어 헤더가 밀렸을 때 발생합니다.<br>ADMIN에서 재고 파일을 다시 업로드해 보세요.</div>
+
+
+
+
+
+
+
+      </div>`;
+      $("#emptyState").classList.add("hidden");
+      $("#results").classList.remove("hidden");
+      $("#noMatch")?.classList.add("hidden");
+      return;
+  }
+
+  $("#emptyState").classList.add("hidden");
+  $("#results").classList.remove("hidden");
+
+  const f = getFilters();
+  const activeSizeFilter = [f.sizeFw, f.sizeAp, f.sizeGear].find(s => s !== "ALL") || "ALL";
+
+  const _todayKey = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+  PRODUCTS.forEach(p => {
+      p.periodSales = 0;
+      p.todaySold = 0;
+      p.todaySoldBySize = {};
+      if (SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+          for (let date in SALES_HISTORY.items[p.품번]) {
+              const dayData = SALES_HISTORY.items[p.품번][date];
+              if (typeof dayData === 'object') {
+                  for (let size in dayData) {
+                      if (typeof dayData[size] === 'object') {
+                          const sd = dayData[size];
+                          // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만
+                          const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+                          if (bq > 0) {
+                              p.periodSales += bq;
+                              if (date === _todayKey) {
+                                  p.todaySold += bq;
+                                  p.todaySoldBySize[size] = (p.todaySoldBySize[size] || 0) + bq;
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  });
+
+  const _matchAll = (p, f) => {
+    // 부산·신사·물류 전부 0개면 기본적으로 숨김(완전 품절/무재고).
+    // 단, "재고보정" 리뷰 필터를 켰거나 검색어로 특정 상품을 찾는 중이면 예외로 보여준다 —
+    // 안 그러면 재고보정 때문에 0개가 된 상품은 그 보정을 검토하려고 필터를 켜도 안 보이고,
+    // 품번을 정확히 검색해도 "결과 없음"으로 나와 마치 그 상품이 아예 없는 것처럼 보이는 문제가 있었음.
+    if(p.busanTotal <= 0 && p.sinsaTotal <= 0 && p.centerTotal <= 0 && !f.overrideOnly && !f.q) return false;
+    if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
+    let g = p.성별 || p.gender || "U";
+    g = _genderLabel(g);
+    if(f.gender!=="ALL" && g!==f.gender && p.gender!==f.gender) return false;
+    if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
+    if(f.salesSpeed!=="ALL" && getSalesSummary(p.품번).speed !== f.salesSpeed) return false;
+    if(f.rtChance && getRTNeed(p).score <= 0) return false;   // 사이즈 단위로 결품/소진임박이면서 가져올 재고가 있는 것만
+    
+    
+    if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
+    if(f.sinsaOnly && !(p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal === 0)) return false;
+    if(f.centerOnly && !(p.busanTotal === 0 && p.centerTotal > 0 && p.sinsaTotal === 0)) return false;
+    if(f.todaySoldOnly && !(p.todaySold > 0)) return false;
+    if(f.dpFilters.length > 0) {
+      if(!f.dpFilters.some(filter => _dpFilterMatch(filter, p))) return false;
+    }
+    if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
+    if(f.noBarcode && !p.noBarcodeBusan) return false;
+    if(f.overrideOnly && !p._hasOverride) return false;
+    if(f.noLocation && (_hasRealLoc(p.품번) || !_needsRealLocation(p))) return false;
+    if(f.hasLocation && !_hasRealLoc(p.품번)) return false;
+
+    if(f.locationZone) {
+        const [_fz, _fs] = f.locationZone.split('::');
+        const _arr = LOCATIONS.assignments[p.품번];
+        const _items = Array.isArray(_arr) ? _arr : (_arr ? [_arr] : []);
+        if(!_items.some(a => a.zoneId === _fz && (!_fs || String(a.slot||'') === _fs))) return false;
+    }
+
+    if(f.promoOnly) {
+        if(!p.currentPromoPrice) return false;
+        if(f.promoType !== "ALL" && f.promoType !== "PREVIEW" && p.promoType !== f.promoType) return false;
+        if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false;
+        if(f.promoName && f.promoName !== "ALL" && p.promoName !== f.promoName) return false;
+    }
+
+    if(activeSizeFilter !== "ALL") {
+        const sizeObj = p.sizes.find(s => String(s.size).trim() === activeSizeFilter);
+        if(!sizeObj) return false;
+        if(f.stock && sizeObj.busan <= 0) return false;
+    } else {
+        if(f.stock && p.busanTotal <= 0) return false;
+    }
+
+    if(f.q) {
+        const tokens = f.q.split(/\s+/).filter(Boolean);
+        let matchAll = true;
+        for(const t of tokens){
+            const cleanT = t.replace(/[\s\-_]/g, "").toLowerCase();
+            if(isAllChosung(cleanT)){
+                if(!p._chosung.includes(cleanT)) matchAll = false;
+            } else {
+                if(!p._hayClean.includes(cleanT)) { matchAll = false; }
+            }
+        }
+        if(!matchAll) return false;
+    }
+    return true;
+  };
+  let filteredList = PRODUCTS.filter(p => _matchAll(p, f));
+  // DP 칩 숫자는 지금 걸린 다른 조건(검색·카테고리·재고있음 등)은 그대로 두고 DP 조건만 뺀 결과 기준으로 센다
+  // → 칩을 눌렀을 때 나올 개수와 항상 같다. (적용된 필터 칩의 라벨이 최신 숫자를 쓰도록 renderActiveFilterBar보다 먼저)
+  _dpFacetFn = () => PRODUCTS.filter(p => _matchAll(p, { ...f, dpFilters: [] }));
+  _refreshDpFilterCounts();
+
+  // RT추천 필터 활성 시 30일 판매량 내림차순 자동 정렬
+  const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "rtDesc" : $("#sortSel").value;
+  filteredList.sort((a,b) => {
+    if(sortMode === "todayDesc") return (b.todaySold||0) - (a.todaySold||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode === "salesDesc") return (getSalesSummary(b.품번).d30||0) - (getSalesSummary(a.품번).d30||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    // RT추천은 판매량이 아니라 "지금 얼마나 급한지"(결품·소진임박 + 최근 판매 가중) 순으로 정렬한다
+    if(sortMode === "rtDesc") return (getRTNeed(b).score||0) - (getRTNeed(a).score||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+
+    if(sortMode === "default") {
+        const ca = CAT_ORDER[a.카테고리] ?? 9;
+        const cb = CAT_ORDER[b.카테고리] ?? 9;
+        if(ca!==cb) return ca-cb;
+        const sa=a.busanTotal>0?0:1; const sb=b.busanTotal>0?0:1;
+        if(sa!==sb) return sa-sb;
+        return String(a.품명).localeCompare(String(b.품명),"ko");
+    }
+    if(sortMode==="stock") return b.busanTotal - a.busanTotal || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode==="name") return String(a.품명).localeCompare(String(b.품명),"ko");
+
+    const priceA = a.currentPromoPrice || a.소비자가 || 0;
+    const priceB = b.currentPromoPrice || b.소비자가 || 0;
+    if(sortMode==="priceAsc") return priceA - priceB;
+    if(sortMode==="priceDesc") return priceB - priceA;
+    if(sortMode==="promoRateDesc") return (b.promoRate||0) - (a.promoRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode==="promoEventRateDesc") return (b.promoEventRate||0) - (a.promoEventRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode==="promoCouponRateDesc") return (b.promoCouponRate||0) - (a.promoCouponRate||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+
+    const br = String(a.브랜드).localeCompare(String(b.브랜드),"ko"); if(br!==0) return br;
+    return String(a.품명).localeCompare(String(b.품명),"ko");
+  });
+
+  grid.innerHTML = "";
+  if(filteredList.length === 0){
+      const f2 = getFilters();
+      const hasQuery = !!f2.q;
+      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.noBarcode || f2.noLocation || f2.hasLocation || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
+      const nm = $("#noMatch");
+      if(nm) nm.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="text-2xl mb-2">${hasQuery ? '🔍' : '📭'}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="text-xl font-black mb-1">결과 없음</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="text-sm text-gray-500 mb-4">${hasQuery ? `"<b>${f2.q}</b>" 검색 결과가 없습니다` : '조건에 맞는 상품이 없습니다'}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${(hasQuery || hasFilters) ? `<button onclick="document.getElementById('resetAll').click()" class="brutal px-5 py-2 bg-black text-white font-black text-sm">↺ 필터 전체 초기화</button>` : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      `;
+      nm.classList.remove("hidden");
+      $("#grid").parentElement.classList.remove("hidden");
+      $("#moreWrap").classList.add("hidden");
+  } else {
+      $("#noMatch").classList.add("hidden");
+      $("#grid").parentElement.classList.remove("hidden");
+
+      const fragment = document.createDocumentFragment();
+      const slice = filteredList.slice(0, visibleCount);
+      slice.forEach(p=>fragment.appendChild(card(p)));
+      grid.appendChild(fragment);
+
+      if(filteredList.length > visibleCount) {
+          $("#moreWrap").classList.remove("hidden");
+          $("#moreBtn").textContent = `더 보기 (+${Math.min(60, filteredList.length - visibleCount)})`;
+      } else {
+          $("#moreWrap").classList.add("hidden");
+      }
+  }
+
+  // 판매 현황 요약 패널 갱신
+  renderSalesSummaryPanel(filteredList);
+  // 적용된 필터 요약 칩 갱신
+  renderActiveFilterBar();
+  _updateFilterUi(filteredList.length);
+
+  if(window.lucide) lucide.createIcons();
+}
+
+$("#moreBtn").onclick = () => { visibleCount+=60; render(); };
+
+
+window.deleteTransfer = async (trId) => {
+    if(!checkPat()) return;
+    if(!confirm("이 이동 요청을 삭제/취소하시겠습니까?")) return;
+    try {
+        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, d => (Array.isArray(d) ? d : []).filter(m => m.id !== trId), "delete transfer");
+        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) window.renderTransfersList();
+        else alert("이동 요청이 삭제되었습니다.");
+    } catch(e) { alert("삭제 실패"); }
+};
+
+window._trFilter = window._trFilter || 'unconfirmed';
+
+window.renderTransfers = () => {
+    let listEl = $("#transfersList");
+    if(!listEl) {
+        const modal = document.createElement("div");
+        modal.id = "transfersModal";
+        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99] p-4";
+        modal.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10" style="max-height:90vh">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <h2 class="font-black text-lg text-blue-800">🚚 RT 이동요청 목록</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex gap-2 items-center">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button onclick="exportTransfersToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> 엑셀</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button onclick="deleteAllTransfers()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 전체삭제</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="closeTransfers" class="p-1.5 hover:bg-gray-100 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="px-4 py-2.5 border-b border-gray-100 flex gap-2 bg-white shrink-0" id="trFilterBar">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button onclick="window._trFilter='unconfirmed';window.renderTransfersList()" id="trFilterUnconfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">미확인목록</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button onclick="window._trFilter='confirmed';window.renderTransfersList()" id="trFilterConfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">확인목록</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <button onclick="window._trFilter='all';window.renderTransfersList()" id="trFilterAll" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">전체</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>`;
+        document.body.appendChild(modal);
+        $("#closeTransfers").onclick = () => modal.classList.add("hidden");
+        listEl = $("#transfersList");
+    }
+    $("#transfersModal").classList.remove("hidden");
+    window.renderTransfersList();
+};
+
+window.renderTransfersList = () => {
+    const listEl = $("#transfersList");
+    if(!listEl) return;
+    // 필터 버튼 스타일
+    [['trFilterUnconfirmed','unconfirmed'],['trFilterConfirmed','confirmed'],['trFilterAll','all']].forEach(([id, val]) => {
+        const btn = document.getElementById(id);
+        if(!btn) return;
+        btn.className = window._trFilter === val
+            ? "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-blue-700 text-white border-blue-700"
+            : "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
+    });
+    let filtered = TRANSFERS.slice().reverse();
+    if(window._trFilter === 'unconfirmed') filtered = filtered.filter(t => !t.confirmed);
+    else if(window._trFilter === 'confirmed') filtered = filtered.filter(t => !!t.confirmed);
+    if(filtered.length === 0) {
+        const msg = window._trFilter === 'unconfirmed' ? '미확인 이동 요청이 없습니다 ✅'
+                  : window._trFilter === 'confirmed' ? '확인된 이동 요청이 없습니다.'
+                  : '이동 요청이 없습니다.';
+        listEl.innerHTML = `<div class='text-center py-10 text-gray-400 font-bold text-sm'>${msg}</div>`;
+        return;
+    }
+    let html = "";
+    filtered.forEach(t => {
+        const confirmed = !!t.confirmed;
+        html += `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="p-4 bg-white rounded-xl border ${confirmed ? 'border-gray-100 opacity-55' : 'border-blue-100'} text-sm shadow-sm relative">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex justify-between items-center mb-1.5 pr-8">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="font-black text-blue-700 text-base">${escapeHtml(t.code)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="font-bold text-gray-800 mb-2.5 text-[15px] line-clamp-2">${escapeHtml(t.product)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex flex-wrap gap-2 text-xs font-bold text-gray-600 mb-2.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="bg-gray-100 px-2.5 py-1 rounded">사이즈: ${escapeHtml(t.size)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="bg-gray-100 px-2.5 py-1 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ${confirmed ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded font-black">✅ 확인완료</span>' : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-blue-900 bg-blue-50 p-2.5 rounded-lg font-medium text-[13px] mb-3">${escapeHtml(t.memo)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ${!confirmed ? `<button onclick="confirmTransfer('${t.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-black text-sm transition-colors">✅ 확인</button>` : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>`;
+    });
+    listEl.innerHTML = html;
+    if(window.lucide) lucide.createIcons();
+};
+
+window.confirmTransfer = async (trId) => {
+    if(!checkPat()) return;
+    try {
+        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, d => {
+            const data = Array.isArray(d) ? d : [];
+            const idx = data.findIndex(m => m.id === trId);
+            if(idx >= 0) data[idx].confirmed = true;
+            return data;
+        }, "confirm transfer");
+        window.renderTransfersList();
+    } catch(e) { alert("처리 실패: " + e.message); }
+};
+
+window.deleteAllTransfers = async () => {
+    if(!checkPat()) return;
+    const unconfirmedCount = TRANSFERS.filter(t => !t.confirmed).length;
+    const confirmedCount = TRANSFERS.filter(t => !!t.confirmed).length;
+    const msg = `전체 삭제하시겠습니까?\n\n• 미확인: ${unconfirmedCount}건\n• 확인완료: ${confirmedCount}건\n\n총 ${TRANSFERS.length}건이 삭제됩니다.`;
+    if(!confirm(msg)) return;
+    try {
+        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, () => [], "delete all transfers");
+        window.renderTransfersList();
+    } catch(e) { alert("삭제 실패: " + e.message); }
+};
+
+const _salesCache = new Map();
+// SALES_HISTORY 로드 후 캐시 초기화용
+
+// ── 판매이력 매장 키 판정 ────────────────────────────────────────────────
+// 매장 키는 원래 '부산(김종훈)'·'신사(승호강)'·'본사물류' 3가지뿐이다(업로드 코드가 직접 넣는 리터럴).
+// 그런데 과거 bare atob 인코딩 버그 때문에 한글이 부분적으로 깨진 변형이 475종 남아 있어서,
+// 정확일치로만 세면 부산 최근 30일 판매의 40%가 통째로 누락되고 일부는 물류 판매로 잘못 잡힌다.
+// 괄호는 ASCII라 깨지지 않으므로 '매장(담당자)' vs '본사물류' 구분에 쓸 수 있고,
+// 살아남은 글자(김/종/훈, 승/호/강)로 지점을 판정한다.
+function _rtStoreOf(key){
+    const k = String(key || '');
+    if(/[김종훈]/.test(k)) return 'busan';
+    if(/[승호강]/.test(k)) return 'sinsa';
+    if(k.includes('(') || k.includes(')')){
+        if(/[부산]/.test(k)) return 'busan';
+        if(/[신사]/.test(k)) return 'sinsa';
+        return 'unknown';   // 전부 깨져 식별 불가 — 어느 쪽에도 넣지 않는다(왜곡 방지)
+    }
+    return 'center';        // 괄호 없는 키는 본사물류뿐
+}
+
+// ── RT(재고이동) 추천 ────────────────────────────────────────────────────
+// 기존 기준은 "30일 판매 1개 이상 + 타지점에 재고 있음"이 전부였다. 그래서 부산에 재고가
+// 넉넉한 상품도 똑같이 추천됐고, 정렬도 판매량순이라 "많이 팔린 것"이 위로 올 뿐
+// "지금 없어서 못 파는 것"은 아래로 묻혔다. 실제로 요청해야 하는 건 사이즈 단위 결품/부족이라
+// 사이즈별로 판정하고 긴급도로 점수를 매긴다.
+const _rtCache = new Map();
+const RT_RECENT_REQ_DAYS = 14;   // 이 기간 안에 이미 요청한 사이즈는 다시 추천하지 않는다
+
+function _rtParseTrDate(s){
+    const m = String(s || '').match(/^(\d{2})\/(\d{1,2})\/(\d{1,2})/);   // '26/09/03 17:08'
+    if(!m) return null;
+    return new Date(2000 + (+m[1]), (+m[2]) - 1, +m[3]).getTime();
+}
+function _rtRecentlyRequested(code, size){
+    if(typeof TRANSFERS === 'undefined' || !Array.isArray(TRANSFERS)) return false;
+    const limit = Date.now() - RT_RECENT_REQ_DAYS * 86400000;
+    return TRANSFERS.some(t => {
+        if(String(t.code) !== String(code)) return false;
+        if(String(t.size || '').trim() !== String(size).trim()) return false;
+        const ts = _rtParseTrDate(t.date);
+        return ts === null ? true : ts >= limit;   // 날짜를 못 읽으면 보수적으로 '이미 요청함' 취급
+    });
+}
+
+// 반환: { score, items:[{size, kind:'out'|'gap'|'low', stock, sold7, sold30, need, fromCenter, fromSinsa}] }
+function getRTNeed(p){
+    if(!p || !p.품번) return { score:0, items:[] };
+    if(_rtCache.has(p.품번)) return _rtCache.get(p.품번);
+
+    const d7 = {}, d30 = {}, dAll = {};
+    const hist = (typeof SALES_HISTORY !== 'undefined' && SALES_HISTORY && SALES_HISTORY.items) ? SALES_HISTORY.items[p.품번] : null;
+    if(hist){
+        const today = new Date(); today.setHours(0,0,0,0);
+        for(const date in hist){
+            const day = hist[date];
+            if(typeof day !== 'object' || day === null) continue;
+            const diff = Math.floor((today - new Date(date)) / 86400000);
+            for(const size in day){
+                const sd = day[size];
+                let q = 0;
+                if(typeof sd === 'object' && sd !== null){
+                    for(const mgr in sd){ if(_rtStoreOf(mgr) === 'busan') q += (sd[mgr] || 0); }
+                } else { q = sd || 0; }   // 담당자 구분 없는 구형 데이터는 기존대로 부산 판매로 본다
+                if(q <= 0) continue;
+                const key = String(size).trim();
+                dAll[key] = (dAll[key] || 0) + q;
+                if(diff >= 0 && diff <= 30){
+                    d30[key] = (d30[key] || 0) + q;
+                    if(diff <= 7) d7[key] = (d7[key] || 0) + q;
+                }
+            }
+        }
+    }
+    let prodD30 = 0; for(const k in d30) prodD30 += d30[k];
+
+    const items = [];
+    let score = 0;
+    for(const s of (p.sizes || [])){
+        const size = String(s.size).trim();
+        if(!size || size === '알수없음') continue;
+        const stock  = Number(s.busan)  || 0;
+        const center = Number(s.center) || 0;
+        const sinsa  = Number(s.sinsa)  || 0;
+        if(center + sinsa <= 0) continue;                   // 가져올 데가 없으면 추천해도 의미 없음
+        if(_rtRecentlyRequested(p.품번, size)) continue;     // 이미 요청해 둔 사이즈
+
+        const sold30 = d30[size] || 0, sold7 = d7[size] || 0, soldAll = dAll[size] || 0;
+        const weekly = sold30 / 30 * 7;
+
+        let kind = null;
+        if(stock <= 0 && sold30 > 0) kind = 'out';                             // 팔리는데 지금 없음(기회손실 진행 중)
+        else if(stock <= 0 && soldAll > 0 && prodD30 > 0) kind = 'gap';        // 모델은 계속 팔리는데 이 사이즈만 비었음
+        else if(stock > 0 && sold30 > 0 && stock < weekly * 1.5) kind = 'low'; // 1.5주치 미만으로 곧 소진
+        if(!kind) continue;
+
+        // 최근 7일에 3배 가중 — 한 달 전 한 번 팔린 것보다 이번 주 팔린 게 훨씬 급하다
+        const demand = sold7 * 3 + (sold30 - sold7);
+        let sizeScore;
+        if(kind === 'out')      sizeScore = demand * 2 + 10;
+        else if(kind === 'gap') sizeScore = Math.min(soldAll, 6) * 0.8;   // 과거 이력만 있는 경우는 낮게
+        else                    sizeScore = demand * Math.max(0, 1 - stock / (weekly * 1.5 + 1));
+        if(center <= 0) sizeScore *= 0.85;   // 물류엔 없고 신사 재고뿐 — 타 매장 물건을 빼오는 셈이라 소폭 감점
+        if(sizeScore <= 0) continue;
+
+        const need = Math.max(1, Math.ceil(weekly) - stock);
+        const fromCenter = Math.min(center, need);
+        items.push({ size, kind, stock, sold7, sold30, need, fromCenter,
+                     fromSinsa: Math.max(0, Math.min(sinsa, need - fromCenter)),
+                     score: sizeScore });
+        score += sizeScore;
+    }
+    items.sort((a,b) => b.score - a.score);
+    const result = { score: Math.round(score * 10) / 10, items };
+    _rtCache.set(p.품번, result);
+    return result;
+}
+
+function clearSalesCache() { _salesCache.clear(); _rtCache.clear(); }
+function getSalesSummary(code) {
+  if(_salesCache.has(code)) return _salesCache.get(code);
+  if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code]) {
+    const empty = { d7:0, d30:0, all:0, avgDay:0, speed:'none' };
+    _salesCache.set(code, empty); return empty;
+  }
+  const history = SALES_HISTORY.items[code];
+  const today = new Date(); today.setHours(0,0,0,0);
+  let d7=0, d30=0, all=0;
+  for(let date in history) {
+    const diffDays = Math.floor((today - new Date(date)) / 86400000);
+    const dayData = history[date];
+    let qty = 0;
+    if(typeof dayData === 'number') { qty = dayData; }
+    else if(typeof dayData === 'object') {
+      for(let size in dayData) {
+        if(typeof dayData[size] === 'object') {
+          // 부산점 카운팅 — 매장 키가 깨진 데이터까지 _rtStoreOf로 판정해 합산한다.
+          const sd = dayData[size];
+
+          for(const _mgr in sd){ if(_rtStoreOf(_mgr) === 'busan') qty += (sd[_mgr] || 0); }
+        } else { qty += (dayData[size]||0); } // 담당자 구분 없는 구형 데이터는 그대로 포함
+      }
+    }
+    all += qty;
+    if(diffDays <= 30) d30 += qty;
+    if(diffDays <= 7) d7 += qty;
+  }
+  const avgDay = Math.round((d30/30)*10)/10;
+  const speed = d7 >= 3 ? 'hot' : d7 >= 1 ? 'normal' : all > 0 ? 'slow' : 'none';
+  const result = { d7, d30, all, avgDay, speed };
+  _salesCache.set(code, result);
+  return result;
+}
+
+// 상품 사진은 화면에서 최대 100px 남짓으로만 보이므로 올리기 전에 긴 변 1000px JPEG로 줄인다.
+// (예전엔 원본 그대로 올려 한 장에 최대 6MB — 앱 저장소가 4.7GB까지 커지고 사진 로딩도 느렸음, 2026-09-22)
+// 이미 작거나(1000px·300KB 이하) GIF면 그대로 두고, 줄인 결과가 더 크면 원본을 쓴다. 투명 배경은 흰색으로 채움.
+async function _shrinkProductImage(b64, ext) {
+  if (ext === 'gif') return { b64, ext };
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i); i.onerror = reject;
+      i.src = `data:image/${ext === 'jpg' ? 'jpeg' : ext};base64,${b64}`;
+    });
+    const w = img.naturalWidth, h = img.naturalHeight, MAX = 1000;
+    if (!w || !h) return { b64, ext };
+    if (Math.max(w, h) <= MAX && b64.length * 0.75 <= 300 * 1024) return { b64, ext };
+    const k = Math.min(1, MAX / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(img, 0, 0, c.width, c.height);
+    const out = c.toDataURL('image/jpeg', 0.85).split(',')[1];
+    return out && out.length < b64.length ? { b64: out, ext: 'jpg' } : { b64, ext };
+  } catch (e) { return { b64, ext }; }
+}
+
+function openDetail(p){
+  CURRENT_PRODUCT = p;
+  const imgSrc = IMAGES[p.shopNo || p.품번] || null;
+
+  $("#detailHead").innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="flex gap-3 sm:gap-4 items-center">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="min-w-0 flex-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-xs sm:text-[13px] text-gray-500 font-black mb-1">${escapeHtml(p.브랜드||"-")}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-[17px] sm:text-[20px] font-black text-gray-900 leading-tight line-clamp-2 break-keep">${escapeHtml(p.품명)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-blue-600 font-bold text-sm sm:text-base mt-1">${escapeHtml(p.품번)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  `;
+
+
+  $("#detailBody").innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="overflow-x-auto w-full no-scrollbar pb-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <table class="w-full min-w-[500px] text-sm sm:text-base bg-white rounded-xl border-hidden shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <thead class="bg-gray-50 text-gray-600 font-black border-b border-gray-200">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-3 px-2 text-center w-[13%] border-r border-white">사이즈</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-3 px-2 text-center w-[12%] text-blue-700 bg-blue-50/50 border-r border-white">부산</th>
+            <th class="py-3 px-2 text-center w-[16%] border-r border-gray-100">부산→물류</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-3 px-2 text-center w-[12%]">물류</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-3 px-2 text-center w-[16%] border-r border-gray-100">물류 RT</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-3 px-2 text-center w-[12%]">신사</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-3 px-2 text-center w-[16%]">신사 RT</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </thead>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
+            let busanOutBtn = s.busan > 0
+                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 rounded-lg flex items-center justify-center w-full transition-colors" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
+                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+
+            let centerRtBtn = s.center > 0
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
+                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+
+            let sinsaRtBtn = s.sinsa > 0
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
+                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+
+            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-red-50/40':''}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-3 px-2 font-black text-center border-r border-gray-50 text-[15px]">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:10px;margin-left:2px;">🔖</span>` : ''}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</td>
+                <td class="py-2.5 px-2 text-center border-r border-gray-100">${busanOutBtn}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.center}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-2.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-3 px-2 font-bold text-center text-gray-600 text-[15px]">${s.sinsa}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-2.5 px-2 text-center">${sinsaRtBtn}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </tr>`;
+        }).join("")}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  `;
+
+  let stickyFooterHtml = "";   // 상세 창 아래 고정 줄 (ADMIN 이미지 도구)
+
+  if (checkAdminSession()) {
+      const targetUrl = p.shopNo ? `https://racement.co.kr/product-detail?productNo=${p.shopNo}` : "";
+      const linkHtml = p.shopNo ? `<a href="${targetUrl}" target="_blank" class="text-[11px] text-blue-600 hover:underline font-bold shrink-0">자사몰</a>` : '';
+      stickyFooterHtml += `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div class="flex items-center gap-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[11px] font-bold text-gray-400 shrink-0">🖼️</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <a href="https://www.google.com/search?q=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||'')+' '+(p.품명||''))}&tbm=isch" target="_blank" class="px-2 py-1.5 text-xs font-black bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg shrink-0 no-underline" title="구글 이미지 검색">🔍G</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||''))}" target="_blank" class="px-2 py-1.5 text-xs font-black bg-green-50 hover:bg-green-100 text-green-600 rounded-lg shrink-0 no-underline" title="네이버쇼핑 검색">🔍N</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <input type="text" id="quickImgUrl" class="ipt flex-1 text-xs px-2 py-1.5 rounded-lg border border-gray-200 mono min-w-0" placeholder="Ctrl+V로 이미지 붙여넣기">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <label class="px-2 py-1.5 text-xs font-black bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg shrink-0 cursor-pointer" title="파일 선택">📁<input type="file" id="quickImgFile" accept="image/*" class="hidden"></label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <label class="px-2 py-1.5 text-xs font-black bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg shrink-0 cursor-pointer" title="카메라로 촬영">📷<input type="file" id="quickImgCamera" accept="image/*" capture="environment" class="hidden"></label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <button id="quickImgSave" class="px-3 py-1.5 text-xs font-black bg-gray-700 hover:bg-black text-white rounded-lg shrink-0">저장</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              ${linkHtml}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div id="quickImgDrop" class="mt-1 border-2 border-dashed border-gray-200 rounded-lg text-center text-[11px] text-gray-400 py-2 cursor-pointer hover:border-blue-300 hover:text-blue-400 transition-colors">이미지 드래그하여 놓기 (또는 클릭하여 파일 선택)</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div id="quickImgMsg" class="text-[11px] font-bold h-3 mt-0.5"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      `;
+  }
+
+  let modalContentWrap = $("#detailModal .modal-content");
+  if(!modalContentWrap) {
+      modalContentWrap = document.createElement("div");
+      modalContentWrap.className = "modal-content relative bg-white w-[96%] max-w-2xl mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 max-h-[88vh]";
+      $("#detailModal").className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[9999] p-4 bg-black/60";
+      $("#detailModal").innerHTML = `<div class="modal-outer absolute inset-0 cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden');document.body.style.overflow=''"></div>`;
+      $("#detailModal").appendChild(modalContentWrap);
+  }
+
+  modalContentWrap.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-white shrink-0 shadow-sm z-10">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div id="detailHead" class="flex-1 min-w-0 pr-2"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <button id="closeDetail" class="p-1.5 text-gray-400 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-full shrink-0 transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden');document.body.style.overflow=''"><i data-lucide="x" class="w-5 h-5"></i></button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="flex-1 overflow-y-auto dash-scroll">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div id="detailBody" class="p-3"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ${stickyFooterHtml ? `<div class="px-3 py-2 border-t border-gray-200 bg-white shrink-0 sticky bottom-0 z-20 shadow-[0_-2px_8px_-1px_rgba(0,0,0,0.06)]">${stickyFooterHtml}</div>` : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  `;
+
+  const _priceHtml = p.currentPromoPrice
+    ? `<span class="text-red-600 font-black text-sm">${krw(p.currentPromoPrice)}</span><span class="text-gray-400 line-through text-xs ml-1">${krw(p.소비자가)}</span>`
+    : `<span class="font-black text-sm text-gray-800">${krw(p.소비자가)}</span>`;
+  $("#detailHead").innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="flex gap-3 items-center">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${imgSrc ? `<img src="${imgSrc}" class="w-14 h-14 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-14 h-14 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="min-w-0 flex-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-[11px] text-gray-400 font-bold">${escapeHtml(p.브랜드||"-")}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="text-[16px] sm:text-[18px] font-black text-gray-900 leading-tight break-keep">${escapeHtml(p.품명)}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex items-center gap-3 mt-0.5 flex-wrap">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-blue-600 font-bold text-xs">${escapeHtml(p.품번)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span>${_priceHtml}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  `;
+
+  // ── 사이즈별 30일 판매량 계산 (부산 / 부산제외 분리) ───────────────────
+  const _sizeSales30Busan = {};  // 부산 전용
+  const _sizeSales30Etc   = {};  // 부산 제외 (신사, 물류 등)
+  const _sizeSalesToday = {};
+  if (SALES_HISTORY && SALES_HISTORY.items && SALES_HISTORY.items[p.품번]) {
+    const _sh = SALES_HISTORY.items[p.품번];
+    const _today = new Date(); _today.setHours(0,0,0,0);
+    const _todayKey = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
+    for (let date in _sh) {
+      const diffDays = Math.floor((_today - new Date(date)) / 86400000);
+      if (diffDays > 30) continue;
+      const dayData = _sh[date];
+      if (typeof dayData === 'object') {
+        for (let size in dayData) {
+          if (typeof dayData[size] === 'object') {
+            const sd = dayData[size];
+            // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
+            const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
+            if (bq > 0) {
+              _sizeSales30Busan[size] = (_sizeSales30Busan[size] || 0) + bq;
+              if (date === _todayKey) {
+                _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + bq;
+              }
+            }
+            for (let mgr in sd) {
+              const qty = sd[mgr] || 0;
+              if (!mgr.includes("김종훈") && !mgr.includes("부산")) {
+                // 부산 제외 (신사, 물류 등)
+                _sizeSales30Etc[size] = (_sizeSales30Etc[size] || 0) + qty;
+              }
+            }
+          } else {
+            // 담당자 구분 없는 구형 데이터 → 부산제외에 포함
+            const qty = dayData[size] || 0;
+            _sizeSales30Etc[size] = (_sizeSales30Etc[size] || 0) + qty;
+          }
+        }
+      }
+    }
+  }
+
+  $("#detailBody").innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="mb-2 flex gap-4 text-xs font-bold text-gray-500 px-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span>부산 <b class="text-blue-600 text-sm">${p.busanTotal}</b></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span>물류 <b class="text-gray-700 text-sm">${p.centerTotal}</b></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span>신사 <b class="text-gray-700 text-sm">${p.sinsaTotal}</b></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="overflow-x-auto w-full no-scrollbar">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <table class="w-full text-sm bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <thead class="bg-gray-50 text-xs text-gray-500 font-black border-b border-gray-200">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-2 px-2 text-center w-[15%] border-r border-gray-100">사이즈</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">🏪 부산<br><span class="font-normal text-[10px] text-blue-400">30일</span></th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-2 px-1 text-center w-[12%] text-indigo-600 bg-indigo-50/60 border-r border-gray-100">🏬 타지점<br><span class="font-normal text-[10px] text-indigo-400">30일</span></th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
+            <th class="py-2 px-2 text-center border-r border-gray-100">부산→물류</th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-2 px-2 text-center border-r border-gray-100">물류 RT <span class="text-gray-400 font-normal">(${p.centerTotal})</span></th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-400 font-normal">(${p.sinsaTotal})</span></th>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </thead>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
+            const _s30b = _sizeSales30Busan[s.size] || 0;
+            const _s30a = _sizeSales30Etc[s.size] || 0;
+            let busanOutBtn = s.busan > 0
+                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.busan}</button>`
+                : `<span class="text-gray-300 text-sm">-</span>`;
+
+            let centerRtBtn = s.center > 0
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
+                : `<span class="text-gray-300 text-sm">-</span>`;
+            let sinsaRtBtn = s.sinsa > 0
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
+                : `<span class="text-gray-300 text-sm">-</span>`;
+            return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-amber-50/60':''}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:9px;margin-left:2px;">🔖</span>` : ''}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-300'}">${_s30b>0?_s30b:'-'}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30a>0?'text-indigo-500':'text-gray-300'}">${_s30a>0?_s30a:'-'}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-1 px-1 text-center bg-blue-50/30 border-r border-gray-100">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex flex-col items-center leading-none gap-0.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        ${(_sizeSalesToday[s.size]||0)>0?`<span class="text-orange-500 text-[10px] font-bold leading-none">-${_sizeSalesToday[s.size]}↓</span>`:''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-1.5 px-2 text-center border-r border-gray-100">${busanOutBtn}</td>
+                <td class="py-1.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <td class="py-1.5 px-2 text-center">${sinsaRtBtn}</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </tr>`;
+        }).join("")}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  `;
+
+  // ── 판매 현황 패널 (detailBody 아래에 append) ──────────────
+  const _sales = getSalesSummary(p.품번);
+  const _totalStock = p.sizes.reduce((s, sz) => s + (sz.busan||0) + (sz.center||0) + (sz.sinsa||0), 0);
+  const _daysLeft = _sales.avgDay > 0 ? Math.round(_totalStock / _sales.avgDay) : null;
+  const _hasData = _sales.all > 0;
+  const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 3 ? '🔥 핫셀러' : _sales.d7 >= 1 ? '📈 보통' : '📦 저조';
+  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 3 ? 'text-red-500' : _sales.d7 >= 1 ? 'text-blue-500' : 'text-gray-400';
+  // 같은 기준(누적 전체)으로 막대 비율 계산
+  const _maxSales = Math.max(_sales.all, 1);
+  const _bar7  = Math.min(100, Math.round((_sales.d7  / _maxSales) * 100));
+  const _bar30 = Math.min(100, Math.round((_sales.d30 / _maxSales) * 100));
+  const _daysColor = _daysLeft === null ? '' : _daysLeft <= 14 ? 'text-red-600' : _daysLeft <= 30 ? 'text-orange-500' : 'text-gray-500';
+
+  const _salesDiv = document.createElement("div");
+  _salesDiv.className = "px-3 pb-3";
+  _salesDiv.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-slate-50 p-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="flex justify-between items-center mb-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex items-center gap-1.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-[11px] font-black text-indigo-600 tracking-wide">📊 판매 현황</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-[9px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded">부산점 기준</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <span class="text-[11px] font-black ${_heatColor}">${_heatLabel}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ${!_hasData
+        ? `<div class="text-[11px] text-gray-400 font-bold text-center py-1.5">판매 이력 없음</div>`
+        : `<div class="space-y-1.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex items-center gap-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">7일</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="h-2 rounded-full bg-indigo-500" style="width:${_bar7}%"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[12px] font-black text-indigo-700 w-9 text-right shrink-0">${_sales.d7}개</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex items-center gap-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">30일</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div class="h-2 rounded-full bg-blue-400" style="width:${_bar30}%"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[12px] font-black text-blue-700 w-9 text-right shrink-0">${_sales.d30}개</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex justify-between items-center pt-1.5 border-t border-indigo-100 mt-0.5 flex-wrap gap-y-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[10px] text-gray-500 font-bold">일평균 <strong class="text-gray-800">${_sales.avgDay}개</strong></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <span class="text-[10px] text-gray-500 font-bold">누적 <strong class="text-gray-800">${_sales.all}개</strong></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              ${_daysLeft !== null ? `<span class="text-[10px] font-black ${_daysColor}">소진까지 약 <strong>${_daysLeft}일</strong></span>` : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </div>`
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>`;
+  $("#detailBody").appendChild(_salesDiv);
+
+  // ── DP 관리 패널 ────────────────────────────────────────────────────
+  const _dpSizesModal = getDPSizes(p.품번);
+  const _dpDiv = document.createElement("div");
+  _dpDiv.className = "px-3 pb-3";
+  _dpDiv.id = "dpPanel";
+  const _renderDPPanel = () => {
+    const dpSizes = getDPSizes(p.품번);
+    const sizeCheckboxes = p.sizes.map(s => {
+      const sz = String(s.size).trim();
+      const isDPed = dpSizes.includes(sz);
+      const isSoldOut = s.busan <= 0;
+      let btnCls = isDPed
+        ? (isSoldOut ? "bg-orange-100 border-orange-400 text-orange-700" : "bg-violet-600 border-violet-600 text-white")
+        : "bg-white border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600";
+      const icon = isDPed ? (isSoldOut ? "⚠️" : "🏷️") : "□";
+      const soldLabel = (isSoldOut && isDPed) ? ` <span class="text-[9px] opacity-70">품절</span>` : "";
+      return `<button onclick="window._toggleDPBtn(this,'${p.품번}','${sz}')"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        class="dp-size-btn px-3 py-1.5 rounded-lg border-2 font-black text-xs transition-all ${btnCls}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        data-dp-size="${sz}" data-code="${p.품번}" data-active="${isDPed?'1':'0'}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ${icon} ${sz}${soldLabel}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </button>`;
+    }).join('');
+    _dpDiv.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div class="rounded-xl border border-violet-200 bg-violet-50 p-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex items-center justify-between mb-2.5">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span class="text-xs font-black text-violet-700 flex items-center gap-1.5">🏷️ DP 관리
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <span class="text-[10px] font-normal text-violet-400">눌러서 등록/해제</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <span id="dpStatusLabel" class="text-[11px] font-black px-2 py-0.5 rounded ${dpSizes.length > 0 ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-400'}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            ${dpSizes.length > 0 ? `🏷️ DP 중: ${dpSizes.join('·')}` : '미DP'}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex flex-wrap gap-2" id="dpSizeBtns">${sizeCheckboxes}</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>`;
+  };
+  _renderDPPanel();
+  window._dpRenderFn = _renderDPPanel;
+  $("#detailBody").appendChild(_dpDiv);
+  // ── 위치찾기: 상품 위치(도서관식) 표시 + (ADMIN) 배정 ────────────────────
+  const _locDiv = document.createElement("div");
+  _locDiv.className = "px-3 pb-3";
+  const _renderLocPanel = () => {
+    const locs = _locArr(p.품번);
+    // skipDp는 위치가 아니라 '미DP 제외' 표시라 목록·개수에서 빼고, 삭제·이동 버튼은 원래 배열 순번(i)을 그대로 쓴다
+    const shownLocs = locs.map((asn, i) => ({ asn, i })).filter(x => !x.asn.skipDp);
+    const dpSkipped = locs.some(l => l.skipDp);
+    const isAdmin = checkAdminSession();
+    const hasDP = locs.some(l => l.dp);
+
+    let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치${shownLocs.length > 1 ? ` (${shownLocs.length})` : ''}</span>
+        ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-400 hover:text-gray-700">구역 관리</button>` : ''}
+      </div>`;
+
+    if(shownLocs.length){
+        html += shownLocs.map(({ asn, i }, k) => {
+            if(asn.dp){
+                return `<div class="flex items-center gap-2 ${k > 0 ? 'mt-2 pt-2' : ''}" style="${k > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div style="width:64px;height:46px;border-radius:9px;flex-shrink:0;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:22px;">📺</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="truncate" style="font-size:18px;line-height:1.2;font-weight:900;color:#4338ca;letter-spacing:-0.5px;">DP 진열중</div>
+                            <div class="text-xs font-bold text-gray-500 mt-0.5 truncate">랙/서랍 없이 매장에 진열되어 있음</div>
+                        </div>
+                    </div>
+                    ${isAdmin ? `<div class="flex items-center gap-1 shrink-0">
+                        <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-100" data-idx="${i}">삭제</button>
+                    </div>` : ''}
+                </div>`;
+            }
+            const zone = LOCATIONS.zones.find(z => z.id === asn.zoneId);
+            if(!zone) return '';
+            return `<div class="flex items-center gap-2 ${k > 0 ? 'mt-2 pt-2' : ''}" style="${k > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
+                <div onclick="window.openFloorPlanView('${zone.id}'${asn.slot ? `,'${escapeHtml(asn.slot)}'` : ''})" class="flex items-center gap-3 cursor-pointer group flex-1 min-w-0">
+                    <div style="width:64px;height:46px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;flex-shrink:0;background:#fff;">
+                        ${storeMapSvg({ highlightZoneId: zone.id, compact: true })}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="group-hover:underline truncate" style="font-size:18px;line-height:1.2;font-weight:900;color:#c2410c;letter-spacing:-0.5px;">${escapeHtml(zoneAddress(zone, asn.slot))}</div>
+                        <div class="text-xs font-bold text-gray-500 mt-0.5 truncate">${escapeHtml(zone.label)}</div>
+                    </div>
+                </div>
+                ${isAdmin ? `<div class="flex items-center gap-1 shrink-0">
+                    <button class="loc-move-btn text-[10px] font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded border border-gray-200" data-idx="${i}">이동</button>
+                    <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-100" data-idx="${i}">삭제</button>
+                </div>` : ''}
+            </div>`;
+        }).join('');
+    } else if(!isAdmin){
+        html += `<div class="text-xs text-gray-400 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
+    }
+
+    if(isAdmin && dpSkipped){
+        html += `<div class="text-[11px] font-bold text-gray-500 mt-2">🙈 미DP 목록에서 제외된 상품</div>`;
+    }
+    if(isAdmin){
+        html += `<div class="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2.5" style="border-top:1px dashed #ffd8c4;">
+            <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${shownLocs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
+            ${!hasDP ? `<button id="locDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#4338ca;">📺 DP 진열 표시</button>` : ''}
+            ${(dpSkipped || getDPStatus(p) === 'none') ? `<button id="locSkipDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] text-gray-600" title="남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품을 미DP 목록에서 뺍니다">${dpSkipped ? '↩ 미DP 목록에 다시 표시' : '🙈 미DP 목록에서 제외'}</button>` : ''}
+            ${shownLocs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
+        </div>`;
+    }
+
+    html += `</div>`;
+
+    _locDiv.innerHTML = html;
+
+    if(isAdmin){
+        // _locDiv가 아직 문서에 붙기 전(최초 렌더)일 수 있어 document 전역 $() 대신 _locDiv 안에서만 탐색
+        const pickBtn = _locDiv.querySelector("#locPickBtn");
+        if(pickBtn) pickBtn.onclick = () => window.openSingleLocModal(p.품번);
+
+        const dpBtn = _locDiv.querySelector("#locDpBtn");
+        if(dpBtn) dpBtn.onclick = () => window.markAsDP(p.품번);
+
+        const skipBtn = _locDiv.querySelector("#locSkipDpBtn");
+        if(skipBtn) skipBtn.onclick = async () => {
+            if(!checkPat()) return;
+            skipBtn.disabled = true;
+            const ok = await saveLocations(server => {
+                const assignments = {...server.assignments};
+                const cur = assignments[p.품번];
+                const arr = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => !a.skipDp);
+                if(!dpSkipped) arr.push({ skipDp: true });
+                if(arr.length) assignments[p.품번] = arr; else delete assignments[p.품번];
+                return { zones: server.zones, assignments };
+            });
+            skipBtn.disabled = false;
+            if(ok){ showToast(dpSkipped ? '✓ 미DP 목록에 다시 표시' : '✓ 미DP 목록에서 제외'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
+        };
+
+        _locDiv.querySelectorAll(".loc-move-btn").forEach(btn => {
+            btn.onclick = (e) => { e.stopPropagation(); window.openSingleLocModal(p.품번, parseInt(btn.dataset.idx, 10)); };
+        });
+
+        _locDiv.querySelectorAll(".loc-del-btn").forEach(btn => {
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                if(!checkPat()) return;
+                if(!confirm('이 위치를 삭제할까요?')) return;
+                const idx = parseInt(btn.dataset.idx, 10);
+                btn.disabled = true;
+                const ok = await saveLocations(server => {
+                    const assignments = {...server.assignments};
+                    const arr = (Array.isArray(assignments[p.품번]) ? assignments[p.품번] : (assignments[p.품번] ? [assignments[p.품번]] : [])).slice();
+                    arr.splice(idx, 1);
+                    if(arr.length) assignments[p.품번] = arr; else delete assignments[p.품번];
+                    return { zones: server.zones, assignments };
+                });
+                btn.disabled = false;
+                if(ok){ showToast('✓ 위치 삭제됨'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
+            };
+        });
+
+        const clearAllBtn = _locDiv.querySelector("#locClearAllBtn");
+        if(clearAllBtn) clearAllBtn.onclick = async () => {
+            if(!checkPat()) return;
+            if(!confirm(`위치 ${shownLocs.length}곳을 모두 해제할까요?`)) return;
+            clearAllBtn.disabled = true;
+            const ok = await saveLocations(server => {
+                const assignments = {...server.assignments};
+                const cur = assignments[p.품번];
+                const keep = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => a.skipDp);
+                if(keep.length) assignments[p.품번] = keep; else delete assignments[p.품번];
+                return { zones: server.zones, assignments };
+            });
+            clearAllBtn.disabled = false;
+            if(ok){ showToast('✓ 위치 전체 해제됨'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
+        };
+    }
+  };
+
+  _renderLocPanel();
+  window._locRenderFn = _renderLocPanel;
+  $("#detailBody").appendChild(_locDiv);
+  // ── 실재고 보정 패널 (ADMIN 전용, 전체 사이즈) ─────────────────────────
+  if (checkAdminSession()) {
+      const _soDiv = document.createElement("div");
+      _soDiv.className = "px-3 pb-3";
+      const _soBtns = p.sizes.map(s => {
+          const sz = String(s.size).trim();
+          const ov = s._override;
+          const cls = ov
+            ? (s._overrideStale ? "bg-amber-100 border-amber-400 text-amber-800" : "bg-emerald-50 border-emerald-500 text-emerald-700")
+            : "bg-white border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600";
+          const label = ov
+            ? `✏️ ${sz}<span class="block text-[10px] font-bold leading-tight">보정 ${ov.actual} → 현재 <b>${ov.effective}</b>${s._overrideStale?' (판매 반영됨)':''}</span>`
+            : `${sz}<span class="block text-[10px] text-gray-400 leading-tight">${s.busan}</span>`;
+          return `<button onclick="window._promptStockOverride('${escapeHtml(p.품번)}','${sz}')" class="px-2.5 py-1.5 rounded-lg border-2 font-black text-xs transition-all text-center leading-tight ${cls}">${label}</button>`;
+      }).join('');
+      _soDiv.innerHTML = `
+
+
+
+
+
+
+
+        <div class="rounded-xl border border-blue-200 bg-blue-50/40 p-3">
+
+
+
+
+
+
+
+          <div class="flex items-center justify-between mb-2.5">
+
+
+
+
+
+
+
+            <span class="text-xs font-black text-blue-700 flex items-center gap-1.5">📦 실재고 보정 <span class="text-[10px] font-normal text-blue-400">시스템과 실제가 다르면 눌러서 수정</span></span>
+
+
+
+
+
+
+
+            <span class="text-[10px] font-black px-2 py-0.5 rounded bg-gray-100 text-gray-400">ADMIN</span>
+
+
+
+
+
+
+
+          </div>
+
+
+
+
+
+
+
+          <div class="flex flex-wrap gap-2">${_soBtns}</div>
+
+
+
+
+
+
+
+          <div class="text-[10px] text-gray-400 mt-2">⚠️ = 보정 후 시스템값이 바뀜(재확인) · 입력창 빈칸 저장 시 보정 해제</div>
+
+
+
+
+
+
+
+        </div>`;
+      $("#detailBody").appendChild(_soDiv);
+  }
+
+
+  if ($("#quickImgSave")) {
+      const msgEl = $("#quickImgMsg");
+      const imgKey = p.shopNo || p.품번;
+      const safeKey = String(imgKey).replace(/[^a-zA-Z0-9_\-]/g, '_');
+      const pat = getPat();
+      const ghBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
+      const IMG_REPO = 'stock-rcm-x9k2p'; // 상품 사진은 Pages로 공개 서빙해야 하므로 항상 공개 저장소에 저장 (비공개 데이터 저장소로는 Pages 접근 불가)
+      const imgGhBase = `https://api.github.com/repos/${GH.owner}/${IMG_REPO}`;
+      const pagesBase = `https://${GH.owner}.github.io/${IMG_REPO}/product-images`;
+      async function uploadAndSave(imgB64, ext, tempUrl) {
+          msgEl.style.color = ""; msgEl.textContent = "사진 크기 줄이는 중...";
+          ({ b64: imgB64, ext } = await _shrinkProductImage(imgB64, ext));
+          msgEl.textContent = "GitHub에 업로드 중...";
+          const imgPath = `product-images/${safeKey}.${ext}`;
+          const imgFileApi = `${imgGhBase}/contents/${imgPath}`;
+          const existRes = await fetch(imgFileApi + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+          const existSha = existRes.ok ? (await existRes.json()).sha : undefined;
+          const imgPutRes = await fetch(imgFileApi, {
+              method:"PUT",
+              headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+              body: JSON.stringify({message:`image: ${imgKey}`, content: imgB64, branch: GH.branch, ...(existSha && {sha:existSha})})
+          });
+          if(!imgPutRes.ok) throw new Error(`이미지 업로드 실패 (${imgPutRes.status})`);
+          const finalUrl = `${pagesBase}/${safeKey}.${ext}`;
+          msgEl.textContent = "images.json 업데이트 중...";
+          const apiBase = `${ghBase}/contents/images.json`;
+          // 충돌(409/422) 시 최신을 다시 읽어 재병합 후 재시도 — 동시 업로드·SHA 갱신 대응
+          let latestImages = null;
+          for(let _att=0; _att<4; _att++){
+              const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+              if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
+              const meta = await metaRes.json();
+              let parsed = {}, _ok = false;
+              // UTF-8(한글 키) 안전 디코딩 — bare atob는 한글에서 깨져 전체 유실의 원인이 됨
+              try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+              // 기존 목록을 못 읽으면 빈 맵으로 덮어써 전체가 날아가므로 저장 중단
+              if(!_ok || typeof parsed !== 'object' || parsed === null) {
+                  throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+              }
+              parsed[imgKey] = finalUrl;
+              const putRes = await fetch(apiBase, {
+                  method:"PUT",
+                  headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                  body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
+              });
+              if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
+              if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
+              latestImages = parsed; break;
+          }
+          if(!latestImages) throw new Error('images.json 저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
+          IMAGES = { ...latestImages };
+          // GitHub Pages 서빙 딜레이 동안 blob URL로 즉시 표시
+          if(tempUrl) IMAGES[imgKey] = tempUrl;
+          sessionStorage.removeItem(CACHE_KEY);
+          msgEl.style.color = "green";
+          msgEl.textContent = "✓ 저장 완료! (GitHub Pages에 영구 보관)";
+          render();
+          setTimeout(()=>{ openDetail(p); }, 600);
+      }
+      function fileToB64(file) {
+          return new Promise((resolve, reject) => {
+              const ext = file.type.includes('png')?'png':file.type.includes('webp')?'webp':file.type.includes('gif')?'gif':'jpg';
+              const reader = new FileReader();
+              reader.onload = e => resolve({b64: e.target.result.split(',')[1], ext});
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+          });
+      }
+      async function handleFile(file) {
+          if(!file || !file.type.startsWith('image/')) return;
+          if(!checkPat()) return;
+          msgEl.style.color = ""; msgEl.textContent = "파일 읽는 중...";
+          try {
+              const {b64, ext} = await fileToB64(file);
+              const tempUrl = URL.createObjectURL(file);
+              await uploadAndSave(b64, ext, tempUrl);
+          } catch(err) {
+              delete IMAGES[p.shopNo || p.품번];
+              msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
+          }
+      }
+      // URL 저장 버튼
+      $("#quickImgSave").onclick = async () => {
+          if(!checkPat()) return;
+          const inputUrl = $("#quickImgUrl").value.trim(); if (!inputUrl) return;
+          msgEl.style.color = ""; msgEl.textContent = "이미지 다운로드 중...";
+          try {
+              let imgB64 = null, ext = 'jpg';
+              try {
+                  const imgResp = await fetch(inputUrl, {mode:'cors'});
+                  if(imgResp.ok) {
+                      const ct = imgResp.headers.get('Content-Type') || '';
+                      ext = ct.includes('png') ? 'png' : ct.includes('webp') ? 'webp' : ct.includes('gif') ? 'gif' : 'jpg';
+                      const buf = await imgResp.arrayBuffer();
+                      const bytes = new Uint8Array(buf);
+                      let binary = '';
+                      for(let i=0;i<bytes.byteLength;i++) binary += String.fromCharCode(bytes[i]);
+                      imgB64 = btoa(binary);
+                  }
+              } catch(e) {}
+              if(imgB64) {
+                  await uploadAndSave(imgB64, ext);
+              } else {
+                  msgEl.textContent = "images.json 업데이트 중...";
+                  const apiBase = `${ghBase}/contents/images.json`;
+                  // 충돌(409/422) 시 최신을 다시 읽어 재병합 후 재시도
+                  let latestImages = null;
+                  for(let _att=0; _att<4; _att++){
+                      const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+                      if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
+                      const meta = await metaRes.json();
+                      let parsed = {}, _ok = false;
+                      try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+                      if(!_ok || typeof parsed !== 'object' || parsed === null) {
+                          throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
+                      }
+                      parsed[imgKey] = inputUrl;
+                      const putRes = await fetch(apiBase, {
+                          method:"PUT",
+                          headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                          body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
+                      });
+                      if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
+                      if(!putRes.ok) throw new Error(`images.json 저장 실패 (${putRes.status})`);
+                      latestImages = parsed; break;
+                  }
+                  if(!latestImages) throw new Error('images.json 저장 실패 (충돌 반복). 잠시 후 다시 시도하세요.');
+                  IMAGES = { ...latestImages };
+                  sessionStorage.removeItem(CACHE_KEY);
+                  msgEl.style.color = "green";
+                  msgEl.textContent = "✓ 저장 완료! (URL 저장 — CORS 제한)";
+                  render();
+                  setTimeout(()=>{ openDetail(p); }, 600);
+              }
+          } catch(err) {
+              delete IMAGES[p.shopNo || p.품번];
+              msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
+          }
+      };
+      // 파일 선택 버튼
+      const fileInput = $("#quickImgFile");
+      if(fileInput) fileInput.onchange = (e) => handleFile(e.target.files[0]);
+      const cameraInput = $("#quickImgCamera");
+      if(cameraInput) cameraInput.onchange = (e) => handleFile(e.target.files[0]);
+      // 드래그 앤 드롭 + 클릭
+      const dropZone = $("#quickImgDrop");
+      if(dropZone) {
+          dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('!border-blue-400','!text-blue-500','bg-blue-50'); };
+          dropZone.ondragleave = () => dropZone.classList.remove('!border-blue-400','!text-blue-500','bg-blue-50');
+          dropZone.ondrop = (e) => {
+              e.preventDefault();
+              dropZone.classList.remove('!border-blue-400','!text-blue-500','bg-blue-50');
+              handleFile(e.dataTransfer.files[0]);
+          };
+          dropZone.onclick = () => { if(fileInput) fileInput.click(); };
+      }
+      // Ctrl+V 클립보드 붙여넣기 (이미지인 경우)
+      const urlInput = $("#quickImgUrl");
+      if(urlInput) urlInput.addEventListener('paste', (e) => {
+          const items = e.clipboardData?.items;
+          if(!items) return;
+          for(const item of items) {
+              if(item.type.startsWith('image/')) {
+                  e.preventDefault();
+                  handleFile(item.getAsFile());
+                  return;
+              }
+          }
+      });
+  }
+
+  $("#detailModal").classList.remove("hidden"); document.body.style.overflow="hidden";
+  if(window.lucide) lucide.createIcons();
+}
+
+document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("modal-outer")) e.target.closest('.modal-backdrop').classList.add("hidden");
+});
+
+$$('button[id^="close"]').forEach(btn => {
+    btn.addEventListener("click", (e) => { e.target.closest('.modal-backdrop').classList.add("hidden"); });
+});
+
+// 적용된 필터 요약 칩 바 — 켜진 필터를 한눈에 보여주고 ✕로 개별 해제
+function renderActiveFilterBar() {
+    const bar = $("#activeFilterBar");
+    if (!bar) return;
+    // 늘 보이는 칩(카테고리·성별·재고있음 등)과 검색어는 제자리에 보이므로 빼고,
+    // 접혀 있는 더보기 패널·점검 보드 안에 숨은 조건만 필터 줄 끝에 보여 준다
+    const hiddenIn = el => { const box = el && el.closest('#filterPanel, #adminBoard'); return !!box && box.classList.contains('hidden'); };
+    const items = []; // {label, onClear}
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-sinsaonly], button.chip[data-centeronly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-hasloc]').forEach(btn => {
+        if (btn.dataset.active === "1" && hiddenIn(btn)) {
+            items.push({ label: btn.textContent.trim(), onClear: () => {
+                btn.dataset.active = "0";
+                [...btn.classList].filter(c => c.startsWith('ring-')).forEach(c => btn.classList.remove(c));
+            }});
+        }
+    });
+    if (hiddenIn($("#brandRow"))) {
+        (window._activeBrands ? [...window._activeBrands] : []).forEach(brand => items.push({ label: brand, onClear: () => {
+            window._activeBrands.delete(brand);
+            if (window._renderBrandChips) window._renderBrandChips();
+        }}));
+        ["sizeSelFw", "sizeSelAp", "sizeSelGear"].forEach(id => {
+            const sel = $("#" + id);
+            if (sel && sel.value !== "ALL") items.push({ label: `사이즈 ${sel.value}`, onClear: () => { sel.value = "ALL"; }});
+        });
+        const lz = $("#locZoneSelect");
+        if (lz && lz.value) items.push({ label: `📍 ${(lz.options[lz.selectedIndex] || {}).text || lz.value}`, onClear: () => {
+            lz.value = ""; lz.classList.remove('ring-2', 'ring-sky-400');
+        }});
+    }
+    if (items.length === 0) { bar.classList.add("hidden"); bar.innerHTML = ""; return; }
+    bar.classList.remove("hidden");
+    bar.innerHTML = "";
+    items.forEach(it => {
+        const chip = document.createElement("button");
+        chip.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold shrink-0 hover:bg-blue-100 transition-colors";
+        chip.innerHTML = `${escapeHtml(it.label)} <span class="text-blue-400 font-black">✕</span>`;
+        chip.onclick = () => { saveHistoryState(); it.onClear(); visibleCount = 60; render(); };
+        bar.appendChild(chip);
+    });
+}
+
+// 필터 칩 전체 해제 헬퍼 (카테고리·성별·브랜드 제외, 단일선택 그룹)
+function _clearAllFilterChips() {
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(x => x.dataset.active = "0");
+    const bb = $('button.chip[data-busanonly]');
+    if (bb) { bb.dataset.active = "0"; bb.classList.remove('ring-2','ring-blue-400'); }
+    const sinsaOb = $('button.chip[data-sinsaonly]');
+    const centerOb = $('button.chip[data-centeronly]');
+    if (sinsaOb) { sinsaOb.dataset.active = "0"; sinsaOb.classList.remove('ring-2','ring-indigo-400'); }
+    if (centerOb) { centerOb.dataset.active = "0"; centerOb.classList.remove('ring-2','ring-teal-400'); }
+    const tb = $('button.chip[data-todaysold]');
+    if (tb) { tb.dataset.active = "0"; tb.classList.remove('ring-2','ring-orange-400'); }
+}
+
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-stock], button.chip[data-busanonly], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.addEventListener("click",()=>{
+    saveHistoryState();
+    if(b.dataset.cat) {
+        // 카테고리: 단일선택 (성별과 조합 가능)
+        $$('button.chip[data-cat]').forEach(x=>x.dataset.active=(x===b?"1":"0"));
+    } else if(b.dataset.gender) {
+        // 성별: 단일선택 (카테고리와 조합 가능)
+        $$('button.chip[data-gender]').forEach(x=>x.dataset.active=(x===b?"1":"0"));
+    } else {
+        // 나머지 필터칩: 단일선택 (하나만 활성화)
+        const isActive = b.dataset.active === "1";
+        _clearAllFilterChips();
+        if (!isActive) {
+            b.dataset.active = "1";
+            if(b.dataset.busanonly) b.classList.add('ring-2', 'ring-blue-400');
+        }
+    }
+    visibleCount=60; render();
+}));
+
+$("#resetAll").onclick=()=>{
+    saveHistoryState();
+    $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
+    $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.dataset.active="0");
+    window._activeBrands = new Set();
+    if(window._renderBrandChips) window._renderBrandChips();
+    if($("#brandSearch")) { $("#brandSearch").value = ""; }
+    if($("#sortSel")) { $("#sortSel").value = "default"; }
+
+    const busanOnlyBtn = $('button.chip[data-busanonly]');
+    if(busanOnlyBtn) { busanOnlyBtn.dataset.active = "0"; busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400'); }
+    const sinsaOnlyBtn2 = $('button.chip[data-sinsaonly]');
+    const centerOnlyBtn2 = $('button.chip[data-centeronly]');
+    if(sinsaOnlyBtn2) { sinsaOnlyBtn2.dataset.active = "0"; sinsaOnlyBtn2.classList.remove('ring-2', 'ring-indigo-400'); }
+    if(centerOnlyBtn2) { centerOnlyBtn2.dataset.active = "0"; centerOnlyBtn2.classList.remove('ring-2', 'ring-teal-400'); }
+    const todaySoldBtn = $('button.chip[data-todaysold]');
+    if(todaySoldBtn) { todaySoldBtn.dataset.active = "0"; todaySoldBtn.classList.remove('ring-2', 'ring-orange-400'); }
+    $$('button.chip[data-dp]').forEach(b => { b.dataset.active = "0"; b.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
+    const noImgBtn = $('button.chip[data-noimage]');
+    if(noImgBtn) { noImgBtn.dataset.active = "0"; noImgBtn.classList.remove('ring-2','ring-gray-400'); }
+    const noBarcodeBtn = $('button.chip[data-nobarcode]');
+    if(noBarcodeBtn) { noBarcodeBtn.dataset.active = "0"; noBarcodeBtn.classList.remove('ring-2','ring-amber-400'); }
+    const ovBtn = $('button.chip[data-override]');
+    if(ovBtn) { ovBtn.dataset.active = "0"; ovBtn.classList.remove('ring-2','ring-amber-400'); }
+    const noLocBtn = $('button.chip[data-noloc]');
+
+    if(noLocBtn) { noLocBtn.dataset.active = "0"; noLocBtn.classList.remove('ring-2','ring-sky-400'); }
+    const hasLocBtn = $('button.chip[data-hasloc]');
+
+    if(hasLocBtn) { hasLocBtn.dataset.active = "0"; hasLocBtn.classList.remove('ring-2','ring-emerald-400'); }
+
+    $("#sortSel").value="default";
+    if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
+    if($("#sizeSelAp")) $("#sizeSelAp").value="ALL";
+    if($("#sizeSelGear")) $("#sizeSelGear").value="ALL";
+    $("#q").value=""; visibleCount=60; render();
+};
+
+$("#sortSel").onchange=()=> { saveHistoryState(); visibleCount=60; render(); };
+let qTimer;
+$("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
+$("#clearQ").onclick=()=>{ saveHistoryState(); $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
+$("#refreshBtn").onclick=()=>loadData(true);
+$("#darkModeBtn").onclick=()=>{ document.documentElement.classList.toggle("dark-mode"); localStorage.setItem("theme", document.documentElement.classList.contains("dark-mode") ? "dark" : "light"); };
+$("#showroomBtn").onclick=()=>{ document.body.classList.toggle("showroom-mode"); $("#showroomBtn").classList.toggle("bg-orange-500"); };
+
+$("#file").onchange = async (e) => {
+    if(!checkPat()) { e.target.value = ""; return; }
+    const f = e.target.files[0]; if(!f) return;
+    const d = new Date();
+    const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    localStorage.setItem('PREV_RAW', JSON.stringify(RAW));
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+        let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], XLSX);
+        const meta = { fileName:f.name, uploadedAt: dateStr };
+        try {
+            await commitInventoryToGitHub(rows, meta);
+            RAW = rows; CURRENT_META = meta;
+            _safeSessionCache({rows, meta, images:IMAGES, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
+            applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
+            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+        } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰을 확인하세요."); console.error("Upload error:", err); }
+        $("#file").value = "";
+    };
+    reader.readAsArrayBuffer(f);
+};
+
+$("#backToUpload").onclick=()=>{ $("#settingsPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); };
+$("#adminBtn").onclick=()=>$("#adminModal").classList.remove("hidden");
+$("#drop").onclick=()=>$("#file").click();
+$("#openSettings").onclick=()=>{ $("#uploadPanel").classList.add("hidden"); $("#settingsPanel").classList.remove("hidden"); };
+// ── 위치찾기: 창고 위치 관리(구역 블록 추가/이동/수정/삭제) ─────────────────
+
+function _uniqueZoneId(label){
+    const base = String(label).trim().toLowerCase().replace(/[^a-z0-9가-힣]+/g,'-').replace(/^-+|-+$/g,'') || 'zone';
+    let id = base, n = 1;
+    const exists = id2 => LOCATIONS.zones.some(z => z.id === id2);
+    while (exists(id)) { id = `${base}-${++n}`; }
+    return id;
+}
+let _zmAddMode = false;
+// ── 매장 도식 지도 (SVG) ──────────────────────────────────────────────
+// 좌표계: zone의 x·y·w·h는 모두 % (x·w는 가로 기준, y·h는 세로 기준) — 기존 핀 좌표 규약과 동일.
+// viewBox 1000×720 이므로 px = x*10 (가로), y*7.2 (세로).
+// 외곽선·랜드마크·구역 좌표는 부산점 CAD 평면도(floorplan 원본)를 실측해 환산한 값.
+const MAP_VB_W = 1000, MAP_VB_H = 720;
+
+// 매장 외곽선 — 위쪽 블록 + 아래쪽 가로 스트립(왼쪽이 오른쪽보다 위에서 시작하는 계단형)
+const MAP_SHELL = "M292,30 H592 V476 H940 V660 H60 V359 H292 Z";
+
+// 방향을 잡아주는 고정 랜드마크 — 구역이 아니라 배경 안내용(편집 불가)
+const MAP_LANDMARKS = [
+    { label: "벽면",      short: "벽",   x: 33.3, y: 22.22, w: 4.2,  h: 33.33 },
+    { label: "의류 벽면",  short: "의류", x: 6.6,  y: 50.56, w: 19.8, h: 3.89  },
+    { label: "모션랩",     short: "모션", x: 8.5,  y: 79.44, w: 16.5, h: 11.11 },
+    { label: "카운터",     short: "POS",  x: 70.5, y: 82.64, w: 7.0,  h: 8.06  }
+];
+
+// 출입구 표시 (viewBox px 단위로 직접 지정)
+const MAP_ENTRANCES = [
+    { label: "입구", px: 54,  py: 450, w: 12, h: 50, lx: 48,  ly: 475, anchor: "end"    },
+    { label: "입구", px: 418, py: 654, w: 60, h: 12, lx: 448, ly: 688, anchor: "middle" }
+];
+
+// 레거시(점 좌표)·폴리곤 구역 모두 안전하게 사각형(바운딩박스)으로 환산
+function _mapZoneRect(z){
+    if(Array.isArray(z.poly) && z.poly.length >= 3){
+        const xs = z.poly.map(p => p[0]), ys = z.poly.map(p => p[1]);
+        const x = Math.min(...xs), y = Math.min(...ys);
+        return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
+    }
+    const hasRect = typeof z.w === 'number' && typeof z.h === 'number' && z.w > 0 && z.h > 0;
+    const w = hasRect ? z.w : 7, h = hasRect ? z.h : 10;
+    return { x: hasRect ? z.x : (z.x - w/2), y: hasRect ? z.y : (z.y - h/2), w, h };
+}
+
+function _zoneIsStorage(z){
+    return /창고|storage/i.test(String(z.group||'') + ' ' + String(z.id||'')) || /^S/i.test(String(z.code||''));
+}
+
+// 직원이 부르는 주소 문자열 — "D3 · 2단" (코드가 없으면 이름으로 대체)
+function zoneAddress(z, slot){
+    if(!z) return '';
+    const head = z.code ? z.code : z.label;
+    return slot ? `${head} · ${slot}` : head;
+}
+
+function _renderStoreMapSvg(opts){
+    opts = opts || {};
+    const hiId = opts.highlightZoneId || null;
+    const compact = !!opts.compact;
+    const editable = !!opts.editable;
+    // 지도가 작게 렌더될수록(모바일) 글자를 키워 화면상 실제 크기를 유지
+    const fs = (base, minPx) => {
+        const hostW = opts.hostW || MAP_VB_W;
+        return Math.round(Math.max(base, (minPx || 14) * MAP_VB_W / hostW));
+    };
+    const tiny = (opts.hostW || MAP_VB_W) < 520;
+    const PX = v => (v * MAP_VB_W / 100).toFixed(1);
+    const PY = v => (v * MAP_VB_H / 100).toFixed(1);
+
+    let out = `<path d="${MAP_SHELL}" fill="#ffffff" stroke="#334155" stroke-width="${compact ? 8 : 3}" stroke-linejoin="round"/>`;
+
+    if(!compact){
+        MAP_LANDMARKS.forEach(l => {
+            out += `<rect x="${PX(l.x)}" y="${PY(l.y)}" width="${PX(l.w)}" height="${PY(l.h)}" rx="6" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="7 5"/>`;
+            out += `<text x="${PX(l.x + l.w/2)}" y="${PY(l.y + l.h/2)}" text-anchor="middle" dominant-baseline="central" font-size="${fs(17, 12)}" font-weight="700" fill="#94a3b8">${escapeHtml(tiny && l.short ? l.short : l.label)}</text>`;
+        });
+        MAP_ENTRANCES.forEach(e => {
+            out += `<rect x="${e.px}" y="${e.py}" width="${e.w}" height="${e.h}" rx="3" fill="#ff5a1f"/>`;
+            out += `<text x="${e.lx}" y="${e.ly}" text-anchor="${e.anchor}" dominant-baseline="central" font-size="${fs(16, 12)}" font-weight="800" fill="#c2410c">${escapeHtml(e.label)}</text>`;
+        });
+    }
+
+    let hiLabel = '';
+    (LOCATIONS.zones || []).forEach(z => {
+        if(z.hideFromMap) return; // 지도에 안 그리는 비공개 구역(예: 비밀창고)
+        const r = _mapZoneRect(z);
+        const isPoly = Array.isArray(z.poly) && z.poly.length >= 3;
+        const isHi = hiId && z.id === hiId;
+        const store = _zoneIsStorage(z);
+        let fill = store ? '#e2e8f0' : '#f1f5f9';
+        let stroke = store ? '#64748b' : '#94a3b8';
+        let textCol = '#334155';
+        if(isHi){ fill = '#ff5a1f'; stroke = '#9a3412'; textCol = '#ffffff'; }
+        // 폴리곤(ㄱ자 등)은 바운딩박스 중심이 빈 곳일 수 있어 라벨 위치를 따로 지정 가능
+        const lx = PX(typeof z.lx === 'number' ? z.lx : r.x + r.w/2);
+        const ly = PY(typeof z.ly === 'number' ? z.ly : r.y + r.h/2);
+
+        out += `<g class="zmap-zone" data-zone="${escapeHtml(z.id)}"${editable ? ' style="cursor:move;"' : ''}>`;
+        out += `<title>${escapeHtml(zoneAddress(z) + ' · ' + (z.label||''))}</title>`;
+        if(isPoly){
+            out += `<polygon points="${z.poly.map(p => PX(p[0]) + ',' + PY(p[1])).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${isHi ? 5 : 2.5}" stroke-linejoin="round"/>`;
+        } else {
+            out += `<rect x="${PX(r.x)}" y="${PY(r.y)}" width="${PX(r.w)}" height="${PY(r.h)}" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="${isHi ? 5 : 2.5}"/>`;
+        }
+        if(!compact){
+            const codeTxt = z.code || z.label || '';
+            const baseFs = r.w >= 11 ? 30 : (r.w >= 7.5 ? 26 : 22);
+            // 블록 밖으로 넘치지 않도록 글자 폭(코드길이×0.62) 기준 상한
+            const capFs = (r.w * MAP_VB_W / 100) * 0.86 / Math.max(1, (z.code || '').length * 0.62);
+            const codeFs = Math.round(Math.min(Math.max(baseFs, fs(baseFs, 15)), capFs));
+            out += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="${codeFs}" font-weight="900" fill="${textCol}" style="pointer-events:none;">${escapeHtml(codeTxt)}</text>`;
+        }
+        out += `</g>`;
+
+        if(isHi && !compact){
+            // 인접 구역 박스에 가려지지 않도록 라벨은 루프 끝난 뒤 맨 위(최상단 z-order)에 그린다
+            hiLabel = `<text x="${lx}" y="${Number(PY(r.y + r.h)) + 22}" text-anchor="middle" font-size="${fs(17, 13)}" font-weight="800" fill="#c2410c" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" style="pointer-events:none;">${escapeHtml(z.label || '')}</text>`;
+        }
+        // 폴리곤은 리사이즈 정의가 모호해 이동만 허용 (핸들 없음)
+        if(editable && !isPoly){
+            out += `<rect class="zmap-handle" data-zone="${escapeHtml(z.id)}" x="${Number(PX(r.x + r.w)) - 9}" y="${Number(PY(r.y + r.h)) - 9}" width="18" height="18" rx="4" fill="#ffffff" stroke="#ff5a1f" stroke-width="2.5" style="cursor:nwse-resize;"/>`;
+        }
+    });
+    out += hiLabel;
+
+    return out;
+}
+
+function storeMapSvg(opts){
+    opts = opts || {};
+    return `<svg viewBox="0 0 ${MAP_VB_W} ${MAP_VB_H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;">${_renderStoreMapSvg(opts)}</svg>`;
+}
+
+// ── 선반 정면도(단별 상세) ────────────────────────────────────────────
+// 방침: 칸(slot)당 품목이 적으면(≤6) 품번 칩을 바로 보여주고, 많으면
+// 개수 + 브랜드 구성 요약만 보여준 뒤 탭하면 아래에 카드 목록을 펼친다.
+const SHELF_CHIP_MAX = 6;
+// ── 창고(S1·S2) 랙 배치도 ────────────────────────────────────────────
+// 실측 CAD 도면을 기준으로 눈대중 비율만 맞춘 스키마틱 배치 — 물리적 mm 정밀도 아님.
+// S1(앞쪽창고)의 "6"은 실제로 두 자리(위쪽 벽면 선반 하나 + 오른쪽 벽면 아래쪽 하나)에 걸쳐 있는데,
+// 둘 다 같은 slot "6"이라 어느 쪽을 눌러도 같은 배정 목록이 뜬다(의도된 동작).
+const WAREHOUSE_LAYOUTS = {
+    'storage1': {
+        vb: [340, 380],
+        racks: [
+            ['3', 20, 20, 100, 40], ['4', 120, 20, 100, 40], ['5', 220, 20, 100, 40],
+            ['6', 270, 60, 50, 40],
+            ['7', 270, 100, 50, 77], ['8', 270, 177, 50, 77], ['9', 270, 254, 50, 76],
+            ['2-루프탑', 135, 90, 40, 16], ['2-4단', 135, 106, 40, 16], ['2-3단', 135, 122, 40, 16], ['2-2단', 135, 138, 40, 16], ['2-1단', 135, 154, 40, 16], ['12', 175, 90, 40, 80],
+            ['1-루프탑', 135, 170, 40, 16], ['1-4단', 135, 186, 40, 16], ['1-3단', 135, 202, 40, 16], ['1-2단', 135, 218, 40, 16], ['1-1단', 135, 234, 40, 16], ['11', 175, 170, 40, 80],
+            ['10', 135, 250, 40, 80],
+        ],
+        // 실사용 안 하는 자리 — 클릭 불가, 점선으로만 표시
+        emptyRacks: [[20, 70, 50, 80, '0']],
+        // 문 위치: [x,y,w,h,라벨x,라벨y,라벨텍스트?] — 10번 옆(바닥벽), 기둥 위 카운터로 나가는 문
+        doors: [[185, 315, 35, 15, 202.5, 305], [16, 155, 10, 85, 55, 198, '문(카운터)']],
+        fixtures: [['기둥', 20, 250, 115, 80]],
+    },
+    'storage2': {
+        vb: [420, 340],
+        racks: [
+            ['7', 20, 20, 60, 70],
+            ['6', 110, 20, 80, 55], ['5', 198, 20, 80, 55], ['4', 286, 20, 80, 55],
+            ['1', 110, 135, 80, 55], ['2', 198, 135, 80, 55], ['3', 286, 135, 80, 55],
+            ['8', 40, 140, 60, 45], ['9', 40, 190, 60, 45], ['10', 40, 240, 60, 45], ['11', 40, 290, 60, 45],
+        ],
+        // 문 위치: [x,y,w,h,라벨x,라벨y] — 6↔7 사이(상단 벽), 8↔1 사이
+        doors: [[75, 0, 40, 6, 95, 20], [98, 132, 14, 20, 105, 122]],
+        fixtures: [],
+    },
+};
+
+function _renderWarehouseRackMap(zoneId, layout, opts){
+    const pickMode = !!(opts && opts.pickMode);
+    const targetSlot = opts && opts.targetSlot != null ? String(opts.targetSlot) : null;
+    const [vbw, vbh] = layout.vb;
+    let svg = `<svg viewBox="0 0 ${vbw} ${vbh}" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">`;
+    svg += `<rect x="1.5" y="1.5" width="${vbw - 3}" height="${vbh - 3}" fill="#f8fafc" stroke="#334155" stroke-width="3"/>`;
+    (layout.fixtures || []).forEach(([label, x, y, w, h]) => {
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#e5e7eb" stroke="#94a3b8" stroke-width="2"/>`;
+        svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#94a3b8">${escapeHtml(label)}</text>`;
+    });
+    (layout.doors || []).forEach(([x, y, w, h, lx, ly, label]) => {
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ff5a1f"/>`;
+        if(lx != null) svg += `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="${label ? 10 : 12}" font-weight="800" fill="#c2410c">${escapeHtml(label || '문')}</text>`;
+    });
+    (layout.emptyRacks || []).forEach(([x, y, w, h, label]) => {
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="5 4"/>`;
+        svg += `<text x="${x + w / 2}" y="${y + h / 2}" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="900" fill="#94a3b8">${escapeHtml(label)}</text>`;
+    });
+    let targetPinSvg = '';
+    layout.racks.forEach(([slot, x, y, w, h, label]) => {
+        const dispLabel = label || slot;
+        const n = _zoneAssignedCodes(zoneId, slot).length;
+        const isTarget = targetSlot != null && String(slot) === targetSlot;
+        const fill = isTarget ? '#f3e8ff' : (n > 0 ? '#fff0e9' : '#f1f5f9');
+        const stroke = isTarget ? '#7c3aed' : (n > 0 ? '#ff5a1f' : '#94a3b8');
+        const strokeWidth = isTarget ? 5 : 2;
+        const thin = h < 24;
+        const fs = thin ? 11 : (Math.min(w, h) > 55 ? 20 : 15);
+        const cy = thin ? (y + h / 2) : (n > 0 ? y + h / 2 - 7 : y + h / 2);
+        const onclick = pickMode
+            ? `_bulkPickRackSlot('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`
+            : `_toggleShelfList('${escapeHtml(zoneId)}','${escapeHtml(slot)}', this)`;
+        svg += `<g class="shelf-rack${isTarget ? ' shelf-rack-target' : ''}" data-zone="${escapeHtml(zoneId)}" data-slot="${escapeHtml(slot)}" onclick="${onclick}">`;
+        svg += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
+        svg += `<text x="${x + w / 2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="900" fill="#334155" style="pointer-events:none;">${escapeHtml(dispLabel)}${thin && n>0 ? ` (${n})` : ''}</text>`;
+        if(n > 0 && !thin) svg += `<text x="${x + w / 2}" y="${y + h / 2 + 14}" text-anchor="middle" font-size="11" font-weight="800" fill="#c2410c" style="pointer-events:none;">${n}개</text>`;
+        svg += `</g>`;
+        // 이웃 랙에 가려지지 않도록 핀 배지는 전부 그린 뒤 맨 위에 별도로 그린다
+        if(isTarget){
+            const pinX = x + w / 2, pinY = y;
+            targetPinSvg = `<g style="pointer-events:none;"><circle cx="${pinX}" cy="${pinY}" r="16" fill="#7c3aed" stroke="#ffffff" stroke-width="3"/>`
+                + `<text x="${pinX}" y="${pinY + 1}" text-anchor="middle" dominant-baseline="central" font-size="18">⭐</text></g>`;
+        }
+    });
+    svg += targetPinSvg;
+    svg += `</svg>`;
+    return svg;
+}
+// 품번 하나가 랙 여러 군데(신발 SKU 분산 등)에 놓일 수 있어 항상 배열로 다룬다.
+// 예전 데이터({zoneId,slot} 단일 객체)가 남아있어도 안전하게 배열로 변환해서 반환.
+function _locArr(code){
+    const v = LOCATIONS.assignments ? LOCATIONS.assignments[code] : null;
+    if(!v) return [];
+    return Array.isArray(v) ? v : [v];
+}
+
+function _zoneAssignedCodes(zoneId, slot){
+    const out = [];
+    for(const code in LOCATIONS.assignments){
+        const locs = _locArr(code);
+        const hit = locs.some(a => a.zoneId === zoneId && (slot === undefined || (a.slot || null) === (slot || null)));
+        if(hit) out.push(code);
+    }
+    return out;
+}
+
+function _productByCode(code){ return PRODUCTS.find(p => p.품번 === code); }
+
+function _shelfTierSummary(codes){
+    const items = codes.map(_productByCode).filter(Boolean);
+    const totalQty = items.reduce((s, p) => s + (p.busanTotal || 0), 0);
+    const brandCount = {};
+    items.forEach(p => { const b = p.브랜드 || '기타'; brandCount[b] = (brandCount[b] || 0) + 1; });
+    const topBrands = Object.entries(brandCount).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    return { items, totalQty, topBrands };
+}
+
+function _shelfChip(p){
+    const qty = p.busanTotal || 0;
+    return `<button type="button" class="shelf-chip" onclick="event.stopPropagation(); openDetail(_productByCode('${escapeHtml(p.품번)}'))">`
+        + `<span>${escapeHtml(p.품번)}</span><em>${qty}</em></button>`;
+}
+
+function _shelfTierRow(label, codes, zoneId, slot, isTarget){
+    const { items, topBrands } = _shelfTierSummary(codes);
+    const star = isTarget ? ' <span style="color:#2563eb;">⭐</span>' : '';
+    const targetCls = isTarget ? ' shelf-tier-target' : '';
+    if(items.length === 0){
+        return `<div class="shelf-tier${targetCls}"><div class="shelf-tier-label">${escapeHtml(label)}${star}</div><div class="shelf-tier-body"><span class="shelf-empty">비어 있음</span></div></div>`;
+    }
+    if(items.length <= SHELF_CHIP_MAX){
+        return `<div class="shelf-tier${targetCls}"><div class="shelf-tier-label">${escapeHtml(label)}${star}</div>`
+            + `<div class="shelf-tier-body">${items.map(_shelfChip).join('')}</div></div>`;
+    }
+    const brandTxt = topBrands.map(([b, n]) => `${escapeHtml(b)} ${n}`).join(' · ');
+    return `<div class="shelf-tier shelf-tier-summary${targetCls}" data-slot="${slot != null ? escapeHtml(String(slot)) : ''}" onclick="_toggleShelfList('${escapeHtml(zoneId)}', ${slot ? `'${escapeHtml(slot)}'` : 'null'}, this)">`
+        + `<div class="shelf-tier-label">${escapeHtml(label)}${star}</div>`
+        + `<div class="shelf-tier-body"><div class="shelf-count-row"><span class="shelf-count">${items.length}개 품목</span><span class="shelf-go">탭하면 목록에서 보기</span></div>`
+        + `<div class="shelf-sum">${brandTxt}</div></div></div>`;
+}
+
+// S1/S2처럼 실측 도면은 없지만 칸(slots)이 있는 구역(서랍 1단/2단 등) — 세로 서랍 모양으로 자동 생성
+function _genericSlotLayout(z){
+    const slots = z.slots || [];
+    if(!slots.length) return null;
+    const w = 260, h = 90, gap = 10, margin = 20;
+    const rows = [...slots].reverse(); // 물리적으로 위에 있는 칸(번호가 큰 단)부터 위에서 아래로
+    return {
+        vb: [w + margin * 2, rows.length * (h + gap) - gap + margin * 2],
+        racks: rows.map((s, i) => [s, margin, margin + i * (h + gap), w, h]),
+        fixtures: [],
+    };
+}
+
+function _renderShelfView(zoneId, targetSlot){
+    const host = $("#fpvShelf"); if(!host) return;
+    const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
+    if(!z){ host.innerHTML = ''; return; }
+    const layout = WAREHOUSE_LAYOUTS[zoneId] || _genericSlotLayout(z);
+    if(layout){
+        host.innerHTML = `<div class="shelf-rackmap">${_renderWarehouseRackMap(zoneId, layout, {targetSlot})}</div><div id="fpvItemList" class="mt-3"></div>`;
+        return;
+    }
+    const rows = _shelfTierRow('전체', _zoneAssignedCodes(zoneId), zoneId, null, false);
+    host.innerHTML = `<div class="shelf-view">${rows}</div><div id="fpvItemList" class="mt-3"></div>`;
+}
+
+window._toggleShelfList = (zoneId, slot, el) => {
+    const listHost = $("#fpvItemList"); if(!listHost) return;
+    const isOpen = el.classList.contains('shelf-tier-open');
+    // 예전 단(tier) 목록형과 새 랙 배치도형 둘 다 같은 토글을 쓰므로 클래스만 기준으로 초기화
+    $$('.shelf-tier-open').forEach(t => t.classList.remove('shelf-tier-open'));
+    if(isOpen){ listHost.innerHTML = ''; return; }
+    el.classList.add('shelf-tier-open');
+    const codes = _zoneAssignedCodes(zoneId, slot);
+    const items = codes.map(_productByCode).filter(Boolean);
+    listHost.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'shelf-item-grid';
+    items.forEach(p => grid.appendChild(card(p)));
+    listHost.appendChild(grid);
+    listHost.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+// 컨테이너 실제 폭을 재서 글자 크기를 맞춘 뒤 지도를 심는다 (모달이 보이는 상태여야 폭이 잡힘)
+function paintMap(hostId, opts){
+    const host = $("#" + hostId); if(!host) return;
+    const w = Math.round(host.getBoundingClientRect().width) || MAP_VB_W;
+    host.innerHTML = storeMapSvg({ ...(opts || {}), hostW: w });
+    host.dataset.mapOpts = JSON.stringify(opts || {});
+    return host.querySelector("svg");
+}
+
+// 화면 회전·창 크기 변경 시 열려 있는 지도만 다시 그려 글자 크기를 재조정
+window.addEventListener("resize", () => {
+    ["zmMap", "fpvMap", "bulkLocMap"].forEach(id => {
+        const host = $("#" + id);
+        if(!host || !host.dataset.mapOpts || host.offsetParent === null) return;
+        if(id === "zmMap") renderZonePins(); else paintMap(id, JSON.parse(host.dataset.mapOpts));
+    });
+});
+
+// ── 구역 관리(ADMIN): 블록 드래그 이동 / 모서리 리사이즈 / 클릭 편집 ──────
+let _zmDrag = null;
+
+function _zmSvgPct(svg, clientX, clientY){
+    const b = svg.getBoundingClientRect();
+    const vbAR = MAP_VB_W / MAP_VB_H, boxAR = b.width / b.height;
+    let dw = b.width, dh = b.height, ox = 0, oy = 0;
+    if(boxAR > vbAR){ dw = b.height * vbAR; ox = (b.width - dw) / 2; }
+    else { dh = b.width / vbAR; oy = (b.height - dh) / 2; }
+    return { x: (clientX - b.left - ox) / dw * 100, y: (clientY - b.top - oy) / dh * 100 };
+}
+
+function renderZonePins(){
+    const host = $("#zmMap"); if(!host) return;
+    const svgEl = paintMap("zmMap", { editable: true });
+    const svg = svgEl; if(!svg) return;
+    svg.style.touchAction = 'none';
+
+    svg.addEventListener('pointerdown', (e) => {
+        const handle = e.target.closest('.zmap-handle');
+        const zoneG = e.target.closest('.zmap-zone');
+        if(!handle && !zoneG){
+            if(_zmAddMode) _zmAddZoneAt(_zmSvgPct(svg, e.clientX, e.clientY));
+            return;
+        }
+        const id = (handle || zoneG).dataset.zone;
+        const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
+        _zmDrag = { id, mode: handle ? 'resize' : 'move', start: _zmSvgPct(svg, e.clientX, e.clientY), orig: _mapZoneRect(z), origPoly: Array.isArray(z.poly) ? z.poly.map(p => [p[0], p[1]]) : null, moved: false };
+        try { svg.setPointerCapture(e.pointerId); } catch(_){}
+        e.preventDefault();
+    });
+
+    svg.addEventListener('pointermove', (e) => {
+        if(!_zmDrag) return;
+        const p = _zmSvgPct(svg, e.clientX, e.clientY);
+        const dx = p.x - _zmDrag.start.x, dy = p.y - _zmDrag.start.y;
+        if(Math.abs(dx) > 0.4 || Math.abs(dy) > 0.4) _zmDrag.moved = true;
+        const z = (LOCATIONS.zones||[]).find(zz => zz.id === _zmDrag.id); if(!z) return;
+        const o = _zmDrag.orig, snap = v => Math.round(v * 4) / 4;
+        if(_zmDrag.mode === 'move'){
+            const nx = snap(Math.min(99 - o.w, Math.max(0, o.x + dx)));
+            const ny = snap(Math.min(99 - o.h, Math.max(0, o.y + dy)));
+            if(_zmDrag.origPoly) z.poly = _zmDrag.origPoly.map(p => [p[0] + (nx - o.x), p[1] + (ny - o.y)]);
+            if(typeof z.lx === 'number'){ z.lx += (nx - z.x); z.ly += (ny - z.y); }
+            z.x = nx; z.y = ny;
+        } else {
+            z.w = snap(Math.min(50, Math.max(3, o.w + dx)));
+            z.h = snap(Math.min(50, Math.max(4, o.h + dy)));
+        }
+        svg.innerHTML = _renderStoreMapSvg({ editable: true, hostW: Math.round(svg.getBoundingClientRect().width) });
+    });
+
+    const endDrag = (e) => {
+        if(!_zmDrag) return;
+        const d = _zmDrag; _zmDrag = null;
+        try { svg.releasePointerCapture(e.pointerId); } catch(_){}
+        if(d.moved) _zmPersistRect(d.id); else _zmEditZone(d.id);
+    };
+    svg.addEventListener('pointerup', endDrag);
+    svg.addEventListener('pointercancel', endDrag);
+}
+
+function _zmPersistRect(id){
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
+    const r = { x: z.x, y: z.y, w: z.w, h: z.h, poly: z.poly, lx: z.lx, ly: z.ly };
+    saveLocations(server => ({
+        zones: server.zones.map(zz => zz.id === id ? { ...zz, x: r.x, y: r.y, w: r.w, h: r.h, ...(r.poly ? { poly: r.poly } : {}), ...(typeof r.lx === 'number' ? { lx: r.lx, ly: r.ly } : {}) } : zz),
+        assignments: server.assignments
+    })).then(ok => {
+        if(ok){ renderZonePins(); showToast('구역 배치 저장됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); }
+        else renderZonePins();
+    });
+}
+
+function _zmEditZone(id){
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === id); if(!z) return;
+    const cur = `${z.code || ''} | ${z.label || ''} | ${(z.slots||[]).join(', ')}`;
+    const input = prompt(`구역 편집 — ${z.label}\n\n형식:  코드 | 이름 | 칸목록(쉼표)\n예:  D3 | 메인존 스툴 3 | 1단 좌, 1단 우, 2단 좌, 2단 우\n\n· 삭제하려면 DELETE 만 입력\n· 그대로 두려면 취소`, cur);
+    if(input === null) return;
+    const t = String(input).trim();
+
+    if(t.toUpperCase() === 'DELETE'){
+        if(!confirm(`"${z.label}" 구역을 삭제할까요? 배정된 상품의 위치 정보도 사라집니다.`)) return;
+        saveLocations(server => {
+            const zones = server.zones.filter(zz => zz.id !== z.id);
+            const assignments = { ...server.assignments };
+            for(const code in assignments){
+                const arr = Array.isArray(assignments[code]) ? assignments[code] : [assignments[code]];
+                const kept = arr.filter(a => a.zoneId !== z.id);
+                if(kept.length) assignments[code] = kept; else delete assignments[code];
+            }
+            return { zones, assignments };
+        }).then(ok => { if(ok){ renderZonePins(); showToast('구역 삭제됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+        return;
+    }
+
+    const parts = t.split('|');
+    const code = (parts[0] || '').trim();
+    const label = (parts[1] || '').trim() || z.label;
+    const slots = (parts[2] || '').split(',').map(s => s.trim()).filter(Boolean);
+    saveLocations(server => ({
+        zones: server.zones.map(zz => zz.id === z.id ? { ...zz, code, label, slots } : zz),
+        assignments: server.assignments
+    })).then(ok => { if(ok){ renderZonePins(); showToast('구역 수정됨'); if(window.CURRENT_PRODUCT && window._locRenderFn) window._locRenderFn(); } });
+}
+
+function _zmAddZoneAt(p){
+    const input = prompt('새 구역 추가\n\n형식:  코드 | 이름 | 칸목록(쉼표)\n예:  S1-3 | 앞쪽창고 3번랙 | 1단, 2단, 3단', '');
+    if(input === null) return;
+    const parts = String(input).split('|');
+    const code = (parts[0] || '').trim();
+    const label = (parts[1] || '').trim() || code;
+    if(!code && !label) return;
+    const slots = (parts[2] || '').split(',').map(s => s.trim()).filter(Boolean);
+    const snap = v => Math.round(v * 4) / 4;
+    const newZone = {
+        id: _uniqueZoneId(label || code),
+        code, label,
+        group: /^S/i.test(code) ? '창고' : '매장',
+        x: snap(Math.min(91, Math.max(0, p.x - 4))),
+        y: snap(Math.min(89, Math.max(0, p.y - 5))),
+        w: 8, h: 10, slots
+    };
+    saveLocations(server => ({ zones: [...server.zones, newZone], assignments: server.assignments }))
+        .then(ok => {
+            if(ok){ renderZonePins(); showToast('구역 추가됨: ' + (label || code)); }
+            _zmAddMode = false;
+            $("#zmAddModeHint").classList.add("hidden");
+            $("#zmAddModeBtn").style.background = '';
+        });
+}
+
+window.openZoneManager = () => {
+    _zmAddMode = false; $("#zmAddModeHint").classList.add("hidden"); $("#zmAddModeBtn").style.background = '';
+    $("#zoneManagerModal").classList.remove("hidden");
+    renderZonePins();
+};
+$("#openZoneManager").onclick = window.openZoneManager;
+$("#closeZoneManager").onclick = () => $("#zoneManagerModal").classList.add("hidden");
+$("#zmAddModeBtn").onclick = () => {
+    _zmAddMode = !_zmAddMode;
+    $("#zmAddModeHint").classList.toggle("hidden", !_zmAddMode);
+    $("#zmAddModeBtn").style.background = _zmAddMode ? '#fff0e9' : '';
+};
+// 구역 추가는 renderZonePins() 안의 SVG pointerdown 핸들러가 처리한다
+// (예전 도면 이미지 위 클릭 방식 #zmImgWrap 은 SVG 도식 지도로 대체되어 제거됨)
+// ── 위치찾기: 도면 크게 보기(직원용, 하이라이트 핀) ──────────────────────
+window.openFloorPlanView = (zoneId, extraLabel) => {
+    if(typeof BULK_LOC_MODE !== "undefined" && BULK_LOC_MODE) return;
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
+    if(!z) return;
+    const addr = zoneAddress(z, extraLabel);
+    $("#fpvTitle").innerHTML = `<span style="display:inline-block;background:#ff5a1f;color:#fff;font-size:20px;font-weight:900;padding:4px 12px;border-radius:9px;letter-spacing:-0.4px;">${escapeHtml(addr)}</span>`
+        + `<span style="margin-left:10px;font-size:14px;font-weight:800;color:#64748b;">${escapeHtml(z.label || '')}</span>`;
+    $("#floorPlanViewModal").classList.remove("hidden");
+    paintMap("fpvMap", { highlightZoneId: zoneId });
+    _renderShelfView(zoneId, extraLabel);
+};
+$("#closeFloorPlanView").onclick = () => $("#floorPlanViewModal").classList.add("hidden");
+
+// ── 여러 상품 위치 일괄 지정 (사진앨범식 다중선택) ────────────────────────
+let BULK_LOC_MODE = false;
+let BULK_LOC_SEL = new Set();
+let _bulkPickZoneId = null;
+
+function _bulkUpdateBar(){
+    const bar = $("#bulkBar"); if(!bar) return;
+    // 인라인 display 로만 제어 — .hidden 클래스는 인라인 스타일에 밀려 무시됨
+    bar.classList.toggle("hidden", !BULK_LOC_MODE);
+    bar.style.display = BULK_LOC_MODE ? 'flex' : 'none';
+    const cnt = $("#bulkBarCount");
+    if(cnt) cnt.textContent = `${BULK_LOC_SEL.size}개 선택`;
+    // 고른 게 없으면 '위치 지정'/'DP로 표시'는 아예 감춘다 (0개일 때 누를 일이 없음)
+    const assign = $("#bulkBarAssign");
+    if(assign) assign.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
+    const moveBtn2 = $("#bulkBarMove");
+    if(moveBtn2) moveBtn2.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
+    const dpBtn = $("#bulkBarDp");
+    if(dpBtn) dpBtn.style.display = BULK_LOC_SEL.size === 0 ? 'none' : '';
+}
+
+// 카드 DOM에 선택 상태만 반영 (전체 재렌더 없이 즉각 반응)
+function _bulkPaintCard(el, on){
+    el.dataset.bulkSel = on ? "1" : "0";
+    el.style.outline = on ? '3px solid #ff5a1f' : '';
+    el.style.outlineOffset = on ? '-3px' : '';
+    const mark = el.querySelector('.bulk-check');
+    if(mark){
+        mark.style.background = on ? '#ff5a1f' : 'rgba(255,255,255,.9)';
+        mark.style.borderColor = on ? '#ff5a1f' : '#cbd5e1';
+        mark.textContent = on ? '✓' : '';
+    }
+}
+
+window.enterBulkLocMode = () => {
+    if(!checkAdminSession()) { showToast('ADMIN 로그인 후 사용하세요.', null, 'error'); return; }
+    BULK_LOC_MODE = true;
+    BULK_LOC_SEL.clear();
+    _bulkUpdateBar();
+    render();
+    showToast('상품 카드를 눌러 선택하세요');
+};
+
+window.exitBulkLocMode = () => {
+    BULK_LOC_MODE = false;
+    BULK_LOC_SEL.clear();
+    _bulkUpdateBar();
+    render();
+};
+
+// 현재 화면(필터 적용)에 보이는 카드 전체 선택 / 전체 해제
+function _bulkToggleAll(){
+    const cards = [...document.querySelectorAll('article.card[data-code]')];
+    const allOn = cards.length > 0 && cards.every(el => BULK_LOC_SEL.has(el.dataset.code));
+    cards.forEach(el => {
+        if(allOn) BULK_LOC_SEL.delete(el.dataset.code);
+        else BULK_LOC_SEL.add(el.dataset.code);
+        _bulkPaintCard(el, !allOn);
+    });
+    _bulkUpdateBar();
+}
+
+// ── 일괄 지정 모달 ──────────────────────────────────────────────────────
+function _bulkRenderPickMap(){
+    const host = $("#bulkLocMap"); if(!host) return;
+    paintMap("bulkLocMap", { highlightZoneId: _bulkPickZoneId });
+    const svg = host.querySelector('svg');
+    if(svg){
+        svg.style.cursor = 'pointer';
+        svg.addEventListener('click', (e) => {
+            const g = e.target.closest('.zmap-zone'); if(!g) return;
+            _bulkPickZoneId = g.dataset.zone;
+            _bulkRenderPickMap();
+            _bulkSyncPick();
+        });
+    }
+    const hiddenHost = $("#bulkLocHiddenZones");
+    if(hiddenHost){
+        const hiddenZones = (LOCATIONS.zones || []).filter(z => z.hideFromMap);
+        hiddenHost.innerHTML = hiddenZones.map(z => {
+            const active = _bulkPickZoneId === z.id;
+            return `<button type="button" class="chip !text-[11px] ${active ? '!bg-orange-500 !text-white !border-orange-500' : '!bg-gray-50 !text-gray-600 !border-gray-300'}" data-hidden-zone="${escapeHtml(z.id)}">🔒 ${escapeHtml(z.label || z.code || z.id)}</button>`;
+        }).join('');
+        hiddenHost.querySelectorAll('[data-hidden-zone]').forEach(btn => {
+            btn.onclick = () => {
+                _bulkPickZoneId = btn.dataset.hiddenZone;
+                _bulkRenderPickMap();
+                _bulkSyncPick();
+            };
+        });
+    }
+}
+
+function _bulkSyncPick(){
+    const z = (LOCATIONS.zones||[]).find(zz => zz.id === _bulkPickZoneId);
+    const pick = $("#bulkLocPick"), slotSel = $("#bulkLocSlot"), rackHost = $("#bulkLocRackMap");
+    if(!pick || !slotSel) return;
+    if(!z){
+        pick.textContent = '구역 미선택'; slotSel.classList.add('hidden'); slotSel.innerHTML = '';
+        if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
+        return;
+    }
+    pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
+    const slots = z.slots || [];
+    const layout = WAREHOUSE_LAYOUTS[z.id] || _genericSlotLayout(z);
+    if(layout && rackHost){
+        slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+        slotSel.classList.add('hidden');
+        rackHost.classList.remove('hidden');
+        rackHost.innerHTML = `<div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">칸을 클릭해 선택하세요</span><button type="button" class="text-xs underline" onclick="_bulkClearRackPick()">칸 미지정으로</button></div><div class="shelf-rackmap" style="max-width:340px;">${_renderWarehouseRackMap(z.id, layout, {pickMode:true})}</div>`;
+        _bulkHighlightRackPick(slotSel.value);
+    } else {
+        slotSel.innerHTML = ''; slotSel.classList.add('hidden');
+        if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
+    }
+}
+
+function _bulkHighlightRackPick(slot){
+    const rackHost = $("#bulkLocRackMap"); if(!rackHost) return;
+    rackHost.querySelectorAll('.shelf-rack').forEach(g => g.classList.remove('shelf-rack-picked'));
+    if(!slot) return;
+    const g = rackHost.querySelector(`.shelf-rack[data-slot="${CSS.escape(slot)}"]`);
+    if(g) g.classList.add('shelf-rack-picked');
+}
+
+window._bulkPickRackSlot = (zoneId, slot, el) => {
+    const sv = $("#bulkLocSlot");
+    if(sv) sv.value = slot;
+    _bulkHighlightRackPick(slot);
+    // 칸까지 골랐으면 상단 표시 텍스트에도 반영 (그동안 구역 이름까지만 보이고 칸은 안 보이던 버그)
+    const pick = $("#bulkLocPick");
+    const z = (LOCATIONS.zones || []).find(zz => zz.id === zoneId);
+    if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''} · ${slot}`;
+};
+
+window._bulkClearRackPick = () => {
+    const sv = $("#bulkLocSlot");
+    if(sv) sv.value = '';
+    _bulkHighlightRackPick(null);
+    const pick = $("#bulkLocPick");
+    const z = (LOCATIONS.zones || []).find(zz => zz.id === _bulkPickZoneId);
+    if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
+};
+
+let _bulkSingleMode = false;
+// null이면 새 위치 추가, 숫자면 그 인덱스의 기존 위치를 다른 랙으로 이동(교체)
+let _bulkEditIndex = null;
+// 여러개 선택 모드 전용: 'add'=기존 위치 유지하고 새 위치 추가(중복지정), 'move'=기존 위치 지우고 이 위치로 교체
+// (1개 선택일 땐 editIndex 유무로 이미 지정/이동이 구분되므로 이 값은 안 씀)
+let _bulkAssignMode = 'add';
+
+function _bulkSaveLabel(){
+    if(!_bulkSingleMode) return _bulkAssignMode === 'move' ? '선택한 상품 위치로 이동' : '선택한 상품에 지정';
+    return _bulkEditIndex != null ? '이 위치로 이동' : '+ 이 위치 추가';
+}
+
+// 지정/이동 선택은 이제 하단바 버튼(진입 시점)에서 이미 끝난 상태라, 모달 안쪽은
+// 클릭 토글이 아니라 "지금 어느 모드인지" 보여만 주는 읽기전용 배지로 표시한다.
+function _bulkSyncModeButtons(){
+    const row = $("#bulkLocModeRow");
+    if(row) row.classList.toggle('hidden', _bulkSingleMode); // 1개 선택 모드에선 이미 add/move가 자동 결정되므로 숨김
+    const label = $("#bulkLocModeLabel");
+    const title = $("#bulkLocTitle");
+    const isMove = _bulkAssignMode === 'move';
+    if(label){
+        label.dataset.active = isMove ? '0' : '1'; // 이동은 파란색 계열로 구분
+        label.style.background = isMove ? '#0891b2' : '';
+        label.style.color = isMove ? '#fff' : '';
+        label.style.borderColor = isMove ? '#0891b2' : '';
+        label.innerHTML = isMove
+            ? '🔄 위치이동 중 <span class="font-normal opacity-80">(기존 위치 지우고 교체)</span>'
+            : '📍 위치지정 중 <span class="font-normal opacity-70">(기존 위치 유지+추가)</span>';
+    }
+    if(title) title.textContent = isMove ? '🔄 위치 일괄 이동' : '📍 위치 일괄 지정';
+    const saveBtn = $("#bulkLocSave");
+    if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
+}
+
+// presetMode: 'add'(기본) | 'move' — 하단바에서 어느 버튼을 눌러 들어왔는지로 결정됨(1개 선택 모드에선 무시)
+window.openBulkLocModal = (presetZoneId, presetMode) => {
+    if(BULK_LOC_SEL.size === 0) return;
+    if(!checkPat()) return;
+    _bulkPickZoneId = presetZoneId || null;
+    if(!_bulkSingleMode) _bulkAssignMode = (presetMode === 'move') ? 'move' : 'add';
+    $("#bulkLocCount").textContent = `선택한 상품 ${BULK_LOC_SEL.size}개`;
+    _bulkRenderPickMap();
+    _bulkSyncPick();
+    _bulkSyncModeButtons();
+    $("#bulkLocModal").classList.remove("hidden");
+};
+
+// 상품 상세에서 상품 1개만 바로 지도로 위치 지정 — 여러개 선택 모드를 거치지 않는다.
+// editIndex 없으면 새 위치 추가, 있으면 그 인덱스의 기존 위치를 이동(교체)
+window.openSingleLocModal = (code, editIndex) => {
+    if(!checkPat()) return;
+    BULK_LOC_SEL = new Set([code]);
+    _bulkSingleMode = true;
+    _bulkEditIndex = (editIndex !== undefined && editIndex !== null) ? editIndex : null;
+    const locs = _locArr(code);
+    const asn = _bulkEditIndex != null ? locs[_bulkEditIndex] : null;
+    window.openBulkLocModal(asn ? asn.zoneId : null);
+    if(asn && asn.slot){
+        requestAnimationFrame(() => {
+            const sv = $("#bulkLocSlot");
+            if(sv) sv.value = asn.slot;
+            _bulkHighlightRackPick(asn.slot);
+            const pick = $("#bulkLocPick");
+            const z = (LOCATIONS.zones || []).find(zz => zz.id === asn.zoneId);
+            if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''} · ${asn.slot}`;
+        });
+    }
+};
+
+// 랙/서랍 없이 매장에 그냥 진열중인 상품(주로 1개짜리 용품) — 자리 없이 "DP 진열중"만 표시.
+// 지도/랙 선택 없이 바로 저장되는 원클릭 액션.
+window.markAsDP = async (code) => {
+    if(!checkPat()) return;
+    const ok = await saveLocations(server => {
+        const assignments = { ...server.assignments };
+        const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
+        if(!arr.some(a => a.dp)) arr.push({ dp: true });
+        assignments[code] = arr;
+        return { zones: server.zones, assignments };
+    });
+    if(ok){
+        showToast('✓ DP 진열중으로 표시했습니다');
+        _refreshDpFilterCounts();
+        if(window._locRenderFn) window._locRenderFn();
+        render();
+    }
+};
+
+// 여러개 선택 모드에서 한번에 "DP 진열중"으로 표시 — 각 상품의 기존 위치는 그대로 두고 DP만 추가
+window.markMultipleAsDP = async () => {
+    const codes = [...BULK_LOC_SEL];
+    if(codes.length === 0) return;
+    if(!checkPat()) return;
+    const btn = $("#bulkBarDp");
+    if(btn) btn.disabled = true;
+    const ok = await saveLocations(server => {
+        const assignments = { ...server.assignments };
+        codes.forEach(code => {
+            const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
+            if(!arr.some(a => a.dp)) arr.push({ dp: true });
+            assignments[code] = arr;
+        });
+        return { zones: server.zones, assignments };
+    });
+    if(btn) btn.disabled = false;
+    if(ok){
+        showToast(`✓ ${codes.length}개 상품을 DP 진열중으로 표시했습니다`);
+        _refreshDpFilterCounts();
+        window.exitBulkLocMode();
+    }
+};
+
+// mode: 'assign' | 'clear'
+async function _bulkApply(mode){
+    const codes = [...BULK_LOC_SEL];
+    if(codes.length === 0) return;
+
+    let zoneId = null, slot = null;
+    if(mode === 'assign'){
+        if(!_bulkPickZoneId){ alert('지도에서 구역을 먼저 선택해주세요.'); return; }
+        zoneId = _bulkPickZoneId;
+        const sv = $("#bulkLocSlot");
+        slot = (sv && sv.value) ? sv.value : null;
+    } else {
+        const msg = _bulkSingleMode ? '이 상품의 위치를 모두 해제할까요?' : `선택한 ${codes.length}개 상품의 위치를 모두 해제할까요?`;
+        if(!confirm(msg)) return;
+    }
+
+    const saveBtn = $("#bulkLocSave"), clearBtn = $("#bulkLocClear");
+    [saveBtn, clearBtn].forEach(b => { if(b) b.disabled = true; });
+    if(saveBtn) saveBtn.textContent = '저장 중…';
+
+    const editIndex = _bulkEditIndex;
+    const ok = await saveLocations(server => {
+        const assignments = { ...server.assignments };
+        codes.forEach(code => {
+            if(mode === 'assign'){
+                const newLoc = slot ? { zoneId, slot } : { zoneId };
+                const arr = (Array.isArray(assignments[code]) ? assignments[code] : (assignments[code] ? [assignments[code]] : [])).slice();
+                if(_bulkSingleMode && editIndex != null && arr[editIndex]){
+                    arr[editIndex] = newLoc; // 1개 선택 + 특정 위치 수정: 그 자리만 교체
+                } else if(!_bulkSingleMode && _bulkAssignMode === 'move'){
+                    // 여러개 선택 + 위치이동: 실제 랙 위치(zoneId 있는 항목)는 전부 지우고 새 위치 하나로 교체.
+                    // DP 진열 표시({dp:true}, zoneId 없음)는 위치가 아니라 별개 상태라 건드리지 않고 남겨둠.
+                    const kept = arr.filter(a => !a.zoneId);
+                    kept.push(newLoc);
+                    assignments[code] = kept;
+                    return; // 아래 공통 assignments[code]=arr 대입을 건너뜀(이미 위에서 지정함)
+                } else {
+                    const dup = arr.some(a => a.zoneId === newLoc.zoneId && (a.slot || null) === (newLoc.slot || null));
+                    if(!dup) arr.push(newLoc); // 추가: 이미 같은 자리가 없으면 더함
+                }
+                assignments[code] = arr;
+            } else {
+                delete assignments[code]; // 전체 해제
+            }
+        });
+        return { zones: server.zones, assignments };
+    });
+
+    [saveBtn, clearBtn].forEach(b => { if(b) b.disabled = false; });
+    if(saveBtn) saveBtn.textContent = _bulkSaveLabel();
+
+    if(ok){
+        $("#bulkLocModal").classList.add("hidden");
+        const z = (LOCATIONS.zones||[]).find(zz => zz.id === zoneId);
+        const wasSingle = _bulkSingleMode;
+        let msg;
+        if(mode !== 'assign'){
+            msg = `✓ 위치를 해제했습니다`;
+        } else if(wasSingle){
+            msg = editIndex != null
+                ? `✓ ${zoneAddress(z, slot)}으로 이동했습니다`
+                : `✓ ${zoneAddress(z, slot)} 에 추가했습니다`;
+        } else if(_bulkAssignMode === 'move'){
+            msg = `✓ ${codes.length}개 상품 위치를 ${zoneAddress(z, slot)}(으)로 이동했습니다`;
+        } else {
+            msg = `✓ ${codes.length}개 상품을 ${zoneAddress(z, slot)} 에 지정했습니다`;
+        }
+        showToast(msg);
+        _refreshDpFilterCounts();
+        if(wasSingle){
+            _bulkSingleMode = false;
+            _bulkEditIndex = null;
+            BULK_LOC_SEL.clear();
+            if(window._locRenderFn) window._locRenderFn();
+            render();
+        } else {
+            _bulkAssignMode = 'add';
+            window.exitBulkLocMode();
+        }
+    }
+}
+
+$("#closeBulkLoc").onclick = () => {
+    $("#bulkLocModal").classList.add("hidden");
+    _bulkAssignMode = 'add';
+    if(_bulkSingleMode){
+        _bulkSingleMode = false;
+        _bulkEditIndex = null;
+        BULK_LOC_SEL.clear();
+    }
+};
+$("#bulkLocSave").onclick = () => _bulkApply('assign');
+$("#bulkLocClear").onclick = () => _bulkApply('clear');
+$("#bulkBarAssign").onclick = () => window.openBulkLocModal(null, 'add');
+$("#bulkBarMove").onclick = () => window.openBulkLocModal(null, 'move');
+$("#bulkBarDp").onclick = () => window.markMultipleAsDP();
+$("#bulkBarExit").onclick = () => window.exitBulkLocMode();
+$("#bulkBarAll").onclick = () => _bulkToggleAll();
+
+$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ setAdminSession(); applyDefaultPatIfNeeded($("#pwd").value); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
+
+window.renderSalesHistoryAdmin = () => {
+    const count = Object.keys(SALES_HISTORY.items || {}).length;
+    const countEl = document.getElementById("shCount");
+    if(countEl) countEl.innerText = `누적 ${count}개`;
+
+    const clearBtn = document.getElementById("shClearBtn");
+    if(clearBtn) {
+        clearBtn.onclick = async (e) => {
+            e.stopPropagation();
+            if(!checkPat()) return;
+            if(!confirm("⚠️ 경고: 저장된 모든 판매 기록(DB)을 완전히 삭제하시겠습니까?\n꼬여버린 데이터를 날리고 엑셀을 다시 올릴 때만 사용하세요.")) return;
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
+                let sha = null;
+                try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                const emptyData = { meta: { name: "초기화됨", lastUpdated: new Date().toISOString() }, items: {} };
+                const body = { message:"clear sales history DB", content: utf8ToB64(JSON.stringify(emptyData, null, 2)), branch: GH.branch };
+                if(sha) body.sha = sha;
+                await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY);
+                _recomputeStock(); render(); window.renderSalesHistoryAdmin();
+                alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
+            } catch(err) { alert("초기화 실패: " + err.message); }
+        };
+    }
+
+    const trigger = document.getElementById("shUploadTrigger");
+    const fileInput = document.getElementById("shFile");
+    if(trigger && fileInput) {
+        trigger.onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            if(!checkPat()) { e.target.value = ""; return; }
+            const f = e.target.files[0]; if(!f) return;
+            const periodName = prompt("이 판매 데이터의 기간/이름을 적어주세요.\n예) 4/17~5/9 전체점 실적", f.name);
+            if(!periodName) { fileInput.value = ""; return; }
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
+                let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && (r.includes('거래명세서일') || r.includes('일자') || r.includes('판매일')));
+                if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
+
+                const headers = rows[headerRowIdx].map(h => String(h||"").trim());
+                let codeIdx = headers.findIndex(h => h === '품번' || h.includes('상품코드') || h.includes('바코드'));
+                let qtyIdx = headers.findIndex(h => h === '수량' || h.includes('판매수량'));
+
+                let revIdx = headers.findIndex(h => h === '판매금액계' || h.includes('판매금액계'));
+                let dateIdx = headers.findIndex(h => h.includes('거래명세서일') || h.includes('일자') || h.includes('판매일'));
+                let sizeIdx = headers.findIndex(h => h.includes('규격') || h.includes('사이즈') || h.includes('옵션'));
+                let managerIdx = headers.findIndex(h => h.includes('담당자') || h.includes('판매원') || h.includes('사원') || h.includes('작업자'));
+                let typeIdx = headers.findIndex(h => h.includes('수주구분') || h.includes('판매구분'));
+                let whIdx = headers.findIndex(h => h === '창고' || h.includes('창고'));
+
+                let nameIdx = headers.findIndex(h => h === '품명');
+                let brandIdx = headers.findIndex(h => h === '브랜드');
+                let catIdx2 = headers.findIndex(h => h === '카테고리2' || h.includes('카테고리'));
+                let genderIdx = headers.findIndex(h => h === '성별');
+                let invoiceIdx = headers.findIndex(h => h.includes('거래명세서번호'));
+
+                // 필수 컬럼(품번·일자·수량)을 못 찾으면 중단 — 못 찾으면 인덱스가 -1이 되어
+                // 엉뚱한 셀(엑셀 열 좌표 'AI','G' 등)이 품번/날짜로 저장되는 오염이 발생함 (2026-07 실제 사례)
+                if(codeIdx < 0 || dateIdx < 0 || qtyIdx < 0) {
+                    const _missing = [codeIdx<0?'품번':null, dateIdx<0?'일자':null, qtyIdx<0?'수량':null].filter(Boolean).join(', ');
+                    alert(`❌ 판매 엑셀에서 필수 컬럼을 찾지 못했습니다: ${_missing}\n\n인식된 헤더: ${headers.filter(Boolean).slice(0,15).join(' | ')}\n\n올바른 판매 엑셀인지 확인해주세요.`);
+                    e.target.value = ""; return;
+                }
+                let sessionData = {};
+
+                let sessionRevData = {};
+
+                let sessionCodeMeta = {};
+                let _skippedBad = 0;
+                // 날짜 형식 검증 (YYYY-MM-DD 또는 YYYY/MM/DD 등 숫자 기반만 허용)
+                const _isValidDate = (s) => /\d{4}[-/.]\d{1,2}[-/.]\d{1,2}/.test(s) || /^\d{8}$/.test(s);
+                // 원본 ERP 엑셀에 완전히 동일한 거래 행이 중복으로 찍혀 나오는 경우가 있어(2026-07 실사례),
+                // 같은 (거래명세서번호+품번+규격+수량) 조합은 한 번만 반영
+                const _seenLines = new Set();
+                for(let i=headerRowIdx+1; i<rows.length; i++) {
+                    const r = rows[i];
+                    const code = String(r[codeIdx]||"").trim();
+
+                    if (!sessionCodeMeta[code]) {
+                        sessionCodeMeta[code] = {
+                            브랜드: brandIdx > -1 ? String(r[brandIdx]||"").trim() : "",
+                            카테고리: catIdx2 > -1 ? String(r[catIdx2]||"").trim() : "",
+                            성별: genderIdx > -1 ? String(r[genderIdx]||"").trim() : "",
+                            품명: nameIdx > -1 ? String(r[nameIdx]||"").trim() : "",
+                        };
+                    }
+                    const date = String(r[dateIdx]||"").trim();
+                    const qty = Number(String(r[qtyIdx]||"").replace(/,/g,'')) || 0;
+
+                    const revAmt = revIdx > -1 ? (Number(String(r[revIdx]||"").replace(/,/g,'')) || 0) : 0;
+
+                    if(!code || !date) continue;
+                    // 날짜가 날짜 형식이 아니거나 수량이 0이면 저장하지 않음 (반품 등 음수는 순매출 계산을 위해 유지)
+                    if(!_isValidDate(date) || qty === 0) { _skippedBad++; continue; }
+                    if(invoiceIdx > -1) {
+                        const lineKey = String(r[invoiceIdx]||"") + "|" + code + "|" + String(r[sizeIdx>-1?sizeIdx:-1]||"") + "|" + qty;
+                        if(_seenLines.has(lineKey)) continue;
+                        _seenLines.add(lineKey);
+                    }
+
+                    const size = sizeIdx > -1 ? String(r[sizeIdx]||"").trim() : "알수없음";
+                    const typeStr = typeIdx > -1 ? String(r[typeIdx]||"").trim() : "";
+                    const rawManager = managerIdx > -1 ? String(r[managerIdx]||"").replace(/\s/g, '') : "김종훈";
+                    const whStr = whIdx > -1 ? String(r[whIdx]||"").trim() : "";
+
+                    // 창고(매장) 컬럼이 있으면 이걸로 지점 판정 (담당자명은 매장 소속과 무관할 수 있어 부정확)
+                    let locationGroup = "본사물류";
+                    if(whStr) {
+                        if(whStr.includes("부산")) locationGroup = "부산(김종훈)";
+                        else if(whStr.includes("신사")) locationGroup = "신사(승호강)";
+                        else locationGroup = "본사물류";
+                    } else if(typeStr === "매장" || typeStr.includes("오프라인")) {
+                        if(rawManager.includes("김종훈") || rawManager.includes("부산")) locationGroup = "부산(김종훈)";
+                        else if(rawManager.includes("승호") || rawManager.includes("강") || rawManager.includes("신사")) locationGroup = "신사(승호강)";
+                    } else if(rawManager.includes("김종훈")) { locationGroup = "부산(김종훈)"; }
+
+                    if(!sessionData[code]) sessionData[code] = {};
+                    if(!sessionData[code][date]) sessionData[code][date] = {};
+                    if(!sessionData[code][date][size]) sessionData[code][date][size] = {};
+                    // qty는 양수(판매)/음수(반품) 그대로 합산 → 같은 날 반품분이 순매출에서 자동 차감됨
+                    sessionData[code][date][size][locationGroup] = (sessionData[code][date][size][locationGroup] || 0) + qty;
+
+                    if (locationGroup === '부산(김종훈)') {
+                        if(!sessionRevData[code]) sessionRevData[code] = {};
+                        if(!sessionRevData[code][date]) sessionRevData[code][date] = {};
+                        sessionRevData[code][date][size] = (sessionRevData[code][date][size] || 0) + revAmt;
+                    }
+                }
+
+                // 반품이 판매보다 많아 순매출이 0 이하가 된 항목은 제거 (음수 판매량으로 남지 않도록)
+                for(let code in sessionData) {
+                    for(let date in sessionData[code]) {
+                        for(let size in sessionData[code][date]) {
+                            for(let mgr in sessionData[code][date][size]) {
+                                if(sessionData[code][date][size][mgr] <= 0) delete sessionData[code][date][size][mgr];
+                            }
+                            if(Object.keys(sessionData[code][date][size]).length === 0) delete sessionData[code][date][size];
+                        }
+                        if(Object.keys(sessionData[code][date]).length === 0) delete sessionData[code][date];
+                    }
+                    if(Object.keys(sessionData[code]).length === 0) delete sessionData[code];
+                }
+
+                let newItems = JSON.parse(JSON.stringify(SALES_HISTORY.items || {}));
+
+                let newRevItems = JSON.parse(JSON.stringify(SALES_HISTORY.rev || {}));
+
+                let newCodeMeta = Object.assign({}, SALES_HISTORY.codeMeta || {});
+                const _todayStr = (()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+                for(let code in sessionData) {
+                    if(!newItems[code]) newItems[code] = {};
+                    for(let date in sessionData[code]) {
+                        if(typeof newItems[code][date] === 'number') {
+                            let oldQty = newItems[code][date];
+                            newItems[code][date] = { "알수없음": { "부산(김종훈)": oldQty } };
+                        }
+                        if(!newItems[code][date]) newItems[code][date] = {};
+                        for(let size in sessionData[code][date]) {
+                            if(!newItems[code][date][size]) newItems[code][date][size] = {};
+                            for(let mgr in sessionData[code][date][size]) {
+                                const incoming = sessionData[code][date][size][mgr];
+                                if(date === _todayStr) {
+                                    // 오늘 날짜는 실시간 POS 자동동기화가 곧 더 완전한 값으로 다시 덮어쓰므로,
+                                    // 엑셀 업로드 시점의 부분적인 스냅샷으로 낮춰지지 않도록 더 큰 값 유지
+                                    const existing = newItems[code][date][size][mgr] || 0;
+                                    newItems[code][date][size][mgr] = Math.max(existing, incoming);
+                                } else {
+                                    // 과거 날짜는 이 엑셀(전체 기간 재집계본)을 최신 정답으로 간주해 덮어씀
+                                    // → 반품으로 순매출이 낮아진 경우도 정확히 반영됨 (예전엔 Math.max라 반품 반영이 막혔음)
+                                    newItems[code][date][size][mgr] = incoming;
+                                }
+                            }
+                        }
+                    }
+                }
+                                for(let code in sessionRevData) {
+                    if(!newRevItems[code]) newRevItems[code] = {};
+                    for(let date in sessionRevData[code]) {
+                        if(!newRevItems[code][date]) newRevItems[code][date] = {};
+                        for(let size in sessionRevData[code][date]) {
+                            const incomingRev = sessionRevData[code][date][size];
+                            if(date === _todayStr) {
+                                const existingRev = newRevItems[code][date][size] || 0;
+                                newRevItems[code][date][size] = Math.max(existingRev, incomingRev);
+                            } else {
+                                newRevItems[code][date][size] = incomingRev;
+                            }
+                        }
+                    }
+                }
+
+Object.assign(newCodeMeta, sessionCodeMeta);
+
+const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOString() }, items: newItems, rev: newRevItems, codeMeta: newCodeMeta };
+
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_HISTORY_PATH}`;
+                    let sha = null;
+                    try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                    const body = { message:"update sales history", content: utf8ToB64(JSON.stringify(newHistory, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY);
+                    _recomputeStock(); render(); window.renderSalesHistoryAdmin();
+                    alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!` + (_skippedBad > 0 ? `\n\n⚠️ 형식이 잘못된 ${_skippedBad}개 행은 제외했습니다 (날짜 형식 오류 또는 수량 0).` : ''));
+                } catch(err) { alert("업로드 실패: " + err.message); }
+                fileInput.value = "";
+            };
+            reader.readAsArrayBuffer(f);
+        };
+    }
+};
+
+window.renderPromoAdmin = () => {
+    const card = $("#promoUploadTrigger");
+    if(!card) return;
+
+    const _promoList = getPromoList();
+    card.onclick = null;
+
+    // 기획전 목록 렌더
+    let _listHtml = _promoList.length > 0 ? _promoList.map((pr, idx) =>
+        `<div class="flex items-center gap-2 py-1.5 border-b border-gray-100 last:border-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex-1 min-w-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="font-bold text-gray-900 text-[13px]">🎁 ${escapeHtml(pr.meta?.name||'기획전')}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                ${pr.meta?.period ? `<span class="text-[11px] text-purple-600 font-bold ml-1.5">${escapeHtml(pr.meta.period)}</span>` : ''}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <span class="text-[11px] text-gray-400 ml-1">(${Object.keys(pr.items||{}).length}품번)</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <span class="end-promo-btn shrink-0 text-[11px] font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded cursor-pointer hover:bg-pink-100 transition-colors" data-promoidx="${idx}">종료</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>`
+    ).join('') : `<div class="text-[12px] text-gray-400 py-1">진행 중인 기획전 없음</div>`;
+
+    card.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="flex-1 w-full cursor-default">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="flex items-center justify-between mb-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <h4 class="m-0 text-gray-900 font-bold text-[14px]">🎁 기획전 관리</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <label for="promoFile" class="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded cursor-pointer hover:bg-purple-100 transition-colors shrink-0">+ 기획전 추가</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <input type="file" id="promoFile" accept=".xlsx, .xls, .csv" class="hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        ${_listHtml}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    `;
+
+    // 종료 버튼 이벤트
+    card.querySelectorAll('.end-promo-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            e.stopPropagation();
+            if(!checkPat()) return;
+            const idx = parseInt(btn.dataset.promoidx);
+            const pName = _promoList[idx]?.meta?.name || '기획전';
+            if(!confirm(`"${pName}"을(를) 종료하시겠습니까?`)) return;
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
+                const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+                if(!r.ok) throw new Error(`GitHub 파일 조회 실패 (${r.status})`);
+                const j = await r.json();
+                let data = {};
+                try { data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, ''))))); }
+                catch(e) { console.error('[기획전 종료] 파싱 실패:', e); throw new Error('기획전 데이터 파싱 실패: ' + e.message); }
+                let list = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
+                if(idx >= list.length) throw new Error(`인덱스 오류: idx=${idx}, 목록 길이=${list.length}`);
+                list.splice(idx, 1);
+                const newData = list.length > 0 ? { promotions: list } : {};
+                const body = { message:`end promotion: ${pName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch, sha: j.sha };
+                const endRes = await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                if(!endRes.ok) { const errJ = await endRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${endRes.status}): ${errJ.message||''}`); }
+                PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
+                _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+                alert(`"${pName}" 기획전이 종료되었습니다.`);
+            } catch(e) { alert("종료 실패: " + e.message); }
+        };
+    });
+
+    // 파일 업로드 (기존 기획전에 추가)
+        document.getElementById("promoFile").onchange = async (e) => {
+        if(!checkPat()) { e.target.value = ""; return; }
+        const f = e.target.files[0]; if(!f) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+            // 기획전 할인 컬럼이 있는 시트를 자동 선택 (재고 시트가 첫 시트로 와도 대응)
+            const _PROMO_COLS = ['최종할인가','기획전 할인가','최종 할인율','특가할인가','위클리특가'];
+            let sheet = null;
+            for(const sn of wb.SheetNames) {
+                const _rr = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:""});
+                const _hasCode = _rr.some(r => r.some(c => String(c||"").trim()==='품번'));
+                const _hasDisc = _rr.some(r => r.some(c => _PROMO_COLS.includes(String(c||"").trim())));
+                if(_hasCode && _hasDisc) { sheet = wb.Sheets[sn]; break; }
+            }
+            if(!sheet) sheet = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
+            // ① 기획전명 기본값: 파일명 (확장자 제거)
+            let promoName = f.name.replace(/\.(xlsx?|xls|csv)$/i, '').trim();
+            let promoPeriod = "";
+            for(let i=0; i<6; i++) {
+                if(!rows[i]) continue;
+                // 메타(기획전명/기간)는 시트에 따라 컬럼 위치가 달라 전체 셀 스캔
+                for(const _cell of rows[i]) {
+                    const col0 = String(_cell||"").trim();
+                    if(!col0) continue;
+                    // 명시적 기획전명 셀 우선
+                    if(/기획전명/.test(col0)) promoName = col0.replace(/기획전명\s*:?\s*/,'').trim();
+                    // 기간 파싱: "5.25~6.14" / "06/19 ~ 06/22" / "06/19(목) ~ 06/22(일), 4일간" 등 지원
+                    if(/기간/.test(col0)) {
+                        const pm = col0.match(/(\d{1,2}[\./]\d{1,2}).*?[~～\-].*?(\d{1,2}[\./]\d{1,2})/);
+                        if(pm) {
+                            const s = pm[1].replace('.','/');
+                            const e = pm[2].replace('.','/');
+                            promoPeriod = `${s}~${e}`;
+                        } else {
+                            promoPeriod = col0.replace(/\*?\s*기간\s*:?\s*/,'').trim();
+                        }
+                    }
+                }
+            }
+            let items = {};
+            let headerRowIdx = rows.findIndex(r => r.some(c => String(c||"").trim() === '품번'));
+            if(headerRowIdx > -1) {
+                const headers = rows[headerRowIdx].map(h => String(h||"").trim());
+                const codeIdx = headers.indexOf('품번');
+                const catIdx  = headers.indexOf('특가 카테고리');
+                let wpIdx = headers.indexOf('위클리특가');
+                if(wpIdx === -1) wpIdx = headers.indexOf('특가할인가');
+                const wrIdx   = headers.indexOf('특가할인율');
+                const fpIdx   = headers.indexOf('최종할인가');
+                // 기획전/쿠폰 할인 컬럼
+                const epIdx   = headers.indexOf('기획전 할인가');
+                const erIdx   = headers.indexOf('기획전 할인율');
+                const crIdx   = headers.indexOf('쿠폰 할인율');
+                // 최종 할인율 컬럼: 다양한 컬럼명 지원
+                let frIdx = headers.indexOf('최종 할인율');
+                if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
+                if(frIdx === -1) frIdx = headers.indexOf('할인율');
+                if(frIdx === -1) frIdx = headers.indexOf('할인');
+
+                for(let i=headerRowIdx+1; i<rows.length; i++) {
+                    const r = rows[i];
+                    const code = String(r[codeIdx]||"").trim(); if(!code) continue;
+                    let wRate = parseFloat(r[wrIdx])||0; if(wRate>1) wRate/=100;
+                    let fRate = parseFloat(r[frIdx])||0; if(fRate>1) fRate/=100;
+                    let eRate = parseFloat(r[erIdx])||0; if(eRate>1) eRate/=100;
+                    let cRate = parseFloat(r[crIdx])||0; if(cRate>1) cRate/=100;
+                    const fp = Number(String(r[fpIdx]||"").replace(/,/g,''))||null;
+                    const ep = Number(String(r[epIdx]||"").replace(/,/g,''))||null;
+                    items[code] = {
+                        targetCat: String(r[catIdx]||"").trim().toUpperCase(),
+                        weeklyPrice: Number(String(r[wpIdx]||"").replace(/,/g,''))||null,
+                        weeklyRate: wRate,
+                        finalPrice: fp,
+                        finalRate: fRate,   // 가격 없을 때는 rate로 계산
+                        eventPrice: ep,
+                        eventRate: eRate,   // 기획전 할인율
+                        couponRate: cRate   // 쿠폰 할인율
+                    };
+                }
+            }
+            const newPromo = { id: Date.now().toString(), meta: { name: promoName, period: promoPeriod }, items };
+            try {
+                const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${PROMOTIONS_PATH}`;
+                let sha = null, existingList = [];
+                // 기존 목록을 못 읽으면 저장 중단 — 빈 목록으로 덮어써 기획전 전체가 날아가는 것 방지 (404=최초 생성만 허용)
+                const r = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}});
+                if(r.ok) {
+                    const j = await r.json(); sha = j.sha;
+                    try {
+                        const data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+                        existingList = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
+                    } catch(e) { throw new Error('기존 기획전 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.'); }
+                } else if(r.status !== 404) { throw new Error('기획전 목록 조회 실패 (' + r.status + ') — 저장을 중단했습니다.'); }
+                existingList.push(newPromo);
+                const newData = { promotions: existingList };
+                const body = { message:`add promotion: ${promoName}`, content: utf8ToB64(JSON.stringify(newData, null, 2)), branch: GH.branch };
+                if(sha) body.sha = sha;
+                const saveRes = await fetch(apiBase, { method:"PUT", headers:{Authorization:"Bearer "+getPat(),"Content-Type":"application/json"}, body: JSON.stringify(body) });
+                if(!saveRes.ok) { const errJ = await saveRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${saveRes.status}): ${errJ.message||''}`); }
+                PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
+                _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
+                alert(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
+            } catch(err) { alert("업로드 실패: " + err.message); }
+            document.getElementById("promoFile").value = "";
+        };
+        reader.readAsArrayBuffer(f);
+    };
+};
+
+window.renderSalesAdmin = () => {
+    const countEl = document.getElementById("sgCount");
+    if(countEl) countEl.innerText = `현재 ${Object.keys(SALES_GUIDES).length}개`;
+
+    const trigger = document.getElementById("salesUploadTrigger");
+    const fileInput = document.getElementById("salesFile");
+    if(trigger && fileInput) {
+        trigger.onclick = () => fileInput.click();
+        fileInput.onchange = async (e) => {
+            if(!checkPat()) { e.target.value = ""; return; }
+            const f = e.target.files[0]; if(!f) return;
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {defval: ""});
+                let newGuides = {};
+                rows.forEach(r => {
+                    const code = String(r["품번"] || r["상품코드"] || "").trim();
+                    if(!code) return;
+                    const rawKw = String(r["키워드"] || r["핵심키워드"] || "");
+                    const keywords = rawKw ? rawKw.split(',').map(k=>k.trim()).filter(Boolean) : [];
+                    newGuides[code] = {
+                        keywords: keywords, features: String(r["특징"] || r["제품특징"] || ""),
+                        target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
+                    };
+                });
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+                    let sha = null;
+                    try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
+                    const body = { message:"update sales guide", content: utf8ToB64(JSON.stringify(newGuides, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY);
+                    _recomputeStock(); render(); window.renderSalesAdmin();
+                    alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
+                } catch(err) { alert("업로드 실패: " + err.message); }
+                fileInput.value = "";
+            };
+            reader.readAsArrayBuffer(f);
+        };
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+    // 다크모드 / 쇼룸모드 상태 복원
+    if(localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark-mode");
+    // 사이즈 단위 토글 초기 상태 복원
+    window.setSizeUnit(window.sizeUnit);
+
+
+    const stockBtn = $('button.chip[data-stock]');
+    if(stockBtn && !$('button.chip[data-busanonly]')) {
+        const busanOnlyBtn = document.createElement("button");
+        busanOnlyBtn.className = "chip !bg-blue-50 !text-blue-700 !border-blue-200 font-black";
+        busanOnlyBtn.dataset.busanonly = "1";
+        busanOnlyBtn.dataset.active = "0";
+        busanOnlyBtn.innerHTML = "🌊 부산점 ONLY";
+        const _stockLocRow = $("#fpStockLoc");
+        if(_stockLocRow) _stockLocRow.appendChild(busanOnlyBtn);
+        else stockBtn.parentNode.insertBefore(busanOnlyBtn, stockBtn.nextSibling);
+        busanOnlyBtn.addEventListener("click", () => {
+            saveHistoryState();
+            if(busanOnlyBtn.dataset.active !== "1") _clearStockOnlyChips(busanOnlyBtn);
+            busanOnlyBtn.dataset.active = busanOnlyBtn.dataset.active === "1" ? "0" : "1";
+            if(busanOnlyBtn.dataset.active === "1") busanOnlyBtn.classList.add('ring-2', 'ring-blue-400');
+            else busanOnlyBtn.classList.remove('ring-2', 'ring-blue-400');
+            visibleCount=60; render();
+        });
+    }
+    // 타지점 ONLY 필터 버튼 (부산엔 없는데 신사/물류엔 있는 품목 — 다른 매장엔 있는데 우리만 없는 경우)
+    if(stockBtn && !$('button.chip[data-sinsaonly]')) {
+        const otherBranchBtn = document.createElement("button");
+        const centerOnlyBtn = document.createElement("button");
+        otherBranchBtn.className = "chip !bg-indigo-50 !text-indigo-700 !border-indigo-200 font-black";
+        centerOnlyBtn.className = "chip !bg-teal-50 !text-teal-700 !border-teal-200 font-black";
+        otherBranchBtn.dataset.sinsaonly = "1";
+        centerOnlyBtn.dataset.centeronly = "1";
+        otherBranchBtn.dataset.active = "0";
+        centerOnlyBtn.dataset.active = "0";
+        otherBranchBtn.innerHTML = "🏢 신사점 ONLY";
+        centerOnlyBtn.innerHTML = "🚚 물류 ONLY";
+        const _busanOnlyRef = $('button.chip[data-busanonly]');
+        (_busanOnlyRef || stockBtn).parentNode.insertBefore(otherBranchBtn, (_busanOnlyRef || stockBtn).nextSibling);
+        otherBranchBtn.parentNode.insertBefore(centerOnlyBtn, otherBranchBtn.nextSibling);
+        otherBranchBtn.addEventListener("click", () => {
+            saveHistoryState();
+            if(otherBranchBtn.dataset.active !== "1") _clearStockOnlyChips(otherBranchBtn);
+            otherBranchBtn.dataset.active = otherBranchBtn.dataset.active === "1" ? "0" : "1";
+            if(otherBranchBtn.dataset.active === "1") otherBranchBtn.classList.add('ring-2', 'ring-indigo-400');
+            else otherBranchBtn.classList.remove('ring-2', 'ring-indigo-400');
+            visibleCount=60; render();
+        });
+        centerOnlyBtn.addEventListener("click", () => {
+            saveHistoryState();
+            if(centerOnlyBtn.dataset.active !== "1") _clearStockOnlyChips(centerOnlyBtn);
+            centerOnlyBtn.dataset.active = centerOnlyBtn.dataset.active === "1" ? "0" : "1";
+            if(centerOnlyBtn.dataset.active === "1") centerOnlyBtn.classList.add('ring-2', 'ring-teal-400');
+            else centerOnlyBtn.classList.remove('ring-2', 'ring-teal-400');
+            visibleCount=60; render();
+        });
+    }
+    // 오늘 판매 필터 버튼
+    if(stockBtn && !$('button.chip[data-todaysold]')) {
+        const todayBtn = document.createElement("button");
+        todayBtn.className = "chip !bg-orange-50 !text-orange-600 !border-orange-300 font-black";
+        todayBtn.dataset.todaysold = "1";
+        todayBtn.dataset.active = "0";
+        todayBtn.innerHTML = "🛍️ 오늘 판매";
+        stockBtn.parentNode.insertBefore(todayBtn, stockBtn.nextSibling);
+        todayBtn.addEventListener("click", () => {
+            saveHistoryState();
+            todayBtn.dataset.active = todayBtn.dataset.active === "1" ? "0" : "1";
+            if(todayBtn.dataset.active === "1") todayBtn.classList.add('ring-2', 'ring-orange-400');
+            else todayBtn.classList.remove('ring-2', 'ring-orange-400');
+            visibleCount=60; render();
+        });
+    }
+
+    // ── DP 필터 칩 그룹 (전용 행에 배치) ─────────────────────────────
+    const dpFilterRow = $("#dpFilterRow");
+    const _checkRow = $("#adminCheckRow") || dpFilterRow;
+    if(dpFilterRow && !$('button.chip[data-dp="dp"]')) {
+        dpFilterRow.classList.remove("hidden");
+        // 숫자 배지는 칩을 다 만든 뒤 _refreshDpFilterCounts()가 한꺼번에 채운다
+        const dpGroup = [
+            { key: 'dp',     label: '🏷️ DP 중', cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
+            { key: 'nodp',   label: '🔲 미DP',    cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
+            { key: 'soldDP', label: '⚠️ 품절DP', cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
+        ];
+        dpGroup.forEach(({ key, label, cls }) => {
+            const btn = document.createElement("button");
+            btn.className = `chip ${cls} font-black`;
+            btn.dataset.dp = key;
+            btn.dataset.active = "0";
+            btn.innerHTML = label;
+            dpFilterRow.appendChild(btn);
+            btn.addEventListener("click", () => {
+                saveHistoryState();
+                const alreadyActive = btn.dataset.active === "1";
+                if (alreadyActive) {
+                    btn.dataset.active = "0";
+                    btn.classList.remove('ring-2','ring-violet-400','ring-orange-400');
+                } else {
+                    // DP 칩: 완전 단일선택 (3개 모두 상호 배타)
+                    $$('button.chip[data-dp]').forEach(x => { x.dataset.active = "0"; x.classList.remove('ring-2','ring-violet-400','ring-orange-400'); });
+                    btn.dataset.active = "1";
+                    btn.classList.add('ring-2', key === 'soldDP' ? 'ring-orange-400' : 'ring-violet-400');
+                }
+                visibleCount=60; render();
+            });
+        });
+    }
+
+    // ── 이미지 없음 필터 칩 (DP 행에 함께) ───────────────────────────
+    if(dpFilterRow && !$('button.chip[data-noimage]')) {
+        const noImgBtn = document.createElement("button");
+        noImgBtn.className = "chip !bg-gray-50 !text-gray-500 !border-gray-300 font-black";
+        noImgBtn.dataset.noimage = "1";
+        noImgBtn.dataset.active = "0";
+        noImgBtn.innerHTML = '📷 이미지없음';
+        _checkRow.appendChild(noImgBtn);
+        noImgBtn.addEventListener("click", () => {
+            saveHistoryState();
+            noImgBtn.dataset.active = noImgBtn.dataset.active === "1" ? "0" : "1";
+            if(noImgBtn.dataset.active === "1") noImgBtn.classList.add('ring-2','ring-gray-400');
+            else noImgBtn.classList.remove('ring-2','ring-gray-400');
+            visibleCount=60; render();
+        });
+    }
+
+    // ── 바코드 누락 필터 칩 ───────────────────────────────────────────
+    if(dpFilterRow && !$('button.chip[data-nobarcode]')) {
+        const noBarcodeBtn = document.createElement("button");
+        noBarcodeBtn.className = "chip !bg-amber-50 !text-amber-600 !border-amber-300 font-black";
+        noBarcodeBtn.dataset.nobarcode = "1";
+        noBarcodeBtn.dataset.active = "0";
+        noBarcodeBtn.innerHTML = '🔖 바코드누락';
+        _checkRow.appendChild(noBarcodeBtn);
+        noBarcodeBtn.addEventListener("click", () => {
+            saveHistoryState();
+            noBarcodeBtn.dataset.active = noBarcodeBtn.dataset.active === "1" ? "0" : "1";
+            if(noBarcodeBtn.dataset.active === "1") noBarcodeBtn.classList.add('ring-2','ring-amber-400');
+            else noBarcodeBtn.classList.remove('ring-2','ring-amber-400');
+            visibleCount=60; render();
+        });
+    }
+    // ── 재고보정 필터 칩 (보기는 전체, 편집은 ADMIN) ─────────────────────
+    if(dpFilterRow && !$('button.chip[data-override]')) {
+        const ovBtn = document.createElement("button");
+        ovBtn.className = "chip !bg-amber-50 !text-amber-700 !border-amber-400 font-black";
+        ovBtn.dataset.override = "1";
+        ovBtn.dataset.active = "0";
+        ovBtn.innerHTML = '✏️ 재고보정';
+        _checkRow.appendChild(ovBtn);
+        ovBtn.addEventListener("click", () => {
+            saveHistoryState();
+            ovBtn.dataset.active = ovBtn.dataset.active === "1" ? "0" : "1";
+            if(ovBtn.dataset.active === "1") ovBtn.classList.add('ring-2','ring-amber-400');
+            else ovBtn.classList.remove('ring-2','ring-amber-400');
+            visibleCount=60; render();
+        });
+    }
+    // ── 위치없음 필터 칩 (부산재고 있는데 창고 위치 미배정) ─────────────────────
+
+    if(dpFilterRow && !$('button.chip[data-noloc]')) {
+
+        const noLocBtn = document.createElement("button");
+
+        noLocBtn.className = "chip !bg-sky-50 !text-sky-700 !border-sky-400 font-black";
+
+        noLocBtn.dataset.noloc = "1";
+
+        noLocBtn.dataset.active = "0";
+
+        noLocBtn.innerHTML = '📍 위치없음';
+
+        _checkRow.appendChild(noLocBtn);
+
+        noLocBtn.addEventListener("click", () => {
+
+            saveHistoryState();
+
+            noLocBtn.dataset.active = noLocBtn.dataset.active === "1" ? "0" : "1";
+
+            if(noLocBtn.dataset.active === "1") noLocBtn.classList.add('ring-2','ring-sky-400');
+
+            else noLocBtn.classList.remove('ring-2','ring-sky-400');
+
+            visibleCount=60; render();
+
+        });
+
+    }
+
+    // ── 위치있음 필터 칩 (창고 위치가 지정된 상품만) ────────────────────────
+    if(dpFilterRow && !$('button.chip[data-hasloc]')) {
+
+        const hasLocBtn = document.createElement("button");
+
+        hasLocBtn.className = "chip !bg-emerald-50 !text-emerald-700 !border-emerald-400 font-black";
+
+        hasLocBtn.dataset.hasloc = "1";
+
+        hasLocBtn.dataset.active = "0";
+
+        hasLocBtn.innerHTML = '📌 위치있음';
+
+        _checkRow.appendChild(hasLocBtn);
+
+        hasLocBtn.addEventListener("click", () => {
+
+            saveHistoryState();
+
+            hasLocBtn.dataset.active = hasLocBtn.dataset.active === "1" ? "0" : "1";
+
+            if(hasLocBtn.dataset.active === "1") hasLocBtn.classList.add('ring-2','ring-emerald-400');
+
+            else hasLocBtn.classList.remove('ring-2','ring-emerald-400');
+
+            visibleCount=60; render();
+
+        });
+
+    }
+
+    _refreshDpFilterCounts();
+
+    // ── 위치별 검색 (배정된 위치 목록에서 골라 그 자리 상품만 보기) ──────────
+    if(dpFilterRow && !$('#locZoneSelect')) {
+        const _zoneOpts = new Map(); // value("zoneId::slot") -> 라벨
+        Object.values(LOCATIONS.assignments || {}).forEach(arr => {
+            const items = Array.isArray(arr) ? arr : (arr ? [arr] : []);
+            items.forEach(a => {
+                if(!a || !a.zoneId) return;
+                const z = (LOCATIONS.zones || []).find(zz => zz.id === a.zoneId);
+                if(!z) return;
+                const val = `${a.zoneId}::${a.slot || ''}`;
+                if(!_zoneOpts.has(val)) _zoneOpts.set(val, zoneAddress(z, a.slot));
+            });
+        });
+        const _sorted = [..._zoneOpts.entries()].sort((a,b) => a[1].localeCompare(b[1], 'ko'));
+        if(_sorted.length) {
+            const sel = document.createElement("select");
+            sel.id = "locZoneSelect";
+            sel.className = "chip !bg-white !text-gray-700 !border-gray-300 font-black";
+            sel.innerHTML = `<option value="">📍 위치로 찾기</option>` + _sorted.map(([val,label]) => `<option value="${escapeHtml(val)}">${escapeHtml(label)}</option>`).join('');
+            const _locRow = $("#fpLocRow");
+            if(_locRow){ _locRow.appendChild(sel); _locRow.classList.remove("hidden"); }
+            else dpFilterRow.appendChild(sel);
+            sel.addEventListener("change", () => {
+                saveHistoryState();
+                sel.classList.toggle('ring-2', !!sel.value);
+                sel.classList.toggle('ring-sky-400', !!sel.value);
+                visibleCount=60; render();
+            });
+        }
+    }
+
+    // ── 여러개 선택 모드 진입 칩 (ADMIN 전용) ──────────────────────────────
+    if(dpFilterRow && !$('button.chip[data-bulkloc]')) {
+
+        const bulkBtn = document.createElement("button");
+
+        bulkBtn.className = "chip !bg-slate-800 !text-white !border-slate-800 font-black";
+
+        bulkBtn.dataset.bulkloc = "1";
+
+        bulkBtn.innerHTML = `☑️ 여러개 선택`;
+
+        bulkBtn.style.display = checkAdminSession() ? '' : 'none';
+
+        ($("#bulkBtnSlot") || dpFilterRow).appendChild(bulkBtn);
+
+        bulkBtn.addEventListener("click", () => window.enterBulkLocMode());
+
+    }
+
+    // 🔥 Admin Modal : 기능(비밀번호, 설정, 업로드) + 디자인(Glassmorphism) 완벽 결합 🔥
+    const adminModal = document.getElementById("adminModal");
+    if(adminModal) {
+        adminModal.className = "hidden fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm transition-opacity";
+
+        // 설정 패널 렌더링을 위해 현재 GH 값 로드
+        const ghOwner = GH.owner || "";
+        const ghRepo = GH.repo || "";
+        const ghBranch = GH.branch || "main";
+        const ghPat = getPat();
+
+        adminModal.innerHTML = `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="absolute inset-0 cursor-pointer modal-outer" onclick="document.getElementById('adminModal').classList.add('hidden')"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="glass-modal relative flex flex-col w-full max-w-[800px] bg-white/50 border border-white/60 rounded-3xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <button class="absolute top-5 right-6 bg-transparent border-none text-3xl cursor-pointer text-gray-800 hover:scale-110 transition-transform z-50" onclick="document.getElementById('adminModal').classList.add('hidden')">&times;</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="authPanel" class="flex flex-col items-center justify-center p-10 sm:p-20 w-full min-h-[400px] transition-all duration-300">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="w-20 h-20 bg-white/60 rounded-full flex items-center justify-center mb-5 shadow-sm border border-white/80">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <i data-lucide="lock" class="w-9 h-9 text-gray-800"></i>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="text-center mb-8">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <h2 class="text-[28px] font-black tracking-tight text-gray-900 leading-tight mb-2">RACEMENT<br>ADMIN</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <p class="text-[13px] font-bold text-gray-500">안전한 관리를 위해 비밀번호를 입력해주세요</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex gap-2 w-full max-w-[340px]">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition-all placeholder:text-gray-400">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="pwdGo" class="px-7 py-3.5 bg-gray-900 hover:bg-black text-white rounded-2xl text-[15px] font-black transition-transform hover:-translate-y-0.5 shadow-md shrink-0">입장</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="uploadPanel" class="hidden flex-col md:flex-row w-full p-6 sm:p-8 gap-6 transition-all duration-300">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex-1 flex flex-col">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="text-center mb-6 w-full">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h2 class="m-0 text-[22px] font-extrabold tracking-wide text-gray-900 leading-tight">RACEMENT<br>ADMIN PANEL</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div id="mainUploadTrigger" class="upload-section flex-1 bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 shadow-sm min-h-[200px]">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="text-5xl mb-4">☁️</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <h3 class="m-0 mb-2 text-gray-900 font-bold text-[16px]">메인 재고 파일 클릭/드래그</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <p class="m-0 text-gray-500 text-[13px] font-bold">업로드 시 창고/매장 재고 자동 갱신</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex-1 flex flex-col gap-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div id="shAdminWrapper" class="setting-card card-orange">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div id="shUploadTrigger" class="flex-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">POS 판매 실적 DB</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span style="font-size: 11px; color: #666; font-weight: bold;">판매 엑셀 누적 업데이트</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex flex-col items-end gap-1.5 ml-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span id="shClearBtn" style="font-size: 11px; font-weight: bold; color: #ff5252; background: rgba(255,82,82,0.1); padding: 4px 8px; border-radius: 6px; cursor: pointer; z-index: 10;">DB 초기화</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span id="shCount" style="font-size: 11px; font-weight: bold; color: #888;"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="file" id="shFile" accept=".xlsx, .xls, .csv" class="hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div id="promoUploadTrigger" class="setting-card card-pink">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="setting-card card-blue">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div id="salesUploadTrigger" class="flex-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <h4 style="margin: 0 0 4px 0; color: #222; font-size: 14px; font-weight: 800;">AI 세일즈 가이드 DB</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span style="font-size: 11px; color: #666; font-weight: bold;">특징 및 추천고객 업데이트</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="flex flex-col items-end gap-1.5 ml-2 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span id="sgCount" style="font-size: 11px; font-weight: bold; color: #4facfe; background: rgba(79,172,254,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap;"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span id="missDetectBtn" style="font-size: 11px; font-weight: bold; color: #ff9f43; background: rgba(255,159,67,0.1); padding: 4px 8px; border-radius: 6px; white-space: nowrap; cursor: pointer;">🔍 미등록 탐지</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="file" id="salesFile" accept=".xlsx, .xls, .csv" class="hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-200/40">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <button id="openSettings" class="px-3 py-2 rounded-lg bg-gray-100/50 text-gray-600 text-xs font-bold hover:bg-white transition-colors flex items-center gap-1.5 border border-white/60"><i data-lucide="settings" class="w-3.5 h-3.5"></i> API 설정</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <button class="px-6 py-2.5 rounded-xl bg-gray-900 text-white border-none text-[13px] font-bold cursor-pointer hover:bg-gray-800 transition-all shadow-sm" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="settingsPanel" class="hidden flex-col w-full p-6 sm:p-8 transition-all duration-300">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <h2 class="text-xl font-black text-gray-900 mb-5 flex items-center gap-2"><i data-lucide="github" class="w-5 h-5"></i> GitHub API 연동 설정</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="space-y-4 mb-6">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <label class="block text-xs font-bold text-gray-500 mb-1">GitHub 저장소 소유자 (Owner)</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" id="ghOwner" value="${ghOwner}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <label class="block text-xs font-bold text-gray-500 mb-1">저장소 이름 (Repo)</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" id="ghRepo" value="${ghRepo}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <label class="block text-xs font-bold text-gray-500 mb-1">브랜치 (Branch)</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" id="ghBranch" value="${ghBranch}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Personal Access Token (PAT)</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="password" id="ghPat" value="${ghPat}" class="ipt w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="pt-3 border-t border-gray-200/40">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Groq API Key (AI 세일즈 가이드 자동생성)</label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="gsk_...">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://console.groq.com" target="_blank" class="text-purple-400 underline">console.groq.com</a> → 무료 (하루 14,400회) / AI 세일즈 가이드 자동생성에 사용</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex justify-end gap-3 mt-auto pt-4 border-t border-gray-200/40">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="backToUpload" class="px-5 py-2.5 rounded-xl bg-white/60 border border-white text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">돌아가기</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="ghSave" class="px-5 py-2.5 rounded-xl bg-gray-900 text-white text-[13px] font-bold hover:bg-black transition-colors shadow-sm">설정 저장</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="missPanel" class="hidden flex-col w-full transition-all duration-300" style="max-height:580px; overflow:hidden;">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex items-center gap-3 px-6 pt-6 pb-3">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <h2 class="text-lg font-black text-gray-900 m-0 flex items-center gap-2">🔍 가이드 미등록 상품</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <span id="missCount" class="px-2.5 py-0.5 bg-orange-100 text-orange-600 rounded-full text-xs font-black"></span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="bulkAiBtn" class="ml-auto px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors shadow-sm whitespace-nowrap">🤖 전체 AI 일괄생성</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div id="missList" class="flex-1 overflow-y-auto px-6 pb-2 space-y-2" style="max-height:400px;"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="flex justify-between items-center px-6 pb-6 pt-3 border-t border-gray-200/40 mt-2 shrink-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="backToUploadFromMiss" class="px-5 py-2.5 rounded-xl bg-white/60 border border-gray-200 text-gray-700 text-[13px] font-bold hover:bg-white transition-colors shadow-sm">← 돌아가기</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="saveMissGuides" class="px-6 py-2.5 rounded-xl bg-green-700 text-white text-[13px] font-black hover:bg-green-800 transition-colors shadow-sm">✅ 선택 항목 저장</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <input type="file" id="file" accept=".xlsx, .xls, .csv" class="hidden">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        `;
+
+        // 아이콘 리렌더링
+        if(window.lucide) lucide.createIcons();
+
+        // ==========================================
+        // 🛠️ 삭제되었던 핵심 이벤트 리스너들 재연결 🛠️
+        // ==========================================
+
+        // 1. 비밀번호 인증
+        const pwdInput = document.getElementById("pwd");
+        const pwdGo = document.getElementById("pwdGo");
+
+        const checkPwd = () => {
+            if(pwdInput.value === ADMIN_PWD) {
+                setAdminSession();
+                applyDefaultPatIfNeeded(pwdInput.value);
+                document.getElementById("authPanel").classList.add("hidden");
+                document.getElementById("uploadPanel").classList.remove("hidden");
+                document.getElementById("uploadPanel").classList.add("flex");
+            } else {
+                alert("비밀번호 오류");
+            }
+        };
+        pwdGo.onclick = checkPwd;
+        pwdInput.onkeydown = (e) => { if(e.key === "Enter") checkPwd(); };
+
+        // 세션 유지 시 자동 패스
+        if (checkAdminSession()) {
+            document.getElementById("authPanel").classList.add("hidden");
+            document.getElementById("uploadPanel").classList.remove("hidden");
+            document.getElementById("uploadPanel").classList.add("flex");
+        }
+
+        // 2. 패널 이동 버튼 (설정 창 <-> 업로드 창)
+        document.getElementById("openSettings").onclick = () => {
+            document.getElementById("uploadPanel").classList.add("hidden");
+            document.getElementById("uploadPanel").classList.remove("flex");
+            document.getElementById("settingsPanel").classList.remove("hidden");
+            document.getElementById("settingsPanel").classList.add("flex");
+        };
+        document.getElementById("backToUpload").onclick = () => {
+            document.getElementById("settingsPanel").classList.add("hidden");
+            document.getElementById("settingsPanel").classList.remove("flex");
+            document.getElementById("uploadPanel").classList.remove("hidden");
+            document.getElementById("uploadPanel").classList.add("flex");
+        };
+
+        // 3. API 환경설정 저장
+        document.getElementById("ghSave").onclick = () => {
+            GH = {
+                owner: document.getElementById("ghOwner").value.trim(),
+                repo: document.getElementById("ghRepo").value.trim(),
+                branch: document.getElementById("ghBranch").value.trim() || "main"
+            };
+            saveGhConfig();
+            setPat(document.getElementById("ghPat").value.trim());
+            setAnthKey(document.getElementById("anthKeyInput").value.trim());
+            alert("API 설정이 저장되었습니다.");
+            document.getElementById("backToUpload").click();
+        };
+
+        // 4. 미등록 탐지 패널
+        const missDetectBtn = document.getElementById("missDetectBtn");
+        const backFromMiss  = document.getElementById("backToUploadFromMiss");
+        const saveMissBtn   = document.getElementById("saveMissGuides");
+
+        const showPanel = (id) => {
+            ["uploadPanel","settingsPanel","missPanel"].forEach(pid => {
+                const el = document.getElementById(pid);
+                if(!el) return;
+                if(pid === id){ el.classList.remove("hidden"); el.classList.add("flex"); }
+                else { el.classList.add("hidden"); el.classList.remove("flex"); }
+            });
+        };
+
+        if(missDetectBtn) {
+            missDetectBtn.onclick = () => {
+                showPanel("missPanel");
+
+                // 신발만, 유니크 품번 기준으로 가이드 없는 상품 추출
+                const seen = new Set();
+                const missing = PRODUCTS.filter(p => {
+                    if(!p.품번 || seen.has(p.품번)) return false;
+                    seen.add(p.품번);
+                    if(p.카테고리 !== "신발") return false;
+                    return !SALES_GUIDES[p.품번];
+                });
+
+                const countEl = document.getElementById("missCount");
+                if(countEl) countEl.textContent = missing.length + "개 미등록";
+
+                const listEl = document.getElementById("missList");
+                if(!listEl) return;
+
+                if(missing.length === 0){
+                    listEl.innerHTML = `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 모든 상품에 가이드가 등록되어 있습니다!</div>`;
+                    return;
+                }
+
+                listEl.innerHTML = missing.map(p => `
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div class="bg-white/70 border border-gray-200 rounded-xl p-3 space-y-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="flex items-center justify-between gap-2">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <label class="flex items-center gap-2 cursor-pointer min-w-0">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400 shrink-0" data-code="${p.품번}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span class="text-[11px] font-black text-gray-500 shrink-0">${escapeHtml(p.브랜드||'')} · ${escapeHtml(p.품번)}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <span class="text-[12px] font-black text-gray-800 truncate">${escapeHtml(p.품명||'')}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </label>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <button class="ai-gen-toggle shrink-0 px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-code="${p.품번}">🤖 AI 생성</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="ai-gen-box hidden space-y-1.5" data-code="${p.품번}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <button class="ai-gen-btn w-full py-2 rounded-lg bg-purple-600 text-white text-[12px] font-black hover:bg-purple-700 transition-colors shadow-sm" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ ${escapeHtml(p.품명||'')} 가이드 자동 생성</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <details class="text-[10px]">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <summary class="text-purple-400 font-bold cursor-pointer hover:text-purple-600 select-none">📋 RunRepeat 스펙 추가 (선택 — 정확도 향상)</summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <p class="text-gray-400 font-bold mt-1 mb-1">RunRepeat에서 Specs 섹션 전체 복사 후 붙여넣기 (영문 그대로 OK)</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                <textarea class="ai-review-text w-full px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="4" placeholder="Terrain: Road&#10;Drop: 8mm&#10;Weight: 198g&#10;Features: Carbon plate | Cushioned&#10;..." data-code="${p.품번}"></textarea>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            </details>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <div class="grid grid-cols-2 gap-1.5 pl-1">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" placeholder="제품 특징" class="miss-ft ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" placeholder="추천 고객" class="miss-tg ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            <input type="text" placeholder="판매 멘트" class="miss-pt ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                `).join('');
+
+                // AI 버튼 이벤트 위임
+                listEl.addEventListener('click', async (e) => {
+                    // 🤖 AI 생성 토글
+                    if (e.target.classList.contains('ai-gen-toggle')) {
+                        const code = e.target.dataset.code;
+                        const box = listEl.querySelector(`.ai-gen-box[data-code="${code}"]`);
+                        if (box) box.classList.toggle('hidden');
+                        return;
+                    }
+                    // ✨ 가이드 자동 생성
+                    if (e.target.classList.contains('ai-gen-btn')) {
+                        if (!getAnthKey()) {
+                            alert("⚠️ Admin > API 설정에서 Anthropic API Key를 먼저 등록해주세요.\n\nsk-ant-api03-... 형식의 키입니다.");
+                            return;
+                        }
+                        const code  = e.target.dataset.code;
+                        const brand = e.target.dataset.brand;
+                        const name  = e.target.dataset.name;
+                        const reviewText = listEl.querySelector(`.ai-review-text[data-code="${code}"]`)?.value || "";
+
+                        const orig = e.target.textContent;
+                        e.target.textContent = "⏳ AI 분석 중...";
+                        e.target.disabled = true;
+
+                        try {
+                            const rawText = await callAIGuide(brand, name, reviewText);
+                            const parsed  = parseGuideResponse(rawText);
+
+                            // 전체 결과 저장
+                            window._missGuideData = window._missGuideData || {};
+                            window._missGuideData[code] = parsed;
+
+                            // 필드 자동 채우기
+                            const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
+                            const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
+                            const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
+                            const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
+                            if (kwEl) kwEl.value = parsed.keywords.join(", ");
+                            if (ftEl) ftEl.value = parsed.features;
+                            if (tgEl) tgEl.value = parsed.target;
+                            if (ptEl) ptEl.value = parsed.closing || parsed.pitch;
+
+                            // 자동 체크 + AI 박스 닫기
+                            const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
+                            if (chk) chk.checked = true;
+                            listEl.querySelector(`.ai-gen-box[data-code="${code}"]`)?.classList.add('hidden');
+
+                            e.target.textContent = "✅ 생성 완료";
+                        } catch(err) {
+                            alert("AI 생성 실패: " + err.message);
+                            e.target.textContent = orig;
+                        } finally {
+                            e.target.disabled = false;
+                        }
+                    }
+                }, { once: false });
+            };
+        }
+
+        // 일괄 AI 생성
+        const bulkAiBtn = document.getElementById("bulkAiBtn");
+        if(bulkAiBtn) {
+            bulkAiBtn.onclick = async () => {
+                if(!getAnthKey()) {
+                    alert("⚠️ Admin > API 설정에서 Groq API Key를 먼저 등록해주세요.\n발급: console.groq.com (무료)");
+                    return;
+                }
+                const items = document.querySelectorAll(".ai-gen-btn");
+                if(items.length === 0) { alert("미등록 신발이 없습니다."); return; }
+                if(!confirm(`신발 ${items.length}개에 AI 가이드를 자동 생성합니다.\n시간이 걸릴 수 있어요. 진행할까요?`)) return;
+
+                bulkAiBtn.disabled = true;
+                let done = 0, failed = 0;
+
+                for(const btn of items) {
+                    const code  = btn.dataset.code;
+                    const brand = btn.dataset.brand;
+                    const name  = btn.dataset.name;
+                    bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
+                    try {
+                        const rawText = await callAIGuide(brand, name, "");
+                        const parsed  = parseGuideResponse(rawText);
+                        window._missGuideData = window._missGuideData || {};
+                        window._missGuideData[code] = parsed;
+                        const listEl  = document.getElementById("missList");
+                        if(listEl) {
+                            const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
+                            const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
+                            const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
+                            const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
+                            if(kwEl) kwEl.value = parsed.keywords.join(", ");
+                            if(ftEl) ftEl.value = parsed.features;
+                            if(tgEl) tgEl.value = parsed.target;
+                            if(ptEl) ptEl.value = parsed.closing || parsed.pitch;
+                            const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
+                            if(chk) chk.checked = true;
+                        }
+                        done++;
+                    } catch(err) {
+                        failed++;
+                        console.warn(`[AI 일괄생성] ${name} 실패:`, err.message);
+                    }
+                    // API 레이트리밋 방지 딜레이
+                    await new Promise(r => setTimeout(r, 2000));
+                }
+
+                bulkAiBtn.textContent = `✅ ${done}개 완료${failed > 0 ? ` (${failed}개 실패)` : ""}`;
+                bulkAiBtn.disabled = false;
+                if(done > 0) {
+                    alert(`✅ AI 가이드 ${done}개 생성 완료!\n이제 "선택 항목 저장" 버튼을 눌러 GitHub에 저장하세요.`);
+                }
+            };
+        }
+
+        if(backFromMiss) backFromMiss.onclick = () => showPanel("uploadPanel");
+
+        if(saveMissBtn) {
+            saveMissBtn.onclick = async () => {
+                if(!checkPat()) return;
+                const checked = document.querySelectorAll(".miss-chk:checked");
+                if(checked.length === 0){ alert("저장할 항목을 체크해주세요."); return; }
+
+                const newEntries = {};
+                checked.forEach(chk => {
+                    const code = chk.dataset.code;
+                    const kw = document.querySelector(`.miss-kw[data-code="${code}"]`)?.value || "";
+                    const ft = document.querySelector(`.miss-ft[data-code="${code}"]`)?.value || "";
+                    const tg = document.querySelector(`.miss-tg[data-code="${code}"]`)?.value || "";
+                    const pt = document.querySelector(`.miss-pt[data-code="${code}"]`)?.value || "";
+                    const ai = window._missGuideData?.[code] || {};
+                    newEntries[code] = {
+                        keywords: kw ? kw.split(",").map(k=>k.trim()).filter(Boolean) : (ai.keywords||[]),
+                        features: ft||ai.features||"", target: tg||ai.target||"", pitch: pt||ai.closing||ai.pitch||"",
+                        weight: ai.weight||"", heel_stack: ai.heel_stack||"", fore_stack: ai.fore_stack||"",
+                        drop: ai.drop||"", spec_analysis: ai.spec_analysis||"",
+                        vs_prev: ai.vs_prev||"", vs_others: ai.vs_others||"",
+                        why: ai.why||"", best_for: ai.best_for||"", closing: ai.closing||pt||""
+                    };
+                });
+
+                const merged = Object.assign({}, SALES_GUIDES, newEntries);
+                const origText = saveMissBtn.textContent;
+                saveMissBtn.textContent = "⏳ 저장 중...";
+                saveMissBtn.disabled = true;
+
+                try {
+                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+                    let sha = null;
+                    try { const r = await fetch(apiBase+"?t="+Date.now(),{headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } } catch(e){}
+                    const body = { message:`update: sales guide +${Object.keys(newEntries).length}개 추가`, content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch };
+                    if(sha) body.sha = sha;
+                    const res = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
+                    if(!res.ok) throw new Error("GitHub 저장 실패 ("+res.status+")");
+
+                    SALES_GUIDES = merged;
+                    sessionStorage.removeItem(CACHE_KEY);
+                    _recomputeStock(); render(); window.renderSalesAdmin();
+                    alert(`✅ ${Object.keys(newEntries).length}개 가이드가 성공적으로 등록되었습니다!`);
+                    showPanel("uploadPanel");
+                } catch(err) {
+                    alert("저장 실패: " + err.message);
+                } finally {
+                    saveMissBtn.textContent = origText;
+                    saveMissBtn.disabled = false;
+                }
+            };
+        }
+
+        // 5. 메인 재고 엑셀 업로드 연결
+        document.getElementById('mainUploadTrigger').onclick = () => {
+            const mainFileInput = document.getElementById('file');
+            if(mainFileInput) mainFileInput.click();
+        };
+
+        // 💡 작동 안 하던 기존 파일 변경 감지 이벤트 복구
+        document.getElementById("file").onchange = async (e) => {
+            if(!checkPat()) { e.target.value = ""; return; }
+            const f = e.target.files[0]; if(!f) return;
+            const d = new Date();
+            const dateStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            localStorage.setItem('PREV_RAW', JSON.stringify(RAW));
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                // XLSX 라이브러리가 로드되어 있어야 함 (기존 글로벌 window.XLSX 사용)
+                if(!window.XLSX) { alert("엑셀 파서 로딩 중입니다. 잠시 후 시도해주세요."); return; }
+                const wb = window.XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
+                let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], window.XLSX);
+                const meta = { fileName:f.name, uploadedAt: dateStr };
+                try {
+                    // 기존에 정의하신 commitInventoryToGitHub 함수 실행
+                    await window.commitInventoryToGitHub(rows, meta);
+                    RAW = rows; CURRENT_META = meta;
+                    _safeSessionCache({rows, meta, images:IMAGES, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
+                    applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar();
+                    document.getElementById("adminModal").classList.add("hidden");
+                    alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+                } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰과 저장소 정보를 확인하세요."); console.error("Upload error:", err); }
+                document.getElementById("file").value = "";
+            };
+            reader.readAsArrayBuffer(f);
+        };
+    }
+
+    // 각각의 상세 어드민 렌더링 호출
+    if(window.renderSalesHistoryAdmin) window.renderSalesHistoryAdmin();
+    if(window.renderPromoAdmin) window.renderPromoAdmin();
+    if(window.renderSalesAdmin) window.renderSalesAdmin();
+});
+
+function _revealDashOnlyUI() {
+    document.body.classList.remove('dashboard-only-mode');
+    const ld = document.getElementById('dashOnlyLoading');
+    if (ld) ld.remove();
+}
+async function checkSyncLockStatus() {
+    try {
+        const sources = ['sync_status.json', 'possync_status.json'];
+        const messages = [];
+        for (const f of sources) {
+            try {
+                const r = await dataFetch(f);
+                if (!r.ok) continue;
+                const status = await r.json();
+                if (f === 'sync_status.json') window._posLastCheckedAt = (status && status.lastCheckedAt) || null;
+                if (status && status.locked) {
+                    messages.push(status.message || 'POS 자동 동기화가 중단되었습니다. 확인이 필요합니다.');
+                }
+            } catch(e) {}
+        }
+        if (messages.length && !document.getElementById('syncLockBanner')) {
+            const bar = document.createElement('div');
+            bar.id = 'syncLockBanner';
+            bar.style.cssText = 'position:sticky;top:0;z-index:200;background:#dc2626;color:#fff;padding:10px 16px;text-align:center;font-weight:800;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;';
+            bar.innerHTML = messages.map(m => `<span>🔒 ${escapeHtml(m)}</span>`).join('') + `<button onclick="this.parentElement.remove()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;font-weight:800;cursor:pointer;margin-top:2px;">닫기</button>`;
+            document.body.prepend(bar);
+        }
+        applyMeta(CURRENT_META);
+    } catch(e) {}
+}
+// 판매 동기화가 오늘 정상으로 돌았는지 — 판매가 없어도 sync_once.js가 lastCheckedAt을 남긴다
+function _posCheckedToday() {
+    const t = window._posLastCheckedAt ? new Date(window._posLastCheckedAt) : null;
+    if (!t || isNaN(t)) return false;
+    const n = new Date();
+    return t.getFullYear() === n.getFullYear() && t.getMonth() === n.getMonth() && t.getDate() === n.getDate();
+}
+
+// 공홈 가격 자동반영이 멈췄을 때 관리자에게만 노란 띠로 알림 (price_status.json — price_sync.js가 매 실행마다 기록)
+async function checkPriceSyncStatus() {
+    try {
+        if (!checkAdminSession() || document.getElementById('priceStatusBanner')) return;
+        const r = await dataFetch('price_status.json');
+        if (!r.ok) return;
+        const st = await r.json();
+        const last = st && st.lastSuccessAt ? new Date(st.lastSuccessAt).getTime() : 0;
+        const hours = last ? Math.floor((Date.now() - last) / 3600000) : null;
+        if (st.ok !== false && hours !== null && hours < 30) return;
+        const lastTxt = last ? new Date(last).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '기록 없음';
+        const why = st.ok === false && st.message ? ` · 최근 실패: ${st.message}` : '';
+        const bar = document.createElement('div');
+        bar.id = 'priceStatusBanner';
+        bar.style.cssText = 'position:sticky;top:0;z-index:199;background:#f59e0b;color:#1f1300;padding:10px 16px;text-align:center;font-weight:800;font-size:13px;';
+        bar.innerHTML = `⚠️ 공홈 가격 자동반영이 ${hours === null ? '한 번도 성공하지 못했습니다' : hours + '시간째 안 되고 있습니다'} (마지막 성공 ${escapeHtml(lastTxt)}${escapeHtml(why)}) <button onclick="this.parentElement.remove()" style="background:rgba(0,0,0,.12);border:none;border-radius:6px;padding:2px 8px;font-weight:800;cursor:pointer;margin-left:8px;">닫기</button>`;
+        document.body.prepend(bar);
+    } catch(e) {}
+}
+
+// ── 필터 영역 접기/펼치기 (스크롤 시 자동 접힘) ──────────────────────────
+// 검색창+적용된필터는 항상 보이고, 카테고리~브랜드까지(filterDetails)는
+// 스크롤을 조금만 내려도 자동으로 접혀서 상품 목록이 화면을 더 넓게 씀.
+// 접힌 상태에서도 토글 버튼으로 언제든 다시 펼칠 수 있음(수동 펼침은 다음 스크롤까지 유지).
+(function setupFilterCollapse(){
+    let _filterManuallyOpen = false; // 사용자가 직접 펼친 상태(다음 스크롤 전까지 유지)
+    let _filterCollapsed = false;
+    let _cooldownUntil = 0; // 접기/펼치기 직후 레이아웃 변화로 인한 재트리거 방지
+    const COLLAPSE_AT = 80; // 이만큼 내려야 "펼침→접힘" 트리거
+    const EXPAND_AT = 5;    // 이 아래여야 "진짜 맨 위로 돌아왔다"고 보고 "접힘→펼침" 트리거
+
+    function applyState(collapsed){
+        const details = document.getElementById('filterDetails');
+        const toggleBtn = document.getElementById('filterToggleBtn');
+        const label = document.getElementById('filterToggleLabel');
+        if(!details || !toggleBtn || !label) return;
+        if(collapsed === _filterCollapsed) return; // 상태 변화 없으면 DOM/쿨다운 건드리지 않음
+        _filterCollapsed = collapsed;
+        details.classList.toggle('hidden', collapsed);
+        toggleBtn.classList.toggle('hidden', !collapsed && window.scrollY < COLLAPSE_AT);
+        label.textContent = collapsed ? '▼ 필터 펼치기' : '▲ 필터 접기';
+        _cooldownUntil = Date.now() + 350; // 접기/펼치기로 페이지 높이가 바뀌는 동안 스크롤 이벤트 재평가 잠시 무시
+    }
+
+    window._toggleFilter = () => {
+        const nowCollapsed = !_filterCollapsed;
+        _filterManuallyOpen = !nowCollapsed; // 펼치는 쪽으로 누르면 다음 스크롤까지 유지
+        applyState(nowCollapsed);
+    };
+
+    let _ticking = false;
+    window.addEventListener('scroll', () => {
+        if(_ticking) return;
+        _ticking = true;
+        requestAnimationFrame(() => {
+            _ticking = false;
+            if(Date.now() < _cooldownUntil) return; // 방금 레이아웃이 바뀐 직후의 스크롤 이벤트는 무시(위아래 반복 방지)
+
+            // 검색결과가 적어서 접었을 때 페이지가 짧아지면, 브라우저가 스크롤 위치를 강제로 위로 밀어버릴 수 있음.
+            // 그 강제 클램프를 "사용자가 맨 위로 스크롤함"으로 착각해 즉시 재펼침하면 접힘↔펼침이 무한 반복됨(위아래 튐 버그).
+            // 그래서 접기 기준(COLLAPSE_AT=80)과 펼치기 기준(EXPAND_AT=5)을 다르게 둬서, "80을 넘겨 접혔다가
+            // 강제로 몇십px 밀린 것"과 "사용자가 실제로 맨 꼭대기까지 스크롤을 되돌린 것"을 구분한다.
+            if(_filterCollapsed){
+                if(window.scrollY <= EXPAND_AT){
+                    _filterManuallyOpen = false;
+                    applyState(false);
+                }
+            } else {
+                const scrolled = window.scrollY > COLLAPSE_AT;
+                if(!scrolled){
+                    _filterManuallyOpen = false; // 맨 위 근처면 다음 스크롤 때 자동접기 다시 허용
+                } else if(!_filterManuallyOpen){
+                    applyState(true);
+                }
+            }
+        });
+    }, { passive: true });
+})();
+
+loadGhConfig(); loadData().then(async () => {
+    checkSyncLockStatus();
+    checkPriceSyncStatus();
+    if (location.hash === '#dashboard' && window.openAnalyticsReport) {
+        try { await window.openAnalyticsReport(); }
+        finally { const ld = document.getElementById('dashOnlyLoading'); if (ld) ld.remove(); } // 대시보드가 화면을 이미 덮으므로 재고앱 본체는 계속 숨긴 채 둠
+    }
+}).catch(() => { _revealDashOnlyUI(); }); // 로딩 실패 시엔 숨겨뒀던 재고앱을 다시 보여줌(빈 화면 방지)
+// 대시보드 열기 실패 등 만약을 대비한 안전장치 — 15초 뒤에도 로딩화면이면 강제로 재고앱 노출
+setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOnlyUI(); }, 15000);
+
+// ── 공용 비밀번호 게이트 (허브 서버 검증 · 90일 기기 기억) ─────────────
+// 비밀번호는 소스에 없다 — racement-hub 서버(HUB_PASSWORD)에서 검증.
+(function(){
+    const GATE_KEY = 'racement_gate_v1';
+    const GATE_API = 'https://racement-hub.vercel.app/api/inv-gate';
+    // 2026-07-30: 데이터 조회에 pass 토큰이 필수가 됨 — 예전에 게이트만 통과하고
+    // 토큰을 못 받은 기존 기기(90일 이내 재방문)도 다시 게이트를 보게 함
+    // 사용 중 토큰이 거절되면 dataFetch가 이 화면을 다시 띄울 수 있게 조기 return 전에 노출
+    window._rcShowGate = () => { if (document.body) showGate(); else document.addEventListener('DOMContentLoaded', showGate); };
+    if (parseInt(localStorage.getItem(GATE_KEY) || '0') > Date.now() && localStorage.getItem(INV_PASS_KEY)) return;
+    function showGate(){
+        if (document.getElementById('rcGateOverlay')) return;
+        const ov = document.createElement('div');
+        ov.id = 'rcGateOverlay';
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f2f3f5;display:flex;align-items:center;justify-content:center;padding:20px;';
+        ov.innerHTML =
+            '<div style="width:100%;max-width:340px;background:#fff;border:2px solid #0A0A0A;border-radius:12px;box-shadow:4px 4px 0 0 #0A0A0A;padding:28px;text-align:center;font-family:Pretendard,-apple-system,sans-serif;">'
+            + '<div style="font-size:34px;margin-bottom:10px;">🔐</div>'
+            + '<div style="font-weight:800;font-size:18px;color:#0A0A0A;">RACEMENT 재고조회</div>'
+            + '<div style="font-size:13px;color:#8A8A8A;margin:6px 0 18px;">매장 공용 비밀번호를 입력하세요</div>'
+            + '<input id="rcGatePw" type="password" placeholder="공용 비밀번호" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #e8eaef;border-radius:10px;font-size:15px;text-align:center;outline:none;font-weight:600;">'
+            + '<div id="rcGateErr" style="display:none;color:#E11D48;font-size:13px;font-weight:700;margin-top:10px;">비밀번호가 틀렸습니다</div>'
+            + '<button id="rcGateGo" style="width:100%;margin-top:14px;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;">입장</button>'
+            + '</div>';
+        document.body.appendChild(ov);
+        const pw = document.getElementById('rcGatePw');
+        const go = document.getElementById('rcGateGo');
+        const err = document.getElementById('rcGateErr');
+        pw.focus();
+        async function verify(){
+            if (!pw.value) return;
+            go.textContent = '확인 중…'; go.disabled = true; err.style.display = 'none';
+            try {
+                const r = await fetch(GATE_API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw.value }) });
+                if (r.ok) {
+                    try { localStorage.setItem(GATE_KEY, String(Date.now() + 90*24*3600*1000)); } catch(e) { console.warn('게이트 통과 기록 저장 실패(storage 제한) — 다음에 다시 비밀번호를 물어볼 수 있음:', e); }
+                    // 데이터 게이트웨이 조회용 서명 토큰 보관
+                    try { const j = await r.json(); if(j && j.pass) localStorage.setItem(INV_PASS_KEY, j.pass); } catch(e){}
+                    // 데이터가 이제 인증 필요라 게이트 통과 전 loadData()가 비어있는 채로 끝났을 수 있음 —
+                    // 새로 받은 토큰으로 다시 로드되도록 새로고침
+                    location.reload();
+                    return;
+                }
+            } catch(e) {}
+            err.style.display = 'block'; pw.value = '';
+            go.textContent = '입장'; go.disabled = false;
+        }
+        go.onclick = verify;
+        pw.onkeydown = e => { if (e.key === 'Enter') verify(); };
+    }
+    if (document.body) showGate();
+    else document.addEventListener('DOMContentLoaded', showGate);
+})();

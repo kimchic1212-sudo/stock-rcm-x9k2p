@@ -1,0 +1,36 @@
+name: POS Sync
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: npm install playwright
+
+      - name: Install Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Run POS sync
+        env:
+          POS_ID: ${{ secrets.POS_ID }}
+          POS_PW: ${{ secrets.POS_PW }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
+        run: node sync_once.js
+

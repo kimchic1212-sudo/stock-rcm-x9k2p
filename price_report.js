@@ -1,0 +1,381 @@
+// price_report.js — 현재 할인 현황 요약 → 텔레그램 발송 (즉시 or 변동분)
+const https = require('https');
+const fs = require('fs');
+const { chromium } = require('playwright');
+
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const CHAT_ID = process.env.CHAT_ID;
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
+const SLACK_CHANNEL = 'C0BQF5VJJ3V'; // #가격-재고알림
+const MODE = process.env.REPORT_MODE || 'summary'; // 'summary' | 'changes'
+const PRICES_FILE = 'prices.json';
+const PRODUCT_MAP_FILE = 'product_map.json';
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ── 해운대 재고 필터용 (2026-09-18: 해운대에 없는 상품은 알림에서 빼달라는 요청) ──
+const DATA_OWNER = 'kimchic1212-sudo';
+const DATA_REPO  = 'stock-rcm-data';
+const GH_TOKEN = process.env.DATA_REPO_PAT || process.env.GITHUB_TOKEN || '';
+
+function ghRequest(method, path) {
+  return new Promise((resolve, reject) => {
+    const req = require('https').request({
+      hostname: 'api.github.com', path, method,
+      headers: { Authorization: `Bearer ${GH_TOKEN}`, 'User-Agent': 'RACEMENT-price-report' }
+    }, res => {
+      let data = ''; res.on('data', c => data += c);
+      res.on('end', () => { try { resolve({ status: res.statusCode, body: JSON.parse(data) }); } catch (e) { resolve({ status: res.statusCode, body: data }); } });
+    });
+    req.on('error', reject); req.end();
+  });
+}
+
+// 큰 파일(Contents API 1MB 인라인 한도 초과)도 안전하게 읽기 위해 Git Blob API 사용 (price_sync.js와 동일 패턴)
+async function loadInventory() {
+  const meta = await ghRequest('GET', `/repos/${DATA_OWNER}/${DATA_REPO}/contents/inventory.json`);
+  if (meta.status !== 200) return null;
+  if (meta.body.content) return JSON.parse(Buffer.from(meta.body.content, 'base64').toString('utf8'));
+  const blob = await ghRequest('GET', `/repos/${DATA_OWNER}/${DATA_REPO}/git/blobs/${meta.body.sha}`);
+  return JSON.parse(Buffer.from(blob.body.content, blob.body.encoding).toString('utf8'));
+}
+
+// 상품번호(샵바이) → 해운대(부산) 매장 재고수량이 1개 이상인지
+async function loadBusanStockSet() {
+  const inv = await loadInventory();
+  if (!inv || !inv.rows) { console.log('[해운대재고필터] inventory.json 로드 실패 — 필터 없이 진행'); return null; }
+  const inStock = new Set();
+  for (const r of inv.rows) {
+    const shopNo = String(r['상품번호(샵바이)'] || '').trim();
+    const stock = Number(r['매장 (부산)']) || 0;
+    if (shopNo && stock > 0) inStock.add(shopNo);
+  }
+  console.log(`[해운대재고필터] 재고 보유 상품번호 ${inStock.size}개`);
+  return inStock;
+}
+
+// ── 품번 매핑 로드 (shopby productNo → {품번, 품명, 브랜드}) ──────────
+const productMap = fs.existsSync(PRODUCT_MAP_FILE)
+  ? JSON.parse(fs.readFileSync(PRODUCT_MAP_FILE, 'utf-8'))
+  : {};
+console.log(`Product map loaded: ${Object.keys(productMap).length} entries`);
+
+// ── 카테고리 매핑 ──────────────────────────────────────────
+const CAT_MAP = {};
+[846976,933689,847004,847005,847001,847000,847002,861070,847003,
+ 847007,847006,847008,877608,847009,847010,847011,847012].forEach(id => CAT_MAP[id]='신발');
+[846977,933690,847039,847046,847040,847041,847042,847043,847044,
+ 847045,847047,847048,847049,847050,847060,847065].forEach(id => CAT_MAP[id]='의류');
+[846978,933691,847174,847175,847176,847087,847088,847089,847090].forEach(id => CAT_MAP[id]='용품');
+
+function getCategory(displayCategoryNos) {
+  if (!displayCategoryNos) return '기타';
+  const ids = String(displayCategoryNos).split('|').map(Number);
+  for (const id of ids) { if (CAT_MAP[id]) return CAT_MAP[id]; }
+  return '기타';
+}
+
+// ── 텔레그램 발송 ──────────────────────────────────────────
+async function sendTelegram(text) {
+  if (!BOT_TOKEN || !CHAT_ID) { console.log('[Telegram skip] BOT_TOKEN 또는 CHAT_ID 미설정'); return; }
+  const chunks = [];
+  let t = text;
+  while (t.length > 0) {
+    if (t.length <= 4000) { chunks.push(t); break; }
+    // <b> 태그 중간에서 분할되지 않도록 4000자 이내의 마지막 줄바꿈 위치에서 분할
+    let splitAt = t.lastIndexOf('\n', 4000);
+    if (splitAt <= 0) splitAt = 4000;
+    chunks.push(t.slice(0, splitAt));
+    t = t.slice(splitAt);
+  }
+  for (const chunk of chunks) {
+    await new Promise(resolve => {
+      const body = JSON.stringify({ chat_id: CHAT_ID, text: chunk, parse_mode: 'HTML' });
+      const req = https.request({
+        hostname: 'api.telegram.org',
+        path: `/bot${BOT_TOKEN}/sendMessage`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+      }, res => {
+        let raw = '';
+        res.on('data', c => raw += c);
+        res.on('end', () => {
+          try {
+            const j = JSON.parse(raw);
+            if (j.ok) {
+              console.log(`[Telegram OK] message_id=${j.result?.message_id}`);
+            } else {
+              // CHAT_ID를 로그에 직접 포함하지 않아 GitHub 마스킹 우회 → 에러 원인 파악 가능
+              const chatIdLen = String(CHAT_ID).length;
+              console.error(`[Telegram ERROR] code=${j.error_code} | desc=${j.description} | chat_id_len=${chatIdLen}`);
+            }
+          } catch(e) { console.error('[Telegram parse error]', raw.slice(0, 200)); }
+          resolve();
+        });
+      });
+      req.on('error', e => { console.error('[Telegram network error]', e.message); resolve(); });
+      req.write(body); req.end();
+    });
+    await new Promise(r => setTimeout(r, 300));
+  }
+}
+
+// 텔레그램 HTML(<b>,<i>) → 슬랙 mrkdwn(*,_)
+function toSlackText(html) {
+  return html.replace(/<b>(.*?)<\/b>/gs, '*$1*').replace(/<i>(.*?)<\/i>/gs, '_$1_').replace(/<\/?[^>]+>/g, '');
+}
+
+// ── 슬랙 발송 (4000자 제한 없음 — 슬랙은 40000자까지 허용되므로 분할 불필요) ──
+async function sendSlack(text) {
+  if (!SLACK_BOT_TOKEN) { console.log('[Slack skip] SLACK_BOT_TOKEN 미설정'); return; }
+  return new Promise(resolve => {
+    const body = JSON.stringify({ channel: SLACK_CHANNEL, text: toSlackText(text), mrkdwn: true });
+    const req = https.request({
+      hostname: 'slack.com',
+      path: '/api/chat.postMessage',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Length': Buffer.byteLength(body) }
+    }, res => {
+      let raw = ''; res.on('data', c => raw += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(raw);
+          if (j.ok) console.log('[Slack OK]');
+          else console.error('[Slack ERROR]', j.error);
+        } catch (e) { console.error('[Slack parse error]', raw.slice(0, 200)); }
+        resolve();
+      });
+    });
+    req.on('error', e => { console.error('[Slack network error]', e.message); resolve(); });
+    req.write(body); req.end();
+  });
+}
+
+// 텔레그램은 계정 삭제 예정으로 발송 정지 (2026-08-17) — sendTelegram은 필요시 재사용할 수 있도록 남겨둠
+async function broadcast(text) {
+  await sendSlack(text);
+}
+
+// ── CHAT_ID 자동 조회 (처음 설정 시 도움용) ──────────────────
+async function printChatId() {
+  if (!BOT_TOKEN) return;
+  return new Promise(resolve => {
+    https.get(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(d);
+          if (j.result && j.result.length > 0) {
+            const chats = [...new Set(j.result.map(u => u.message?.chat?.id || u.channel_post?.chat?.id).filter(Boolean))];
+            console.log('[getUpdates] 감지된 chat_id 목록:', chats);
+          } else {
+            console.log('[getUpdates] 메시지 없음 → 봇에게 먼저 /start 메시지를 보내세요');
+          }
+        } catch(e) { console.error('[getUpdates error]', d.slice(0, 200)); }
+        resolve();
+      });
+    }).on('error', resolve);
+  });
+}
+
+// ── Playwright로 SALE 카테고리 전체 수집 ───────────────────
+async function getAllProducts() {
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  const all = [];
+
+  async function fetchPage(pageNum) {
+    const page = await browser.newPage();
+    let items = [], total = 0;
+    // 브라우저 요청을 가로채서 pageSize=100, pageNumber 변경
+    await page.route('**/products/search**', async route => {
+      let url = route.request().url();
+      url = url.replace(/pageSize=\d+/, 'pageSize=100').replace(/pageNumber=\d+/, `pageNumber=${pageNum}`);
+      if (!url.includes('hasTotalCount')) url += '&hasTotalCount=true';
+      await route.continue({ url });
+    });
+    await new Promise(resolve => {
+      page.on('response', async resp => {
+        if (resp.url().includes('products/search') && resp.url().includes('categoryNos=933746')) {
+          try {
+            const j = await resp.json();
+            if (j.items) { items = j.items; total = j.totalCount || 0; resolve(); }
+          } catch(e) {}
+        }
+      });
+      page.goto('https://racement.co.kr/products?categoryNo=933746', { waitUntil: 'networkidle', timeout: 30000 }).catch(()=>{});
+      setTimeout(resolve, 25000);
+    });
+    await page.close();
+    console.log(`Page ${pageNum}: ${items.length} / ${total}`);
+    return { items, total };
+  }
+
+  const first = await fetchPage(1);
+  all.push(...first.items);
+  const totalPages = Math.ceil(first.total / 100);
+  for (let p = 2; p <= totalPages; p++) {
+    const { items } = await fetchPage(p);
+    all.push(...items);
+  }
+
+  await browser.close();
+  const unique = Object.values(all.reduce((acc, p) => { acc[p.productNo]=p; return acc; }, {}));
+  console.log(`Total unique collected: ${unique.length}`);
+  return unique;
+}
+
+// ── 숫자 포맷 ──────────────────────────────────────────────
+function fmt(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
+function discPct(salePrice, discAmt) {
+  if (!salePrice || !discAmt) return 0;
+  return Math.round(discAmt / salePrice * 100);
+}
+
+// ── 요약 리포트 ────────────────────────────────────────────
+async function sendSummaryReport(products) {
+  // 중복 제거
+  const unique = Object.values(
+    products.reduce((acc, p) => { acc[p.productNo] = p; return acc; }, {})
+  );
+  const discounted = unique.filter(p => p.immediateDiscountAmt > 0);
+  console.log(`Unique products: ${unique.length} | Discounted: ${discounted.length}`);
+
+  if (discounted.length === 0) {
+    await broadcast('ℹ️ 현재 할인 중인 상품이 없습니다.');
+    return;
+  }
+
+  const byCat = { '신발': {}, '의류': {}, '용품': {}, '기타': {} };
+  for (const p of discounted) {
+    const cat = getCategory(p.displayCategoryNos);
+    const pct = discPct(p.salePrice, p.immediateDiscountAmt);
+    const key = `${pct}%`;
+    if (!byCat[cat][key]) byCat[cat][key] = [];
+    byCat[cat][key].push(p);
+  }
+
+  const KST = new Date(Date.now() + 9*3600*1000).toISOString().replace('T',' ').slice(0,16);
+  let msg = `🏷️ <b>RACEMENT 현재 할인 현황</b>\n📅 ${KST} 기준 | 총 ${discounted.length}개 상품\n`;
+
+  for (const [cat, emoji] of [['신발','👟'],['의류','👕'],['용품','🎒'],['기타','📦']]) {
+    const byPct = byCat[cat];
+    const pctKeys = Object.keys(byPct).sort((a,b)=>parseInt(a)-parseInt(b));
+    if (pctKeys.length === 0) continue;
+    msg += `\n━━━━━━━━━━━━━━━\n${emoji} <b>${cat}</b>\n`;
+    for (const pct of pctKeys) {
+      const items = byPct[pct];
+      msg += `\n🔸 <b>${pct} 할인</b> (${items.length}개)\n`;
+      for (const p of items) {
+        const discPrice = p.salePrice - p.immediateDiscountAmt;
+        const mapped = productMap[String(p.productNo)] || {};
+        const brand  = esc(mapped.브랜드 || p.brandName || '');
+        const pcode  = esc(mapped.품번 || '');
+        const info   = [brand, pcode].filter(Boolean).join(' · ');
+        msg += `  • ${esc(p.productName)}\n    <i>${info}</i>\n    ${fmt(p.salePrice)} → <b>${fmt(discPrice)}</b>\n`;
+      }
+    }
+  }
+
+  await broadcast(msg);
+  console.log('Summary sent!');
+}
+
+// ── 변동 리포트 ────────────────────────────────────────────
+async function sendChangesReport(products) {
+  const unique = Object.values(
+    products.reduce((acc, p) => { acc[p.productNo] = p; return acc; }, {})
+  );
+
+  const prevPrices = fs.existsSync(PRICES_FILE)
+    ? JSON.parse(fs.readFileSync(PRICES_FILE, 'utf-8')) : {};
+
+  const newPrices = {};
+  const newDisc=[], removedDisc=[], changedDisc=[];
+
+  for (const p of unique) {
+    const no = String(p.productNo);
+    const salePrice = p.salePrice || 0;
+    const discAmt = p.immediateDiscountAmt || 0;
+    newPrices[no] = { name: p.productName, salePrice, discAmt, displayCategoryNos: p.displayCategoryNos, checkedAt: new Date().toISOString() };
+
+    const prev = prevPrices[no];
+    if (prev) {
+      if (prev.discAmt === 0 && discAmt > 0) {
+        newDisc.push({ p, pct: discPct(salePrice, discAmt) });
+      } else if (prev.discAmt > 0 && discAmt === 0) {
+        removedDisc.push({ p, prevPct: discPct(prev.salePrice, prev.discAmt) });
+      } else if (prev.discAmt !== discAmt || prev.salePrice !== salePrice) {
+        changedDisc.push({ p,
+          prevPct: discPct(prev.salePrice, prev.discAmt),
+          newPct: discPct(salePrice, discAmt),
+          prevPrice: prev.salePrice - prev.discAmt,
+          newPrice: salePrice - discAmt,
+        });
+      }
+    }
+  }
+
+  fs.writeFileSync(PRICES_FILE, JSON.stringify(newPrices, null, 2), 'utf-8');
+
+  const total = newDisc.length + removedDisc.length + changedDisc.length;
+  if (total === 0) { console.log('No changes today.'); return; }
+
+  const KST = new Date(Date.now() + 9*3600*1000).toISOString().replace('T',' ').slice(0,16);
+  let msg = `⚠️ <b>RACEMENT 가격 변동 알림</b>\n📅 ${KST} | 총 ${total}개 변동\n`;
+
+  if (newDisc.length > 0) {
+    msg += `\n🔻 <b>신규 할인 시작</b> (${newDisc.length}개)\n`;
+    newDisc.forEach(({p, pct}) => {
+      const mapped = productMap[String(p.productNo)] || {};
+      const brand  = esc(mapped.브랜드 || p.brandName || '');
+      const pcode  = esc(mapped.품번 || '');
+      const info   = [brand, pcode].filter(Boolean).join(' · ');
+      msg += `  • ${esc(p.productName)}\n    <i>${info}</i>\n    ${fmt(p.salePrice)} → <b>${fmt(p.salePrice - p.immediateDiscountAmt)}</b> (-${pct}%)\n`;
+    });
+  }
+  if (changedDisc.length > 0) {
+    msg += `\n🔄 <b>할인율 변경</b> (${changedDisc.length}개)\n`;
+    changedDisc.forEach(({p, prevPct, newPct, prevPrice, newPrice}) => {
+      const mapped = productMap[String(p.productNo)] || {};
+      const brand  = esc(mapped.브랜드 || p.brandName || '');
+      const pcode  = esc(mapped.품번 || '');
+      const info   = [brand, pcode].filter(Boolean).join(' · ');
+      const arrow  = newPct > prevPct ? '🔺' : '🔻';
+      msg += `  ${arrow} ${esc(p.productName)}\n    <i>${info}</i>\n    ${prevPct}% → <b>${newPct}%</b>  (${fmt(prevPrice)} → <b>${fmt(newPrice)}</b>)\n`;
+    });
+  }
+  if (removedDisc.length > 0) {
+    msg += `\n✅ <b>할인 종료</b> (${removedDisc.length}개)\n`;
+    removedDisc.forEach(({p, prevPct}) => {
+      const mapped = productMap[String(p.productNo)] || {};
+      const brand  = esc(mapped.브랜드 || p.brandName || '');
+      const pcode  = esc(mapped.품번 || '');
+      const info   = [brand, pcode].filter(Boolean).join(' · ');
+      msg += `  • ${esc(p.productName)}\n    <i>${info}</i>  (${prevPct}% 종료)\n`;
+    });
+  }
+
+  await broadcast(msg);
+  console.log(`Changes report sent: ${total} changes`);
+}
+
+// ── 메인 ──────────────────────────────────────────────────
+async function main() {
+  console.log(`Mode: ${MODE}`);
+  console.log(`BOT_TOKEN: ${BOT_TOKEN ? BOT_TOKEN.slice(0,10)+'...(설정됨)' : '❌ 미설정'}`);
+  console.log(`CHAT_ID 설정됨: ${CHAT_ID ? 'YES (길이=' + String(CHAT_ID).length + ')' : '❌ 미설정'}`);
+  // 항상 getUpdates 실행 → 실제 수신 chat_id를 로그에 출력 (올바른 ID 확인용)
+  if (BOT_TOKEN) await printChatId();
+  const allProducts = await getAllProducts();
+
+  const busanStock = await loadBusanStockSet();
+  const products = busanStock
+    ? allProducts.filter(p => busanStock.has(String(p.productNo)))
+    : allProducts;
+  console.log(`해운대 재고 필터: ${allProducts.length}개 → ${products.length}개`);
+
+  if (MODE === 'summary') await sendSummaryReport(products);
+  else await sendChangesReport(products);
+}
+
+main().catch(e => { console.error('Fatal:', e); process.exit(1); });

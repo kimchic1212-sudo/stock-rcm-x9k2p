@@ -1,0 +1,28 @@
+name: 18시 해운대점 일일 브리핑
+
+on:
+  schedule:
+    - cron: '0 9 * * *' # UTC 기준 09:00 = 한국 시간 18:00
+  workflow_dispatch: 
+
+jobs:
+  send_telegram:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v3
+
+      - name: 메모 읽고 텔레그램 발송
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ ! -f requests.json ]; then
+            curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="🔔 [해운대점] 오늘 직원들이 작성한 메모가 없습니다."
+            exit 0
+          fi
+
+          BODY=$(jq -r 'if length == 0 then "오늘 작성된 메모가 없습니다." else (.[] | "📌 [\(.tag)] \(.staff) 님\n상품: \(.product) (\(.shopNo))\n내용: \(.text)\n시간: \(.date)\n") end' requests.json)
+          MSG=$'🔔 [해운대점 18시 마감 브리핑]\n\n'"$BODY"$'\n오늘 하루도 고생 많으셨습니다 점장님!'
+          
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" -d chat_id="${CHAT_ID}" -d text="$MSG"
