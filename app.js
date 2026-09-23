@@ -2357,6 +2357,8 @@ const HUB_TOKEN_API = 'https://racement-hub.vercel.app/api/inv-token';
 // 게이트(공용비번) 통과 시 받은 서명 토큰을 Authorization 헤더로 보낸다.
 // 아직 Pages 에 파일이 남아있는 이전 기간에는 실패 시 기존 경로로 폴백한다.
 const HUB_DATA_API = 'https://racement-hub.vercel.app/api/inv-data';
+// AI 세일즈 가이드 생성 창구 — Groq 키는 허브 서버에만 두고 앱은 공용비번 토큰으로 호출한다
+const HUB_AI_API = 'https://racement-hub.vercel.app/api/ai-guide';
 const INV_PASS_KEY = 'racement_inv_pass_v1';
 
 async function dataFetch(path){
@@ -4592,6 +4594,10 @@ best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프
 
 closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 
+issues: (매장에서 미리 알아둘 주의점 1~2가지. 예: "사이즈가 작게 나와 반 치수 업 권장", "발볼이 좁아 넓은 발에는 비권장". 없으면 "특별한 이슈 없음")
+
+brand_focus: (브랜드가 이 모델에서 공식적으로 내세우는 강조 포인트 1~2문장)
+
 
 
 
@@ -4610,12 +4616,36 @@ closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
 
 // Groq API (llama-3.3-70b) 호출 — AI 세일즈 가이드 자동생성
 async function callAIGuide(brand, modelName, reviewText) {
-    const key = getAnthKey();
-    if (!key) throw new Error("Groq API Key가 설정되지 않았습니다.\nAdmin > API 설정에서 등록해주세요.\n발급: console.groq.com (무료)");
     const userContent = reviewText.trim()
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
 
+    // 1순위: 허브 창구 — 키가 서버에만 있어 기기마다 등록할 필요가 없다
+    const _pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e) { return null; } })();
+    let _hubErr = "";
+    if (_pass) {
+        const r = await fetch(HUB_AI_API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + _pass },
+            body: JSON.stringify({ system: SALES_GUIDE_SYSTEM_PROMPT, user: userContent, maxTokens: 1400 }),
+        }).catch(e => ({ ok: false, status: 0, _netErr: e.message }));
+        if (r.ok) {
+            const j = await r.json();
+            return j.text || "";
+        }
+        if (r.status === 429) throw new Error("AI 요청이 잠시 몰렸습니다. 30초쯤 뒤에 다시 시도하세요.");
+        if (r.status === 401) {
+            try { localStorage.removeItem(INV_PASS_KEY); } catch(e) {}
+            window._rcShowGate?.();
+            throw new Error("공용 비밀번호를 다시 입력해주세요.");
+        }
+        const j = r.json ? await r.json().catch(() => ({})) : {};
+        _hubErr = j.error || r._netErr || ("허브 응답 " + r.status);
+    }
+
+    // 2순위: 이 기기에 등록된 Groq 키 (예전 방식 — 허브가 준비되기 전이나 장애 시)
+    const key = getAnthKey();
+    if (!key) throw new Error("AI 가이드를 생성할 수 없습니다." + (_hubErr ? "\n(허브: " + _hubErr + ")" : "") + "\n허브에 GROQ_API_KEY를 등록하면 기기마다 키를 넣지 않아도 됩니다.\n임시로 쓰려면 ADMIN > API 설정에 Groq 키를 넣어주세요. 발급: console.groq.com (무료)");
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -4628,7 +4658,7 @@ async function callAIGuide(brand, modelName, reviewText) {
                 { role: "system", content: SALES_GUIDE_SYSTEM_PROMPT },
                 { role: "user",   content: userContent }
             ],
-            max_tokens: 1200,
+            max_tokens: 1400,
             temperature: 0.7
         })
     });
@@ -4640,9 +4670,43 @@ async function callAIGuide(brand, modelName, reviewText) {
     return data.choices?.[0]?.message?.content || "";
 }
 
+// AI 결과를 가이드 DB 형식으로 변환 — 예전엔 heel_stack 같은 이름으로 저장돼 '이슈·브랜드 포커스'가 늘 빈칸이었다
+function _guideEntryFromAI(ai, info, over) {
+    ai = ai || {}; info = info || {}; over = over || {};
+    return {
+        품번: info.품번 || "", 품명: info.품명 || "", 브랜드: info.브랜드 || "",
+        keywords: (over.keywords && over.keywords.length) ? over.keywords : (ai.keywords || []),
+        features: over.features || ai.features || "",
+        target:   over.target   || ai.target   || "",
+        pitch:    over.pitch    || ai.pitch    || ai.closing || "",
+        weight: ai.weight || "", heelStack: ai.heel_stack || "", foreStack: ai.fore_stack || "", drop: ai.drop || "",
+        specAdv: ai.spec_analysis || "", verDiff: ai.vs_prev || "", vsComp: ai.vs_others || "",
+        whyThis: ai.why || "", bestFor: ai.best_for || "", closing: ai.closing || over.pitch || "",
+        issues: ai.issues || "", brandFocus: ai.brand_focus || "",
+    };
+}
+
+// 가이드 저장 공용 함수 — 서버 최신 sha로 전체 파일을 교체한다(일괄 생성 중간 저장도 이걸 쓴다).
+// 저장은 공백 없는 JSON: 예쁜 들여쓰기로 저장하면 파일이 1MB를 넘어 읽기가 깨지는 함정이 있다.
+async function _saveGuideEntries(entries) {
+    const codes = Object.keys(entries || {});
+    if (!codes.length) return 0;
+    const merged = Object.assign({}, SALES_GUIDES, entries);
+    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
+    let sha = null;
+    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) { const j = await r.json(); sha = j.sha; } } catch(e) {}
+    const body = { message: `update: sales guide +${codes.length}개`, content: utf8ToB64(JSON.stringify(merged)), branch: GH.branch };
+    if (sha) body.sha = sha;
+    const res = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error("GitHub 저장 실패 (" + res.status + ")");
+    SALES_GUIDES = merged;
+    sessionStorage.removeItem(CACHE_KEY);
+    return codes.length;
+}
+
 function parseGuideResponse(text) {
     const result = { keywords: [], features: "", target: "", pitch: "",
-                     weight: "", heel_stack: "", fore_stack: "", drop: "",
+                     weight: "", heel_stack: "", fore_stack: "", drop: "", issues: "", brand_focus: "",
                      spec_analysis: "", vs_prev: "", vs_others: "",
                      why: "", best_for: "", closing: "" };
     const blockMatch = text.match(/%%APP_DATA_START%%([\s\S]*?)%%APP_DATA_END%%/);
@@ -4663,6 +4727,8 @@ function parseGuideResponse(text) {
     result.why          = field("why");
     result.best_for     = field("best_for");
     result.closing      = field("closing");
+    result.issues       = field("issues");
+    result.brand_focus  = field("brand_focus");
     return result;
 }
 
@@ -11198,6 +11264,13 @@ window.openSalesGuide = (code) => {
     modal.querySelector("#sgTarget").textContent   = guide.target      || "—";
     modal.querySelector("#sgBestFor").textContent  = guide.bestFor     || guide.best_for || guide.target   || "—";
     modal.querySelector("#sgPitch").textContent    = guide.closing     || guide.pitch    || "—";
+
+    // 내용이 없는 항목은 칸 자체를 숨긴다
+    const _sgShow = (sel, has) => { const el = modal.querySelector(sel); if (el && el.parentElement) el.parentElement.classList.toggle("hidden", !has); };
+    _sgShow("#sgIssues", !!guide.issues);
+    _sgShow("#sgBrandFocus", !!guide.brandFocus);
+    _sgShow("#sgVsPrev", !!(guide.verDiff || guide.vs_prev || guide.features));
+    _sgShow("#sgVsOthers", !!(guide.vsComp || guide.vs_others));
 
     modal.classList.remove("hidden");
     if(window.lucide) lucide.createIcons();
@@ -18081,16 +18154,19 @@ window.renderSalesAdmin = () => {
                         target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
                     };
                 });
+                // 엑셀 업로드는 '덮어쓰기'가 아니라 '병합' — 예전엔 이 업로드 한 번으로 기존 상세 가이드(스펙·비교·클로징 등)가 통째로 날아갔다
+                let _added = 0, _updated = 0;
+                const _mergedGuides = Object.assign({}, SALES_GUIDES);
+                for (const [code, g] of Object.entries(newGuides)) {
+                    const filled = Object.fromEntries(Object.entries(g).filter(([, v]) => Array.isArray(v) ? v.length : String(v || "").trim()));
+                    if (_mergedGuides[code]) { _mergedGuides[code] = Object.assign({}, _mergedGuides[code], filled); _updated++; }
+                    else { _mergedGuides[code] = g; _added++; }
+                }
+                if (!confirm(`엑셀에서 ${Object.keys(newGuides).length}개를 읽었습니다.\n\n새로 추가: ${_added}개\n기존 항목 갱신: ${_updated}개 (엑셀에 없는 항목과 상세 내용은 그대로 유지)\n\n저장할까요?`)) { fileInput.value = ""; return; }
                 try {
-                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
-                    let sha = null;
-                    try { const req = await fetch(apiBase+"?t="+Date.now(), {headers:{Authorization:"Bearer "+getPat()}}); if(req.ok){ const j=await req.json(); sha=j.sha; } }catch(e){}
-                    const body = { message:"update sales guide", content: utf8ToB64(JSON.stringify(newGuides, null, 2)), branch: GH.branch };
-                    if(sha) body.sha = sha;
-                    await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                    SALES_GUIDES = newGuides; sessionStorage.removeItem(CACHE_KEY);
+                    await _saveGuideEntries(_mergedGuides);
                     _recomputeStock(); render(); window.renderSalesAdmin();
-                    alert(`✅ 총 ${Object.keys(SALES_GUIDES).length}개의 세일즈 가이드가 성공적으로 등록되었습니다!`);
+                    alert(`✅ 세일즈 가이드 저장 완료 — 추가 ${_added}개, 갱신 ${_updated}개 (전체 ${Object.keys(SALES_GUIDES).length}개)`);
                 } catch(err) { alert("업로드 실패: " + err.message); }
                 fileInput.value = "";
             };
@@ -20297,8 +20373,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     return !SALES_GUIDES[p.품번];
                 });
 
+                // 재고 있는 상품부터 채우는 게 우선이라 부산 재고 많은 순으로 정렬
+                missing.sort((a, b) => (b.busanTotal || 0) - (a.busanTotal || 0) || String(a.품명).localeCompare(String(b.품명), "ko"));
+                const _inStock = missing.filter(p => (p.busanTotal || 0) > 0).length;
                 const countEl = document.getElementById("missCount");
-                if(countEl) countEl.textContent = missing.length + "개 미등록";
+                if(countEl) countEl.textContent = `${missing.length}개 미등록 (재고 있는 것 ${_inStock}개 먼저)`;
 
                 const listEl = document.getElementById("missList");
                 if(!listEl) return;
@@ -20721,10 +20800,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     }
                     // ✨ 가이드 자동 생성
                     if (e.target.classList.contains('ai-gen-btn')) {
-                        if (!getAnthKey()) {
-                            alert("⚠️ Admin > API 설정에서 Anthropic API Key를 먼저 등록해주세요.\n\nsk-ant-api03-... 형식의 키입니다.");
-                            return;
-                        }
                         const code  = e.target.dataset.code;
                         const brand = e.target.dataset.brand;
                         const name  = e.target.dataset.name;
@@ -20782,18 +20857,40 @@ window.addEventListener('DOMContentLoaded', () => {
                 if(!confirm(`신발 ${items.length}개에 AI 가이드를 자동 생성합니다.\n시간이 걸릴 수 있어요. 진행할까요?`)) return;
 
                 bulkAiBtn.disabled = true;
-                let done = 0, failed = 0;
+                let done = 0, failed = 0, saved = 0;
+                let pending = {};   // 10개마다 중간 저장 — 오래 걸리는 작업이라 중간에 끊겨도 날아가지 않게
+                const _flush = async () => {
+                    if (!Object.keys(pending).length || !getPat()) return;
+                    try { saved += await _saveGuideEntries(pending); pending = {}; }
+                    catch(e) { console.warn('[AI 일괄생성] 중간 저장 실패:', e.message); }
+                };
 
                 for(const btn of items) {
                     const code  = btn.dataset.code;
                     const brand = btn.dataset.brand;
                     const name  = btn.dataset.name;
+                    if (SALES_GUIDES[code]) { done++; continue; }   // 중간 저장으로 이미 등록된 건 건너뜀
                     bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
-                    try {
-                        const rawText = await callAIGuide(brand, name, "");
-                        const parsed  = parseGuideResponse(rawText);
+                    let parsed = null;
+                    for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
+                        try {
+                            const rawText = await callAIGuide(brand, name, "");
+                            parsed = parseGuideResponse(rawText);
+                        } catch(err) {
+                            if (/몰렸|429/.test(err.message) && attempt === 0) {   // 레이트리밋이면 좀 더 기다렸다 한 번 더
+                                bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 대기중...`;
+                                await new Promise(r => setTimeout(r, 30000));
+                                continue;
+                            }
+                            failed++;
+                            console.warn(`[AI 일괄생성] ${name} 실패:`, err.message);
+                            break;
+                        }
+                    }
+                    if (parsed) {
                         window._missGuideData = window._missGuideData || {};
                         window._missGuideData[code] = parsed;
+                        pending[code] = _guideEntryFromAI(parsed, { 품번: code, 품명: name, 브랜드: brand });
                         const listEl  = document.getElementById("missList");
                         if(listEl) {
                             const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
@@ -20808,18 +20905,18 @@ window.addEventListener('DOMContentLoaded', () => {
                             if(chk) chk.checked = true;
                         }
                         done++;
-                    } catch(err) {
-                        failed++;
-                        console.warn(`[AI 일괄생성] ${name} 실패:`, err.message);
+                        if (Object.keys(pending).length >= 10) await _flush();
                     }
                     // API 레이트리밋 방지 딜레이
                     await new Promise(r => setTimeout(r, 2000));
                 }
+                await _flush();
 
                 bulkAiBtn.textContent = `✅ ${done}개 완료${failed > 0 ? ` (${failed}개 실패)` : ""}`;
                 bulkAiBtn.disabled = false;
                 if(done > 0) {
-                    alert(`✅ AI 가이드 ${done}개 생성 완료!\n이제 "선택 항목 저장" 버튼을 눌러 GitHub에 저장하세요.`);
+                    render(); if(window.renderSalesAdmin) window.renderSalesAdmin();
+                    alert(`✅ AI 가이드 ${done}개 생성 완료` + (saved ? `, 그중 ${saved}개는 자동 저장됨.` : ".") + `\n남은 항목은 "선택 항목 저장" 버튼으로 저장하세요.` + (failed ? `\n(${failed}개 실패 — 다시 누르면 실패한 것만 재시도)` : ""));
                 }
             };
         }
@@ -20840,32 +20937,18 @@ window.addEventListener('DOMContentLoaded', () => {
                     const tg = document.querySelector(`.miss-tg[data-code="${code}"]`)?.value || "";
                     const pt = document.querySelector(`.miss-pt[data-code="${code}"]`)?.value || "";
                     const ai = window._missGuideData?.[code] || {};
-                    newEntries[code] = {
-                        keywords: kw ? kw.split(",").map(k=>k.trim()).filter(Boolean) : (ai.keywords||[]),
-                        features: ft||ai.features||"", target: tg||ai.target||"", pitch: pt||ai.closing||ai.pitch||"",
-                        weight: ai.weight||"", heel_stack: ai.heel_stack||"", fore_stack: ai.fore_stack||"",
-                        drop: ai.drop||"", spec_analysis: ai.spec_analysis||"",
-                        vs_prev: ai.vs_prev||"", vs_others: ai.vs_others||"",
-                        why: ai.why||"", best_for: ai.best_for||"", closing: ai.closing||pt||""
-                    };
+                    const _p = PRODUCTS.find(x => x.품번 === code) || {};
+                    newEntries[code] = _guideEntryFromAI(ai, { 품번: code, 품명: _p.품명, 브랜드: _p.브랜드 }, {
+                        keywords: kw ? kw.split(",").map(k => k.trim()).filter(Boolean) : null,
+                        features: ft, target: tg, pitch: pt,
+                    });
                 });
-
-                const merged = Object.assign({}, SALES_GUIDES, newEntries);
                 const origText = saveMissBtn.textContent;
                 saveMissBtn.textContent = "⏳ 저장 중...";
                 saveMissBtn.disabled = true;
 
                 try {
-                    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
-                    let sha = null;
-                    try { const r = await fetch(apiBase+"?t="+Date.now(),{headers:{Authorization:"Bearer "+getPat()}}); if(r.ok){ const j=await r.json(); sha=j.sha; } } catch(e){}
-                    const body = { message:`update: sales guide +${Object.keys(newEntries).length}개 추가`, content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch };
-                    if(sha) body.sha = sha;
-                    const res = await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-                    if(!res.ok) throw new Error("GitHub 저장 실패 ("+res.status+")");
-
-                    SALES_GUIDES = merged;
-                    sessionStorage.removeItem(CACHE_KEY);
+                    await _saveGuideEntries(newEntries);
                     _recomputeStock(); render(); window.renderSalesAdmin();
                     alert(`✅ ${Object.keys(newEntries).length}개 가이드가 성공적으로 등록되었습니다!`);
                     showPanel("uploadPanel");
