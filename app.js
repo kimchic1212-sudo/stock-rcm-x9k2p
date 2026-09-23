@@ -20848,8 +20848,10 @@ window.addEventListener('DOMContentLoaded', () => {
         const bulkAiBtn = document.getElementById("bulkAiBtn");
         if(bulkAiBtn) {
             bulkAiBtn.onclick = async () => {
-                if(!getAnthKey()) {
-                    alert("⚠️ Admin > API 설정에서 Groq API Key를 먼저 등록해주세요.\n발급: console.groq.com (무료)");
+                // 허브 창구가 있으면 기기 키가 없어도 된다 — 실제 가능 여부와 안내는 callAIGuide가 처리
+                const _hasPass = (() => { try { return !!localStorage.getItem(INV_PASS_KEY); } catch(e) { return false; } })();
+                if(!_hasPass && !getAnthKey()) {
+                    alert("⚠️ 공용 비밀번호 로그인이 필요합니다.\n(또는 ADMIN > API 설정에 Groq 키 등록)");
                     return;
                 }
                 const items = document.querySelectorAll(".ai-gen-btn");
