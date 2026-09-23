@@ -2711,6 +2711,8 @@ function restoreHistoryState() {
     if($("#sizeSelFw")) $("#sizeSelFw").value = state.sizeFw;
     if($("#sizeSelAp")) $("#sizeSelAp").value = state.sizeAp;
     if($("#sizeSelGear")) $("#sizeSelGear").value = state.sizeGear;
+    if($("#weightSel")) $("#weightSel").value = state.weightBand || "ALL";
+    if($("#dropSel")) $("#dropSel").value = state.dropBand || "ALL";
     if($("#sortSel")) $("#sortSel").value = state.sort;
 
     // 기획전 필터는 저장된 켜짐/꺼짐을 그대로 되살린다. 예전엔 togglePromoView를 빌려 썼는데, 기획전이 2개 이상이면
@@ -5035,6 +5037,7 @@ function rebuildIndex(){
       $("#sizeSelAp").onchange = handleSizeChange;
       $("#sizeSelGear").onchange = handleSizeChange;
   }
+  _ensureSpecFilterRow();
 
   if($("#sortSel") && !$("#sortSel").querySelector('option[value="salesDesc"]')) {
       const opt = document.createElement("option"); opt.value = "salesDesc"; opt.innerHTML = "🔥 전체 판매량순";
@@ -11724,6 +11727,59 @@ function card(p){
   return el;
 }
 
+// 가이드의 무게·드롭을 숫자로 (예: "약 285g" → 285, "8 mm" → 8). 가이드 객체가 바뀌면 다시 계산한다.
+const _specCache = new WeakMap();
+function _guideSpec(code) {
+    const g = SALES_GUIDES[code];
+    if (!g || typeof g !== "object") return { w: null, d: null };
+    const hit = _specCache.get(g);
+    if (hit) return hit;
+    const num = v => { const m = String(v == null ? "" : v).match(/\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : null; };
+    const spec = { w: num(g.weight), d: num(g.drop) };
+    _specCache.set(g, spec);
+    return spec;
+}
+
+// "230-260" / "-230"(미만) / "290-"(이상) 구간 판정. 스펙이 없는 상품(가이드 없음)은 걸러진다.
+function _inSpecBand(val, band) {
+    if (!band || band === "ALL") return true;
+    if (val == null) return false;
+    const [lo, hi] = String(band).split("-");
+    if (lo !== "" && val < parseFloat(lo)) return false;
+    if (hi !== "" && hi != null && val >= parseFloat(hi)) return false;
+    return true;
+}
+
+// 더보기 패널의 스펙 줄(무게·드롭)과 무게·드롭 정렬 옵션 — 사이즈 줄을 만들 때 같이 만든다
+function _ensureSpecFilterRow() {
+    const sortSel = $("#sortSel");
+    if (!sortSel) return;
+    if (!sortSel.querySelector('option[value="weightAsc"]')) {
+        [["weightAsc","⚖️ 가벼운 순"],["weightDesc","⚖️ 무거운 순"],["dropAsc","↕️ 드롭 낮은 순"],["dropDesc","↕️ 드롭 높은 순"]].forEach(([v, t]) => {
+            const o = document.createElement("option"); o.value = v; o.textContent = t; sortSel.appendChild(o);
+        });
+    }
+    if ($("#weightSel")) return;
+    const specRow = document.createElement("div");
+    specRow.className = "flex gap-1.5 items-center flex-wrap";
+    const cls = "ipt text-xs font-bold bg-white border-gray-200 rounded px-2 py-1 outline-none";
+    specRow.innerHTML =
+        `<span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">스펙</span>` +
+        `<select id="weightSel" class="${cls}">` +
+          `<option value="ALL">⚖️ 무게</option><option value="-230">~229g</option><option value="230-260">230~259g</option><option value="260-290">260~289g</option><option value="290-">290g~</option>` +
+        `</select>` +
+        `<select id="dropSel" class="${cls}">` +
+          `<option value="ALL">↕️ 드롭</option><option value="-4">~3mm</option><option value="4-8">4~7mm</option><option value="8-">8mm~</option>` +
+        `</select>` +
+        `<span class="text-[10px] font-bold text-gray-400 shrink-0">판매 가이드 있는 상품 기준</span>`;
+    const slot = $("#fpSizeSlot") || $("#filterDetails");
+    if (!slot) return;
+    slot.appendChild(specRow);
+    const onSpecChange = () => { saveHistoryState(); visibleCount = 60; render(); };
+    $("#weightSel").onchange = onSpecChange;
+    $("#dropSel").onchange = onSpecChange;
+}
+
 function getFilters(){
   const promoBtn = $('button[data-promo]');
   const promoOnly = window.tempPromoFilter === true || (promoBtn ? promoBtn.dataset.active === "1" : false);
@@ -11741,6 +11797,8 @@ function getFilters(){
     sizeFw: $("#sizeSelFw") ? $("#sizeSelFw").value : "ALL",
     sizeAp: $("#sizeSelAp") ? $("#sizeSelAp").value : "ALL",
     sizeGear: $("#sizeSelGear") ? $("#sizeSelGear").value : "ALL",
+    weightBand: $("#weightSel") ? $("#weightSel").value : "ALL",
+    dropBand: $("#dropSel") ? $("#dropSel").value : "ALL",
     promoOnly: promoOnly,
     promoType: promoOnly && $("#promoTypeSel") && $("#promoTypeSel").value !== "" ? $("#promoTypeSel").value : "ALL",
     promoRate: promoOnly && $("#promoRateSel") && $("#promoRateSel").value !== "" ? Number($("#promoRateSel").value) : 0,
@@ -12310,7 +12368,7 @@ function _updateFilterUi(resultCount){
   const panel = $("#filterPanel"), badge = $("#filterPanelCount");
   if(!panel || !badge) return;
   let n = [...panel.querySelectorAll('button.chip[data-active="1"]')].filter(b => !b.dataset.brand).length;
-  ['sizeSelFw','sizeSelAp','sizeSelGear'].forEach(id => { const s = document.getElementById(id); if(s && s.value !== 'ALL') n++; });
+  ['sizeSelFw','sizeSelAp','sizeSelGear','weightSel','dropSel'].forEach(id => { const s = document.getElementById(id); if(s && s.value !== 'ALL') n++; });
   if($("#locZoneSelect")?.value) n++;
   n += (window._activeBrands?.size || 0);
   badge.textContent = n;
@@ -12632,6 +12690,13 @@ function render(){
     if(f.noLocation && (_hasRealLoc(p.품번) || !_needsRealLocation(p))) return false;
     if(f.hasLocation && !_hasRealLoc(p.품번)) return false;
 
+    // 무게·드롭은 판매 가이드에 있는 값 — 가이드가 없는 상품은 이 필터를 켜면 빠진다
+    if(f.weightBand !== "ALL" || f.dropBand !== "ALL") {
+        const _sp = _guideSpec(p.품번);
+        if(!_inSpecBand(_sp.w, f.weightBand)) return false;
+        if(!_inSpecBand(_sp.d, f.dropBand)) return false;
+    }
+
     if(f.locationZone) {
         const [_fz, _fs] = f.locationZone.split('::');
         const _arr = LOCATIONS.assignments[p.품번];
@@ -12683,6 +12748,16 @@ function render(){
     // RT추천은 판매량이 아니라 "지금 얼마나 급한지"(결품·소진임박 + 최근 판매 가중) 순으로 정렬한다
     if(sortMode === "rtDesc") return (getRTNeed(b).score||0) - (getRTNeed(a).score||0) || String(a.품명).localeCompare(String(b.품명),"ko");
 
+    // 무게·드롭 정렬 — 가이드에 값이 없는 상품은 항상 뒤로
+    if(/^(weight|drop)(Asc|Desc)$/.test(sortMode)) {
+        const key = sortMode.startsWith("weight") ? "w" : "d";
+        const av = _guideSpec(a.품번)[key], bv = _guideSpec(b.품번)[key];
+        if(av == null && bv == null) return String(a.품명).localeCompare(String(b.품명),"ko");
+        if(av == null) return 1;
+        if(bv == null) return -1;
+        return (sortMode.endsWith("Asc") ? av - bv : bv - av) || String(a.품명).localeCompare(String(b.품명),"ko");
+    }
+
     if(sortMode === "default") {
         const ca = CAT_ORDER[a.카테고리] ?? 9;
         const cb = CAT_ORDER[b.카테고리] ?? 9;
@@ -12710,7 +12785,7 @@ function render(){
   if(filteredList.length === 0){
       const f2 = getFilters();
       const hasQuery = !!f2.q;
-      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.noBarcode || f2.noLocation || f2.hasLocation || f2.noImage || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
+      const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.noBarcode || f2.noLocation || f2.hasLocation || f2.noImage || f2.weightBand !== "ALL" || f2.dropBand !== "ALL" || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
       const nm = $("#noMatch");
       if(nm) nm.innerHTML = `
 
@@ -16581,6 +16656,10 @@ function renderActiveFilterBar() {
             const sel = $("#" + id);
             if (sel && sel.value !== "ALL") items.push({ label: `사이즈 ${sel.value}`, onClear: () => { sel.value = "ALL"; }});
         });
+        ["weightSel", "dropSel"].forEach(id => {
+            const sel = $("#" + id);
+            if (sel && sel.value !== "ALL") items.push({ label: (sel.options[sel.selectedIndex] || {}).text || sel.value, onClear: () => { sel.value = "ALL"; }});
+        });
         const lz = $("#locZoneSelect");
         if (lz && lz.value) items.push({ label: `📍 ${(lz.options[lz.selectedIndex] || {}).text || lz.value}`, onClear: () => {
             lz.value = ""; lz.classList.remove('ring-2', 'ring-sky-400');
@@ -16667,6 +16746,8 @@ $("#resetAll").onclick=()=>{
     if($("#sizeSelFw")) $("#sizeSelFw").value="ALL";
     if($("#sizeSelAp")) $("#sizeSelAp").value="ALL";
     if($("#sizeSelGear")) $("#sizeSelGear").value="ALL";
+    if($("#weightSel")) $("#weightSel").value="ALL";
+    if($("#dropSel")) $("#dropSel").value="ALL";
     $("#q").value=""; visibleCount=60; render();
 };
 
