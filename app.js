@@ -4615,7 +4615,20 @@ brand_focus: (브랜드가 이 모델에서 공식적으로 내세우는 강조 
 %%APP_DATA_END%%`;
 
 // Groq API (llama-3.3-70b) 호출 — AI 세일즈 가이드 자동생성
+// 결과에 한글 외 문자(일본어·한자 등)가 섞여 나오는 일이 있어(2026-06 실제 사례) 한 번 더 뽑아 본다
+const _FOREIGN_RE = /[぀-ヿ一-鿿]/;   // 히라가나·가타카나·한자
 async function callAIGuide(brand, modelName, reviewText) {
+    const first = await _callAIGuideOnce(brand, modelName, reviewText);
+    if (!_FOREIGN_RE.test(first)) return first;
+    try {
+        const second = await _callAIGuideOnce(brand, modelName, reviewText);
+        if (second && !_FOREIGN_RE.test(second)) return second;
+    } catch(e) { /* 재시도가 실패하면 첫 결과를 그대로 쓴다 */ }
+    console.warn('[AI 가이드] 한글 외 문자가 섞인 결과 — 검수 필요:', modelName);
+    return first;
+}
+
+async function _callAIGuideOnce(brand, modelName, reviewText) {
     const userContent = reviewText.trim()
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
         : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
