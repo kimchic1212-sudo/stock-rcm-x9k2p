@@ -4646,7 +4646,13 @@ async function _callAIGuideOnce(brand, modelName, reviewText) {
             const j = await r.json();
             return j.text || "";
         }
-        if (r.status === 429) throw new Error("AI 요청이 잠시 몰렸습니다. 30초쯤 뒤에 다시 시도하세요.");
+        if (r.status === 429) {
+            const j429 = await r.json().catch(() => ({}));
+            const wait = Math.min(Math.max(Number(j429.retryAfter) || 20, 10), 90);
+            const e429 = new Error(`AI 사용량 제한입니다. ${wait}초 뒤에 다시 시도하세요.`);
+            e429.rateLimited = true; e429.retryAfter = wait;
+            throw e429;
+        }
         if (r.status === 401) {
             try { localStorage.removeItem(INV_PASS_KEY); } catch(e) {}
             window._rcShowGate?.();
@@ -4677,6 +4683,12 @@ async function _callAIGuideOnce(brand, modelName, reviewText) {
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+            const wait = Math.min(Math.max(Number(res.headers.get("retry-after")) || 20, 10), 90);
+            const e429 = new Error(`AI 사용량 제한입니다. ${wait}초 뒤에 다시 시도하세요.`);
+            e429.rateLimited = true; e429.retryAfter = wait;
+            throw e429;
+        }
         throw new Error(`Groq API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
     }
     const data = await res.json();
@@ -20887,14 +20899,18 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (SALES_GUIDES[code]) { done++; continue; }   // 중간 저장으로 이미 등록된 건 건너뜀
                     bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
                     let parsed = null;
-                    for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
+                    for (let attempt = 0; attempt < 3 && !parsed; attempt++) {
                         try {
                             const rawText = await callAIGuide(brand, name, "");
                             parsed = parseGuideResponse(rawText);
                         } catch(err) {
-                            if (/몰렸|429/.test(err.message) && attempt === 0) {   // 레이트리밋이면 좀 더 기다렸다 한 번 더
-                                bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 대기중...`;
-                                await new Promise(r => setTimeout(r, 30000));
+                            const limited = err.rateLimited || /사용량 제한|몰렸|429/.test(err.message);
+                            if (limited && attempt < 2) {   // 서버가 알려준 시간만큼 기다렸다 다시
+                                const wait = Math.min(Math.max(Number(err.retryAfter) || 20, 10), 90);
+                                for (let left = wait; left > 0; left--) {
+                                    bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 대기 ${left}초...`;
+                                    await new Promise(r => setTimeout(r, 1000));
+                                }
                                 continue;
                             }
                             failed++;
