@@ -4316,462 +4316,90 @@ window.addEventListener('beforeunload', () => {
     if(_posIntervalId)   clearInterval(_posIntervalId);
 });
 
-// ── AI 세일즈 가이드 자동생성 ──────────────────────────────────────
-const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 수석 러닝 슈즈 애널리스트입니다.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-요청받은 러닝화에 대해 RunRepeat·Believe in the Run·브랜드 공식 스펙·러닝 커뮤니티 데이터 등 보유한 모든 지식을 활용하여 아래 형식의 가이드를 생성하세요.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-수치를 정확히 모를 경우 "약 OOg" 형식으로 추정값을 제공하세요 (추정이라도 비워두지 말 것).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-출력은 반드시 100% 한국어(한글)로만 작성하세요. 일본어·중국어·한자(漢字)·가타카나·히라가나·태국어 등 외국 문자를 단 한 글자도 섞지 마세요. 외래어/기술 용어도 한글 표기로 쓰세요 (예: plate→플레이트, 搭載→탑재, バランス→밸런스, carbon→카본, 高速→고속). 영어 모델명과 단위(mm, g, km), 숫자는 허용합니다. 작성 후 외국 문자가 섞이지 않았는지 스스로 점검하세요.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 출력 블록 (파싱용 — 키 이름·순서 절대 변경 금지)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%APP_DATA_START%%
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-keywords: 태그1,태그2,태그3,태그4,태그5 (브랜드명·모델명·품번은 쓰지 말 것 — 카드에 이미 보인다. 쿠셔닝·템포주·넓은발·카본·회복주처럼 신발의 성격·용도·착용감만 쓴다)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-features: (핵심 기술 특징 2문장. 폼/플레이트/소재 명시)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-target: (추천 대상. 페이스 구간·발형·거리 포함)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-pitch: (판매 멘트 1~2문장. 구어체)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-weight: (남성 기준 무게. 예: 238g)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-heel_stack: (힐 스택. 예: 40mm)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fore_stack: (포어풋 스택. 예: 32mm)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-drop: (드롭. 예: 8mm)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-spec_analysis: (스펙 수치의 실전 의미 1~2문장. "OOg이라 OO할 때 OO" 형식)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-vs_prev: (전작 대비 핵심 개선점 1~2문장. 전작 없으면 "초대 모델" 표기)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-vs_others: (동급 경쟁 모델 1~2개 언급 후 본 모델 우위 1~2문장)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-why: (이 신발의 한 줄 정의. "카본 없이 카본 속도를 내는 슈퍼트레이너" 같은 임팩트 있는 문장)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-best_for: (구체적 페이스 구간 + 러너 타입. 예: "4:30~5:30/km 하프~풀 준비 중립 발")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-closing: (클로징 멘트. 수치와 비교를 섞은 확신 어린 1~2문장)
-
-issues: (매장에서 미리 알아둘 주의점 1~2가지. 예: "사이즈가 작게 나와 반 치수 업 권장", "발볼이 좁아 넓은 발에는 비권장". 없으면 "특별한 이슈 없음")
-
-brand_focus: (브랜드가 이 모델에서 공식적으로 내세우는 강조 포인트 1~2문장)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%APP_DATA_END%%`;
-
-// Groq API (llama-3.3-70b) 호출 — AI 세일즈 가이드 자동생성
-// 결과에 한글 외 문자(일본어·한자 등)가 섞여 나오는 일이 있어(2026-06 실제 사례) 한 번 더 뽑아 본다
-const _FOREIGN_RE = /[぀-ヿ一-鿿]/;   // 히라가나·가타카나·한자
-async function callAIGuide(brand, modelName, reviewText) {
-    const first = await _callAIGuideOnce(brand, modelName, reviewText);
-    if (!_FOREIGN_RE.test(first)) return first;
-    try {
-        const second = await _callAIGuideOnce(brand, modelName, reviewText);
-        if (second && !_FOREIGN_RE.test(second)) return second;
-    } catch(e) { /* 재시도가 실패하면 첫 결과를 그대로 쓴다 */ }
-    console.warn('[AI 가이드] 한글 외 문자가 섞인 결과 — 검수 필요:', modelName);
-    return first;
+// ── AI 세일즈 가이드: 웹 조사 방식 (2026-09 재구축) ──────────────────
+// 예전엔 브랜드+모델명만 주고 AI 기억으로 "모르면 추정해서라도 채워라" 하고 받았다.
+// 전수검사해 보니 678개 전부 지어낸 값이었다(같은 신발인데 색상마다 무게가 다르고, 트레일화에 마라톤 페이스가 붙음).
+// 이제 허브(/api/ai-guide, mode:'research')가 웹 검색으로 실제 페이지를 찾아 출처에 적힌 값만 돌려주고
+// (서버에서 출처·범위·문장 속 수치까지 검증), 정확한 모델을 못 찾으면 found:false.
+// 앱은 출처 확인된 가이드(method 'web') 또는 직원이 직접 넣은 가이드(method 'manual')만 보여준다.
+// 옛 AI 추정 가이드는 파일에 남아 있지만 화면에는 나오지 않는다.
+function _verifiedGuide(code) {
+    const g = SALES_GUIDES[code];
+    return (g && (g.method === "web" || g.method === "manual")) ? g : null;
 }
-
-// 기기 키로 직접 부를 때 쓸 모델 — 허브가 '이 계정에서 실제로 쓸 수 있는 모델'을 알려준다.
-// (2026-09: 예전 기본값 llama-3.3-70b-versatile이 이 계정에서 404. 모델이 바뀌어도 앱 수정 없이 따라간다)
-let _groqModel = null;
-async function _getGroqModel() {
-    if (_groqModel) return _groqModel;
-    try {
-        const r = await fetch(HUB_AI_API, { cache: "no-store" });
-        if (r.ok) { const j = await r.json(); if (j && j.model) _groqModel = j.model; }
-    } catch(e) {}
-    return _groqModel || "openai/gpt-oss-120b";
+function _guideGender(p) {
+    const g = String((p && (p.gender || p.성별)) || "");
+    return /^(M|남)/i.test(g) ? "남성" : /^(W|여)/i.test(g) ? "여성" : "공용";
 }
+// 같은 모델(브랜드·품명·성별)은 색상만 다르니 한 번 조사해서 모든 품번에 넣는다
+function _guideModelKey(p) { return [p.브랜드, p.품명, _guideGender(p)].map(v => String(v || "").trim()).join("|"); }
+function _todayYmd() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+// 사이즈를 올리거나 내리라는 말이 있을 때만 카드에 ⚠️사이즈를 띄운다 ("와이드 있음" 같은 건 제외)
+const _FIT_SIZE_RE = /반\s*(사이즈|치수)|반\s*업|업\s*사이즈|사이즈\s*업|한\s*(사이즈|치수)|(작게|크게)\s*나|(작은|큰)\s*편|half\s*size|size\s*up|runs?\s*(small|large|big|short|long)/i;
 
-async function _callAIGuideOnce(brand, modelName, reviewText) {
-    const userContent = reviewText.trim()
-        ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
-        : `브랜드: ${brand}\n모델명: ${modelName}\n\n당신이 알고 있는 이 러닝화의 모든 스펙(무게, 스택, 드롭, 전작 비교, 경쟁사 비교)을 활용해 AI 세일즈 가이드를 작성해주세요.`;
-
-    // 1순위: 허브 창구 — 키가 서버에만 있어 기기마다 등록할 필요가 없다
+// 허브에 웹 조사 요청 — { found, guide, sources, reason } 을 돌려준다
+async function researchGuide(p) {
     const _pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e) { return null; } })();
-    let _hubErr = "";
-    if (_pass) {
-        const r = await fetch(HUB_AI_API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: "Bearer " + _pass },
-            body: JSON.stringify({ system: SALES_GUIDE_SYSTEM_PROMPT, user: userContent, maxTokens: 1400 }),
-        }).catch(e => ({ ok: false, status: 0, _netErr: e.message }));
-        if (r.ok) {
-            const j = await r.json();
-            return j.text || "";
-        }
-        if (r.status === 429) {
-            const j429 = await r.json().catch(() => ({}));
-            const wait = Math.min(Math.max(Number(j429.retryAfter) || 20, 10), 90);
-            const e429 = new Error(`AI 사용량 제한입니다. ${wait}초 뒤에 다시 시도하세요.`);
-            e429.rateLimited = true; e429.retryAfter = wait;
-            throw e429;
-        }
-        if (r.status === 401) {
-            try { localStorage.removeItem(INV_PASS_KEY); } catch(e) {}
-            window._rcShowGate?.();
-            throw new Error("공용 비밀번호를 다시 입력해주세요.");
-        }
-        const j = r.json ? await r.json().catch(() => ({})) : {};
-        _hubErr = j.error || r._netErr || ("허브 응답 " + r.status);
-    }
-
-    // 2순위: 이 기기에 등록된 Groq 키 (예전 방식 — 허브가 준비되기 전이나 장애 시)
-    const key = getAnthKey();
-    if (!key) throw new Error("AI 가이드를 생성할 수 없습니다." + (_hubErr ? "\n(허브: " + _hubErr + ")" : "") + "\n허브에 GROQ_API_KEY를 등록하면 기기마다 키를 넣지 않아도 됩니다.\n임시로 쓰려면 ADMIN > API 설정에 Groq 키를 넣어주세요. 발급: console.groq.com (무료)");
-    const _directModel = await _getGroqModel();
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    if (!_pass) throw new Error("공용 비밀번호 로그인이 필요합니다.");
+    const r = await fetch(HUB_AI_API, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${key}`
-        },
-        body: JSON.stringify({
-            model: _directModel,
-            messages: [
-                { role: "system", content: SALES_GUIDE_SYSTEM_PROMPT },
-                { role: "user",   content: userContent }
-            ],
-            max_tokens: 1400,
-            temperature: 0.7,
-            // gpt-oss 계열은 추론 모델이라 생각 과정에도 토큰을 쓴다 — 가이드 생성엔 낮게
-            ...(/gpt-oss/.test(_directModel) ? { reasoning_effort: "low" } : {})
-        })
-    });
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        if (res.status === 429) {
-            const wait = Math.min(Math.max(Number(res.headers.get("retry-after")) || 20, 10), 90);
-            const e429 = new Error(`AI 사용량 제한입니다. ${wait}초 뒤에 다시 시도하세요.`);
-            e429.rateLimited = true; e429.retryAfter = wait;
-            throw e429;
-        }
-        throw new Error(`Groq API 오류 (${res.status}): ${err.error?.message || res.statusText}`);
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + _pass },
+        body: JSON.stringify({ mode: "research", product: { brand: p.브랜드 || "", name: p.품명 || "", sku: p.품번 || "", gender: _guideGender(p) } }),
+    }).catch(e => ({ ok: false, status: 0, _netErr: e.message }));
+    if (r.ok) return r.json();
+    const j = r.json ? await r.json().catch(() => ({})) : {};
+    if (r.status === 429) {
+        const wait = Number(j.retryAfter) || 20;
+        const e429 = new Error(`AI 사용량 제한입니다. ${wait}초 뒤에 다시 시도하세요.`);
+        e429.rateLimited = true; e429.retryAfter = wait;
+        e429.daily = wait > 120 || /per day|TPD|RPD/i.test(String(j.detail || ""));
+        throw e429;
     }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "";
+    if (r.status === 401) {
+        try { localStorage.removeItem(INV_PASS_KEY); } catch(e) {}
+        window._rcShowGate?.();
+        throw new Error("공용 비밀번호를 다시 입력해주세요.");
+    }
+    throw new Error(j.error || r._netErr || ("허브 응답 " + r.status));
 }
 
-// AI 결과를 가이드 DB 형식으로 변환 — 예전엔 heel_stack 같은 이름으로 저장돼 '이슈·브랜드 포커스'가 늘 빈칸이었다
-function _guideEntryFromAI(ai, info, over) {
-    ai = ai || {}; info = info || {}; over = over || {};
+function _guideEntryFromResearch(res, p) {
+    const g = (res && res.guide) || {};
+    const t = v => (v == null ? "" : String(v));
+    const n = v => (typeof v === "number" && isFinite(v) ? v : null);
     return {
-        품번: info.품번 || "", 품명: info.품명 || "", 브랜드: info.브랜드 || "",
-        keywords: (over.keywords && over.keywords.length) ? over.keywords : (ai.keywords || []),
-        features: over.features || ai.features || "",
-        target:   over.target   || ai.target   || "",
-        pitch:    over.pitch    || ai.pitch    || ai.closing || "",
-        weight: ai.weight || "", heelStack: ai.heel_stack || "", foreStack: ai.fore_stack || "", drop: ai.drop || "",
-        specAdv: ai.spec_analysis || "", verDiff: ai.vs_prev || "", vsComp: ai.vs_others || "",
-        whyThis: ai.why || "", bestFor: ai.best_for || "", closing: ai.closing || over.pitch || "",
-        issues: ai.issues || "", brandFocus: ai.brand_focus || "",
+        v: 3, method: "web", researchedAt: _todayYmd(), modelKey: _guideModelKey(p),
+        품번: p.품번 || "", 품명: p.품명 || "", 브랜드: p.브랜드 || "",
+        matchedProduct: t(g.matchedProduct), type: t(g.type),
+        weightG: n(g.weightG), weightBasis: t(g.weightBasis),
+        heelStackMm: n(g.heelStackMm), foreStackMm: n(g.foreStackMm), dropMm: n(g.dropMm),
+        foam: t(g.foam), plate: t(g.plate), features: t(g.features), bestUse: t(g.bestUse),
+        fitNotes: t(g.fitNotes), vsPrev: t(g.vsPrev),
+        keywords: Array.isArray(g.keywords) ? g.keywords.map(String).filter(Boolean).slice(0, 5) : [],
+        salesPitch: t(g.salesPitch),
+        sources: Array.isArray(res.sources) ? res.sources.map(String).slice(0, 5) : [],
     };
 }
 
-// 가이드 저장 공용 함수 — 서버 최신 sha로 전체 파일을 교체한다(일괄 생성 중간 저장도 이걸 쓴다).
+// 모델 하나를 조사해서 그 모델의 모든 품번에 넣을 항목을 만든다. 못 찾으면 '못 찾음' 표시만 남긴다(내용은 비움).
+async function _researchModelEntries(m) {
+    const res = await researchGuide(m.rep);
+    const out = {};
+    for (const code of m.codes) {
+        const p = PRODUCTS.find(x => x.품번 === code) || m.rep;
+        out[code] = (res && res.found && res.guide)
+            ? _guideEntryFromResearch(res, p)
+            : { v: 3, method: "notfound", researchedAt: _todayYmd(), modelKey: _guideModelKey(p), 품번: code, 품명: p.품명 || "", 브랜드: p.브랜드 || "", reason: String((res && res.reason) || "") };
+    }
+    return out;
+}
+
+function _guideSourceHost(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch(e) { return ""; } }
+
+// 가이드 저장 공용 함수 — 서버 최신 sha로 전체 파일을 교체한다(일괄 조사 중간 저장도 이걸 쓴다).
 // 저장은 공백 없는 JSON: 예쁜 들여쓰기로 저장하면 파일이 1MB를 넘어 읽기가 깨지는 함정이 있다.
 async function _saveGuideEntries(entries) {
     const codes = Object.keys(entries || {});
@@ -4787,34 +4415,6 @@ async function _saveGuideEntries(entries) {
     SALES_GUIDES = merged;
     sessionStorage.removeItem(CACHE_KEY);
     return codes.length;
-}
-
-function parseGuideResponse(text) {
-    const result = { keywords: [], features: "", target: "", pitch: "",
-                     weight: "", heel_stack: "", fore_stack: "", drop: "", issues: "", brand_focus: "",
-                     spec_analysis: "", vs_prev: "", vs_others: "",
-                     why: "", best_for: "", closing: "" };
-    const blockMatch = text.match(/%%APP_DATA_START%%([\s\S]*?)%%APP_DATA_END%%/);
-    if (!blockMatch) return result;
-    const block = blockMatch[1];
-    const field = (key) => { const m = block.match(new RegExp(key + ":\\s*(.+)")); return m ? m[1].trim() : ""; };
-    result.keywords     = field("keywords").split(",").map(k => k.trim()).filter(Boolean);
-    result.features     = field("features");
-    result.target       = field("target");
-    result.pitch        = field("pitch");
-    result.weight       = field("weight");
-    result.heel_stack   = field("heel_stack");
-    result.fore_stack   = field("fore_stack");
-    result.drop         = field("drop");
-    result.spec_analysis= field("spec_analysis");
-    result.vs_prev      = field("vs_prev");
-    result.vs_others    = field("vs_others");
-    result.why          = field("why");
-    result.best_for     = field("best_for");
-    result.closing      = field("closing");
-    result.issues       = field("issues");
-    result.brand_focus  = field("brand_focus");
-    return result;
 }
 
 
@@ -9858,7 +9458,7 @@ window.openDashDetail = (code, periodParam) => {
 };
 
 window.openSalesGuide = (code) => {
-    const guide = SALES_GUIDES[code];
+    const guide = _verifiedGuide(code);
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!guide) return;
 
@@ -11312,55 +10912,50 @@ window.openSalesGuide = (code) => {
         $("#closeSalesGuide").onclick = () => modal.classList.add("hidden");
     }
 
-    modal.querySelector("#sgTitle").textContent  = p ? p.품명 : code;
-    modal.querySelector("#sgBrand").textContent  = p ? p.브랜드 : "";
-    modal.querySelector("#sgKeywords").innerHTML = (guide.keywords || []).map(kw =>
-        `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">#${escapeHtml(kw)}</span>`).join('');
-    // 무게 - 성별 기준 사이즈 표기 (p.gender: "M"/"W"/"U", detectGender()로 설정됨)
-    const _isWomens = p && (p.gender === "W" || p.성별 === "여성" || p.성별 === "여");
-    const _sizeRef = _isWomens ? "(여 240mm)" : "(남 270mm)";
-    const _weightVal = guide.weight || "";
-    modal.querySelector("#sgWeight").textContent = _weightVal ? `${_weightVal} ${_sizeRef}` : "—";
-    modal.querySelector("#sgWeightLabel").textContent = `무게 (한쪽, ${_isWomens ? "여 US7" : "남 US9"} 기준)`;
-    // 스펙 (V2 필드명 매핑)
-    modal.querySelector("#sgHeel").textContent     = guide.heelStack   || guide.heel_stack  || "—";
-    modal.querySelector("#sgFore").textContent     = guide.foreStack   || guide.fore_stack  || "—";
-    modal.querySelector("#sgDrop").textContent     = guide.drop        || "—";
-    modal.querySelector("#sgSpecBox").textContent  = guide.specAdv     || guide.spec_analysis || guide.features || "—";
-    modal.querySelector("#sgFeatures").textContent = guide.features    || "—";
-    // 비교 (V2 필드명 매핑)
-    // ①②③ 항목을 줄바꿈으로 분리하는 헬퍼
-    function fmtBullet(text, fallback) {
-      if (!text) return fallback || "—";
-      const escaped = escapeHtml(text);
-      // ② ③ ④ ⑤ 앞에 줄바꿈 삽입 (① 앞은 그대로)
-      return escaped.replace(/\s*([②③④⑤⑥⑦⑧⑨])/g, '<br>$1');
+    // 출처로 확인된 값(웹 조사) 또는 직원이 직접 넣은 값만 보여준다. 값이 없는 칸은 통째로 숨긴다.
+    const _q = sel => modal.querySelector(sel);
+    const _mm = v => (v == null || v === "") ? "" : `${v}mm`;
+    const _row = (sel, text) => { const el = _q(sel); if (!el) return; el.textContent = text || ""; if (el.parentElement) el.parentElement.classList.toggle("hidden", !text); };
+    const _self = (sel, text) => { const el = _q(sel); if (!el) return; el.textContent = text || ""; el.classList.toggle("hidden", !text); };
+    const _head = (sel, text) => { const el = _q(sel); const h = el && el.parentElement && el.parentElement.querySelector("span, h4"); if (h && h !== el) h.textContent = text; };
+    _q("#sgTitle").textContent = p ? p.품명 : (guide.품명 || code);
+    _q("#sgBrand").textContent = [p ? p.브랜드 : guide.브랜드, guide.matchedProduct ? `확인 제품: ${guide.matchedProduct}` : ""].filter(Boolean).join(" · ");
+    _q("#sgKeywords").innerHTML = [guide.type, ...(guide.keywords || []).map(k => "#" + k)].filter(Boolean).map(kw =>
+        `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">${escapeHtml(kw)}</span>`).join('');
+    // 핵심 스펙
+    _row("#sgWeight", guide.weightG != null ? `${guide.weightG}g` : "");
+    _q("#sgWeightLabel").textContent = guide.weightBasis ? `무게 (한쪽, ${guide.weightBasis})` : "무게 (한쪽)";
+    _row("#sgHeel", _mm(guide.heelStackMm));
+    _row("#sgFore", _mm(guide.foreStackMm));
+    _row("#sgDrop", _mm(guide.dropMm));
+    _self("#sgSpecBox", [guide.foam && `폼: ${guide.foam}`, guide.plate && `플레이트: ${guide.plate}`].filter(Boolean).join(" · "));
+    _row("#sgFeatures", guide.features);
+    // 비교·핏·출처
+    const _c2 = _q("#sgVsPrev") && _q("#sgVsPrev").closest(".bg-white");
+    const _c2h = _c2 && _c2.querySelector("h3");
+    if (_c2h && _c2h.lastChild) _c2h.lastChild.textContent = " 비교 · 핏 · 출처";
+    _head("#sgVsPrev", "VS 전작 (출처 기준)");
+    _row("#sgVsPrev", guide.vsPrev);
+    _head("#sgIssues", "👟 사이즈 · 발볼 (출처 기준)");
+    _row("#sgIssues", guide.fitNotes);
+    _row("#sgVsOthers", "");
+    const _src = _q("#sgWhy");
+    if (_src) {
+        _head("#sgWhy", guide.method === "web" ? "출처" : "작성");
+        _src.className = "text-[11px] text-slate-600 font-medium leading-snug space-y-0.5";
+        _src.innerHTML = guide.method === "web"
+            ? (guide.sources || []).map(u => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener" class="block truncate text-indigo-600 underline">${escapeHtml(_guideSourceHost(u) || u)}</a>`).join("")
+              + `<div class="text-slate-400">웹 조사 ${escapeHtml(guide.researchedAt || "")}</div>`
+            : `<div>직원 직접 입력${guide.researchedAt ? " · " + escapeHtml(guide.researchedAt) : ""}</div>`;
+        if (_src.parentElement) _src.parentElement.classList.remove("hidden");
     }
-    // vp: 콤마+공백 기준으로 줄바꿈 (힐/무게/기타 수치 가독성)
-    function fmtVp(text) {
-      if (!text) return "—";
-      const escaped = escapeHtml(text);
-      // "V14→V15:" 형태 뒤 줄바꿈, 이후 콤마+스페이스 기준 줄바꿈
-      return escaped
-        .replace(/^([^:]+:\s*)/, '<strong>$1</strong><br>')
-        .replace(/,\s+(?=[^\s])/g, ',<br>');
-    }
-    modal.querySelector("#sgVsPrev").innerHTML    = fmtVp(guide.verDiff || guide.vs_prev || guide.features);
-    modal.querySelector("#sgIssues").innerHTML   = fmtBullet(guide.issues, "특별한 이슈 없음");
-    modal.querySelector("#sgVsOthers").textContent = guide.vsComp      || guide.vs_others || "—";
-    modal.querySelector("#sgWhy").textContent      = guide.whyThis     || guide.why      || guide.pitch    || "—";
-    // 전략 (V2 필드명 매핑)
-    modal.querySelector("#sgBrandFocus").innerHTML = fmtBullet(guide.brandFocus, "—");
-    modal.querySelector("#sgTarget").textContent   = guide.target      || "—";
-    modal.querySelector("#sgBestFor").textContent  = guide.bestFor     || guide.best_for || guide.target   || "—";
-    modal.querySelector("#sgPitch").textContent    = guide.closing     || guide.pitch    || "—";
-
-    // 내용이 없는 항목은 칸 자체를 숨긴다
-    const _sgShow = (sel, has) => { const el = modal.querySelector(sel); if (el && el.parentElement) el.parentElement.classList.toggle("hidden", !has); };
-    _sgShow("#sgIssues", !!guide.issues);
-    _sgShow("#sgBrandFocus", !!guide.brandFocus);
-    _sgShow("#sgVsPrev", !!(guide.verDiff || guide.vs_prev || guide.features));
-    _sgShow("#sgVsOthers", !!(guide.vsComp || guide.vs_others));
+    // 세일즈
+    _row("#sgBrandFocus", "");
+    _row("#sgTarget", "");
+    _head("#sgBestFor", "용도");
+    _row("#sgBestFor", guide.bestUse);
+    _head("#sgPitch", "판매 멘트 (확인된 사실 기반)");
+    _row("#sgPitch", guide.salesPitch);
 
     modal.classList.remove("hidden");
     if(window.lucide) lucide.createIcons();
@@ -11455,10 +11050,10 @@ function card(p){
 
 
   let salesHtml = "";
-  const guide = SALES_GUIDES[p.품번];
+  const guide = _verifiedGuide(p.품번);
   if (guide) {
-      // 러너가 실제로 묻는 것부터 — 무게·드롭·사이즈 주의·페이스 구간. 브랜드·품번은 바로 위에 이미 있어서
-      // 그걸 되뇌는 키워드(#나이키 #001A 같은 것)는 뺀다. 칩을 누르면 판매 가이드가 열린다.
+      // 출처로 확인된 가이드만 칩으로 — 무게·드롭·종류(트레일 등)·사이즈 주의. 브랜드·품번을 되뇌는 키워드는 뺀다.
+      // 칩을 누르면 판매 가이드가 열린다.
       const _norm = v => String(v || "").toLowerCase().replace(/[\s\-_/.]/g, "");
       const _bN = _norm(p.브랜드), _nN = _norm(p.품명), _cN = _norm(p.품번);
       const _kw = (guide.keywords || []).map(k => String(k).trim()).filter(k => {
@@ -11469,18 +11064,19 @@ function card(p){
           if (_nN && n.length >= 2 && _nN.includes(n)) return false;
           return true;
       });
-      const _pace = (String(guide.bestFor || "").match(/\d{1,2}:\d{2}\s*[~\-–]\s*\d{1,2}:\d{2}/) || [])[0];
-      const _sizeTip = /치수|사이즈|발볼|좁게|넓게|작게|크게/.test(String(guide.issues || ""));
+      const _sizeTip = _FIT_SIZE_RE.test(String(guide.fitNotes || ""));
       const _chip = (txt, cls) => `<span class="btn-sales shrink-0 ${cls} text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer">${escapeHtml(txt)}</span>`;
       const _spec = "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-600 hover:text-white transition-colors";
       const _tag  = "bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-colors";
       const _warn = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-500 hover:text-white transition-colors";
+      const _trail = "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors";
       const _chips = [];
-      if (guide.weight) _chips.push(_chip(String(guide.weight).replace(/\s/g, ""), _spec));
-      if (guide.drop)   _chips.push(_chip("드롭 " + String(guide.drop).replace(/\s/g, ""), _spec));
-      if (_sizeTip)     _chips.push(_chip("⚠️ 사이즈", _warn));
-      if (_pace)        _chips.push(_chip(_pace.replace(/\s/g, ""), _spec));
-      _kw.slice(0, _pace ? 1 : 2).forEach(k => _chips.push(_chip("#" + k, _tag)));
+      if (guide.weightG != null) _chips.push(_chip(guide.weightG + "g", _spec));
+      if (guide.dropMm != null)  _chips.push(_chip("드롭 " + guide.dropMm + "mm", _spec));
+      if (guide.type)            _chips.push(_chip(guide.type, guide.type === "트레일" ? _trail : _spec));
+      if (_sizeTip)              _chips.push(_chip("⚠️ 사이즈", _warn));
+      _kw.slice(0, 1).forEach(k => _chips.push(_chip("#" + k, _tag)));
+      if (!_chips.length)        _chips.push(_chip("📖 가이드", _tag));
       if (_chips.length) salesHtml = `<div class="flex items-center gap-1 mt-1 overflow-hidden">${_chips.join("")}</div>`;
   }
 
@@ -11774,17 +11370,11 @@ function card(p){
   return el;
 }
 
-// 가이드의 무게·드롭을 숫자로 (예: "약 285g" → 285, "8 mm" → 8). 가이드 객체가 바뀌면 다시 계산한다.
-const _specCache = new WeakMap();
+// 가이드의 무게·드롭 — 출처로 확인된 값만 쓴다(옛 AI 추정값은 필터·정렬에서도 제외)
 function _guideSpec(code) {
-    const g = SALES_GUIDES[code];
-    if (!g || typeof g !== "object") return { w: null, d: null };
-    const hit = _specCache.get(g);
-    if (hit) return hit;
-    const num = v => { const m = String(v == null ? "" : v).match(/\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : null; };
-    const spec = { w: num(g.weight), d: num(g.drop) };
-    _specCache.set(g, spec);
-    return spec;
+    const g = _verifiedGuide(code);
+    if (!g) return { w: null, d: null };
+    return { w: typeof g.weightG === "number" ? g.weightG : null, d: typeof g.dropMm === "number" ? g.dropMm : null };
 }
 
 // "230-260" / "-230"(미만) / "290-"(이상) 구간 판정. 스펙이 없는 상품(가이드 없음)은 걸러진다.
@@ -11818,7 +11408,7 @@ function _ensureSpecFilterRow() {
         `<select id="dropSel" class="${cls}">` +
           `<option value="ALL">↕️ 드롭</option><option value="-4">~3mm</option><option value="4-8">4~7mm</option><option value="8-">8mm~</option>` +
         `</select>` +
-        `<span class="text-[10px] font-bold text-gray-400 shrink-0">판매 가이드 있는 상품 기준</span>`;
+        `<span class="text-[10px] font-bold text-gray-400 shrink-0">출처 확인된 가이드 기준</span>`;
     const slot = $("#fpSizeSlot") || $("#filterDetails");
     if (!slot) return;
     slot.appendChild(specRow);
@@ -18317,7 +17907,7 @@ window.renderPromoAdmin = () => {
 
 window.renderSalesAdmin = () => {
     const countEl = document.getElementById("sgCount");
-    if(countEl) countEl.innerText = `현재 ${Object.keys(SALES_GUIDES).length}개`;
+    if(countEl) { const _all = Object.values(SALES_GUIDES); const _ok = _all.filter(g => g && (g.method === "web" || g.method === "manual")).length; countEl.innerText = `확인된 가이드 ${_ok}개`; countEl.title = `옛 AI 추정 가이드 ${_all.filter(g => g && !g.method).length}개는 화면에 표시하지 않음`; }
 
     const trigger = document.getElementById("salesUploadTrigger");
     const fileInput = document.getElementById("salesFile");
@@ -18339,7 +17929,7 @@ window.renderSalesAdmin = () => {
                     const keywords = rawKw ? rawKw.split(',').map(k=>k.trim()).filter(Boolean) : [];
                     newGuides[code] = {
                         keywords: keywords, features: String(r["특징"] || r["제품특징"] || ""),
-                        target: String(r["추천고객"] || r["타겟고객"] || ""), pitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
+                        bestUse: String(r["추천고객"] || r["타겟고객"] || ""), salesPitch: String(r["응대멘트"] || r["실전응대멘트"] || "")
                     };
                 });
                 // 엑셀 업로드는 '덮어쓰기'가 아니라 '병합' — 예전엔 이 업로드 한 번으로 기존 상세 가이드(스펙·비교·클로징 등)가 통째로 날아갔다
@@ -18347,14 +17937,20 @@ window.renderSalesAdmin = () => {
                 const _mergedGuides = Object.assign({}, SALES_GUIDES);
                 for (const [code, g] of Object.entries(newGuides)) {
                     const filled = Object.fromEntries(Object.entries(g).filter(([, v]) => Array.isArray(v) ? v.length : String(v || "").trim()));
-                    if (_mergedGuides[code]) { _mergedGuides[code] = Object.assign({}, _mergedGuides[code], filled); _updated++; }
-                    else { _mergedGuides[code] = g; _added++; }
+                    // 확인된 가이드(웹 조사·직원 입력)에는 엑셀 내용을 덧씌우고, 옛 AI 추정 항목은 엑셀 내용만으로 새로 만든다
+                    const _base = _verifiedGuide(code);
+                    if (_base) { _mergedGuides[code] = Object.assign({}, _base, filled); _updated++; }
+                    else {
+                        const _p = PRODUCTS.find(x => x.품번 === code) || {};
+                        _mergedGuides[code] = Object.assign({ v: 3, method: "manual", researchedAt: _todayYmd(), modelKey: _p.품명 ? _guideModelKey(_p) : "", 품번: code, 품명: _p.품명 || "", 브랜드: _p.브랜드 || "", sources: [] }, filled);
+                        _added++;
+                    }
                 }
                 if (!confirm(`엑셀에서 ${Object.keys(newGuides).length}개를 읽었습니다.\n\n새로 추가: ${_added}개\n기존 항목 갱신: ${_updated}개 (엑셀에 없는 항목과 상세 내용은 그대로 유지)\n\n저장할까요?`)) { fileInput.value = ""; return; }
                 try {
                     await _saveGuideEntries(_mergedGuides);
                     _recomputeStock(); render(); window.renderSalesAdmin();
-                    alert(`✅ 세일즈 가이드 저장 완료 — 추가 ${_added}개, 갱신 ${_updated}개 (전체 ${Object.keys(SALES_GUIDES).length}개)`);
+                    alert(`✅ 세일즈 가이드 저장 완료 — 추가 ${_added}개, 갱신 ${_updated}개`);
                 } catch(err) { alert("업로드 실패: " + err.message); }
                 fileInput.value = "";
             };
@@ -20056,7 +19652,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Groq API Key (AI 세일즈 가이드 자동생성)</label>
+                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Groq API Key (사용 안 함 — 가이드는 허브 웹 조사로 생성)</label>
 
 
 
@@ -20088,7 +19684,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://console.groq.com" target="_blank" class="text-purple-400 underline">console.groq.com</a> → 무료 (하루 14,400회) / AI 세일즈 가이드 자동생성에 사용</p>
+                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://console.groq.com" target="_blank" class="text-purple-400 underline">console.groq.com</a> — 이 기기 키는 더 이상 쓰지 않습니다. 비워 두셔도 됩니다.</p>
 
 
 
@@ -20264,7 +19860,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <h2 class="text-lg font-black text-gray-900 m-0 flex items-center gap-2">🔍 가이드 미등록 상품</h2>
+                        <h2 class="text-lg font-black text-gray-900 m-0 flex items-center gap-2">🔍 가이드 없는 모델</h2>
 
 
 
@@ -20296,7 +19892,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <button id="bulkAiBtn" class="ml-auto px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors shadow-sm whitespace-nowrap">🤖 전체 AI 일괄생성</button>
+                        <button id="bulkAiBtn" class="ml-auto px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors shadow-sm whitespace-nowrap">🔎 전체 웹 조사</button>
 
 
 
@@ -20376,7 +19972,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <button id="saveMissGuides" class="px-6 py-2.5 rounded-xl bg-green-700 text-white text-[13px] font-black hover:bg-green-800 transition-colors shadow-sm">✅ 선택 항목 저장</button>
+                        <button id="saveMissGuides" class="px-6 py-2.5 rounded-xl bg-green-700 text-white text-[13px] font-black hover:bg-green-800 transition-colors shadow-sm">✅ 직접 입력 저장</button>
 
 
 
@@ -20552,600 +20148,206 @@ window.addEventListener('DOMContentLoaded', () => {
             missDetectBtn.onclick = () => {
                 showPanel("missPanel");
 
-                // 신발만, 유니크 품번 기준으로 가이드 없는 상품 추출
-                const seen = new Set();
-                const missing = PRODUCTS.filter(p => {
-                    if(!p.품번 || seen.has(p.품번)) return false;
-                    seen.add(p.품번);
-                    if(p.카테고리 !== "신발") return false;
-                    return !SALES_GUIDES[p.품번];
-                });
-
-                // 재고 있는 상품부터 채우는 게 우선이라 부산 재고 많은 순으로 정렬
-                missing.sort((a, b) => (b.busanTotal || 0) - (a.busanTotal || 0) || String(a.품명).localeCompare(String(b.품명), "ko"));
-                const _inStock = missing.filter(p => (p.busanTotal || 0) > 0).length;
-                const countEl = document.getElementById("missCount");
-                if(countEl) countEl.textContent = `${missing.length}개 미등록 (재고 있는 것 ${_inStock}개 먼저)`;
-
-                const listEl = document.getElementById("missList");
-                if(!listEl) return;
-
-                if(missing.length === 0){
-                    listEl.innerHTML = `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 모든 상품에 가이드가 등록되어 있습니다!</div>`;
-                    return;
-                }
-
-                listEl.innerHTML = missing.map(p => `
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="bg-white/70 border border-gray-200 rounded-xl p-3 space-y-2">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="flex items-center justify-between gap-2">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <label class="flex items-center gap-2 cursor-pointer min-w-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400 shrink-0" data-code="${p.품번}">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <span class="text-[11px] font-black text-gray-500 shrink-0">${escapeHtml(p.브랜드||'')} · ${escapeHtml(p.품번)}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <span class="text-[12px] font-black text-gray-800 truncate">${escapeHtml(p.품명||'')}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </label>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <button class="ai-gen-toggle shrink-0 px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-code="${p.품번}">🤖 AI 생성</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="ai-gen-box hidden space-y-1.5" data-code="${p.품번}">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <button class="ai-gen-btn w-full py-2 rounded-lg bg-purple-600 text-white text-[12px] font-black hover:bg-purple-700 transition-colors shadow-sm" data-code="${p.품번}" data-brand="${escapeHtml(p.브랜드||'')}" data-name="${escapeHtml(p.품명||'')}">✨ ${escapeHtml(p.품명||'')} 가이드 자동 생성</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <details class="text-[10px]">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <summary class="text-purple-400 font-bold cursor-pointer hover:text-purple-600 select-none">📋 RunRepeat 스펙 추가 (선택 — 정확도 향상)</summary>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <p class="text-gray-400 font-bold mt-1 mb-1">RunRepeat에서 Specs 섹션 전체 복사 후 붙여넣기 (영문 그대로 OK)</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <textarea class="ai-review-text w-full px-2 py-1.5 rounded-lg border border-purple-200 text-xs font-bold outline-none focus:border-purple-400 bg-purple-50/40 resize-none" rows="4" placeholder="Terrain: Road&#10;Drop: 8mm&#10;Weight: 198g&#10;Features: Carbon plate | Cushioned&#10;..." data-code="${p.품번}"></textarea>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </details>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="grid grid-cols-2 gap-1.5 pl-1">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <input type="text" placeholder="제품 특징" class="miss-ft ipt col-span-2 px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <input type="text" placeholder="추천 고객" class="miss-tg ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <input type="text" placeholder="판매 멘트" class="miss-pt ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90" data-code="${p.품번}">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                `).join('');
-
-                // AI 버튼 이벤트 위임
-                listEl.addEventListener('click', async (e) => {
-                    // 🤖 AI 생성 토글
-                    if (e.target.classList.contains('ai-gen-toggle')) {
-                        const code = e.target.dataset.code;
-                        const box = listEl.querySelector(`.ai-gen-box[data-code="${code}"]`);
-                        if (box) box.classList.toggle('hidden');
-                        return;
-                    }
-                    // ✨ 가이드 자동 생성
-                    if (e.target.classList.contains('ai-gen-btn')) {
-                        const code  = e.target.dataset.code;
-                        const brand = e.target.dataset.brand;
-                        const name  = e.target.dataset.name;
-                        const reviewText = listEl.querySelector(`.ai-review-text[data-code="${code}"]`)?.value || "";
-
-                        const orig = e.target.textContent;
-                        e.target.textContent = "⏳ AI 분석 중...";
-                        e.target.disabled = true;
-
-                        try {
-                            const rawText = await callAIGuide(brand, name, reviewText);
-                            const parsed  = parseGuideResponse(rawText);
-
-                            // 전체 결과 저장
-                            window._missGuideData = window._missGuideData || {};
-                            window._missGuideData[code] = parsed;
-
-                            // 필드 자동 채우기
-                            const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
-                            const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
-                            const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
-                            const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
-                            if (kwEl) kwEl.value = parsed.keywords.join(", ");
-                            if (ftEl) ftEl.value = parsed.features;
-                            if (tgEl) tgEl.value = parsed.target;
-                            if (ptEl) ptEl.value = parsed.closing || parsed.pitch;
-
-                            // 자동 체크 + AI 박스 닫기
-                            const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
-                            if (chk) chk.checked = true;
-                            listEl.querySelector(`.ai-gen-box[data-code="${code}"]`)?.classList.add('hidden');
-
-                            e.target.textContent = "✅ 생성 완료";
-                        } catch(err) {
-                            alert("AI 생성 실패: " + err.message);
-                            e.target.textContent = orig;
-                        } finally {
-                            e.target.disabled = false;
-                        }
-                    }
-                }, { once: false });
+                _renderMissList();
             };
         }
 
-        // 일괄 AI 생성
+        // 신발을 모델(브랜드·품명·성별) 단위로 묶어, 확인된 가이드가 하나도 없는 모델만 뽑는다
+        function _missModels() {
+            const groups = new Map();
+            for (const p of PRODUCTS) {
+                if (!p.품번 || p.카테고리 !== "신발") continue;
+                const mk = _guideModelKey(p);
+                let m = groups.get(mk);
+                if (!m) { m = { mk, rep: p, codes: [], stock: 0 }; groups.set(mk, m); }
+                if (!m.codes.includes(p.품번)) m.codes.push(p.품번);
+                m.stock += p.busanTotal || 0;
+                if ((p.busanTotal || 0) > (m.rep.busanTotal || 0)) m.rep = p;   // 재고 많은 품번으로 조사
+            }
+            return [...groups.values()]
+                .filter(m => !m.codes.some(c => _verifiedGuide(c)))
+                .map(m => { const nf = m.codes.map(c => SALES_GUIDES[c]).find(g => g && g.method === "notfound"); m.notFound = nf ? (nf.researchedAt || "?") : ""; return m; })
+                .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || ((!!a.notFound) - (!!b.notFound)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), "ko"));
+        }
+
+        let _missCache = [];
+        function _researchSummaryHtml(g) {
+            if (!g || g.method !== "web") return `<span class="text-gray-400">❔ 웹에서 정확히 같은 모델을 찾지 못해 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
+            const bits = [g.matchedProduct, g.type,
+                g.weightG != null ? `${g.weightG}g${g.weightBasis ? "(" + g.weightBasis + ")" : ""}` : "",
+                g.dropMm != null ? `드롭 ${g.dropMm}mm` : ""].filter(Boolean).map(escapeHtml);
+            const hosts = (g.sources || []).map(_guideSourceHost).filter(Boolean).map(escapeHtml);
+            return `<span class="text-green-700">✅ ${bits.join(" · ")}</span> <span class="text-gray-400">출처: ${hosts.join(", ")}</span>`;
+        }
+        function _renderMissList() {
+            const listEl = document.getElementById("missList");
+            const countEl = document.getElementById("missCount");
+            if (!listEl) return;
+            const models = _missCache = _missModels();
+            const inStock = models.filter(m => m.stock > 0).length;
+            if (countEl) countEl.textContent = `${models.length}개 모델 (재고 있는 것 ${inStock}개 먼저)`;
+            if (!models.length) {
+                listEl.innerHTML = `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 모든 신발 모델에 확인된 가이드가 있습니다!</div>`;
+                return;
+            }
+            const inp = "ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90";
+            listEl.innerHTML = models.map((m, i) => { const p = m.rep; return `
+                    <div class="bg-white/70 border border-gray-200 rounded-xl p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer min-w-0">
+                                <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400 shrink-0" data-i="${i}">
+                                <span class="text-[11px] font-black text-gray-500 shrink-0">${escapeHtml(p.브랜드||'')} · ${_guideGender(p)}</span>
+                                <span class="text-[12px] font-black text-gray-800 truncate">${escapeHtml(p.품명||'')}</span>
+                                <span class="text-[10px] font-bold text-gray-400 shrink-0">품번 ${m.codes.length}개 · 재고 ${m.stock}</span>
+                            </label>
+                            <div class="flex items-center gap-1 shrink-0">
+                                ${m.notFound ? `<span class="text-[10px] font-bold text-gray-400">못 찾음 ${escapeHtml(m.notFound)}</span>` : ""}
+                                <button class="miss-research px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-i="${i}">🔎 웹 조사</button>
+                                <button class="miss-manual px-2 py-1 rounded-lg bg-white text-gray-600 text-[10px] font-black border border-gray-200 hover:bg-gray-100 transition-colors" data-i="${i}">✏️ 직접</button>
+                            </div>
+                        </div>
+                        <div class="miss-result hidden text-[11px] font-bold pl-6" data-i="${i}"></div>
+                        <div class="miss-form hidden grid grid-cols-2 gap-1.5 pl-1" data-i="${i}">
+                            <input type="text" placeholder="키워드 (쉼표 구분)" class="miss-kw col-span-2 ${inp}" data-i="${i}">
+                            <input type="text" placeholder="제품 특징 (확인된 사실만)" class="miss-ft col-span-2 ${inp}" data-i="${i}">
+                            <input type="text" placeholder="용도 (예: 데일리 조깅, 트레일)" class="miss-tg ${inp}" data-i="${i}">
+                            <input type="text" placeholder="판매 멘트" class="miss-pt ${inp}" data-i="${i}">
+                        </div>
+                    </div>`; }).join('');
+
+            // 이벤트는 onclick/oninput으로 한 번만 — 예전엔 패널을 열 때마다 리스너가 쌓여 같은 요청이 여러 번 나갔다
+            listEl.oninput = (e) => {
+                const i = e.target.dataset && e.target.dataset.i;
+                if (i == null || !e.target.classList.contains("ipt")) return;
+                const chk = listEl.querySelector(`.miss-chk[data-i="${i}"]`);
+                if (chk) chk.checked = true;
+            };
+            listEl.onclick = async (e) => {
+                const btn = e.target.closest("button");
+                if (!btn || btn.dataset.i == null) return;
+                const i = btn.dataset.i, m = _missCache[+i];
+                if (!m) return;
+                if (btn.classList.contains("miss-manual")) {
+                    listEl.querySelector(`.miss-form[data-i="${i}"]`)?.classList.toggle("hidden");
+                    return;
+                }
+                if (btn.classList.contains("miss-research")) {
+                    if (!checkPat()) return;
+                    const orig = btn.textContent;
+                    btn.disabled = true; btn.textContent = "⏳ 조사 중...";
+                    const resEl = listEl.querySelector(`.miss-result[data-i="${i}"]`);
+                    try {
+                        const entries = await _researchModelEntries(m);
+                        await _saveGuideEntries(entries);
+                        const g = entries[m.codes[0]];
+                        if (resEl) { resEl.innerHTML = _researchSummaryHtml(g); resEl.classList.remove("hidden"); }
+                        btn.textContent = g && g.method === "web" ? "✅ 저장됨" : "❔ 못 찾음";
+                        render(); if (window.renderSalesAdmin) window.renderSalesAdmin();
+                    } catch(err) {
+                        alert("웹 조사 실패: " + err.message);
+                        btn.textContent = orig;
+                    } finally {
+                        btn.disabled = false;
+                    }
+                }
+            };
+        }
+
+        // 전체 웹 조사 — 모델 하나씩 차례로. 사용량 제한(429)이면 알려준 시간만큼 기다렸다 다시, 하루 한도면 멈춘다.
         const bulkAiBtn = document.getElementById("bulkAiBtn");
         if(bulkAiBtn) {
             bulkAiBtn.onclick = async () => {
-                // 허브 창구가 있으면 기기 키가 없어도 된다 — 실제 가능 여부와 안내는 callAIGuide가 처리
                 const _hasPass = (() => { try { return !!localStorage.getItem(INV_PASS_KEY); } catch(e) { return false; } })();
-                if(!_hasPass && !getAnthKey()) {
-                    alert("⚠️ 공용 비밀번호 로그인이 필요합니다.\n(또는 ADMIN > API 설정에 Groq 키 등록)");
-                    return;
-                }
-                const items = document.querySelectorAll(".ai-gen-btn");
-                if(items.length === 0) { alert("미등록 신발이 없습니다."); return; }
-                if(!confirm(`신발 ${items.length}개에 AI 가이드를 자동 생성합니다.\n시간이 걸릴 수 있어요. 진행할까요?`)) return;
+                if(!_hasPass) { alert("⚠️ 공용 비밀번호 로그인이 필요합니다."); return; }
+                if(!checkPat()) return;
+                const todo = _missModels().filter(m => !m.notFound);
+                if(!todo.length) { alert("웹 조사할 모델이 없습니다. ('못 찾음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
+                if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 웹에서 조사합니다.\n\n· 브랜드 공식몰·리뷰 사이트에서 확인된 값만 저장하고, 정확한 모델을 못 찾으면 비워 둡니다.\n· 무료 사용량 한도 때문에 모델당 수십 초 걸릴 수 있고, 하루 한도에 닿으면 멈춥니다(다시 누르면 이어서).\n\n진행할까요?`)) return;
 
                 bulkAiBtn.disabled = true;
-                let done = 0, failed = 0, saved = 0;
-                let pending = {};   // 10개마다 중간 저장 — 오래 걸리는 작업이라 중간에 끊겨도 날아가지 않게
+                const origLabel = "🔎 전체 웹 조사";
+                let done = 0, found = 0, notFound = 0, failed = 0, stopped = "";
+                let pending = {}, pendingModels = 0;
                 const _flush = async () => {
-                    if (!Object.keys(pending).length || !getPat()) return;
-                    try { saved += await _saveGuideEntries(pending); pending = {}; }
-                    catch(e) { console.warn('[AI 일괄생성] 중간 저장 실패:', e.message); }
+                    if (!pendingModels) return;
+                    try { await _saveGuideEntries(pending); pending = {}; pendingModels = 0; }
+                    catch(e) { console.warn('[웹 조사] 중간 저장 실패:', e.message); }
                 };
-
-                for(const btn of items) {
-                    const code  = btn.dataset.code;
-                    const brand = btn.dataset.brand;
-                    const name  = btn.dataset.name;
-                    if (SALES_GUIDES[code]) { done++; continue; }   // 중간 저장으로 이미 등록된 건 건너뜀
-                    bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 생성중...`;
-                    let parsed = null;
-                    for (let attempt = 0; attempt < 3 && !parsed; attempt++) {
-                        try {
-                            const rawText = await callAIGuide(brand, name, "");
-                            parsed = parseGuideResponse(rawText);
-                        } catch(err) {
-                            const limited = err.rateLimited || /사용량 제한|몰렸|429/.test(err.message);
-                            if (limited && attempt < 2) {   // 서버가 알려준 시간만큼 기다렸다 다시
+                for (const m of todo) {
+                    bulkAiBtn.textContent = `⏳ ${done+1}/${todo.length} 조사중...`;
+                    let entries = null;
+                    for (let attempt = 0; attempt < 4 && !entries; attempt++) {
+                        try { entries = await _researchModelEntries(m); }
+                        catch(err) {
+                            if (err.rateLimited && !err.daily && attempt < 3) {
                                 const wait = Math.min(Math.max(Number(err.retryAfter) || 20, 10), 90);
                                 for (let left = wait; left > 0; left--) {
-                                    bulkAiBtn.textContent = `⏳ ${done+1}/${items.length} 대기 ${left}초...`;
+                                    bulkAiBtn.textContent = `⏳ ${done+1}/${todo.length} 대기 ${left}초...`;
                                     await new Promise(r => setTimeout(r, 1000));
                                 }
                                 continue;
                             }
-                            failed++;
-                            console.warn(`[AI 일괄생성] ${name} 실패:`, err.message);
+                            if (err.rateLimited) stopped = "오늘 AI 사용량 한도에 닿아 멈췄습니다. 내일 다시 누르면 이어서 합니다.";
+                            else { failed++; console.warn(`[웹 조사] ${m.rep.품명} 실패:`, err.message); }
                             break;
                         }
                     }
-                    if (parsed) {
-                        window._missGuideData = window._missGuideData || {};
-                        window._missGuideData[code] = parsed;
-                        pending[code] = _guideEntryFromAI(parsed, { 품번: code, 품명: name, 브랜드: brand });
-                        const listEl  = document.getElementById("missList");
-                        if(listEl) {
-                            const kwEl = listEl.querySelector(`.miss-kw[data-code="${code}"]`);
-                            const ftEl = listEl.querySelector(`.miss-ft[data-code="${code}"]`);
-                            const tgEl = listEl.querySelector(`.miss-tg[data-code="${code}"]`);
-                            const ptEl = listEl.querySelector(`.miss-pt[data-code="${code}"]`);
-                            if(kwEl) kwEl.value = parsed.keywords.join(", ");
-                            if(ftEl) ftEl.value = parsed.features;
-                            if(tgEl) tgEl.value = parsed.target;
-                            if(ptEl) ptEl.value = parsed.closing || parsed.pitch;
-                            const chk = listEl.querySelector(`.miss-chk[data-code="${code}"]`);
-                            if(chk) chk.checked = true;
-                        }
-                        done++;
-                        if (Object.keys(pending).length >= 10) await _flush();
+                    if (stopped) break;
+                    done++;
+                    if (entries) {
+                        Object.assign(pending, entries); pendingModels++;
+                        if (entries[m.codes[0]].method === "web") found++; else notFound++;
+                        if (pendingModels >= 5) await _flush();
                     }
-                    // API 레이트리밋 방지 딜레이
-                    await new Promise(r => setTimeout(r, 2000));
+                    await new Promise(r => setTimeout(r, 3000));
                 }
                 await _flush();
 
-                bulkAiBtn.textContent = `✅ ${done}개 완료${failed > 0 ? ` (${failed}개 실패)` : ""}`;
+                bulkAiBtn.textContent = origLabel;
                 bulkAiBtn.disabled = false;
-                if(done > 0) {
-                    render(); if(window.renderSalesAdmin) window.renderSalesAdmin();
-                    alert(`✅ AI 가이드 ${done}개 생성 완료` + (saved ? `, 그중 ${saved}개는 자동 저장됨.` : ".") + `\n남은 항목은 "선택 항목 저장" 버튼으로 저장하세요.` + (failed ? `\n(${failed}개 실패 — 다시 누르면 실패한 것만 재시도)` : ""));
-                }
+                render(); if(window.renderSalesAdmin) window.renderSalesAdmin();
+                _renderMissList();
+                alert(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 정확한 모델 못 찾음(비워 둠): ${notFound}개` + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
             };
         }
 
         if(backFromMiss) backFromMiss.onclick = () => showPanel("uploadPanel");
 
+        // 직접 입력 저장 — 체크한 모델의 모든 품번에 직원 입력(manual)으로 저장
         if(saveMissBtn) {
             saveMissBtn.onclick = async () => {
                 if(!checkPat()) return;
                 const checked = document.querySelectorAll(".miss-chk:checked");
-                if(checked.length === 0){ alert("저장할 항목을 체크해주세요."); return; }
+                if(checked.length === 0){ alert("저장할 모델을 체크해주세요."); return; }
 
                 const newEntries = {};
+                let models = 0;
                 checked.forEach(chk => {
-                    const code = chk.dataset.code;
-                    const kw = document.querySelector(`.miss-kw[data-code="${code}"]`)?.value || "";
-                    const ft = document.querySelector(`.miss-ft[data-code="${code}"]`)?.value || "";
-                    const tg = document.querySelector(`.miss-tg[data-code="${code}"]`)?.value || "";
-                    const pt = document.querySelector(`.miss-pt[data-code="${code}"]`)?.value || "";
-                    const ai = window._missGuideData?.[code] || {};
-                    const _p = PRODUCTS.find(x => x.품번 === code) || {};
-                    newEntries[code] = _guideEntryFromAI(ai, { 품번: code, 품명: _p.품명, 브랜드: _p.브랜드 }, {
-                        keywords: kw ? kw.split(",").map(k => k.trim()).filter(Boolean) : null,
-                        features: ft, target: tg, pitch: pt,
-                    });
+                    const i = chk.dataset.i, m = _missCache[+i];
+                    if (!m) return;
+                    const val = cls => (document.querySelector(`.${cls}[data-i="${i}"]`)?.value || "").trim();
+                    const kw = val("miss-kw"), ft = val("miss-ft"), tg = val("miss-tg"), pt = val("miss-pt");
+                    if (!kw && !ft && !tg && !pt) return;
+                    models++;
+                    for (const code of m.codes) {
+                        const _p = PRODUCTS.find(x => x.품번 === code) || m.rep;
+                        newEntries[code] = {
+                            v: 3, method: "manual", researchedAt: _todayYmd(), modelKey: _guideModelKey(_p),
+                            품번: code, 품명: _p.품명 || "", 브랜드: _p.브랜드 || "",
+                            keywords: kw ? kw.split(",").map(k => k.trim()).filter(Boolean) : [],
+                            features: ft, bestUse: tg, salesPitch: pt, sources: [],
+                        };
+                    }
                 });
+                if(!models){ alert("체크한 모델에 입력된 내용이 없습니다. ✏️ 직접 버튼으로 내용을 넣어주세요."); return; }
                 const origText = saveMissBtn.textContent;
                 saveMissBtn.textContent = "⏳ 저장 중...";
                 saveMissBtn.disabled = true;
-
                 try {
                     await _saveGuideEntries(newEntries);
                     _recomputeStock(); render(); window.renderSalesAdmin();
-                    alert(`✅ ${Object.keys(newEntries).length}개 가이드가 성공적으로 등록되었습니다!`);
-                    showPanel("uploadPanel");
+                    alert(`✅ ${models}개 모델(품번 ${Object.keys(newEntries).length}개) 가이드를 저장했습니다.`);
+                    _renderMissList();
                 } catch(err) {
                     alert("저장 실패: " + err.message);
                 } finally {
