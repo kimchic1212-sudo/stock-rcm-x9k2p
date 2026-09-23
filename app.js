@@ -4387,6 +4387,10 @@ function _guideEntryFromResearch(res, p) {
 // 모델 하나를 조사해서 그 모델의 모든 품번에 넣을 항목을 만든다. 못 찾으면 '못 찾음' 표시만 남긴다(내용은 비움).
 async function _researchModelEntries(m) {
     const res = await researchGuide(m.rep);
+    if (res && res.retryLater) {   // 런리피트에 없고 AI 한도 초과 — 저장하지 않고 다음에 다시
+        const e = new Error(res.reason || "오늘은 조사할 수 없는 모델입니다. 내일 다시 시도하세요.");
+        e.skip = true; throw e;
+    }
     const out = {};
     for (const code of m.codes) {
         const p = PRODUCTS.find(x => x.품번 === code) || m.rep;
@@ -20262,11 +20266,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 if(!checkPat()) return;
                 const todo = _missModels().filter(m => !m.notFound);
                 if(!todo.length) { alert("웹 조사할 모델이 없습니다. ('못 찾음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
-                if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 웹에서 조사합니다.\n\n· 브랜드 공식몰·리뷰 사이트에서 확인된 값만 저장하고, 정확한 모델을 못 찾으면 비워 둡니다.\n· 무료 사용량 한도 때문에 모델당 수십 초 걸릴 수 있고, 하루 한도에 닿으면 멈춥니다(다시 누르면 이어서).\n\n진행할까요?`)) return;
+                if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 웹에서 조사합니다.\n\n· 브랜드 공식몰·리뷰 사이트에서 확인된 값만 저장하고, 정확한 모델을 못 찾으면 비워 둡니다.\n· 런리피트(RunRepeat)에 있는 모델은 무료로 바로 읽고, 없는 모델만 AI 웹검색(하루 한도)으로 찾습니다. 한도가 차면 그 모델은 다음에 다시 합니다.\n\n진행할까요?`)) return;
 
                 bulkAiBtn.disabled = true;
                 const origLabel = "🔎 전체 웹 조사";
-                let done = 0, found = 0, notFound = 0, failed = 0, stopped = "";
+                let done = 0, found = 0, notFound = 0, failed = 0, later = 0, stopped = "";
                 let pending = {}, pendingModels = 0;
                 const _flush = async () => {
                     if (!pendingModels) return;
@@ -20287,6 +20291,7 @@ window.addEventListener('DOMContentLoaded', () => {
                                 }
                                 continue;
                             }
+                            if (err.skip) { later++; break; }
                             if (err.rateLimited) stopped = "오늘 AI 사용량 한도에 닿아 멈췄습니다. 내일 다시 누르면 이어서 합니다.";
                             else { failed++; console.warn(`[웹 조사] ${m.rep.품명} 실패:`, err.message); }
                             break;
@@ -20307,7 +20312,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 bulkAiBtn.disabled = false;
                 render(); if(window.renderSalesAdmin) window.renderSalesAdmin();
                 _renderMissList();
-                alert(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 정확한 모델 못 찾음(비워 둠): ${notFound}개` + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
+                alert(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 정확한 모델 못 찾음(비워 둠): ${notFound}개` + (later ? `\n⏳ 런리피트에 없어 다음에 다시: ${later}개` : "") + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
             };
         }
 
