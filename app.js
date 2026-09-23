@@ -4628,6 +4628,18 @@ async function callAIGuide(brand, modelName, reviewText) {
     return first;
 }
 
+// 기기 키로 직접 부를 때 쓸 모델 — 허브가 '이 계정에서 실제로 쓸 수 있는 모델'을 알려준다.
+// (2026-09: 예전 기본값 llama-3.3-70b-versatile이 이 계정에서 404. 모델이 바뀌어도 앱 수정 없이 따라간다)
+let _groqModel = null;
+async function _getGroqModel() {
+    if (_groqModel) return _groqModel;
+    try {
+        const r = await fetch(HUB_AI_API, { cache: "no-store" });
+        if (r.ok) { const j = await r.json(); if (j && j.model) _groqModel = j.model; }
+    } catch(e) {}
+    return _groqModel || "openai/gpt-oss-120b";
+}
+
 async function _callAIGuideOnce(brand, modelName, reviewText) {
     const userContent = reviewText.trim()
         ? `브랜드: ${brand}\n모델명: ${modelName}\n\n아래 스펙 데이터를 참고해서 AI 세일즈 가이드를 작성해주세요:\n\n${reviewText}`
@@ -4665,6 +4677,7 @@ async function _callAIGuideOnce(brand, modelName, reviewText) {
     // 2순위: 이 기기에 등록된 Groq 키 (예전 방식 — 허브가 준비되기 전이나 장애 시)
     const key = getAnthKey();
     if (!key) throw new Error("AI 가이드를 생성할 수 없습니다." + (_hubErr ? "\n(허브: " + _hubErr + ")" : "") + "\n허브에 GROQ_API_KEY를 등록하면 기기마다 키를 넣지 않아도 됩니다.\n임시로 쓰려면 ADMIN > API 설정에 Groq 키를 넣어주세요. 발급: console.groq.com (무료)");
+    const _directModel = await _getGroqModel();
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -4672,13 +4685,15 @@ async function _callAIGuideOnce(brand, modelName, reviewText) {
             "Authorization": `Bearer ${key}`
         },
         body: JSON.stringify({
-            model: "llama-3.3-70b-versatile",
+            model: _directModel,
             messages: [
                 { role: "system", content: SALES_GUIDE_SYSTEM_PROMPT },
                 { role: "user",   content: userContent }
             ],
             max_tokens: 1400,
-            temperature: 0.7
+            temperature: 0.7,
+            // gpt-oss 계열은 추론 모델이라 생각 과정에도 토큰을 쓴다 — 가이드 생성엔 낮게
+            ...(/gpt-oss/.test(_directModel) ? { reasoning_effort: "low" } : {})
         })
     });
     if (!res.ok) {
