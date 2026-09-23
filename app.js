@@ -4384,7 +4384,7 @@ const SALES_GUIDE_SYSTEM_PROMPT = `당신은 RACEMENT 프리미엄 러닝샵의 
 
 
 
-keywords: 태그1,태그2,태그3,태그4,태그5
+keywords: 태그1,태그2,태그3,태그4,태그5 (브랜드명·모델명·품번은 쓰지 말 것 — 카드에 이미 보인다. 쿠셔닝·템포주·넓은발·카본·회복주처럼 신발의 성격·용도·착용감만 쓴다)
 
 
 
@@ -11406,12 +11406,32 @@ function card(p){
 
   let salesHtml = "";
   const guide = SALES_GUIDES[p.품번];
-  if (guide && guide.keywords && guide.keywords.length > 0) {
-      // 판매 가이드 키워드는 한 줄로 — 앞 3개만, 나머지는 +N (누르면 판매 가이드가 열림)
-      salesHtml = `<div class="flex items-center gap-1 mt-1 overflow-hidden">` +
-          guide.keywords.slice(0, 3).map(kw => `<span class="btn-sales shrink-0 bg-indigo-50 text-indigo-600 border border-indigo-100 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer hover:bg-indigo-600 hover:text-white transition-colors">#${escapeHtml(kw.trim())}</span>`).join('') +
-          (guide.keywords.length > 3 ? `<span class="btn-sales shrink-0 text-[10px] font-bold text-indigo-400 cursor-pointer">+${guide.keywords.length - 3}</span>` : '') +
-      `</div>`;
+  if (guide) {
+      // 러너가 실제로 묻는 것부터 — 무게·드롭·사이즈 주의·페이스 구간. 브랜드·품번은 바로 위에 이미 있어서
+      // 그걸 되뇌는 키워드(#나이키 #001A 같은 것)는 뺀다. 칩을 누르면 판매 가이드가 열린다.
+      const _norm = v => String(v || "").toLowerCase().replace(/[\s\-_/.]/g, "");
+      const _bN = _norm(p.브랜드), _nN = _norm(p.품명), _cN = _norm(p.품번);
+      const _kw = (guide.keywords || []).map(k => String(k).trim()).filter(k => {
+          const n = _norm(k);
+          if (!n) return false;
+          if (_bN && (_bN.includes(n) || n.includes(_bN))) return false;
+          if (_cN && (_cN.includes(n) || n.includes(_cN))) return false;
+          if (_nN && n.length >= 2 && _nN.includes(n)) return false;
+          return true;
+      });
+      const _pace = (String(guide.bestFor || "").match(/\d{1,2}:\d{2}\s*[~\-–]\s*\d{1,2}:\d{2}/) || [])[0];
+      const _sizeTip = /치수|사이즈|발볼|좁게|넓게|작게|크게/.test(String(guide.issues || ""));
+      const _chip = (txt, cls) => `<span class="btn-sales shrink-0 ${cls} text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer">${escapeHtml(txt)}</span>`;
+      const _spec = "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-600 hover:text-white transition-colors";
+      const _tag  = "bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-colors";
+      const _warn = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-500 hover:text-white transition-colors";
+      const _chips = [];
+      if (guide.weight) _chips.push(_chip(String(guide.weight).replace(/\s/g, ""), _spec));
+      if (guide.drop)   _chips.push(_chip("드롭 " + String(guide.drop).replace(/\s/g, ""), _spec));
+      if (_sizeTip)     _chips.push(_chip("⚠️ 사이즈", _warn));
+      if (_pace)        _chips.push(_chip(_pace.replace(/\s/g, ""), _spec));
+      _kw.slice(0, _pace ? 1 : 2).forEach(k => _chips.push(_chip("#" + k, _tag)));
+      if (_chips.length) salesHtml = `<div class="flex items-center gap-1 mt-1 overflow-hidden">${_chips.join("")}</div>`;
   }
 
 
