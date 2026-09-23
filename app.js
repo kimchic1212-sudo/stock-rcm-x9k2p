@@ -3807,6 +3807,44 @@ async function ghSaveJson(path, mutateFn, message) {
 // ── 실재고 보정(부산) 엔진 ───────────────────────────────────────────
 // 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
 // 별도 파일 저장 → 엑셀 재업로드해도 유지. 적용은 판매차감 이후 마지막 단계(항상 우선).
+// 보정 기록의 시각(ms). 새 기록은 atMs를 갖고, 예전 기록의 at은 UTC 문자열이라 UTC로 읽는다.
+function _overrideMs(o) {
+    if (o && Number.isFinite(o.atMs)) return o.atMs;
+    const t = String((o && o.at) || "");
+    const m = t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})$/);
+    return m ? Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:00Z`) : 0;
+}
+
+// 지금 쓰고 있는 재고 파일이 올라온 시각(ms). 예전 meta에는 uploadedAt("9/22 10:39")만 있어 그걸 해석한다.
+function _inventoryUploadMs() {
+    if (CURRENT_META && Number.isFinite(CURRENT_META.uploadedMs)) return CURRENT_META.uploadedMs;
+    const m = String((CURRENT_META && CURRENT_META.uploadedAt) || "").match(/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/);
+    if (!m) return 0;
+    const now = new Date();
+    const d = new Date(now.getFullYear(), Number(m[1]) - 1, Number(m[2]), Number(m[3]), Number(m[4]));
+    if (d.getTime() - now.getTime() > 7 * 86400000) d.setFullYear(now.getFullYear() - 1);   // 연말 경계 보정
+    return d.getTime();
+}
+
+// 새 재고 파일이 기준이 되므로 그 전에 한 보정은 무효 — 안 그러면 보정 차이(+1 등)가 계속 따라다닌다
+function _overrideOutdated(o) {
+    const up = _inventoryUploadMs(), ov = _overrideMs(o);
+    return !!(up && ov && ov < up);
+}
+
+// 재고 파일을 새로 올린 직후 호출 — 남아 있는 보정을 전부 해제한다
+async function _clearOverridesOnNewInventory() {
+    try {
+        const n = Object.keys(STOCK_OVERRIDES || {}).length;
+        if (!n) return 0;
+        const saved = await ghSaveJson(STOCK_OVERRIDES_PATH, () => ({}), "stock: 새 재고 업로드로 실재고 보정 초기화");
+        STOCK_OVERRIDES = (saved && typeof saved === "object") ? saved : {};
+        try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "{}"); c.stockOverrides = STOCK_OVERRIDES; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+        showToast(`✏️ 새 재고 기준이라 실재고 보정 ${n}개 상품 자동 해제`);
+        return n;
+    } catch(e) { console.warn("보정 자동 해제 실패:", e.message); return 0; }
+}
+
 function applyStockOverrides() {
     if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object') return;
     PRODUCTS.forEach(p => {
@@ -3817,6 +3855,7 @@ function applyStockOverrides() {
         p.sizes.forEach(s => {
             const o = ov[String(s.size).trim()];
             if(!o || o.actual === undefined || o.actual === null) return;
+            if(_overrideOutdated(o)) return;   // 새 재고 파일 이전 보정 — 무시(업로드한 기기에서 정리됨)
             const actual = Number(o.actual);
             if(!Number.isFinite(actual)) return;
             const sysNow = s.busan;   // 판매차감까지 반영된 현재 시스템값
@@ -3825,7 +3864,8 @@ function applyStockOverrides() {
             const effective = Math.max(0, actual - soldSinceCorrection);
             s._override = { actual, system: o.system, by: o.by, at: o.at, sysNow, effective };
             s._rawBusan = sysNow; // 보정 적용 전의 순수 시스템값 — 재보정 시 기준점으로 사용
-            s._overrideStale = (typeof o.system === 'number' && sysNow !== o.system); // 보정 후 시스템값이 바뀜 → 재확인
+            // 팔려서 줄어드는 건 정상이라 표시하지 않고, 재고가 늘었을 때(반품·본사 수정)만 재확인 표시
+            s._overrideStale = (typeof o.system === 'number' && sysNow > o.system);
             s.busan = effective;
             p._hasOverride = true;
         });
@@ -4027,7 +4067,10 @@ window._setStockOverride = async (code, size, actual) => {
     const sysNow = s ? (s._rawBusan ?? s.busan) : null;   // 이전 보정이 있어도 순수 시스템값을 기준으로 저장
     const prev = STOCK_OVERRIDES[code] ? STOCK_OVERRIDES[code][sz] : undefined;
     if(!STOCK_OVERRIDES[code]) STOCK_OVERRIDES[code] = {};
-    STOCK_OVERRIDES[code][sz] = { actual: Number(actual), system: sysNow, by: (localStorage.getItem('rcm_last_memo_staff')||'ADMIN'), at: new Date().toISOString().slice(0,16).replace('T',' ') };
+    const _now = new Date();
+    const _pad = v => String(v).padStart(2, '0');
+    const _atLocal = `${_now.getFullYear()}-${_pad(_now.getMonth()+1)}-${_pad(_now.getDate())} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}`;
+    STOCK_OVERRIDES[code][sz] = { actual: Number(actual), system: sysNow, by: (localStorage.getItem('rcm_last_memo_staff')||'ADMIN'), at: _atLocal, atMs: _now.getTime() };
     try { await saveStockOverrides(code, sz, STOCK_OVERRIDES[code][sz]); } catch(e) { if(prev!==undefined) STOCK_OVERRIDES[code][sz]=prev; else { delete STOCK_OVERRIDES[code][sz]; if(!Object.keys(STOCK_OVERRIDES[code]).length) delete STOCK_OVERRIDES[code]; } showToast('보정 저장 실패: '+e.message, null, 'error'); return false; }
     _recomputeStock(); render(); _reopenDetail(code);
     showToast(`✏️ ${size} 실재고 ${actual}개로 보정`);
@@ -4826,7 +4869,11 @@ async function commitInventoryToGitHub(rows, meta) {
     let r2;
     for(let attempt = 0; attempt < 4; attempt++) {
         r2 = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(payload) });
-        if(r2.ok) return await r2.json();
+        if(r2.ok) {
+            const _res = await r2.json();
+            await _clearOverridesOnNewInventory();   // 새 재고가 기준 — 이전 보정은 모두 해제
+            return _res;
+        }
         if((r2.status === 409 || r2.status === 422) && attempt < 3) {
             await new Promise(res => setTimeout(res, 500 * (attempt + 1)));
             try {
@@ -16435,7 +16482,7 @@ function openDetail(p){
 
 
 
-          <div class="text-[10px] text-gray-400 mt-2">⚠️ = 보정 후 시스템값이 바뀜(재확인) · 입력창 빈칸 저장 시 보정 해제</div>
+          <div class="text-[10px] text-gray-400 mt-2">⚠️ = 보정 후 재고가 늘어남(반품·본사 수정 — 재확인) · 입력창 빈칸 저장 시 해제 · 새 재고 파일을 올리면 이전 보정은 자동 해제</div>
 
 
 
@@ -16769,7 +16816,7 @@ $("#file").onchange = async (e) => {
     reader.onload = async (ev) => {
         const wb = XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
         let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], XLSX);
-        const meta = { fileName:f.name, uploadedAt: dateStr };
+        const meta = { fileName:f.name, uploadedAt: dateStr, uploadedMs: Date.now() };
         try {
             await commitInventoryToGitHub(rows, meta);
             RAW = rows; CURRENT_META = meta;
@@ -21127,7 +21174,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if(!window.XLSX) { alert("엑셀 파서 로딩 중입니다. 잠시 후 시도해주세요."); return; }
                 const wb = window.XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
                 let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], window.XLSX);
-                const meta = { fileName:f.name, uploadedAt: dateStr };
+                const meta = { fileName:f.name, uploadedAt: dateStr, uploadedMs: Date.now() };
                 try {
                     // 기존에 정의하신 commitInventoryToGitHub 함수 실행
                     await window.commitInventoryToGitHub(rows, meta);
