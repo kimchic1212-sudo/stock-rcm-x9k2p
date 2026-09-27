@@ -3807,43 +3807,11 @@ async function ghSaveJson(path, mutateFn, message) {
 // ── 실재고 보정(부산) 엔진 ───────────────────────────────────────────
 // 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
 // 별도 파일 저장 → 엑셀 재업로드해도 유지. 적용은 판매차감 이후 마지막 단계(항상 우선).
-// 보정 기록의 시각(ms). 새 기록은 atMs를 갖고, 예전 기록의 at은 UTC 문자열이라 UTC로 읽는다.
-function _overrideMs(o) {
-    if (o && Number.isFinite(o.atMs)) return o.atMs;
-    const t = String((o && o.at) || "");
-    const m = t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})$/);
-    return m ? Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:00Z`) : 0;
-}
-
-// 지금 쓰고 있는 재고 파일이 올라온 시각(ms). 예전 meta에는 uploadedAt("9/22 10:39")만 있어 그걸 해석한다.
-function _inventoryUploadMs() {
-    if (CURRENT_META && Number.isFinite(CURRENT_META.uploadedMs)) return CURRENT_META.uploadedMs;
-    const m = String((CURRENT_META && CURRENT_META.uploadedAt) || "").match(/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})/);
-    if (!m) return 0;
-    const now = new Date();
-    const d = new Date(now.getFullYear(), Number(m[1]) - 1, Number(m[2]), Number(m[3]), Number(m[4]));
-    if (d.getTime() - now.getTime() > 7 * 86400000) d.setFullYear(now.getFullYear() - 1);   // 연말 경계 보정
-    return d.getTime();
-}
-
-// 새 재고 파일이 기준이 되므로 그 전에 한 보정은 무효 — 안 그러면 보정 차이(+1 등)가 계속 따라다닌다
-function _overrideOutdated(o) {
-    const up = _inventoryUploadMs(), ov = _overrideMs(o);
-    return !!(up && ov && ov < up);
-}
-
-// 재고 파일을 새로 올린 직후 호출 — 남아 있는 보정을 전부 해제한다
-async function _clearOverridesOnNewInventory() {
-    try {
-        const n = Object.keys(STOCK_OVERRIDES || {}).length;
-        if (!n) return 0;
-        const saved = await ghSaveJson(STOCK_OVERRIDES_PATH, () => ({}), "stock: 새 재고 업로드로 실재고 보정 초기화");
-        STOCK_OVERRIDES = (saved && typeof saved === "object") ? saved : {};
-        try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "{}"); c.stockOverrides = STOCK_OVERRIDES; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
-        showToast(`✏️ 새 재고 기준이라 실재고 보정 ${n}개 상품 자동 해제`);
-        return n;
-    } catch(e) { console.warn("보정 자동 해제 실패:", e.message); return 0; }
-}
+// 2026-09-27까지는 여기서 "새 재고 파일보다 이전 보정은 무효"로 보고 화면에서 숨기거나(≈적용 안 함)
+// 심지어 새 엑셀을 올릴 때마다 보정 파일 자체를 통째로 비웠다. 매일 엑셀을 올리는 운영 방식과 안 맞아
+// 애써 해놓은 보정이 거의 매일 사라지는 문제가 있어서 그 로직(_overrideMs/_inventoryUploadMs/
+// _overrideOutdated/_clearOverridesOnNewInventory)을 전부 제거했다. 이제 보정은 사람이 직접
+// 지우기 전까지 계속 적용되고, 재고가 늘어난 경우에만 아래 _overrideStale로 재확인만 유도한다.
 
 function applyStockOverrides() {
     if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object') return;
@@ -3855,7 +3823,9 @@ function applyStockOverrides() {
         p.sizes.forEach(s => {
             const o = ov[String(s.size).trim()];
             if(!o || o.actual === undefined || o.actual === null) return;
-            if(_overrideOutdated(o)) return;   // 새 재고 파일 이전 보정 — 무시(업로드한 기기에서 정리됨)
+            // 예전엔 여기서 "새 재고 파일 이전 보정"을 무시했으나, 매일 엑셀을 올리는 운영 방식과 안 맞아
+            // 전날 애써 해놓은 보정이 화면에서 계속 사라지는 문제가 있었다(2026-09-27). 이제 보정은
+            // 지우기 전까지 계속 적용하고, 재고가 늘어난 경우에만 아래 _overrideStale로 재확인을 유도한다.
             const actual = Number(o.actual);
             if(!Number.isFinite(actual)) return;
             const sysNow = s.busan;   // 판매차감까지 반영된 현재 시스템값
@@ -4475,7 +4445,9 @@ async function commitInventoryToGitHub(rows, meta) {
         r2 = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(payload) });
         if(r2.ok) {
             const _res = await r2.json();
-            await _clearOverridesOnNewInventory();   // 새 재고가 기준 — 이전 보정은 모두 해제
+            // 예전엔 여기서 재고보정을 자동 초기화했으나, 매일 엑셀을 올리는 운영 방식과 안 맞아
+            // 애써 해놓은 보정이 계속 사라지는 문제가 있었다(2026-09-27). 이제 보정은 사람이
+            // 지우기 전까지 그대로 유지된다(applyStockOverrides 참고).
             return _res;
         }
         if((r2.status === 409 || r2.status === 422) && attempt < 3) {
