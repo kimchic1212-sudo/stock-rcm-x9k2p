@@ -413,7 +413,7 @@ style.innerHTML = `
 
 
 
-    .chip { background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; transition: all 0.2s ease-in-out; cursor: pointer; }
+    .chip { background-color: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; transition: background-color .2s ease-in-out, border-color .2s ease-in-out, color .2s ease-in-out, box-shadow .2s ease-in-out, transform .2s ease-in-out; cursor: pointer; }
 
 
 
@@ -1245,7 +1245,7 @@ style.innerHTML = `
 
 
 
-        padding: 16px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; cursor: pointer;
+        padding: 16px; display: flex; align-items: center; justify-content: space-between; transition: background-color .3s ease, border-color .3s ease, color .3s ease, box-shadow .3s ease, transform .3s ease; cursor: pointer;
 
 
 
@@ -2630,6 +2630,7 @@ function showToast(message, onUndo, type) {
     if(!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
+        container.setAttribute('role', 'status'); container.setAttribute('aria-live', 'polite');
         document.body.appendChild(container);
     }
     const toast = document.createElement('div');
@@ -2773,6 +2774,41 @@ function updateUndoBtnUI() {
     }
 }
 
+// ── 접근성(2026-09-30) ─────────────────────────────────────────────
+// 클릭만 되던 상품 카드·div 버튼을 키보드(Enter·Space)로도 누를 수 있게 한다
+document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const t = e.target;
+    if (!(t instanceof Element) || t.matches('button, a, input, select, textarea, [contenteditable="true"]')) return;
+    if (t.matches('[role="button"], article.card[tabindex]')) { e.preventDefault(); t.click(); }
+});
+// 모달이 열리면 모달로 초점을 옮기고(모바일 키보드가 뜨지 않게 입력칸이 아닌 모달 자체에), Tab이 모달 밖으로
+// 새지 않게 하며, 닫히면 연 버튼으로 초점을 돌려놓는다
+(function _a11yDialogs(){
+    const SEL = '[role="dialog"][aria-modal="true"]';
+    const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const isOpen = (d) => !d.classList.contains('hidden') && getComputedStyle(d).display !== 'none';
+    const focusables = (d) => [...d.querySelectorAll(FOCUSABLE)].filter(el => el.getClientRects().length > 0);
+    document.querySelectorAll(SEL).forEach(d => {
+        let was = isOpen(d), opener = null;
+        new MutationObserver(() => {
+            const now = isOpen(d);
+            if (now && !was) { opener = document.activeElement; setTimeout(() => { if (!d.contains(document.activeElement)) d.focus({ preventScroll: true }); }, 0); }
+            if (!now && was && opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus({ preventScroll: true });
+            was = now;
+        }).observe(d, { attributes: true, attributeFilter: ['class', 'style'] });
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Tab") return;
+        const d = [...document.querySelectorAll(SEL)].reverse().find(isOpen);
+        if (!d) return;
+        const f = focusables(d); if (!f.length) return;
+        const first = f[0], last = f[f.length - 1], cur = document.activeElement;
+        if (!d.contains(cur) || cur === d) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+        else if (e.shiftKey && cur === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus(); }
+    });
+})();
 document.addEventListener("keydown", (e) => {
     // 💡 수정됨: #adminModal 을 선택자에 추가하여 ESC로 닫히게 복구
     if(e.key === "Escape") {
@@ -2872,7 +2908,7 @@ function applyMeta(meta){
         const _staleMin = Math.floor((Date.now() - _lastSalesSync) / 60000);
         _salesStaleShown = Date.now() - _lastSalesSync >= SALES_STALE_MS;
         if (_salesStaleShown) {
-            posSyncInfo = `<div onclick="location.reload()" title="이 화면이 ${_staleMin}분째 판매 데이터를 못 받고 있어요. 눌러서 새로고침" class="cursor-pointer bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-300 flex items-center gap-1 shrink-0 hover:bg-orange-100 transition-colors">
+            posSyncInfo = `<div role="button" tabindex="0" onclick="location.reload()" title="이 화면이 ${_staleMin}분째 판매 데이터를 못 받고 있어요. 눌러서 새로고침" class="cursor-pointer bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-[11px] font-black border border-orange-300 flex items-center gap-1 shrink-0 hover:bg-orange-100 transition-colors">
                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5 shrink-0"></i> POS판매 ${_staleMin}분째 끊김 · 새로고침
             </div>`;
         } else if (lastSynced) {
@@ -2885,7 +2921,7 @@ function applyMeta(meta){
             const min = String(d.getMinutes()).padStart(2,'0');
             if (isToday) {
                 // 오늘 데이터 → 초록 + 시간만
-                posSyncInfo = `<div onclick="showPosSyncGuide('ok')" class="cursor-pointer bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0 hover:bg-emerald-100 transition-colors">
+                posSyncInfo = `<div role="button" tabindex="0" onclick="showPosSyncGuide('ok')" class="cursor-pointer bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-[11px] font-black border border-emerald-200 flex items-center gap-1 shrink-0 hover:bg-emerald-100 transition-colors">
 
 
 
@@ -2922,14 +2958,14 @@ function applyMeta(meta){
                 // 동기화는 오늘 정상으로 돌았는데 아직 판매가 없음(영업 전 등) → 노란 경고 대신 회색 안내
                 const _c = new Date(window._posLastCheckedAt);
                 const _ch = String(_c.getHours()).padStart(2,'0'), _cm = String(_c.getMinutes()).padStart(2,'0');
-                posSyncInfo = `<div onclick="showPosSyncGuide('ok')" title="POS 동기화는 정상이고, 오늘 판매가 아직 없어요 (${_ch}:${_cm} 확인)" class="cursor-pointer bg-gray-50 text-gray-600 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
+                posSyncInfo = `<div role="button" tabindex="0" onclick="showPosSyncGuide('ok')" title="POS 동기화는 정상이고, 오늘 판매가 아직 없어요 (${_ch}:${_cm} 확인)" class="cursor-pointer bg-gray-50 text-gray-600 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
                     <i data-lucide="zap" class="w-3.5 h-3.5 shrink-0"></i> POS판매: 오늘 판매 없음 · ${_ch}:${_cm} 확인
                 </div>`;
             } else {
                 // 어제 이전 데이터 → 노란색 경고
                 const mm = String(d.getMonth()+1);
                 const dd = String(d.getDate());
-                posSyncInfo = `<div onclick="showPosSyncGuide('stale')" class="cursor-pointer bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-[11px] font-black border border-yellow-300 flex items-center gap-1 shrink-0 hover:bg-yellow-100 transition-colors">
+                posSyncInfo = `<div role="button" tabindex="0" onclick="showPosSyncGuide('stale')" class="cursor-pointer bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-[11px] font-black border border-yellow-300 flex items-center gap-1 shrink-0 hover:bg-yellow-100 transition-colors">
 
 
 
@@ -2964,7 +3000,7 @@ function applyMeta(meta){
                 </div>`;
             }
         } else {
-            posSyncInfo = `<div onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
+            posSyncInfo = `<div role="button" tabindex="0" onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
 
 
 
@@ -5450,7 +5486,7 @@ function setupSearchAutocomplete() {
 
 
 
-                <span class="cursor-pointer hover:text-red-500 bg-white px-2 py-1 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
+                <span role="button" tabindex="0" class="cursor-pointer hover:text-red-500 bg-white px-2 py-1 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
 
 
 
@@ -5498,7 +5534,7 @@ function setupSearchAutocomplete() {
 
 
 
-                <div class="p-3.5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
+                <div role="button" tabindex="0" class="p-3.5 border-b border-gray-50 hover:bg-gray-50 cursor-pointer flex justify-between items-center group" onclick="applySearch('${escapeHtml(t).replace(/'/g, "\\'")}')">
 
 
 
@@ -5656,7 +5692,7 @@ function setupSearchAutocomplete() {
 
 
 
-            <div class="p-3 border-b border-gray-50 hover:bg-blue-50 cursor-pointer flex gap-3 items-center" onclick="applySearch('${p.품번}')">
+            <div role="button" tabindex="0" class="p-3 border-b border-gray-50 hover:bg-blue-50 cursor-pointer flex gap-3 items-center" onclick="applySearch('${p.품번}')">
 
 
 
@@ -5672,7 +5708,7 @@ function setupSearchAutocomplete() {
 
 
 
-                ${imgSrc ? `<img src="${imgSrc}" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+                ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
 
 
 
@@ -7696,7 +7732,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-            <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${g.품번}', '${(currentPeriod === 'CUSTOM' ? `CUSTOM_${currentCustomStart}_${currentCustomEnd}` : currentPeriod)}')">
+            <div role="button" tabindex="0" class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${g.품번}', '${(currentPeriod === 'CUSTOM' ? `CUSTOM_${currentCustomStart}_${currentCustomEnd}` : currentPeriod)}')">
 
 
 
@@ -7720,7 +7756,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                    <div class="thumbnail shrink-0">${imgSrc ? `<img src="${imgSrc}" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}</div>
+                    <div class="thumbnail shrink-0">${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}</div>
 
 
 
@@ -7894,7 +7930,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-            <div class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
+            <div role="button" tabindex="0" class="list-item flex-col items-start w-full" onclick="window.openDashDetail('${p.품번}', '${pParam}')">
 
 
 
@@ -7958,7 +7994,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        ${imgSrc ? `<img src="${imgSrc}" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}
+                        ${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}
 
 
 
@@ -8759,7 +8795,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                    ${imgSrc ? `<img src="${imgSrc}" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
+                    ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
 
 
 
@@ -9787,6 +9823,8 @@ function card(p){
   el.className = "card card-hover p-3.5 flex flex-col h-full";
 
   el.dataset.code = p.품번;
+  el.tabIndex = 0;   // 접근성: 키보드로 카드에 도달해 Enter로 상세 열기
+  el.setAttribute('aria-label', [p.브랜드, p.품명, p.품번].filter(Boolean).join(' '));
 
   if(BULK_LOC_MODE && BULK_LOC_SEL.has(p.품번)){ el.style.outline = "3px solid #ff5a1f"; el.style.outlineOffset = "-3px"; el.dataset.bulkSel = "1"; }
   el.onclick = (e)=>{
@@ -10127,7 +10165,7 @@ function card(p){
 
 
 
-               ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onload="this.classList.add('loaded')" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">` : `<div class="w-full h-full bg-gray-50 flex items-center justify-center flex-col gap-1"><span style="font-size:32px;opacity:.35">${p.카테고리==='신발'?'👟':p.카테고리==='의류'?'👕':'🎒'}</span></div>`}
+               ${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy" onload="this.classList.add('loaded')" class="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal">` : `<div class="w-full h-full bg-gray-50 flex items-center justify-center flex-col gap-1"><span style="font-size:32px;opacity:.35">${p.카테고리==='신발'?'👟':p.카테고리==='의류'?'👕':'🎒'}</span></div>`}
 
 
 
@@ -10302,7 +10340,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
   const colHtml = cats.map(cat => {
     const g = grouped[cat];
     const hotItems = g.hot.slice(0, 8).map(({ p, d7 }) =>
-      `<div class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
+      `<div role="button" tabindex="0" class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
 
 
 
@@ -10369,7 +10407,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
       </div>`
     ).join('');
 
-    const remainHot = g.hot.length > 8 ? `<div class="text-[10px] text-gray-400 font-bold px-1 pt-0.5 cursor-pointer hover:text-red-500" onclick="window._quickFilter('${cat}','hot')">+ ${g.hot.length - 8}개 더</div>` : '';
+    const remainHot = g.hot.length > 8 ? `<div role="button" tabindex="0" class="text-[10px] text-gray-400 font-bold px-1 pt-0.5 cursor-pointer hover:text-red-500" onclick="window._quickFilter('${cat}','hot')">+ ${g.hot.length - 8}개 더</div>` : '';
 
     return `
 
@@ -10451,7 +10489,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','hot')">🔥 ${g.hot.length}</span>
+          <span role="button" tabindex="0" class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','hot')">🔥 ${g.hot.length}</span>
 
 
 
@@ -10467,7 +10505,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','normal')">📈 ${g.normal.length}</span>
+          <span role="button" tabindex="0" class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-500 border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','normal')">📈 ${g.normal.length}</span>
 
 
 
@@ -10483,7 +10521,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-          <span class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-200 hover:bg-gray-400 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','slow')">📦 ${g.slow.length}</span>
+          <span role="button" tabindex="0" class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-200 hover:bg-gray-400 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','slow')">📦 ${g.slow.length}</span>
 
 
 
@@ -12167,7 +12205,7 @@ function openDetail(p){
 
 
 
-        ${imgSrc ? `<img src="${imgSrc}" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
+        ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
 
 
 
@@ -13138,7 +13176,7 @@ function openDetail(p){
 
 
 
-        ${imgSrc ? `<img src="${imgSrc}" class="w-14 h-14 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-14 h-14 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`}
+        ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-14 h-14 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-14 h-14 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`}
 
 
 
@@ -14452,7 +14490,7 @@ function openDetail(p){
 
 
 
-        class="dp-size-btn px-3 py-1.5 rounded-lg border-2 font-black text-xs transition-all ${btnCls}"
+        class="dp-size-btn px-3 py-1.5 rounded-lg border-2 font-black text-xs transition ${btnCls}"
 
 
 
@@ -14719,7 +14757,7 @@ function openDetail(p){
             const zone = LOCATIONS.zones.find(z => z.id === asn.zoneId);
             if(!zone) return '';
             return `<div class="flex items-center gap-2 ${k > 0 ? 'mt-2 pt-2' : ''}" style="${k > 0 ? 'border-top:1px dashed #ffd8c4;' : ''}">
-                <div onclick="window.openFloorPlanView('${zone.id}'${asn.slot ? `,'${escapeHtml(asn.slot)}'` : ''})" class="flex items-center gap-3 cursor-pointer group flex-1 min-w-0">
+                <div role="button" tabindex="0" onclick="window.openFloorPlanView('${zone.id}'${asn.slot ? `,'${escapeHtml(asn.slot)}'` : ''})" class="flex items-center gap-3 cursor-pointer group flex-1 min-w-0">
                     <div style="width:64px;height:46px;border-radius:9px;overflow:hidden;border:1px solid #ffd8c4;flex-shrink:0;background:#fff;">
                         ${storeMapSvg({ highlightZoneId: zone.id, compact: true })}
                     </div>
@@ -14835,7 +14873,7 @@ function openDetail(p){
           const label = ov
             ? `✏️ ${sz}<span class="block text-[10px] font-bold leading-tight">보정 ${ov.actual} → 현재 <b>${ov.effective}</b>${s._overrideStale?' (판매 반영됨)':''}</span>`
             : `${sz}<span class="block text-[10px] text-gray-400 leading-tight">${s.busan}</span>`;
-          return `<button onclick="window._promptStockOverride('${escapeHtml(p.품번)}','${sz}')" class="px-2.5 py-1.5 rounded-lg border-2 font-black text-xs transition-all text-center leading-tight ${cls}">${label}</button>`;
+          return `<button onclick="window._promptStockOverride('${escapeHtml(p.품번)}','${sz}')" class="px-2.5 py-1.5 rounded-lg border-2 font-black text-xs transition text-center leading-tight ${cls}">${label}</button>`;
       }).join('');
       _soDiv.innerHTML = `
 
@@ -15514,7 +15552,7 @@ function _shelfTierRow(label, codes, zoneId, slot, isTarget){
             + `<div class="shelf-tier-body">${items.map(_shelfChip).join('')}</div></div>`;
     }
     const brandTxt = topBrands.map(([b, n]) => `${escapeHtml(b)} ${n}`).join(' · ');
-    return `<div class="shelf-tier shelf-tier-summary${targetCls}" data-slot="${slot != null ? escapeHtml(String(slot)) : ''}" onclick="_toggleShelfList('${escapeHtml(zoneId)}', ${slot ? `'${escapeHtml(slot)}'` : 'null'}, this)">`
+    return `<div role="button" tabindex="0" class="shelf-tier shelf-tier-summary${targetCls}" data-slot="${slot != null ? escapeHtml(String(slot)) : ''}" onclick="_toggleShelfList('${escapeHtml(zoneId)}', ${slot ? `'${escapeHtml(slot)}'` : 'null'}, this)">`
         + `<div class="shelf-tier-label">${escapeHtml(label)}${star}</div>`
         + `<div class="shelf-tier-body"><div class="shelf-count-row"><span class="shelf-count">${items.length}개 품목</span><span class="shelf-go">탭하면 목록에서 보기</span></div>`
         + `<div class="shelf-sum">${brandTxt}</div></div></div>`;
@@ -17179,7 +17217,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                <div id="authPanel" class="flex flex-col items-center justify-center p-10 sm:p-20 w-full min-h-[400px] transition-all duration-300">
+                <div id="authPanel" class="flex flex-col items-center justify-center p-10 sm:p-20 w-full min-h-[400px] transition duration-300">
 
 
 
@@ -17323,7 +17361,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition-all placeholder:text-gray-400">
+                        <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition placeholder:text-gray-400">
 
 
 
@@ -17403,7 +17441,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                <div id="uploadPanel" class="hidden flex-col md:flex-row w-full p-6 sm:p-8 gap-6 transition-all duration-300">
+                <div id="uploadPanel" class="hidden flex-col md:flex-row w-full p-6 sm:p-8 gap-6 transition duration-300">
 
 
 
@@ -17483,7 +17521,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <div id="mainUploadTrigger" class="upload-section flex-1 bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all hover:bg-white/60 hover:border-gray-400 shadow-sm min-h-[200px]">
+                        <div id="mainUploadTrigger" class="upload-section flex-1 bg-white/40 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer transition hover:bg-white/60 hover:border-gray-400 shadow-sm min-h-[200px]">
 
 
 
@@ -18075,7 +18113,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                            <button class="px-6 py-2.5 rounded-xl bg-gray-900 text-white border-none text-[13px] font-bold cursor-pointer hover:bg-gray-800 transition-all shadow-sm" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
+                            <button class="px-6 py-2.5 rounded-xl bg-gray-900 text-white border-none text-[13px] font-bold cursor-pointer hover:bg-gray-800 transition shadow-sm" onclick="document.getElementById('adminModal').classList.add('hidden')">닫기</button>
 
 
 
@@ -18155,7 +18193,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                <div id="settingsPanel" class="hidden flex-col w-full p-6 sm:p-8 transition-all duration-300">
+                <div id="settingsPanel" class="hidden flex-col w-full p-6 sm:p-8 transition duration-300">
 
 
 
@@ -18571,7 +18609,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                <div id="missPanel" class="hidden flex-col w-full transition-all duration-300" style="max-height:580px; overflow:hidden;">
+                <div id="missPanel" class="hidden flex-col w-full transition duration-300" style="max-height:580px; overflow:hidden;">
 
 
 
@@ -19289,8 +19327,11 @@ setTimeout(() => { if (document.getElementById('dashOnlyLoading')) _revealDashOn
             + '<div id="rcGateErr" style="display:none;color:#E11D48;font-size:13px;font-weight:700;margin-top:10px;">비밀번호가 틀렸습니다</div>'
             + '<button id="rcGateGo" style="width:100%;margin-top:14px;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;">입장</button>'
             + '</div>';
+        ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', '매장 공용 비밀번호 입력');
         document.body.appendChild(ov);
+        [...document.body.children].forEach(c => { if (c !== ov && c.tagName !== 'SCRIPT') c.inert = true; });
         const pw = document.getElementById('rcGatePw');
+        pw.setAttribute('aria-label', '공용 비밀번호');
         const go = document.getElementById('rcGateGo');
         const err = document.getElementById('rcGateErr');
         pw.focus();
