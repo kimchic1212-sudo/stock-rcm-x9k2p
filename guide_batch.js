@@ -152,6 +152,18 @@ async function main() {
   if (!inv || !Array.isArray(inv.rows)) throw new Error('inventory.json 형식 오류');
   const guides = guides0 || {}, models = models0 || {};
   const all = buildModels(inv.rows);
+  // 잘 팔리는 모델부터: 최근 90일 판매 수량(sales_history.json: 품번 → 날짜 → 사이즈 → 판매처별 수량)
+  const { data: sh } = await loadJson('sales_history.json').catch(() => ({ data: null }));
+  const since = new Date(Date.now() - 90 * 86400e3).toISOString().slice(0, 10);
+  const soldOf = (code) => {
+    let n = 0;
+    for (const [day, sizes] of Object.entries((sh && sh.items && sh.items[code]) || {})) {
+      if (day < since) continue;
+      for (const ch of Object.values(sizes || {})) for (const q of Object.values(ch || {})) n += Number(q) || 0;
+    }
+    return n;
+  };
+  for (const m of all) m.sold = m.codes.reduce((s, c) => s + soldOf(c), 0);
   const byCode = new Map(); for (const r of inv.rows) if (r['품번'] && !byCode.has(r['품번'])) byCode.set(r['품번'], { 품명: r['품명'], 브랜드: r['브랜드'] });
 
   const guideChanges = {}, modelChanges = {};
@@ -171,7 +183,7 @@ async function main() {
   const queue = all
     .filter((m) => !m.codes.some((c) => guides[c] && guides[c].method === 'manual'))
     .filter((m) => { const mm = models[m.mk]; return !(mm && mm.v === 4 && (mm.method === 'web' || (mm.method === 'notfound' && daysSince(mm.researchedAt) < RETRY_NOTFOUND_DAYS))); })
-    .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), 'ko'));
+    .sort((a, b) => (b.sold - a.sold) || ((b.stock > 0) - (a.stock > 0)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), 'ko'));
 
   // ONLY: 쉼표로 구분한 품명 일부(예: "클라우드붐,클라우드서퍼") — 그 모델만 먼저 조사 (이미 v4인 모델은 queue에서 빠져 있음)
   const only = String(process.env.ONLY || '').split(',').map((s) => s.trim()).filter(Boolean);
