@@ -22,7 +22,9 @@
                     body = await new Response(new Blob([body]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
                     h.set('x-body-gzip', '1');
                 }
-                return origFetch(HUB + url.slice(GH.length), Object.assign({}, init, { headers: h, body }));
+                const res = await origFetch(HUB + url.slice(GH.length), Object.assign({}, init, { headers: h, body }));
+                if (res.status === 401) { try { localStorage.removeItem('racement_gh_pat_v1'); } catch (e) {} }
+                return res;
             }
         }
         return origFetch(input, init);
@@ -2238,7 +2240,7 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-const ADMIN_PWD = "1212";
+// 관리자 비밀번호는 앱 코드(공개 저장소)에 두지 않는다 — 허브(/api/inv-token)만 검증한다 (2026-09-29)
 const SESSION_FLAG = "racement_admin_session";
 // 어드민 세션 helpers — localStorage + 8시간 만료 (iOS Safari 탭 kill 대응)
 function setAdminSession() { try { localStorage.setItem(SESSION_FLAG, String(Date.now() + 8 * 3600 * 1000)); } catch(e) { console.warn('세션 저장 실패(storage 제한):', e); } }
@@ -2385,30 +2387,40 @@ async function dataFetch(path){
     }
     return new Response(null, { status: 503 });
 }
-// Admin 비번 입력 시 허브 서버에서 PAT 발급 (토큰은 소스에 두지 않는다)
-// 성공 시 항상 최신 토큰으로 갱신 → 토큰 교체(rotation) 자동 대응
-async function applyDefaultPatIfNeeded(pwd, silent) {
+// 관리자 비밀번호 → 허브(/api/inv-token)가 검증하고 서명된 관리자 토큰(adm.*)을 준다.
+// 결과: 'ok' | 'denied'(비밀번호 틀림) | 'error'(네트워크·서버 문제)
+async function requestAdminToken(pwd) {
+    let result = 'error';
     try {
         const r = await fetch(HUB_TOKEN_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password: pwd }),
         });
-        if (r.ok) {
+        if (r.status === 401) result = 'denied';
+        else if (r.ok) {
             const j = await r.json();
-            if (j.pat) setPat(j.pat);
-        } else if (!getPat() && !silent) {
-            alert('저장 토큰 발급 실패 — 저장 기능이 제한될 수 있습니다');
+            if (j.pat) { setPat(j.pat); result = 'ok'; }
         }
-    } catch(e) {
-        if (!getPat() && !silent) alert('네트워크 오류 — 저장 토큰 발급 실패');
-    }
+    } catch(e) { console.warn('관리자 토큰 발급 실패:', e && e.message); }
     if (!GH.owner) {
         GH.owner  = DEFAULT_GH.owner;
         GH.repo   = DEFAULT_GH.repo;
         GH.branch = DEFAULT_GH.branch;
         saveGhConfig();
     }
+    return result;
+}
+// ADMIN 비밀번호 확인 — 허브가 맞다고 해야만 관리자 화면을 연다
+async function adminLogin(pwInput, goBtn, onOk) {
+    const pw = String((pwInput && pwInput.value) || '').trim();
+    if (!pw) return;
+    if (goBtn) goBtn.disabled = true;
+    const res = await requestAdminToken(pw);
+    if (goBtn) goBtn.disabled = false;
+    if (res === 'ok') { pwInput.value = ''; setAdminSession(); onOk(); }
+    else if (res === 'denied') alert("비밀번호 오류");
+    else alert("네트워크 오류 — 잠시 후 다시 시도해주세요");
 }
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
@@ -2539,9 +2551,8 @@ function loadGhConfig(){
 function saveGhConfig(){ try { localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(GH)); } catch(e) { console.warn('설정 저장 실패(storage 제한):', e); } }
 function getPat(){ return localStorage.getItem(GH_PAT_KEY) || ""; }
 function setPat(v){ try { if(v) localStorage.setItem(GH_PAT_KEY, v); else localStorage.removeItem(GH_PAT_KEY); } catch(e) { console.warn('로그인 토큰 저장 실패(storage 제한) — 이 기기/브라우저에서는 새로고침 시 ADMIN이 풀릴 수 있음:', e); } }
-const ANTH_KEY = "racement_anth_key_v1";
-function getAnthKey(){ return localStorage.getItem(ANTH_KEY) || ""; }
-function setAnthKey(v){ try { if(v) localStorage.setItem(ANTH_KEY, v); else localStorage.removeItem(ANTH_KEY); } catch(e) { console.warn('키 저장 실패(storage 제한):', e); } }
+// 예전 기기별 AI 키(Groq)는 더 이상 쓰지 않는다 — 가이드는 허브가 만든다. 기기에 남은 키는 지운다 (2026-09-29)
+try { localStorage.removeItem("racement_anth_key_v1"); } catch(e) {}
 
 function checkPat() {
     if(!getPat()) {
@@ -2560,13 +2571,10 @@ function checkPat() {
 // PAT가 없을 때(어드민 세션은 유효) 토큰 자동 재발급
 async function ensurePatForAdmin() {
     if(getPat()) return true;
-    // 1차: 저장된 관리자 비번으로 허브에서 자동 발급 (프롬프트 없음)
-    try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {}
-    if(getPat()) return true;
-    // 2차: 자동 실패 시에만 수동 입력
+    // 비밀번호는 허브만 알고 있으므로 관리자에게 직접 묻는다
     const pw = prompt('저장하려면 관리자 비밀번호를 입력해주세요.');
     if(pw === null) return false;
-    try { await applyDefaultPatIfNeeded(String(pw).trim()); } catch(e) {}
+    await requestAdminToken(String(pw).trim());
     return !!getPat();
 }
 
@@ -3542,8 +3550,6 @@ function showSkeletonCards(n = 6) {
 }
 
 async function loadData(force = false){
-  // 어드민 세션이면 로드 시 항상 최신 토큰 재발급 (옛/만료 토큰이 남아있어도 교체 → 401 방지)
-  if(checkAdminSession()) { applyDefaultPatIfNeeded(ADMIN_PWD, true).catch(()=>{}); }
   // 캐시 없거나 강제 갱신이면 스켈레톤 표시
   const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
   if(!cached || force) showSkeletonCards();
@@ -4424,8 +4430,6 @@ function applyPosSalesDeductions() {
 
 async function commitInventoryToGitHub(rows, meta) {
     if(!GH.owner || !GH.repo) throw new Error("저장소 설정 없음 (ADMIN > API 설정 확인)");
-    // 업로드 직전 항상 최신 토큰 확보 (옛/만료 토큰으로 인한 401 방지)
-    if(checkAdminSession()) { try { await applyDefaultPatIfNeeded(ADMIN_PWD, true); } catch(e) {} }
     const pat = getPat();
     if(!pat) throw new Error("PAT 토큰이 없습니다 (ADMIN > API 설정 확인)");
     const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${DATA_PATH}`;
@@ -5157,7 +5161,7 @@ window.togglePromoView = (btn, bypassRender = false) => {
             { pname: "ALL", label: "🎁 전체 기획전" },
             ..._promos.map(pr => ({
                 pname: pr.meta?.name || '기획전',
-                label: `🎪 ${pr.meta?.name || '기획전'}${pr.meta?.period ? '  <span style="opacity:.6;font-size:10px;">'+escapeHtml(pr.meta.period)+'</span>' : ''}`
+                label: `🎪 ${escapeHtml(pr.meta?.name || '기획전')}${pr.meta?.period ? '  <span style="opacity:.6;font-size:10px;">'+escapeHtml(pr.meta.period)+'</span>' : ''}`
             }))
         ];
         ddItems.forEach(item => {
@@ -5577,7 +5581,7 @@ function setupSearchAutocomplete() {
 
 
 
-                    <span class="text-[15px] font-black text-gray-900 truncate">${p.품명}</span>
+                    <span class="text-[15px] font-black text-gray-900 truncate">${escapeHtml(p.품명)}</span>
 
 
 
@@ -8716,7 +8720,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                        <h2 class="font-black text-[20px] leading-tight text-gray-900 line-clamp-2 max-w-[300px] sm:max-w-lg">${p.품명}</h2>
+                        <h2 class="font-black text-[20px] leading-tight text-gray-900 line-clamp-2 max-w-[300px] sm:max-w-lg">${escapeHtml(p.품명)}</h2>
 
 
 
@@ -11064,7 +11068,7 @@ function card(p){
   if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
       const rateInt = Math.round((p.promoRate || 0) * 100);
       const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
-      const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${p.promoName}]</span> ` : '';
+      const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${escapeHtml(p.promoName)}]</span> ` : '';
       const _previewLabel = p.promoIsPreview ? `<span class="text-[9px] font-bold text-gray-400 ml-0.5">📅미리보기</span>` : '';
       if (p.promoType === 'weekly') {
           promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-400' : 'bg-red-600'} text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
@@ -13875,7 +13879,7 @@ function openDetail(p){
 
   if (checkAdminSession()) {
       const targetUrl = p.shopNo ? `https://racement.co.kr/product-detail?productNo=${p.shopNo}` : "";
-      const linkHtml = p.shopNo ? `<a href="${targetUrl}" target="_blank" class="text-[11px] text-blue-600 hover:underline font-bold shrink-0">자사몰</a>` : '';
+      const linkHtml = p.shopNo ? `<a href="${targetUrl}" target="_blank" rel="noopener" class="text-[11px] text-blue-600 hover:underline font-bold shrink-0">자사몰</a>` : '';
       stickyFooterHtml += `
 
 
@@ -13924,7 +13928,7 @@ function openDetail(p){
 
 
 
-              <a href="https://www.google.com/search?q=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||'')+' '+(p.품명||''))}&tbm=isch" target="_blank" class="px-2 py-1.5 text-xs font-black bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg shrink-0 no-underline" title="구글 이미지 검색">🔍G</a>
+              <a href="https://www.google.com/search?q=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||'')+' '+(p.품명||''))}&tbm=isch" target="_blank" rel="noopener" class="px-2 py-1.5 text-xs font-black bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg shrink-0 no-underline" title="구글 이미지 검색">🔍G</a>
 
 
 
@@ -13940,7 +13944,7 @@ function openDetail(p){
 
 
 
-              <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||''))}" target="_blank" class="px-2 py-1.5 text-xs font-black bg-green-50 hover:bg-green-100 text-green-600 rounded-lg shrink-0 no-underline" title="네이버쇼핑 검색">🔍N</a>
+              <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent((p.브랜드||'')+' '+(p.품번||''))}" target="_blank" rel="noopener" class="px-2 py-1.5 text-xs font-black bg-green-50 hover:bg-green-100 text-green-600 rounded-lg shrink-0 no-underline" title="네이버쇼핑 검색">🔍N</a>
 
 
 
@@ -17249,7 +17253,7 @@ $("#bulkBarDp").onclick = () => window.markMultipleAsDP();
 $("#bulkBarExit").onclick = () => window.exitBulkLocMode();
 $("#bulkBarAll").onclick = () => _bulkToggleAll();
 
-$("#pwdGo").onclick=()=>{ if($("#pwd").value===ADMIN_PWD){ setAdminSession(); applyDefaultPatIfNeeded($("#pwd").value); $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); } else alert("비밀번호 오류"); };
+$("#pwdGo").onclick=()=>adminLogin($("#pwd"), $("#pwdGo"), ()=>{ $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); });
 $("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
 
 window.renderSalesHistoryAdmin = () => {
@@ -19612,86 +19616,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <div class="pt-3 border-t border-gray-200/40">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <label class="block text-xs font-bold text-purple-500 mb-1">🤖 Groq API Key (사용 안 함 — 가이드는 허브 웹 조사로 생성)</label>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <input type="password" id="anthKeyInput" value="${getAnthKey()}" class="ipt w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm font-bold outline-none focus:border-purple-500 shadow-sm bg-purple-50/30" placeholder="gsk_...">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <p class="text-[10px] text-gray-400 font-bold mt-1">발급: <a href="https://console.groq.com" target="_blank" class="text-purple-400 underline">console.groq.com</a> — 이 기기 키는 더 이상 쓰지 않습니다. 비워 두셔도 됩니다.</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </div>
 
 
@@ -20057,17 +19981,11 @@ window.addEventListener('DOMContentLoaded', () => {
         const pwdInput = document.getElementById("pwd");
         const pwdGo = document.getElementById("pwdGo");
 
-        const checkPwd = () => {
-            if(pwdInput.value === ADMIN_PWD) {
-                setAdminSession();
-                applyDefaultPatIfNeeded(pwdInput.value);
+        const checkPwd = () => adminLogin(pwdInput, pwdGo, () => {
                 document.getElementById("authPanel").classList.add("hidden");
                 document.getElementById("uploadPanel").classList.remove("hidden");
                 document.getElementById("uploadPanel").classList.add("flex");
-            } else {
-                alert("비밀번호 오류");
-            }
-        };
+            });
         pwdGo.onclick = checkPwd;
         pwdInput.onkeydown = (e) => { if(e.key === "Enter") checkPwd(); };
 
@@ -20101,7 +20019,6 @@ window.addEventListener('DOMContentLoaded', () => {
             };
             saveGhConfig();
             setPat(document.getElementById("ghPat").value.trim());
-            setAnthKey(document.getElementById("anthKeyInput").value.trim());
             alert("API 설정이 저장되었습니다.");
             document.getElementById("backToUpload").click();
         };
