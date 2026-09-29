@@ -1309,7 +1309,7 @@ style.innerHTML = `
 
 
 
-    .card-pink { border-left: 4px solid #fecfef; }
+    .card-pink { border-left: 4px solid #e9d5ff; }   /* 기획전 = purple 계열 (DESIGN.md 3) */
 
 
 
@@ -3000,7 +3000,7 @@ function applyMeta(meta){
                 </div>`;
             }
         } else {
-            posSyncInfo = `<div role="button" tabindex="0" onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-400 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
+            posSyncInfo = `<div role="button" tabindex="0" onclick="showPosSyncGuide('none')" class="cursor-pointer bg-gray-50 text-gray-500 px-2 py-1 rounded-lg text-[11px] font-black border border-gray-200 flex items-center gap-1 shrink-0 hover:bg-gray-100 transition-colors">
 
 
 
@@ -3235,7 +3235,7 @@ function showPosSyncGuide(status) {
 
 
 
-            <button onclick="document.getElementById('posSyncGuideModal').remove()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-xl font-black">✕</button>
+            <button onclick="document.getElementById('posSyncGuideModal').remove()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-black">✕</button>
 
 
 
@@ -3299,7 +3299,7 @@ function showPosSyncGuide(status) {
 
 
 
-                <span class="text-gray-400 text-xs">신세계 스파로스 POS → GitHub 자동 업로드 (약 2~3분 소요)</span>
+                <span class="text-gray-500 text-xs">신세계 스파로스 POS → GitHub 자동 업로드 (약 2~3분 소요)</span>
 
 
 
@@ -3379,7 +3379,7 @@ function showPosSyncGuide(status) {
 
 
 
-            <div id="posSyncNowResult" class="mt-3 text-xs text-center text-gray-400"></div>
+            <div id="posSyncNowResult" class="mt-3 text-xs text-center text-gray-500"></div>
 
 
 
@@ -3516,7 +3516,7 @@ function showSkeletonCards(n = 6) {
 
 
 
-          <div class="flex-1 flex flex-col gap-1.5"><div class="h-4 w-3/4 bg-gray-200 rounded"></div><div class="h-3 w-1/2 bg-gray-100 rounded"></div></div>
+          <div class="flex-1 flex flex-col gap-1.5"><div class="h-4 w-3/4 bg-gray-200 rounded-lg"></div><div class="h-3 w-1/2 bg-gray-100 rounded-lg"></div></div>
 
 
 
@@ -3580,7 +3580,7 @@ function showSkeletonCards(n = 6) {
 
 
 
-        <div class="border-t pt-3 flex justify-between"><div class="h-3 w-24 bg-gray-100 rounded"></div><div class="h-5 w-20 bg-gray-200 rounded"></div></div>
+        <div class="border-t pt-3 flex justify-between"><div class="h-3 w-24 bg-gray-100 rounded-lg"></div><div class="h-5 w-20 bg-gray-200 rounded-lg"></div></div>
 
 
 
@@ -3786,7 +3786,7 @@ async function loadData(force = false){
 
 
 
-        <div class="text-sm text-gray-400 font-bold">${e.message || '네트워크 오류'}</div>
+        <div class="text-sm text-gray-500 font-bold">${e.message || '네트워크 오류'}</div>
 
 
 
@@ -4773,7 +4773,7 @@ function rebuildIndex(){
       container.className = "flex gap-1.5 items-center flex-wrap";
 
       const createSel = (id, label, optionsHtml) => {
-          return `<select id="${id}" class="ipt text-xs font-bold bg-white border-gray-200 rounded px-2 py-1 outline-none">
+          return `<select id="${id}" class="ipt text-xs font-bold bg-white border-gray-200 rounded-lg px-2 py-1 outline-none">
 
 
 
@@ -4877,7 +4877,7 @@ function rebuildIndex(){
 
 
 
-              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option><option value="PREVIEW">📅 시작 전 미리보기</option></select>
+              <select id="promoTypeSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded-lg px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="ALL">기획전 전체보기</option><option value="weekly">🔥 위클리특가만</option><option value="general">🎟️ 쿠폰사용가능만</option><option value="PREVIEW">📅 시작 전 미리보기</option></select>
 
 
 
@@ -4893,7 +4893,7 @@ function rebuildIndex(){
 
 
 
-              <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
+              <select id="promoRateSel" class="ipt text-sm font-bold bg-white border-purple-200 text-purple-700 rounded-lg px-3 py-1.5 ${_showSel} shrink-0 outline-none"><option value="0">할인율 전체</option><option value="10">🔥 10% 할인</option><option value="20">🔥 20% 할인</option><option value="30">🔥 30% 할인</option></select>
 
 
 
@@ -5486,7 +5486,7 @@ function setupSearchAutocomplete() {
 
 
 
-                <span role="button" tabindex="0" class="cursor-pointer hover:text-red-500 bg-white px-2 py-1 rounded border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
+                <span role="button" tabindex="0" class="cursor-pointer hover:text-red-500 bg-white px-2 py-1 rounded-lg border shadow-sm" onclick="clearRecentSearches(event)">전체삭제</span>
 
 
 
@@ -5566,7 +5566,7 @@ function setupSearchAutocomplete() {
 
 
 
-                    <i data-lucide="search" class="w-4 h-4 text-gray-300 group-hover:text-blue-500"></i>
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 group-hover:text-blue-500"></i>
 
 
 
@@ -5708,7 +5708,7 @@ function setupSearchAutocomplete() {
 
 
 
-                ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-12 h-12 object-contain rounded bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-[10px] text-gray-400 font-bold border border-gray-200">NO IMG</div>`}
+                ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-12 h-12 object-contain rounded-lg bg-white border border-gray-100 mix-blend-multiply">` : `<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-500 font-bold border border-gray-200">NO IMG</div>`}
 
 
 
@@ -5740,7 +5740,7 @@ function setupSearchAutocomplete() {
 
 
 
-                    <span class="text-xs font-bold text-gray-400 truncate">${p.브랜드} | ${p.품번}</span>
+                    <span class="text-xs font-bold text-gray-500 truncate">${p.브랜드} | ${p.품번}</span>
 
 
 
@@ -6504,7 +6504,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <h1 class="text-base font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 <span class="text-xs font-bold text-gray-400 hidden sm:inline">(담당: 김종훈)</span></h1>
+                        <h1 class="text-base font-black text-gray-900 tracking-tight flex items-center gap-2">📈 부산점 판매 리포트 <span class="text-xs font-bold text-gray-500 hidden sm:inline">(담당: 김종훈)</span></h1>
 
 
 
@@ -6568,7 +6568,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <select id="dashBrandSel" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700">
+                        <select id="dashBrandSel" class="ipt text-xs font-black bg-white border border-gray-200 rounded-lg px-2 py-1.5 outline-none text-gray-700">
 
 
 
@@ -6616,7 +6616,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <select id="dashSizeFw" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">신발</option>${generateSizeOptionsHtml(allSizesFwSet)}</select>
+                        <select id="dashSizeFw" class="ipt text-xs font-black bg-white border border-gray-200 rounded-lg px-2 py-1.5 outline-none text-gray-700"><option value="ALL">신발</option>${generateSizeOptionsHtml(allSizesFwSet)}</select>
 
 
 
@@ -6632,7 +6632,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <select id="dashSizeAp" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">의류</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
+                        <select id="dashSizeAp" class="ipt text-xs font-black bg-white border border-gray-200 rounded-lg px-2 py-1.5 outline-none text-gray-700"><option value="ALL">의류</option>${generateSizeOptionsHtml(allSizesApSet)}</select>
 
 
 
@@ -6648,7 +6648,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <select id="dashSizeGear" class="ipt text-xs font-black bg-white border border-gray-200 rounded px-2 py-1.5 outline-none text-gray-700"><option value="ALL">용품</option>${generateSizeOptionsHtml(allSizesGearSet)}</select>
+                        <select id="dashSizeGear" class="ipt text-xs font-black bg-white border border-gray-200 rounded-lg px-2 py-1.5 outline-none text-gray-700"><option value="ALL">용품</option>${generateSizeOptionsHtml(allSizesGearSet)}</select>
 
 
 
@@ -6680,7 +6680,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        <select id="dashPeriodSel" class="ipt text-xs font-black bg-orange-50 border border-orange-200 text-orange-800 rounded px-2.5 py-1.5 outline-none cursor-pointer">
+                        <select id="dashPeriodSel" class="ipt text-xs font-black bg-orange-50 border border-orange-200 text-orange-800 rounded-lg px-2.5 py-1.5 outline-none cursor-pointer">
 
 
 
@@ -6888,7 +6888,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                    <input type="text" id="dashStart" placeholder="2026-05-01" maxlength="10" class="ipt text-xs px-2 py-1.5 w-[96px] border border-orange-200 rounded bg-white outline-none text-gray-700 font-bold tabular-nums">
+                    <input type="text" id="dashStart" placeholder="2026-05-01" maxlength="10" class="ipt text-xs px-2 py-1.5 w-[96px] border border-orange-200 rounded-lg bg-white outline-none text-gray-700 font-bold tabular-nums">
 
 
 
@@ -6920,7 +6920,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                    <input type="text" id="dashEnd" placeholder="2026-05-31" maxlength="10" class="ipt text-xs px-2 py-1.5 w-[96px] border border-orange-200 rounded bg-white outline-none text-gray-700 font-bold tabular-nums">
+                    <input type="text" id="dashEnd" placeholder="2026-05-31" maxlength="10" class="ipt text-xs px-2 py-1.5 w-[96px] border border-orange-200 rounded-lg bg-white outline-none text-gray-700 font-bold tabular-nums">
 
 
 
@@ -6936,7 +6936,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                    <button id="dashApply" class="px-3 py-1.5 bg-orange-500 text-white rounded text-xs font-black shrink-0 hover:bg-orange-600">적용</button>
+                    <button id="dashApply" class="px-3 py-1.5 bg-orange-500 text-white rounded-lg text-xs font-black shrink-0 hover:bg-orange-600">적용</button>
 
 
 
@@ -7064,7 +7064,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                            <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="pie-chart" class="w-3 h-3 text-blue-400"></i> 카테고리</h2>
+                            <h2 class="text-[11px] font-black text-gray-500 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="pie-chart" class="w-3 h-3 text-blue-400"></i> 카테고리</h2>
 
 
 
@@ -7128,7 +7128,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                            <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="users" class="w-3 h-3 text-pink-400"></i> 성별</h2>
+                            <h2 class="text-[11px] font-black text-gray-500 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="users" class="w-3 h-3 text-pink-400"></i> 성별</h2>
 
 
 
@@ -7192,7 +7192,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                            <h2 class="text-[11px] font-black text-gray-400 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="award" class="w-3 h-3 text-emerald-400"></i> 브랜드 Top5</h2>
+                            <h2 class="text-[11px] font-black text-gray-500 mb-2 flex items-center gap-1 uppercase tracking-wide"><i data-lucide="award" class="w-3 h-3 text-emerald-400"></i> 브랜드 Top5</h2>
 
 
 
@@ -7432,7 +7432,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                                <select id="dashSortSel" class="ipt text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded px-2 py-1.5 outline-none cursor-pointer">
+                                <select id="dashSortSel" class="ipt text-xs font-bold bg-white border border-gray-200 text-gray-700 rounded-lg px-2 py-1.5 outline-none cursor-pointer">
 
 
 
@@ -7756,7 +7756,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                    <div class="thumbnail shrink-0">${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}</div>
+                    <div class="thumbnail shrink-0">${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy">` : `<span style="font-size:10px;color:#ccc;font-weight:700;">NO IMG</span>`}</div>
 
 
 
@@ -7788,7 +7788,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                            <span class="text-[10px] font-black text-orange-500 bg-orange-50 border border-orange-200 rounded px-1.5">SKU ${g.skuCount}</span>
+                            <span class="text-[10px] font-black text-orange-500 bg-orange-50 border border-orange-200 rounded-lg px-1.5">SKU ${g.skuCount}</span>
 
 
 
@@ -7796,7 +7796,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                            ${mixBar}<span class="text-[10px] text-gray-400 font-bold">${mixTxt}</span>
+                            ${mixBar}<span class="text-[10px] text-gray-500 font-bold">${mixTxt}</span>
 
 
 
@@ -7878,7 +7878,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
         });
 
         const activeSizeFilter = [currentSizeFw, currentSizeAp, currentSizeGear].find(s => s !== "ALL") || "ALL";
-        let sizeText = activeSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded ml-1">[${activeSizeFilter} 사이즈 필터됨]</span>`;
+        let sizeText = activeSizeFilter === "ALL" ? "" : ` <span class="bg-gray-800 text-white px-2 py-0.5 rounded-lg ml-1">[${activeSizeFilter} 사이즈 필터됨]</span>`;
         $("#dashTotalLabel").innerHTML = `조회기간 내 총 <span class="text-gray-900 font-black text-base">${fmt(totalSales)}개</span> / <span class="text-gray-800 font-black text-base">${krw(totalRev)}</span> 판매${sizeText}`;
 
         const filterLabel = $("#activeFilterLabel"); let labelText = [];
@@ -7994,7 +7994,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
 
 
-                        ${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy">` : `<span style="font-size:9px;color:#ccc;font-weight:700;">NO IMG</span>`}
+                        ${imgSrc ? `<img src="${imgSrc}" alt="" loading="lazy">` : `<span style="font-size:10px;color:#ccc;font-weight:700;">NO IMG</span>`}
 
 
 
@@ -8188,7 +8188,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
 
             `}).join('');
 
-        if (_listSrc.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-400">조건에 맞는 데이터가 없습니다.</div>';
+        if (_listSrc.length === 0) $("#dashListBody").innerHTML = '<div class="h-full flex items-center justify-center text-base font-bold text-gray-500">조건에 맞는 데이터가 없습니다.</div>';
 
         const renderPieChart = (ctxId, dataObj, filterKey, colors) => {
             const ctx = document.getElementById(ctxId);
@@ -8298,7 +8298,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl mx-auto my-auto flex flex-col rounded-3xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
+                           <div id="ddContentWrap" class="modal-content relative bg-white w-full max-w-6xl mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 transition-transform duration-200"></div>`;
         document.body.appendChild(modal);
 
         let touchstartX = 0; let touchendX = 0;
@@ -8345,7 +8345,7 @@ window.openDashDetail = (code, periodParam) => {
         const soldCenter = sizeSalesMapCenter[size] || 0;
         const sObj = p.sizes.find(s => String(s.size).trim() === String(size)) || { busan: 0, sinsa: 0, center: 0 };
 
-        let suggestHtml = `<span class="text-gray-300">-</span>`;
+        let suggestHtml = `<span class="text-gray-400">-</span>`;
         let needed = Math.max(0, soldBusan - sObj.busan);
         let takeCenter = Math.min(sObj.center, needed);
         let takeSinsa = Math.min(sObj.sinsa, Math.max(0, needed - takeCenter));
@@ -8369,7 +8369,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 px-1.5 py-1 rounded w-full">
+                <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 px-1.5 py-1 rounded-lg w-full">
 
 
 
@@ -8401,7 +8401,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                    <input type="number" id="rt_c_${size}" value="${defaultVal}" min="1" max="${sObj.center}" class="w-8 text-center text-xs font-black bg-white border border-gray-300 rounded outline-none h-6">
+                    <input type="number" id="rt_c_${size}" value="${defaultVal}" min="1" max="${sObj.center}" class="w-8 text-center text-xs font-black bg-white border border-gray-300 rounded-lg outline-none h-6">
 
 
 
@@ -8417,7 +8417,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                    <button onclick="quickRT('${p.품번}','${size}','물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-700 hover:bg-black text-white px-1.5 py-0.5 rounded text-[10px] font-bold flex-1 transition-colors">↔RT</button>
+                    <button onclick="quickRT('${p.품번}','${size}','물류', document.getElementById('rt_c_${size}').value, this)" class="bg-gray-700 hover:bg-black text-white px-1.5 py-0.5 rounded-lg text-[10px] font-bold flex-1 transition-colors">↔RT</button>
 
 
 
@@ -8469,7 +8469,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                <div class="flex items-center gap-1 bg-orange-50 border border-orange-200 px-1.5 py-1 rounded w-full">
+                <div class="flex items-center gap-1 bg-orange-50 border border-orange-200 px-1.5 py-1 rounded-lg w-full">
 
 
 
@@ -8501,7 +8501,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                    <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-xs font-black bg-white border border-orange-200 rounded outline-none h-6 text-orange-700">
+                    <input type="number" id="rt_s_${size}" value="${defaultVal}" min="1" max="${sObj.sinsa}" class="w-8 text-center text-xs font-black bg-white border border-orange-200 rounded-lg outline-none h-6 text-orange-700">
 
 
 
@@ -8517,7 +8517,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                    <button onclick="quickRT('${p.품번}','${size}','신사', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 rounded text-[10px] font-bold flex-1 transition-colors">↔RT</button>
+                    <button onclick="quickRT('${p.품번}','${size}','신사', document.getElementById('rt_s_${size}').value, this)" class="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 rounded-lg text-[10px] font-bold flex-1 transition-colors">↔RT</button>
 
 
 
@@ -8554,7 +8554,7 @@ window.openDashDetail = (code, periodParam) => {
 
         if(badges.length > 0 && needed > 0) suggestHtml = `<div class="flex flex-col gap-1 items-stretch w-full">${badges.join("")}</div>`;
         else if (badges.length > 0 && needed <= 0) suggestHtml = `<div class="flex flex-col gap-1 items-stretch w-full opacity-30 hover:opacity-100 transition-opacity">${badges.join("")}</div>`;
-        else if (needed > 0) suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded text-[10px] font-black block text-center">🚨 전사품절</span>`;
+        else if (needed > 0) suggestHtml = `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-lg text-[10px] font-black block text-center">🚨 전사품절</span>`;
 
         let rowClass = "border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors";
         if (size === "알수없음") rowClass += " hidden";
@@ -8795,7 +8795,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                    ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
+                    ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-16 h-16 object-contain rounded-lg border border-gray-200 bg-white shrink-0">` : `<div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-500 font-bold border border-gray-200 shrink-0">NO IMG</div>`}
 
 
 
@@ -8907,7 +8907,7 @@ window.openDashDetail = (code, periodParam) => {
 
 
 
-                        <div class="text-sm font-bold text-gray-400 mt-0.5">${p.품번}</div>
+                        <div class="text-sm font-bold text-gray-500 mt-0.5">${p.품번}</div>
 
 
 
@@ -9853,22 +9853,22 @@ function card(p){
 
   let busanOnlyBadge = "";
   if (p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0) {
-      busanOnlyBadge = `<span class="bg-blue-800 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
+      busanOnlyBadge = `<span class="bg-blue-800 text-white px-2 py-0.5 rounded-lg font-black tracking-wide shadow-sm">부산점 ONLY</span>`;
   }
   let otherBranchOnlyBadge = "";
   if (p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal === 0) {
-      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span>`;
+      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded-lg font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span>`;
   } else if (p.busanTotal === 0 && p.centerTotal > 0 && p.sinsaTotal === 0) {
-      otherBranchOnlyBadge = `<span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
+      otherBranchOnlyBadge = `<span class="bg-teal-600 text-white px-2 py-0.5 rounded-lg font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
   } else if (p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal > 0) {
-      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span><span class="bg-teal-600 text-white px-2 py-0.5 rounded font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
+      otherBranchOnlyBadge = `<span class="bg-indigo-600 text-white px-2 py-0.5 rounded-lg font-black tracking-wide shadow-sm">🏢 신사점 ONLY</span><span class="bg-teal-600 text-white px-2 py-0.5 rounded-lg font-black tracking-wide shadow-sm">🚚 물류 ONLY</span>`;
   }
 
   // 판매 속도 뱃지
   const _cardSales = getSalesSummary(p.품번);
   let salesSpeedBadge = "";
-  if(_cardSales.d7 >= 3)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
-  else if(_cardSales.d7 >= 1) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
+  if(_cardSales.d7 >= 3)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded-lg font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
+  else if(_cardSales.d7 >= 1) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded-lg font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
 
   // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
   let rtChanceBadge = "";
@@ -9877,13 +9877,13 @@ function card(p){
     const _rtTop = _rtNeed.items[0];
     const _rtMore = _rtNeed.items.length > 1 ? ` +${_rtNeed.items.length - 1}` : '';
     const _rtLabel = _rtTop.kind === 'low' ? '부족' : '결품';
-    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded font-black text-[10px]">🔄 RT ${escapeHtml(_rtTop.size)} ${_rtLabel}${_rtMore}</span>`;
+    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-lg font-black text-[10px]">🔄 RT ${escapeHtml(_rtTop.size)} ${_rtLabel}${_rtMore}</span>`;
   }
 
   // 오늘 POS 판매 뱃지
   let todaySoldBadge = "";
   if ((p.todaySold || 0) > 0) {
-    todaySoldBadge = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded font-black text-[10px]">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
+    todaySoldBadge = `<span class="bg-amber-500 text-white px-2 py-0.5 rounded-lg font-black text-[10px]">🛍️ 오늘 ${p.todaySold}개 판매</span>`;
   }
 
   // DP 배지
@@ -9893,18 +9893,18 @@ function card(p){
     const _dpSt = getDPStatus(p);
     const _dpSizeLabel = _dpSizes.join('·');
     if (_dpSt === 'soldDP') {
-      dpBadge = `<span class="bg-orange-100 text-orange-700 border border-orange-300 px-2 py-0.5 rounded font-black text-[10px]">⚠️ 품절DP ${_dpSizeLabel}</span>`;
+      dpBadge = `<span class="bg-orange-100 text-orange-700 border border-orange-300 px-2 py-0.5 rounded-lg font-black text-[10px]">⚠️ 품절DP ${_dpSizeLabel}</span>`;
     } else {
-      dpBadge = `<span class="bg-violet-100 text-violet-700 border border-violet-300 px-2 py-0.5 rounded font-black text-[10px]">🏷️ DP ${_dpSizeLabel}</span>`;
+      dpBadge = `<span class="bg-violet-100 text-violet-700 border border-violet-300 px-2 py-0.5 rounded-lg font-black text-[10px]">🏷️ DP ${_dpSizeLabel}</span>`;
     }
   }
 
   // 이미지 없음 배지 (관리자 모드에서만)
-  const _noImgBadge = !IMAGES[p.shopNo || p.품번] ? `<span class="bg-gray-100 text-gray-400 border border-gray-200 px-2 py-0.5 rounded font-black text-[10px]">📷 이미지없음</span>` : "";
+  const _noImgBadge = !IMAGES[p.shopNo || p.품번] ? `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-2 py-0.5 rounded-lg font-black text-[10px]">📷 이미지없음</span>` : "";
   // 실재고 보정 배지
   const _hasStale = p._hasOverride && p.sizes.some(s => s._override && s._overrideStale);
   const overrideBadge = p._hasOverride
-    ? `<span class="bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded font-black text-[10px]">✏️ 재고보정${_hasStale?' ⚠️':''}</span>`
+    ? `<span class="bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded-lg font-black text-[10px]">✏️ 재고보정${_hasStale?' ⚠️':''}</span>`
     : "";
 
 
@@ -9924,8 +9924,8 @@ function card(p){
           return true;
       });
       const _sizeTip = _FIT_SIZE_RE.test(String(guide.fitNotes || ""));
-      const _chip = (txt, cls) => `<span class="btn-sales shrink-0 ${cls} text-[10px] font-bold px-1.5 py-0.5 rounded cursor-pointer">${escapeHtml(txt)}</span>`;
-      const _spec = "bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-600 hover:text-white transition-colors";
+      const _chip = (txt, cls) => `<span class="btn-sales shrink-0 ${cls} text-[10px] font-bold px-1.5 py-0.5 rounded-lg cursor-pointer">${escapeHtml(txt)}</span>`;
+      const _spec = "bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-600 hover:text-white transition-colors";
       const _tag  = "bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-colors";
       const _warn = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-500 hover:text-white transition-colors";
       const _trail = "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors";
@@ -9947,10 +9947,10 @@ function card(p){
   if (p.currentPromoPrice && p.currentPromoPrice < p.소비자가) {
       const rateInt = Math.round((p.promoRate || 0) * 100);
       const rateLabel = rateInt > 0 ? `▼${rateInt}%` : '';
-      const _pnLabel = p.promoName ? `<span class="opacity-75 text-[9px] font-bold">[${escapeHtml(p.promoName)}]</span> ` : '';
-      const _previewLabel = p.promoIsPreview ? `<span class="text-[9px] font-bold text-gray-400 ml-0.5">📅미리보기</span>` : '';
+      const _pnLabel = p.promoName ? `<span class="opacity-75 text-[10px] font-bold">[${escapeHtml(p.promoName)}]</span> ` : '';
+      const _previewLabel = p.promoIsPreview ? `<span class="text-[10px] font-bold text-gray-500 ml-0.5">📅미리보기</span>` : '';
       if (p.promoType === 'weekly') {
-          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-400' : 'bg-red-600'} text-white px-2 py-0.5 rounded font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
+          promoBadge = `<span class="${p.promoIsPreview ? 'bg-gray-400' : 'bg-red-600'} text-white px-2 py-0.5 rounded-lg font-black flex items-center gap-1 shadow-sm"><i data-lucide="flame" class="w-3.5 h-3.5"></i>${_pnLabel}위클리특가 ${rateLabel}${p.promoEndDate?' (~'+p.promoEndDate+')':''}${_previewLabel}</span>`;
           priceDisplay = `
 
 
@@ -9983,7 +9983,7 @@ function card(p){
 
 
 
-                <span class="text-xs text-gray-400 line-through mb-0.5">${krw(p.소비자가)}</span>
+                <span class="text-xs text-gray-500 line-through mb-0.5">${krw(p.소비자가)}</span>
 
 
 
@@ -10031,7 +10031,7 @@ function card(p){
           _steps[0] = '🎟️ ' + _steps[0];
           const _tip = (p.promoName ? `[${p.promoName}] ` : '') + [(_erInt > 0 && p.promoEventPrice) ? `기획전가 ${krw(p.promoEventPrice)}` : '', `최종 ▼${rateInt}% ${krw(p.currentPromoPrice)}`].filter(Boolean).join(' → ');
           // 좁은 카드(태블릿 3열)에서는 '·' 자리에서만 줄이 바뀌게 항목마다 묶는다
-          promoSummary = `<div class="${_isGray ? 'text-gray-400' : 'text-purple-600'}" title="${escapeHtml(_tip)}">${_steps.map(s => `<span class="whitespace-nowrap">${s}</span>`).join(' · ')}</div>`;
+          promoSummary = `<div class="${_isGray ? 'text-gray-500' : 'text-purple-600'}" title="${escapeHtml(_tip)}">${_steps.map(s => `<span class="whitespace-nowrap">${s}</span>`).join(' · ')}</div>`;
           priceDisplay = `
 
 
@@ -10064,7 +10064,7 @@ function card(p){
 
 
 
-                <span class="text-xs mb-0.5"><b class="${_isGray ? 'text-gray-400' : 'text-purple-600'} mr-1">▼${rateInt}%</b><span class="text-gray-400 line-through">${krw(p.소비자가)}</span></span>
+                <span class="text-xs mb-0.5"><b class="${_isGray ? 'text-gray-500' : 'text-purple-600'} mr-1">▼${rateInt}%</b><span class="text-gray-500 line-through">${krw(p.소비자가)}</span></span>
 
 
 
@@ -10112,7 +10112,7 @@ function card(p){
   const _MAX_BADGES = 3;
   let _badgesHtml = _statusBadges.slice(0, _MAX_BADGES).join("");
   if (_statusBadges.length > _MAX_BADGES) {
-      _badgesHtml += `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-1.5 py-0.5 rounded font-black text-[10px]" title="추가 상태 ${_statusBadges.length - _MAX_BADGES}개">+${_statusBadges.length - _MAX_BADGES}</span>`;
+      _badgesHtml += `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-1.5 py-0.5 rounded-lg font-black text-[10px]" title="추가 상태 ${_statusBadges.length - _MAX_BADGES}개">+${_statusBadges.length - _MAX_BADGES}</span>`;
   }
   // 창고 위치 배지 — 배정된 상품만. button 이라 카드 클릭(상세 열기)과 분리됨.
   // 신발처럼 SKU가 랙 여러 곳에 나뉘어 놓이는 경우가 있어 위치마다 배지 하나씩.
@@ -10143,7 +10143,7 @@ function card(p){
                   ${deltaHtml}
               </div>
               <div class="copyable font-extrabold text-[14px] leading-snug mb-0.5 text-left w-full hover:text-blue-600 text-gray-900 line-clamp-2" data-copy="${escapeHtml(p.품명)}">${escapeHtml(p.품명)}</div>
-              <div class="copyable text-[11px] font-bold text-gray-400 mb-1 text-left w-full hover:text-blue-600 flex items-center gap-1 overflow-hidden" data-copy="${escapeHtml(p.품번)}">
+              <div class="copyable text-[11px] font-bold text-gray-500 mb-1 text-left w-full hover:text-blue-600 flex items-center gap-1 overflow-hidden" data-copy="${escapeHtml(p.품번)}">
                   <span class="truncate">${escapeHtml(p.품번)}</span><i data-lucide="copy" class="w-4 h-4 opacity-60 shrink-0"></i>
               </div>
               ${locHtml}
@@ -10209,16 +10209,16 @@ function card(p){
               const _szWide = window.sizeUnit !== 'KR' && _szLabel.length > 3;
               let cls = "size-cell tnum shrink-0 " + (_szWide ? "w-[52px] " : "w-[46px] ");
               if(q===0) cls+="zero"; else if(q===1) cls+="danger"; else if(q===2) cls+="warn";
-              const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:9px;margin-top:1px">↓${soldToday}판매</span>` : '';
-              const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:9px;margin-top:1px" title="보정값 ${s._override.actual}개(${s._override.at||''}) · 이후 판매 반영해 현재 ${s._override.effective}개">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
+              const todayTag = soldToday > 0 ? `<span class="block text-center text-orange-500 font-black leading-none" style="font-size:10px;margin-top:1px">↓${soldToday}판매</span>` : '';
+              const _ovTag = s._override ? `<span class="block text-center text-amber-600 font-black leading-none" style="font-size:10px;margin-top:1px" title="보정값 ${s._override.actual}개(${s._override.at||''}) · 이후 판매 반영해 현재 ${s._override.effective}개">✏️보정${s._overrideStale?'⚠️':''}</span>` : '';
 
-              const _noBcTag = (q > 0 && !s.barcode) ? `<span class="block text-center text-rose-600 font-black leading-none" style="font-size:9px;margin-top:1px">🔖누락</span>` : '';
-              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''} ${(q>0 && !s.barcode)?'!border-rose-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}${_noBcTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
+              const _noBcTag = (q > 0 && !s.barcode) ? `<span class="block text-center text-red-600 font-black leading-none" style="font-size:10px;margin-top:1px">🔖누락</span>` : '';
+              return `<div class="${cls} ${soldToday>0?'!border-orange-300':''} ${s._override?'!border-amber-400':''} ${(q>0 && !s.barcode)?'!border-red-400':''}"><span class="sz">${_szLabel}</span><span class="qty real-qty">${q}</span>${_ovTag}${todayTag}${_noBcTag}<span class="qty showroom-qty hidden">${q>0?'O':'X'}</span></div>`;
           }).join("")}
         </div>
     </div>
     <div class="flex items-end justify-between gap-2 border-t border-gray-100 pt-2 mt-auto shrink-0">
-        <div class="min-w-0 text-[11px] font-bold text-gray-400 leading-snug">
+        <div class="min-w-0 text-[11px] font-bold text-gray-500 leading-snug">
             <div>부산 <b class="text-blue-600">${p.busanTotal}</b> · 신사 ${p.sinsaTotal} · 물류 ${p.centerTotal}</div>
             ${promoSummary}
         </div>
@@ -10258,7 +10258,7 @@ function _ensureSpecFilterRow() {
     if ($("#weightSel")) return;
     const specRow = document.createElement("div");
     specRow.className = "flex gap-1.5 items-center flex-wrap";
-    const cls = "ipt text-xs font-bold bg-white border-gray-200 rounded px-2 py-1 outline-none";
+    const cls = "ipt text-xs font-bold bg-white border-gray-200 rounded-lg px-2 py-1 outline-none";
     specRow.innerHTML =
         `<span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">스펙</span>` +
         `<select id="weightSel" class="${cls}">` +
@@ -10267,7 +10267,7 @@ function _ensureSpecFilterRow() {
         `<select id="dropSel" class="${cls}">` +
           `<option value="ALL">↕️ 드롭</option><option value="-4">~3mm</option><option value="4-8">4~7mm</option><option value="8-">8mm~</option>` +
         `</select>` +
-        `<span class="text-[10px] font-bold text-gray-400 shrink-0">출처 확인된 가이드 기준</span>`;
+        `<span class="text-[10px] font-bold text-gray-500 shrink-0">출처 확인된 가이드 기준</span>`;
     const slot = $("#fpSizeSlot") || $("#filterDetails");
     if (!slot) return;
     slot.appendChild(specRow);
@@ -10340,7 +10340,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
   const colHtml = cats.map(cat => {
     const g = grouped[cat];
     const hotItems = g.hot.slice(0, 8).map(({ p, d7 }) =>
-      `<div role="button" tabindex="0" class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
+      `<div role="button" tabindex="0" class="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-red-50 rounded-lg px-1 transition-colors" onclick="window._quickFilterProduct('${p.품번}')">
 
 
 
@@ -10372,7 +10372,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-        <span class="text-[9px] text-gray-400 font-mono shrink-0 mr-0.5">${escapeHtml(String(p.품번))}</span>
+        <span class="text-[10px] text-gray-500 font-mono shrink-0 mr-0.5">${escapeHtml(String(p.품번))}</span>
 
 
 
@@ -10407,7 +10407,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
       </div>`
     ).join('');
 
-    const remainHot = g.hot.length > 8 ? `<div role="button" tabindex="0" class="text-[10px] text-gray-400 font-bold px-1 pt-0.5 cursor-pointer hover:text-red-500" onclick="window._quickFilter('${cat}','hot')">+ ${g.hot.length - 8}개 더</div>` : '';
+    const remainHot = g.hot.length > 8 ? `<div role="button" tabindex="0" class="text-[10px] text-gray-500 font-bold px-1 pt-0.5 cursor-pointer hover:text-red-500" onclick="window._quickFilter('${cat}','hot')">+ ${g.hot.length - 8}개 더</div>` : '';
 
     return `
 
@@ -10521,7 +10521,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-          <span role="button" tabindex="0" class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-400 border border-gray-200 hover:bg-gray-400 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','slow')">📦 ${g.slow.length}</span>
+          <span role="button" tabindex="0" class="cursor-pointer text-[10px] font-black px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-400 hover:text-white transition-colors" onclick="window._quickFilter('${cat}','slow')">📦 ${g.slow.length}</span>
 
 
 
@@ -10569,7 +10569,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-      ${g.hot.length > 0 ? `<div class="space-y-0.5">${hotItems}${remainHot}</div>` : `<div class="text-[10px] text-gray-300 font-bold text-center py-2">핫셀러 없음</div>`}
+      ${g.hot.length > 0 ? `<div class="space-y-0.5">${hotItems}${remainHot}</div>` : `<div class="text-[10px] text-gray-400 font-bold text-center py-2">핫셀러 없음</div>`}
 
 
 
@@ -10668,7 +10668,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-          <span class="text-[10px] text-gray-400 font-bold">(7일 기준)</span>
+          <span class="text-[10px] text-gray-500 font-bold">(7일 기준)</span>
 
 
 
@@ -10732,7 +10732,7 @@ function renderSalesSummaryPanel(filteredList) {  // filteredList는 미사용 (
 
 
 
-        <button onclick="window._salesSummaryDismissed=true;document.getElementById('salesSummaryPanel').classList.add('hidden')" class="text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+        <button onclick="window._salesSummaryDismissed=true;document.getElementById('salesSummaryPanel').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 transition-colors"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
 
 
 
@@ -10926,7 +10926,7 @@ window._openSoldDpCleanup = () => {
       <div class="flex items-center justify-between"><h3 id="soldDpCleanTitle" class="font-black">🧹 품절 DP 정리</h3><button class="p-1.5 font-black" data-sd-close aria-label="닫기">✕</button></div>
       <p class="text-xs font-bold text-[color:var(--muted)]">재고가 0인 사이즈의 DP 표시를 해제합니다. 화면 재고 기준: ${escapeHtml((CURRENT_META && CURRENT_META.uploadedAt) || '알 수 없음')}. 오래됐다면 새로고침 후 다시 열어 확인하세요.</p>
       ${pairs.length ? `<ul class="overflow-y-auto">${rows}</ul>
-      <div class="flex gap-2 pt-2"><button class="chip font-black flex-1 justify-center" data-sd-close>취소</button><button id="soldDpCleanGo" class="chip !bg-slate-800 !text-white !border-slate-800 font-black flex-1 justify-center" data-sd-go>${pairs.length}개 사이즈 DP 해제</button></div>` : '<p class="text-sm font-bold py-6 text-center text-[color:var(--muted)]">정리할 품절 DP가 없습니다</p>'}
+      <div class="flex gap-2 pt-2"><button class="chip font-black flex-1 justify-center" data-sd-close>취소</button><button id="soldDpCleanGo" class="chip !bg-gray-800 !text-white !border-gray-800 font-black flex-1 justify-center" data-sd-go>${pairs.length}개 사이즈 DP 해제</button></div>` : '<p class="text-sm font-bold py-6 text-center text-[color:var(--muted)]">정리할 품절 DP가 없습니다</p>'}
     </div>`;
   modal.addEventListener('click', async (e) => {
     const t = e.target.closest('[data-sd-close],[data-sd-go]');
@@ -11109,7 +11109,7 @@ function render(){
 
 
 
-          <div class="text-sm text-gray-400 max-w-md">엑셀 ${fmt(RAW.length)}건을 불러왔지만 상품으로 변환하지 못했습니다.<br>보통 엑셀 맨 위에 제목행이 끼어 헤더가 밀렸을 때 발생합니다.<br>ADMIN에서 재고 파일을 다시 업로드해 보세요.</div>
+          <div class="text-sm text-gray-500 max-w-md">엑셀 ${fmt(RAW.length)}건을 불러왔지만 상품으로 변환하지 못했습니다.<br>보통 엑셀 맨 위에 제목행이 끼어 헤더가 밀렸을 때 발생합니다.<br>ADMIN에서 재고 파일을 다시 업로드해 보세요.</div>
 
 
 
@@ -11713,7 +11713,7 @@ window.renderTransfersList = () => {
         const msg = window._trFilter === 'unconfirmed' ? '미확인 이동 요청이 없습니다 ✅'
                   : window._trFilter === 'confirmed' ? '확인된 이동 요청이 없습니다.'
                   : '이동 요청이 없습니다.';
-        listEl.innerHTML = `<div class='text-center py-10 text-gray-400 font-bold text-sm'>${msg}</div>`;
+        listEl.innerHTML = `<div class='text-center py-10 text-gray-500 font-bold text-sm'>${msg}</div>`;
         return;
     }
     let html = "";
@@ -11751,7 +11751,7 @@ window.renderTransfersList = () => {
 
 
 
-            <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
 
 
 
@@ -11799,7 +11799,7 @@ window.renderTransfersList = () => {
 
 
 
-                <span class="text-xs text-gray-400">${escapeHtml(t.date)}</span>
+                <span class="text-xs text-gray-500">${escapeHtml(t.date)}</span>
 
 
 
@@ -11863,7 +11863,7 @@ window.renderTransfersList = () => {
 
 
 
-                <span class="bg-gray-100 px-2.5 py-1 rounded">사이즈: ${escapeHtml(t.size)}</span>
+                <span class="bg-gray-100 px-2.5 py-1 rounded-lg">사이즈: ${escapeHtml(t.size)}</span>
 
 
 
@@ -11879,7 +11879,7 @@ window.renderTransfersList = () => {
 
 
 
-                <span class="bg-gray-100 px-2.5 py-1 rounded">수량: <span class="text-blue-600">${t.qty}개</span></span>
+                <span class="bg-gray-100 px-2.5 py-1 rounded-lg">수량: <span class="text-blue-600">${t.qty}개</span></span>
 
 
 
@@ -11895,7 +11895,7 @@ window.renderTransfersList = () => {
 
 
 
-                ${confirmed ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded font-black">✅ 확인완료</span>' : ''}
+                ${confirmed ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg font-black">✅ 확인완료</span>' : ''}
 
 
 
@@ -12205,7 +12205,7 @@ function openDetail(p){
 
 
 
-        ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-400 font-bold shrink-0">NO IMG</div>`}
+        ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-xs text-gray-500 font-bold shrink-0">NO IMG</div>`}
 
 
 
@@ -12548,15 +12548,15 @@ function openDetail(p){
         ${p.sizes.filter(s => s.busan > 0 || s.center > 0 || s.sinsa > 0).map(s => {
             let busanOutBtn = s.busan > 0
                 ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-2 rounded-lg flex items-center justify-center w-full transition-colors" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+                : `<button disabled class="bg-gray-50 text-gray-400 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             let centerRtBtn = s.center > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-800 hover:bg-black text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+                : `<button disabled class="bg-gray-50 text-gray-400 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             let sinsaRtBtn = s.sinsa > 0
                 ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg flex items-center justify-center w-full transition-colors shadow-sm"><i data-lucide="arrow-left-right" class="w-4 h-4"></i></button>`
-                : `<button disabled class="bg-gray-50 text-gray-300 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
+                : `<button disabled class="bg-gray-50 text-gray-400 py-2 rounded-lg w-full flex items-center justify-center cursor-not-allowed border border-gray-100"><i data-lucide="minus" class="w-4 h-4"></i></button>`;
 
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-red-50/40':''}">
 
@@ -12590,7 +12590,7 @@ function openDetail(p){
 
 
 
-                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</td>
+                <td class="py-3 px-2 font-black text-center bg-blue-50/30 border-r border-gray-50 text-[15px] ${s.busan>0?'text-blue-600':'text-gray-400'}">${s.busan>0?s.busan:'-'}</td>
                 <td class="py-2.5 px-2 text-center border-r border-gray-100">${busanOutBtn}</td>
 
 
@@ -12791,7 +12791,7 @@ function openDetail(p){
 
 
 
-              <span class="text-[11px] font-bold text-gray-400 shrink-0">🖼️</span>
+              <span class="text-[11px] font-bold text-gray-500 shrink-0">🖼️</span>
 
 
 
@@ -12935,7 +12935,7 @@ function openDetail(p){
 
 
 
-          <div id="quickImgDrop" class="mt-1 border-2 border-dashed border-gray-200 rounded-lg text-center text-[11px] text-gray-400 py-2 cursor-pointer hover:border-blue-300 hover:text-blue-400 transition-colors">이미지 드래그하여 놓기 (또는 클릭하여 파일 선택)</div>
+          <div id="quickImgDrop" class="mt-1 border-2 border-dashed border-gray-200 rounded-lg text-center text-[11px] text-gray-500 py-2 cursor-pointer hover:border-blue-300 hover:text-blue-400 transition-colors">이미지 드래그하여 놓기 (또는 클릭하여 파일 선택)</div>
 
 
 
@@ -13027,7 +13027,7 @@ function openDetail(p){
 
 
 
-          <button id="closeDetail" class="p-1.5 text-gray-400 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-full shrink-0 transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden');document.body.style.overflow=''"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button id="closeDetail" class="p-1.5 text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-full shrink-0 transition-colors" onclick="this.closest('.modal-backdrop').classList.add('hidden');document.body.style.overflow=''"><i data-lucide="x" class="w-5 h-5"></i></button>
 
 
 
@@ -13142,7 +13142,7 @@ function openDetail(p){
   `;
 
   const _priceHtml = p.currentPromoPrice
-    ? `<span class="text-red-600 font-black text-sm">${krw(p.currentPromoPrice)}</span><span class="text-gray-400 line-through text-xs ml-1">${krw(p.소비자가)}</span>`
+    ? `<span class="text-red-600 font-black text-sm">${krw(p.currentPromoPrice)}</span><span class="text-gray-500 line-through text-xs ml-1">${krw(p.소비자가)}</span>`
     : `<span class="font-black text-sm text-gray-800">${krw(p.소비자가)}</span>`;
   $("#detailHead").innerHTML = `
 
@@ -13176,7 +13176,7 @@ function openDetail(p){
 
 
 
-        ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-14 h-14 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-14 h-14 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">NO IMG</div>`}
+        ${imgSrc ? `<img src="${imgSrc}" alt="" class="w-14 h-14 object-contain rounded-xl border border-gray-200 bg-white shadow-sm shrink-0">` : `<div class="w-14 h-14 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 font-bold shrink-0">NO IMG</div>`}
 
 
 
@@ -13208,7 +13208,7 @@ function openDetail(p){
 
 
 
-            <div class="text-[11px] text-gray-400 font-bold">${escapeHtml(p.브랜드||"-")}</div>
+            <div class="text-[11px] text-gray-500 font-bold">${escapeHtml(p.브랜드||"-")}</div>
 
 
 
@@ -13604,7 +13604,7 @@ function openDetail(p){
 
 
 
-            <th class="py-2 px-2 text-center border-r border-gray-100">물류 RT <span class="text-gray-400 font-normal">(${p.centerTotal})</span></th>
+            <th class="py-2 px-2 text-center border-r border-gray-100">물류 RT <span class="text-gray-500 font-normal">(${p.centerTotal})</span></th>
 
 
 
@@ -13620,7 +13620,7 @@ function openDetail(p){
 
 
 
-            <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-400 font-normal">(${p.sinsaTotal})</span></th>
+            <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-500 font-normal">(${p.sinsaTotal})</span></th>
 
 
 
@@ -13688,15 +13688,15 @@ function openDetail(p){
             const _s30b = _sizeSales30Busan[s.size] || 0;
             const _s30a = _sizeSales30Etc[s.size] || 0;
             let busanOutBtn = s.busan > 0
-                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.busan}</button>`
-                : `<span class="text-gray-300 text-sm">-</span>`;
+                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1 px-2 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.busan}</button>`
+                : `<span class="text-gray-400 text-sm">-</span>`;
 
             let centerRtBtn = s.center > 0
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
-                : `<span class="text-gray-300 text-sm">-</span>`;
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
+                : `<span class="text-gray-400 text-sm">-</span>`;
             let sinsaRtBtn = s.sinsa > 0
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-md flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
-                : `<span class="text-gray-300 text-sm">-</span>`;
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
+                : `<span class="text-gray-400 text-sm">-</span>`;
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-amber-50/60':''}">
 
 
@@ -13713,7 +13713,7 @@ function openDetail(p){
 
 
 
-                <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:9px;margin-left:2px;">🔖</span>` : ''}</td>
+                <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:10px;margin-left:2px;">🔖</span>` : ''}</td>
 
 
 
@@ -13729,7 +13729,7 @@ function openDetail(p){
 
 
 
-                <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-300'}">${_s30b>0?_s30b:'-'}</td>
+                <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-400'}">${_s30b>0?_s30b:'-'}</td>
 
 
 
@@ -13745,7 +13745,7 @@ function openDetail(p){
 
 
 
-                <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30a>0?'text-indigo-500':'text-gray-300'}">${_s30a>0?_s30a:'-'}</td>
+                <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30a>0?'text-indigo-500':'text-gray-400'}">${_s30a>0?_s30a:'-'}</td>
 
 
 
@@ -13793,7 +13793,7 @@ function openDetail(p){
 
 
 
-                        <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-gray-300'}">${s.busan>0?s.busan:'-'}</span>
+                        <span class="font-black text-base ${s.busan>0?'text-blue-600':'text-gray-400'}">${s.busan>0?s.busan:'-'}</span>
 
 
 
@@ -13963,7 +13963,7 @@ function openDetail(p){
   const _daysLeft = _sales.avgDay > 0 ? Math.round(_totalStock / _sales.avgDay) : null;
   const _hasData = _sales.all > 0;
   const _heatLabel = !_hasData ? '데이터 없음' : _sales.d7 >= 3 ? '🔥 핫셀러' : _sales.d7 >= 1 ? '📈 보통' : '📦 저조';
-  const _heatColor = !_hasData ? 'text-gray-400' : _sales.d7 >= 3 ? 'text-red-500' : _sales.d7 >= 1 ? 'text-blue-500' : 'text-gray-400';
+  const _heatColor = !_hasData ? 'text-gray-500' : _sales.d7 >= 3 ? 'text-red-500' : _sales.d7 >= 1 ? 'text-blue-500' : 'text-gray-500';
   // 같은 기준(누적 전체)으로 막대 비율 계산
   const _maxSales = Math.max(_sales.all, 1);
   const _bar7  = Math.min(100, Math.round((_sales.d7  / _maxSales) * 100));
@@ -13988,7 +13988,7 @@ function openDetail(p){
 
 
 
-    <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-slate-50 p-3">
+    <div class="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-gray-50 p-3">
 
 
 
@@ -14052,7 +14052,7 @@ function openDetail(p){
 
 
 
-          <span class="text-[9px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded">부산점 기준</span>
+          <span class="text-[10px] text-gray-500 font-bold bg-gray-100 px-1.5 py-0.5 rounded-lg">부산점 기준</span>
 
 
 
@@ -14117,7 +14117,7 @@ function openDetail(p){
 
 
       ${!_hasData
-        ? `<div class="text-[11px] text-gray-400 font-bold text-center py-1.5">판매 이력 없음</div>`
+        ? `<div class="text-[11px] text-gray-500 font-bold text-center py-1.5">판매 이력 없음</div>`
         : `<div class="space-y-1.5">
 
 
@@ -14150,7 +14150,7 @@ function openDetail(p){
 
 
 
-              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">7일</span>
+              <span class="text-[10px] font-black text-gray-500 w-7 shrink-0">7일</span>
 
 
 
@@ -14262,7 +14262,7 @@ function openDetail(p){
 
 
 
-              <span class="text-[10px] font-black text-gray-400 w-7 shrink-0">30일</span>
+              <span class="text-[10px] font-black text-gray-500 w-7 shrink-0">30일</span>
 
 
 
@@ -14473,7 +14473,7 @@ function openDetail(p){
         ? (isSoldOut ? "bg-orange-100 border-orange-400 text-orange-700" : "bg-violet-600 border-violet-600 text-white")
         : "bg-white border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600";
       const icon = isDPed ? (isSoldOut ? "⚠️" : "🏷️") : "□";
-      const soldLabel = (isSoldOut && isDPed) ? ` <span class="text-[9px] opacity-70">품절</span>` : "";
+      const soldLabel = (isSoldOut && isDPed) ? ` <span class="text-[10px] opacity-70">품절</span>` : "";
       return `<button onclick="window._toggleDPBtn(this,'${p.품번}','${sz}')"
 
 
@@ -14636,7 +14636,7 @@ function openDetail(p){
 
 
 
-          <span id="dpStatusLabel" class="text-[11px] font-black px-2 py-0.5 rounded ${dpSizes.length > 0 ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-400'}">
+          <span id="dpStatusLabel" class="text-[11px] font-black px-2 py-0.5 rounded-lg ${dpSizes.length > 0 ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-500'}">
 
 
 
@@ -14735,7 +14735,7 @@ function openDetail(p){
     let html = `<div class="rounded-xl border p-3" style="border-color:#ffd8c4; background:#fff8f5;">
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-black flex items-center gap-1.5" style="color:#c2410c;">📍 위치${shownLocs.length > 1 ? ` (${shownLocs.length})` : ''}</span>
-        ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-400 hover:text-gray-700">구역 관리</button>` : ''}
+        ${isAdmin ? `<button onclick="window.openZoneManager()" class="text-[10px] font-bold text-gray-500 hover:text-gray-700">구역 관리</button>` : ''}
       </div>`;
 
     if(shownLocs.length){
@@ -14750,7 +14750,7 @@ function openDetail(p){
                         </div>
                     </div>
                     ${isAdmin ? `<div class="flex items-center gap-1 shrink-0">
-                        <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-100" data-idx="${i}">삭제</button>
+                        <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded-lg border border-red-100" data-idx="${i}">삭제</button>
                     </div>` : ''}
                 </div>`;
             }
@@ -14767,13 +14767,13 @@ function openDetail(p){
                     </div>
                 </div>
                 ${isAdmin ? `<div class="flex items-center gap-1 shrink-0">
-                    <button class="loc-move-btn text-[10px] font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded border border-gray-200" data-idx="${i}">이동</button>
-                    <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded border border-red-100" data-idx="${i}">삭제</button>
+                    <button class="loc-move-btn text-[10px] font-bold text-gray-500 hover:text-gray-800 px-2 py-1 rounded-lg border border-gray-200" data-idx="${i}">이동</button>
+                    <button class="loc-del-btn text-[10px] font-bold text-red-500 hover:text-red-700 px-2 py-1 rounded-lg border border-red-100" data-idx="${i}">삭제</button>
                 </div>` : ''}
             </div>`;
         }).join('');
     } else if(!isAdmin){
-        html += `<div class="text-xs text-gray-400 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
+        html += `<div class="text-xs text-gray-500 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
     }
 
     if(isAdmin && dpSkipped){
@@ -14872,7 +14872,7 @@ function openDetail(p){
             : "bg-white border-gray-200 text-gray-500 hover:border-blue-400 hover:text-blue-600";
           const label = ov
             ? `✏️ ${sz}<span class="block text-[10px] font-bold leading-tight">보정 ${ov.actual} → 현재 <b>${ov.effective}</b>${s._overrideStale?' (판매 반영됨)':''}</span>`
-            : `${sz}<span class="block text-[10px] text-gray-400 leading-tight">${s.busan}</span>`;
+            : `${sz}<span class="block text-[10px] text-gray-500 leading-tight">${s.busan}</span>`;
           return `<button onclick="window._promptStockOverride('${escapeHtml(p.품번)}','${sz}')" class="px-2.5 py-1.5 rounded-lg border-2 font-black text-xs transition text-center leading-tight ${cls}">${label}</button>`;
       }).join('');
       _soDiv.innerHTML = `
@@ -14907,7 +14907,7 @@ function openDetail(p){
 
 
 
-            <span class="text-[10px] font-black px-2 py-0.5 rounded bg-gray-100 text-gray-400">ADMIN</span>
+            <span class="text-[10px] font-black px-2 py-0.5 rounded-lg bg-gray-100 text-gray-500">ADMIN</span>
 
 
 
@@ -14931,7 +14931,7 @@ function openDetail(p){
 
 
 
-          <div class="text-[10px] text-gray-400 mt-2">⚠️ = 보정 후 재고가 늘어남(반품·본사 수정 — 재확인) · 입력창 빈칸 저장 시 해제 · 새 재고 파일을 올리면 이전 보정은 자동 해제</div>
+          <div class="text-[10px] text-gray-500 mt-2">⚠️ = 보정 후 재고가 늘어남(반품·본사 수정 — 재확인) · 입력창 빈칸 저장 시 해제 · 새 재고 파일을 올리면 이전 보정은 자동 해제</div>
 
 
 
@@ -16427,7 +16427,7 @@ window.renderPromoAdmin = () => {
 
 
 
-                <span class="text-[11px] text-gray-400 ml-1">(${Object.keys(pr.items||{}).length}품번)</span>
+                <span class="text-[11px] text-gray-500 ml-1">(${Object.keys(pr.items||{}).length}품번)</span>
 
 
 
@@ -16459,7 +16459,7 @@ window.renderPromoAdmin = () => {
 
 
 
-            <span class="end-promo-btn shrink-0 text-[11px] font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded cursor-pointer hover:bg-pink-100 transition-colors" data-promoidx="${idx}">종료</span>
+            <span class="end-promo-btn shrink-0 text-[11px] font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors" data-promoidx="${idx}">종료</span>
 
 
 
@@ -16476,7 +16476,7 @@ window.renderPromoAdmin = () => {
 
 
         </div>`
-    ).join('') : `<div class="text-[12px] text-gray-400 py-1">진행 중인 기획전 없음</div>`;
+    ).join('') : `<div class="text-[12px] text-gray-500 py-1">진행 중인 기획전 없음</div>`;
 
     card.innerHTML = `
 
@@ -16542,7 +16542,7 @@ window.renderPromoAdmin = () => {
 
 
 
-                <label for="promoFile" class="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded cursor-pointer hover:bg-purple-100 transition-colors shrink-0">+ 기획전 추가</label>
+                <label for="promoFile" class="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-purple-100 transition-colors shrink-0">+ 기획전 추가</label>
 
 
 
@@ -17080,7 +17080,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const bulkBtn = document.createElement("button");
 
-        bulkBtn.className = "chip !bg-slate-800 !text-white !border-slate-800 font-black";
+        bulkBtn.className = "chip !bg-gray-800 !text-white !border-gray-800 font-black";
 
         bulkBtn.dataset.bulkloc = "1";
 
@@ -17153,7 +17153,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-            <div class="glass-modal relative flex flex-col w-full max-w-[800px] bg-white/50 border border-white/60 rounded-3xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+            <div class="glass-modal relative flex flex-col w-full max-w-[800px] bg-white/50 border border-white/60 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] overflow-hidden" style="backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
 
 
 
@@ -17361,7 +17361,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition placeholder:text-gray-400">
+                        <input type="password" id="pwd" placeholder="비밀번호 입력" class="ipt flex-1 px-5 py-3.5 rounded-2xl bg-white/60 border border-white/80 text-[15px] font-black text-center text-gray-800 outline-none focus:bg-white focus:border-gray-400 shadow-sm transition placeholder:text-gray-500">
 
 
 
@@ -18673,7 +18673,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-                        <button id="bulkAiBtn" class="ml-auto px-3 py-1.5 rounded-lg bg-purple-600 text-white text-[11px] font-black hover:bg-purple-700 transition-colors shadow-sm whitespace-nowrap">🔎 전체 웹 조사</button>
+                        <button id="bulkAiBtn" class="ml-auto px-3 py-1.5 rounded-lg bg-gray-900 text-white text-[11px] font-black hover:bg-gray-800 transition-colors shadow-sm whitespace-nowrap">🔎 전체 웹 조사</button>
 
 
 
@@ -18947,12 +18947,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
         let _missCache = [];
         function _researchSummaryHtml(g) {
-            if (!g || g.method !== "web") return `<span class="text-gray-400">❔ RunRepeat·Doctors of Running에 같은 모델 리뷰가 없어 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
+            if (!g || g.method !== "web") return `<span class="text-gray-500">❔ RunRepeat·Doctors of Running에 같은 모델 리뷰가 없어 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
             const bits = [g.matchedProduct, g.type,
                 g.weightG != null ? `${g.weightG}g${g.weightBasis ? "(" + g.weightBasis + ")" : ""}` : "",
                 g.dropMm != null ? `드롭 ${g.dropMm}mm` : ""].filter(Boolean).map(escapeHtml);
             const hosts = (g.sources || []).map(_guideSourceHost).filter(Boolean).map(escapeHtml);
-            return `<span class="text-green-700">✅ ${bits.join(" · ")}</span> <span class="text-gray-400">출처: ${hosts.join(", ")}</span>`;
+            return `<span class="text-green-700">✅ ${bits.join(" · ")}</span> <span class="text-gray-500">출처: ${hosts.join(", ")}</span>`;
         }
         function _renderMissList() {
             const listEl = document.getElementById("missList");
@@ -18962,7 +18962,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const inStock = models.filter(m => m.stock > 0).length;
             if (countEl) countEl.textContent = `${models.length}개 모델 (재고 있는 것 ${inStock}개 먼저)`;
             if (!models.length) {
-                listEl.innerHTML = `<div class="text-center py-12 text-gray-400 font-bold text-sm">🎉 모든 신발 모델에 확인된 가이드가 있습니다!</div>`;
+                listEl.innerHTML = `<div class="text-center py-12 text-gray-500 font-bold text-sm">🎉 모든 신발 모델에 확인된 가이드가 있습니다!</div>`;
                 return;
             }
             const inp = "ipt px-2 py-1.5 rounded-lg border border-gray-200 text-xs font-bold outline-none focus:border-orange-400 bg-white/90";
@@ -18973,11 +18973,11 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <input type="checkbox" class="miss-chk w-4 h-4 accent-orange-400 shrink-0" data-i="${i}">
                                 <span class="text-[11px] font-black text-gray-500 shrink-0">${escapeHtml(p.브랜드||'')} · ${_guideGender(p)}</span>
                                 <span class="text-[12px] font-black text-gray-800 truncate">${escapeHtml(p.품명||'')}</span>
-                                <span class="text-[10px] font-bold text-gray-400 shrink-0">품번 ${m.codes.length}개 · 재고 ${m.stock}</span>
+                                <span class="text-[10px] font-bold text-gray-500 shrink-0">품번 ${m.codes.length}개 · 재고 ${m.stock}</span>
                             </label>
                             <div class="flex items-center gap-1 shrink-0">
-                                ${m.v4NotFound ? `<span class="text-[10px] font-bold text-gray-400" title="RunRepeat·Doctors of Running에 같은 모델 리뷰가 없음">리뷰 없음 ${escapeHtml(m.notFound)}</span>` : m.notFound ? `<span class="text-[10px] font-bold" style="color:#d97706" title="예전 조사 때 AI 한도로 건너뜀 — 자동 조사가 다시 합니다">조사 대기</span>` : ""}
-                                <button class="miss-research px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-i="${i}">🔎 웹 조사</button>
+                                ${m.v4NotFound ? `<span class="text-[10px] font-bold text-gray-500" title="RunRepeat·Doctors of Running에 같은 모델 리뷰가 없음">리뷰 없음 ${escapeHtml(m.notFound)}</span>` : m.notFound ? `<span class="text-[10px] font-bold" style="color:#d97706" title="예전 조사 때 AI 한도로 건너뜀 — 자동 조사가 다시 합니다">조사 대기</span>` : ""}
+                                <button class="miss-research px-2 py-1 rounded-lg bg-gray-50 text-gray-700 text-[10px] font-black border border-gray-200 hover:bg-gray-100 transition-colors" data-i="${i}">🔎 웹 조사</button>
                                 <button class="miss-manual px-2 py-1 rounded-lg bg-white text-gray-600 text-[10px] font-black border border-gray-200 hover:bg-gray-100 transition-colors" data-i="${i}">✏️ 직접</button>
                             </div>
                         </div>
