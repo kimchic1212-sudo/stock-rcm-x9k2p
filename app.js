@@ -3390,7 +3390,7 @@ async function fetchGithubJson(path) {
         );
         if(!res.ok) return null;
         const j = await res.json();
-        return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+        return JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g, '')));
     } catch(e) { return null; }
 }
 
@@ -3775,7 +3775,22 @@ async function loadData(force = false){
   }
 }
 
-function utf8ToB64(str){ return btoa(unescape(encodeURIComponent(str))); }
+// base64(UTF-8) ↔ 문자열. 예전 btoa·unescape·encodeURIComponent / decodeURIComponent·escape·atob 조합
+// 관용구를 폐기 예정 API 없이 같은 결과로 바꾼 것(2026-09-30). 잘못된 UTF-8·짝 없는 서로게이트는 예전처럼
+// 예외를 던진다 — 저장 코드가 "파싱 실패면 저장 중단"을 이 예외로 판단하기 때문(한글 키 유실 사고 대책).
+function utf8ToB64(str){
+    if (typeof str.isWellFormed === 'function' && !str.isWellFormed()) throw new URIError('URI malformed');
+    const bytes = new TextEncoder().encode(str);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+}
+function b64ToUtf8(b64){
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
+}
 
 // 데이터 파일 저장 공통 흐름 — 최신본 읽기 → mutateFn(최신본)으로 변경 → sha 넣어 저장 → 충돌(409/422)이면 최신본부터 다시.
 // 이 기기가 들고 있던 데이터로 통째로 덮어쓰지 않으므로 다른 기기가 방금 저장한 내용이 지워지지 않는다.
@@ -3790,7 +3805,7 @@ async function ghSaveJson(path, mutateFn, message) {
             const j = await r.json();
             sha = j.sha;
             try {
-                if (j.content) data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\s/g, '')))));
+                if (j.content) data = JSON.parse(b64ToUtf8(j.content.replace(/\s/g, '')));
                 else if (j.download_url) data = await (await fetch(j.download_url, { headers: auth })).json();
             } catch (e) { data = undefined; }
             if (data === undefined || data === null) throw new Error("저장된 데이터를 읽지 못해 중단했습니다 (덮어쓰기 방지)");
@@ -3948,7 +3963,7 @@ async function autoRemoveSoldDP() {
       if (r.ok) {
         const j = await r.json(); sha = j.sha;
         let parsed = null;
-        try { parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e) {}
+        try { parsed = JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g,''))); } catch(e) {}
         if (!parsed || typeof parsed !== 'object') return; // 읽기 실패 시 조용히 포기 (덮어쓰기 방지, 다음 주기에 재시도됨)
         server = parsed;
       } else if (r.status !== 404) {
@@ -4146,7 +4161,7 @@ async function toggleDP(code, size) {
     if (r.ok) {
       const j = await r.json(); sha = j.sha;
       let parsed = null;
-      try { parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g,''))))); } catch(e) {}
+      try { parsed = JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g,''))); } catch(e) {}
       if (!parsed || typeof parsed !== 'object') throw new Error("기존 DP 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지)");
       server = parsed;
     } else if (r.status === 401) {
@@ -4205,7 +4220,7 @@ async function _removeDpSizes(pairs) {
     if (!r.ok) throw new Error(r.status === 401 ? "인증 실패 — ADMIN 재로그인 후 다시 시도하세요" : "DP 목록을 읽지 못했습니다 (" + r.status + ")");
     const j = await r.json();
     let server = null;
-    try { server = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, ''))))); } catch (e) {}
+    try { server = JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g, ''))); } catch (e) {}
     if (!server || typeof server !== 'object') throw new Error("기존 DP 목록을 읽지 못해 중단했습니다 (덮어쓰기 방지)");
     let removed = 0;
     pairs.forEach(({ p, size }) => {
@@ -5739,7 +5754,7 @@ async function _saveTransfersToGH() {
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
             if(!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
             let serverData = [], sha;
-            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {} }
+            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) {} }
             // id union: 서버 레코드 보존 + 로컬 레코드 반영(같은 id면 로컬 우선)
             const byId = new Map();
             for (const s of serverData) byId.set(s.id, s);
@@ -5765,7 +5780,7 @@ async function _removeTransferFromGH(trId) {
             if(!r.ok) throw new Error('fetch ' + r.status);
             const j = await r.json();
             let serverData = [];
-            try { serverData = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))); } catch(e2) {}
+            try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) {}
             const filtered = serverData.filter(t => t.id !== trId);
             const body = { message:"undo transfer", content: utf8ToB64(JSON.stringify(filtered, null, 2)), branch: GH.branch, sha: j.sha };
             const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
@@ -5792,7 +5807,7 @@ async function saveLocations(mutateFn) {
                 const j = await r.json(); sha = j.sha;
                 let ok = false;
                 try {
-                    const parsed = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+                    const parsed = JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g, '')));
                     if (parsed && Array.isArray(parsed.zones)) { serverData = parsed; ok = true; }
                 } catch (e2) {}
                 if (!ok) throw new Error('기존 위치 데이터를 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
@@ -16149,7 +16164,7 @@ function openDetail(p){
               const meta = await metaRes.json();
               let parsed = {}, _ok = false;
               // UTF-8(한글 키) 안전 디코딩 — bare atob는 한글에서 깨져 전체 유실의 원인이 됨
-              try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+              try { parsed = JSON.parse(b64ToUtf8(meta.content.replace(/[\s\n]/g,''))); _ok = true; } catch(e) {}
               // 기존 목록을 못 읽으면 빈 맵으로 덮어써 전체가 날아가므로 저장 중단
               if(!_ok || typeof parsed !== 'object' || parsed === null) {
                   throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
@@ -16227,7 +16242,7 @@ function openDetail(p){
                       if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
                       const meta = await metaRes.json();
                       let parsed = {}, _ok = false;
-                      try { parsed = JSON.parse(decodeURIComponent(escape(atob(meta.content.replace(/[\s\n]/g,''))))); _ok = true; } catch(e) {}
+                      try { parsed = JSON.parse(b64ToUtf8(meta.content.replace(/[\s\n]/g,''))); _ok = true; } catch(e) {}
                       if(!_ok || typeof parsed !== 'object' || parsed === null) {
                           throw new Error('기존 이미지 목록을 읽지 못해 저장을 중단했습니다 (전체 덮어쓰기 방지). 새로고침 후 다시 시도하세요.');
                       }
@@ -17809,7 +17824,7 @@ window.renderPromoAdmin = () => {
                 if(!r.ok) throw new Error(`GitHub 파일 조회 실패 (${r.status})`);
                 const j = await r.json();
                 let data = {};
-                try { data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, ''))))); }
+                try { data = JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g, ''))); }
                 catch(e) { console.error('[기획전 종료] 파싱 실패:', e); throw new Error('기획전 데이터 파싱 실패: ' + e.message); }
                 let list = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
                 if(idx >= list.length) throw new Error(`인덱스 오류: idx=${idx}, 목록 길이=${list.length}`);
@@ -17917,7 +17932,7 @@ window.renderPromoAdmin = () => {
                 if(r.ok) {
                     const j = await r.json(); sha = j.sha;
                     try {
-                        const data = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/[\s\n]/g, '')))));
+                        const data = JSON.parse(b64ToUtf8(j.content.replace(/[\s\n]/g, '')));
                         existingList = Array.isArray(data.promotions) ? data.promotions : (data.meta ? [data] : []);
                     } catch(e) { throw new Error('기존 기획전 목록을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지). 새로고침 후 다시 시도하세요.'); }
                 } else if(r.status !== 404) { throw new Error('기획전 목록 조회 실패 (' + r.status + ') — 저장을 중단했습니다.'); }
