@@ -3813,11 +3813,63 @@ async function ghSaveJson(path, mutateFn, message) {
 // ── 실재고 보정(부산) 엔진 ───────────────────────────────────────────
 // 시스템재고(엑셀+판매차감) ≠ 실제 매장재고일 때 ADMIN이 부산 재고를 수동 보정.
 // 별도 파일 저장 → 엑셀 재업로드해도 유지. 적용은 판매차감 이후 마지막 단계(항상 우선).
-// 2026-09-27까지는 여기서 "새 재고 파일보다 이전 보정은 무효"로 보고 화면에서 숨기거나(≈적용 안 함)
-// 심지어 새 엑셀을 올릴 때마다 보정 파일 자체를 통째로 비웠다. 매일 엑셀을 올리는 운영 방식과 안 맞아
-// 애써 해놓은 보정이 거의 매일 사라지는 문제가 있어서 그 로직(_overrideMs/_inventoryUploadMs/
-// _overrideOutdated/_clearOverridesOnNewInventory)을 전부 제거했다. 이제 보정은 사람이 직접
-// 지우기 전까지 계속 적용되고, 재고가 늘어난 경우에만 아래 _overrideStale로 재확인만 유도한다.
+// ── 새 재고 파일을 올릴 때 보정 기준점 다시 맞추기 (2026-09-30) ─────────────
+// 보정 화면 값 = actual − (보정 당시 시스템값 − 지금 시스템값). 새 엑셀이 실재고대로 바로잡히면 이 식이
+// 차이를 한 번 더 더한다(실재고 1·시스템 0 → 엑셀이 1로 고쳐지면 화면 2). 예전엔 업로드 때 보정을 통째로
+// 지워서 막았는데(9/27까지), 매일 엑셀을 올리니 애써 한 보정이 매일 사라졌다. 이제는 보정을 남기되
+// "올리기 직전 화면 값(before)"과 "새 시스템 값(sysNew)"으로 기준을 다시 잡고, 둘이 같아지면
+// (엑셀이 실재고를 따라잡으면) 해제한다. 새 재고에 없는 품번·사이즈는 그대로 둔다.
+// before·sysNew 키는 "품번|사이즈". 입력 객체는 바꾸지 않는다.
+function _rebaseOverrides(overrides, before, sysNew, nowStr, nowMs) {
+    const out = {};
+    for (const code of Object.keys(overrides || {})) {
+        for (const sz of Object.keys(overrides[code] || {})) {
+            const o = overrides[code][sz], key = code + '|' + sz;
+            let next = o;
+            if (key in before && key in sysNew) {
+                if (before[key] === sysNew[key]) continue;   // 엑셀이 실재고와 같아짐 → 보정 해제
+                if (before[key] !== o.actual || sysNew[key] !== o.system) {
+                    next = Object.assign({}, o, { actual: before[key], system: sysNew[key], rebasedAt: nowStr, rebasedMs: nowMs });
+                }
+            }
+            (out[code] || (out[code] = {}))[sz] = next;
+        }
+    }
+    return out;
+}
+// 보정이 걸린 상품의 지금 화면 값(eff: 품번|사이즈 → 보정 반영 값)과 순수 시스템 값(sys: 판매 차감까지, 보정 전)
+function _overrideViewMaps() {
+    const eff = {}, sys = {};
+    for (const p of PRODUCTS) {
+        if (!STOCK_OVERRIDES || !STOCK_OVERRIDES[p.품번]) continue;
+        for (const s of p.sizes) {
+            const key = p.품번 + '|' + String(s.size).trim();
+            if (s._override) eff[key] = s._override.effective;
+            sys[key] = s._rawBusan ?? s.busan;
+        }
+    }
+    return { eff, sys };
+}
+// 새 재고를 올리고 화면을 다시 계산한 뒤 호출 — 실패해도 업로드 자체는 성공으로 둔다
+async function _rebaseOverridesAfterUpload(before) {
+    if (!before || !Object.keys(before).length) return;
+    const sysNew = _overrideViewMaps().sys;
+    const d = new Date(), pad = v => String(v).padStart(2, '0');
+    const nowStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const preview = _rebaseOverrides(STOCK_OVERRIDES, before, sysNew, nowStr, d.getTime());
+    if (JSON.stringify(preview) === JSON.stringify(STOCK_OVERRIDES)) return;
+    const countSizes = o => Object.values(o || {}).reduce((a, v) => a + Object.keys(v || {}).length, 0);
+    try {
+        const saved = await ghSaveJson(STOCK_OVERRIDES_PATH,
+            cur => _rebaseOverrides((cur && typeof cur === 'object') ? cur : {}, before, sysNew, nowStr, d.getTime()),
+            "stock: 새 재고 기준으로 보정 기준점 재설정");
+        const cleared = countSizes(STOCK_OVERRIDES) - countSizes(saved);
+        STOCK_OVERRIDES = saved;
+        try { const c = JSON.parse(sessionStorage.getItem(CACHE_KEY) || '{}'); c.stockOverrides = STOCK_OVERRIDES; c._timestamp = Date.now(); sessionStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch(e) {}
+        _recomputeStock(); render();
+        if (cleared > 0) showToast(`✏️ 엑셀이 실재고와 같아진 보정 ${cleared}건 자동 해제`);
+    } catch (e) { console.warn('보정 기준점 재설정 실패:', e && e.message); }
+}
 
 function applyStockOverrides() {
     if(!STOCK_OVERRIDES || typeof STOCK_OVERRIDES !== 'object') return;
@@ -4449,9 +4501,7 @@ async function commitInventoryToGitHub(rows, meta) {
         r2 = await fetch(apiBase, { method: "PUT", headers, body: JSON.stringify(payload) });
         if(r2.ok) {
             const _res = await r2.json();
-            // 예전엔 여기서 재고보정을 자동 초기화했으나, 매일 엑셀을 올리는 운영 방식과 안 맞아
-            // 애써 해놓은 보정이 계속 사라지는 문제가 있었다(2026-09-27). 이제 보정은 사람이
-            // 지우기 전까지 그대로 유지된다(applyStockOverrides 참고).
+            // 보정은 지우지 않는다 — 업로드 뒤 _rebaseOverridesAfterUpload가 새 재고 기준으로 기준점만 다시 잡는다.
             return _res;
         }
         if((r2.status === 409 || r2.status === 422) && attempt < 3) {
@@ -16388,10 +16438,12 @@ $("#file").onchange = async (e) => {
         let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], XLSX);
         const meta = { fileName:f.name, uploadedAt: dateStr, uploadedMs: Date.now() };
         try {
+            const _ovBefore = _overrideViewMaps().eff;   // 올리기 직전 보정 화면 값
             await commitInventoryToGitHub(rows, meta);
             RAW = rows; CURRENT_META = meta;
             _safeSessionCache({rows, meta, images:IMAGES, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
             applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
+            await _rebaseOverridesAfterUpload(_ovBefore);
             alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
         } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰을 확인하세요."); console.error("Upload error:", err); }
         $("#file").value = "";
@@ -20273,12 +20325,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 const meta = { fileName:f.name, uploadedAt: dateStr, uploadedMs: Date.now() };
                 try {
                     // 기존에 정의하신 commitInventoryToGitHub 함수 실행
+                    const _ovBefore = _overrideViewMaps().eff;   // 올리기 직전 보정 화면 값
                     await window.commitInventoryToGitHub(rows, meta);
                     RAW = rows; CURRENT_META = meta;
                     _safeSessionCache({rows, meta, images:IMAGES, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
                     applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar();
                     document.getElementById("adminModal").classList.add("hidden");
-                    alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
+                    await _rebaseOverridesAfterUpload(_ovBefore);
+            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
                 } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰과 저장소 정보를 확인하세요."); console.error("Upload error:", err); }
                 document.getElementById("file").value = "";
             };
