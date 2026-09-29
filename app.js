@@ -2428,6 +2428,21 @@ let IMAGES = {};
 let TRANSFERS = [];
 let PROMOTIONS = {};
 let SALES_GUIDES = {};
+// 모델별 v4 가이드 본문(스펙·전작 대비·경쟁 모델·피팅 팁) — 가이드를 처음 열 때 한 번 받는다(품번별 요약은 SALES_GUIDES)
+const GUIDE_MODELS_PATH = "sales_guide_models.json";
+let GUIDE_MODELS = null;
+let _guideModelsLoading = null;
+function ensureGuideModels() {
+    if (GUIDE_MODELS) return Promise.resolve(GUIDE_MODELS);
+    if (!_guideModelsLoading) {
+        _guideModelsLoading = dataFetch(GUIDE_MODELS_PATH)
+            .then(r => (r && r.ok) ? r.json() : null)
+            .then(j => { GUIDE_MODELS = (j && typeof j === "object") ? j : {}; return GUIDE_MODELS; })
+            .catch(() => { GUIDE_MODELS = {}; return GUIDE_MODELS; })
+            .finally(() => { _guideModelsLoading = null; });
+    }
+    return _guideModelsLoading;
+}
 
 // 복수 기획전 헬퍼
 function getPromoList() {
@@ -4359,16 +4374,25 @@ window.addEventListener('beforeunload', () => {
     if(_posIntervalId)   clearInterval(_posIntervalId);
 });
 
-// ── AI 세일즈 가이드: 웹 조사 방식 (2026-09 재구축) ──────────────────
+// ── AI 세일즈 가이드: 웹 조사 방식 (2026-09 재구축, v4 2026-09-29) ──────────────────
 // 예전엔 브랜드+모델명만 주고 AI 기억으로 "모르면 추정해서라도 채워라" 하고 받았다.
 // 전수검사해 보니 678개 전부 지어낸 값이었다(같은 신발인데 색상마다 무게가 다르고, 트레일화에 마라톤 페이스가 붙음).
-// 이제 허브(/api/ai-guide, mode:'research')가 웹 검색으로 실제 페이지를 찾아 출처에 적힌 값만 돌려주고
-// (서버에서 출처·범위·문장 속 수치까지 검증), 정확한 모델을 못 찾으면 found:false.
+// v4: 허브(/api/ai-guide, mode:'research4')가 RunRepeat·Doctors of Running 리뷰 원문을 발췌해 무료 AI(Groq)에게
+// 한국어 카드를 쓰게 하고, 출처에 없는 수치·경쟁 모델·전작 이야기는 서버에서 지운다. 같은 모델 리뷰가 없으면 found:false.
+// 저장: 모델별 본문(스펙·전작 대비·경쟁 모델·피팅 팁)은 sales_guide_models.json(GUIDE_MODELS),
+//       품번별 요약(카드 칩·필터·옛 화면이 읽는 필드)은 sales_guide_v2.json(SALES_GUIDES).
+// 일괄 조사는 GitHub Actions(guide_batch.js)가 무료 한도 안에서 조금씩 하고, 앱의 🔎 버튼은 한 모델씩 바로 조사한다.
 // 앱은 출처 확인된 가이드(method 'web') 또는 직원이 직접 넣은 가이드(method 'manual')만 보여준다.
-// 옛 AI 추정 가이드는 파일에 남아 있지만 화면에는 나오지 않는다.
 function _verifiedGuide(code) {
     const g = SALES_GUIDES[code];
     return (g && (g.method === "web" || g.method === "manual")) ? g : null;
+}
+// 화면용: 품번 요약 + 모델 본문(받아 둔 경우). 본문이 없으면 요약만 돌려준다.
+function _guideView(code) {
+    const g = _verifiedGuide(code);
+    if (!g) return null;
+    const mm = g.method === "web" && g.modelKey && GUIDE_MODELS ? GUIDE_MODELS[g.modelKey] : null;
+    return (mm && mm.v === 4 && mm.method === "web") ? Object.assign({}, mm, { 품번: g.품번, 품명: g.품명, 브랜드: g.브랜드 }) : g;
 }
 function _guideGender(p) {
     const g = String((p && (p.gender || p.성별)) || "");
@@ -4383,14 +4407,14 @@ function _todayYmd() {
 // 사이즈를 올리거나 내리라는 말이 있을 때만 카드에 ⚠️사이즈를 띄운다 ("와이드 있음" 같은 건 제외)
 const _FIT_SIZE_RE = /반\s*(사이즈|치수)|반\s*업|업\s*사이즈|사이즈\s*업|한\s*(사이즈|치수)|(작게|크게)\s*나|(작은|큰)\s*편|half\s*size|size\s*up|runs?\s*(small|large|big|short|long)/i;
 
-// 허브에 웹 조사 요청 — { found, guide, sources, reason } 을 돌려준다
+// 허브에 v4 조사 요청 — { found, guide, sources, query } 또는 { found:false, reason, retryLater?, daily?, retryAfter? }
 async function researchGuide(p) {
     const _pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e) { return null; } })();
     if (!_pass) throw new Error("공용 비밀번호 로그인이 필요합니다.");
     const r = await fetch(HUB_AI_API, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: "Bearer " + _pass },
-        body: JSON.stringify({ mode: "research", product: { brand: p.브랜드 || "", name: p.품명 || "", sku: p.품번 || "", gender: _guideGender(p) } }),
+        body: JSON.stringify({ mode: "research4", product: { brand: p.브랜드 || "", name: p.품명 || "", sku: p.품번 || "", gender: _guideGender(p) } }),
     }).catch(e => ({ ok: false, status: 0, _netErr: e.message }));
     if (r.ok) return r.json();
     const j = r.json ? await r.json().catch(() => ({})) : {};
@@ -4409,57 +4433,107 @@ async function researchGuide(p) {
     throw new Error(j.error || r._netErr || ("허브 응답 " + r.status));
 }
 
-function _guideEntryFromResearch(res, p) {
-    const g = (res && res.guide) || {};
+// 허브 결과 → 모델 본문 한 항목 (guide_batch.js modelEntry와 같은 모양)
+function _guideModelFromResearch(res, m) {
+    return Object.assign({}, (res && res.guide) || {}, {
+        v: 4, method: "web", modelKey: m.mk, 브랜드: m.rep.브랜드 || "", 품명: m.rep.품명 || "", gender: _guideGender(m.rep),
+        researchedAt: _todayYmd(), query: String((res && res.query) || ""),
+        sources: (Array.isArray(res && res.sources) ? res.sources : []).map(String).slice(0, 5),
+    });
+}
+// 모델 본문 → 품번별 요약 (guide_batch.js skuEntry와 같은 모양 — 옛 화면·카드 칩이 읽는 필드)
+function _guideSkuSummary(code, mm, p) {
     const t = v => (v == null ? "" : String(v));
     const n = v => (typeof v === "number" && isFinite(v) ? v : null);
     return {
-        v: 3, method: "web", researchedAt: _todayYmd(), modelKey: _guideModelKey(p),
-        품번: p.품번 || "", 품명: p.품명 || "", 브랜드: p.브랜드 || "",
-        matchedProduct: t(g.matchedProduct), type: t(g.type),
-        weightG: n(g.weightG), weightBasis: t(g.weightBasis),
-        heelStackMm: n(g.heelStackMm), foreStackMm: n(g.foreStackMm), dropMm: n(g.dropMm),
-        foam: t(g.foam), plate: t(g.plate), features: t(g.features), bestUse: t(g.bestUse),
-        fitNotes: t(g.fitNotes), vsPrev: t(g.vsPrev),
-        keywords: Array.isArray(g.keywords) ? g.keywords.map(String).filter(Boolean).slice(0, 5) : [],
-        salesPitch: t(g.salesPitch),
-        sources: Array.isArray(res.sources) ? res.sources.map(String).slice(0, 5) : [],
+        v: 4, method: "web", modelKey: mm.modelKey, researchedAt: mm.researchedAt,
+        품번: code, 품명: (p && p.품명) || mm.품명, 브랜드: (p && p.브랜드) || mm.브랜드,
+        matchedProduct: t(mm.matchedProduct), type: t(mm.type), category: t(mm.category),
+        weightG: n(mm.weightG), weightBasis: t(mm.weightBasis),
+        heelStackMm: n(mm.heelStackMm), foreStackMm: n(mm.foreStackMm), dropMm: n(mm.dropMm),
+        foam: t(mm.foam), plate: t(mm.plate), features: t(mm.features), bestUse: t(mm.bestUse),
+        fitNotes: t(mm.fitNotes), vsPrev: t(mm.vsPrev), salesPitch: t(mm.salesPitch),
+        keywords: Array.isArray(mm.keywords) ? mm.keywords.map(String).filter(Boolean).slice(0, 5) : [],
+        sources: mm.sources || [],
     };
 }
 
-// 모델 하나를 조사해서 그 모델의 모든 품번에 넣을 항목을 만든다. 못 찾으면 '못 찾음' 표시만 남긴다(내용은 비움).
+// 모델 하나를 조사해 { entries: 품번별 요약, models: 모델 본문, found } 를 만든다.
+// 리뷰가 없으면 '리뷰 없음' 표시만 남기고(예전 확인 가이드는 그대로 둠), 한도·일시 오류는 저장하지 않고 던진다.
 async function _researchModelEntries(m) {
     const res = await researchGuide(m.rep);
-    if (res && res.retryLater) {   // 런리피트에 없고 AI 한도 초과 — 저장하지 않고 다음에 다시
-        const e = new Error(res.reason || "오늘은 조사할 수 없는 모델입니다. 내일 다시 시도하세요.");
-        e.skip = true; throw e;
+    if (res && res.retryLater) {
+        const e = new Error(res.reason || "지금은 조사할 수 없습니다. 잠시 뒤 다시 시도하세요.");
+        if (res.daily || res.retryAfter != null || /한도/.test(String(res.reason || ""))) {
+            e.rateLimited = true; e.daily = !!res.daily; e.retryAfter = Number(res.retryAfter) || 30;
+        } else e.skip = true;
+        throw e;
     }
-    const out = {};
-    for (const code of m.codes) {
-        const p = PRODUCTS.find(x => x.품번 === code) || m.rep;
-        out[code] = (res && res.found && res.guide)
-            ? _guideEntryFromResearch(res, p)
-            : { v: 3, method: "notfound", researchedAt: _todayYmd(), modelKey: _guideModelKey(p), 품번: code, 품명: p.품명 || "", 브랜드: p.브랜드 || "", reason: String((res && res.reason) || "") };
+    const entries = {}, models = {};
+    const found = !!(res && res.found && res.guide);
+    if (found) {
+        const mm = models[m.mk] = _guideModelFromResearch(res, m);
+        for (const code of m.codes) {
+            if (SALES_GUIDES[code] && SALES_GUIDES[code].method === "manual") continue;   // 직원이 쓴 가이드는 그대로
+            entries[code] = _guideSkuSummary(code, mm, PRODUCTS.find(x => x.품번 === code) || m.rep);
+        }
+    } else {
+        const reason = String((res && res.reason) || "");
+        models[m.mk] = { v: 4, method: "notfound", modelKey: m.mk, 브랜드: m.rep.브랜드 || "", 품명: m.rep.품명 || "", gender: _guideGender(m.rep), researchedAt: _todayYmd(), query: String((res && res.query) || ""), reason };
+        for (const code of m.codes) {
+            const g = SALES_GUIDES[code];
+            if (g && (g.method === "manual" || g.method === "web")) continue;
+            const p = PRODUCTS.find(x => x.품번 === code) || m.rep;
+            entries[code] = { v: 4, method: "notfound", researchedAt: _todayYmd(), modelKey: m.mk, 품번: code, 품명: p.품명 || "", 브랜드: p.브랜드 || "", reason };
+        }
     }
-    return out;
+    return { entries, models, found };
 }
 
 function _guideSourceHost(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch(e) { return ""; } }
 
-// 가이드 저장 공용 함수 — 서버 최신 sha로 전체 파일을 교체한다(일괄 조사 중간 저장도 이걸 쓴다).
-// 저장은 공백 없는 JSON: 예쁜 들여쓰기로 저장하면 파일이 1MB를 넘어 읽기가 깨지는 함정이 있다.
-async function _saveGuideEntries(entries) {
-    const codes = Object.keys(entries || {});
-    if (!codes.length) return 0;
-    const merged = Object.assign({}, SALES_GUIDES, entries);
-    const apiBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${SALES_GUIDE_PATH}`;
-    let sha = null;
-    try { const r = await fetch(apiBase + "?t=" + Date.now(), { headers: { Authorization: "Bearer " + getPat() } }); if (r.ok) { const j = await r.json(); sha = j.sha; } } catch(e) {}
-    const body = { message: `update: sales guide +${codes.length}개`, content: utf8ToB64(JSON.stringify(merged)), branch: GH.branch };
-    if (sha) body.sha = sha;
-    const res = await fetch(apiBase, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error("GitHub 저장 실패 (" + res.status + ")");
-    SALES_GUIDES = merged;
+// 데이터 저장소 JSON 읽기 — 1MB가 넘으면 Contents API가 내용을 비워 주므로 raw로 다시 받는다
+// (download_url은 raw.githubusercontent.com이라 허브 프록시를 못 탄다)
+async function _ghReadJson(path) {
+    const url = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}?ref=${GH.branch}`;
+    const auth = { Authorization: "Bearer " + getPat() };
+    const r = await fetch(url + "&t=" + Date.now(), { headers: auth });
+    if (r.status === 404) return { data: null, sha: null };
+    if (r.status === 401) throw new Error("인증 실패 — ADMIN 재로그인 후 다시 시도하세요");
+    if (!r.ok) throw new Error("데이터를 읽지 못했습니다 (" + r.status + ")");
+    const j = await r.json();
+    let text;
+    if (j.content) text = b64ToUtf8(j.content.replace(/\s/g, ""));
+    else {
+        const raw = await fetch(url + "&t=" + Date.now(), { headers: Object.assign({ Accept: "application/vnd.github.raw" }, auth) });
+        if (!raw.ok) throw new Error("큰 파일을 읽지 못했습니다 (" + raw.status + ")");
+        text = await raw.text();
+    }
+    return { data: JSON.parse(text), sha: j.sha };
+}
+// 서버 최신본에 바뀐 키만 덮어써서 저장 — 다른 기기·자동 조사가 방금 저장한 가이드를 지우지 않는다.
+// 저장은 공백 없는 JSON (예쁜 들여쓰기로 저장하면 파일이 커져 읽기 한도에 먼저 닿는다). 충돌(409/422)이면 다시 읽고 재시도.
+async function _ghMergeSave(path, changes, message) {
+    const url = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`;
+    for (let attempt = 0; attempt < 4; attempt++) {
+        const { data, sha } = await _ghReadJson(path);
+        const merged = Object.assign({}, data || {}, changes);
+        const body = { message, content: utf8ToB64(JSON.stringify(merged)), branch: GH.branch };
+        if (sha) body.sha = sha;
+        const res = await fetch(url, { method: "PUT", headers: { Authorization: "Bearer " + getPat(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (res.ok) return merged;
+        if (res.status === 409 || res.status === 422) { await new Promise(r => setTimeout(r, 800 * (attempt + 1))); continue; }
+        throw new Error("GitHub 저장 실패 (" + res.status + ")");
+    }
+    throw new Error("GitHub 저장 실패 — 다른 저장과 계속 겹칩니다. 잠시 뒤 다시 시도하세요.");
+}
+
+// 가이드 저장 공용 함수 — entries: 품번별 요약, models: 모델 본문(선택). 둘 다 서버 최신본에 합쳐 저장한다.
+async function _saveGuideEntries(entries, models) {
+    const codes = Object.keys(entries || {}), mks = Object.keys(models || {});
+    if (!codes.length && !mks.length) return 0;
+    if (mks.length) GUIDE_MODELS = await _ghMergeSave(GUIDE_MODELS_PATH, models, `update: sales guide models +${mks.length}개`);
+    if (codes.length) SALES_GUIDES = await _ghMergeSave(SALES_GUIDE_PATH, entries, `update: sales guide +${codes.length}개`);
     sessionStorage.removeItem(CACHE_KEY);
     return codes.length;
 }
@@ -9502,1508 +9576,214 @@ window.openDashDetail = (code, periodParam) => {
     }, 150);
 };
 
-window.openSalesGuide = (code) => {
-    const guide = _verifiedGuide(code);
-    const p = PRODUCTS.find(x => x.품번 === code);
-    if(!guide) return;
+// ── 세일즈 가이드 모달 (v4, 2026-09-29) ─────────────────────────────
+// 순서: 30초 추천 멘트·타깃 → Quick Spec(+RunRepeat 실측) → 현장 피팅 팁 → 전작 대비 → 경쟁 모델 → 출처.
+// 값이 없는 칸·섹션은 통째로 숨긴다. 스타일은 이 모달 전용 <style>(sg4-)로 — Tailwind 빌드 없이 동작.
+function _sg4Css() {
+    if (document.getElementById("sg4Style")) return;
+    const st = document.createElement("style");
+    st.id = "sg4Style";
+    st.textContent = `
+#salesGuideModal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:12px}
+#salesGuideModal.hidden{display:none}
+.sg4-dim{position:absolute;inset:0;background:rgba(15,23,42,.62);backdrop-filter:blur(3px);cursor:pointer}
+.sg4-sheet{position:relative;width:100%;max-width:920px;max-height:94vh;display:flex;flex-direction:column;background:#f2f3f5;border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);color:#1f2937}
+.sg4-head{background:#fff;border-bottom:1px solid #e8eaef;padding:14px 16px 12px;display:flex;gap:12px;align-items:flex-start}
+.sg4-eyebrow{font-size:11px;font-weight:800;color:#6b7280;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.sg4-tag{background:#fff0e9;color:#c2410c;border-radius:999px;padding:2px 8px;font-size:10px;font-weight:900;letter-spacing:.04em}
+.sg4-title{font-size:19px;font-weight:900;line-height:1.25;margin:4px 0 2px;word-break:keep-all;color:#111827}
+.sg4-match{font-size:11.5px;font-weight:700;color:#9ca3af}
+.sg4-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.sg4-chip{background:#f3f4f6;color:#374151;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700}
+.sg4-x{margin-left:auto;flex:none;width:36px;height:36px;border-radius:999px;border:0;background:#f3f4f6;color:#4b5563;font-size:20px;font-weight:900;line-height:1;cursor:pointer}
+.sg4-x:hover{background:#e5e7eb}
+.sg4-body{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px;display:grid;gap:10px}
+.sg4-grid{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:720px){.sg4-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.sg4-card{background:#fff;border:1px solid #e8eaef;border-radius:14px;padding:12px 14px;min-width:0}
+.sg4-h{font-size:11px;font-weight:900;color:#ff5a1f;letter-spacing:.05em;margin:0 0 8px}
+.sg4-h small{color:#9ca3af;font-weight:800;letter-spacing:0;margin-left:4px}
+.sg4-pitch{background:#fff;border:1px solid #ffd9c9;border-left:4px solid #ff5a1f;border-radius:14px;padding:12px 14px}
+.sg4-pitch p{font-size:14.5px;font-weight:700;line-height:1.65;margin:0;color:#111827;word-break:keep-all}
+.sg4-target{margin-top:8px;padding-top:8px;border-top:1px dashed #f1e1d9;font-size:12.5px;font-weight:700;color:#4b5563;line-height:1.55;word-break:keep-all}
+.sg4-target b{color:#c2410c}
+.sg4-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.sg4-tbl th{text-align:left;font-weight:800;color:#6b7280;padding:6px 10px 6px 0;white-space:nowrap;vertical-align:top;width:1%}
+.sg4-tbl td{font-weight:700;color:#111827;padding:6px 0;border-bottom:1px dashed #eef0f3;line-height:1.5;word-break:keep-all}
+.sg4-tbl tr:last-child td{border-bottom:0}
+.sg4-sub{display:block;font-size:11px;color:#9ca3af;font-weight:700}
+.sg4-badge{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;font-weight:800;background:#f3f4f6;color:#4b5563;white-space:nowrap}
+.sg4-badge.good{background:#ecfdf5;color:#047857}
+.sg4-badge.warn{background:#fff7ed;color:#c2410c}
+.sg4-lab{margin-top:10px;padding-top:8px;border-top:1px solid #f1f2f5}
+.sg4-lab-h{font-size:10.5px;font-weight:900;color:#6b7280;margin-bottom:2px}
+.sg4-list{margin:0;padding-left:18px;font-size:12.5px;font-weight:700;line-height:1.6;word-break:keep-all}
+.sg4-list.pro li::marker{color:#16a34a}
+.sg4-list.con li::marker{color:#dc2626}
+.sg4-pc{display:grid;gap:8px;grid-template-columns:minmax(0,1fr);margin-top:8px}
+@media(min-width:480px){.sg4-pc{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.sg4-pc-h{font-size:10.5px;font-weight:900;margin-bottom:2px}
+.sg4-rival{padding:7px 0;border-bottom:1px dashed #eef0f3}
+.sg4-rival:last-child{border-bottom:0}
+.sg4-rival b{font-size:12.5px;font-weight:900;color:#111827}
+.sg4-rival p{margin:2px 0 0;font-size:12.5px;font-weight:600;color:#374151;line-height:1.55;word-break:keep-all}
+.sg4-text{font-size:12.5px;font-weight:600;color:#374151;line-height:1.6;margin:0;word-break:keep-all}
+.sg4-foot{background:#fff;border-top:1px solid #e8eaef;padding:9px 16px;font-size:11px;font-weight:700;color:#6b7280;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.sg4-foot a{color:#c2410c;text-decoration:underline}
+.sg4-note{font-size:11px;font-weight:700;color:#9ca3af}
+@media(max-width:480px){#salesGuideModal{padding:0;align-items:flex-end}.sg4-sheet{max-height:96vh;border-radius:18px 18px 0 0}.sg4-title{font-size:17px}}
+`;
+    document.head.appendChild(st);
+}
 
-    let modal = $("#salesGuideModal");
-    if(!modal) {
+// RunRepeat 실측값을 전체 평균과 비교한 말 — 숫자로만 판단한다(AI 해석 없음)
+function _sg4Cmp(v, avg, tol, hiWord, loWord, hiCls, loCls) {
+    if (typeof v !== "number" || typeof avg !== "number") return "";
+    const d = v - avg;
+    if (Math.abs(d) < tol) return `<span class="sg4-badge">평균 수준 · 평균 ${avg}</span>`;
+    return d > 0 ? `<span class="sg4-badge ${hiCls || ""}">${hiWord} · 평균 ${avg}</span>` : `<span class="sg4-badge ${loCls || ""}">${loWord} · 평균 ${avg}</span>`;
+}
+
+function _salesGuideHtml(code, loading) {
+    const g = _guideView(code) || {};
+    const p = PRODUCTS.find(x => x.품번 === code);
+    const e = escapeHtml;
+    const has = v => Array.isArray(v) ? v.length > 0 : (v != null && String(v).trim() !== "");
+    const num = v => typeof v === "number" && isFinite(v);
+    const row = (label, val, sub) => has(val) ? `<tr><th>${e(label)}</th><td>${val}${sub ? `<span class="sg4-sub">${sub}</span>` : ""}</td></tr>` : "";
+    const v4 = g.v === 4 && g.method === "web";
+
+    // ── 헤더
+    const title = p ? p.품명 : (g.품명 || code);
+    const eyebrow = [p ? p.브랜드 : g.브랜드, p ? _guideGender(p) : g.gender].filter(Boolean).map(e).join(" · ");
+    const catTag = has(g.category) ? g.category : g.type;
+    const chips = (g.keywords || []).map(k => `<span class="sg4-chip">#${e(k)}</span>`).join("");
+    const head = `
+        <div class="sg4-head">
+            <div style="min-width:0;flex:1">
+                <div class="sg4-eyebrow"><span class="sg4-tag">SALES GUIDE</span>${eyebrow}${has(catTag) ? `<span class="sg4-tag">${e(catTag)}</span>` : ""}</div>
+                <h2 class="sg4-title" id="sg4Title">${e(title)}</h2>
+                ${has(g.matchedProduct) ? `<div class="sg4-match">리뷰 기준 모델: ${e(g.matchedProduct)}</div>` : ""}
+                ${chips ? `<div class="sg4-chips">${chips}</div>` : ""}
+            </div>
+            <button type="button" class="sg4-x" data-close="1" aria-label="닫기">×</button>
+        </div>`;
+
+    // ── 30초 멘트 + 타깃
+    const pitch = v4 ? g.pitch : g.salesPitch;
+    const target = v4 ? g.target : g.bestUse;
+    const pitchHtml = (has(pitch) || has(target)) ? `
+        <section class="sg4-pitch">
+            <div class="sg4-h">🎤 30초 추천 멘트</div>
+            ${has(pitch) ? `<p>${e(pitch)}</p>` : `<p class="sg4-note">리뷰에서 확인된 멘트가 없습니다.</p>`}
+            ${has(target) ? `<div class="sg4-target"><b>이런 러너에게</b> · ${e(target)}</div>` : ""}
+        </section>` : "";
+
+    // ── Quick Spec
+    let weight = "", weightSub = "";
+    if (num(g.weightMenG) && num(g.weightWomenG)) { weight = `남 ${g.weightMenG}g · 여 ${g.weightWomenG}g`; weightSub = "한 짝 기준"; }
+    else if (num(g.weightG)) { weight = `${g.weightG}g`; weightSub = ["한 짝", g.weightBasis].filter(has).map(e).join(" · "); }
+    const stack = [num(g.heelStackMm) ? `힐 ${g.heelStackMm}mm` : "", num(g.foreStackMm) ? `포어풋 ${g.foreStackMm}mm` : ""].filter(Boolean).join(" · ");
+    const foamPlate = [has(g.foam) ? e(g.foam) : "", has(g.plate) ? `플레이트: ${e(g.plate)}` : ""].filter(Boolean).join("<br>");
+    const L = (v4 && g.lab && typeof g.lab === "object") ? g.lab : {};
+    const labRows = [
+        num(L.toeboxMm) ? row("토박스 폭", `${L.toeboxMm}mm` + _sg4Cmp(L.toeboxMm, L.toeboxAvgMm, 2, "넓은 편", "좁은 편")) : "",
+        num(L.widthMm) ? row("발볼(중족부) 폭", `${L.widthMm}mm` + _sg4Cmp(L.widthMm, L.widthAvgMm, 2, "넓은 편", "좁은 편")) : "",
+        num(L.softness) ? row("미드솔 경도", `${L.softness} ${e(L.softnessUnit || "")}` + _sg4Cmp(L.softness, L.softnessAvg, 3, "단단한 편", "부드러운 편")) : "",
+        num(L.energyPct) ? row("에너지 리턴", `${L.energyPct}%` + _sg4Cmp(L.energyPct, L.energyAvgPct, 3, "높은 편", "낮은 편", "good", "warn")) : "",
+        num(L.outsoleWearMm) ? row("아웃솔 마모", `${L.outsoleWearMm}mm` + _sg4Cmp(L.outsoleWearMm, L.outsoleWearAvgMm, 0.3, "빨리 닳는 편", "잘 안 닳는 편", "warn", "good")) : "",
+    ].join("");
+    const specRows = [
+        row("무게", e(weight), weightSub),
+        row("스택", e(stack)),
+        row("드롭", num(g.dropMm) ? `${g.dropMm}mm` : ""),
+        row("폼 · 플레이트", foamPlate),
+        row("아웃솔", has(g.outsole) ? e(g.outsole) : ""),
+        row("착화감", v4 && has(g.feel) ? e(g.feel) : ""),
+        row("특징", !v4 && has(g.features) ? e(g.features) : ""),
+    ].join("");
+    const specHtml = (specRows || labRows) ? `
+        <section class="sg4-card">
+            <div class="sg4-h">📐 QUICK SPEC</div>
+            ${specRows ? `<table class="sg4-tbl">${specRows}</table>` : ""}
+            ${labRows ? `<div class="sg4-lab"><div class="sg4-lab-h">RunRepeat 실측 <span class="sg4-note">(평균 = 측정한 러닝화 전체 평균)</span></div><table class="sg4-tbl">${labRows}</table></div>` : ""}
+        </section>` : "";
+
+    // ── 현장 피팅 팁
+    const fitRows = v4
+        ? [row("사이즈", has(g.size) ? e(g.size) : ""), row("발볼", has(g.width) ? e(g.width) : "")].join("")
+        : row("사이즈 · 발볼", has(g.fitNotes) ? e(g.fitNotes) : "");
+    const pros = v4 && has(g.pros) ? `<div><div class="sg4-pc-h" style="color:#15803d">장점</div><ul class="sg4-list pro">${g.pros.map(x => `<li>${e(x)}</li>`).join("")}</ul></div>` : "";
+    const cons = v4 && has(g.cons) ? `<div><div class="sg4-pc-h" style="color:#b91c1c">아쉬운 점</div><ul class="sg4-list con">${g.cons.map(x => `<li>${e(x)}</li>`).join("")}</ul></div>` : "";
+    const fitHtml = (fitRows || pros || cons) ? `
+        <section class="sg4-card">
+            <div class="sg4-h">👟 현장 피팅 팁</div>
+            ${fitRows ? `<table class="sg4-tbl">${fitRows}</table>` : ""}
+            ${(pros || cons) ? `<div class="sg4-pc">${pros}${cons}</div>` : ""}
+        </section>` : "";
+
+    // ── 전작 대비
+    let prevHtml = "";
+    if (v4 && g.whatsNew && typeof g.whatsNew === "object") {
+        const w = g.whatsNew;
+        const rows = [row("미드솔", has(w.midsole) ? e(w.midsole) : ""), row("어퍼", has(w.upper) ? e(w.upper) : ""), row("지오메트리", has(w.geometry) ? e(w.geometry) : "")].join("");
+        if (rows) prevHtml = `<section class="sg4-card"><div class="sg4-h">🔁 전작 대비${has(g.prevModel) ? `<small>vs ${e(g.prevModel)}</small>` : ""}</div><table class="sg4-tbl">${rows}</table></section>`;
+    } else if (!v4 && has(g.vsPrev)) {
+        prevHtml = `<section class="sg4-card"><div class="sg4-h">🔁 전작 대비</div><p class="sg4-text">${e(g.vsPrev)}</p></section>`;
+    }
+
+    // ── 경쟁 모델
+    const rivals = v4 && Array.isArray(g.rivals) ? g.rivals.filter(r => r && has(r.model) && has(r.diff)) : [];
+    const rivalHtml = rivals.length ? `
+        <section class="sg4-card">
+            <div class="sg4-h">⚔️ 경쟁 모델 비교</div>
+            ${rivals.map(r => `<div class="sg4-rival"><b>${e(r.model)}</b><p>${e(r.diff)}</p></div>`).join("")}
+        </section>` : "";
+
+    // ── 출처
+    const srcs = (g.sources || []).filter(u => /^https?:\/\//i.test(String(u)));
+    const foot = g.method === "web"
+        ? `<span>출처</span>${srcs.map(u => `<a href="${e(u)}" target="_blank" rel="noopener noreferrer">${e(_guideSourceHost(u) || u)}</a>`).join("")}<span>· 조사 ${e(g.researchedAt || "")}</span><span class="sg4-note">리뷰에 적힌 내용만 정리했습니다. 무게·실측은 리뷰 측정값(사이즈·개체마다 차이 있음).</span>`
+        : `<span>직원 직접 입력${g.researchedAt ? " · " + e(g.researchedAt) : ""}</span>`;
+    const loadingHtml = loading ? `<div class="sg4-note" style="text-align:center">상세 내용을 불러오는 중…</div>` : "";
+
+    const pair = [specHtml, fitHtml].filter(Boolean);
+    const body = `
+        <div class="sg4-body">
+            ${pitchHtml}
+            ${loadingHtml}
+            ${pair.length === 2 ? `<div class="sg4-grid">${pair.join("")}</div>` : pair.join("")}
+            ${prevHtml && rivalHtml ? `<div class="sg4-grid">${prevHtml}${rivalHtml}</div>` : prevHtml + rivalHtml}
+        </div>`;
+    return head + body + `<div class="sg4-foot">${foot}</div>`;
+}
+
+window.openSalesGuide = (code) => {
+    if (!_verifiedGuide(code)) return;
+    _sg4Css();
+    let modal = document.getElementById("salesGuideModal");
+    if (!modal) {
         modal = document.createElement("div");
         modal.id = "salesGuideModal";
-        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[100] p-3";
-        modal.innerHTML = `
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="modal-outer absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="modal-content relative bg-gradient-to-br from-slate-50 to-slate-100 w-full max-w-5xl mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10 border border-slate-200" style="max-height:95vh;height:95vh;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <!-- 헤더 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div class="px-5 pt-3 pb-2.5 bg-gradient-to-r from-indigo-900 to-indigo-700 flex justify-between items-center shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="flex-1 min-w-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="flex items-center gap-2 mb-1 flex-wrap">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <span class="bg-white/20 text-white text-[9px] px-2 py-0.5 rounded-full font-black tracking-widest uppercase">AI SALES GUIDE</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <span id="sgBrand" class="text-indigo-200 text-[11px] font-bold"></span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="flex items-center gap-3">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <h2 id="sgTitle" class="font-black text-xl text-white leading-tight truncate"></h2>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div id="sgKeywords" class="flex flex-wrap gap-1 shrink-0"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <button id="closeSalesGuide" class="ml-3 p-1.5 text-white/60 hover:text-white transition-colors bg-white/10 rounded-full shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <!-- 대시보드 3컬럼 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div id="sgDashboard" class="flex-1 overflow-hidden p-3">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 h-full">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <!-- Col 1: 핵심 스펙 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="bar-chart-2" class="w-3 h-3"></i> 핵심 스펙</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div id="sgMetrics" class="shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span id="sgWeightLabel" class="text-[10px] font-bold text-slate-400">무게</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span id="sgWeight" class="text-[12px] font-black text-slate-800"></span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span class="text-[10px] font-bold text-slate-400">힐 스택</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span id="sgHeel" class="text-[12px] font-black text-slate-800"></span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div class="flex justify-between items-center py-1 border-b border-dashed border-slate-100">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span class="text-[10px] font-bold text-slate-400">포어풋 스택</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span id="sgFore" class="text-[12px] font-black text-slate-800"></span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div class="flex justify-between items-center py-1">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span class="text-[10px] font-bold text-slate-400">드롭</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                    <span id="sgDrop" class="text-[12px] font-black text-slate-800"></span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div id="sgSpecBox" class="bg-amber-50 border border-amber-100 rounded-lg p-2 text-[11px] text-amber-800 font-medium leading-snug shrink-0"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="flex-1 overflow-hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">핵심 특징</h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgFeatures" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <!-- Col 2: 비교 분석 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="git-compare" class="w-3 h-3"></i> 비교 분석</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="bg-slate-50 rounded-lg p-2 shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-1">VS 전작 (수치)</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgVsPrev" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="bg-red-50 border border-red-100 rounded-lg p-2 shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <span class="text-[9px] font-black text-red-400 uppercase tracking-widest block mb-1">⚠ 알려진 이슈 / 단점</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgIssues" class="text-[11px] text-red-700 font-medium leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="bg-slate-50 rounded-lg p-2 shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest block mb-1">VS 경쟁 모델</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgVsOthers" class="text-[11px] text-slate-700 font-medium leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="flex-1 overflow-hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1">한 줄 정의</h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgWhy" class="text-[12px] font-black text-indigo-700 italic leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <!-- Col 3: 세일즈 전략 -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col gap-2 overflow-hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <h3 class="font-black text-[10px] text-indigo-500 uppercase tracking-widest flex items-center gap-1 shrink-0"><i data-lucide="target" class="w-3 h-3"></i> 세일즈 전략</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="bg-amber-50 border border-amber-100 rounded-lg p-2 shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <h4 class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">🎯 브랜드 강조 포인트</h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgBrandFocus" class="text-[11px] text-amber-800 font-medium leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">추천 타겟</h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgTarget" class="text-[11px] text-slate-700 font-medium leading-snug bg-slate-50 rounded-lg p-2"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Best For</h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgBestFor" class="text-[11px] font-bold text-indigo-600 bg-indigo-50 rounded-lg p-2 leading-snug"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            <div class="flex-1 overflow-hidden">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">클로징 멘트</h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                <div id="sgPitch" class="text-[12px] font-bold text-indigo-900 leading-snug bg-indigo-50 border-l-4 border-indigo-500 p-2 rounded-r-lg italic"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        `;
+        modal.className = "hidden";
+        modal.setAttribute("role", "dialog");
+        modal.setAttribute("aria-modal", "true");
+        modal.setAttribute("aria-labelledby", "sg4Title");
+        modal.innerHTML = `<div class="sg4-dim" data-close="1"></div><div class="sg4-sheet"></div>`;
         document.body.appendChild(modal);
-        $("#closeSalesGuide").onclick = () => modal.classList.add("hidden");
+        modal.addEventListener("click", (ev) => { if (ev.target.closest("[data-close]")) modal.classList.add("hidden"); });
     }
-
-    // 출처로 확인된 값(웹 조사) 또는 직원이 직접 넣은 값만 보여준다. 값이 없는 칸은 통째로 숨긴다.
-    const _q = sel => modal.querySelector(sel);
-    const _mm = v => (v == null || v === "") ? "" : `${v}mm`;
-    const _row = (sel, text) => { const el = _q(sel); if (!el) return; el.textContent = text || ""; if (el.parentElement) el.parentElement.classList.toggle("hidden", !text); };
-    const _self = (sel, text) => { const el = _q(sel); if (!el) return; el.textContent = text || ""; el.classList.toggle("hidden", !text); };
-    const _head = (sel, text) => { const el = _q(sel); const h = el && el.parentElement && el.parentElement.querySelector("span, h4"); if (h && h !== el) h.textContent = text; };
-    _q("#sgTitle").textContent = p ? p.품명 : (guide.품명 || code);
-    _q("#sgBrand").textContent = [p ? p.브랜드 : guide.브랜드, guide.matchedProduct ? `확인 제품: ${guide.matchedProduct}` : ""].filter(Boolean).join(" · ");
-    _q("#sgKeywords").innerHTML = [guide.type, ...(guide.keywords || []).map(k => "#" + k)].filter(Boolean).map(kw =>
-        `<span class="bg-white/20 text-white/90 px-2 py-0.5 rounded-full text-[10px] font-bold border border-white/20">${escapeHtml(kw)}</span>`).join('');
-    // 핵심 스펙
-    _row("#sgWeight", guide.weightG != null ? `${guide.weightG}g` : "");
-    _q("#sgWeightLabel").textContent = guide.weightBasis ? `무게 (한쪽, ${guide.weightBasis})` : "무게 (한쪽)";
-    _row("#sgHeel", _mm(guide.heelStackMm));
-    _row("#sgFore", _mm(guide.foreStackMm));
-    _row("#sgDrop", _mm(guide.dropMm));
-    _self("#sgSpecBox", [guide.foam && `폼: ${guide.foam}`, guide.plate && `플레이트: ${guide.plate}`].filter(Boolean).join(" · "));
-    _row("#sgFeatures", guide.features);
-    // 비교·핏·출처
-    const _c2 = _q("#sgVsPrev") && _q("#sgVsPrev").closest(".bg-white");
-    const _c2h = _c2 && _c2.querySelector("h3");
-    if (_c2h && _c2h.lastChild) _c2h.lastChild.textContent = " 비교 · 핏 · 출처";
-    _head("#sgVsPrev", "VS 전작 (출처 기준)");
-    _row("#sgVsPrev", guide.vsPrev);
-    _head("#sgIssues", "👟 사이즈 · 발볼 (출처 기준)");
-    _row("#sgIssues", guide.fitNotes);
-    _row("#sgVsOthers", "");
-    const _src = _q("#sgWhy");
-    if (_src) {
-        _head("#sgWhy", guide.method === "web" ? "출처" : "작성");
-        _src.className = "text-[11px] text-slate-600 font-medium leading-snug space-y-0.5";
-        _src.innerHTML = guide.method === "web"
-            ? (guide.sources || []).map(u => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener" class="block truncate text-indigo-600 underline">${escapeHtml(_guideSourceHost(u) || u)}</a>`).join("")
-              + `<div class="text-slate-400">웹 조사 ${escapeHtml(guide.researchedAt || "")}</div>`
-            : `<div>직원 직접 입력${guide.researchedAt ? " · " + escapeHtml(guide.researchedAt) : ""}</div>`;
-        if (_src.parentElement) _src.parentElement.classList.remove("hidden");
-    }
-    // 세일즈
-    _row("#sgBrandFocus", "");
-    _row("#sgTarget", "");
-    _head("#sgBestFor", "용도");
-    _row("#sgBestFor", guide.bestUse);
-    _head("#sgPitch", "판매 멘트 (확인된 사실 기반)");
-    _row("#sgPitch", guide.salesPitch);
-
+    modal.dataset.code = code;
+    const g = _verifiedGuide(code);
+    const needModels = g.method === "web" && g.v === 4 && !GUIDE_MODELS;
+    const paint = (loading) => {
+        if (modal.dataset.code !== code) return;
+        modal.querySelector(".sg4-sheet").innerHTML = _salesGuideHtml(code, loading);
+        const body = modal.querySelector(".sg4-body"); if (body && !loading) body.scrollTop = 0;
+    };
+    paint(needModels);
     modal.classList.remove("hidden");
-    if(window.lucide) lucide.createIcons();
+    if (needModels) ensureGuideModels().then(() => { if (!modal.classList.contains("hidden")) paint(false); });
 };
 
 function card(p){
@@ -17995,7 +16775,7 @@ window.renderSalesAdmin = () => {
                 }
                 if (!confirm(`엑셀에서 ${Object.keys(newGuides).length}개를 읽었습니다.\n\n새로 추가: ${_added}개\n기존 항목 갱신: ${_updated}개 (엑셀에 없는 항목과 상세 내용은 그대로 유지)\n\n저장할까요?`)) { fileInput.value = ""; return; }
                 try {
-                    await _saveGuideEntries(_mergedGuides);
+                    await _saveGuideEntries(Object.fromEntries(Object.keys(newGuides).filter(c => _mergedGuides[c]).map(c => [c, _mergedGuides[c]])));   // 바뀐 품번만 서버 최신본에 합쳐 저장
                     _recomputeStock(); render(); window.renderSalesAdmin();
                     alert(`✅ 세일즈 가이드 저장 완료 — 추가 ${_added}개, 갱신 ${_updated}개`);
                 } catch(err) { alert("업로드 실패: " + err.message); }
@@ -20126,13 +18906,14 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             return [...groups.values()]
                 .filter(m => !m.codes.some(c => _verifiedGuide(c)))
-                .map(m => { const nf = m.codes.map(c => SALES_GUIDES[c]).find(g => g && g.method === "notfound"); m.notFound = nf ? (nf.researchedAt || "?") : ""; return m; })
-                .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || ((!!a.notFound) - (!!b.notFound)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), "ko"));
+                // 'v4 리뷰 없음'(30일 안)만 뒤로 — 예전 v3 '못 찾음'은 대부분 AI 한도로 건너뛴 것이라 다시 조사 대상
+                .map(m => { const nf = m.codes.map(c => SALES_GUIDES[c]).find(g => g && g.method === "notfound"); m.notFound = nf ? (nf.researchedAt || "?") : ""; m.v4NotFound = !!(nf && nf.v === 4 && (Date.now() - Date.parse(nf.researchedAt || "")) / 86400e3 < 30); return m; })
+                .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || ((!!a.v4NotFound) - (!!b.v4NotFound)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), "ko"));
         }
 
         let _missCache = [];
         function _researchSummaryHtml(g) {
-            if (!g || g.method !== "web") return `<span class="text-gray-400">❔ 웹에서 정확히 같은 모델을 찾지 못해 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
+            if (!g || g.method !== "web") return `<span class="text-gray-400">❔ RunRepeat·Doctors of Running에 같은 모델 리뷰가 없어 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
             const bits = [g.matchedProduct, g.type,
                 g.weightG != null ? `${g.weightG}g${g.weightBasis ? "(" + g.weightBasis + ")" : ""}` : "",
                 g.dropMm != null ? `드롭 ${g.dropMm}mm` : ""].filter(Boolean).map(escapeHtml);
@@ -20161,7 +18942,7 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <span class="text-[10px] font-bold text-gray-400 shrink-0">품번 ${m.codes.length}개 · 재고 ${m.stock}</span>
                             </label>
                             <div class="flex items-center gap-1 shrink-0">
-                                ${m.notFound ? `<span class="text-[10px] font-bold text-gray-400">못 찾음 ${escapeHtml(m.notFound)}</span>` : ""}
+                                ${m.v4NotFound ? `<span class="text-[10px] font-bold text-gray-400" title="RunRepeat·Doctors of Running에 같은 모델 리뷰가 없음">리뷰 없음 ${escapeHtml(m.notFound)}</span>` : m.notFound ? `<span class="text-[10px] font-bold" style="color:#d97706" title="예전 조사 때 AI 한도로 건너뜀 — 자동 조사가 다시 합니다">조사 대기</span>` : ""}
                                 <button class="miss-research px-2 py-1 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black border border-purple-200 hover:bg-purple-100 transition-colors" data-i="${i}">🔎 웹 조사</button>
                                 <button class="miss-manual px-2 py-1 rounded-lg bg-white text-gray-600 text-[10px] font-black border border-gray-200 hover:bg-gray-100 transition-colors" data-i="${i}">✏️ 직접</button>
                             </div>
@@ -20197,11 +18978,10 @@ window.addEventListener('DOMContentLoaded', () => {
                     btn.disabled = true; btn.textContent = "⏳ 조사 중...";
                     const resEl = listEl.querySelector(`.miss-result[data-i="${i}"]`);
                     try {
-                        const entries = await _researchModelEntries(m);
-                        await _saveGuideEntries(entries);
-                        const g = entries[m.codes[0]];
-                        if (resEl) { resEl.innerHTML = _researchSummaryHtml(g); resEl.classList.remove("hidden"); }
-                        btn.textContent = g && g.method === "web" ? "✅ 저장됨" : "❔ 못 찾음";
+                        const out = await _researchModelEntries(m);
+                        await _saveGuideEntries(out.entries, out.models);
+                        if (resEl) { resEl.innerHTML = _researchSummaryHtml(out.models[m.mk]); resEl.classList.remove("hidden"); }
+                        btn.textContent = out.found ? "✅ 저장됨" : "❔ 리뷰 없음";
                         render(); if (window.renderSalesAdmin) window.renderSalesAdmin();
                     } catch(err) {
                         alert("웹 조사 실패: " + err.message);
@@ -20220,17 +19000,17 @@ window.addEventListener('DOMContentLoaded', () => {
                 const _hasPass = (() => { try { return !!localStorage.getItem(INV_PASS_KEY); } catch(e) { return false; } })();
                 if(!_hasPass) { alert("⚠️ 공용 비밀번호 로그인이 필요합니다."); return; }
                 if(!checkPat()) return;
-                const todo = _missModels().filter(m => !m.notFound);
-                if(!todo.length) { alert("웹 조사할 모델이 없습니다. ('못 찾음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
-                if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 웹에서 조사합니다.\n\n· 브랜드 공식몰·리뷰 사이트에서 확인된 값만 저장하고, 정확한 모델을 못 찾으면 비워 둡니다.\n· 런리피트(RunRepeat)에 있는 모델은 무료로 바로 읽고, 없는 모델만 AI 웹검색(하루 한도)으로 찾습니다. 한도가 차면 그 모델은 다음에 다시 합니다.\n\n진행할까요?`)) return;
+                const todo = _missModels().filter(m => !m.v4NotFound);
+                if(!todo.length) { alert("웹 조사할 모델이 없습니다. ('리뷰 없음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
+                if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 조사합니다.\n\n· RunRepeat·Doctors of Running 리뷰에 적힌 내용만 무료 AI로 한국어 정리해 저장하고, 같은 모델 리뷰가 없으면 비워 둡니다.\n· 모델 하나에 약 30초~1분, 하루 무료 한도는 약 40개 모델입니다. 한도가 차면 멈추고, 매일 자동 조사가 이어서 합니다.\n\n진행할까요?`)) return;
 
                 bulkAiBtn.disabled = true;
                 const origLabel = "🔎 전체 웹 조사";
                 let done = 0, found = 0, notFound = 0, failed = 0, later = 0, stopped = "";
-                let pending = {}, pendingModels = 0;
+                let pending = {}, pendingM = {}, pendingModels = 0;
                 const _flush = async () => {
                     if (!pendingModels) return;
-                    try { await _saveGuideEntries(pending); pending = {}; pendingModels = 0; }
+                    try { await _saveGuideEntries(pending, pendingM); pending = {}; pendingM = {}; pendingModels = 0; }
                     catch(e) { console.warn('[웹 조사] 중간 저장 실패:', e.message); }
                 };
                 for (const m of todo) {
@@ -20256,11 +19036,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (stopped) break;
                     done++;
                     if (entries) {
-                        Object.assign(pending, entries); pendingModels++;
-                        if (entries[m.codes[0]].method === "web") found++; else notFound++;
+                        Object.assign(pending, entries.entries); Object.assign(pendingM, entries.models); pendingModels++;
+                        if (entries.found) found++; else notFound++;
                         if (pendingModels >= 5) await _flush();
                     }
-                    await new Promise(r => setTimeout(r, 3000));
+                    await new Promise(r => setTimeout(r, 20000));   // 무료 AI 분당 한도 — 모델당 약 5천 토큰
                 }
                 await _flush();
 
@@ -20268,7 +19048,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 bulkAiBtn.disabled = false;
                 render(); if(window.renderSalesAdmin) window.renderSalesAdmin();
                 _renderMissList();
-                alert(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 정확한 모델 못 찾음(비워 둠): ${notFound}개` + (later ? `\n⏳ 런리피트에 없어 다음에 다시: ${later}개` : "") + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
+                alert(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 같은 모델 리뷰 없음(비워 둠): ${notFound}개` + (later ? `\n⏳ 다음에 다시: ${later}개` : "") + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
             };
         }
 
