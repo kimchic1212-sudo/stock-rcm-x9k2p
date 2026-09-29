@@ -99,7 +99,7 @@
   /* 기기에서 '동작 줄이기'를 켜면 애니메이션·전환을 거의 없앤다 */
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
 </style>
-<link rel="stylesheet" href="./libs/tailwind.css?v=2609292221">
+<link rel="stylesheet" href="./libs/tailwind.css?v=2609292247">
 </head>
 <body class="min-h-screen pb-20">
 <script>
@@ -125,9 +125,9 @@
     </div>
     <div id="headerStatusSlot" class="hidden xl:flex flex-1 min-w-0 justify-center"></div>
     <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-      <button id="allTransfersBtn" aria-label="이동요청 목록" class="chip mono text-[11px] bg-blue-50 text-blue-700 border-blue-200" onclick="window.renderTransfers()">🚚<span class="hidden sm:inline"> 이동요청 목록</span></button>
+      <button id="allTransfersBtn" aria-label="이동요청 목록" class="chip mono text-[11px] bg-blue-50 text-blue-700 border-blue-200" onclick="window.renderTransfers()"><i data-lucide="truck" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i><span class="hidden sm:inline"> 이동요청 목록</span></button>
       <button id="showroomBtn" aria-label="쇼룸 모드" class="chip mono text-[11px]"><i data-lucide="eye" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">쇼룸</span></button>
-      <button id="darkModeBtn" aria-label="다크 모드 전환" class="chip mono text-[11px]">🌙</button>
+      <button id="darkModeBtn" aria-label="다크 모드 전환" class="chip mono text-[11px]"><i data-lucide="moon" class="w-3.5 h-3.5 inline-block align-[-2px]" aria-hidden="true"></i></button>
       <button id="refreshBtn" aria-label="새로고침" class="chip mono text-xs"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
       <button id="adminBtn" class="brutal mono font-black px-2.5 sm:px-3 py-2 text-sm bg-[color:var(--surface)]">ADMIN</button>
     </div>
@@ -206,9 +206,9 @@
       <div class="flex flex-wrap gap-1.5 items-center">
         <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">필터</span>
         <button class="chip" data-stock="1" data-active="1">재고있음</button>
-        <button class="chip" data-rtchance="1">🔄 RT 추천</button>
+        <button class="chip" data-rtchance="1"><i data-lucide="repeat" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>RT 추천</button>
         <button id="filterPanelBtn" type="button" class="chip font-black" aria-expanded="false" aria-controls="filterPanel" onclick="window._toggleFilterPanel()">＋ 더보기 <span id="filterPanelCount" class="hidden ml-0.5 rounded-full px-1.5 text-[10px] text-white" style="background:var(--accent)"></span></button>
-        <button id="adminBoardBtn" type="button" class="chip font-black hidden" aria-expanded="false" aria-controls="adminBoard" onclick="window._toggleAdminBoard()">🧰 점검 <span id="adminBoardCount" class="hidden ml-0.5 bg-gray-700 text-white rounded-full px-1.5 text-[10px]"></span></button>
+        <button id="adminBoardBtn" type="button" class="chip font-black hidden" aria-expanded="false" aria-controls="adminBoard" onclick="window._toggleAdminBoard()"><i data-lucide="wrench" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>점검 <span id="adminBoardCount" class="hidden ml-0.5 bg-gray-700 text-white rounded-full px-1.5 text-[10px]"></span></button>
         <div id="activeFilterBar" class="hidden flex flex-wrap gap-1.5 items-center border-l border-[color:var(--line)] pl-2 ml-1"></div>
       </div>
       <div id="fpPromoSlot"></div>
@@ -221,9 +221,9 @@
         <div id="fpSpeedRow" class="flex flex-wrap gap-1.5 items-center">
           <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">판매속도</span>
           <select id="salesSpeedSel" class="ipt py-1 px-2.5 text-xs font-bold" aria-label="판매속도" onchange="window._onSalesSpeedSel(this.value)"><option value="ALL">전체</option><option value="hot">🔥 핫셀러</option><option value="normal">📈 보통</option><option value="slow">📦 저조</option></select>
-          <button class="chip" data-salesspeed="hot">🔥 핫셀러</button>
-          <button class="chip" data-salesspeed="normal">📈 보통</button>
-          <button class="chip" data-salesspeed="slow">📦 저조</button>
+          <button class="chip" data-salesspeed="hot"><i data-lucide="flame" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>핫셀러</button>
+          <button class="chip" data-salesspeed="normal"><i data-lucide="trending-up" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>보통</button>
+          <button class="chip" data-salesspeed="slow"><i data-lucide="package" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>저조</button>
       </div>
         <div id="fpSizeSlot"></div>
         <div id="brandRow" class="flex gap-2 items-center">
@@ -266,8 +266,8 @@
       </div>
         <div class="flex flex-wrap gap-1.5 items-center">
           <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0"></span>
-          <button id="soldDpCleanBtn" type="button" class="chip font-black" onclick="window._openSoldDpCleanup()">🧹 품절DP 정리 <span id="soldDpCleanCount" class="ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]">0</span></button>
-          <button id="dpSkipListBtn" type="button" class="chip font-black" onclick="window._openDpSkipList()">🙈 미DP 제외 목록 <span id="dpSkipCount" class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">0</span></button>
+          <button id="soldDpCleanBtn" type="button" class="chip font-black" onclick="window._openSoldDpCleanup()"><i data-lucide="eraser" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>품절DP 정리 <span id="soldDpCleanCount" class="ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]">0</span></button>
+          <button id="dpSkipListBtn" type="button" class="chip font-black" onclick="window._openDpSkipList()"><i data-lucide="eye-off" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>미DP 제외 목록 <span id="dpSkipCount" class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">0</span></button>
       </div>
       </div>
     </div>
@@ -396,7 +396,7 @@
 <style>
 @keyframes fpv-pulse { 0%,100%{ box-shadow:0 0 0 4px rgba(255,90,31,.35);} 50%{ box-shadow:0 0 0 10px rgba(255,90,31,.12);} }
 </style>
-<script src="./app.js?v=2609292221"></script>
+<script src="./app.js?v=2609292247"></script>
 <script>
   (function(){
     const filterEl    = document.getElementById('filterDetails');
