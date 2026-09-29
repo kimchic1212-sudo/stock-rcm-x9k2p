@@ -1,0 +1,35 @@
+name: AI Sales Guide Batch
+
+# AI 세일즈 가이드 v4 일괄 조사 (guide_batch.js). 무료 한도 안에서 모델을 조금씩 채운다.
+# 파일럿 검토 전이라 수동 실행만 둔다 — 확인되면 schedule을 추가.
+on:
+  workflow_dispatch:
+    inputs:
+      max:
+        description: '이번에 조사할 최대 모델 수 (하루 무료 한도 약 40개)'
+        required: false
+        default: '20'
+
+concurrency:
+  group: guide-batch
+  cancel-in-progress: false
+
+jobs:
+  batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run guide batch
+        env:
+          DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          MAX_MODELS: ${{ github.event.inputs.max || '20' }}
+        run: node guide_batch.js
