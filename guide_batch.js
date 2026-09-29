@@ -173,6 +173,9 @@ async function main() {
     .filter((m) => { const mm = models[m.mk]; return !(mm && mm.v === 4 && (mm.method === 'web' || (mm.method === 'notfound' && daysSince(mm.researchedAt) < RETRY_NOTFOUND_DAYS))); })
     .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), 'ko'));
 
+  // ONLY: 쉼표로 구분한 품명 일부(예: "클라우드붐,클라우드서퍼") — 그 모델만 먼저 조사 (이미 v4인 모델은 queue에서 빠져 있음)
+  const only = String(process.env.ONLY || '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (only.length) queue.splice(0, queue.length, ...queue.filter((m) => only.some((s) => m.mk.includes(s))));
   const hadV3 = queue.filter((m) => m.codes.some((c) => guides[c] && guides[c].method === 'web')).length;
   log(`신발 모델 ${all.length}개 · 조사 대상 ${queue.length}개 (기존 v3 다시 쓰기 ${hadV3}개) · 이번 실행 최대 ${MAX}개 · 새 색상 요약 채움 ${filled}개`);
   if (DRY_RUN) { log('DRY_RUN — 조사·저장 없이 종료'); return; }
