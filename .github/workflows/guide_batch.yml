@@ -3,12 +3,19 @@ name: AI Sales Guide Batch
 # AI 세일즈 가이드 v4 일괄 조사 (guide_batch.js). 무료 한도 안에서 모델을 조금씩 채운다.
 # 파일럿 검토 전이라 수동 실행만 둔다 — 확인되면 schedule을 추가.
 on:
+  schedule:
+    - cron: '10 18 * * *'   # KST 03:10
+    - cron: '10 6 * * *'    # KST 15:10
   workflow_dispatch:
     inputs:
       max:
         description: '이번에 조사할 최대 모델 수 (하루 무료 한도 약 40개)'
         required: false
         default: '20'
+      only:
+        description: '특정 모델만 (품명 일부, 쉼표 구분 — 예: 클라우드붐,클라우드서퍼). 비우면 재고 많은 순'
+        required: false
+        default: ''
 
 concurrency:
   group: guide-batch
@@ -32,4 +39,5 @@ jobs:
           DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           MAX_MODELS: ${{ github.event.inputs.max || '20' }}
+          ONLY: ${{ github.event.inputs.only || '' }}
         run: node guide_batch.js
