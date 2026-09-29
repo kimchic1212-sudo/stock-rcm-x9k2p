@@ -2600,6 +2600,15 @@ function detectGender(code, sex){
   return "U";
 }
 
+// 칩·버튼용 lucide 아이콘을 SVG 문자열로 (DESIGN.md 8: 버튼·칩에는 이모지 대신 아이콘).
+// innerHTML로 숫자 배지를 다시 그려도 그대로 남도록 createIcons() 없이 바로 SVG를 만든다.
+function _ico(name) {
+    const key = String(name).replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+    const node = window.lucide && lucide.icons && lucide.icons[key];
+    if (!node) return '';
+    const attrs = (o) => Object.entries(o).map(([k, v]) => `${k}="${v}"`).join(' ');
+    return `<svg ${attrs(Object.assign({}, node[1], { width: 14, height: 14 }))} class="inline-block align-[-2px] mr-1 shrink-0" aria-hidden="true">${node[2].map(([t, a]) => `<${t} ${attrs(a)}/>`).join('')}</svg>`;
+}
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 function getChosung(str){
@@ -4085,33 +4094,33 @@ function _refreshDpFilterCounts(){
             if(_dpFilterMatch('nodp', p)) cnt.nodp++;
             if(_dpFilterMatch('soldDP', p)) cnt.soldDP++;
         });
-        if(dpBtn) dpBtn.innerHTML = `🏷️ DP 중${cnt.dp > 0 ? ` <span class=\"ml-0.5 bg-violet-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.dp}</span>` : ''}`;
-        if(nodpBtn) nodpBtn.innerHTML = `🔲 미DP${cnt.nodp > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${cnt.nodp}</span>` : ''}`;
-        if(soldDpBtn) soldDpBtn.innerHTML = `⚠️ 품절DP${cnt.soldDP > 0 ? ` <span class=\"ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.soldDP}</span>` : ''}`;
+        if(dpBtn) dpBtn.innerHTML = `${_ico('tag')}DP 중${cnt.dp > 0 ? ` <span class=\"ml-0.5 bg-violet-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.dp}</span>` : ''}`;
+        if(nodpBtn) nodpBtn.innerHTML = `${_ico('square-dashed')}미DP${cnt.nodp > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${cnt.nodp}</span>` : ''}`;
+        if(soldDpBtn) soldDpBtn.innerHTML = `${_ico('triangle-alert')}품절DP${cnt.soldDP > 0 ? ` <span class=\"ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]\">${cnt.soldDP}</span>` : ''}`;
     }
 
     const noImgBtn = $('button.chip[data-noimage]');
     if(noImgBtn){
         const n = PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length;
-        noImgBtn.innerHTML = `📷 이미지없음${n > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+        noImgBtn.innerHTML = `${_ico('camera-off')}이미지없음${n > 0 ? ` <span class=\"ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
     const noBarcodeBtn = $('button.chip[data-nobarcode]');
     if(noBarcodeBtn){
         const n = PRODUCTS.filter(p => p.noBarcodeBusan).length;
-        noBarcodeBtn.innerHTML = `🔖 바코드누락${n > 0 ? ` <span class=\"ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+        noBarcodeBtn.innerHTML = `${_ico('barcode')}바코드누락${n > 0 ? ` <span class=\"ml-0.5 bg-amber-400 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
     const ovBtn = $('button.chip[data-override]');
     if(ovBtn){
         const n = PRODUCTS.filter(p => p._hasOverride).length;
-        ovBtn.innerHTML = `✏️ 재고보정${n > 0 ? ` <span class=\"ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+        ovBtn.innerHTML = `${_ico('pencil')}재고보정${n > 0 ? ` <span class=\"ml-0.5 bg-amber-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
     const noLocBtn = $('button.chip[data-noloc]');
     if(noLocBtn){
         const n = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
-        noLocBtn.innerHTML = `📍 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+        noLocBtn.innerHTML = `${_ico('map-pin-off')}위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
     const _boardCount = $("#adminBoardCount");
@@ -4130,7 +4139,7 @@ function _refreshDpFilterCounts(){
     const hasLocBtn = $('button.chip[data-hasloc]');
     if(hasLocBtn){
         const n = PRODUCTS.filter(p => p.busanTotal > 0 && _hasRealLoc(p.품번)).length;
-        hasLocBtn.innerHTML = `📌 위치있음${n > 0 ? ` <span class=\"ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+        hasLocBtn.innerHTML = `${_ico('map-pin')}위치있음${n > 0 ? ` <span class=\"ml-0.5 bg-emerald-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 }
 
@@ -16884,7 +16893,7 @@ window.addEventListener('DOMContentLoaded', () => {
         todayBtn.className = "chip !bg-orange-50 !text-orange-600 !border-orange-300 font-black";
         todayBtn.dataset.todaysold = "1";
         todayBtn.dataset.active = "0";
-        todayBtn.innerHTML = "🛍️ 오늘 판매";
+        todayBtn.innerHTML = _ico('shopping-bag') + '오늘 판매';
         stockBtn.parentNode.insertBefore(todayBtn, stockBtn.nextSibling);
         todayBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -16902,9 +16911,9 @@ window.addEventListener('DOMContentLoaded', () => {
         dpFilterRow.classList.remove("hidden");
         // 숫자 배지는 칩을 다 만든 뒤 _refreshDpFilterCounts()가 한꺼번에 채운다
         const dpGroup = [
-            { key: 'dp',     label: '🏷️ DP 중', cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
-            { key: 'nodp',   label: '🔲 미DP',    cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
-            { key: 'soldDP', label: '⚠️ 품절DP', cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
+            { key: 'dp',     label: _ico('tag') + 'DP 중', cls: '!bg-violet-50 !text-violet-700 !border-violet-300' },
+            { key: 'nodp',   label: _ico('square-dashed') + '미DP',    cls: '!bg-gray-50 !text-gray-600 !border-gray-300' },
+            { key: 'soldDP', label: _ico('triangle-alert') + '품절DP', cls: '!bg-orange-50 !text-orange-600 !border-orange-300' },
         ];
         dpGroup.forEach(({ key, label, cls }) => {
             const btn = document.createElement("button");
@@ -16936,7 +16945,7 @@ window.addEventListener('DOMContentLoaded', () => {
         noImgBtn.className = "chip !bg-gray-50 !text-gray-500 !border-gray-300 font-black";
         noImgBtn.dataset.noimage = "1";
         noImgBtn.dataset.active = "0";
-        noImgBtn.innerHTML = '📷 이미지없음';
+        noImgBtn.innerHTML = _ico('camera-off') + '이미지없음';
         _checkRow.appendChild(noImgBtn);
         noImgBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -16953,7 +16962,7 @@ window.addEventListener('DOMContentLoaded', () => {
         noBarcodeBtn.className = "chip !bg-amber-50 !text-amber-600 !border-amber-300 font-black";
         noBarcodeBtn.dataset.nobarcode = "1";
         noBarcodeBtn.dataset.active = "0";
-        noBarcodeBtn.innerHTML = '🔖 바코드누락';
+        noBarcodeBtn.innerHTML = _ico('barcode') + '바코드누락';
         _checkRow.appendChild(noBarcodeBtn);
         noBarcodeBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -16969,7 +16978,7 @@ window.addEventListener('DOMContentLoaded', () => {
         ovBtn.className = "chip !bg-amber-50 !text-amber-700 !border-amber-400 font-black";
         ovBtn.dataset.override = "1";
         ovBtn.dataset.active = "0";
-        ovBtn.innerHTML = '✏️ 재고보정';
+        ovBtn.innerHTML = _ico('pencil') + '재고보정';
         _checkRow.appendChild(ovBtn);
         ovBtn.addEventListener("click", () => {
             saveHistoryState();
@@ -16991,7 +17000,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         noLocBtn.dataset.active = "0";
 
-        noLocBtn.innerHTML = '📍 위치없음';
+        noLocBtn.innerHTML = _ico('map-pin-off') + '위치없음';
 
         _checkRow.appendChild(noLocBtn);
 
@@ -17022,7 +17031,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         hasLocBtn.dataset.active = "0";
 
-        hasLocBtn.innerHTML = '📌 위치있음';
+        hasLocBtn.innerHTML = _ico('map-pin') + '위치있음';
 
         _checkRow.appendChild(hasLocBtn);
 
