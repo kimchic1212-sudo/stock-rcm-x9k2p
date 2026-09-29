@@ -177,7 +177,7 @@ async function main() {
   log(`신발 모델 ${all.length}개 · 조사 대상 ${queue.length}개 (기존 v3 다시 쓰기 ${hadV3}개) · 이번 실행 최대 ${MAX}개 · 새 색상 요약 채움 ${filled}개`);
   if (DRY_RUN) { log('DRY_RUN — 조사·저장 없이 종료'); return; }
 
-  const stats = { done: 0, found: 0, notFound: 0, later: 0, errors: 0, tokens: 0 };
+  const stats = { done: 0, found: 0, notFound: 0, later: 0, errors: 0, tokens: 0, reused: 0 };
   const results = [];
   let stopped = '', consecutiveErr = 0, pendingModels = 0;
   const flush = async () => {
@@ -188,10 +188,42 @@ async function main() {
     pendingModels = 0;
   };
 
+  // 같은 신발의 다른 성별(브랜드·품명이 같음)을 이미 v4로 조사했으면 그 결과를 그대로 쓴다 — 리뷰는 한 모델 기준이라 내용이 같다
+  const baseOf = (mk) => mk.split('|').slice(0, 2).join('|');
+  const sibling = (m) => {
+    const b = baseOf(m.mk);
+    for (const src of [modelChanges, models]) {
+      for (const [k, v] of Object.entries(src)) {
+        if (k === m.mk || baseOf(k) !== b || !v || v.v !== 4) continue;
+        if (v.method === 'web' || (v.method === 'notfound' && daysSince(v.researchedAt) < RETRY_NOTFOUND_DAYS)) return v;
+      }
+    }
+    return null;
+  };
+
   const todo = queue.slice(0, MAX);
+  let calledHub = false;
   for (let i = 0; i < todo.length; i++) {
     const m = todo[i];
-    if (i > 0) await sleep(GAP_MS);
+    const sib = sibling(m);
+    if (sib) {
+      const copy = { ...sib, modelKey: m.mk, gender: m.gender, 브랜드: m.rep.브랜드 || '', 품명: m.rep.품명 || '', reusedFrom: sib.modelKey };
+      modelChanges[m.mk] = copy;
+      for (const c of m.codes) {
+        const g = guides[c];
+        if (g && g.method === 'manual') continue;
+        if (copy.method === 'web') guideChanges[c] = skuEntry(c, copy, byCode.get(c));
+        else if (!(g && g.method === 'web')) { const p = byCode.get(c) || {}; guideChanges[c] = { v: 4, method: 'notfound', researchedAt: copy.researchedAt, modelKey: m.mk, 품번: c, 품명: p.품명 || '', 브랜드: p.브랜드 || '', reason: copy.reason || '' }; }
+      }
+      if (copy.method === 'web') stats.found++; else stats.notFound++;
+      stats.done++; stats.reused++; pendingModels++;
+      results.push({ modelKey: m.mk, result: copy.method === 'web' ? 'found' : 'notfound', reusedFrom: sib.modelKey });
+      log(`[${i + 1}/${todo.length}] 다른 성별 결과 재사용 (${copy.method === 'web' ? '확인' : '리뷰 없음'})`);
+      if (pendingModels >= SAVE_EVERY) await flush();
+      continue;
+    }
+    if (calledHub) await sleep(GAP_MS);
+    calledHub = true;
     let res = null, err = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       try { res = await research(m); err = null; } catch (e) { err = e; res = null; if (e.fatal) break; }
@@ -248,7 +280,7 @@ async function main() {
     content: Buffer.from(JSON.stringify(status)).toString('base64'),
     ...(meta.status === 200 ? { sha: meta.json.sha } : {}),
   }));
-  log(`완료 — 확인 ${stats.found} · 리뷰 없음 ${stats.notFound} · 다음에 ${stats.later} · 오류 ${stats.errors} · 남은 모델 ${remaining} · 토큰 ${stats.tokens}${stopped ? ' · ' + stopped : ''}`);
+  log(`완료 — 확인 ${stats.found} · 리뷰 없음 ${stats.notFound} (다른 성별 재사용 ${stats.reused}) · 다음에 ${stats.later} · 오류 ${stats.errors} · 남은 모델 ${remaining} · 토큰 ${stats.tokens}${stopped ? ' · ' + stopped : ''}`);
   if (stopped && !/한도/.test(stopped)) process.exitCode = 1;
 }
 
