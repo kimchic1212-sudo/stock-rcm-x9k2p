@@ -5828,7 +5828,8 @@ async function _saveTransfersToGH() {
             const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
             if(!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
             let serverData = [], sha;
-            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) {} }
+            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) { serverData = null; }
+                if(!Array.isArray(serverData)) throw new Error('기존 이동요청을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지)'); }
             // id union: 서버 레코드 보존 + 로컬 레코드 반영(같은 id면 로컬 우선)
             const byId = new Map();
             for (const s of serverData) byId.set(s.id, s);
@@ -5854,7 +5855,8 @@ async function _removeTransferFromGH(trId) {
             if(!r.ok) throw new Error('fetch ' + r.status);
             const j = await r.json();
             let serverData = [];
-            try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) {}
+            try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) { serverData = null; }
+            if(!Array.isArray(serverData)) throw new Error('기존 이동요청을 읽지 못해 되돌리기를 중단했습니다 (덮어쓰기 방지)');
             const filtered = serverData.filter(t => t.id !== trId);
             const body = { message:"undo transfer", content: utf8ToB64(JSON.stringify(filtered, null, 2)), branch: GH.branch, sha: j.sha };
             const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
@@ -5906,11 +5908,8 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
 
-    // iPad/iOS Safari 대응
-    if(!btn || !btn.tagName) {
-        try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
-        catch(e) { btn = document.createElement('button'); }
-    }
+    // 호출하는 곳은 모두 this(누른 버튼)를 넘긴다 — 혹시 빠져도 멈추지 않게 임시 버튼으로 대신한다
+    if(!btn || !btn.tagName) btn = document.createElement('button');
 
     const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
 
@@ -5953,7 +5952,7 @@ window.quickRT = async (code, size, fromStr, qty, btn) => {
 
     const trId = "tr_" + Date.now();
     const d = new Date();
-    const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const shortDate = `${d.getFullYear().toString().slice(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
     // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
     const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
@@ -5984,11 +5983,8 @@ window.quickRTOut = async (code, size, qty, btn) => {
     const p = PRODUCTS.find(x => x.품번 === code);
     if(!p) return;
 
-    // iPad/iOS Safari 대응
-    if(!btn || !btn.tagName) {
-        try { btn = (window.event && (window.event.currentTarget || window.event.target)) || document.createElement('button'); }
-        catch(e) { btn = document.createElement('button'); }
-    }
+    // 호출하는 곳은 모두 this(누른 버튼)를 넘긴다 — 혹시 빠져도 멈추지 않게 임시 버튼으로 대신한다
+    if(!btn || !btn.tagName) btn = document.createElement('button');
 
     const finalMemo = `[부산점 ➡️ 물류센터] 부진재고 반납요청`;
 
@@ -6031,7 +6027,7 @@ window.quickRTOut = async (code, size, qty, btn) => {
 
     const trId = "tr_" + Date.now();
     const d = new Date();
-    const shortDate = `${d.getFullYear().toString().substr(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    const shortDate = `${d.getFullYear().toString().slice(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
     // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
     const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
