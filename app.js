@@ -6039,105 +6039,159 @@ async function _rtSendCart() {
 }
 window._rtSend = _rtSendCart;
 
-window.exportTransfersToExcel = () => {
-    if(TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return; }
-    if(!window.XLSX || !window.XLSX.writeFile) {
-        alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요.");
-        const s = document.createElement('script'); s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'; document.head.appendChild(s); return;
-    }
-
-    // ── 이동요청리스트 양식에 맞게 출력 ──
-    // 행 구성: A열(빈칸), B~L열 데이터
-    const aoa = [];
-
-    // Row1: 빈 행
-    aoa.push(Array(12).fill(''));
-
-    // Row2: 타이틀 (B2, B2:M2 병합)
-    aoa.push(['', 'RACEMENT 이동요청리스트', '', '', '', '', '', '', '', '', '', '', '']);
-
-    // Row3: 헤더 — 카테고리는 품번 바로 뒤(대분류 위치)에 배치, 중복이던 품명은 하나로 통합
-    aoa.push(['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', '브랜드', '카테고리', '품명', '규격', '요청수량', '물류센터재고', '매장재고', '단위이상']);
-
-    // ── 품번(규격) → 품목내부코드 룩업 테이블 (RAW 데이터 기반, 사이즈 레벨 정확 매칭) ──
-    // 기존에 itemCode가 잘못 저장된 항목도 이 테이블로 재매핑
-    const _itemCodeMap = {};
-    RAW.forEach(r => {
-        const 품번 = String(r["품번"] || "").trim();
-        const 규격 = String(r["규격"] || "").trim();
-        const 코드 = String(r["품목내부코드"] || "").trim();
-        if(품번 && 규격 && 코드) _itemCodeMap[`${품번}(${규격})`] = 코드;
+// ── RT 이동요청 엑셀 (2026-09-30 개편) ──────────────────────────────────
+// 본사 양식의 열 순서(A 빈칸, 2행 제목, 3행 머리글, 4행부터 데이터)는 그대로 두고 품번 옆에 LOT(시즌)만 추가.
+// 방향별로 시트를 나누고(물류→부산·신사→부산·반납), ExcelJS로 보기 좋게 꾸민다. ExcelJS를 못 불러오면 기본 엑셀로 저장.
+const _TR_XL_HEAD = ['', 'ERP이동요청번호', '요청일', '품목내부코드', '품번', 'LOT', '브랜드', '카테고리', '품명', '규격', '요청수량', '물류센터재고', '매장재고', '단위이상'];
+// 엑셀에 쓸 줄 — 카테고리(신발→의류→용품) → 브랜드 → 품번 → 규격 순
+function _trExcelRows(transfers) {
+    const icMap = {}, lotMap = {}, lotByCode = {};
+    (RAW || []).forEach(r => {
+        const c = String(r["품번"] || "").trim(), sz = String(r["규격"] || "").trim();
+        const ic = String(r["품목내부코드"] || "").trim(), lot = String(r["시즌"] || "").trim();
+        if (c && sz) { if (ic) icMap[c + '(' + sz + ')'] = ic; if (lot) lotMap[c + '(' + sz + ')'] = lot; }
+        if (c && lot && !lotByCode[c]) lotByCode[c] = lot;
     });
-    // Row4+: 데이터 — 카테고리(신발→의류→용품) → 브랜드 가나다순 → 품번(같은 품목끼리 묶임) → 규격 오름차순 정렬
-    const _sortedTransfers = TRANSFERS.map(t => ({ t, prod: PRODUCTS.find(p => p.품번 === t.code) })).sort((a, b) => {
-        const ca = CAT_ORDER[a.prod?.카테고리] ?? 9;
-        const cb = CAT_ORDER[b.prod?.카테고리] ?? 9;
+    const num = (v) => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+    return (transfers || []).map(t => {
+        const prod = PRODUCTS.find(p => p.품번 === t.code);
+        const so = prod && prod.sizes ? prod.sizes.find(x => String(x.size).trim() === String(t.size || '').trim()) : undefined;
+        const dir = _trDirOf(t.memo);
+        const from = so === undefined ? '' : (dir === '신사' ? (so.sinsa || 0) : (so.center || 0));
+        const busan = so === undefined ? '' : (so.busan || 0);
+        const key = t.code + '(' + t.size + ')';
+        return {
+            dir, date: t.date ? String(t.date).split(' ')[0] : '',
+            itemCode: icMap[key] || (so && so.itemCode) || t.itemCode || (prod && prod.itemCode) || t.code,
+            code: t.code, lot: lotMap[key] || lotByCode[t.code] || '', brand: (prod && prod.브랜드) || '', cat: (prod && prod.카테고리) || '',
+            product: t.product || (prod && prod.품명) || '', size: t.size, qty: Number(t.qty) || 0,
+            stockFrom: from, stockBusan: busan, diff: (typeof from === 'number' && typeof busan === 'number') ? from - busan : '',
+        };
+    }).sort((a, b) => {
+        const ca = CAT_ORDER[a.cat] ?? 9, cb = CAT_ORDER[b.cat] ?? 9;
         if (ca !== cb) return ca - cb;
-        const brandCmp = String(a.prod?.브랜드 || '').localeCompare(String(b.prod?.브랜드 || ''), 'ko');
-        if (brandCmp !== 0) return brandCmp;
-        const codeCmp = String(a.t.code || '').localeCompare(String(b.t.code || ''), 'ko');
-        if (codeCmp !== 0) return codeCmp;
-        // 같은 품번끼리는 규격(사이즈) 오름차순 — 숫자 사이즈면 숫자로 비교
-        const sa = String(a.t.size || ''), sb = String(b.t.size || '');
-        const na = parseFloat(sa), nb = parseFloat(sb);
-        if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
-        return sa.localeCompare(sb, 'ko');
+        const bc = String(a.brand).localeCompare(String(b.brand), 'ko'); if (bc) return bc;
+        const cc = String(a.code).localeCompare(String(b.code), 'ko'); if (cc) return cc;
+        const na = num(a.size), nb = num(b.size);
+        if (na !== null && nb !== null && na !== nb) return na - nb;
+        return String(a.size).localeCompare(String(b.size), 'ko');
     });
-
-    _sortedTransfers.forEach(({ t, prod }) => {
-        // sizes 배열에서 해당 사이즈의 물류센터 재고 조회 (prod는 위에서 미리 조회)
-        const sizeObj = prod?.sizes?.find(s => String(s.size).trim() === String(t.size || '').trim());
-        const wms   = sizeObj !== undefined ? (sizeObj.center || 0) : '';
-        const store = sizeObj !== undefined ? (sizeObj.busan  || 0) : '';
-        const diff  = (typeof wms === 'number' && typeof store === 'number') ? wms - store : '';
-        // 품목내부코드 우선순위:
-        //   1) RAW 룩업 테이블 [품번(규격)] — 가장 정확 (사이즈 레벨)
-        //   2) sizes[].itemCode — 현재 세션 rebuildIndex 결과
-        //   3) TRANSFERS에 저장된 itemCode — 과거 저장값
-        //   4) 품번 레벨 itemCode
-        //   5) 품번 자체 (최후 fallback)
-        const _lookupKey = `${t.code}(${t.size})`;
-        const itemCode = _itemCodeMap[_lookupKey] || sizeObj?.itemCode || t.itemCode || prod?.itemCode || t.code;
-        aoa.push([
-            '',                                    // A (빈칸)
-            '',                                    // B: ERP이동요청번호 (본사 입력)
-            t.date ? t.date.split(' ')[0] : '',    // C: 요청일 (날짜만, 시간 제거)
-            itemCode,                              // D: 품목내부코드 (ERP 내부코드)
-            t.code,                                // E: 품번
-            prod?.브랜드 || '',                      // F: 브랜드
-            prod?.카테고리 || '',                    // G: 카테고리 (신발/의류/용품 — 대분류)
-            t.product,                             // H: 품명
-            t.size,                                // I: 규격
-            t.qty,                                 // J: 요청수량
-            wms,                                   // K: 물류센터재고
-            store,                                 // L: 매장재고(부산)
-            diff,                                  // M: 단위이상
-        ]);
+}
+let _excelJsLoading = null;
+function _loadExcelJS() {
+    if (window.ExcelJS) return Promise.resolve();
+    if (!_excelJsLoading) _excelJsLoading = new Promise((resolve, reject) => {
+        const sc = document.createElement('script');
+        sc.src = './libs/exceljs.min.js?v=4.4.0';
+        sc.onload = () => window.ExcelJS ? resolve() : reject(new Error('ExcelJS 없음'));
+        sc.onerror = () => { _excelJsLoading = null; reject(new Error('ExcelJS 불러오기 실패')); };
+        document.head.appendChild(sc);
     });
-
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-
-    // B2:M2 병합
-    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 12 } }];
-
-    // 열 너비 — 각 열의 최대 글자 수 기준 자동 계산
-    const colCount = 13;
-    const colWidths = Array(colCount).fill(4);
-    aoa.forEach(row => {
-        row.forEach((cell, ci) => {
-            const len = String(cell ?? '').length;
-            if (len > colWidths[ci]) colWidths[ci] = len;
+    return _excelJsLoading;
+}
+function _trBuildSheet(wb, name, dir, list, today) {
+    const FONT = '맑은 고딕', INK = 'FF0A0A0A', LINE = 'FFE8EAEF', BAND = 'FFF2F3F5', ACCENT_BG = 'FFFFF0E9', ACCENT_TX = 'FFC2410C', ERP_BG = 'FFFFFBEB';
+    const head = _TR_XL_HEAD.slice(); if (dir === '신사') head[11] = '신사재고';
+    const total = list.reduce((a, r) => a + r.qty, 0);
+    const ws = wb.addWorksheet(name, {
+        views: [{ state: 'frozen', ySplit: 3, showGridLines: false }],
+        pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0, printTitlesRow: '3:3', margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 } },
+    });
+    ws.columns = [2, 14, 11, 15, 17, 8, 12, 8, 34, 7, 9, 11, 9, 9].map(width => ({ width }));
+    const thin = { style: 'thin', color: { argb: LINE } };
+    const box = { top: thin, left: thin, bottom: thin, right: thin };
+    // 1행 여백, 2행 제목
+    ws.getRow(1).height = 8;
+    ws.mergeCells('B2:N2');
+    const title = ws.getCell('B2');
+    title.value = 'RACEMENT 이동요청리스트  ·  ' + name + '   (' + today + ' · ' + list.length + '건 · 총 ' + total + '개)';
+    title.font = { name: FONT, size: 15, bold: true, color: { argb: INK } };
+    title.alignment = { vertical: 'middle' };
+    ws.getRow(2).height = 30;
+    // 3행 머리글
+    const hr = ws.getRow(3);
+    head.forEach((h, i) => {
+        if (i === 0) return;
+        const c = hr.getCell(i + 1);
+        c.value = h;
+        c.font = { name: FONT, size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: INK } };
+        c.alignment = { horizontal: 'center', vertical: 'middle' };
+        c.border = box;
+    });
+    hr.height = 22;
+    // 4행부터 데이터 — 같은 품번끼리 옅은 회색 줄무늬로 묶는다
+    let band = false, prevCode = null;
+    list.forEach((r, k) => {
+        if (r.code !== prevCode) { band = !band; prevCode = r.code; }
+        const row = ws.getRow(4 + k);
+        const vals = ['', '', r.date, r.itemCode, r.code, r.lot, r.brand, r.cat, r.product, r.size, r.qty, r.stockFrom, r.stockBusan, r.diff];
+        vals.forEach((v, i) => {
+            if (i === 0) return;
+            const c = row.getCell(i + 1);
+            c.value = v === '' ? null : v;
+            c.font = { name: FONT, size: 10, color: { argb: INK } };
+            c.border = box;
+            c.alignment = { vertical: 'middle', horizontal: [2, 5, 7, 9, 10, 11, 12, 13].includes(i) ? 'center' : 'left' };
+            if (band) c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BAND } };
         });
+        row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ERP_BG } };   // 본사가 채우는 칸
+        const q = row.getCell(11);
+        q.font = { name: FONT, size: 11, bold: true, color: { argb: ACCENT_TX } };
+        q.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ACCENT_BG } };
+        row.getCell(6).font = { name: FONT, size: 10, bold: true, color: { argb: INK } };   // LOT
+        if (typeof r.diff === 'number' && r.diff < 0) row.getCell(14).font = { name: FONT, size: 10, bold: true, color: { argb: 'FFDC2626' } };
+        row.height = 19;
     });
-    colWidths[0] = 2; // A열 고정
-    ws['!cols'] = colWidths.map(w => ({ wch: Math.min(w + 2, 40) }));
-
+    // 합계 행
+    const last = 3 + list.length, tr = ws.getRow(last + 1);
+    tr.getCell(10).value = '합계';
+    tr.getCell(11).value = { formula: 'SUM(K4:K' + last + ')', result: total };
+    [10, 11].forEach(i => {
+        const c = tr.getCell(i);
+        c.font = { name: FONT, size: 11, bold: true, color: { argb: INK } };
+        c.alignment = { horizontal: 'center', vertical: 'middle' };
+        c.border = { top: { style: 'medium', color: { argb: INK } } };
+    });
+    tr.height = 22;
+    ws.autoFilter = { from: 'B3', to: 'N' + last };
+    return ws;
+}
+window.exportTransfersToExcel = async () => {
+    if (TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return false; }
+    try { await _loadExcelJS(); } catch (e) { console.warn('ExcelJS 불러오기 실패 — 기본 엑셀로 저장:', e && e.message); return _exportTransfersPlain(); }
+    const rows = _trExcelRows(TRANSFERS);
+    const d = new Date(), pad = v => String(v).padStart(2, '0');
+    const today = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'RACEMENT 해운대 재고조회';
+    for (const [dir, name] of [['물류', '물류→부산'], ['신사', '신사→부산'], ['반납', '반납(부산→물류)']]) {
+        const list = rows.filter(r => r.dir === dir);
+        if (list.length) _trBuildSheet(wb, name, dir, list, today);
+    }
+    const buf = await wb.xlsx.writeBuffer();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = 'RT이동요청_' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '.xlsx';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    return true;
+};
+// ExcelJS를 못 불러왔을 때의 기본 엑셀(서식 없음, 열·LOT은 같음)
+function _exportTransfersPlain() {
+    if (!window.XLSX || !window.XLSX.writeFile) { alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요."); return false; }
+    const rows = _trExcelRows(TRANSFERS);
+    const aoa = [Array(14).fill(''), ['', 'RACEMENT 이동요청리스트'], _TR_XL_HEAD.slice()];
+    rows.forEach(r => aoa.push(['', '', r.date, r.itemCode, r.code, r.lot, r.brand, r.cat, r.product, r.size, r.qty, r.stockFrom, r.stockBusan, r.diff]));
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!merges'] = [{ s: { r: 1, c: 1 }, e: { r: 1, c: 13 } }];
+    ws['!cols'] = [2, 14, 11, 15, 17, 8, 12, 8, 34, 7, 9, 11, 9, 9].map(w => ({ wch: w }));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "이동요청리스트");
     const d = new Date();
-    XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
+    XLSX.writeFile(wb, 'RT이동요청_' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + '.xlsx');
     return true;
-};
+}
 
 window.exportDashboardImage = async () => {
     const modal = document.querySelector('#analyticsDashboard');
@@ -11443,7 +11497,7 @@ window._trExportAndClear = async () => {
     if (!TRANSFERS.length) { alert('비울 이동 요청이 없습니다.'); return; }
     if (!checkPat()) return;
     const ids = new Set(TRANSFERS.map(t => t.id));
-    if (!window.exportTransfersToExcel()) return;   // 엑셀을 못 만들었으면 비우지 않는다
+    if (!(await window.exportTransfersToExcel())) return;   // 엑셀을 못 만들었으면 비우지 않는다
     if (!confirm('엑셀 파일(' + ids.size + '건)을 받았어요.\n받은 요청을 목록에서 비울까요?\n(그 사이 새로 들어온 요청은 남습니다)')) return;
     try {
         await _trQueue;
