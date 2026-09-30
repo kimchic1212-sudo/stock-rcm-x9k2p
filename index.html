@@ -99,7 +99,16 @@
   /* 기기에서 '동작 줄이기'를 켜면 애니메이션·전환을 거의 없앤다 */
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
 </style>
-<link rel="stylesheet" href="./libs/tailwind.css?v=2609292247">
+<style>
+  /* RT 담기(2026-09-30): 아래 막대와 버튼 모서리 뱃지 */
+  #rtCartBar { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 9990; display: flex; gap: 6px; align-items: center; background: var(--ink); color: #fff; border-radius: 999px; padding: 5px 5px 5px 14px; box-shadow: 0 6px 20px rgba(10,10,10,.25); font-size: 13px; font-weight: 700; white-space: nowrap; }
+  #rtCartBar .rt-open { color: #fff; display: flex; align-items: center; gap: 2px; min-height: 38px; }
+  #rtCartBar .rt-send { background: var(--accent); color: #fff; border-radius: 999px; padding: 0 16px; min-height: 38px; font-weight: 900; }
+  #rtCartBar .rt-send:disabled { opacity: .6; }
+  button[data-cart] { position: relative; }
+  button[data-cart]::after { content: attr(data-cart); position: absolute; top: -7px; right: -7px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 900; line-height: 19px; text-align: center; box-shadow: 0 0 0 2px #fff; pointer-events: none; }
+</style>
+<link rel="stylesheet" href="./libs/tailwind.css?v=2609301432">
 </head>
 <body class="min-h-screen pb-20">
 <script>
@@ -396,6 +405,6 @@
 <style>
 @keyframes fpv-pulse { 0%,100%{ box-shadow:0 0 0 4px rgba(255,90,31,.35);} 50%{ box-shadow:0 0 0 10px rgba(255,90,31,.12);} }
 </style>
-<script src="./app.js?v=2609300932"></script>
+<script src="./app.js?v=2609301432"></script>
 </body>
 </html>
