@@ -19264,6 +19264,7 @@ async function checkPriceSyncStatus() {
         toggleBtn.classList.toggle('hidden', !collapsed && window.scrollY < COLLAPSE_AT);
         label.textContent = collapsed ? '▼ 필터 펼치기' : '▲ 필터 접기';
         _cooldownUntil = Date.now() + 350; // 접기/펼치기로 페이지 높이가 바뀌는 동안 스크롤 이벤트 재평가 잠시 무시
+        setTimeout(_evalFilterCollapse, 400); // 쿨다운 중에 맨 위에 도착해 스크롤이 멈춘 경우도 놓치지 않게 한 번 더 판정
     }
 
     window._toggleFilter = () => {
@@ -19276,8 +19277,11 @@ async function checkPriceSyncStatus() {
     window.addEventListener('scroll', () => {
         if(_ticking) return;
         _ticking = true;
-        requestAnimationFrame(() => {
-            _ticking = false;
+        requestAnimationFrame(() => { _ticking = false; _evalFilterCollapse(); });
+    }, { passive: true });
+
+    function _evalFilterCollapse(){
+        {
             if(Date.now() < _cooldownUntil) return; // 방금 레이아웃이 바뀐 직후의 스크롤 이벤트는 무시(위아래 반복 방지)
 
             // 검색결과가 적어서 접었을 때 페이지가 짧아지면, 브라우저가 스크롤 위치를 강제로 위로 밀어버릴 수 있음.
@@ -19297,8 +19301,8 @@ async function checkPriceSyncStatus() {
                     applyState(true);
                 }
             }
-        });
-    }, { passive: true });
+        }
+    }
 })();
 
 loadGhConfig(); loadData().then(async () => {
