@@ -5863,57 +5863,6 @@ async function loadChartJS() {
     });
 }
 
-// GitHub transfers 저장 (딜레이 후 저장, 연속 클릭 시 debounce)
-async function _saveTransfersToGH() {
-    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
-    // 서버 최신 transfers.json을 읽어 id 기준으로 병합(union) 후 PUT.
-    // 409/422(SHA 충돌) 시 최신 sha로 재병합 후 재시도 — 다른 기기 요청을 덮어쓰지 않음.
-    for (let attempt = 0; attempt < 3; attempt++) {
-        try {
-            const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
-            if(!r.ok && r.status !== 404) throw new Error('fetch ' + r.status);
-            let serverData = [], sha;
-            if(r.ok) { const j = await r.json(); sha = j.sha; try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) { serverData = null; }
-                if(!Array.isArray(serverData)) throw new Error('기존 이동요청을 읽지 못해 저장을 중단했습니다 (덮어쓰기 방지)'); }
-            // id union: 서버 레코드 보존 + 로컬 레코드 반영(같은 id면 로컬 우선)
-            const byId = new Map();
-            for (const s of serverData) byId.set(s.id, s);
-            for (const loc of TRANSFERS) byId.set(loc.id, loc);
-            const merged = Array.from(byId.values());
-            const body = { message:"update transfers", content: utf8ToB64(JSON.stringify(merged, null, 2)), branch: GH.branch, ...(sha && {sha}) };
-            const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-            if(put.status === 409 || put.status === 422) continue;   // 최신 sha로 재시도
-            if(!put.ok) throw new Error('PUT ' + put.status);
-            TRANSFERS = merged;
-            return true;
-        } catch(err) { if(attempt === 2) { console.error('transfers save error:', err); showToast('RT 저장 실패. 다시 시도해주세요.', null, 'error'); return false; } }
-    }
-    showToast('RT 저장 실패. 다시 시도해주세요.', null, 'error'); return false;
-}
-
-async function _removeTransferFromGH(trId) {
-    const apiUrl = `https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${TRANSFERS_PATH}`;
-    // 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존), 409/422 시 재시도
-    for (let attempt = 0; attempt < 3; attempt++) {
-        try {
-            const r = await fetch(apiUrl + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
-            if(!r.ok) throw new Error('fetch ' + r.status);
-            const j = await r.json();
-            let serverData = [];
-            try { serverData = JSON.parse(b64ToUtf8(j.content.replace(/\n/g,''))); } catch(e2) { serverData = null; }
-            if(!Array.isArray(serverData)) throw new Error('기존 이동요청을 읽지 못해 되돌리기를 중단했습니다 (덮어쓰기 방지)');
-            const filtered = serverData.filter(t => t.id !== trId);
-            const body = { message:"undo transfer", content: utf8ToB64(JSON.stringify(filtered, null, 2)), branch: GH.branch, sha: j.sha };
-            const put = await fetch(apiUrl, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
-            if(put.status === 409 || put.status === 422) continue;
-            if(!put.ok) throw new Error('PUT ' + put.status);
-            TRANSFERS = filtered;
-            return true;
-        } catch(err) { if(attempt === 2) { console.error('transfer undo error:', err); return false; } }
-    }
-    return false;
-}
-
 // ── 위치찾기: locations.json 안전 저장 ──────────────────────────────
 // 서버 최신본을 읽어 mutateFn으로 변형한 뒤 저장 (다른 기기의 구역/배정 변경을 보존).
 // 로드 실패 시 저장 중단(빈 데이터로 덮어쓰기 방지), 409/422는 최신본 재조회 후 재시도.
@@ -5948,155 +5897,147 @@ async function saveLocations(mutateFn) {
     return false;
 }
 
-window.quickRT = async (code, size, fromStr, qty, btn) => {
-    if(!checkPat()) return;
-    const p = PRODUCTS.find(x => x.품번 === code);
-    if(!p) return;
-
-    // 호출하는 곳은 모두 this(누른 버튼)를 넘긴다 — 혹시 빠져도 멈추지 않게 임시 버튼으로 대신한다
-    if(!btn || !btn.tagName) btn = document.createElement('button');
-
-    const finalMemo = `[${fromStr} ➡️ 부산점] 스마트보충 RT요청`;
-
-    // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
-    const existing = TRANSFERS.find(t => t.code === code && t.size === size && t.memo === finalMemo);
-    if (existing) {
-        existing.qty += 1;
-        // 버튼: 수량 표시 유지 (계속 클릭 가능)
-        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
-        if(window.lucide) lucide.createIcons();
-        // debounce 저장 (800ms 내 추가 클릭이 없을 때 저장)
-        clearTimeout(window._rtSaveTimer);
-        window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
-        showToast(`📦 ${fromStr} → ${size} | ${existing.qty}개로 업데이트`, async () => {
-            // 실행취소: 방금 올린 1개만 되돌림 (대기 중 저장 취소 후 정리)
-            clearTimeout(window._rtSaveTimer);
-            existing.qty -= 1;
-            if (existing.qty <= 0) {
-                TRANSFERS = TRANSFERS.filter(t => t.id !== existing.id);
-                btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
-                if(window.lucide) lucide.createIcons();
-                await _removeTransferFromGH(existing.id);
-            } else {
-                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
-                if(window.lucide) lucide.createIcons();
-                await _saveTransfersToGH();
-            }
-        });
-        return;
+// ── RT 담기 → 한 번에 보내기 (2026-09-30) ─────────────────────────────────
+// 예전엔 누를 때마다 서버에 저장해서 느렸고, 연타하면 저장이 서로 부딪혀 수량이 빠지기도 했다(첫 저장 실패 시
+// 그동안 올린 수량까지 통째로 취소). 이제 누르면 이 기기에 바로 담고(서버 안 거침), 아래 막대의 '요청 보내기'로
+// 한 번에 저장한다. 담은 목록은 기기에 남아 앱을 닫았다 열어도 유지된다.
+const RT_CART_KEY = 'rcm_rt_cart_v1';
+const _RT_DIRS = {
+    '물류': { memo: '[물류 ➡️ 부산점] 스마트보충 RT요청', label: '물류 → 부산' },
+    '신사': { memo: '[신사 ➡️ 부산점] 스마트보충 RT요청', label: '신사 → 부산' },
+    '반납': { memo: '[부산점 ➡️ 물류센터] 부진재고 반납요청', label: '부산 → 물류 반납' },
+};
+let RT_CART = (() => { try { const v = JSON.parse(localStorage.getItem(RT_CART_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } })();
+function _rtCartSave() { try { localStorage.setItem(RT_CART_KEY, JSON.stringify(RT_CART)); } catch (e) { console.warn('RT 담기 저장 실패(storage 제한):', e && e.message); } }
+function _rtKey(code, size, dir) { return code + '|' + String(size) + '|' + dir; }
+function _rtCartQty(code, size, dir) { const it = RT_CART.find(x => x.key === _rtKey(code, size, dir)); return it ? it.qty : 0; }
+function _rtCartSet(code, size, dir, qty) {
+    size = String(size);
+    qty = Math.max(0, Math.min(999, Math.floor(Number(qty) || 0)));
+    const key = _rtKey(code, size, dir), i = RT_CART.findIndex(x => x.key === key);
+    if (qty === 0) { if (i >= 0) RT_CART.splice(i, 1); }
+    else if (i >= 0) RT_CART[i].qty = qty;
+    else {
+        const p = PRODUCTS.find(x => x.품번 === code) || {};
+        const so = (p.sizes || []).find(x => String(x.size).trim() === size.trim());
+        RT_CART.push({ key, code, size, dir, qty, product: p.품명 || '', shopNo: p.shopNo || '', itemCode: (so && so.itemCode) || p.itemCode || '' });
     }
+    _rtCartSave(); _rtPaint();
+}
+function _rtCartAdd(code, size, dir, n) { const k = Math.floor(Number(n)); _rtCartSet(code, size, dir, _rtCartQty(code, size, dir) + (k > 0 ? k : 1)); }
 
-    // ── 신규 이동요청 추가 ──
-    const origHtml = btn.innerHTML;
-    const origClass = btn.className;
-
-    // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
-    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>1개`;
-    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
-    if(window.lucide) lucide.createIcons();
-
-    const trId = "tr_" + Date.now();
-    const d = new Date();
-    const shortDate = `${d.getFullYear().toString().slice(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-
-    // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
-    const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
-    const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
-    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: _trItemCode, date: shortDate, size, qty: 1, memo: finalMemo });
-
-    // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
-    const _saveOk = await _saveTransfersToGH();
-    if(!_saveOk) {
-        // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
-        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
-        if(window.lucide) lucide.createIcons();
-        return;
-    }
-
-    showToast(`📦 ${fromStr} → ${size} 1개 RT요청 (한 번 더 누르면 +1개)`, async () => {
-        // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
-        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        await _removeTransferFromGH(trId);
-        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
-        if(window.lucide) lucide.createIcons();
+// 버튼 모서리 뱃지(담은 수량)와 아래 막대를 지금 담긴 목록에 맞춘다
+function _rtPaint() {
+    document.querySelectorAll('button[onclick^="quickRT"]').forEach(b => {
+        const m = (b.getAttribute('onclick') || '').match(/^quickRT(Out)?\('([^']*)','([^']*)'(?:,'([^']*)')?/);
+        if (!m) return;
+        const q = _rtCartQty(m[2], m[3], m[1] ? '반납' : m[4]);
+        if (q > 0) { if (b.getAttribute('data-cart') !== String(q)) b.setAttribute('data-cart', q); }
+        else if (b.hasAttribute('data-cart')) b.removeAttribute('data-cart');
     });
+    const n = RT_CART.length, total = RT_CART.reduce((a, x) => a + x.qty, 0);
+    let bar = document.getElementById('rtCartBar');
+    if (!n) { if (bar) bar.remove(); return; }
+    if (!bar) { bar = document.createElement('div'); bar.id = 'rtCartBar'; bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'RT 담은 목록'); document.body.appendChild(bar); }
+    const sig = n + '|' + total + '|' + (window._rtSending ? 1 : 0);
+    if (bar.dataset.sig === sig) return;   // 바뀐 게 없으면 다시 그리지 않는다(화면 변화 감시가 되풀이되지 않게)
+    bar.dataset.sig = sig;
+    bar.innerHTML = '<button type="button" class="rt-open" onclick="window._rtOpenCart()">' + _ico('truck') + 'RT 담음 <b>' + n + '</b>건 · <b>' + total + '</b>개</button>'
+        + '<button type="button" class="rt-send" onclick="window._rtSend()"' + (window._rtSending ? ' disabled' : '') + '>' + (window._rtSending ? '보내는 중…' : '요청 보내기') + '</button>';
+}
+// 상세창·RT 추천 화면이 새로 그려져도 뱃지가 붙도록 화면 변화를 가볍게 따라간다
+(function _rtAutoPaint() {
+    let queued = false;
+    const run = () => { queued = false; _rtPaint(); };
+    new MutationObserver(() => { if (!queued) { queued = true; setTimeout(run, 60); } }).observe(document.body, { childList: true, subtree: true });
+    run();
+})();
+
+window.quickRT = (code, size, fromStr, qty, btn) => {
+    if (!PRODUCTS.find(x => x.품번 === code) || !_RT_DIRS[fromStr]) return;
+    _rtCartAdd(code, size, fromStr, qty);
+};
+window.quickRTOut = (code, size, qty, btn) => {
+    if (!PRODUCTS.find(x => x.품번 === code)) return;
+    _rtCartAdd(code, size, '반납', qty);
 };
 
-window.quickRTOut = async (code, size, qty, btn) => {
-    if(!checkPat()) return;
-    const p = PRODUCTS.find(x => x.품번 === code);
-    if(!p) return;
-
-    // 호출하는 곳은 모두 this(누른 버튼)를 넘긴다 — 혹시 빠져도 멈추지 않게 임시 버튼으로 대신한다
-    if(!btn || !btn.tagName) btn = document.createElement('button');
-
-    const finalMemo = `[부산점 ➡️ 물류센터] 부진재고 반납요청`;
-
-    // ── 이미 같은 품번+사이즈+출처 이동요청이 있으면 수량 증가 ──
-    const existing = TRANSFERS.find(t => t.code === code && t.size === size && t.memo === finalMemo);
-    if (existing) {
-        existing.qty += 1;
-        // 버튼: 수량 표시 유지 (계속 클릭 가능)
-        btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
-        if(window.lucide) lucide.createIcons();
-        // debounce 저장 (800ms 내 추가 클릭이 없을 때 저장)
-        clearTimeout(window._rtSaveTimer);
-        window._rtSaveTimer = setTimeout(_saveTransfersToGH, 800);
-        showToast(`📦 부산 → 물류 ${size} | ${existing.qty}개로 업데이트`, async () => {
-            // 실행취소: 방금 올린 1개만 되돌림 (대기 중 저장 취소 후 정리)
-            clearTimeout(window._rtSaveTimer);
-            existing.qty -= 1;
-            if (existing.qty <= 0) {
-                TRANSFERS = TRANSFERS.filter(t => t.id !== existing.id);
-                btn.innerHTML = `<i data-lucide="arrow-left-right" class="w-4 h-4"></i>`;
-                if(window.lucide) lucide.createIcons();
-                await _removeTransferFromGH(existing.id);
-            } else {
-                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>${existing.qty}개`;
-                if(window.lucide) lucide.createIcons();
-                await _saveTransfersToGH();
-            }
-        });
-        return;
+// 담은 목록 창 — 숫자 직접 입력·−/+·빼기, 여기서도 '요청 보내기'
+window._rtOpenCart = () => {
+    let m = document.getElementById('rtCartModal');
+    if (!m) {
+        m = document.createElement('div'); m.id = 'rtCartModal';
+        m.className = 'modal-backdrop hidden fixed inset-0 flex items-end sm:items-center justify-center z-[100] p-3';
+        m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', 'RT 담은 목록'); m.tabIndex = -1;
+        document.body.appendChild(m);
     }
-
-    // ── 신규 이동요청 추가 ──
-    const origHtml = btn.innerHTML;
-    const origClass = btn.className;
-
-    // 버튼 → 초록 "1개" 표시, 클릭 가능 유지 (추가 클릭으로 수량 증가)
-    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3 shrink-0"></i>1개`;
-    btn.className = origClass.replace(/(bg-\w+-\d+|hover:bg-\w+-\d+)/g, '') + ' bg-green-600 hover:bg-green-700 text-white';
-    if(window.lucide) lucide.createIcons();
-
-    const trId = "tr_" + Date.now();
-    const d = new Date();
-    const shortDate = `${d.getFullYear().toString().slice(2)}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-
-    // 사이즈별 품목내부코드 우선 사용 (sizes[].itemCode), 없으면 품번 레벨 itemCode fallback
-    const _sizeObj = p.sizes?.find(s => String(s.size).trim() === String(size).trim());
-    const _trItemCode = _sizeObj?.itemCode || p.itemCode || "";
-    TRANSFERS.push({ id: trId, code, product: p.품명, shopNo: p.shopNo || "", itemCode: _trItemCode, date: shortDate, size, qty: 1, memo: finalMemo });
-
-    // 서버 최신 transfers.json과 병합 저장 (성공 확인 후에만 성공 토스트)
-    const _saveOk = await _saveTransfersToGH();
-    if(!_saveOk) {
-        // 저장 실패 → 낙관적 UI 롤백 (실패 토스트는 _saveTransfersToGH가 표시)
-        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
-        if(window.lucide) lucide.createIcons();
-        return;
-    }
-
-    showToast(`📦 부산 → 물류 ${size} 1개 반납요청 (한 번 더 누르면 +1개)`, async () => {
-        // 실행취소: 서버 최신을 읽어 해당 id만 제거 후 PUT (다른 기기 요청 보존)
-        TRANSFERS = TRANSFERS.filter(t => t.id !== trId);
-        await _removeTransferFromGH(trId);
-        btn.innerHTML = origHtml; btn.className = origClass; btn.disabled = false;
-        if(window.lucide) lucide.createIcons();
-    });
+    _rtRenderCart();
+    m.classList.remove('hidden'); m.focus({ preventScroll: true });
 };
+function _rtRenderCart() {
+    const m = document.getElementById('rtCartModal');
+    if (!m) return;
+    const n = RT_CART.length, total = RT_CART.reduce((a, x) => a + x.qty, 0);
+    const q = (v) => escapeHtml(v).replace(/'/g, '&#39;');
+    const rows = RT_CART.map(x => {
+        const a = "'" + q(x.code) + "','" + q(x.size) + "','" + q(x.dir) + "'";
+        return '<div class="flex items-center gap-2 py-2 border-b border-gray-100 last:border-0">'
+            + '<div class="min-w-0 flex-1"><div class="text-sm font-black text-gray-900 truncate">' + escapeHtml(x.product || x.code) + '</div>'
+            + '<div class="text-xs font-bold text-gray-500">' + escapeHtml(x.code) + ' · <span class="text-gray-800">' + escapeHtml(x.size) + '</span> · ' + escapeHtml((_RT_DIRS[x.dir] || {}).label || x.dir) + '</div></div>'
+            + '<button type="button" aria-label="한 개 빼기" onclick="_rtCartSet(' + a + ',' + (x.qty - 1) + ');_rtRenderCart()" class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-lg font-black text-gray-700">−</button>'
+            + '<input type="number" inputmode="numeric" min="0" max="999" value="' + x.qty + '" aria-label="' + escapeHtml(x.size) + ' 수량" onchange="_rtCartSet(' + a + ',this.value);_rtRenderCart()" class="w-14 h-8 text-center rounded-lg border border-gray-200 font-black text-sm tabular-nums">'
+            + '<button type="button" aria-label="한 개 더" onclick="_rtCartSet(' + a + ',' + (x.qty + 1) + ');_rtRenderCart()" class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-lg font-black text-gray-700">+</button>'
+            + '</div>';
+    }).join('');
+    m.innerHTML = '<div class="modal-outer absolute inset-0 bg-black/50" onclick="this.closest(\'.modal-backdrop\').classList.add(\'hidden\')"></div>'
+        + '<div class="relative bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col z-10" style="max-height:80vh">'
+        + '<div class="p-4 border-b border-gray-100 flex items-center justify-between"><h2 class="font-black text-base text-gray-900">RT 담은 목록 <span class="text-sm text-gray-500">' + n + '건 · ' + total + '개</span></h2>'
+        + '<button type="button" aria-label="닫기" onclick="document.getElementById(\'rtCartModal\').classList.add(\'hidden\')" class="p-1.5 rounded-full hover:bg-gray-100"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button></div>'
+        + '<div class="px-4 py-1 overflow-y-auto flex-1">' + (rows || '<div class="py-8 text-center text-sm font-bold text-gray-500">담은 요청이 없습니다.</div>') + '</div>'
+        + '<div class="p-3 border-t border-gray-100 flex gap-2">'
+        + '<button type="button" onclick="window._rtClearCart()" class="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600">비우기</button>'
+        + '<button type="button" onclick="window._rtSend()" ' + (n && !window._rtSending ? '' : 'disabled ') + 'class="flex-1 py-2.5 rounded-xl bg-[color:var(--accent)] text-white text-sm font-black disabled:opacity-50">' + (window._rtSending ? '보내는 중…' : '요청 보내기') + '</button>'
+        + '</div></div>';
+    if (window.lucide) lucide.createIcons();
+}
+window._rtClearCart = () => {
+    if (!RT_CART.length || !confirm('담은 RT ' + RT_CART.length + '건을 모두 뺄까요? (보내지 않은 것만 지워집니다)')) return;
+    RT_CART = []; _rtCartSave(); _rtPaint(); _rtRenderCart();
+};
+
+// 담은 것을 한 번에 저장 — 같은 품번·사이즈·방향 요청이 이미 있으면 수량을 더한다
+function _rtMergeCart(list, items, shortDate, stamp) {
+    const out = Array.isArray(list) ? list : [];
+    items.forEach((it, i) => {
+        const memo = _RT_DIRS[it.dir].memo;
+        const ex = out.find(t => t.code === it.code && String(t.size) === String(it.size) && t.memo === memo);
+        if (ex) ex.qty = (Number(ex.qty) || 0) + it.qty;
+        else out.push({ id: 'tr_' + stamp + '_' + i, code: it.code, product: it.product, shopNo: it.shopNo, itemCode: it.itemCode, date: shortDate, size: it.size, qty: it.qty, memo });
+    });
+    return out;
+}
+async function _rtSendCart() {
+    if (!RT_CART.length || window._rtSending) return;
+    if (!checkPat()) return;
+    window._rtSending = true; _rtPaint(); _rtRenderCart();
+    const items = RT_CART.map(x => Object.assign({}, x));
+    const d = new Date(), pad = v => String(v).padStart(2, '0');
+    const shortDate = String(d.getFullYear()).slice(2) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    try {
+        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, cur => _rtMergeCart(cur, items, shortDate, d.getTime()), 'RT 요청 ' + items.length + '건');
+        // 보내는 동안 새로 담은 수량은 남기고, 보낸 만큼만 뺀다
+        RT_CART = RT_CART.filter(x => { const sent = items.find(i => i.key === x.key); if (!sent) return true; x.qty -= sent.qty; return x.qty > 0; });
+        _rtCartSave();
+        const cm = document.getElementById('rtCartModal'); if (cm && !RT_CART.length) cm.classList.add('hidden');
+        if (document.getElementById('transfersModal') && !document.getElementById('transfersModal').classList.contains('hidden')) window.renderTransfersList();
+        showToast('RT ' + items.length + '건 · ' + items.reduce((a, x) => a + x.qty, 0) + '개 요청 완료');
+    } catch (e) {
+        showToast('RT 요청을 보내지 못했습니다. 담은 목록은 그대로 있으니 다시 눌러 주세요. (' + (e && e.message || e) + ')', null, 'error');
+    } finally {
+        window._rtSending = false; _rtPaint(); _rtRenderCart();
+    }
+}
+window._rtSend = _rtSendCart;
 
 window.exportTransfersToExcel = () => {
     if(TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return; }
@@ -6195,6 +6136,7 @@ window.exportTransfersToExcel = () => {
     XLSX.utils.book_append_sheet(wb, ws, "이동요청리스트");
     const d = new Date();
     XLSX.writeFile(wb, `RT이동요청_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.xlsx`);
+    return true;
 };
 
 window.exportDashboardImage = async () => {
@@ -11405,588 +11347,111 @@ function render(){
 $("#moreBtn").onclick = () => { visibleCount+=60; render(); };
 
 
-window.deleteTransfer = async (trId) => {
-    if(!checkPat()) return;
-    if(!confirm("이 이동 요청을 삭제/취소하시겠습니까?")) return;
-    try {
-        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, d => (Array.isArray(d) ? d : []).filter(m => m.id !== trId), "delete transfer");
-        if($("#transfersModal") && !$("#transfersModal").classList.contains("hidden")) window.renderTransfersList();
-        else alert("이동 요청이 삭제되었습니다.");
-    } catch(e) { alert("삭제 실패"); }
-};
-
-window._trFilter = window._trFilter || 'unconfirmed';
-
+// ── RT 이동요청 목록 (2026-09-30 개편) ───────────────────────────────────
+// 방향(물류→부산·신사→부산·반납) → 품번으로 묶어 사이즈별 수량을 한 카드에. 수량은 − [숫자] + 로 바로 고치고(0이면 삭제),
+// 처리가 끝나면 '엑셀 받고 비우기' 한 번. 쓰지 않던 확인/미확인 구분은 없앴다(데이터의 confirmed 값은 그대로 둠).
+const _TR_DIR_STYLE = { '물류': 'bg-teal-50 text-teal-700 border-teal-200', '신사': 'bg-indigo-50 text-indigo-700 border-indigo-200', '반납': 'bg-gray-100 text-gray-700 border-gray-200' };
+function _trDirOf(memo) { const m = String(memo || ''); if (m.includes('반납')) return '반납'; if (m.startsWith('[신사')) return '신사'; if (m.startsWith('[물류')) return '물류'; return '반납'; }
 window.renderTransfers = () => {
-    let listEl = $("#transfersList");
-    if(!listEl) {
-        const modal = document.createElement("div");
-        modal.id = "transfersModal";
-        modal.className = "modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99] p-4";
-        modal.innerHTML = `
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.closest('.modal-backdrop').classList.add('hidden')"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10" style="max-height:90vh">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <h2 class="font-black text-lg text-blue-800">🚚 RT 이동요청 목록</h2>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div class="flex gap-2 items-center">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <button onclick="exportTransfersToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> 엑셀</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <button onclick="deleteAllTransfers()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors flex items-center gap-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 전체삭제</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <button id="closeTransfers" class="p-1.5 hover:bg-gray-100 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div class="px-4 py-2.5 border-b border-gray-100 flex gap-2 bg-white shrink-0" id="trFilterBar">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <button onclick="window._trFilter='unconfirmed';window.renderTransfersList()" id="trFilterUnconfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">미확인목록</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <button onclick="window._trFilter='confirmed';window.renderTransfersList()" id="trFilterConfirmed" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">확인목록</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <button onclick="window._trFilter='all';window.renderTransfersList()" id="trFilterAll" class="px-3 py-1.5 rounded-lg text-xs font-black border transition-colors">전체</button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div id="transfersList" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3"></div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>`;
+    let modal = document.getElementById('transfersModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'transfersModal';
+        modal.className = 'modal-backdrop hidden fixed inset-0 flex items-center justify-center z-[99] p-4';
+        modal.setAttribute('role', 'dialog'); modal.setAttribute('aria-modal', 'true'); modal.setAttribute('aria-label', 'RT 이동요청 목록'); modal.tabIndex = -1;
+        modal.innerHTML = '<div class="modal-outer absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="this.closest(\'.modal-backdrop\').classList.add(\'hidden\')"></div>'
+            + '<div class="modal-content relative bg-white w-full max-w-lg mx-auto my-auto flex flex-col rounded-2xl overflow-hidden shadow-2xl z-10" style="max-height:90vh">'
+            + '<div class="p-4 border-b border-gray-100 bg-white shrink-0">'
+            + '<div class="flex justify-between items-center"><h2 class="font-black text-lg text-gray-900 flex items-center">' + _ico('truck') + 'RT 이동요청 목록</h2>'
+            + '<button id="closeTransfers" type="button" aria-label="닫기" class="p-1.5 hover:bg-gray-100 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button></div>'
+            + '<div class="flex items-center justify-between mt-2 gap-2"><span id="trSummary" class="text-sm font-bold text-gray-600"></span>'
+            + '<div class="flex items-center gap-1.5">'
+            + '<button type="button" onclick="window._trExportAndClear()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-sm transition-colors">엑셀 받고 비우기</button>'
+            + '<button type="button" onclick="exportTransfersToExcel()" class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors">엑셀만</button>'
+            + '</div></div></div>'
+            + '<div id="transfersList" class="p-3 overflow-y-auto flex-1 bg-gray-50 space-y-2.5"></div>'
+            + '<div class="px-4 py-2 border-t border-gray-100 bg-white shrink-0 text-right"><button type="button" onclick="deleteAllTransfers()" class="text-xs font-bold text-red-600 hover:underline">목록 전체 삭제</button></div>'
+            + '</div>';
         document.body.appendChild(modal);
-        $("#closeTransfers").onclick = () => modal.classList.add("hidden");
-        listEl = $("#transfersList");
+        document.getElementById('closeTransfers').onclick = () => modal.classList.add('hidden');
     }
-    $("#transfersModal").classList.remove("hidden");
+    modal.classList.remove('hidden');
     window.renderTransfersList();
+    if (window.lucide) lucide.createIcons();
+    modal.focus({ preventScroll: true });
 };
-
 window.renderTransfersList = () => {
-    const listEl = $("#transfersList");
-    if(!listEl) return;
-    // 필터 버튼 스타일
-    [['trFilterUnconfirmed','unconfirmed'],['trFilterConfirmed','confirmed'],['trFilterAll','all']].forEach(([id, val]) => {
-        const btn = document.getElementById(id);
-        if(!btn) return;
-        btn.className = window._trFilter === val
-            ? "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-blue-700 text-white border-blue-700"
-            : "px-3 py-1.5 rounded-lg text-xs font-black border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50";
-    });
-    let filtered = TRANSFERS.slice().reverse();
-    if(window._trFilter === 'unconfirmed') filtered = filtered.filter(t => !t.confirmed);
-    else if(window._trFilter === 'confirmed') filtered = filtered.filter(t => !!t.confirmed);
-    if(filtered.length === 0) {
-        const msg = window._trFilter === 'unconfirmed' ? '미확인 이동 요청이 없습니다 ✅'
-                  : window._trFilter === 'confirmed' ? '확인된 이동 요청이 없습니다.'
-                  : '이동 요청이 없습니다.';
-        listEl.innerHTML = `<div class='text-center py-10 text-gray-500 font-bold text-sm'>${msg}</div>`;
-        return;
+    const listEl = document.getElementById('transfersList');
+    if (!listEl) return;
+    const total = TRANSFERS.reduce((a, t) => a + (Number(t.qty) || 0), 0);
+    const sum = document.getElementById('trSummary');
+    if (sum) sum.textContent = TRANSFERS.length ? TRANSFERS.length + '건 · 총 ' + total + '개' : '';
+    if (!TRANSFERS.length) { listEl.innerHTML = '<div class="text-center py-10 text-gray-500 font-bold text-sm">이동 요청이 없습니다.</div>'; return; }
+    const groups = new Map();
+    for (const t of TRANSFERS) {
+        const dir = _trDirOf(t.memo), key = dir + '|' + t.code;
+        if (!groups.has(key)) groups.set(key, { dir, code: t.code, product: t.product, items: [] });
+        groups.get(key).items.push(t);
     }
-    let html = "";
-    filtered.forEach(t => {
-        const confirmed = !!t.confirmed;
-        html += `
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <div class="p-4 bg-white rounded-xl border ${confirmed ? 'border-gray-100 opacity-55' : 'border-blue-100'} text-sm shadow-sm relative">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <button onclick="deleteTransfer('${t.id}')" class="absolute top-3 right-3 text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="flex justify-between items-center mb-1.5 pr-8">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <span class="font-black text-blue-700 text-base">${escapeHtml(t.code)}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <span class="text-xs text-gray-500">${escapeHtml(t.date)}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="font-bold text-gray-800 mb-2.5 text-[15px] line-clamp-2">${escapeHtml(t.product)}</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="flex flex-wrap gap-2 text-xs font-bold text-gray-600 mb-2.5">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <span class="bg-gray-100 px-2.5 py-1 rounded-lg">사이즈: ${escapeHtml(t.size)}</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <span class="bg-gray-100 px-2.5 py-1 rounded-lg">수량: <span class="text-blue-600">${t.qty}개</span></span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                ${confirmed ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg font-black">✅ 확인완료</span>' : ''}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="text-blue-900 bg-blue-50 p-2.5 rounded-lg font-medium text-[13px] mb-3">${escapeHtml(t.memo)}</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            ${!confirmed ? `<button onclick="confirmTransfer('${t.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg font-black text-sm transition-colors">✅ 확인</button>` : ''}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        </div>`;
-    });
-    listEl.innerHTML = html;
-    if(window.lucide) lucide.createIcons();
+    const order = { '물류': 0, '신사': 1, '반납': 2 };
+    const sizeCmp = (a, b) => { const na = parseFloat(a.size), nb = parseFloat(b.size); return (!isNaN(na) && !isNaN(nb) && na !== nb) ? na - nb : String(a.size).localeCompare(String(b.size), 'ko'); };
+    const q = (v) => escapeHtml(v).replace(/'/g, '&#39;');
+    listEl.innerHTML = [...groups.values()]
+        .sort((a, b) => (order[a.dir] - order[b.dir]) || String(a.code).localeCompare(String(b.code), 'ko'))
+        .map(g => {
+            const qty = g.items.reduce((a, t) => a + (Number(t.qty) || 0), 0);
+            const rows = g.items.slice().sort(sizeCmp).map(t => {
+                const n = Number(t.qty) || 0, id = "'" + q(t.id) + "'";
+                return '<div class="flex items-center gap-2 py-1">'
+                    + '<span class="w-14 text-sm font-black text-gray-800">' + escapeHtml(t.size) + '</span>'
+                    + '<button type="button" aria-label="' + escapeHtml(t.size) + ' 한 개 빼기" onclick="window._trSetQty(' + id + ',' + (n - 1) + ')" class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-lg font-black text-gray-700 hover:bg-gray-100">−</button>'
+                    + '<input type="number" inputmode="numeric" min="0" max="999" value="' + n + '" aria-label="' + escapeHtml(t.size) + ' 수량" onchange="window._trSetQty(' + id + ',this.value)" class="w-14 h-8 text-center rounded-lg border border-gray-200 font-black text-sm tabular-nums">'
+                    + '<button type="button" aria-label="' + escapeHtml(t.size) + ' 한 개 더" onclick="window._trSetQty(' + id + ',' + (n + 1) + ')" class="w-8 h-8 rounded-lg border border-gray-200 bg-white text-lg font-black text-gray-700 hover:bg-gray-100">+</button>'
+                    + '<span class="text-[11px] text-gray-500 ml-auto">' + escapeHtml(t.date || '') + '</span></div>';
+            }).join('');
+            return '<div class="bg-white rounded-xl border border-gray-200 p-3 shadow-sm">'
+                + '<div class="flex items-start justify-between gap-2 mb-1"><div class="min-w-0"><div class="font-black text-gray-900 text-[15px] truncate">' + escapeHtml(g.product || '') + '</div>'
+                + '<div class="text-xs font-bold text-gray-500">' + escapeHtml(g.code) + '</div></div>'
+                + '<div class="flex flex-col items-end gap-1 shrink-0"><span class="text-[11px] font-black px-2 py-0.5 rounded-full border ' + _TR_DIR_STYLE[g.dir] + '">' + _RT_DIRS[g.dir].label + '</span>'
+                + '<span class="text-xs font-black text-gray-700">' + qty + '개</span></div></div>' + rows + '</div>';
+        }).join('');
 };
-
-window.confirmTransfer = async (trId) => {
-    if(!checkPat()) return;
+// 목록에서 수량 고치기 — 화면은 바로 바꾸고, 저장은 줄을 세워 하나씩(연타해도 저장끼리 부딪히지 않게)
+let _trQueue = Promise.resolve(), _trPending = 0;
+function _trApplyQty(list, id, qty) {
+    const l = Array.isArray(list) ? list : [];
+    if (qty <= 0) return l.filter(x => x.id !== id);
+    const t = l.find(x => x.id === id); if (t) t.qty = qty;
+    return l;
+}
+window._trSetQty = (id, qty) => {
+    if (!checkPat()) return;
+    qty = Math.max(0, Math.min(999, Math.floor(Number(qty) || 0)));
+    const t = TRANSFERS.find(x => x.id === id);
+    if (!t) return;
+    if (qty === 0 && !confirm((t.product || t.code) + ' ' + t.size + ' 요청을 삭제할까요?')) { window.renderTransfersList(); return; }
+    TRANSFERS = _trApplyQty(TRANSFERS, id, qty);
+    window.renderTransfersList();
+    _trPending++;
+    _trQueue = _trQueue
+        .then(() => ghSaveJson(TRANSFERS_PATH, cur => _trApplyQty(cur, id, qty), 'RT 수량 수정'))
+        .then(saved => { if (--_trPending === 0) { TRANSFERS = saved; window.renderTransfersList(); } })
+        .catch(e => { _trPending--; showToast('수량을 저장하지 못했습니다: ' + (e && e.message || e), null, 'error'); });
+};
+// 엑셀로 받은 요청만 비운다 — 그 사이 다른 기기에서 새로 들어온 요청은 남는다
+window._trExportAndClear = async () => {
+    if (!TRANSFERS.length) { alert('비울 이동 요청이 없습니다.'); return; }
+    if (!checkPat()) return;
+    const ids = new Set(TRANSFERS.map(t => t.id));
+    if (!window.exportTransfersToExcel()) return;   // 엑셀을 못 만들었으면 비우지 않는다
+    if (!confirm('엑셀 파일(' + ids.size + '건)을 받았어요.\n받은 요청을 목록에서 비울까요?\n(그 사이 새로 들어온 요청은 남습니다)')) return;
     try {
-        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, d => {
-            const data = Array.isArray(d) ? d : [];
-            const idx = data.findIndex(m => m.id === trId);
-            if(idx >= 0) data[idx].confirmed = true;
-            return data;
-        }, "confirm transfer");
+        await _trQueue;
+        TRANSFERS = await ghSaveJson(TRANSFERS_PATH, cur => (Array.isArray(cur) ? cur : []).filter(t => !ids.has(t.id)), 'RT 엑셀 받고 비우기');
         window.renderTransfersList();
-    } catch(e) { alert("처리 실패: " + e.message); }
+        showToast(ids.size + '건을 비웠어요');
+    } catch (e) { alert('비우기 실패: ' + (e && e.message || e)); }
 };
-
 window.deleteAllTransfers = async () => {
     if(!checkPat()) return;
     const unconfirmedCount = TRANSFERS.filter(t => !t.confirmed).length;
