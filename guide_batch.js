@@ -24,6 +24,8 @@ const HUB = (process.env.HUB_URL || 'https://racement-hub.vercel.app').replace(/
 const MAX = Math.max(1, Math.min(60, Number(process.env.MAX_MODELS) || 20));
 const GAP_MS = Math.max(10, Number(process.env.GAP_SEC) || 55) * 1000;   // Groq 무료 분당 한도(8K 토큰) — 모델당 약 5K
 const DRY_RUN = process.env.DRY_RUN === '1';
+// RETRY_NOTFOUND=1: 30일이 안 된 '리뷰 없음'도 다시 조사 (검색 규칙을 고친 뒤 한 번 돌릴 때)
+const RETRY_NOTFOUND = process.env.RETRY_NOTFOUND === '1';
 const RETRY_NOTFOUND_DAYS = 30;
 const SAVE_EVERY = 5;
 const GUIDES = 'sales_guide_v2.json', MODELS = 'sales_guide_models.json', STATUS = 'guide_batch_status.json';
@@ -182,7 +184,7 @@ async function main() {
 
   const queue = all
     .filter((m) => !m.codes.some((c) => guides[c] && guides[c].method === 'manual'))
-    .filter((m) => { const mm = models[m.mk]; return !(mm && mm.v === 4 && (mm.method === 'web' || (mm.method === 'notfound' && daysSince(mm.researchedAt) < RETRY_NOTFOUND_DAYS))); })
+    .filter((m) => { const mm = models[m.mk]; return !(mm && mm.v === 4 && (mm.method === 'web' || (mm.method === 'notfound' && !RETRY_NOTFOUND && daysSince(mm.researchedAt) < RETRY_NOTFOUND_DAYS))); })
     .sort((a, b) => (b.sold - a.sold) || ((b.stock > 0) - (a.stock > 0)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), 'ko'));
 
   // ONLY: 쉼표로 구분한 품명 일부(예: "클라우드붐,클라우드서퍼") — 그 모델만 먼저 조사 (이미 v4인 모델은 queue에서 빠져 있음)
@@ -210,7 +212,9 @@ async function main() {
     for (const src of [modelChanges, models]) {
       for (const [k, v] of Object.entries(src)) {
         if (k === m.mk || baseOf(k) !== b || !v || v.v !== 4) continue;
-        if (v.method === 'web' || (v.method === 'notfound' && daysSince(v.researchedAt) < RETRY_NOTFOUND_DAYS)) return v;
+        // 다시 조사할 때는 예전 '리뷰 없음'을 재사용하지 않는다(이번 실행 결과만)
+        const freshNotFound = v.method === 'notfound' && (src === modelChanges || (!RETRY_NOTFOUND && daysSince(v.researchedAt) < RETRY_NOTFOUND_DAYS));
+        if (v.method === 'web' || freshNotFound) return v;
       }
     }
     return null;
