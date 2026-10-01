@@ -15422,7 +15422,7 @@ function _bulkRenderPickMap(){
         const hiddenZones = (LOCATIONS.zones || []).filter(z => z.hideFromMap);
         hiddenHost.innerHTML = hiddenZones.map(z => {
             const active = _bulkPickZoneId === z.id;
-            return `<button type="button" class="chip !text-[11px] ${active ? '!bg-orange-500 !text-white !border-orange-500' : '!bg-gray-50 !text-gray-600 !border-gray-300'}" data-hidden-zone="${escapeHtml(z.id)}">🔒 ${escapeHtml(z.label || z.code || z.id)}</button>`;
+            return `<button type="button" class="chip !text-[11px] ${active ? '!bg-orange-500 !text-white !border-orange-500' : '!bg-gray-50 !text-gray-600 !border-gray-300'}" data-hidden-zone="${escapeHtml(z.id)}">${z.floor ? _ico('square-dashed') : '🔒 '}${escapeHtml(z.label || z.code || z.id)}</button>`;
         }).join('');
         hiddenHost.querySelectorAll('[data-hidden-zone]').forEach(btn => {
             btn.onclick = () => {
@@ -15443,14 +15443,16 @@ function _bulkSyncPick(){
         if(rackHost){ rackHost.classList.add('hidden'); rackHost.innerHTML = ''; }
         return;
     }
-    pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
+    pick.textContent = (z.label && z.label !== zoneAddress(z)) ? `${zoneAddress(z)} · ${z.label}` : zoneAddress(z);
     const slots = z.slots || [];
     const layout = WAREHOUSE_LAYOUTS[z.id] || _genericSlotLayout(z);
     if(layout && rackHost){
         slotSel.innerHTML = `<option value="">칸 미지정</option>` + slots.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
         slotSel.classList.add('hidden');
         rackHost.classList.remove('hidden');
-        rackHost.innerHTML = `<div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">칸을 클릭해 선택하세요</span><button type="button" class="text-xs underline" onclick="_bulkClearRackPick()">칸 미지정으로</button></div><div class="shelf-rackmap" style="max-width:340px;">${_renderWarehouseRackMap(z.id, layout, {pickMode:true})}</div>`;
+        rackHost.innerHTML = `<div class="flex items-center justify-between mb-1"><span class="text-xs text-gray-500">칸을 클릭해 선택하세요</span><button type="button" class="text-xs underline" onclick="_bulkClearRackPick()">칸 미지정으로</button></div><div class="shelf-rackmap" style="max-width:340px;">${_renderWarehouseRackMap(z.id, layout, {pickMode:true})}</div>`
+            // 선반이 아니라 창고 바닥에 둔 경우(2026-10-01) — 칸 목록에 '바닥'이 있으면 버튼으로 고른다
+            + (slots.includes('바닥') ? `<button type="button" id="bulkFloorBtn" class="chip w-full justify-center mt-1.5 !text-[12px] !bg-gray-50 !text-gray-700 !border-gray-300" onclick="window._bulkPickRackSlot('${escapeHtml(z.id)}','바닥',this)">${_ico('square-dashed')}창고 바닥</button>` : '');
         _bulkHighlightRackPick(slotSel.value);
     } else {
         slotSel.innerHTML = ''; slotSel.classList.add('hidden');
@@ -15461,6 +15463,8 @@ function _bulkSyncPick(){
 function _bulkHighlightRackPick(slot){
     const rackHost = $("#bulkLocRackMap"); if(!rackHost) return;
     rackHost.querySelectorAll('.shelf-rack').forEach(g => g.classList.remove('shelf-rack-picked'));
+    const _fb = rackHost.querySelector('#bulkFloorBtn');
+    if(_fb){ const on = slot === '바닥'; _fb.classList.toggle('!bg-orange-500', on); _fb.classList.toggle('!text-white', on); _fb.classList.toggle('!border-orange-500', on); _fb.classList.toggle('!bg-gray-50', !on); _fb.classList.toggle('!text-gray-700', !on); _fb.classList.toggle('!border-gray-300', !on); }
     if(!slot) return;
     const g = rackHost.querySelector(`.shelf-rack[data-slot="${CSS.escape(slot)}"]`);
     if(g) g.classList.add('shelf-rack-picked');
@@ -15482,7 +15486,7 @@ window._bulkClearRackPick = () => {
     _bulkHighlightRackPick(null);
     const pick = $("#bulkLocPick");
     const z = (LOCATIONS.zones || []).find(zz => zz.id === _bulkPickZoneId);
-    if(pick && z) pick.textContent = `${zoneAddress(z)} · ${z.label || ''}`;
+    if(pick && z) pick.textContent = (z.label && z.label !== zoneAddress(z)) ? `${zoneAddress(z)} · ${z.label}` : zoneAddress(z);
 };
 
 let _bulkSingleMode = false;
