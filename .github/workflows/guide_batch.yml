@@ -12,6 +12,10 @@ on:
         description: '이번에 조사할 최대 모델 수 (하루 무료 한도 약 40개)'
         required: false
         default: '20'
+      retry_notfound:
+        description: "'리뷰 없음' 모델도 다시 조사 (1 = 예)"
+        required: false
+        default: '0'
       only:
         description: '특정 모델만 (품명 일부, 쉼표 구분 — 예: 클라우드붐,클라우드서퍼). 비우면 재고 많은 순'
         required: false
@@ -40,4 +44,5 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           MAX_MODELS: ${{ github.event.inputs.max || '20' }}
           ONLY: ${{ github.event.inputs.only || '' }}
+          RETRY_NOTFOUND: ${{ github.event.inputs.retry_notfound || '0' }}
         run: node guide_batch.js
