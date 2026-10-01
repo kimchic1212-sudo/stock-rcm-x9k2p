@@ -1,0 +1,19 @@
+name: Post Slack Once
+
+# 1회용: 비공개 데이터 저장소의 _slack_once.json 메시지를 슬랙 봇으로 보낸다 (발송 후 삭제 예정)
+on:
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Post
+        env:
+          DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: node post_slack_once.js
