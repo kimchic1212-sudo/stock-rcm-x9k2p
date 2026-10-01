@@ -159,7 +159,14 @@ async function getDiscountedProducts() {
 
   await browser.close();
   const unique = Object.values(all.reduce((acc, p) => { acc[p.productNo] = p; return acc; }, {}));
-  return unique.filter(p => p.immediateDiscountAmt > 0);
+  const discounted = unique.filter(p => p.immediateDiscountAmt > 0);
+  // 수집이 끝까지 됐는지, 할인 종료일이 이미 지난 상품이 얼마나 되는지 — 할인 상품 수가 급감했을 때
+  // "스크래핑 실패"와 "공홈 세일이 정상 종료"를 구분하는 근거 (2026-10-01)
+  const nowKst = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 19).replace('T', ' ');
+  discounted.scraped = unique.length;
+  discounted.total = first.total;
+  discounted.expired = unique.filter(p => p.immediateDiscountEndYmdt && p.immediateDiscountEndYmdt < nowKst && p.immediateDiscountEndYmdt < '2999').length;
+  return discounted;
 }
 
 // 앱(재고조회) 상단 경고 배너·허브 헬스체크가 읽는 실행 상태 — 마지막 성공 시각을 유지한다
@@ -219,7 +226,15 @@ async function main() {
 
   // ── 안전장치: 스크래핑이 일부만 되거나 실패해서 매칭 개수가 급감하면,
   //    잘 반영되던 할인가들이 전부 정가로 되돌아가는 "역행"을 막기 위해 저장을 건너뜀 ──
-  if (prevCount >= DROP_GUARD_MIN_PREV && matched < prevCount * DROP_GUARD_RATIO) {
+  // 단, 카테고리를 끝까지 읽었고(읽은 수 ≥ 전체의 98%) 읽은 상품 절반 이상의 할인 종료일이 이미 지났다면
+  // 실패가 아니라 공홈 세일이 정상 종료된 것 — 끝난 할인가가 앱에 계속 남지 않도록 그대로 반영한다.
+  const completeScrape = discounted.total >= 100 && discounted.scraped >= discounted.total * 0.98;
+  const saleEnded = completeScrape && discounted.expired >= discounted.scraped * 0.5;
+  if (prevCount >= DROP_GUARD_MIN_PREV && matched < prevCount * DROP_GUARD_RATIO && saleEnded) {
+    log(`[세일 종료] 이전(${prevCount}) → ${matched}개: 전체 ${discounted.scraped}/${discounted.total}개 수집, 할인 종료일 지난 상품 ${discounted.expired}개 — 정상 종료로 보고 반영`);
+    await broadcast(`ℹ️ <b>공홈 할인 종료 반영</b>
+공홈 즉시할인이 끝나 자동 할인가를 ${prevCount}개 → ${matched}개로 정리했습니다. (전체 ${discounted.scraped}개 수집, 할인 종료일 지난 상품 ${discounted.expired}개)`);
+  } else if (prevCount >= DROP_GUARD_MIN_PREV && matched < prevCount * DROP_GUARD_RATIO) {
     const warnMsg = `⚠️ <b>가격 자동동기화 건너뜀</b>\n이전 ${prevCount}개 → 이번 ${matched}개로 급감 (공홈 스크래핑 실패 의심)\n기존 할인가는 그대로 유지했습니다. 확인이 필요합니다.`;
     log(`[SKIP] 이전(${prevCount}) 대비 급감(${matched}) — 저장 건너뜀, 기존 데이터 유지`);
     await broadcast(warnMsg);
