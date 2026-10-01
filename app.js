@@ -2698,6 +2698,7 @@ const _TOGGLE_CHIPS = [
   ["noBarcode","data-nobarcode","ring-amber-400"],
   ["overrideOnly","data-override","ring-amber-400"],
   ["noLocation","data-noloc","ring-sky-400"],
+  ["noLocationDp","data-nolocdp","ring-sky-400"],
   ["hasLocation","data-hasloc","ring-emerald-400"],
 ];
 // 되돌리기용 스냅샷 — 필터가 읽는 모든 조건을 그대로 저장하고, 검색창은 입력한 그대로, 정렬도 함께
@@ -4128,8 +4129,14 @@ function _refreshDpFilterCounts(){
 
     const noLocBtn = $('button.chip[data-noloc]');
     if(noLocBtn){
-        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length;
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p) && getDPSizes(p.품번).length === 0).length;
         noLocBtn.innerHTML = `${_ico('map-pin-off')}위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
+    }
+
+    const noLocDpBtn = $('button.chip[data-nolocdp]');
+    if(noLocDpBtn){
+        const n = PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p) && getDPSizes(p.품번).length > 0).length;
+        noLocDpBtn.innerHTML = `${_ico('map-pin-off')}DP 외 재고 위치없음${n > 0 ? ` <span class=\"ml-0.5 bg-sky-500 text-white rounded-full px-1.5 text-[10px]\">${n}</span>` : ''}`;
     }
 
     const _boardCount = $("#adminBoardCount");
@@ -10135,7 +10142,15 @@ function card(p){
   {
     const _locs = _locArr(p.품번).filter(a => !a.skipDp);
     const _locsDpSt = getDPStatus(p);
-    const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt) && !_needsRealLocation(p)) ? [{ dp: true }] : _locs;
+    // 랙/서랍 위치가 없어도 DP 진열 중이면 그 사실은 보여 준다(다른 사이즈 재고가 있어도) — 예전엔 이 경우 아무 표시가 없어 헷갈렸다
+    const _locsEff = (_locs.length === 0 && ['dp','soldDP'].includes(_locsDpSt)) ? [{ dp: true }] : _locs;
+    // 위치없음 칩을 켰을 때: 보관 위치가 필요한 사이즈(진열 안 한 재고)를 적어 준다
+    let _needPill = '';
+    if (window._locNeedHint && !_hasRealLoc(p.품번) && _needsRealLocation(p)) {
+      const _dpS = getDPSizes(p.품번);
+      const _need = p.sizes.filter(s => s.busan > 0 && !_dpS.includes(String(s.size).trim())).map(s => escapeHtml(String(s.size)) + '×' + s.busan).join(', ');
+      _needPill = `<span class="loc-pill" style="background:#fffbeb;color:#b45309;border-color:#fcd34d;cursor:default;" title="진열하지 않은 재고의 보관 위치가 아직 없어요">위치 필요: <span>${_need}</span></span>`;
+    }
     const _pills = _locsEff.map(_asn => {
       if(_asn.dp) return `<span class="loc-pill" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;cursor:default;" title="랙/서랍 없이 DP 진열중">📺 <span>DP 진열중</span></span>`;
       const _zone = (LOCATIONS.zones || []).find(z => z.id === _asn.zoneId);
@@ -10143,7 +10158,7 @@ function card(p){
       const _locText = (_zone.label || zoneAddress(_zone)) + (_asn.slot ? ` · ${_asn.slot}` : '');
       return `<button type="button" class="loc-pill" title="${escapeHtml(zoneAddress(_zone, _asn.slot))}" onclick="event.stopPropagation(); window.openFloorPlanView('${_zone.id}'${_asn.slot ? `,'${escapeHtml(_asn.slot)}'` : ''})">📍 <span>${escapeHtml(_locText)}</span></button>`;
     }).filter(Boolean).join('');
-    if(_pills) locHtml = `<div class="flex flex-wrap gap-1 mb-1.5">${_pills}</div>`;
+    if(_pills || _needPill) locHtml = `<div class="flex flex-wrap gap-1 mb-1.5">${_pills}${_needPill}</div>`;
   }
 
   el.innerHTML = `
@@ -11142,6 +11157,7 @@ function render(){
   $("#results").classList.remove("hidden");
 
   const f = getFilters();
+  window._locNeedHint = !!(f.noLocation || f.noLocationDp);
   const activeSizeFilter = [f.sizeFw, f.sizeAp, f.sizeGear].find(s => s !== "ALL") || "ALL";
 
   const _todayKey = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
@@ -11197,7 +11213,9 @@ function render(){
     if(f.noImage && (IMAGES[p.shopNo || p.품번])) return false;
     if(f.noBarcode && !p.noBarcodeBusan) return false;
     if(f.overrideOnly && !p._hasOverride) return false;
-    if(f.noLocation && (_hasRealLoc(p.품번) || !_needsRealLocation(p))) return false;
+    // 위치없음 = DP도 위치도 없는 상품 / DP 외 재고 위치없음 = DP 진열 중인데 진열 안 한 사이즈의 보관 위치가 없는 상품 (2026-10-01 나눔)
+    if(f.noLocation && (_hasRealLoc(p.품번) || !_needsRealLocation(p) || getDPSizes(p.품번).length > 0)) return false;
+    if(f.noLocationDp && (_hasRealLoc(p.품번) || !_needsRealLocation(p) || getDPSizes(p.품번).length === 0)) return false;
     if(f.hasLocation && !_hasRealLoc(p.품번)) return false;
 
     // 무게·드롭은 판매 가이드에 있는 값 — 가이드가 없는 상품은 이 필터를 켜면 빠진다
@@ -14677,7 +14695,7 @@ function renderActiveFilterBar() {
     // 접혀 있는 더보기 패널·점검 보드 안에 숨은 조건만 필터 줄 끝에 보여 준다
     const hiddenIn = el => { const box = el && el.closest('#filterPanel, #adminBoard'); return !!box && box.classList.contains('hidden'); };
     const items = []; // {label, onClear}
-    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-sinsaonly], button.chip[data-centeronly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-hasloc]').forEach(btn => {
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-sinsaonly], button.chip[data-centeronly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-nolocdp], button.chip[data-hasloc]').forEach(btn => {
         if (btn.dataset.active === "1" && hiddenIn(btn)) {
             items.push({ label: btn.textContent.trim(), onClear: () => {
                 btn.dataset.active = "0";
@@ -14776,6 +14794,8 @@ $("#resetAll").onclick=()=>{
     const noLocBtn = $('button.chip[data-noloc]');
 
     if(noLocBtn) { noLocBtn.dataset.active = "0"; noLocBtn.classList.remove('ring-2','ring-sky-400'); }
+    const noLocDpBtn = $('button.chip[data-nolocdp]');
+    if(noLocDpBtn) { noLocDpBtn.dataset.active = "0"; noLocDpBtn.classList.remove('ring-2','ring-sky-400'); }
     const hasLocBtn = $('button.chip[data-hasloc]');
 
     if(hasLocBtn) { hasLocBtn.dataset.active = "0"; hasLocBtn.classList.remove('ring-2','ring-emerald-400'); }
@@ -16551,6 +16571,25 @@ window.addEventListener('DOMContentLoaded', () => {
 
         });
 
+    }
+
+    // ── DP 외 재고 위치없음 칩 (DP 진열 중인데, 진열 안 한 사이즈의 보관 위치가 없는 상품) ──
+    if(dpFilterRow && !$('button.chip[data-nolocdp]')) {
+        const noLocDpBtn = document.createElement("button");
+        noLocDpBtn.className = "chip !bg-sky-50 !text-sky-700 !border-sky-400 font-black";
+        noLocDpBtn.dataset.nolocdp = "1";
+        noLocDpBtn.dataset.active = "0";
+        noLocDpBtn.title = "DP로 진열 중이지만, 진열하지 않은 사이즈의 보관 위치가 없는 상품";
+        noLocDpBtn.innerHTML = _ico('map-pin-off') + 'DP 외 재고 위치없음';
+        const _noLocBtnEl = $('button.chip[data-noloc]');
+        if(_noLocBtnEl && _noLocBtnEl.parentNode === _checkRow) _noLocBtnEl.after(noLocDpBtn); else _checkRow.appendChild(noLocDpBtn);
+        noLocDpBtn.addEventListener("click", () => {
+            saveHistoryState();
+            noLocDpBtn.dataset.active = noLocDpBtn.dataset.active === "1" ? "0" : "1";
+            if(noLocDpBtn.dataset.active === "1") noLocDpBtn.classList.add('ring-2','ring-sky-400');
+            else noLocDpBtn.classList.remove('ring-2','ring-sky-400');
+            visibleCount=60; render();
+        });
     }
 
     // ── 위치있음 필터 칩 (창고 위치가 지정된 상품만) ────────────────────────
