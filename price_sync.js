@@ -118,7 +118,7 @@ async function saveJsonFile(path, data, message) {
   throw new Error('저장 실패: 재시도 초과');
 }
 
-// ── racement.co.kr CLEARANCE(SALE) 카테고리 전체 수집 (price_report.js와 동일 방식) ──
+// ── racement.co.kr 전체 상품 수집 후 즉시할인 상품만 추림 (카테고리 제한 없음) ──
 async function getDiscountedProducts() {
   const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
   const all = [];
@@ -128,13 +128,15 @@ async function getDiscountedProducts() {
     let items = [], total = 0;
     await page.route('**/products/search**', async route => {
       let url = route.request().url();
+      // SALE 카테고리로 제한하지 않는다 — 공개 즉시할인 중에는 SALE 카테고리에 안 들어 있는 상품이 있다 (2026-10-01)
+      url = url.replace(/categoryNos=\d+&?/, '').replace(/&$/, '');
       url = url.replace(/pageSize=\d+/, 'pageSize=100').replace(/pageNumber=\d+/, `pageNumber=${pageNum}`);
       if (!url.includes('hasTotalCount')) url += '&hasTotalCount=true';
       await route.continue({ url });
     });
     await new Promise(resolve => {
       page.on('response', async resp => {
-        if (resp.url().includes('products/search') && resp.url().includes('categoryNos=933746')) {
+        if (resp.url().includes('products/search') && !resp.url().includes('categoryNos=') && resp.url().includes(`pageNumber=${pageNum}`)) {
           try {
             const j = await resp.json();
             if (j.items) { items = j.items; total = j.totalCount || 0; resolve(); }
@@ -229,7 +231,8 @@ async function main() {
   // 단, 카테고리를 끝까지 읽었고(읽은 수 ≥ 전체의 98%) 읽은 상품 절반 이상의 할인 종료일이 이미 지났다면
   // 실패가 아니라 공홈 세일이 정상 종료된 것 — 끝난 할인가가 앱에 계속 남지 않도록 그대로 반영한다.
   const completeScrape = discounted.total >= 100 && discounted.scraped >= discounted.total * 0.98;
-  const saleEnded = completeScrape && discounted.expired >= discounted.scraped * 0.5;
+  // 전체 상품을 읽으므로 '종료일 지난 상품 수'는 전체가 아니라 이전 자동 할인 개수와 비교한다
+  const saleEnded = completeScrape && discounted.expired >= prevCount * 0.5;
   if (prevCount >= DROP_GUARD_MIN_PREV && matched < prevCount * DROP_GUARD_RATIO && saleEnded) {
     log(`[세일 종료] 이전(${prevCount}) → ${matched}개: 전체 ${discounted.scraped}/${discounted.total}개 수집, 할인 종료일 지난 상품 ${discounted.expired}개 — 정상 종료로 보고 반영`);
     await broadcast(`ℹ️ <b>공홈 할인 종료 반영</b>
