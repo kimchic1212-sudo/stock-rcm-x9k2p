@@ -2609,6 +2609,15 @@ function _ico(name) {
     const attrs = (o) => Object.entries(o).map(([k, v]) => `${k}="${v}"`).join(' ');
     return `<svg ${attrs(Object.assign({}, node[1], { width: 14, height: 14 }))} class="inline-block align-[-2px] mr-1 shrink-0" aria-hidden="true">${node[2].map(([t, a]) => `<${t} ${attrs(a)}/>`).join('')}</svg>`;
 }
+// 상품 사진: GitHub Pages에 아직 반영 전(업로드 직후 1~2분)이라 못 불러오면 저장소 원본 주소로 한 번 대신 불러온다
+document.addEventListener('error', (e) => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || img.dataset.rawTried) return;
+    const m = (img.getAttribute('src') || '').match(/^https:\/\/kimchic1212-sudo\.github\.io\/stock-rcm-x9k2p\/(product-images\/[^?#]+)(\?[^#]*)?/);
+    if (!m) return;
+    img.dataset.rawTried = '1';
+    img.src = 'https://raw.githubusercontent.com/kimchic1212-sudo/stock-rcm-x9k2p/main/' + m[1] + (m[2] || '');
+}, true);
 function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
 function getChosung(str){
@@ -14476,7 +14485,6 @@ function openDetail(p){
       const msgEl = $("#quickImgMsg");
       const imgKey = p.shopNo || p.품번;
       const safeKey = String(imgKey).replace(/[^a-zA-Z0-9_\-]/g, '_');
-      const pat = getPat();
       const ghBase = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
       const IMG_REPO = 'stock-rcm-x9k2p'; // 상품 사진은 Pages로 공개 서빙해야 하므로 항상 공개 저장소에 저장 (비공개 데이터 저장소로는 Pages 접근 불가)
       const imgGhBase = `https://api.github.com/repos/${GH.owner}/${IMG_REPO}`;
@@ -14487,21 +14495,21 @@ function openDetail(p){
           msgEl.textContent = "GitHub에 업로드 중...";
           const imgPath = `product-images/${safeKey}.${ext}`;
           const imgFileApi = `${imgGhBase}/contents/${imgPath}`;
-          const existRes = await fetch(imgFileApi + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+          const existRes = await fetch(imgFileApi + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
           const existSha = existRes.ok ? (await existRes.json()).sha : undefined;
           const imgPutRes = await fetch(imgFileApi, {
               method:"PUT",
-              headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+              headers:{Authorization:"Bearer "+getPat(), "Content-Type":"application/json"},
               body: JSON.stringify({message:`image: ${imgKey}`, content: imgB64, branch: GH.branch, ...(existSha && {sha:existSha})})
           });
           if(!imgPutRes.ok) throw new Error(`이미지 업로드 실패 (${imgPutRes.status})`);
-          const finalUrl = `${pagesBase}/${safeKey}.${ext}`;
+          const finalUrl = `${pagesBase}/${safeKey}.${ext}?v=${Date.now()}`;
           msgEl.textContent = "images.json 업데이트 중...";
           const apiBase = `${ghBase}/contents/images.json`;
           // 충돌(409/422) 시 최신을 다시 읽어 재병합 후 재시도 — 동시 업로드·SHA 갱신 대응
           let latestImages = null;
           for(let _att=0; _att<4; _att++){
-              const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+              const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
               if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
               const meta = await metaRes.json();
               let parsed = {}, _ok = false;
@@ -14514,7 +14522,7 @@ function openDetail(p){
               parsed[imgKey] = finalUrl;
               const putRes = await fetch(apiBase, {
                   method:"PUT",
-                  headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                  headers:{Authorization:"Bearer "+getPat(), "Content-Type":"application/json"},
                   body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
               });
               if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
@@ -14543,15 +14551,18 @@ function openDetail(p){
       async function handleFile(file) {
           if(!file || !file.type.startsWith('image/')) return;
           if(!checkPat()) return;
-          msgEl.style.color = ""; msgEl.textContent = "파일 읽는 중...";
+          if(window._imgSaving) { msgEl.style.color = ""; msgEl.textContent = "앞 사진을 저장하는 중이에요 — 끝나면 다시 붙여넣어 주세요"; return; }
+          window._imgSaving = true;
+          const _prevImg = IMAGES[imgKey];
+          msgEl.style.color = ""; msgEl.textContent = "사진 받는 중...";
           try {
               const {b64, ext} = await fileToB64(file);
               const tempUrl = URL.createObjectURL(file);
               await uploadAndSave(b64, ext, tempUrl);
           } catch(err) {
-              delete IMAGES[p.shopNo || p.품번];
+              if(_prevImg) IMAGES[imgKey] = _prevImg; else delete IMAGES[imgKey];   // 실패하면 원래 사진 그대로
               msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
-          }
+          } finally { window._imgSaving = false; }
       }
       // URL 저장 버튼
       $("#quickImgSave").onclick = async () => {
@@ -14580,7 +14591,7 @@ function openDetail(p){
                   // 충돌(409/422) 시 최신을 다시 읽어 재병합 후 재시도
                   let latestImages = null;
                   for(let _att=0; _att<4; _att++){
-                      const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+pat}});
+                      const metaRes = await fetch(apiBase + `?t=${Date.now()}`, {headers:{Authorization:"Bearer "+getPat()}});
                       if(!metaRes.ok) throw new Error(`images.json 조회 실패 (${metaRes.status})`);
                       const meta = await metaRes.json();
                       let parsed = {}, _ok = false;
@@ -14591,7 +14602,7 @@ function openDetail(p){
                       parsed[imgKey] = inputUrl;
                       const putRes = await fetch(apiBase, {
                           method:"PUT",
-                          headers:{Authorization:"Bearer "+pat, "Content-Type":"application/json"},
+                          headers:{Authorization:"Bearer "+getPat(), "Content-Type":"application/json"},
                           body: JSON.stringify({message:`image: ${imgKey}`, content: utf8ToB64(JSON.stringify(parsed)), branch: GH.branch, sha: meta.sha})
                       });
                       if(putRes.status === 409 || putRes.status === 422){ await new Promise(r=>setTimeout(r, 400*(_att+1))); continue; }
@@ -14607,7 +14618,6 @@ function openDetail(p){
                   setTimeout(()=>{ openDetail(p); }, 600);
               }
           } catch(err) {
-              delete IMAGES[p.shopNo || p.품번];
               msgEl.style.color = "red"; msgEl.textContent = "❌ 저장 실패: " + err.message;
           }
       };
@@ -14628,19 +14638,23 @@ function openDetail(p){
           };
           dropZone.onclick = () => { if(fileInput) fileInput.click(); };
       }
-      // Ctrl+V 클립보드 붙여넣기 (이미지인 경우)
+      // Ctrl+V 붙여넣기 — 상세창이 열려 있으면 어디서 눌러도 받는다(예전엔 '사진 주소' 입력칸에 커서가 있을 때만 됐다).
+      // 사진이면 바로 저장, 사진 주소(글자)면 입력칸에 채워 둔다. 다른 입력칸에 글자를 붙이는 건 그대로 둔다.
       const urlInput = $("#quickImgUrl");
-      if(urlInput) urlInput.addEventListener('paste', (e) => {
-          const items = e.clipboardData?.items;
-          if(!items) return;
-          for(const item of items) {
-              if(item.type.startsWith('image/')) {
-                  e.preventDefault();
-                  handleFile(item.getAsFile());
-                  return;
-              }
+      window._detailImgPaste = (e) => {
+          const dm = document.getElementById('detailModal');
+          if(!dm || dm.classList.contains('hidden') || !document.getElementById('quickImgUrl')) return;
+          for(const item of (e.clipboardData?.items || [])) {
+              if(item.kind === 'file' && item.type.startsWith('image/')) { e.preventDefault(); handleFile(item.getAsFile()); return; }
           }
-      });
+          const t = (e.clipboardData?.getData('text') || '').trim();
+          const inOtherField = e.target && e.target !== urlInput && e.target.matches && e.target.matches('input, textarea, [contenteditable="true"]');
+          if(urlInput && !inOtherField && e.target !== urlInput && /^https?:\/\/\S+$/i.test(t)) {
+              e.preventDefault(); urlInput.value = t; urlInput.focus();
+              msgEl.style.color = ""; msgEl.textContent = "사진 주소를 넣었어요 — 저장을 누르세요";
+          }
+      };
+      if(!window._detailImgPasteBound) { window._detailImgPasteBound = true; document.addEventListener('paste', (e) => window._detailImgPaste && window._detailImgPaste(e)); }
   }
 
   $("#detailModal").classList.remove("hidden"); document.body.style.overflow="hidden";
