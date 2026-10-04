@@ -15,7 +15,10 @@
  *               v4에서 리뷰를 못 찾은 지 30일이 안 된 모델.
  * 하루 AI 한도(429 daily)에 닿으면 저장하고 멈춘다 — 다음 실행이 이어서 한다.
  *
- * env: DATA_REPO_PAT, CRON_SECRET (필수) / MAX_MODELS(기본 20) / GAP_SEC(기본 55) / DRY_RUN=1(조사 없이 대상만 셈)
+ * 러닝화가 아닌 신발(리커버리 슬리퍼·클로그·하이킹화 등)은 조사하지 않고 'skip'으로 표시한다 — 앱에서 직원이 ✏️ 직접 입력.
+ * 리뷰 사이트에 없는 모델은 실행당 WEB_MAX개까지 허브의 웹 검색(공식·판매 페이지 사양)으로 한 번 더 찾는다(토큰을 많이 씀).
+ *
+ * env: DATA_REPO_PAT, CRON_SECRET (필수) / MAX_MODELS(기본 20) / GAP_SEC(기본 55) / WEB_MAX(기본 4) / DRY_RUN=1(조사 없이 대상만 셈)
  */
 const OWNER = 'kimchic1212-sudo', REPO = 'stock-rcm-data', BRANCH = 'main';
 const PAT = (process.env.DATA_REPO_PAT || '').trim();
@@ -24,9 +27,18 @@ const HUB = (process.env.HUB_URL || 'https://racement-hub.vercel.app').replace(/
 const MAX = Math.max(1, Math.min(60, Number(process.env.MAX_MODELS) || 20));
 const GAP_MS = Math.max(10, Number(process.env.GAP_SEC) || 55) * 1000;   // Groq 무료 분당 한도(8K 토큰) — 모델당 약 5K
 const DRY_RUN = process.env.DRY_RUN === '1';
+const WEB_MAX = Math.max(0, Math.min(20, Number(process.env.WEB_MAX ?? 4) || 0));
+// 러닝화가 아닌 신발 — 리뷰 사이트 대상이 아니라 조사하지 않는다 (2026-10-04: 우포스 리커버리, 온 클라우드소마 모크, 나이키 마인드 001·ACG 제가마 하이크 등)
+const NON_RUNNING_BRANDS = new Set(['우포스']);
+const NON_RUNNING_NAME = /모크|클로그|슬라이드|샌들|슬리퍼|뮬|하이크|마인드s*0|테스트s*품목/;
+function isNonRunning(p) { return NON_RUNNING_BRANDS.has(String(p.브랜드 || '').trim()) || NON_RUNNING_NAME.test(String(p.품명 || '')); }
 // RETRY_NOTFOUND=1: 30일이 안 된 '리뷰 없음'도 다시 조사 (검색 규칙을 고친 뒤 한 번 돌릴 때)
 const RETRY_NOTFOUND = process.env.RETRY_NOTFOUND === '1';
 const RETRY_NOTFOUND_DAYS = 30;
+// 검색 규칙 버전 — 규칙을 고치면 올린다. 이보다 옛 규칙으로 난 '리뷰 없음'은 30일을 기다리지 않고 다시 조사한다.
+// 2 (2026-10-04): 한글 이름 사전·폭 표기 제거·변형 모델은 기본 모델 리뷰·리뷰 사이트 2곳 추가·웹 검색 대체
+const SEARCH_REV = 2;
+const freshNotFound = (v) => v && v.method === 'notfound' && (Number(v.searchRev) || 1) >= SEARCH_REV && !RETRY_NOTFOUND && daysSince(v.researchedAt) < RETRY_NOTFOUND_DAYS;
 const SAVE_EVERY = 5;
 const GUIDES = 'sales_guide_v2.json', MODELS = 'sales_guide_models.json', STATUS = 'guide_batch_status.json';
 
@@ -132,12 +144,12 @@ function skuEntry(code, mm, p) {
   };
 }
 
-async function research(m) {
+async function research(m, allowWeb) {
   const p = m.rep;
   const r = await fetch(`${HUB}/api/ai-guide`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-cron-secret': CRON_SECRET },
-    body: JSON.stringify({ mode: 'research4', product: { brand: p.브랜드 || '', name: p.품명 || '', sku: p.품번 || '', gender: m.gender } }),
+    body: JSON.stringify({ mode: 'research4', allowWeb: !!allowWeb, product: { brand: p.브랜드 || '', name: p.품명 || '', sku: p.품번 || '', gender: m.gender } }),
     signal: AbortSignal.timeout(90_000),
   });
   if (r.status === 401) { const e = new Error('허브 인증 실패 — CRON_SECRET 확인'); e.fatal = true; throw e; }
@@ -182,16 +194,31 @@ async function main() {
     }
   }
 
+  // 러닝화가 아닌 모델은 'skip'으로 한 번만 표시한다(직원 입력·이미 확인된 품번은 그대로)
+  let skipped = 0;
+  for (const m of all) {
+    if (!isNonRunning(m.rep) || (models[m.mk] && models[m.mk].method === 'skip')) continue;
+    modelChanges[m.mk] = { v: 4, method: 'skip', modelKey: m.mk, 브랜드: m.rep.브랜드 || '', 품명: m.rep.품명 || '', gender: m.gender, researchedAt: today, reason: '러닝화 아님 — 직원 직접 입력' };
+    for (const c of m.codes) {
+      const g = guides[c];
+      if (g && (g.method === 'manual' || g.method === 'web')) continue;
+      const p = byCode.get(c) || {};
+      guideChanges[c] = { v: 4, method: 'skip', researchedAt: today, modelKey: m.mk, 품번: c, 품명: p.품명 || '', 브랜드: p.브랜드 || '', reason: '러닝화 아님 — 직원 직접 입력' };
+    }
+    skipped++;
+  }
+
   const queue = all
+    .filter((m) => !isNonRunning(m.rep))
     .filter((m) => !m.codes.some((c) => guides[c] && guides[c].method === 'manual'))
-    .filter((m) => { const mm = models[m.mk]; return !(mm && mm.v === 4 && (mm.method === 'web' || (mm.method === 'notfound' && !RETRY_NOTFOUND && daysSince(mm.researchedAt) < RETRY_NOTFOUND_DAYS))); })
+    .filter((m) => { const mm = models[m.mk]; return !(mm && mm.v === 4 && (mm.method === 'web' || freshNotFound(mm))); })
     .sort((a, b) => (b.sold - a.sold) || ((b.stock > 0) - (a.stock > 0)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), 'ko'));
 
   // ONLY: 쉼표로 구분한 품명 일부(예: "클라우드붐,클라우드서퍼") — 그 모델만 먼저 조사 (이미 v4인 모델은 queue에서 빠져 있음)
   const only = String(process.env.ONLY || '').split(',').map((s) => s.trim()).filter(Boolean);
   if (only.length) queue.splice(0, queue.length, ...queue.filter((m) => only.some((s) => m.mk.includes(s))));
   const hadV3 = queue.filter((m) => m.codes.some((c) => guides[c] && guides[c].method === 'web')).length;
-  log(`신발 모델 ${all.length}개 · 조사 대상 ${queue.length}개 (기존 v3 다시 쓰기 ${hadV3}개) · 이번 실행 최대 ${MAX}개 · 새 색상 요약 채움 ${filled}개`);
+  log(`신발 모델 ${all.length}개 · 조사 대상 ${queue.length}개 (기존 v3 다시 쓰기 ${hadV3}개) · 이번 실행 최대 ${MAX}개 · 새 색상 요약 채움 ${filled}개 · 러닝화 아님 표시 ${skipped}개`);
   if (DRY_RUN) { log('DRY_RUN — 조사·저장 없이 종료'); return; }
 
   const stats = { done: 0, found: 0, notFound: 0, later: 0, errors: 0, tokens: 0, reused: 0 };
@@ -213,15 +240,15 @@ async function main() {
       for (const [k, v] of Object.entries(src)) {
         if (k === m.mk || baseOf(k) !== b || !v || v.v !== 4) continue;
         // 다시 조사할 때는 예전 '리뷰 없음'을 재사용하지 않는다(이번 실행 결과만)
-        const freshNotFound = v.method === 'notfound' && (src === modelChanges || (!RETRY_NOTFOUND && daysSince(v.researchedAt) < RETRY_NOTFOUND_DAYS));
-        if (v.method === 'web' || freshNotFound) return v;
+        const nfOk = v.method === 'notfound' && (src === modelChanges || freshNotFound(v));
+        if (v.method === 'web' || nfOk) return v;
       }
     }
     return null;
   };
 
   const todo = queue.slice(0, MAX);
-  let calledHub = false;
+  let calledHub = false, webUsed = 0;
   for (let i = 0; i < todo.length; i++) {
     const m = todo[i];
     const sib = sibling(m);
@@ -245,7 +272,7 @@ async function main() {
     calledHub = true;
     let res = null, err = null;
     for (let attempt = 0; attempt < 3; attempt++) {
-      try { res = await research(m); err = null; } catch (e) { err = e; res = null; if (e.fatal) break; }
+      try { res = await research(m, webUsed < WEB_MAX); err = null; } catch (e) { err = e; res = null; if (e.fatal) break; }
       if (err) { await sleep(10_000); continue; }
       if (res && !res.found && res.retryLater && !res.daily && attempt < 2) {
         const wait = Math.min(Math.max(Number(res.retryAfter) || 30, 15), 120);
@@ -263,12 +290,13 @@ async function main() {
       continue;
     }
     consecutiveErr = 0;
+    if (res.via === 'websearch' || res.webSearch) webUsed++;
     if (res.found && res.guide) {
       const mm = modelEntry(m, res, today);
       modelChanges[m.mk] = mm;
       for (const c of m.codes) { if (!(guides[c] && guides[c].method === 'manual')) guideChanges[c] = skuEntry(c, mm, byCode.get(c)); }
       stats.found++; stats.done++; stats.tokens += Number(res.tokens) || 0; pendingModels++;
-      results.push({ modelKey: m.mk, result: 'found', query: res.query, matched: mm.matchedProduct, sources: mm.sources.length });
+      results.push({ modelKey: m.mk, result: 'found', query: res.query, matched: mm.matchedProduct, sources: mm.sources.length, ...(mm.editionOf ? { variantOf: mm.editionOf } : {}), ...(mm.basis ? { basis: mm.basis } : {}) });
       log(`[${i + 1}/${todo.length}] 확인 · 출처 ${mm.sources.length}곳 · ${res.tokens || '?'} 토큰`);
     } else if (res.retryLater) {
       stats.later++;
@@ -277,7 +305,7 @@ async function main() {
       log(`[${i + 1}/${todo.length}] 다음에 다시 (${res.reason || ''})`);
     } else {
       // 리뷰 없음: v4 표시만 남기고, 예전 v3 확인 가이드가 있는 품번은 그대로 둔다
-      modelChanges[m.mk] = { v: 4, method: 'notfound', modelKey: m.mk, 브랜드: m.rep.브랜드 || '', 품명: m.rep.품명 || '', gender: m.gender, researchedAt: today, query: String(res.query || ''), reason: String(res.reason || '') };
+      modelChanges[m.mk] = { v: 4, method: 'notfound', modelKey: m.mk, 브랜드: m.rep.브랜드 || '', 품명: m.rep.품명 || '', gender: m.gender, researchedAt: today, searchRev: SEARCH_REV, query: String(res.query || ''), reason: String(res.reason || '') };
       for (const c of m.codes) {
         const g = guides[c];
         if (g && (g.method === 'manual' || g.method === 'web')) continue;
@@ -293,7 +321,7 @@ async function main() {
   await flush();
 
   const remaining = Math.max(0, queue.length - stats.done);
-  const status = { lastRun: new Date().toISOString(), date: today, ...stats, filled, remaining, stopped, results };
+  const status = { lastRun: new Date().toISOString(), date: today, ...stats, filled, skipped, webUsed, remaining, stopped, results };
   await gh('GET', `contents/${STATUS}?ref=${BRANCH}`).then((meta) => gh('PUT', `contents/${STATUS}`, {
     message: `guide batch status ${today}`, branch: BRANCH,
     content: Buffer.from(JSON.stringify(status)).toString('base64'),
