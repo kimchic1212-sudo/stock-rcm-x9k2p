@@ -9736,11 +9736,12 @@ function _salesGuideHtml(code, loading) {
 
     // ── Quick Spec
     let weight = "", weightSub = "";
-    if (num(g.weightMenG) && num(g.weightWomenG)) { weight = `남 ${g.weightMenG}g · 여 ${g.weightWomenG}g`; weightSub = "한 짝 기준"; }
+    if (num(g.weightMenG) && num(g.weightWomenG)) { weight = (p && _guideGender(p) === "여성") ? `여 ${g.weightWomenG}g · 남 ${g.weightMenG}g` : `남 ${g.weightMenG}g · 여 ${g.weightWomenG}g`; weightSub = "한 짝 기준"; }
     else if (num(g.weightG)) { weight = `${g.weightG}g`; weightSub = ["한 짝", g.weightBasis].filter(has).map(e).join(" · "); }
     const stack = [num(g.heelStackMm) ? `힐 ${g.heelStackMm}mm` : "", num(g.foreStackMm) ? `포어풋 ${g.foreStackMm}mm` : ""].filter(Boolean).join(" · ");
     const foamPlate = [has(g.foam) ? e(g.foam) : "", has(g.plate) ? `플레이트: ${e(g.plate)}` : ""].filter(Boolean).join("<br>");
     const L = (v4 && g.lab && typeof g.lab === "object") ? g.lab : {};
+    const _wideLab = !!(p && /와이드|wide|(?:^|[^0-9A-Za-z])[24]E(?![0-9A-Za-z])/i.test(String(p.품명 || "")));
     const labRows = [
         num(L.toeboxMm) ? row("토박스 폭", `${L.toeboxMm}mm` + _sg4Cmp(L.toeboxMm, L.toeboxAvgMm, 2, "넓은 편", "좁은 편")) : "",
         num(L.widthMm) ? row("발볼(중족부) 폭", `${L.widthMm}mm` + _sg4Cmp(L.widthMm, L.widthAvgMm, 2, "넓은 편", "좁은 편")) : "",
@@ -9761,7 +9762,7 @@ function _salesGuideHtml(code, loading) {
         <section class="sg4-card">
             <div class="sg4-h">📐 QUICK SPEC</div>
             ${specRows ? `<table class="sg4-tbl">${specRows}</table>` : ""}
-            ${labRows ? `<div class="sg4-lab"><div class="sg4-lab-h">RunRepeat 실측 <span class="sg4-note">(평균 = 측정한 러닝화 전체 평균)</span></div><table class="sg4-tbl">${labRows}</table></div>` : ""}
+            ${labRows ? `<div class="sg4-lab"><div class="sg4-lab-h">RunRepeat 실측 <span class="sg4-note">(평균 = 측정한 러닝화 전체 평균${_wideLab ? " · 일반 폭 기준" : ""})</span></div><table class="sg4-tbl">${labRows}</table></div>` : ""}
         </section>` : "";
 
     // ── 현장 피팅 팁
@@ -9770,9 +9771,13 @@ function _salesGuideHtml(code, loading) {
         : row("사이즈 · 발볼", has(g.fitNotes) ? e(g.fitNotes) : "");
     const pros = v4 && has(g.pros) ? `<div><div class="sg4-pc-h" style="color:#15803d">장점</div><ul class="sg4-list pro">${g.pros.map(x => `<li>${e(x)}</li>`).join("")}</ul></div>` : "";
     const cons = v4 && has(g.cons) ? `<div><div class="sg4-pc-h" style="color:#b91c1c">아쉬운 점</div><ul class="sg4-list con">${g.cons.map(x => `<li>${e(x)}</li>`).join("")}</ul></div>` : "";
-    const fitHtml = (fitRows || pros || cons) ? `
+    // 와이드(2E·4E) 제품: 리뷰·실측은 일반 폭 기준이라 그대로 말하면 안 된다 (2026-10-04)
+    const _wide = !!(p && /와이드|wide|(?:^|[^0-9A-Za-z])[24]E(?![0-9A-Za-z])/i.test(String(p.품명 || "")));
+    const wideNote = _wide ? `<p class="sg4-note" style="color:#b45309;margin:0 0 6px">↔️ 이 제품은 와이드(발볼 넓은 버전)예요. 아래 발볼·토박스 리뷰와 실측은 일반 폭 기준이라, 실제로는 그보다 넉넉해요.</p>` : "";
+    const fitHtml = (fitRows || pros || cons || _wide) ? `
         <section class="sg4-card">
             <div class="sg4-h">👟 현장 피팅 팁</div>
+            ${wideNote}
             ${fitRows ? `<table class="sg4-tbl">${fitRows}</table>` : ""}
             ${(pros || cons) ? `<div class="sg4-pc">${pros}${cons}</div>` : ""}
         </section>` : "";
@@ -9953,7 +9958,7 @@ function card(p){
       const _warn = "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-500 hover:text-white transition-colors";
       const _trail = "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors";
       const _chips = [];
-      if (guide.weightG != null) _chips.push(_chip(guide.weightG + "g", _spec));
+      if (guide.weightG != null) _chips.push(_chip(guide.weightG + "g" + (_guideGender(p) === "여성" && /남성/.test(String(guide.weightBasis || "")) ? "(남)" : _guideGender(p) === "남성" && /여성/.test(String(guide.weightBasis || "")) ? "(여)" : ""), _spec));
       if (guide.dropMm != null)  _chips.push(_chip("드롭 " + guide.dropMm + "mm", _spec));
       if (guide.type)            _chips.push(_chip(guide.type, guide.type === "트레일" ? _trail : _spec));
       if (_sizeTip)              _chips.push(_chip("⚠️ 사이즈", _warn));
