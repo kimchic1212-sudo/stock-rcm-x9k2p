@@ -120,6 +120,14 @@ function buildModels(rows) {
   return [...models.values()];
 }
 
+// 카드에 보이는 무게(weightG)는 그 모델 성별 기준 — 리뷰에 남녀 무게가 둘 다 있으면 성별에 맞는 쪽을 쓴다.
+// (다른 성별 결과를 재사용하면서 여성 보메로 18에 남성 무게 325g이 들어간 사례, 2026-10-04)
+function genderWeight(mm, gender) {
+  const w = gender === '여성' ? mm.weightWomenG : gender === '남성' ? mm.weightMenG : null;
+  if (typeof w !== 'number' || !isFinite(w)) return {};
+  return { weightG: w, weightBasis: `${gender} (브랜드 표기)` };
+}
+
 // ── 저장 항목 ──
 function modelEntry(m, res, today) {
   const g = res.guide || {};
@@ -254,6 +262,7 @@ async function main() {
     const sib = sibling(m);
     if (sib) {
       const copy = { ...sib, modelKey: m.mk, gender: m.gender, 브랜드: m.rep.브랜드 || '', 품명: m.rep.품명 || '', reusedFrom: sib.modelKey };
+      if (copy.method === 'web') Object.assign(copy, genderWeight(copy, m.gender));
       modelChanges[m.mk] = copy;
       for (const c of m.codes) {
         const g = guides[c];
