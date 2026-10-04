@@ -4469,13 +4469,13 @@ function _todayYmd() {
 const _FIT_SIZE_RE = /반\s*(사이즈|치수)|반\s*업|업\s*사이즈|사이즈\s*업|한\s*(사이즈|치수)|(작게|크게)\s*나|(작은|큰)\s*편|half\s*size|size\s*up|runs?\s*(small|large|big|short|long)/i;
 
 // 허브에 v4 조사 요청 — { found, guide, sources, query } 또는 { found:false, reason, retryLater?, daily?, retryAfter? }
-async function researchGuide(p) {
+async function researchGuide(p, opts = {}) {
     const _pass = (() => { try { return localStorage.getItem(INV_PASS_KEY); } catch(e) { return null; } })();
     if (!_pass) throw new Error("공용 비밀번호 로그인이 필요합니다.");
     const r = await fetch(HUB_AI_API, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: "Bearer " + _pass },
-        body: JSON.stringify({ mode: "research4", product: { brand: p.브랜드 || "", name: p.품명 || "", sku: p.품번 || "", gender: _guideGender(p) } }),
+        body: JSON.stringify({ mode: "research4", allowWeb: !!opts.allowWeb, product: { brand: p.브랜드 || "", name: p.품명 || "", sku: p.품번 || "", gender: _guideGender(p) } }),
     }).catch(e => ({ ok: false, status: 0, _netErr: e.message }));
     if (r.ok) return r.json();
     const j = r.json ? await r.json().catch(() => ({})) : {};
@@ -4521,8 +4521,8 @@ function _guideSkuSummary(code, mm, p) {
 
 // 모델 하나를 조사해 { entries: 품번별 요약, models: 모델 본문, found } 를 만든다.
 // 리뷰가 없으면 '리뷰 없음' 표시만 남기고(예전 확인 가이드는 그대로 둠), 한도·일시 오류는 저장하지 않고 던진다.
-async function _researchModelEntries(m) {
-    const res = await researchGuide(m.rep);
+async function _researchModelEntries(m, opts) {
+    const res = await researchGuide(m.rep, opts);
     if (res && res.retryLater) {
         const e = new Error(res.reason || "지금은 조사할 수 없습니다. 잠시 뒤 다시 시도하세요.");
         if (res.daily || res.retryAfter != null || /한도/.test(String(res.reason || ""))) {
@@ -9716,7 +9716,9 @@ function _salesGuideHtml(code, loading) {
             <div style="min-width:0;flex:1">
                 <div class="sg4-eyebrow"><span class="sg4-tag">SALES GUIDE</span>${eyebrow}${has(catTag) ? `<span class="sg4-tag">${e(catTag)}</span>` : ""}</div>
                 <h2 class="sg4-title" id="sg4Title">${e(title)}</h2>
-                ${has(g.matchedProduct) ? `<div class="sg4-match">리뷰 기준 모델: ${e(g.matchedProduct)}</div>` : ""}
+                ${has(g.matchedProduct) ? `<div class="sg4-match">${g.basis === "websearch" ? "확인한 제품" : "리뷰 기준 모델"}: ${e(g.matchedProduct)}</div>` : ""}
+                ${v4 && has(g.editionOf) ? `<div class="sg4-match" style="color:#b45309">⚠️ ${has(g.variantTag) ? e(g.variantTag) + " 버전 — " : ""}기본 모델(${e(g.editionOf)}) 리뷰 기준이에요. 방수·소재·무게 등은 다를 수 있어요.</div>` : ""}
+                ${v4 && g.basis === "websearch" ? `<div class="sg4-match" style="color:#b45309">🔎 리뷰 사이트에 없어 웹 검색(공식·판매 페이지) 사양으로 만든 카드예요. 착화감·비교 내용은 없어요.</div>` : ""}
                 ${chips ? `<div class="sg4-chips">${chips}</div>` : ""}
             </div>
             <button type="button" class="sg4-x" data-close="1" aria-label="닫기">×</button>
@@ -18526,13 +18528,13 @@ window.addEventListener('DOMContentLoaded', () => {
             return [...groups.values()]
                 .filter(m => !m.codes.some(c => _verifiedGuide(c)))
                 // 'v4 리뷰 없음'(30일 안)만 뒤로 — 예전 v3 '못 찾음'은 대부분 AI 한도로 건너뛴 것이라 다시 조사 대상
-                .map(m => { const nf = m.codes.map(c => SALES_GUIDES[c]).find(g => g && g.method === "notfound"); m.notFound = nf ? (nf.researchedAt || "?") : ""; m.v4NotFound = !!(nf && nf.v === 4 && (Date.now() - Date.parse(nf.researchedAt || "")) / 86400e3 < 30); return m; })
-                .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || ((!!a.v4NotFound) - (!!b.v4NotFound)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), "ko"));
+                .map(m => { m.skip = m.codes.some(c => SALES_GUIDES[c] && SALES_GUIDES[c].method === "skip"); const nf = m.codes.map(c => SALES_GUIDES[c]).find(g => g && g.method === "notfound"); m.notFound = nf ? (nf.researchedAt || "?") : ""; m.v4NotFound = !!(nf && nf.v === 4 && (Date.now() - Date.parse(nf.researchedAt || "")) / 86400e3 < 30); return m; })
+                .sort((a, b) => ((b.stock > 0) - (a.stock > 0)) || ((!!a.skip) - (!!b.skip)) || ((!!a.v4NotFound) - (!!b.v4NotFound)) || (b.stock - a.stock) || String(a.rep.품명).localeCompare(String(b.rep.품명), "ko"));
         }
 
         let _missCache = [];
         function _researchSummaryHtml(g) {
-            if (!g || g.method !== "web") return `<span class="text-gray-500">❔ RunRepeat·Doctors of Running에 같은 모델 리뷰가 없어 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
+            if (!g || g.method !== "web") return `<span class="text-gray-500">❔ 리뷰 사이트와 웹 검색에서 같은 모델을 못 찾아 비워 뒀습니다${g && g.reason ? " (" + escapeHtml(g.reason) + ")" : ""}</span>`;
             const bits = [g.matchedProduct, g.type,
                 g.weightG != null ? `${g.weightG}g${g.weightBasis ? "(" + g.weightBasis + ")" : ""}` : "",
                 g.dropMm != null ? `드롭 ${g.dropMm}mm` : ""].filter(Boolean).map(escapeHtml);
@@ -18561,7 +18563,7 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <span class="text-[10px] font-bold text-gray-500 shrink-0">품번 ${m.codes.length}개 · 재고 ${m.stock}</span>
                             </label>
                             <div class="flex items-center gap-1 shrink-0">
-                                ${m.v4NotFound ? `<span class="text-[10px] font-bold text-gray-500" title="RunRepeat·Doctors of Running에 같은 모델 리뷰가 없음">리뷰 없음 ${escapeHtml(m.notFound)}</span>` : m.notFound ? `<span class="text-[10px] font-bold" style="color:#d97706" title="예전 조사 때 AI 한도로 건너뜀 — 자동 조사가 다시 합니다">조사 대기</span>` : ""}
+                                ${m.skip ? `<span class="text-[10px] font-bold text-gray-500" title="리커버리 슬리퍼·하이킹화 등은 리뷰 조사 대상이 아니에요 — ✏️ 직접 버튼으로 짧게 적어 주세요">러닝화 아님 · 직접 입력</span>` : m.v4NotFound ? `<span class="text-[10px] font-bold text-gray-500" title="리뷰 사이트 4곳(RunRepeat·Doctors of Running·Running Shoes Guru·iRunFar)과 웹 검색에서 같은 모델을 못 찾음">리뷰 없음 ${escapeHtml(m.notFound)}</span>` : m.notFound ? `<span class="text-[10px] font-bold" style="color:#d97706" title="예전 조사 때 AI 한도로 건너뜀 — 자동 조사가 다시 합니다">조사 대기</span>` : ""}
                                 <button class="miss-research px-2 py-1 rounded-lg bg-gray-50 text-gray-700 text-[10px] font-black border border-gray-200 hover:bg-gray-100 transition-colors" data-i="${i}">🔎 웹 조사</button>
                                 <button class="miss-manual px-2 py-1 rounded-lg bg-white text-gray-600 text-[10px] font-black border border-gray-200 hover:bg-gray-100 transition-colors" data-i="${i}">✏️ 직접</button>
                             </div>
@@ -18597,7 +18599,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     btn.disabled = true; btn.textContent = "⏳ 조사 중...";
                     const resEl = listEl.querySelector(`.miss-result[data-i="${i}"]`);
                     try {
-                        const out = await _researchModelEntries(m);
+                        const out = await _researchModelEntries(m, { allowWeb: true });   // 직원이 한 모델만 누른 경우라 웹 검색 대체까지
                         await _saveGuideEntries(out.entries, out.models);
                         if (resEl) { resEl.innerHTML = _researchSummaryHtml(out.models[m.mk]); resEl.classList.remove("hidden"); }
                         btn.textContent = out.found ? "✅ 저장됨" : "❔ 리뷰 없음";
@@ -18619,7 +18621,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 const _hasPass = (() => { try { return !!localStorage.getItem(INV_PASS_KEY); } catch(e) { return false; } })();
                 if(!_hasPass) { alert("⚠️ 공용 비밀번호 로그인이 필요합니다."); return; }
                 if(!checkPat()) return;
-                const todo = _missModels().filter(m => !m.v4NotFound);
+                const todo = _missModels().filter(m => !m.v4NotFound && !m.skip);
                 if(!todo.length) { alert("웹 조사할 모델이 없습니다. ('리뷰 없음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
                 if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 조사합니다.\n\n· RunRepeat·Doctors of Running 리뷰에 적힌 내용만 무료 AI로 한국어 정리해 저장하고, 같은 모델 리뷰가 없으면 비워 둡니다.\n· 모델 하나에 약 30초~1분, 하루 무료 한도는 약 40개 모델입니다. 한도가 차면 멈추고, 매일 자동 조사가 이어서 합니다.\n\n진행할까요?`)) return;
 
