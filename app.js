@@ -5460,6 +5460,7 @@ function setupSearchAutocomplete() {
     }
 
     const suggBox = document.getElementById("searchSuggestions");
+    if(!suggBox) return;   // 상자가 없으면(감싸는 칸에 이미 relative) 입력마다 null 오류가 나던 것 방지
 
     const showRecent = () => {
         if(RECENT_SEARCHES.length === 0) { suggBox.classList.add("hidden"); return; }
@@ -5838,7 +5839,7 @@ window.applySearch = (term) => {
     saveHistoryState();
     const qEl = document.getElementById("q");
     qEl.value = term;
-    document.getElementById("searchSuggestions").classList.add("hidden");
+    document.getElementById("searchSuggestions")?.classList.add("hidden");
     saveRecentSearch(term);
     visibleCount=60; render();
 };
@@ -11319,7 +11320,13 @@ function render(){
   grid.innerHTML = "";
   if(filteredList.length === 0){
       const f2 = getFilters();
-      const hasQuery = !!f2.q;
+       const hasQuery = !!f2.q;
+       // 검색어와 맞는 상품이 있는데 켜진 조건(재고있음·카테고리·사이즈 등) 때문에 숨은 경우 — 부산 재고 0인 품번을 찾을 때 자주 생김 (2026-10-05)
+       let _qHidden = 0;
+       if (hasQuery) {
+           const _toks = f2.q.split(/\s+/).filter(Boolean).map(t => t.replace(/[\s\-_]/g, "").toLowerCase());
+           _qHidden = PRODUCTS.filter(p => _toks.every(t => isAllChosung(t) ? p._chosung.includes(t) : p._hayClean.includes(t))).length;
+       }
       const hasFilters = f2.cat !== "ALL" || f2.gender !== "ALL" || f2.brand !== "ALL" || f2.stock || f2.noBarcode || f2.noLocation || f2.hasLocation || f2.noImage || f2.weightBand !== "ALL" || f2.dropBand !== "ALL" || f2.sizeFw !== "ALL" || f2.sizeAp !== "ALL" || f2.sizeGear !== "ALL";
       const nm = $("#noMatch");
       if(nm) nm.innerHTML = `
@@ -11370,7 +11377,7 @@ function render(){
 
 
 
-        <div class="text-sm text-gray-500 mb-4">${hasQuery ? `"<b>${f2.q}</b>" 검색 결과가 없습니다` : '조건에 맞는 상품이 없습니다'}</div>
+        <div class="text-sm text-gray-500 mb-4">${hasQuery ? `"<b>${escapeHtml(f2.q)}</b>" 검색 결과가 없습니다` : '조건에 맞는 상품이 없습니다'}</div>
 
 
 
@@ -11386,6 +11393,7 @@ function render(){
 
 
 
+        ${_qHidden > 0 ? `<div class="text-sm font-bold mb-3" style="color:#b45309">검색어와 맞는 상품 ${_qHidden}개가 지금 켜진 조건(재고있음 등) 때문에 숨겨져 있어요</div><button onclick="window._searchWithoutFilters()" class="brutal px-5 py-2 bg-orange-500 text-white font-black text-sm mr-2">🔍 조건 풀고 보기</button>` : ''}
         ${(hasQuery || hasFilters) ? `<button onclick="document.getElementById('resetAll').click()" class="brutal px-5 py-2 bg-black text-white font-black text-sm">↺ 필터 전체 초기화</button>` : ''}
 
 
@@ -14818,6 +14826,24 @@ $("#resetAll").onclick=()=>{
 
 $("#sortSel").onchange=()=> { saveHistoryState(); visibleCount=60; render(); };
 let qTimer;
+// 검색한 뒤 검색창을 다시 누르면 기존 글자를 전체 선택 — 새 품번을 치면 덮어쓴다 (예전엔 뒤에 이어 붙어 결과가 0개가 됐다, 2026-10-05)
+(() => {
+    const qEl = $("#q"); let justFocused = false;
+    const selectAll = () => { try { qEl.setSelectionRange(0, qEl.value.length); } catch (e) { qEl.select(); } };
+    qEl.addEventListener("focus", () => { if (!qEl.value) return; justFocused = true; selectAll(); });
+    // 누른 직후 mouseup·click이 선택을 풀고 커서만 두는 브라우저(iOS 등) 대비 — 포커스 직후 한 번만 다시 전체 선택
+    qEl.addEventListener("mouseup", (e) => { if (justFocused) e.preventDefault(); });
+    qEl.addEventListener("click", () => { if (justFocused) { justFocused = false; if (qEl.value) selectAll(); } });
+    qEl.addEventListener("blur", () => { justFocused = false; });
+})();
+// 검색어는 그대로 두고 다른 조건(재고있음·카테고리·사이즈·브랜드 등)만 모두 푼다
+window._searchWithoutFilters = () => {
+    const q = $("#q").value;
+    document.getElementById('resetAll').click();
+    const stockBtn = $('button.chip[data-stock]');
+    if (stockBtn && stockBtn.dataset.active === "1") stockBtn.click();
+    $("#q").value = q; visibleCount = 60; render();
+};
 $("#q").oninput=()=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ visibleCount=60; render(); },120); };
 $("#clearQ").onclick=()=>{ saveHistoryState(); $("#q").value=""; visibleCount=60; render(); $("#q").focus(); };
 $("#refreshBtn").onclick=()=>loadData(true);
