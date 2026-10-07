@@ -665,7 +665,7 @@ function showToast(message, onUndo, type, opts) {
 function _notice(message) {
     const m = String(message == null ? '' : message);
     const isErr = /실패|오류|❌|⚠️|없습니다|못했|필요합니다|확인하세요|확인해주세요|선택해주세요|체크해주세요|찾을 수 없|로딩 ?중/.test(m);
-    const text = m.replace(/^(?:✅|❌|⚠️|🗑️)s*/u, '');
+    const text = m.replace(/^(?:✅|❌|⚠️|🗑️)\s*/u, '');
     showToast(text, null, isErr ? 'error' : undefined, { ms: isErr ? 10000 : Math.min(9000, 3500 + m.length * 40) });
 }
 
