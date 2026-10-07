@@ -18873,8 +18873,26 @@ async function checkPriceSyncStatus() {
         toggleBtn.classList.toggle('hidden', !collapsed && window.scrollY < COLLAPSE_AT);
         label.textContent = collapsed ? '▼ 필터 펼치기' : '▲ 필터 접기';
         _cooldownUntil = Date.now() + 350; // 접기/펼치기로 페이지 높이가 바뀌는 동안 스크롤 이벤트 재평가 잠시 무시
+        _layoutAt = Date.now();
+        if(collapsed) _collapsedAt = Date.now();
         setTimeout(_evalFilterCollapse, 400); // 쿨다운 중에 맨 위에 도착해 스크롤이 멈춘 경우도 놓치지 않게 한 번 더 판정
     }
+
+    // 다시 펼치는 건 '사용자가 직접 위로 올렸을 때'만 (2026-10-07).
+    // 필터가 접히면 위쪽 높이가 줄어 브라우저가 스크롤 위치를 그만큼 끌어올린다(스크롤 앵커링·짧은 페이지 클램프).
+    // 필터 영역이 높은 화면(노트북·브랜드 줄이 여러 줄)에서는 이게 맨 위(≤5px)까지 올라가 '맨 위 도착'으로 오인 →
+    // 다시 펼침 → 다시 접힘이 반복돼 마우스 휠로 내려도 제자리에 머무는 문제가 있었다. 스크롤바를 끌면 한 번에 멀리 가서 괜찮았음.
+    let _collapsedAt = 0, _userUpAt = 0, _layoutAt = 0, _lastY = window.scrollY, _touchY = null;
+    // 맨 위에서 휠을 위로 굴리면 스크롤 이벤트가 안 생기므로 여기서 바로 다시 판정한다
+    const _markUp = () => { _userUpAt = Date.now(); if(_filterCollapsed && window.scrollY <= EXPAND_AT) _evalFilterCollapse(); };
+    window.addEventListener('wheel', (e) => { if(e.deltaY < 0) _markUp(); }, { passive: true });
+    window.addEventListener('keydown', (e) => { if(e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Home') _markUp(); });
+    window.addEventListener('touchstart', (e) => { _touchY = e.touches[0] ? e.touches[0].clientY : null; }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+        const y = e.touches[0] ? e.touches[0].clientY : null;
+        if(_touchY != null && y != null && y > _touchY + 4) _markUp();   // 손가락을 아래로 = 화면을 위로
+        _touchY = y;
+    }, { passive: true });
 
     window._toggleFilter = () => {
         const nowCollapsed = !_filterCollapsed;
@@ -18884,6 +18902,10 @@ async function checkPriceSyncStatus() {
 
     let _ticking = false;
     window.addEventListener('scroll', () => {
+        // 스크롤바를 끌어 올린 경우도 '직접 올림'으로 — 단, 방금 접기·펼치기로 높이가 바뀐 직후의 위치 변화는 제외
+        const y = window.scrollY;
+        if(y < _lastY && Date.now() - _layoutAt > 600) _markUp();
+        _lastY = y;
         if(_ticking) return;
         _ticking = true;
         requestAnimationFrame(() => { _ticking = false; _evalFilterCollapse(); });
@@ -18898,7 +18920,7 @@ async function checkPriceSyncStatus() {
             // 그래서 접기 기준(COLLAPSE_AT=80)과 펼치기 기준(EXPAND_AT=5)을 다르게 둬서, "80을 넘겨 접혔다가
             // 강제로 몇십px 밀린 것"과 "사용자가 실제로 맨 꼭대기까지 스크롤을 되돌린 것"을 구분한다.
             if(_filterCollapsed){
-                if(window.scrollY <= EXPAND_AT){
+                if(window.scrollY <= EXPAND_AT && _userUpAt > _collapsedAt){
                     _filterManuallyOpen = false;
                     applyState(false);
                 }
