@@ -124,6 +124,7 @@ style.innerHTML = `
     #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 12px; width: 90%; max-width: 420px; pointer-events: none; }
     .toast { background: #1e293b; color: white; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; pointer-events: auto; }
     @keyframes toast-in { from { transform: translateY(150%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .toast > span { white-space: pre-line; }
     .toast-undo { color: #facc15; cursor: pointer; padding-left: 14px; border-left: 1px solid #475569; margin-left: auto; flex-shrink: 0; font-weight: 900; }
     .toast-undo:hover { color: #fef08a; }
     /* 🔥 Glassmorphism 모달 컨테이너 🔥 */
@@ -392,8 +393,8 @@ async function adminLogin(pwInput, goBtn, onOk) {
     const res = await requestAdminToken(pw);
     if (goBtn) goBtn.disabled = false;
     if (res === 'ok') { pwInput.value = ''; setAdminSession(); onOk(); }
-    else if (res === 'denied') alert("비밀번호 오류");
-    else alert("네트워크 오류 — 잠시 후 다시 시도해주세요");
+    else if (res === 'denied') _notice("비밀번호 오류");
+    else _notice("네트워크 오류 — 잠시 후 다시 시도해주세요");
 }
 let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
@@ -550,7 +551,7 @@ function checkPat() {
             ensurePatForAdmin().then(ok => { if(ok) showToast('✓ 토큰 재발급 완료 — 저장을 한 번 더 눌러주세요.'); })
                 .finally(() => { window._patPrompting = false; });
         } else if(!checkAdminSession()) {
-            alert("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 입력해주세요.");
+            _notice("⚠️ 저장 토큰이 없습니다.\n우측 상단 ADMIN을 눌러 비밀번호를 입력해주세요.");
         }
         return false;
     }
@@ -613,10 +614,10 @@ async function copyText(text, btn){
       if(window.lucide) lucide.createIcons();
       setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove("copied"); if(window.lucide) lucide.createIcons(); }, 1200);
     }
-  }catch(e){ alert("복사 실패"); }
+  }catch(e){ _notice("복사 실패"); }
 }
 
-function showToast(message, onUndo, type) {
+function showToast(message, onUndo, type, opts) {
     let container = document.getElementById('toast-container');
     if(!container) {
         container = document.createElement('div');
@@ -648,13 +649,24 @@ function showToast(message, onUndo, type) {
     container.appendChild(toast);
     if(window.lucide) lucide.createIcons();
 
-    timer = setTimeout(() => {
+    const _close = () => {
+        clearTimeout(timer);
         toast.style.animation = 'none';
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(20px)';
         toast.style.transition = 'all 0.3s';
         setTimeout(() => toast.remove(), 300);
-    }, 5000);
+    };
+    toast.addEventListener('click', (e) => { if (!e.target.closest('.toast-undo')) _close(); });   // 누르면 바로 닫힘
+    timer = setTimeout(_close, (opts && opts.ms) || 5000);
+}
+// 브라우저 기본 알림창(alert) 대신 — 작업을 멈추지 않는 토스트 (2026-10-08, 40곳).
+// 실패·확인이 필요한 문구는 빨간 아이콘으로 10초, 나머지는 길이에 맞춰 3.5~9초. 누르면 닫힌다. 여러 줄은 줄바꿈 그대로.
+function _notice(message) {
+    const m = String(message == null ? '' : message);
+    const isErr = /실패|오류|❌|⚠️|없습니다|못했|필요합니다|확인하세요|확인해주세요|선택해주세요|체크해주세요|찾을 수 없|로딩 ?중/.test(m);
+    const text = m.replace(/^(?:✅|❌|⚠️|🗑️)s*/u, '');
+    showToast(text, null, isErr ? 'error' : undefined, { ms: isErr ? 10000 : Math.min(9000, 3500 + m.length * 40) });
 }
 
 // 켜고 끄는 필터 칩 [상태 키, data 속성, 켜졌을 때 링 색] — getFilters·되돌리기 저장/복원이 모두 이 목록을 쓴다
@@ -1528,7 +1540,7 @@ window._toggleDPBtn = async (btn, code, size) => {
     if (window._dpRenderFn) window._dpRenderFn();
     if (window.lucide) lucide.createIcons();
   } catch(e) {
-    alert("DP 저장 실패: " + e.message);
+    _notice("DP 저장 실패: " + e.message);
     $$('#dpSizeBtns button').forEach(b => b.disabled = false);
   }
 };
@@ -2942,7 +2954,7 @@ function _trBuildSheet(wb, name, dir, list, today) {
     return ws;
 }
 window.exportTransfersToExcel = async () => {
-    if (TRANSFERS.length === 0) { alert("다운로드할 이동 요청 데이터가 없습니다."); return false; }
+    if (TRANSFERS.length === 0) { _notice("다운로드할 이동 요청 데이터가 없습니다."); return false; }
     try { await _loadExcelJS(); } catch (e) { console.warn('ExcelJS 불러오기 실패 — 기본 엑셀로 저장:', e && e.message); await _loadXlsx().catch(() => {}); return _exportTransfersPlain(); }
     const rows = _trExcelRows(TRANSFERS);
     const d = new Date(), pad = v => String(v).padStart(2, '0');
@@ -2963,7 +2975,7 @@ window.exportTransfersToExcel = async () => {
 };
 // ExcelJS를 못 불러왔을 때의 기본 엑셀(서식 없음, 열·LOT은 같음)
 function _exportTransfersPlain() {
-    if (!window.XLSX || !window.XLSX.writeFile) { alert("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요."); return false; }
+    if (!window.XLSX || !window.XLSX.writeFile) { _notice("엑셀 모듈 로딩중입니다. 잠시 후 다시 시도해주세요."); return false; }
     const rows = _trExcelRows(TRANSFERS);
     const aoa = [Array(14).fill(''), ['', 'RACEMENT 이동요청리스트'], _TR_XL_HEAD.slice()];
     rows.forEach(r => aoa.push(['', '', r.date, r.itemCode, r.code, r.lot, r.brand, r.cat, r.product, r.size, r.qty, r.stockFrom, r.stockBusan, r.diff]));
@@ -3039,7 +3051,7 @@ window.exportDashboardImage = async () => {
         document.body.removeChild(link);
         setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch(e) {
-        alert('이미지 저장에 실패했습니다: ' + (e && e.message ? e.message : e));
+        _notice('이미지 저장에 실패했습니다: ' + (e && e.message ? e.message : e));
     } finally {
         if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
         if (btn) { btn.innerHTML = origBtnHtml; btn.disabled = false; }
@@ -3354,7 +3366,7 @@ return items.sort((a, b) => b.dashSales - a.dashSales);
         $("#dashApply").onclick = () => {
             const start = _parseDate($("#dashStart").value);
             const end = _parseDate($("#dashEnd").value);
-            if(!start || !end) { alert("날짜 형식을 확인하세요.\n예: 2026-05-01 또는 20260501"); return; }
+            if(!start || !end) { _notice("날짜 형식을 확인하세요.\n예: 2026-05-01 또는 20260501"); return; }
             currentPeriod = "CUSTOM"; currentCustomStart = start; currentCustomEnd = end;
             dashFilter = { cat: null, brand: null, gender: null }; updateDashData();
         };
@@ -5027,7 +5039,7 @@ window._trSetQty = (id, qty) => {
 };
 // 엑셀로 받은 요청만 비운다 — 그 사이 다른 기기에서 새로 들어온 요청은 남는다
 window._trExportAndClear = async () => {
-    if (!TRANSFERS.length) { alert('비울 이동 요청이 없습니다.'); return; }
+    if (!TRANSFERS.length) { _notice('비울 이동 요청이 없습니다.'); return; }
     if (!checkPat()) return;
     const ids = new Set(TRANSFERS.map(t => t.id));
     if (!(await window.exportTransfersToExcel())) return;   // 엑셀을 못 만들었으면 비우지 않는다
@@ -5037,7 +5049,7 @@ window._trExportAndClear = async () => {
         TRANSFERS = await ghSaveJson(TRANSFERS_PATH, cur => (Array.isArray(cur) ? cur : []).filter(t => !ids.has(t.id)), 'RT 엑셀 받고 비우기');
         window.renderTransfersList();
         showToast(ids.size + '건을 비웠어요');
-    } catch (e) { alert('비우기 실패: ' + (e && e.message || e)); }
+    } catch (e) { _notice('비우기 실패: ' + (e && e.message || e)); }
 };
 window.deleteAllTransfers = async () => {
     if(!checkPat()) return;
@@ -5048,7 +5060,7 @@ window.deleteAllTransfers = async () => {
     try {
         TRANSFERS = await ghSaveJson(TRANSFERS_PATH, () => [], "delete all transfers");
         window.renderTransfersList();
-    } catch(e) { alert("삭제 실패: " + e.message); }
+    } catch(e) { _notice("삭제 실패: " + e.message); }
 };
 
 const _salesCache = new Map();
@@ -6049,8 +6061,8 @@ $("#file").onchange = async (e) => {
             _safeSessionCache({rows, meta, images:IMAGES, transfers:TRANSFERS, promotions:PROMOTIONS, salesGuides:SALES_GUIDES, salesHistory:SALES_HISTORY, displayItems:DISPLAY_ITEMS, stockOverrides:STOCK_OVERRIDES, locations:LOCATIONS, _timestamp: Date.now()});
             applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar(); $("#adminModal").classList.add("hidden");
             await _rebaseOverridesAfterUpload(_ovBefore);
-            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
-        } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰을 확인하세요."); console.error("Upload error:", err); }
+            _notice("업로드 성공! 데이터가 즉시 반영되었습니다.");
+        } catch(err) { _notice("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰을 확인하세요."); console.error("Upload error:", err); }
         $("#file").value = "";
     };
     reader.readAsArrayBuffer(f);
@@ -6822,7 +6834,7 @@ async function _bulkApply(mode){
 
     let zoneId = null, slot = null;
     if(mode === 'assign'){
-        if(!_bulkPickZoneId){ alert('지도에서 구역을 먼저 선택해주세요.'); return; }
+        if(!_bulkPickZoneId){ _notice('지도에서 구역을 먼저 선택해주세요.'); return; }
         zoneId = _bulkPickZoneId;
         const sv = $("#bulkLocSlot");
         slot = (sv && sv.value) ? sv.value : null;
@@ -6915,7 +6927,7 @@ $("#bulkBarExit").onclick = () => window.exitBulkLocMode();
 $("#bulkBarAll").onclick = () => _bulkToggleAll();
 
 $("#pwdGo").onclick=()=>adminLogin($("#pwd"), $("#pwdGo"), ()=>{ $("#authPanel").classList.add("hidden"); $("#uploadPanel").classList.remove("hidden"); });
-$("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); alert("저장됨"); };
+$("#ghSave").onclick=()=>{ GH = { owner:$("#ghOwner").value.trim(), repo:$("#ghRepo").value.trim(), branch:$("#ghBranch").value.trim()||"main" }; saveGhConfig(); setPat($("#ghPat").value.trim()); _notice("저장됨"); };
 
 window.renderSalesHistoryAdmin = () => {
     const count = Object.keys(SALES_HISTORY.items || {}).length;
@@ -6938,8 +6950,8 @@ window.renderSalesHistoryAdmin = () => {
                 await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
                 SALES_HISTORY = emptyData; sessionStorage.removeItem(CACHE_KEY);
                 _recomputeStock(); render(); window.renderSalesHistoryAdmin();
-                alert("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
-            } catch(err) { alert("초기화 실패: " + err.message); }
+                _notice("🗑️ 판매 DB가 완벽하게 초기화되었습니다.\n이제 올바른 엑셀 파일을 다시 업로드해주세요.");
+            } catch(err) { _notice("초기화 실패: " + err.message); }
         };
     }
 
@@ -6958,7 +6970,7 @@ window.renderSalesHistoryAdmin = () => {
                 const sheet = wb.Sheets[wb.SheetNames[0]];
                 const rows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
                 let headerRowIdx = rows.findIndex(r => r.includes('품번') && r.includes('수량') && (r.includes('거래명세서일') || r.includes('일자') || r.includes('판매일')));
-                if(headerRowIdx === -1) { alert("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
+                if(headerRowIdx === -1) { _notice("엑셀에서 '품번', '수량', 날짜('거래명세서일' 등) 열을 찾을 수 없습니다."); return; }
 
                 const headers = rows[headerRowIdx].map(h => String(h||"").trim());
                 let codeIdx = headers.findIndex(h => h === '품번' || h.includes('상품코드') || h.includes('바코드'));
@@ -6981,7 +6993,7 @@ window.renderSalesHistoryAdmin = () => {
                 // 엉뚱한 셀(엑셀 열 좌표 'AI','G' 등)이 품번/날짜로 저장되는 오염이 발생함 (2026-07 실제 사례)
                 if(codeIdx < 0 || dateIdx < 0 || qtyIdx < 0) {
                     const _missing = [codeIdx<0?'품번':null, dateIdx<0?'일자':null, qtyIdx<0?'수량':null].filter(Boolean).join(', ');
-                    alert(`❌ 판매 엑셀에서 필수 컬럼을 찾지 못했습니다: ${_missing}\n\n인식된 헤더: ${headers.filter(Boolean).slice(0,15).join(' | ')}\n\n올바른 판매 엑셀인지 확인해주세요.`);
+                    _notice(`❌ 판매 엑셀에서 필수 컬럼을 찾지 못했습니다: ${_missing}\n\n인식된 헤더: ${headers.filter(Boolean).slice(0,15).join(' | ')}\n\n올바른 판매 엑셀인지 확인해주세요.`);
                     e.target.value = ""; return;
                 }
                 let sessionData = {};
@@ -7125,8 +7137,8 @@ const newHistory = { meta: { name: periodName, lastUpdated: new Date().toISOStri
                     await fetch(apiBase, { method:"PUT", headers:{ Authorization:"Bearer "+getPat(), "Content-Type":"application/json" }, body: JSON.stringify(body) });
                     SALES_HISTORY = newHistory; sessionStorage.removeItem(CACHE_KEY);
                     _recomputeStock(); render(); window.renderSalesHistoryAdmin();
-                    alert(`✅ 데이터 업로드 및 지점 자동 분류 성공!` + (_skippedBad > 0 ? `\n\n⚠️ 형식이 잘못된 ${_skippedBad}개 행은 제외했습니다 (날짜 형식 오류 또는 수량 0).` : ''));
-                } catch(err) { alert("업로드 실패: " + err.message); }
+                    _notice(`✅ 데이터 업로드 및 지점 자동 분류 성공!` + (_skippedBad > 0 ? `\n\n⚠️ 형식이 잘못된 ${_skippedBad}개 행은 제외했습니다 (날짜 형식 오류 또는 수량 0).` : ''));
+                } catch(err) { _notice("업로드 실패: " + err.message); }
                 fileInput.value = "";
             };
             reader.readAsArrayBuffer(f);
@@ -7189,8 +7201,8 @@ window.renderPromoAdmin = () => {
                 if(!endRes.ok) { const errJ = await endRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${endRes.status}): ${errJ.message||''}`); }
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
                 _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
-                alert(`"${pName}" 기획전이 종료되었습니다.`);
-            } catch(e) { alert("종료 실패: " + e.message); }
+                _notice(`"${pName}" 기획전이 종료되었습니다.`);
+            } catch(e) { _notice("종료 실패: " + e.message); }
         };
     });
 
@@ -7298,8 +7310,8 @@ window.renderPromoAdmin = () => {
                 if(!saveRes.ok) { const errJ = await saveRes.json().catch(()=>({})); throw new Error(`GitHub 저장 실패 (${saveRes.status}): ${errJ.message||''}`); }
                 PROMOTIONS = newData; sessionStorage.removeItem(CACHE_KEY);
                 _recomputeStock(); render(); setupQuickActionBar(); window.renderPromoAdmin();
-                alert(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
-            } catch(err) { alert("업로드 실패: " + err.message); }
+                _notice(`"${promoName}" 기획전 등록 완료! (${Object.keys(items).length}품번)`);
+            } catch(err) { _notice("업로드 실패: " + err.message); }
             document.getElementById("promoFile").value = "";
         };
         reader.readAsArrayBuffer(f);
@@ -7351,8 +7363,8 @@ window.renderSalesAdmin = () => {
                 try {
                     await _saveGuideEntries(Object.fromEntries(Object.keys(newGuides).filter(c => _mergedGuides[c]).map(c => [c, _mergedGuides[c]])));   // 바뀐 품번만 서버 최신본에 합쳐 저장
                     _recomputeStock(); render(); window.renderSalesAdmin();
-                    alert(`✅ 세일즈 가이드 저장 완료 — 추가 ${_added}개, 갱신 ${_updated}개`);
-                } catch(err) { alert("업로드 실패: " + err.message); }
+                    _notice(`✅ 세일즈 가이드 저장 완료 — 추가 ${_added}개, 갱신 ${_updated}개`);
+                } catch(err) { _notice("업로드 실패: " + err.message); }
                 fileInput.value = "";
             };
             reader.readAsArrayBuffer(f);
@@ -7812,7 +7824,7 @@ window.addEventListener('DOMContentLoaded', () => {
             };
             saveGhConfig();
             setPat(document.getElementById("ghPat").value.trim());
-            alert("API 설정이 저장되었습니다.");
+            _notice("API 설정이 저장되었습니다.");
             document.getElementById("backToUpload").click();
         };
 
@@ -7930,7 +7942,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         btn.textContent = out.found ? "✅ 저장됨" : "❔ 리뷰 없음";
                         render(); if (window.renderSalesAdmin) window.renderSalesAdmin();
                     } catch(err) {
-                        alert("웹 조사 실패: " + err.message);
+                        _notice("웹 조사 실패: " + err.message);
                         btn.textContent = orig;
                     } finally {
                         btn.disabled = false;
@@ -7944,10 +7956,10 @@ window.addEventListener('DOMContentLoaded', () => {
         if(bulkAiBtn) {
             bulkAiBtn.onclick = async () => {
                 const _hasPass = (() => { try { return !!localStorage.getItem(INV_PASS_KEY); } catch(e) { return false; } })();
-                if(!_hasPass) { alert("⚠️ 공용 비밀번호 로그인이 필요합니다."); return; }
+                if(!_hasPass) { _notice("⚠️ 공용 비밀번호 로그인이 필요합니다."); return; }
                 if(!checkPat()) return;
                 const todo = _missModels().filter(m => !m.v4NotFound && !m.skip);
-                if(!todo.length) { alert("웹 조사할 모델이 없습니다. ('리뷰 없음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
+                if(!todo.length) { _notice("웹 조사할 모델이 없습니다. ('리뷰 없음' 모델은 줄마다 🔎 웹 조사로 다시 시도할 수 있어요)"); return; }
                 if(!confirm(`가이드 없는 신발 ${todo.length}개 모델을 조사합니다.\n\n· RunRepeat·Doctors of Running 리뷰에 적힌 내용만 무료 AI로 한국어 정리해 저장하고, 같은 모델 리뷰가 없으면 비워 둡니다.\n· 모델 하나에 약 30초~1분, 하루 무료 한도는 약 40개 모델입니다. 한도가 차면 멈추고, 매일 자동 조사가 이어서 합니다.\n\n진행할까요?`)) return;
 
                 bulkAiBtn.disabled = true;
@@ -7994,7 +8006,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 bulkAiBtn.disabled = false;
                 render(); if(window.renderSalesAdmin) window.renderSalesAdmin();
                 _renderMissList();
-                alert(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 같은 모델 리뷰 없음(비워 둠): ${notFound}개` + (later ? `\n⏳ 다음에 다시: ${later}개` : "") + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
+                _notice(`웹 조사 결과\n✅ 확인·저장: ${found}개 모델\n❔ 같은 모델 리뷰 없음(비워 둠): ${notFound}개` + (later ? `\n⏳ 다음에 다시: ${later}개` : "") + (failed ? `\n⚠️ 오류: ${failed}개 (다시 누르면 재시도)` : "") + (stopped ? `\n\n${stopped}` : ""));
             };
         }
 
@@ -8005,7 +8017,7 @@ window.addEventListener('DOMContentLoaded', () => {
             saveMissBtn.onclick = async () => {
                 if(!checkPat()) return;
                 const checked = document.querySelectorAll(".miss-chk:checked");
-                if(checked.length === 0){ alert("저장할 모델을 체크해주세요."); return; }
+                if(checked.length === 0){ _notice("저장할 모델을 체크해주세요."); return; }
 
                 const newEntries = {};
                 let models = 0;
@@ -8026,17 +8038,17 @@ window.addEventListener('DOMContentLoaded', () => {
                         };
                     }
                 });
-                if(!models){ alert("체크한 모델에 입력된 내용이 없습니다. ✏️ 직접 버튼으로 내용을 넣어주세요."); return; }
+                if(!models){ _notice("체크한 모델에 입력된 내용이 없습니다. ✏️ 직접 버튼으로 내용을 넣어주세요."); return; }
                 const origText = saveMissBtn.textContent;
                 saveMissBtn.textContent = "⏳ 저장 중...";
                 saveMissBtn.disabled = true;
                 try {
                     await _saveGuideEntries(newEntries);
                     _recomputeStock(); render(); window.renderSalesAdmin();
-                    alert(`✅ ${models}개 모델(품번 ${Object.keys(newEntries).length}개) 가이드를 저장했습니다.`);
+                    _notice(`✅ ${models}개 모델(품번 ${Object.keys(newEntries).length}개) 가이드를 저장했습니다.`);
                     _renderMissList();
                 } catch(err) {
-                    alert("저장 실패: " + err.message);
+                    _notice("저장 실패: " + err.message);
                 } finally {
                     saveMissBtn.textContent = origText;
                     saveMissBtn.disabled = false;
@@ -8060,7 +8072,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = async (ev) => {
                 // XLSX 라이브러리가 로드되어 있어야 함 (기존 글로벌 window.XLSX 사용)
-                await _loadXlsx().catch(() => {}); if(!window.XLSX) { alert("엑셀 파서 로딩 중입니다. 잠시 후 시도해주세요."); return; }
+                await _loadXlsx().catch(() => {}); if(!window.XLSX) { _notice("엑셀 파서 로딩 중입니다. 잠시 후 시도해주세요."); return; }
                 const wb = window.XLSX.read(new Uint8Array(ev.target.result), {type:"array"});
                 let rows = parseInventorySheet(wb.Sheets[wb.SheetNames[0]], window.XLSX);
                 const meta = { fileName:f.name, uploadedAt: dateStr, uploadedMs: Date.now() };
@@ -8073,8 +8085,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     applyMeta(CURRENT_META); _recomputeStock(); render(); setupSearchAutocomplete(); setupQuickActionBar();
                     document.getElementById("adminModal").classList.add("hidden");
                     await _rebaseOverridesAfterUpload(_ovBefore);
-            alert("업로드 성공! 데이터가 즉시 반영되었습니다.");
-                } catch(err) { alert("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰과 저장소 정보를 확인하세요."); console.error("Upload error:", err); }
+            _notice("업로드 성공! 데이터가 즉시 반영되었습니다.");
+                } catch(err) { _notice("업로드 실패!\n\n원인: " + (err?.message || err) + "\n\n→ ADMIN > API 설정에서 PAT 토큰과 저장소 정보를 확인하세요."); console.error("Upload error:", err); }
                 document.getElementById("file").value = "";
             };
             reader.readAsArrayBuffer(f);
