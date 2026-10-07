@@ -44,9 +44,11 @@ function ghRequest(method, path, body, token) {
         ...(bodyStr && { 'Content-Length': Buffer.byteLength(bodyStr) })
       }
     }, res => {
-      let data = '';
-      res.on('data', c => data += c);
+      // 조각(Buffer)을 모아 한 번에 UTF-8로 — 조각마다 문자열로 바꾸면 경계에 걸린 한글이 깨진다(2026-10-08)
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
       res.on('end', () => {
+        const data = Buffer.concat(chunks).toString('utf8');
         try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
         catch(e) { resolve({ status: res.statusCode, body: data }); }
       });
@@ -66,9 +68,11 @@ function fetchRawUrl(url, token) {
       hostname: u.hostname, path: u.pathname + u.search, method: 'GET',
       headers: { Authorization: `Bearer ${token || CONFIG.ghToken}`, 'User-Agent': 'RACEMENT-GHA' }
     }, res => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => resolve(data));
+      // 1MB 넘는 판매기록 원문(한글 판매처 이름 포함)을 받는 곳 — 조각마다 문자열로 바꾸면 경계의 한글이 U+FFFD로 깨져
+      // 그대로 다시 저장되며 판매처 이름이 계속 갈라졌다(4월~10월 약 20만 글자). 조각을 모아 한 번에 해석한다 (2026-10-08)
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     });
     req.on('error', reject);
     req.end();
