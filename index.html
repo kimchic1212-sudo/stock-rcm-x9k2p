@@ -268,12 +268,14 @@
       </div>
       <!-- ADMIN 점검 보드 (평소 접힘) -->
       <div id="adminBoard" class="hidden flex-col gap-1.5 pt-2 border-t border-dashed border-[color:var(--line)]">
+        <div id="adminBoardSummary" class="text-[11px] font-bold text-[color:var(--muted)]" aria-live="polite"></div>
         <div id="adminCheckRow" class="flex flex-wrap gap-1.5 items-center">
           <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">점검</span>
       </div>
         <div class="flex flex-wrap gap-1.5 items-center">
           <span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0"></span>
           <button id="soldDpCleanBtn" type="button" class="chip font-black" onclick="window._openSoldDpCleanup()"><i data-lucide="eraser" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>품절DP 정리 <span id="soldDpCleanCount" class="ml-0.5 bg-orange-500 text-white rounded-full px-1.5 text-[10px]">0</span></button>
+          <button id="guideMissBtn" type="button" class="chip font-black" onclick="window._openGuideMiss()" title="재고 있는 신발 중 세일즈 가이드가 없는 모델 — 누르면 누락 목록이 열려요"><i data-lucide="book-open" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>가이드 없음 <span id="guideMissCount" class="ml-0.5 bg-indigo-500 text-white rounded-full px-1.5 text-[10px]">0</span></button>
           <button id="dpSkipListBtn" type="button" class="chip font-black" onclick="window._openDpSkipList()"><i data-lucide="eye-off" class="w-3.5 h-3.5 inline-block align-[-2px] mr-1" aria-hidden="true"></i>미DP 제외 목록 <span id="dpSkipCount" class="ml-0.5 bg-gray-400 text-white rounded-full px-1.5 text-[10px]">0</span></button>
       </div>
       </div>
@@ -403,6 +405,6 @@
 <style>
 @keyframes fpv-pulse { 0%,100%{ box-shadow:0 0 0 4px rgba(255,90,31,.35);} 50%{ box-shadow:0 0 0 10px rgba(255,90,31,.12);} }
 </style>
-<script src="./app.js?v=2610081035"></script>
+<script src="./app.js?v=2610081100"></script>
 </body>
 </html>
