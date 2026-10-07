@@ -1471,6 +1471,7 @@ function _refreshDpFilterCounts(){
     }
     const _sdCount = $("#soldDpCleanCount");
     if(_sdCount) _sdCount.textContent = _soldOutDpPairs().length;
+    _renderBoardSummary();
     const _skipCount = $("#dpSkipCount");
     if(_skipCount) _skipCount.textContent = Object.keys(LOCATIONS.assignments || {}).filter(c => _dpSkipped(c)).length;
 
@@ -1600,6 +1601,55 @@ function _hasRealLoc(code) {
   return _locArr(code).some(a => a.zoneId);
 }
 // 부산 재고가 0인 DP 사이즈 목록. getDPStatus의 'soldDP'와 같은 기준 — 재고표에 없는 사이즈는 (일시적 누락일 수 있어) 포함하지 않는다
+// 점검 보드 맨 위 '정리할 것' 요약 — 항목별 개수 + 이 기기에 남긴 날짜별 합계와 비교한 증감 (2026-10-08)
+function _guideMissModels() {
+    const seen = new Map();
+    for (const p of PRODUCTS) {
+        if (!p.품번 || p.카테고리 !== "신발" || !(p.busanTotal > 0)) continue;
+        const mk = _guideModelKey(p);
+        const m = seen.get(mk) || { ok: false, skip: false };
+        const g = SALES_GUIDES[p.품번];
+        if (_verifiedGuide(p.품번)) m.ok = true;
+        if (g && g.method === "skip") m.skip = true;
+        seen.set(mk, m);
+    }
+    return [...seen.values()].filter(m => !m.ok && !m.skip).length;
+}
+function _renderBoardSummary() {
+    const el = $("#adminBoardSummary");
+    if (!el || !PRODUCTS.length) return;
+    const parts = [
+        ["사진", PRODUCTS.filter(p => p.busanTotal > 0 && !IMAGES[p.shopNo || p.품번]).length],
+        ["바코드", PRODUCTS.filter(p => p.noBarcodeBusan).length],
+        ["위치", PRODUCTS.filter(p => p.busanTotal > 0 && !_hasRealLoc(p.품번) && _needsRealLocation(p)).length],
+        ["품절DP", _soldOutDpPairs().length],
+        ["가이드", _guideMissModels()],
+    ];
+    const gm = $("#guideMissCount"); if (gm) gm.textContent = parts[4][1];
+    const total = parts.reduce((a, [, n]) => a + n, 0);
+    const today = _todayYmd();
+    let hist = {};
+    try { hist = JSON.parse(localStorage.getItem('rcm_board_hist_v1') || '{}') || {}; } catch (e) {}
+    const prevDay = Object.keys(hist).filter(d => d < today).sort().pop();
+    hist[today] = total;
+    const keep = Object.keys(hist).sort().slice(-30);   // 최근 30일만
+    try { localStorage.setItem('rcm_board_hist_v1', JSON.stringify(Object.fromEntries(keep.map(d => [d, hist[d]])))); } catch (e) {}
+    let trend = "";
+    if (prevDay) {
+        const d = total - hist[prevDay];
+        const label = prevDay.slice(5).replace("-", "/");
+        trend = d === 0 ? ` · ${label} 대비 그대로` : ` · ${label} 대비 <b style="color:${d < 0 ? '#15803d' : '#b45309'}">${d < 0 ? '−' : '+'}${Math.abs(d)}</b>`;
+    }
+    el.innerHTML = `정리할 것 <b style="color:var(--ink,#0a0a0a)">${total}개</b> (${parts.map(([k, n]) => `${k} ${n}`).join(" · ")})${trend}`;
+}
+// 점검 보드의 '가이드 없음' → ADMIN 창의 누락 목록을 바로 연다
+window._openGuideMiss = () => {
+    const modal = document.getElementById("adminModal");
+    if (modal) modal.classList.remove("hidden");
+    const btn = document.getElementById("missDetectBtn");
+    if (btn) btn.click(); else _notice("ADMIN 창에서 '미등록 탐지'를 눌러 주세요.");
+};
+
 function _soldOutDpPairs() {
   const out = [];
   PRODUCTS.forEach(p => {
