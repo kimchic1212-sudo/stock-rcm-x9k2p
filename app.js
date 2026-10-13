@@ -5462,13 +5462,13 @@ function openDetail(p){
         <table class="w-full text-sm bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm">
         <thead class="bg-gray-50 text-xs text-gray-500 font-black border-b border-gray-200">
             <tr>
-            <th class="py-2 px-2 text-center w-[15%] border-r border-gray-100">사이즈</th>
-            <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">🏪 부산<br><span class="font-normal text-[10px] text-blue-400">30일</span></th>
-            <th class="py-2 px-1 text-center w-[12%] text-indigo-600 bg-indigo-50/60 border-r border-gray-100">🏬 타지점<br><span class="font-normal text-[10px] text-indigo-400">30일</span></th>
-            <th class="py-2 px-1 text-center w-[12%] text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
-            <th class="py-2 px-2 text-center border-r border-gray-100">부산→물류</th>
-            <th class="py-2 px-2 text-center border-r border-gray-100">물류 RT <span class="text-gray-500 font-normal">(${p.centerTotal})</span></th>
-            <th class="py-2 px-2 text-center">신사 RT <span class="text-gray-500 font-normal">(${p.sinsaTotal})</span></th>
+            <th class="py-2 px-1 text-center whitespace-nowrap border-r border-gray-100">사이즈</th>
+            <th class="py-2 px-1 text-center whitespace-nowrap text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">30일</span></th>
+            <th class="py-2 px-1 text-center whitespace-nowrap text-indigo-600 bg-indigo-50/60 border-r border-gray-100">타지점<br><span class="font-normal text-[10px] text-indigo-400">30일</span></th>
+            <th class="py-2 px-1 text-center whitespace-nowrap text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
+            <th class="py-2 px-1 text-center whitespace-nowrap border-r border-gray-100">부산→<br>물류</th>
+            <th class="py-2 px-1 text-center whitespace-nowrap border-r border-gray-100">물류 RT<br><span class="text-gray-500 font-normal">(${p.centerTotal})</span></th>
+            <th class="py-2 px-1 text-center whitespace-nowrap">신사 RT<br><span class="text-gray-500 font-normal">(${p.sinsaTotal})</span></th>
             </tr>
         </thead>
         <tbody>
@@ -5476,17 +5476,17 @@ function openDetail(p){
             const _s30b = _sizeSales30Busan[s.size] || 0;
             const _s30a = _sizeSales30Etc[s.size] || 0;
             let busanOutBtn = s.busan > 0
-                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1 px-2 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.busan}</button>`
+                ? `<button onclick="quickRTOut('${p.품번}','${s.size}',1,this)" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 py-1 px-1 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black" title="부산 → 물류 반납"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.busan}</button>`
                 : `<span class="text-gray-400 text-sm">-</span>`;
 
             let centerRtBtn = s.center > 0
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-2 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','물류',1,this)" class="bg-gray-700 hover:bg-black text-white py-1 px-1 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.center}</button>`
                 : `<span class="text-gray-400 text-sm">-</span>`;
             let sinsaRtBtn = s.sinsa > 0
-                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
+                ? `<button onclick="quickRT('${p.품번}','${s.size}','신사',1,this)" class="bg-orange-500 hover:bg-orange-600 text-white py-1 px-1 rounded-lg flex items-center justify-center w-full transition-colors gap-1 text-xs font-black"><i data-lucide="arrow-left-right" class="w-3 h-3 shrink-0"></i>${s.sinsa}</button>`
                 : `<span class="text-gray-400 text-sm">-</span>`;
             return `<tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 ${s.busan===0?'bg-amber-50/60':''}">
-                <td class="py-1.5 px-2 font-black text-center border-r border-gray-100 text-sm">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:10px;margin-left:2px;">🔖</span>` : ''}</td>
+                <td class="py-1.5 px-1 font-black text-center border-r border-gray-100 text-sm whitespace-nowrap">${s.size}${(s.busan>0 && !s.barcode) ? `<span title="바코드 없음" style="color:#e11d48;font-size:10px;margin-left:2px;">🔖</span>` : ''}</td>
                 <td class="py-1.5 px-1 font-bold text-center bg-blue-50/30 border-r border-gray-100 text-sm ${_s30b>0?'text-blue-700':'text-gray-400'}">${_s30b>0?_s30b:'-'}</td>
                 <td class="py-1.5 px-1 font-bold text-center bg-indigo-50/30 border-r border-gray-100 text-sm ${_s30a>0?'text-indigo-500':'text-gray-400'}">${_s30a>0?_s30a:'-'}</td>
                 <td class="py-1 px-1 text-center bg-blue-50/30 border-r border-gray-100">
@@ -5495,9 +5495,9 @@ function openDetail(p){
                         ${(_sizeSalesToday[s.size]||0)>0?`<span class="text-orange-500 text-[10px] font-bold leading-none">-${_sizeSalesToday[s.size]}↓</span>`:''}
                     </div>
                 </td>
-                <td class="py-1.5 px-2 text-center border-r border-gray-100">${busanOutBtn}</td>
-                <td class="py-1.5 px-2 text-center border-r border-gray-100">${centerRtBtn}</td>
-                <td class="py-1.5 px-2 text-center">${sinsaRtBtn}</td>
+                <td class="py-1.5 px-1 text-center border-r border-gray-100">${busanOutBtn}</td>
+                <td class="py-1.5 px-1 text-center border-r border-gray-100">${centerRtBtn}</td>
+                <td class="py-1.5 px-1 text-center">${sinsaRtBtn}</td>
             </tr>`;
         }).join("")}
         </tbody>
