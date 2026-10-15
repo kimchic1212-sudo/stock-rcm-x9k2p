@@ -26,6 +26,28 @@ const CONFIG = {
   maxConsecutiveFailures: 3,
 };
 
+// 매장관리 '오늘 매출'도 같이 갱신 (2026-10-15) — 로그인 직후 POS 메인 화면이 오늘 매출 합계(selectReleaseForMain)를
+// 저절로 불러온다. 예전엔 버리던 값을 받아 매장관리로 보낸다. 노트북·유료 작업 없이도 영업 중 10분마다 갱신된다.
+const PUSH_URL = 'https://racement-busan.vercel.app/api/pos-today-sales';
+let todaySalesTotal = null;
+
+function kstDateKey() {
+  return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+async function pushTodaySales(total) {
+  const key = process.env.POS_PUSH_KEY || '';
+  if (!key) { log('매장관리 매출: POS_PUSH_KEY 없음 → 건너뜀'); return; }
+  try {
+    const r = await fetch(PUSH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-push-key': key },
+      body: JSON.stringify({ date: kstDateKey(), total }),
+    });
+    log(`매장관리 오늘 매출 ${Number(total).toLocaleString()}원 → ${r.status} ${(await r.text()).slice(0, 120)}`);
+  } catch (e) { log(`매장관리 매출 전송 실패: ${e.message}`); }   // 판매내역 동기화는 그대로 진행
+}
+
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -224,6 +246,11 @@ async function fetchPOSSales() {
           url.includes('/main/login') || url.includes('/main/init')) {
         debugLog.push(`[RES] ${response.status()} ${url.split('/').slice(-1)[0]}`);
       }
+      if (url.includes('selectReleaseForMain')) {
+        response.json().then(d => {
+          if (d?.dma_sales?.TODAY !== undefined) todaySalesTotal = Number(d.dma_sales.TODAY);
+        }).catch(() => {});
+      }
       // selTodaySalesList: Promise로 body 읽기
       if (url.includes('selTodaySalesList')) {
         const p = response.json().then(d => {
@@ -287,6 +314,10 @@ async function fetchPOSSales() {
       problem = '로그인 실패';
       return { todayItems: {}, loginFailed: true, failReason: dialogMsg || lockHit || '비밀번호 입력칸이 로그인 시도 후에도 그대로 남아있음' };
     }
+
+    // 메인 화면의 오늘 매출 응답이 늦게 오면 잠깐 더 기다린다(최대 10초) — 해외 서버라 왕복이 느릴 때가 있다
+    for (let i = 0; i < 20 && todaySalesTotal === null; i++) await page.waitForTimeout(500);
+    log(todaySalesTotal === null ? '오늘 매출 합계: 못 받음' : `오늘 매출 합계: ${todaySalesTotal.toLocaleString()}원`);
 
     // ── selTodaySalesList가 안 왔으면 메뉴 직접 클릭 시도 ──
     if (tradeNos.length === 0) {
@@ -414,6 +445,8 @@ async function fetchPOSSales() {
       next.lastCheckedAt = new Date().toISOString();
       await saveSyncStatus(next, statusSha);
     }
+
+    if (todaySalesTotal !== null) await pushTodaySales(todaySalesTotal);
 
     const codes = Object.keys(todayItems);
     if (codes.length === 0) { log('판매 없음'); process.exit(0); }

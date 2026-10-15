@@ -32,5 +32,6 @@ jobs:
           POS_PW: ${{ secrets.POS_PW }}
           GITHUB_TOKEN: ${{ github.token }}
           DATA_REPO_PAT: ${{ secrets.DATA_REPO_PAT }}
+          POS_PUSH_KEY: ${{ secrets.POS_PUSH_KEY }}
         run: node sync_once.js
 
