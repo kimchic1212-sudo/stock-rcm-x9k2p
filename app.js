@@ -1720,9 +1720,48 @@ function getDPStatus(p) {
 }
 
 // ── 판매 데이터 자동 갱신 (5분마다) ──────────────────────────────────
+// 판매 화면 반영이 한 번 실패했는지 — 실패한 채로 두면 다음 주기에 '같은 데이터'라며 건너뛰어
+// 판매내역이 계속 안 보이는 상태로 굳는다(2026-10-16). 실패했으면 같은 데이터라도 다시 그린다.
+let _salesApplyFailed = false;
+
 async function loadSalesOnly() {
+  // ① 판매내역을 먼저, 따로 받는다 (2026-10-16) — 예전엔 기획전·DP·재고보정 3개를 먼저 받고 그 뒤에 판매를 받아서,
+  //    앞의 것 하나가 멈추거나 에러가 나면 판매내역은 아예 못 받고 화면엔 아무 표시도 없었다(에러를 조용히 삼킴).
+  //    매장 노트북·패드·직원 휴대폰 모두 이 함수로 5분마다(그리고 화면을 다시 열 때) 판매내역을 받는다.
   try {
-    // 기획전·DP·재고보정: API에서 직접 읽어 즉시 반영 (앱을 켜둔 기기도 자동 동기화)
+    const res = await dataFetch(SALES_HISTORY_PATH);
+    if (res.ok) {
+      const newHistory = await res.json();
+      _lastSalesSync = Date.now();
+      if (_salesStaleShown) applyMeta(CURRENT_META);
+      // 변경된 경우에만 갱신 (단, 지난번 반영이 실패했으면 다시 그린다)
+      const same = JSON.stringify(newHistory.meta) === JSON.stringify(SALES_HISTORY.meta) &&
+                   newHistory.meta?.lastSynced === SALES_HISTORY.meta?.lastSynced;
+      if (!same || _salesApplyFailed) {
+        SALES_HISTORY = newHistory;
+        try {
+          clearSalesCache();
+          // ERP 원본 재고 복원 후 차감 + 실재고 보정까지 순서대로 재계산
+          _recomputeStock();
+          render();
+          // DATA SOURCE POS판매 뱃지 갱신
+          applyMeta(CURRENT_META);
+          _salesApplyFailed = false;
+          console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
+        } catch (e) {
+          _salesApplyFailed = true;
+          console.error('[판매동기화] 화면 반영 실패 — 다음 주기에 다시 시도:', e);
+        }
+      }
+    } else {
+      console.warn('[판매동기화] 판매내역을 못 받음:', res.status);   // 10분 넘게 못 받으면 'POS판매 N분째 끊김' 표시가 뜬다
+    }
+  } catch (e) {
+    console.error('[판매동기화] 판매내역 받기 실패:', e);
+  }
+
+  // ② 기획전·DP·재고보정: API에서 직접 읽어 즉시 반영 (앱을 켜둔 기기도 자동 동기화)
+  try {
     const [promoFresh, _dpFresh, _soFresh] = await Promise.all([
         fetchGithubJson(PROMOTIONS_PATH),
         fetchGithubJson(DISPLAY_PATH),
@@ -1741,25 +1780,7 @@ async function loadSalesOnly() {
         if(window.CURRENT_PRODUCT && window._dpRenderFn) window._dpRenderFn();
         render();
     }
-
-    const res = await dataFetch(SALES_HISTORY_PATH);
-    if (!res.ok) return;
-    const newHistory = await res.json();
-    _lastSalesSync = Date.now();
-    if (_salesStaleShown) applyMeta(CURRENT_META);
-    // 변경된 경우에만 갱신
-    const newStr = JSON.stringify(newHistory.meta);
-    if (newStr === JSON.stringify(SALES_HISTORY.meta) &&
-        newHistory.meta?.lastSynced === SALES_HISTORY.meta?.lastSynced) return;
-    SALES_HISTORY = newHistory;
-    clearSalesCache();
-    // ERP 원본 재고 복원 후 차감 + 실재고 보정까지 순서대로 재계산
-    _recomputeStock();
-    render();
-    // DATA SOURCE POS판매 뱃지 갱신
-    applyMeta(CURRENT_META);
-    console.log('[판매동기화] 새 데이터 반영 완료:', newHistory.meta?.lastSynced);
-  } catch(e) {}
+  } catch(e) { console.error('[동기화] 기획전·DP·재고보정 갱신 실패:', e); }
 }
 // 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
 const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
