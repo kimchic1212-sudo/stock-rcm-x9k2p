@@ -1070,6 +1070,9 @@ async function loadData(force = false){
               _recomputeStock(); render();
           }
       }).catch(()=>{});
+      // 사본의 판매내역이 비어 있으면(첫 화면 시점에 만든 사본이고, 큰 판매내역을 덧붙이는 건 iOS 저장공간 한도로 실패하기도 함)
+      // 5분 타이머를 기다리지 않고 바로 받는다 — 안 그러면 'POS판매: 미연동'이 한참 이어진다(2026-10-16)
+      if (!SALES_HISTORY || !SALES_HISTORY.meta || !SALES_HISTORY.meta.lastSynced) loadSalesOnly().catch(()=>{});
       const _bar1 = $("#actionBtnsWrap"); if(_bar1) _bar1.dataset.setup = "0";
       setupQuickActionBar();
       if(window.renderPromoAdmin) window.renderPromoAdmin();
@@ -4853,7 +4856,10 @@ function render(){
     // 단, "재고보정" 리뷰 필터를 켰거나 검색어로 특정 상품을 찾는 중이면 예외로 보여준다 —
     // 안 그러면 재고보정 때문에 0개가 된 상품은 그 보정을 검토하려고 필터를 켜도 안 보이고,
     // 품번을 정확히 검색해도 "결과 없음"으로 나와 마치 그 상품이 아예 없는 것처럼 보이는 문제가 있었음.
-    if(p.busanTotal <= 0 && p.sinsaTotal <= 0 && p.centerTotal <= 0 && !f.overrideOnly && !f.q) return false;
+    // 예외: '오늘 판매' 필터 중 오늘 팔린 상품 — 마지막 1개가 팔려 재고가 0이 돼도 보여줘야 한다
+    // (2026-10-16: 이걸 숨겨서 방금 판매한 상품이 '오늘 판매' 목록에 안 나오고 0개로 보였다)
+    const _soldTodayShow = f.todaySoldOnly && p.todaySold > 0;
+    if(p.busanTotal <= 0 && p.sinsaTotal <= 0 && p.centerTotal <= 0 && !f.overrideOnly && !f.q && !_soldTodayShow) return false;
     if(f.cat!=="ALL" && p.카테고리!==f.cat) return false;
     let g = p.성별 || p.gender || "U";
     g = _genderLabel(g);
@@ -4901,9 +4907,9 @@ function render(){
     if(activeSizeFilter !== "ALL") {
         const sizeObj = p.sizes.find(s => String(s.size).trim() === activeSizeFilter);
         if(!sizeObj) return false;
-        if(f.stock && sizeObj.busan <= 0) return false;
+        if(f.stock && sizeObj.busan <= 0 && !_soldTodayShow) return false;
     } else {
-        if(f.stock && p.busanTotal <= 0) return false;
+        if(f.stock && p.busanTotal <= 0 && !_soldTodayShow) return false;
     }
 
     if(f.q) {
