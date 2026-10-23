@@ -1,8 +1,7 @@
 name: POS Sync
 
+# 자체 schedule(24시간 15분마다) 제거 2026-10-23 — 영업시간에만 매장관리 서버(pg_cron → /api/tick-pos-sync)가 10분마다 실행시킨다.
 on:
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
