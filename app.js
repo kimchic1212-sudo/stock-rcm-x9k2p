@@ -1802,8 +1802,17 @@ setInterval(() => {
 // 앱이 열려있는 동안 10분마다 workflow_dispatch로 직접 트리거
 let _lastPosTrigger = 0;
 const _POS_TRIGGER_KEY = 'rcm_pos_last_trigger';
+// 영업시간(평일 12~20시, 주말 11~19시)의 시작 10분 전~마감 30분 뒤에만 — 화면을 밤새 열어 둬도 새벽에 POS 로그인하지 않게 (2026-10-23)
+// 영업시간 동기화는 매장관리 서버(pg_cron → /api/tick-pos-sync)가 10분마다 맡으므로 이 앱이 꺼져 있어도 멈추지 않는다.
+function _inPosSyncHours() {
+    const k = new Date(Date.now() + 9 * 3600 * 1000);
+    const dow = k.getUTCDay(), min = k.getUTCHours() * 60 + k.getUTCMinutes();
+    const [open, close] = (dow === 0 || dow === 6) ? [11 * 60, 19 * 60] : [12 * 60, 20 * 60];
+    return min >= open - 10 && min <= close + 30;
+}
 async function autoTriggerPosSync() {
     if (!getPat()) return; // PAT 없으면 skip
+    if (!_inPosSyncHours()) return;
     const now = Date.now();
     // localStorage로 탭 간 공유 — 어느 탭에서든 9분 내 트리거했으면 skip
     const sharedLast = parseInt(localStorage.getItem(_POS_TRIGGER_KEY) || '0');
