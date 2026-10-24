@@ -5280,7 +5280,7 @@ function getRTNeed(p){
 
 // ── LAST CHANCE 행거 추천 (2026-10-24) ─────────────────────────────────────
 // 수량이 조금 남았거나 과년도인 의류를 정면 중앙 입구 옆 행거로 빼서 노출을 늘린다.
-// 점수: 사이즈 깨짐(사이즈 2개 이하·3장 이하) +3 · 보충 불가(신사·물류 0) +2 · 과년도 +3(24년 이전 +4) · 지난 시즌 +1
+// 점수: 사이즈 깨짐(사이즈 2개 이하·3장 이하) +3 · 보충 불가(신사·물류 0) +3 · 과년도 +3(24년 이전 +4)
 //       · 60일 무판매 +2 / 30일 무판매 +1. 최근 30일 부산 3장 이상 팔린 것과 이번 시즌 신상(진짜 마지막 물량 제외)은 뺀다.
 // 시즌: 26FW·FA26·HO26 = 이번 시즌, 26SS·SP26·SU26 = 지난 시즌, 25년 이전 = 과년도 — 시즌이 바뀌면 HANGER_CUR_YEAR·가을/봄 판단을 고친다.
 const HANGER_ZONE = { id: 'lastChance', group: '매장', label: 'LAST CHANCE 행거', code: 'LC', x: 39, y: 80, w: 14, h: 5, slots: [] };
@@ -5329,9 +5329,9 @@ function getHangerRec(p){
     const broken = left.length <= 2 || p.busanTotal <= 3;
     let score = 0; const tags = [];
     if(broken){ score += 3; tags.push(p.busanTotal === 1 ? 'LAST PIECE' : `${left.join('·')}만`); }
-    if(other <= 0){ score += 2; tags.push('보충 불가'); }
+    if(other <= 0){ score += 3; tags.push('보충 불가'); }
     if(se.kind === 'old'){ score += se.yr <= HANGER_CUR_YEAR - 2 ? 4 : 3; tags.push('과년도 ' + p.시즌); }
-    else if(se.kind === 'prev'){ score += 1; tags.push('지난 시즌 ' + p.시즌); }
+    // 같은 해 지난 시즌(26SS 등)은 점수를 주지 않는다 — 사용자 판단(10/24): 같은 해면 굳이 행거로 뺄 이유가 아님
     if(last60 === 0){ score += 2; tags.push(lastDate ? `60일+ 무판매` : '판매 기록 없음'); }
     else if(sales.d30 === 0){ score += 1; tags.push('30일 무판매'); }
     if(se.kind === 'cur' && !(broken && other <= 0)) return done(none);   // 신상은 진짜 마지막 물량만
