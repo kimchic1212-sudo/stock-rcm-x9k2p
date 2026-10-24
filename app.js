@@ -5283,8 +5283,8 @@ function getRTNeed(p){
 // 점수: 사이즈 깨짐(사이즈 2개 이하·3장 이하) +3 · 보충 불가(신사·물류 0) +3 · 과년도 +3(24년 이전 +4)
 //       · 60일 무판매 +2 / 30일 무판매 +1. 최근 30일 부산 3장 이상 팔린 것과 이번 시즌 신상(진짜 마지막 물량 제외)은 뺀다.
 // 시즌: 26FW·FA26·HO26 = 이번 시즌, 26SS·SP26·SU26 = 지난 시즌, 25년 이전 = 과년도 — 시즌이 바뀌면 HANGER_CUR_YEAR·가을/봄 판단을 고친다.
-// 정면 입구 오른쪽의 대각선 행거(10/24 사용자 표시 위치) — poly는 % 좌표
-const HANGER_ZONE = { id: 'lastChance', group: '매장', label: 'LAST CHANCE 행거', code: 'LC', poly: [[47.0, 85.1], [48.2, 83.2], [53.3, 89.3], [52.1, 91.2]], slots: [] };
+// 정면 입구 오른쪽, 입구 벽과 90도로 선 행거(10/24 사용자 요청) — x·y·w·h는 % 좌표, 지도 글자는 code('행거')
+const HANGER_ZONE = { id: 'lastChance', group: '매장', label: 'LAST CHANCE 행거', code: '행거', x: 49.5, y: 77, w: 3.5, h: 14.5, slots: [] };
 const HANGER_MIN_SCORE = 4;
 const HANGER_CUR_YEAR = 26, HANGER_CUR_FALL = true;   // 지금 = 26년 가을·겨울 시즌
 const _hangerCache = new Map();
