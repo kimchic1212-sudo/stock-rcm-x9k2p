@@ -4179,7 +4179,7 @@ function card(p){
   // LAST CHANCE 행거 뱃지 — 걸려 있으면 늘, 추천은 LAST CHANCE 칩을 켰을 때만
   let hangerBadge = "";
   if(_onHanger(p.품번)) hangerBadge = `<span style="background:#ffe4e6;color:#be123c;border:1px solid #fecdd3" class="px-2 py-0.5 rounded-lg font-black text-[10px]">LAST CHANCE 행거</span>`;
-  else if(getFilters().hangerRec){ const _hr = getHangerRec(p); if(_hr.score > 0) hangerBadge = `<span style="background:#fff1f2;color:#e11d48;border:1px solid #fecdd3" class="px-2 py-0.5 rounded-lg font-black text-[10px]">행거 추천 ${_hr.score} · ${escapeHtml(_hr.tags.slice(0, 2).join(' · '))}</span>`; }
+  else if(getFilters().hangerRec){ const _hr = getHangerRec(p); if(_hr.score > 0) hangerBadge = `<span style="background:#fff1f2;color:#e11d48;border:1px solid #fecdd3" class="px-2 py-0.5 rounded-lg font-black text-[10px]">행거 추천 ${_hangerStars(_hr.score)} · ${escapeHtml(_hr.tags.slice(0, 2).join(' · '))}</span>`; }
 
   // 오늘 POS 판매 뱃지
   let todaySoldBadge = "";
@@ -5298,6 +5298,8 @@ function _hangerSeason(s){
     if(yr === HANGER_CUR_YEAR - 1 && !HANGER_CUR_FALL && fall) return { kind: 'prev', yr };
     return { kind: 'old', yr };
 }
+// 점수 대신 별로 보여준다 — 9점 이상 ★★★(꼭 빼기), 6~8점 ★★, 4~5점 ★
+function _hangerStars(score){ return score >= 9 ? '★★★' : score >= 6 ? '★★' : '★'; }
 function _onHanger(code){ return _locArr(code).some(a => a.zoneId === HANGER_ZONE.id); }
 // 반환: { score, tags:[...], left:[사이즈] } — 추천 대상이 아니면 score 0
 function getHangerRec(p){
@@ -5753,7 +5755,7 @@ function openDetail(p){
 
     const _hrDetail = (p.카테고리 === '의류' && !_onHanger(p.품번)) ? getHangerRec(p) : null;
     if(_hrDetail && _hrDetail.score > 0){
-        html += `<div class="text-[11px] font-bold mt-2" style="color:#be123c;">LAST CHANCE 행거 추천 ${_hrDetail.score}점 — ${escapeHtml(_hrDetail.tags.join(' · '))}</div>`;
+        html += `<div class="text-[11px] font-bold mt-2" style="color:#be123c;">LAST CHANCE 행거 추천 ${_hangerStars(_hrDetail.score)} — ${escapeHtml(_hrDetail.tags.join(' · '))}</div>`;
     }
     if(isAdmin && dpSkipped){
         html += `<div class="text-[11px] font-bold text-gray-500 mt-2">🙈 미DP 목록에서 제외된 상품</div>`;
@@ -5763,7 +5765,7 @@ function openDetail(p){
             <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${shownLocs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
             ${!hasDP ? `<button id="locDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#4338ca;">📺 DP 진열 표시</button>` : ''}
             ${(dpSkipped || getDPStatus(p) === 'none') ? `<button id="locSkipDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] text-gray-600" title="남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품을 미DP 목록에서 뺍니다">${dpSkipped ? '↩ 미DP 목록에 다시 표시' : '🙈 미DP 목록에서 제외'}</button>` : ''}
-            ${p.카테고리 === '의류' ? (_onHanger(p.품번) ? `<button id="locHangerBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#be123c;">LAST CHANCE 행거에서 빼기</button>` : `<button id="locHangerBtn" class="brutal px-3 py-2 text-xs font-black" style="background:#ffe4e6;color:#be123c;">LAST CHANCE 행거로${getHangerRec(p).score > 0 ? ' (추천 ' + getHangerRec(p).score + ')' : ''}</button>`) : ''}
+            ${p.카테고리 === '의류' ? (_onHanger(p.품번) ? `<button id="locHangerBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#be123c;">LAST CHANCE 행거에서 빼기</button>` : `<button id="locHangerBtn" class="brutal px-3 py-2 text-xs font-black" style="background:#ffe4e6;color:#be123c;">LAST CHANCE 행거로${getHangerRec(p).score > 0 ? ' ' + _hangerStars(getHangerRec(p).score) : ''}</button>`) : ''}
             ${shownLocs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
         </div>`;
     }
