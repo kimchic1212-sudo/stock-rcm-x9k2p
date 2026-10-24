@@ -673,6 +673,7 @@ function _notice(message) {
 // 켜고 끄는 필터 칩 [상태 키, data 속성, 켜졌을 때 링 색] — getFilters·되돌리기 저장/복원이 모두 이 목록을 쓴다
 const _TOGGLE_CHIPS = [
   ["rtChance","data-rtchance"],
+  ["hangerRec","data-hanger"],
   ["stock","data-stock"],
   
   ["busanOnly","data-busanonly","ring-blue-400"],
@@ -2138,7 +2139,7 @@ function rebuildIndex(){
     }
 
     if(!map.has(code)){
-      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), itemCode:String(r["품목내부코드"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })(), sizes:[], periodSales: 0 });
+      map.set(code, { 품번:code, 품명:r["품명"], 브랜드:r["브랜드"], 카테고리:r["카테고리2"]||r["카테고리"], 시즌:String(r["시즌"]||"").trim(), 성별:r["성별"], gender:detectGender(code, r["성별"]), 소비자가:Number(r["소비자가"]||0), shopNo:String(r["상품번호(샵바이)"]||""), itemCode:String(r["품목내부코드"]||""), barcode:(()=>{ const keys=["POS바코드번호","POS연동바코드","바코드번호","바코드","EAN","ean","barcode","Barcode"]; for(const k of keys){ const v=String(r[k]||"").replace(/[\s\-]/g,""); if(v.length>=8) return v; } return ""; })(), sizes:[], periodSales: 0 });
     }
     const p = map.get(code);
     // 소비자가가 0이고 현재 행에 가격 있으면 업데이트 (첫 행이 0원인 경우 대비)
@@ -4175,6 +4176,11 @@ function card(p){
     rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-lg font-black text-[10px]">🔄 RT ${escapeHtml(_rtTop.size)} ${_rtLabel}${_rtMore}</span>`;
   }
 
+  // LAST CHANCE 행거 뱃지 — 걸려 있으면 늘, 추천은 LAST CHANCE 칩을 켰을 때만
+  let hangerBadge = "";
+  if(_onHanger(p.품번)) hangerBadge = `<span style="background:#ffe4e6;color:#be123c;border:1px solid #fecdd3" class="px-2 py-0.5 rounded-lg font-black text-[10px]">LAST CHANCE 행거</span>`;
+  else if(getFilters().hangerRec){ const _hr = getHangerRec(p); if(_hr.score > 0) hangerBadge = `<span style="background:#fff1f2;color:#e11d48;border:1px solid #fecdd3" class="px-2 py-0.5 rounded-lg font-black text-[10px]">행거 추천 ${_hr.score} · ${escapeHtml(_hr.tags.slice(0, 2).join(' · '))}</span>`; }
+
   // 오늘 POS 판매 뱃지
   let todaySoldBadge = "";
   if ((p.todaySold || 0) > 0) {
@@ -4281,7 +4287,7 @@ function card(p){
   if(gLabel === "여성") gBadgeClass = "ui-badge women";
 
   // 상단 상태 배지: 중요도 순으로 최대 3개만 노출, 나머지는 +N 축약 (품명이 밀리지 않게)
-  const _statusBadges = [overrideBadge, dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, otherBranchOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
+  const _statusBadges = [hangerBadge, overrideBadge, dpBadge, todaySoldBadge, rtChanceBadge, salesSpeedBadge, busanOnlyBadge, otherBranchOnlyBadge, promoBadge, (getFilters().noImage ? _noImgBadge : "")].filter(Boolean);
   const _MAX_BADGES = 3;
   let _badgesHtml = _statusBadges.slice(0, _MAX_BADGES).join("");
   if (_statusBadges.length > _MAX_BADGES) {
@@ -4875,7 +4881,8 @@ function render(){
     if(f.gender!=="ALL" && g!==f.gender && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
     if(f.salesSpeed!=="ALL" && getSalesSummary(p.품번).speed !== f.salesSpeed) return false;
-    if(f.rtChance && getRTNeed(p).score <= 0) return false;   // 사이즈 단위로 결품/소진임박이면서 가져올 재고가 있는 것만
+    if(f.rtChance && getRTNeed(p).score <= 0) return false;
+    if(f.hangerRec && !(_onHanger(p.품번) || getHangerRec(p).score > 0)) return false;   // 행거에 걸린 것 + 추천 후보   // 사이즈 단위로 결품/소진임박이면서 가져올 재고가 있는 것만
     
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
     if(f.sinsaOnly && !(p.busanTotal === 0 && p.sinsaTotal > 0 && p.centerTotal === 0)) return false;
@@ -4943,11 +4950,12 @@ function render(){
   _refreshDpFilterCounts();
 
   // RT추천 필터 활성 시 30일 판매량 내림차순 자동 정렬
-  const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "rtDesc" : $("#sortSel").value;
+  const sortMode = f.todaySoldOnly ? "todayDesc" : f.rtChance ? "rtDesc" : f.hangerRec ? "hangerDesc" : $("#sortSel").value;
   filteredList.sort((a,b) => {
     if(sortMode === "todayDesc") return (b.todaySold||0) - (a.todaySold||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode === "salesDesc") return (getSalesSummary(b.품번).d30||0) - (getSalesSummary(a.품번).d30||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     // RT추천은 판매량이 아니라 "지금 얼마나 급한지"(결품·소진임박 + 최근 판매 가중) 순으로 정렬한다
+    if(sortMode === "hangerDesc") return ((_onHanger(b.품번)?1:0) - (_onHanger(a.품번)?1:0)) || (getHangerRec(b).score - getHangerRec(a).score) || ((a.busanTotal||0) - (b.busanTotal||0)) || String(a.품명).localeCompare(String(b.품명),"ko");
     if(sortMode === "rtDesc") return (getRTNeed(b).score||0) - (getRTNeed(a).score||0) || String(a.품명).localeCompare(String(b.품명),"ko");
 
     // 무게·드롭 정렬 — 가이드에 값이 없는 상품은 항상 뒤로
@@ -5270,7 +5278,65 @@ function getRTNeed(p){
     return result;
 }
 
-function clearSalesCache() { _salesCache.clear(); _rtCache.clear(); }
+// ── LAST CHANCE 행거 추천 (2026-10-24) ─────────────────────────────────────
+// 수량이 조금 남았거나 과년도인 의류를 정면 중앙 입구 옆 행거로 빼서 노출을 늘린다.
+// 점수: 사이즈 깨짐(사이즈 2개 이하·3장 이하) +3 · 보충 불가(신사·물류 0) +2 · 과년도 +3(24년 이전 +4) · 지난 시즌 +1
+//       · 60일 무판매 +2 / 30일 무판매 +1. 최근 30일 부산 3장 이상 팔린 것과 이번 시즌 신상(진짜 마지막 물량 제외)은 뺀다.
+// 시즌: 26FW·FA26·HO26 = 이번 시즌, 26SS·SP26·SU26 = 지난 시즌, 25년 이전 = 과년도 — 시즌이 바뀌면 HANGER_CUR_YEAR·가을/봄 판단을 고친다.
+const HANGER_ZONE = { id: 'lastChance', group: '매장', label: 'LAST CHANCE 행거', code: 'LC', x: 39, y: 80, w: 14, h: 5, slots: [] };
+const HANGER_MIN_SCORE = 4;
+const HANGER_CUR_YEAR = 26, HANGER_CUR_FALL = true;   // 지금 = 26년 가을·겨울 시즌
+const _hangerCache = new Map();
+function _hangerSeason(s){
+    const t = String(s || '').toUpperCase();
+    let m = t.match(/^(\d{2})(SS|FW)$/), yr, fall;
+    if(m){ yr = +m[1]; fall = m[2] === 'FW'; }
+    else if((m = t.match(/^(SP|SU|FA|HO)(\d{2})$/))){ yr = +m[2]; fall = m[1] === 'FA' || m[1] === 'HO'; }
+    else return { kind: '', yr: 0 };
+    if(yr > HANGER_CUR_YEAR || (yr === HANGER_CUR_YEAR && (fall === HANGER_CUR_FALL || !HANGER_CUR_FALL))) return { kind: 'cur', yr };
+    if(yr === HANGER_CUR_YEAR) return { kind: 'prev', yr };
+    if(yr === HANGER_CUR_YEAR - 1 && !HANGER_CUR_FALL && fall) return { kind: 'prev', yr };
+    return { kind: 'old', yr };
+}
+function _onHanger(code){ return _locArr(code).some(a => a.zoneId === HANGER_ZONE.id); }
+// 반환: { score, tags:[...], left:[사이즈] } — 추천 대상이 아니면 score 0
+function getHangerRec(p){
+    if(!p || !p.품번) return { score: 0, tags: [] };
+    if(_hangerCache.has(p.품번)) return _hangerCache.get(p.품번);
+    const none = { score: 0, tags: [] };
+    const done = r => { _hangerCache.set(p.품번, r); return r; };
+    if(p.카테고리 !== '의류' || !(p.busanTotal > 0)) return done(none);
+    const sales = getSalesSummary(p.품번);
+    if(sales.d30 >= 3) return done(none);   // 잘 팔리는 중 — 행거로 빼면 손해
+    let last60 = 0, lastDate = '';
+    const hist = SALES_HISTORY && SALES_HISTORY.items ? SALES_HISTORY.items[p.품번] : null;
+    if(hist){
+        const today = new Date(); today.setHours(0,0,0,0);
+        for(const date in hist){
+            const day = hist[date]; if(typeof day !== 'object' || !day) continue;
+            let q = 0;
+            for(const size in day){ const sd = day[size]; if(typeof sd === 'object' && sd) { for(const mgr in sd) if(_rtStoreOf(mgr) === 'busan') q += (sd[mgr] || 0); } else q += (sd || 0); }
+            if(q <= 0) continue;
+            if(Math.floor((today - new Date(date)) / 86400000) <= 60) last60 += q;
+            if(date > lastDate) lastDate = date;
+        }
+    }
+    const left = (p.sizes || []).filter(x => (Number(x.busan) || 0) > 0).map(x => String(x.size).trim());
+    const other = (p.sinsaTotal || 0) + (p.centerTotal || 0);
+    const se = _hangerSeason(p.시즌);
+    const broken = left.length <= 2 || p.busanTotal <= 3;
+    let score = 0; const tags = [];
+    if(broken){ score += 3; tags.push(p.busanTotal === 1 ? 'LAST PIECE' : `${left.join('·')}만`); }
+    if(other <= 0){ score += 2; tags.push('보충 불가'); }
+    if(se.kind === 'old'){ score += se.yr <= HANGER_CUR_YEAR - 2 ? 4 : 3; tags.push('과년도 ' + p.시즌); }
+    else if(se.kind === 'prev'){ score += 1; tags.push('지난 시즌 ' + p.시즌); }
+    if(last60 === 0){ score += 2; tags.push(lastDate ? `60일+ 무판매` : '판매 기록 없음'); }
+    else if(sales.d30 === 0){ score += 1; tags.push('30일 무판매'); }
+    if(se.kind === 'cur' && !(broken && other <= 0)) return done(none);   // 신상은 진짜 마지막 물량만
+    return done(score >= HANGER_MIN_SCORE ? { score, tags, left, lastDate } : none);
+}
+
+function clearSalesCache() { _salesCache.clear(); _rtCache.clear(); _hangerCache.clear(); }
 function getSalesSummary(code) {
   if(_salesCache.has(code)) return _salesCache.get(code);
   if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code]) {
@@ -5685,6 +5751,10 @@ function openDetail(p){
         html += `<div class="text-xs text-gray-500 font-bold py-1">위치가 아직 지정되지 않았습니다</div>`;
     }
 
+    const _hrDetail = (p.카테고리 === '의류' && !_onHanger(p.품번)) ? getHangerRec(p) : null;
+    if(_hrDetail && _hrDetail.score > 0){
+        html += `<div class="text-[11px] font-bold mt-2" style="color:#be123c;">LAST CHANCE 행거 추천 ${_hrDetail.score}점 — ${escapeHtml(_hrDetail.tags.join(' · '))}</div>`;
+    }
     if(isAdmin && dpSkipped){
         html += `<div class="text-[11px] font-bold text-gray-500 mt-2">🙈 미DP 목록에서 제외된 상품</div>`;
     }
@@ -5693,6 +5763,7 @@ function openDetail(p){
             <button id="locPickBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] flex-1">📍 ${shownLocs.length ? '위치 추가' : '지도에서 위치 지정'}</button>
             ${!hasDP ? `<button id="locDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#4338ca;">📺 DP 진열 표시</button>` : ''}
             ${(dpSkipped || getDPStatus(p) === 'none') ? `<button id="locSkipDpBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)] text-gray-600" title="남/녀 중 한쪽만 진열하는 상품처럼 일부러 DP 안 하는 상품을 미DP 목록에서 뺍니다">${dpSkipped ? '↩ 미DP 목록에 다시 표시' : '🙈 미DP 목록에서 제외'}</button>` : ''}
+            ${p.카테고리 === '의류' ? (_onHanger(p.품번) ? `<button id="locHangerBtn" class="brutal px-3 py-2 text-xs font-black bg-[color:var(--surface)]" style="color:#be123c;">LAST CHANCE 행거에서 빼기</button>` : `<button id="locHangerBtn" class="brutal px-3 py-2 text-xs font-black" style="background:#ffe4e6;color:#be123c;">LAST CHANCE 행거로${getHangerRec(p).score > 0 ? ' (추천 ' + getHangerRec(p).score + ')' : ''}</button>`) : ''}
             ${shownLocs.length > 1 ? `<button id="locClearAllBtn" class="brutal px-3 py-2 text-xs font-black text-red-600 bg-[color:var(--surface)]">전체 해제</button>` : ''}
         </div>`;
     }
@@ -5705,6 +5776,26 @@ function openDetail(p){
         // _locDiv가 아직 문서에 붙기 전(최초 렌더)일 수 있어 document 전역 $() 대신 _locDiv 안에서만 탐색
         const pickBtn = _locDiv.querySelector("#locPickBtn");
         if(pickBtn) pickBtn.onclick = () => window.openSingleLocModal(p.품번);
+
+        const hangerBtn = _locDiv.querySelector("#locHangerBtn");
+        if(hangerBtn) hangerBtn.onclick = async () => {
+            if(!checkPat()) return;
+            const wasOn = _onHanger(p.품번);
+            hangerBtn.disabled = true;
+            const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+            const ok = await saveLocations(server => {
+                const zones = (server.zones || []).some(z => z.id === HANGER_ZONE.id) ? server.zones : [...(server.zones || []), { ...HANGER_ZONE }];
+                const assignments = {...server.assignments};
+                const cur = assignments[p.품번];
+                const arr = (Array.isArray(cur) ? cur : (cur ? [cur] : [])).filter(a => a.zoneId !== HANGER_ZONE.id);
+                // since: 행거에 건 날 — 나중에 '걸기 전후 판매'를 비교할 기준
+                if(!wasOn) arr.push({ zoneId: HANGER_ZONE.id, since: today });
+                if(arr.length) assignments[p.품번] = arr; else delete assignments[p.품번];
+                return { zones, assignments };
+            });
+            hangerBtn.disabled = false;
+            if(ok){ showToast(wasOn ? '✓ LAST CHANCE 행거에서 뺐습니다' : '✓ LAST CHANCE 행거로 옮겼습니다'); _refreshDpFilterCounts(); _renderLocPanel(); render(); }
+        };
 
         const dpBtn = _locDiv.querySelector("#locDpBtn");
         if(dpBtn) dpBtn.onclick = () => window.markAsDP(p.품번);
@@ -5992,7 +6083,7 @@ function renderActiveFilterBar() {
     // 접혀 있는 더보기 패널·점검 보드 안에 숨은 조건만 필터 줄 끝에 보여 준다
     const hiddenIn = el => { const box = el && el.closest('#filterPanel, #adminBoard'); return !!box && box.classList.contains('hidden'); };
     const items = []; // {label, onClear}
-    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-busanonly], button.chip[data-sinsaonly], button.chip[data-centeronly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-nolocdp], button.chip[data-hasloc]').forEach(btn => {
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-hanger], button.chip[data-busanonly], button.chip[data-sinsaonly], button.chip[data-centeronly], button.chip[data-todaysold], button.chip[data-dp], button.chip[data-noimage], button.chip[data-nobarcode], button.chip[data-override], button.chip[data-noloc], button.chip[data-nolocdp], button.chip[data-hasloc]').forEach(btn => {
         if (btn.dataset.active === "1" && hiddenIn(btn)) {
             items.push({ label: btn.textContent.trim(), onClear: () => {
                 btn.dataset.active = "0";
@@ -6032,7 +6123,7 @@ function renderActiveFilterBar() {
 
 // 필터 칩 전체 해제 헬퍼 (카테고리·성별·브랜드 제외, 단일선택 그룹)
 function _clearAllFilterChips() {
-    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(x => x.dataset.active = "0");
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-hanger]').forEach(x => x.dataset.active = "0");
     const bb = $('button.chip[data-busanonly]');
     if (bb) { bb.dataset.active = "0"; bb.classList.remove('ring-2','ring-blue-400'); }
     const sinsaOb = $('button.chip[data-sinsaonly]');
@@ -6043,7 +6134,7 @@ function _clearAllFilterChips() {
     if (tb) { tb.dataset.active = "0"; tb.classList.remove('ring-2','ring-orange-400'); }
 }
 
-$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-stock], button.chip[data-busanonly], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.addEventListener("click",()=>{
+$$('button.chip[data-cat], button.chip[data-gender], button.chip[data-stock], button.chip[data-busanonly], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-hanger]').forEach(b=>b.addEventListener("click",()=>{
     saveHistoryState();
     if(b.dataset.cat) {
         // 카테고리: 단일선택 (성별과 조합 가능)
@@ -6067,7 +6158,7 @@ $("#resetAll").onclick=()=>{
     saveHistoryState();
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
-    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance]').forEach(b=>b.dataset.active="0");
+    $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-hanger]').forEach(b=>b.dataset.active="0");
     window._activeBrands = new Set();
     if(window._renderBrandChips) window._renderBrandChips();
     if($("#brandSearch")) { $("#brandSearch").value = ""; }
