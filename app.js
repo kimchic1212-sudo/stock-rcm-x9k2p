@@ -430,7 +430,7 @@ function getPromoList() {
 //   "06/19~06/22"  /  "5.25-6.14"  /  "06/19(목) ~ 06/22(일), 4일간"
 function _parsePromoPeriod(period) {
   // .*? 비탐욕 매칭으로 날짜와 ~ 사이 임의 텍스트 허용
-  const m = (period||'').match(/(\d{1,2}[\/.]\d{1,2}).*?[~～\-].*?(\d{1,2}[\/.]\d{1,2})/);
+  const m = (period||'').match(/(\d{1,2}[\/.]\d{1,2}).*?[~～\-–—].*?(\d{1,2}[\/.]\d{1,2})/);
   if(!m) return null;
   const toDate = s => { const [mo,d]=s.replace('.','/').split('/'); const yr=new Date().getFullYear(); return new Date(yr,parseInt(mo)-1,parseInt(d)); };
   const start = toDate(m[1]);
@@ -443,12 +443,18 @@ function isPromoActive(pr) {
   const now = new Date();
   return now >= range.start && now <= range.end;
 }
-function findPromoForCode(code, consumerPrice) {
+// 매장 단독 기획전 — 이름·기간 글에 '오프라인' 또는 '매장 단독/전용/온리'가 있으면 (등록 화면에 따로 고르는 칸이 없어 글로 판단)
+function _isStoreOnlyPromo(pr) {
+  return /오프라인|매장\s*(단독|전용|온리|only)/i.test(String(pr?.meta?.name || '') + ' ' + String(pr?.meta?.period || ''));
+}
+// onlineOnly: 매장 단독을 빼고 찾는다 — 같은 상품을 온라인에서 사면 얼마인지 안내할 때
+function findPromoForCode(code, consumerPrice, onlineOnly) {
   let best = null;
   let bestPrice = Infinity;
   let bestId = -Infinity;
   for (const pr of getPromoList()) {
     if (!window.promoPreviewMode && !isPromoActive(pr)) continue;
+    if (onlineOnly && _isStoreOnlyPromo(pr)) continue;
     const item = pr.items && pr.items[code];
     if (!item) continue;
     let price = null;
@@ -466,7 +472,7 @@ function findPromoForCode(code, consumerPrice) {
     if (better) {
       bestPrice = price;
       bestId = prId;
-      best = { promo: pr, item, isPreview: !isPromoActive(pr) };
+      best = { promo: pr, item, price, isPreview: !isPromoActive(pr) };
     }
   }
   return best;
@@ -476,12 +482,14 @@ function reapplyPromoData() {
   const activeWeeklyCat = getActiveWeeklyCategory();
   PRODUCTS.forEach(p => {
     delete p.currentPromoPrice; delete p.promoType; delete p.promoName;
-    delete p.promoRate; delete p.promoEndDate; delete p.promoIsPreview;
+    delete p.promoRate; delete p.promoEndDate; delete p.promoIsPreview; delete p.promoStoreOnly; delete p.promoOnlinePrice;
     const _pm = findPromoForCode(p.품번, p.소비자가);
     if(!_pm) return;
     const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
     p.promoIsPreview = !!_isPreview;
-    const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
+    p.promoStoreOnly = _isStoreOnlyPromo(_pr);
+    if(p.promoStoreOnly) p.promoOnlinePrice = findPromoForCode(p.품번, p.소비자가, true)?.price || null;
+    const _endDate = (function(period){ const m=(period||'').match(/[~～\-–—]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
     const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
     p.promoEventRate  = _pi.eventRate  || 0;
     p.promoCouponRate = _pi.couponRate || 0;
@@ -2171,7 +2179,9 @@ function rebuildIndex(){
     if (_pm) {
         const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
         p.promoIsPreview = !!_isPreview;
-        const _endDate = (function(period){ const m=(period||'').match(/[~～]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
+        p.promoStoreOnly = _isStoreOnlyPromo(_pr);
+        if(p.promoStoreOnly) p.promoOnlinePrice = findPromoForCode(p.품번, p.소비자가, true)?.price || null;
+        const _endDate = (function(period){ const m=(period||'').match(/[~～\-–—]\s*(\d{1,2}[\/\.]\d{1,2})/); return m?m[1].replace('.','/'):'' ; })(_pr.meta?.period||'');
         const _promoMeta = { promoType:'general', promoName: _pr.meta?.name||'', promoEndDate: _endDate||'' };
         p.promoEventRate  = _pi.eventRate  || 0;
         p.promoCouponRate = _pi.couponRate || 0;
@@ -4262,17 +4272,24 @@ function card(p){
           // 기획전·쿠폰은 상단 배지 없이 하단에 한 줄로 — 할인율과 마감일만. 단계별 가격과 기획전 이름은 마우스를 올리면 보인다
           const _steps = [];
           // 쿠폰까지 있으면 '쿠폰 없이 살 때 가격'(기획전가)도 같이 — 매장에서 안내할 때 필요
-          if(_erInt > 0) _steps.push(`기획전 ▼${_erInt}%${(_crInt > 0 && p.promoEventPrice) ? ' ' + krw(p.promoEventPrice) : ''}`);
-          if(_crInt > 0) _steps.push(`쿠폰 ▼${_crInt}%`);
-          if(!_steps.length) _steps.push(`할인 ▼${rateInt}%`);
+          if(p.promoStoreOnly){
+              _steps.push(`매장 단독 ▼${rateInt}%`);
+              // 온라인에도 할인이 있으면 그 값을, 없으면 정가임을 — 고객이 온라인과 비교할 때 바로 안내하도록
+              _steps.push(p.promoOnlinePrice ? `온라인 ${krw(p.promoOnlinePrice)}` : '온라인 할인 없음');
+          } else {
+              if(_erInt > 0) _steps.push(`기획전 ▼${_erInt}%${(_crInt > 0 && p.promoEventPrice) ? ' ' + krw(p.promoEventPrice) : ''}`);
+              if(_crInt > 0) _steps.push(`쿠폰 ▼${_crInt}%`);
+              if(!_steps.length) _steps.push(`할인 ▼${rateInt}%`);
+          }
           if(p.promoEndDate) _steps.push(`~${p.promoEndDate}`);
           if(_isGray) _steps.push('📅미리보기');
-          _steps[0] = '🎟️ ' + _steps[0];
+          if(!p.promoStoreOnly) _steps[0] = '🎟️ ' + _steps[0];
           const _tip = (p.promoName ? `[${p.promoName}] ` : '') + [(_erInt > 0 && p.promoEventPrice) ? `기획전가 ${krw(p.promoEventPrice)}` : '', `최종 ▼${rateInt}% ${krw(p.currentPromoPrice)}`].filter(Boolean).join(' → ');
           // 좁은 카드(태블릿 3열)에서는 '·' 자리에서만 줄이 바뀌게 항목마다 묶는다
           promoSummary = `<div class="${_isGray ? 'text-gray-500' : 'text-purple-600'}" title="${escapeHtml(_tip)}">${_steps.map(s => `<span class="whitespace-nowrap">${s}</span>`).join(' · ')}</div>`;
           priceDisplay = `
             <div class="flex flex-col items-end leading-tight">
+                ${p.promoStoreOnly ? `<span class="font-black mb-1" style="border-radius:5px;background:${_isGray ? '#6b7280' : '#0a0a0a'};color:#fff;font-size:11px;padding:2px 7px;">매장 단독</span>` : ''}
                 <span class="text-xs mb-0.5"><b class="${_isGray ? 'text-gray-500' : 'text-purple-600'} mr-1">▼${rateInt}%</b><span class="text-gray-500 line-through">${krw(p.소비자가)}</span></span>
                 <span class="text-[17px] sm:text-lg font-black ${_isGray ? 'text-gray-500' : 'text-purple-700'}">${krw(p.currentPromoPrice)}</span>
             </div>`;
@@ -5500,7 +5517,7 @@ function openDetail(p){
   `;
 
   const _priceHtml = p.currentPromoPrice
-    ? `<span class="text-red-600 font-black text-sm">${krw(p.currentPromoPrice)}</span><span class="text-gray-500 line-through text-xs ml-1">${krw(p.소비자가)}</span>`
+    ? `${p.promoStoreOnly ? `<span class="font-black mr-1" style="border-radius:5px;background:#0a0a0a;color:#fff;font-size:11px;padding:2px 7px;">매장 단독</span>` : ''}<span class="text-red-600 font-black text-sm">${krw(p.currentPromoPrice)}</span><span class="text-gray-500 line-through text-xs ml-1">${krw(p.소비자가)}</span>`
     : `<span class="font-black text-sm text-gray-800">${krw(p.소비자가)}</span>`;
   $("#detailHead").innerHTML = `
     <div class="flex gap-3 items-center">
