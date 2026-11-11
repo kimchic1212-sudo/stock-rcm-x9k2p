@@ -1809,8 +1809,15 @@ async function loadSalesOnly() {
   } catch(e) { console.error('[동기화] 기획전·DP·재고보정 갱신 실패:', e); }
 }
 // 5분마다 판매데이터 갱신 (GitHub에서 최신 sales_history 읽기)
-const _salesIntervalId = setInterval(loadSalesOnly, 5 * 60 * 1000);
-setInterval(() => checkSyncLockStatus(), 10 * 60 * 1000);
+// 영업시간(오픈 1시간 전~마감 1시간 뒤) + 화면이 보일 때만 — 밤새·숨긴 탭이 허브(Vercel)를 계속 불러 무료 CPU 한도를 90%까지 쓴 일(2026-11-11)
+function _inDataHours() {
+    const k = new Date(Date.now() + 9 * 3600 * 1000);
+    const dow = k.getUTCDay(), min = k.getUTCHours() * 60 + k.getUTCMinutes();
+    const [open, close] = (dow === 0 || dow === 6) ? [11 * 60, 19 * 60] : [12 * 60, 20 * 60];
+    return min >= open - 60 && min <= close + 60;
+}
+const _salesIntervalId = setInterval(() => { if (document.visibilityState === 'visible' && _inDataHours()) loadSalesOnly(); }, 5 * 60 * 1000);
+setInterval(() => { if (document.visibilityState === 'visible' && _inDataHours()) checkSyncLockStatus(); }, 10 * 60 * 1000);
 // 절전·백그라운드 동안에는 타이머가 멈추므로, 화면이 다시 보이면 다음 주기를 기다리지 않고 바로 받는다
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && Date.now() - _lastSalesSync > 60 * 1000) loadSalesOnly();
