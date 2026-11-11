@@ -480,7 +480,9 @@ function findPromoForCode(code, consumerPrice, onlineOnly) {
     }
     if (price === null) continue;
     const prId = parseInt(pr.id, 10) || 0;
-    const better = price < bestPrice || (price === bestPrice && prId > bestId);
+    // 값이 같으면 온라인과 같은 가격이라 매장 단독이 아닌 쪽을 고른다(매장 단독 표시가 잘못 붙지 않게), 그다음 최신 기획전
+    const _so = _isStoreOnlyPromo(pr), _bestSo = best ? _isStoreOnlyPromo(best.promo) : false;
+    const better = price < bestPrice || (price === bestPrice && (_so !== _bestSo ? !_so : prId > bestId));
     if (better) {
       bestPrice = price;
       bestId = prId;
