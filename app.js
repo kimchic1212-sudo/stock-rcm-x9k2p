@@ -7484,6 +7484,9 @@ window.renderPromoAdmin = () => {
                 const epIdx   = headers.indexOf('기획전 할인가');
                 const erIdx   = headers.indexOf('기획전 할인율');
                 const crIdx   = headers.indexOf('쿠폰 할인율');
+                // 제안할인율: 채워진 행은 이 값이 최종 — 공지 엑셀의 최종할인가 칸은 제안할인율을 반영하지 않은 채 남아 있었다(11/11 테렉스 30%로 잘못 등록)
+                const sugIdx  = headers.indexOf('제안할인율');
+                const rrpIdx  = headers.indexOf('소비자가');
                 // 최종 할인율 컬럼: 다양한 컬럼명 지원
                 let frIdx = headers.indexOf('최종 할인율');
                 if(frIdx === -1) frIdx = headers.indexOf('쿠폰 할인율');
@@ -7497,7 +7500,9 @@ window.renderPromoAdmin = () => {
                     let fRate = parseFloat(r[frIdx])||0; if(fRate>1) fRate/=100;
                     let eRate = parseFloat(r[erIdx])||0; if(eRate>1) eRate/=100;
                     let cRate = parseFloat(r[crIdx])||0; if(cRate>1) cRate/=100;
-                    const fp = Number(String(r[fpIdx]||"").replace(/,/g,''))||null;
+                    let fp = Number(String(r[fpIdx]||"").replace(/,/g,''))||null;
+                    let sRate = sugIdx > -1 ? (parseFloat(r[sugIdx])||0) : 0; if(sRate>1) sRate/=100;
+                    if(sRate > 0){ fRate = sRate; const rrp = Number(String(r[rrpIdx]||"").replace(/,/g,''))||0; fp = rrp ? Math.round(rrp * (1 - sRate) / 10) * 10 : null; }
                     const ep = Number(String(r[epIdx]||"").replace(/,/g,''))||null;
                     items[code] = {
                         targetCat: String(r[catIdx]||"").trim().toUpperCase(),
