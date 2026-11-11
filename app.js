@@ -4955,7 +4955,8 @@ function render(){
         if(!p.currentPromoPrice) return false;
         if(f.promoType !== "ALL" && f.promoType !== "PREVIEW" && p.promoType !== f.promoType) return false;
         if(f.promoRate > 0 && Math.round((p.promoRate || 0) * 100) !== f.promoRate) return false;
-        if(f.promoName && f.promoName !== "ALL" && p.promoName !== f.promoName) return false;
+        // 고른 기획전에 등록된 상품이면 보인다 — 다른 기획전과 값이 같아 그쪽 가격이 표시되는 상품도 빠지지 않게(11/11 테렉스 9개 누락)
+        if(f.promoName && f.promoName !== "ALL" && p.promoName !== f.promoName && !getPromoList().some(pr => (pr.meta?.name || '') === f.promoName && pr.items && pr.items[p.품번])) return false;
     }
 
     if(activeSizeFilter !== "ALL") {
