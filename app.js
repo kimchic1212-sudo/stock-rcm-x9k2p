@@ -2113,13 +2113,23 @@ function getActiveWeeklyCategory() {
     return null;
 }
 
+// 사이즈 정렬 — 신발(230·235…)은 숫자순, 의류는 XS<S<M<L<XL<2XL…, FREE·1SIZE는 맨 뒤.
+// 재고 엑셀 행 순서가 알파벳순(L, M, S, XL, XS)으로 오는 경우가 있어 상품 만들 때 한 번 정렬한다 (2026-11-18)
+const _APPAREL_ORDER = {"XXXS":1,"3XS":1,"XXS":2,"2XS":2,"XS":3,"S":4,"M":5,"L":6,"XL":7,"XXL":8,"2XL":8,"XXXL":9,"3XL":9,"4XL":10,"5XL":11,"FREE":20,"F":20,"OS":20,"1SIZE":20,"ONESIZE":20};
+function _sizeCmp(a, b) {
+    const A = String(a ?? '').trim(), B = String(b ?? '').trim();
+    const ua = A.toUpperCase().replace(/\s/g, ''), ub = B.toUpperCase().replace(/\s/g, '');
+    const oa = _APPAREL_ORDER[ua], ob = _APPAREL_ORDER[ub];
+    if (oa && ob) return oa - ob;
+    const na = /^\d+(\.\d+)?$/.test(ua) ? parseFloat(ua) : NaN, nb = /^\d+(\.\d+)?$/.test(ub) ? parseFloat(ub) : NaN;
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    if (!isNaN(na)) return -1; if (!isNaN(nb)) return 1;      // 숫자 사이즈를 글자 사이즈보다 앞에
+    if (oa) return -1; if (ob) return 1;                     // 아는 의류 사이즈를 모르는 표기보다 앞에
+    return A.localeCompare(B, 'ko', { numeric: true });
+}
 function generateSizeOptionsHtml(sizesSet) {
     const arr = Array.from(sizesSet).map(s => String(s).trim()).filter(Boolean);
-    const apOrder = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
-    arr.sort((a,b) => {
-        if (isFwSize(a) && isFwSize(b)) return parseInt(a) - parseInt(b);
-        return (apOrder[a.toUpperCase()]||99) - (apOrder[b.toUpperCase()]||99);
-    });
+    arr.sort(_sizeCmp);
     return arr.map(s => `<option value="${s}">${s}</option>`).join('');
 }
 
@@ -2187,6 +2197,7 @@ function rebuildIndex(){
   }
 
   PRODUCTS = Array.from(map.values()).map(p=>{
+    p.sizes.sort((x, y) => _sizeCmp(x.size, y.size));
     p.busanTotal = p.sizes.reduce((a,b)=>a+b.busan,0);
     p.sinsaTotal = p.sizes.reduce((a,b)=>a+b.sinsa,0);
     p.centerTotal = p.sizes.reduce((a,b)=>a+b.center,0);
@@ -3759,12 +3770,7 @@ window.openDashDetail = (code, periodParam) => {
     }
 
     const allUniqueSizes = Array.from(new Set([...Object.keys(sizeSalesMapBusan), ...p.sizes.map(s=>String(s.size).trim())]))
-        .sort((a,b) => {
-            if(isFwSize(a) && isFwSize(b)) return parseInt(a) - parseInt(b);
-            const order = {"XS":1, "S":2, "M":3, "L":4, "XL":5, "2XL":6, "XXL":6, "3XL":7, "FREE":8, "OS":9, "F":10};
-            if(order[a.toUpperCase()] && order[b.toUpperCase()]) return order[a.toUpperCase()] - order[b.toUpperCase()];
-            return a.localeCompare(b);
-        });
+        .sort(_sizeCmp);
 
     const chartLabels = allUniqueSizes.filter(s => s !== "알수없음");
     const chartDataBusan = chartLabels.map(s => sizeSalesMapBusan[s] || 0);
