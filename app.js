@@ -460,12 +460,15 @@ function _isStoreOnlyPromo(pr) {
   return /오프라인|매장\s*(단독|전용|온리|only)/i.test(String(pr?.meta?.name || '') + ' ' + String(pr?.meta?.period || ''));
 }
 // onlineOnly: 매장 단독을 빼고 찾는다 — 같은 상품을 온라인에서 사면 얼마인지 안내할 때
-function findPromoForCode(code, consumerPrice, onlineOnly) {
+// scope: 기본은 진행 중인 기획전만 / 'upcoming'이면 곧 시작할(PROMO_PREVIEW_DAYS 이내) 기획전만.
+// 예전엔 둘을 섞어 가장 싼 쪽을 골라서, 내일 시작하는 주말 특가가 오늘 가격(공홈 자동반영 등)을 가렸다 (2026-11-20)
+function findPromoForCode(code, consumerPrice, onlineOnly, scope) {
   let best = null;
   let bestPrice = Infinity;
   let bestId = -Infinity;
   for (const pr of getPromoList()) {
-    if (!window.promoPreviewMode && !isPromoActive(pr) && !_promoUpcoming(pr)) continue;
+    if (scope === 'upcoming') { if (!_promoUpcoming(pr)) continue; }
+    else if (!window.promoPreviewMode && !isPromoActive(pr)) continue;
     if (onlineOnly && _isStoreOnlyPromo(pr)) continue;
     const item = pr.items && pr.items[code];
     if (!item) continue;
@@ -491,13 +494,22 @@ function findPromoForCode(code, consumerPrice, onlineOnly) {
   }
   return best;
 }
+function _setPromoNext(p, main) {
+  delete p.promoNext;
+  if (main && main.isPreview) return;               // 진행 중 기획전이 없어 시작 전 것이 이미 주 가격으로 보이는 중
+  if (!(p.소비자가 > 0)) return;
+  const nx = findPromoForCode(p.품번, p.소비자가, false, 'upcoming');
+  if (!nx || (main && nx.price >= main.price)) return;
+  p.promoNext = { price: nx.price, rate: (p.소비자가 - nx.price) / p.소비자가, storeOnly: _isStoreOnlyPromo(nx.promo), start: _promoStartLabel(nx.promo), name: nx.promo.meta?.name || '' };
+}
 function reapplyPromoData() {
   if(!PRODUCTS || !PRODUCTS.length) return;
   const activeWeeklyCat = getActiveWeeklyCategory();
   PRODUCTS.forEach(p => {
     delete p.currentPromoPrice; delete p.promoType; delete p.promoName;
     delete p.promoRate; delete p.promoEndDate; delete p.promoIsPreview; delete p.promoStoreOnly; delete p.promoOnlinePrice; delete p.promoStartLabel;
-    const _pm = findPromoForCode(p.품번, p.소비자가);
+    const _pm = findPromoForCode(p.품번, p.소비자가) || findPromoForCode(p.품번, p.소비자가, false, 'upcoming');
+    _setPromoNext(p, _pm);
     if(!_pm) return;
     const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
     p.promoIsPreview = !!_isPreview;
@@ -2207,7 +2219,8 @@ function rebuildIndex(){
     const prevTotal = prevRaw.filter(pr=>pr["품번"]===p.품번).reduce((a,b)=>a+Number(b["매장 (부산)"] ?? b["매장(부산)"] ?? 0),0);
     p.delta = prevRaw.length ? p.busanTotal - prevTotal : 0;
     
-    const _pm = findPromoForCode(p.품번, p.소비자가);
+    const _pm = findPromoForCode(p.품번, p.소비자가) || findPromoForCode(p.품번, p.소비자가, false, 'upcoming');
+    _setPromoNext(p, _pm);
     if (_pm) {
         const { promo: _pr, item: _pi, isPreview: _isPreview } = _pm;
         p.promoIsPreview = !!_isPreview;
@@ -4314,6 +4327,7 @@ function card(p){
           const _tip = (p.promoName ? `[${p.promoName}] ` : '') + [(_erInt > 0 && p.promoEventPrice) ? `기획전가 ${krw(p.promoEventPrice)}` : '', `최종 ▼${rateInt}% ${krw(p.currentPromoPrice)}`].filter(Boolean).join(' → ');
           // 좁은 카드(태블릿 3열)에서는 '·' 자리에서만 줄이 바뀌게 항목마다 묶는다
           promoSummary = `<div class="${_isGray ? 'text-gray-500' : 'text-purple-600'}" title="${escapeHtml(_tip)}">${_steps.map(s => `<span class="whitespace-nowrap">${s}</span>`).join(' · ')}</div>`;
+          if(p.promoNext) promoSummary += `<div class="text-gray-500" title="${escapeHtml(p.promoNext.name)}"><span class="whitespace-nowrap">📅${p.promoNext.start}부터 ${p.promoNext.storeOnly ? '매장 단독 ' : ''}▼${Math.round(p.promoNext.rate * 100)}% ${krw(p.promoNext.price)}</span></div>`;
           priceDisplay = `
             <div class="flex flex-col items-end leading-tight">
                 ${p.promoStoreOnly ? `<span class="font-black mb-1" style="border-radius:5px;background:${_isGray ? '#6b7280' : '#0a0a0a'};color:#fff;font-size:11px;padding:2px 7px;">매장 단독</span>` : ''}
