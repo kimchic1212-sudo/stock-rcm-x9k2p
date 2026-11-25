@@ -401,6 +401,14 @@ let GH = { owner:"", repo:"", branch:"main" };
 let RAW=[], PRODUCTS=[], filtered=[];
 let IMAGES = {};
 let TRANSFERS = [];
+// RT 요청·반납 기록 — 요청 목록(transfers.json)은 엑셀을 받으면 비워지므로 '이미 요청함/최근 반납'을 따로 남긴다 (60일 보관)
+const RT_LOG_PATH = "rt_log.json";
+let RT_LOG = [];
+async function _loadRtLog(){
+    const d = await fetchGithubJson(RT_LOG_PATH);   // 요청 보내기도 관리자 토큰이 있어야 해서, 관리자 기기에서만 읽힌다
+    if(Array.isArray(d)){ RT_LOG = d; if(typeof clearSalesCache === 'function') clearSalesCache(); if(typeof render === 'function' && PRODUCTS && PRODUCTS.length) render(); }
+}
+setTimeout(() => { _loadRtLog().catch(() => {}); }, 2500);
 let PROMOTIONS = {};
 let SALES_GUIDES = {};
 // 모델별 v4 가이드 본문(스펙·전작 대비·경쟁 모델·피팅 팁) — 가이드를 처음 열 때 한 번 받는다(품번별 요약은 SALES_GUIDES)
@@ -2948,6 +2956,14 @@ async function _rtSendCart() {
         // 보내는 동안 새로 담은 수량은 남기고, 보낸 만큼만 뺀다
         RT_CART = RT_CART.filter(x => { const sent = items.find(i => i.key === x.key); if (!sent) return true; x.qty -= sent.qty; return x.qty > 0; });
         _rtCartSave();
+        // 기록에도 남긴다(이미 요청함·최근 반납 거르기용) — 실패해도 요청 자체는 저장됐으니 조용히 넘어간다
+        try {
+            if (typeof RT_LOG !== 'undefined') {
+                const _logAdd = items.map(x => ({ code: x.code, size: String(x.size), dir: x.dir, qty: x.qty, ts: d.getTime() }));
+                RT_LOG = RT_LOG.concat(_logAdd); clearSalesCache();
+                ghSaveJson(RT_LOG_PATH, cur => (Array.isArray(cur) ? cur : []).concat(_logAdd).filter(e => e && e.ts > Date.now() - 60 * 86400000), 'RT 기록 ' + items.length + '건').then(v => { if (Array.isArray(v)) RT_LOG = v; }).catch(() => {});
+            }
+        } catch (e) { console.warn('RT 기록 저장 생략:', e && e.message); }
         const cm = document.getElementById('rtCartModal'); if (cm && !RT_CART.length) cm.classList.add('hidden');
         if (document.getElementById('transfersModal') && !document.getElementById('transfersModal').classList.contains('hidden')) window.renderTransfersList();
         showToast('RT ' + items.length + '건 · ' + items.reduce((a, x) => a + x.qty, 0) + '개 요청 완료');
@@ -4216,14 +4232,13 @@ function card(p){
   if(_cardSales.d7 >= 3)      salesSpeedBadge = `<span class="bg-red-50 text-red-500 border border-red-200 px-2 py-0.5 rounded-lg font-black text-[10px]">🔥 7일 ${_cardSales.d7}개</span>`;
   else if(_cardSales.d7 >= 1) salesSpeedBadge = `<span class="bg-blue-50 text-blue-500 border border-blue-100 px-2 py-0.5 rounded-lg font-black text-[10px]">📈 7일 ${_cardSales.d7}개</span>`;
 
-  // RT 추천 뱃지: 30일내 부산 판매 있고 타지점에 재고 있을 때
+  // RT 추천 뱃지: 등급(긴급·보충·구색·신상·인기·참고)과 첫 사이즈 — '참고'는 RT 필터를 켰을 때만 (카드가 어지럽지 않게)
   let rtChanceBadge = "";
   const _rtNeed = getRTNeed(p);
-  if(_rtNeed.score > 0) {
-    const _rtTop = _rtNeed.items[0];
+  if(_rtNeed.score > 0 && (_rtNeed.items[0].grade !== 'ref' || window._rtFilterOn)) {
+    const _rtTop = _rtNeed.items[0], _g = RT_GRADES[_rtTop.grade];
     const _rtMore = _rtNeed.items.length > 1 ? ` +${_rtNeed.items.length - 1}` : '';
-    const _rtLabel = _rtTop.kind === 'low' ? '부족' : '결품';
-    rtChanceBadge = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-0.5 rounded-lg font-black text-[10px]">🔄 RT ${escapeHtml(_rtTop.size)} ${_rtLabel}${_rtMore}</span>`;
+    rtChanceBadge = `<span class="px-2 py-0.5 rounded-lg font-black text-[10px]" style="background:${_g.bg};color:${_g.color};border:1px solid ${_g.bd}" title="${escapeHtml(_rtNeed.items.map(x => x.size + ' ' + x.label + ' ' + x.need + '개').join(' · '))}">🔄 RT ${escapeHtml(_rtTop.size)} ${_g.label}${_rtMore}</span>`;
   }
 
   // LAST CHANCE 행거 뱃지 — 걸려 있으면 늘, 추천은 LAST CHANCE 칩을 켰을 때만
@@ -4496,7 +4511,8 @@ function getFilters(){
     promoOnly: promoOnly,
     promoType: promoOnly && $("#promoTypeSel") && $("#promoTypeSel").value !== "" ? $("#promoTypeSel").value : "ALL",
     promoRate: promoOnly && $("#promoRateSel") && $("#promoRateSel").value !== "" ? Number($("#promoRateSel").value) : 0,
-    promoName: promoOnly ? (window._activePromoName || "ALL") : "ALL"
+    promoName: promoOnly ? (window._activePromoName || "ALL") : "ALL",
+    rtGrade: window._rtGrade || "ALL"
   };
 }
 
@@ -4939,7 +4955,7 @@ function render(){
     if(f.gender!=="ALL" && g!==f.gender && p.gender!==f.gender) return false;
     if(f.brand!=="ALL" && !f.brand.includes(p.브랜드)) return false;
     if(f.salesSpeed!=="ALL" && getSalesSummary(p.품번).speed !== f.salesSpeed) return false;
-    if(f.rtChance && getRTNeed(p).score <= 0) return false;
+    if(f.rtChance){ const _n = getRTNeed(p); if(_n.score <= 0) return false; if(f.rtGrade && f.rtGrade !== 'ALL' && !_n.items.some(x => x.grade === f.rtGrade)) return false; }
     if(f.hangerRec && !(_onHanger(p.품번) || getHangerRec(p).score > 0)) return false;   // 행거에 걸린 것 + 추천 후보   // 사이즈 단위로 결품/소진임박이면서 가져올 재고가 있는 것만
     
     if(f.busanOnly && !(p.busanTotal > 0 && p.sinsaTotal === 0 && p.centerTotal === 0)) return false;
@@ -5003,6 +5019,25 @@ function render(){
     return true;
   };
   let filteredList = PRODUCTS.filter(p => _matchAll(p, f));
+  // RT 추천 등급 칩 — RT 추천 필터를 켰을 때만 보인다. 숫자는 등급 조건만 뺀 지금 필터 결과 기준
+  window._rtFilterOn = !!f.rtChance;
+  {
+    const row = $("#rtGradeRow");
+    if(row){
+      if(!f.rtChance){ row.classList.add('hidden'); row.innerHTML = ''; }
+      else {
+        const base = (f.rtGrade && f.rtGrade !== 'ALL') ? PRODUCTS.filter(p => _matchAll(p, { ...f, rtGrade: 'ALL' })) : filteredList;
+        const cnt = { ALL: base.length }; RT_GRADE_ORDER.forEach(g => cnt[g] = 0);
+        base.forEach(p => { const gs = new Set(getRTNeed(p).items.map(x => x.grade)); gs.forEach(g => cnt[g]++); });
+        const cur = f.rtGrade || 'ALL';
+        const chip = (g, label, color) => `<button type="button" class="chip" data-active="${cur === g ? 1 : 0}" onclick="window._setRtGrade('${g}')" style="${cur === g && color ? 'background:' + color + ';border-color:' + color + ';color:#fff' : ''}">${label} <b>${cnt[g]}</b></button>`;
+        const _anc = _otherSalesAnchor();
+        row.innerHTML = `<span class="text-[10px] font-bold text-[color:var(--muted)] w-10 shrink-0">RT 등급</span>` + chip('ALL', '전체', '') + RT_GRADE_ORDER.map(g => chip(g, RT_GRADES[g].label, RT_GRADES[g].color)).join('')
+          + `<span class="text-[10px] text-[color:var(--muted)]">요청 14일·반납 30일 안 사이즈는 뺌${_anc ? ' · 신사·온라인 판매 ~' + (_anc.getMonth() + 1) + '/' + _anc.getDate() + ' 기준' : ''}</span>`;
+        row.classList.remove('hidden');
+      }
+    }
+  }
   // DP 칩 숫자는 지금 걸린 다른 조건(검색·카테고리·재고있음 등)은 그대로 두고 DP 조건만 뺀 결과 기준으로 센다
   // → 칩을 눌렀을 때 나올 개수와 항상 같다. (적용된 필터 칩의 라벨이 최신 숫자를 쓰도록 renderActiveFilterBar보다 먼저)
   _dpFacetFn = () => PRODUCTS.filter(p => _matchAll(p, { ...f, dpFilters: [] }));
@@ -5015,7 +5050,10 @@ function render(){
     if(sortMode === "salesDesc") return (getSalesSummary(b.품번).d30||0) - (getSalesSummary(a.품번).d30||0) || String(a.품명).localeCompare(String(b.품명),"ko");
     // RT추천은 판매량이 아니라 "지금 얼마나 급한지"(결품·소진임박 + 최근 판매 가중) 순으로 정렬한다
     if(sortMode === "hangerDesc") return ((_onHanger(b.품번)?1:0) - (_onHanger(a.품번)?1:0)) || (getHangerRec(b).score - getHangerRec(a).score) || ((a.busanTotal||0) - (b.busanTotal||0)) || String(a.품명).localeCompare(String(b.품명),"ko");
-    if(sortMode === "rtDesc") return (getRTNeed(b).score||0) - (getRTNeed(a).score||0) || String(a.품명).localeCompare(String(b.품명),"ko");
+    if(sortMode === "rtDesc") {
+        const _gs = (p) => { const n = getRTNeed(p); if(f.rtGrade && f.rtGrade !== 'ALL'){ const it = n.items.find(x => x.grade === f.rtGrade); return it ? it.score : 0; } return n.score || 0; };
+        return _gs(b) - _gs(a) || String(a.품명).localeCompare(String(b.품명),"ko");
+    }
 
     // 무게·드롭 정렬 — 가이드에 값이 없는 상품은 항상 뒤로
     if(/^(weight|drop)(Asc|Desc)$/.test(sortMode)) {
@@ -5246,92 +5284,144 @@ function _rtStoreOf(key){
 // "지금 없어서 못 파는 것"은 아래로 묻혔다. 실제로 요청해야 하는 건 사이즈 단위 결품/부족이라
 // 사이즈별로 판정하고 긴급도로 점수를 매긴다.
 const _rtCache = new Map();
-const RT_RECENT_REQ_DAYS = 14;   // 이 기간 안에 이미 요청한 사이즈는 다시 추천하지 않는다
+// 2026-11-25 개편 — 3개월(8/23~11/18) 실제 입고 요청 1,023건과 비교해 다시 짰다.
+//  · 요청·반납 기록(rt_log.json)을 따로 남긴다. 요청 목록은 엑셀을 받으면 비워져서 '이미 요청함'을 못 거르던 문제(14일 안 재요청 157건)
+//  · 등급: 긴급(7일 안 판매·결품) / 보충(30일 안 판매·결품이나 곧 소진) / 구색(모델은 팔리는데 사이즈 빈칸) /
+//          신상·인기(부산 판매는 없지만 신사·온라인에서 팔림) / 참고(31~90일 전 판매) — 실제 요청 비중 36/21/14/19/10%
+//  · 신사에만 재고가 있으면 같은 등급 안에서 아래로(실제 신사→부산 요청은 13%뿐)
+//  · 전시품 1개뿐인 사이즈는 팔 새 상품이 없으니 재고 0으로 본다
+//  · 수량은 2주치(판매 속도 × 14일 − 부산 재고), 가져올 재고 안에서
+//  · 신사·온라인 판매는 월 1회 엑셀이라 늦다 → '마지막으로 올린 날 기준 30일'로 세고 순위 참고에만 쓴다
+const RT_RECENT_REQ_DAYS = 14;   // 들여오기 요청한 사이즈는 이 기간 동안 다시 추천하지 않는다
+const RT_RECENT_RET_DAYS = 30;   // 반납한 사이즈는 이 기간 동안 다시 들여오라고 하지 않는다
+const RT_GRADES = {
+    urgent: { label: '긴급',     base: 400, color: '#dc2626', bg: '#fef2f2', bd: '#fecaca' },
+    refill: { label: '보충',     base: 300, color: '#059669', bg: '#ecfdf5', bd: '#a7f3d0' },
+    size:   { label: '구색',     base: 200, color: '#2563eb', bg: '#eff6ff', bd: '#bfdbfe' },
+    hot:    { label: '신상·인기', base: 150, color: '#7c3aed', bg: '#f5f3ff', bd: '#ddd6fe' },
+    ref:    { label: '참고',     base: 50,  color: '#6b7280', bg: '#f9fafb', bd: '#e5e7eb' },
+};
+const RT_GRADE_ORDER = ['urgent', 'refill', 'size', 'hot', 'ref'];
 
 function _rtParseTrDate(s){
     const m = String(s || '').match(/^(\d{2})\/(\d{1,2})\/(\d{1,2})/);   // '26/09/03 17:08'
     if(!m) return null;
     return new Date(2000 + (+m[1]), (+m[2]) - 1, +m[3]).getTime();
 }
-function _rtRecentlyRequested(code, size){
-    if(typeof TRANSFERS === 'undefined' || !Array.isArray(TRANSFERS)) return false;
-    const limit = Date.now() - RT_RECENT_REQ_DAYS * 86400000;
-    return TRANSFERS.some(t => {
-        if(String(t.code) !== String(code)) return false;
-        if(String(t.size || '').trim() !== String(size).trim()) return false;
-        const ts = _rtParseTrDate(t.date);
-        return ts === null ? true : ts >= limit;   // 날짜를 못 읽으면 보수적으로 '이미 요청함' 취급
-    });
+// 품번|사이즈 → 마지막 들여오기 요청·반납 시각. 요청 목록(TRANSFERS)과 기록(RT_LOG)을 합친다
+let _rtLogIdx = null;
+function _rtLogIndex(){
+    if(_rtLogIdx) return _rtLogIdx;
+    const idx = new Map(), now = Date.now();
+    const see = (code, size, dir, ts) => {
+        const k = String(code) + '|' + String(size || '').trim();
+        const o = idx.get(k) || { inTs: 0, outTs: 0 };
+        if(dir === '반납') o.outTs = Math.max(o.outTs, ts); else o.inTs = Math.max(o.inTs, ts);
+        idx.set(k, o);
+    };
+    (Array.isArray(TRANSFERS) ? TRANSFERS : []).forEach(t => { const ts = _rtParseTrDate(t.date); see(t.code, t.size, _trDirOf(t.memo), ts === null ? now : ts); });
+    (Array.isArray(RT_LOG) ? RT_LOG : []).forEach(e => { if(e && e.ts) see(e.code, e.size, e.dir, e.ts); });
+    return (_rtLogIdx = idx);
+}
+// 신사·온라인 판매의 기준일 — 월 1회 엑셀이라, 그 채널 데이터가 있는 마지막 날
+let _otherAnchorFor = null, _otherAnchor = null;
+function _otherSalesAnchor(){
+    const items = SALES_HISTORY && SALES_HISTORY.items;
+    if(!items) return null;
+    if(_otherAnchorFor === items) return _otherAnchor;
+    let last = '';
+    for(const code in items) for(const date in items[code]){
+        if(date <= last) continue;
+        const day = items[code][date];
+        if(!day || typeof day !== 'object') continue;
+        let hit = false;
+        for(const size in day){ const sd = day[size]; if(sd && typeof sd === 'object') for(const m in sd){ const st = _rtStoreOf(m); if((st === 'sinsa' || st === 'center') && sd[m] > 0){ hit = true; break; } } if(hit) break; }
+        if(hit) last = date;
+    }
+    _otherAnchorFor = items;
+    _otherAnchor = last ? new Date(last + 'T00:00:00') : null;
+    return _otherAnchor;
 }
 
-// 반환: { score, items:[{size, kind:'out'|'gap'|'low', stock, sold7, sold30, need, fromCenter, fromSinsa}] }
+// 반환: { score, items:[{size, grade, kind, label, stock, rawStock, dp, sold7, sold30, other, need, fromCenter, fromSinsa, score}] }
 function getRTNeed(p){
     if(!p || !p.품번) return { score:0, items:[] };
     if(_rtCache.has(p.품번)) return _rtCache.get(p.품번);
 
-    const d7 = {}, d30 = {}, dAll = {};
+    const d7 = {}, d30 = {}, d90 = {}, oth = {};
     const hist = (typeof SALES_HISTORY !== 'undefined' && SALES_HISTORY && SALES_HISTORY.items) ? SALES_HISTORY.items[p.품번] : null;
+    const anchor = _otherSalesAnchor();
     if(hist){
         const today = new Date(); today.setHours(0,0,0,0);
         for(const date in hist){
             const day = hist[date];
             if(typeof day !== 'object' || day === null) continue;
-            const diff = Math.floor((today - new Date(date)) / 86400000);
+            const dt = new Date(date + 'T00:00:00');
+            const diff = Math.floor((today - dt) / 86400000);
+            const aDiff = anchor ? Math.floor((anchor - dt) / 86400000) : -1;
             for(const size in day){
-                const sd = day[size];
-                let q = 0;
+                const sd = day[size], key = String(size).trim();
+                let q = 0, o = 0;
                 if(typeof sd === 'object' && sd !== null){
-                    for(const mgr in sd){ if(_rtStoreOf(mgr) === 'busan') q += (sd[mgr] || 0); }
-                } else { q = sd || 0; }   // 담당자 구분 없는 구형 데이터는 기존대로 부산 판매로 본다
-                if(q <= 0) continue;
-                const key = String(size).trim();
-                dAll[key] = (dAll[key] || 0) + q;
-                if(diff >= 0 && diff <= 30){
-                    d30[key] = (d30[key] || 0) + q;
-                    if(diff <= 7) d7[key] = (d7[key] || 0) + q;
+                    for(const mgr in sd){
+                        const st = _rtStoreOf(mgr), v = sd[mgr] || 0;
+                        if(st === 'busan') q += v; else if(st === 'sinsa' || st === 'center') o += v;
+                    }
+                } else { q = sd || 0; }   // 담당자 구분 없는 구형 데이터는 부산 판매로 본다
+                if(q > 0 && diff >= 0 && diff <= 90){
+                    d90[key] = (d90[key] || 0) + q;
+                    if(diff <= 30){ d30[key] = (d30[key] || 0) + q; if(diff <= 7) d7[key] = (d7[key] || 0) + q; }
                 }
+                if(o > 0 && aDiff >= 0 && aDiff <= 30) oth[key] = (oth[key] || 0) + o;
             }
         }
     }
-    let prodD30 = 0; for(const k in d30) prodD30 += d30[k];
+    let prod30 = 0; for(const k in d30) prod30 += d30[k];
+    let prodOther = 0; for(const k in oth) prodOther += oth[k];
+
+    // 구색 판단용: 사이즈 순서에서 부산(90일)·다른 채널(30일)에서 팔린 범위 ±2칸 (3개월 실제 요청 기준 ±1칸 79% → ±2칸 83%)
+    const order = (p.sizes || []).map(s => String(s.size).trim());
+    const range = (m) => { const ix = order.map((s, i) => (m[s] > 0 ? i : -1)).filter(i => i >= 0); return ix.length ? [Math.min(...ix) - 2, Math.max(...ix) + 2] : null; };
+    const busanRange = range(d90), otherRange = range(oth);
+    const isCur = _hangerSeason(p.시즌).kind === 'cur';
+    const dpMap = (typeof DISPLAY_ITEMS !== 'undefined' && DISPLAY_ITEMS) ? DISPLAY_ITEMS[p.품번] : null;
+    const logIdx = _rtLogIndex(), now = Date.now();
 
     const items = [];
-    let score = 0;
-    for(const s of (p.sizes || [])){
+    (p.sizes || []).forEach((s, i) => {
         const size = String(s.size).trim();
-        if(!size || size === '알수없음') continue;
-        const stock  = Number(s.busan)  || 0;
-        const center = Number(s.center) || 0;
-        const sinsa  = Number(s.sinsa)  || 0;
-        if(center + sinsa <= 0) continue;                   // 가져올 데가 없으면 추천해도 의미 없음
-        if(_rtRecentlyRequested(p.품번, size)) continue;     // 이미 요청해 둔 사이즈
-
-        const sold30 = d30[size] || 0, sold7 = d7[size] || 0, soldAll = dAll[size] || 0;
+        if(!size || size === '알수없음') return;
+        const rawStock = Number(s.busan) || 0;
+        const center = Number(s.center) || 0, sinsa = Number(s.sinsa) || 0;
+        if(center + sinsa <= 0) return;                     // 가져올 데가 없으면 추천해도 의미 없음
+        const lg = logIdx.get(p.품번 + '|' + size);
+        if(lg && lg.inTs && (now - lg.inTs) <= RT_RECENT_REQ_DAYS * 86400000) return;    // 이미 요청함
+        if(lg && lg.outTs && (now - lg.outTs) <= RT_RECENT_RET_DAYS * 86400000) return;  // 최근에 반납함
+        const dp = !!(dpMap && dpMap[size]) && rawStock === 1;   // 전시품 1개뿐 = 팔 새 상품 없음
+        const stock = dp ? 0 : rawStock;
+        const sold7 = d7[size] || 0, sold30 = d30[size] || 0, sold90 = d90[size] || 0, other = oth[size] || 0;
         const weekly = sold30 / 30 * 7;
 
-        let kind = null;
-        if(stock <= 0 && sold30 > 0) kind = 'out';                             // 팔리는데 지금 없음(기회손실 진행 중)
-        else if(stock <= 0 && soldAll > 0 && prodD30 > 0) kind = 'gap';        // 모델은 계속 팔리는데 이 사이즈만 비었음
-        else if(stock > 0 && sold30 > 0 && stock < weekly * 1.5) kind = 'low'; // 1.5주치 미만으로 곧 소진
-        if(!kind) continue;
+        let grade = null, sub = 0;
+        if(stock <= 0 && sold7 > 0)                                   { grade = 'urgent'; sub = sold7 * 10 + sold30 * 3; }
+        else if(sold30 > 0 && (stock <= 0 || stock < weekly * 1.5))   { grade = 'refill'; sub = sold30 * 5 + (stock <= 0 ? 20 : 0) - stock * 3; }
+        else if(stock <= 0 && center > 0 && prod30 > 0 && sold90 === 0 && busanRange && i >= busanRange[0] && i <= busanRange[1]) { grade = 'size'; sub = prod30 * 3 + other * 2; }
+        else if(stock <= 0 && center > 0 && sold90 === 0 && prodOther >= 3 && (other > 0 || (isCur && otherRange && i >= otherRange[0] && i <= otherRange[1]))) { grade = 'hot'; sub = prodOther + other * 3; }
+        else if(stock <= 0 && sold90 > 0 && prod30 + prodOther > 0)  { grade = 'ref'; sub = sold90 * 3; }
+        if(!grade) return;
+        sub = Math.max(1, Math.min(99, sub));
+        if(center <= 0) sub *= 0.4;   // 신사에서만 가져올 수 있음 — 같은 등급 안에서 아래로
 
-        // 최근 7일에 3배 가중 — 한 달 전 한 번 팔린 것보다 이번 주 팔린 게 훨씬 급하다
-        const demand = sold7 * 3 + (sold30 - sold7);
-        let sizeScore;
-        if(kind === 'out')      sizeScore = demand * 2 + 10;
-        else if(kind === 'gap') sizeScore = Math.min(soldAll, 6) * 0.8;   // 과거 이력만 있는 경우는 낮게
-        else                    sizeScore = demand * Math.max(0, 1 - stock / (weekly * 1.5 + 1));
-        if(center <= 0) sizeScore *= 0.85;   // 물류엔 없고 신사 재고뿐 — 타 매장 물건을 빼오는 셈이라 소폭 감점
-        if(sizeScore <= 0) continue;
-
-        const need = Math.max(1, Math.ceil(weekly) - stock);
+        const rate = Math.max(sold7 / 7, sold30 / 30);
+        let need = (grade === 'urgent' || grade === 'refill') ? Math.max(1, Math.ceil(rate * 14) - stock) : 1;
+        need = Math.min(need, center + sinsa);
         const fromCenter = Math.min(center, need);
-        items.push({ size, kind, stock, sold7, sold30, need, fromCenter,
-                     fromSinsa: Math.max(0, Math.min(sinsa, need - fromCenter)),
-                     score: sizeScore });
-        score += sizeScore;
-    }
+        items.push({ size, grade, kind: grade, label: RT_GRADES[grade].label, stock, rawStock, dp, sold7, sold30, other,
+                     need, fromCenter, fromSinsa: Math.max(0, Math.min(sinsa, need - fromCenter)),
+                     score: RT_GRADES[grade].base + sub });
+    });
     items.sort((a,b) => b.score - a.score);
+    const score = items.length ? items[0].score + items.slice(1).reduce((a, x) => a + x.score, 0) * 0.02 : 0;
     const result = { score: Math.round(score * 10) / 10, items };
     _rtCache.set(p.품번, result);
     return result;
@@ -5398,7 +5488,7 @@ function getHangerRec(p){
     return done(score >= HANGER_MIN_SCORE ? { score, tags, left, lastDate } : none);
 }
 
-function clearSalesCache() { _salesCache.clear(); _rtCache.clear(); _hangerCache.clear(); }
+function clearSalesCache() { _salesCache.clear(); _rtCache.clear(); _hangerCache.clear(); _rtLogIdx = null; }
 function getSalesSummary(code) {
   if(_salesCache.has(code)) return _salesCache.get(code);
   if(!SALES_HISTORY || !SALES_HISTORY.items || !SALES_HISTORY.items[code]) {
@@ -5583,9 +5673,13 @@ function openDetail(p){
     const _sh = SALES_HISTORY.items[p.품번];
     const _today = new Date(); _today.setHours(0,0,0,0);
     const _todayKey = `${_today.getFullYear()}-${String(_today.getMonth()+1).padStart(2,'0')}-${String(_today.getDate()).padStart(2,'0')}`;
+    const _anc = _otherSalesAnchor();
     for (let date in _sh) {
       const diffDays = Math.floor((_today - new Date(date)) / 86400000);
-      if (diffDays > 30) continue;
+      // 신사·온라인은 월 1회 엑셀이라 '마지막으로 올린 날 기준 30일'로 센다 (오늘 기준이면 월말엔 거의 0)
+      const _aDiff = _anc ? Math.floor((_anc - new Date(date + 'T00:00:00')) / 86400000) : diffDays;
+      const _inBusan = diffDays >= 0 && diffDays <= 30, _inEtc = _aDiff >= 0 && _aDiff <= 30;
+      if (!_inBusan && !_inEtc) continue;
       const dayData = _sh[date];
       if (typeof dayData === 'object') {
         for (let size in dayData) {
@@ -5593,7 +5687,7 @@ function openDetail(p){
             const sd = dayData[size];
             // 부산 중복 방지: '부산(김종훈)'과 '부산' 키 동시 존재 시 최대값만 카운트
             const bq = Math.max(sd['부산(김종훈)'] || 0, sd['부산'] || 0);
-            if (bq > 0) {
+            if (bq > 0 && _inBusan) {
               _sizeSales30Busan[size] = (_sizeSales30Busan[size] || 0) + bq;
               if (date === _todayKey) {
                 _sizeSalesToday[size] = (_sizeSalesToday[size] || 0) + bq;
@@ -5601,13 +5695,14 @@ function openDetail(p){
             }
             for (let mgr in sd) {
               const qty = sd[mgr] || 0;
-              if (!mgr.includes("김종훈") && !mgr.includes("부산")) {
+              if (_inEtc && !mgr.includes("김종훈") && !mgr.includes("부산")) {
                 // 부산 제외 (신사, 물류 등)
                 _sizeSales30Etc[size] = (_sizeSales30Etc[size] || 0) + qty;
               }
             }
           } else {
             // 담당자 구분 없는 구형 데이터 → 부산제외에 포함
+            if (!_inEtc) continue;
             const qty = dayData[size] || 0;
             _sizeSales30Etc[size] = (_sizeSales30Etc[size] || 0) + qty;
           }
@@ -5616,7 +5711,13 @@ function openDetail(p){
     }
   }
 
+  // RT 추천 요약 — 사이즈별 등급과 제안 수량(2주치)
+  const _rtD = getRTNeed(p);
+  const _rtDetailHtml = _rtD.items.length ? `<div class="mb-2 px-1 flex flex-wrap gap-1 items-center text-[11px] font-bold"><span class="text-gray-500">RT 추천</span>${_rtD.items.map(x => { const g = RT_GRADES[x.grade]; return `<span class="px-1.5 py-0.5 rounded-md" style="background:${g.bg};color:${g.color};border:1px solid ${g.bd}" title="부산 7일 ${x.sold7} · 30일 ${x.sold30}${x.other ? ' · 신사·온라인 ' + x.other : ''}${x.dp ? ' · 전시품뿐' : ''}">${escapeHtml(x.size)} ${g.label} ${x.need}개${x.fromCenter ? '' : '(신사)'}</span>`; }).join('')}</div>` : '';
+  const _ancD = _otherSalesAnchor();
+  const _etcLabel = _ancD ? `~${_ancD.getMonth() + 1}/${_ancD.getDate()}` : '30일';
   $("#detailBody").innerHTML = `
+    ${_rtDetailHtml}
     <div class="mb-2 flex gap-4 text-xs font-bold text-gray-500 px-1">
         <span>부산 <b class="text-blue-600 text-sm">${p.busanTotal}</b></span>
         <span>물류 <b class="text-gray-700 text-sm">${p.centerTotal}</b></span>
@@ -5628,7 +5729,7 @@ function openDetail(p){
             <tr>
             <th class="py-2 px-1 text-center whitespace-nowrap border-r border-gray-100">사이즈</th>
             <th class="py-2 px-1 text-center whitespace-nowrap text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">30일</span></th>
-            <th class="py-2 px-1 text-center whitespace-nowrap text-indigo-600 bg-indigo-50/60 border-r border-gray-100">타지점<br><span class="font-normal text-[10px] text-indigo-400">30일</span></th>
+            <th class="py-2 px-1 text-center whitespace-nowrap text-indigo-600 bg-indigo-50/60 border-r border-gray-100" title="신사·온라인 판매는 월 1회 엑셀이라 마지막으로 올린 날 기준 30일">타지점<br><span class="font-normal text-[10px] text-indigo-400">30일 ${_etcLabel}</span></th>
             <th class="py-2 px-1 text-center whitespace-nowrap text-blue-700 bg-blue-50/60 border-r border-gray-100">부산<br><span class="font-normal text-[10px] text-blue-400">재고</span></th>
             <th class="py-2 px-1 text-center whitespace-nowrap border-r border-gray-100">부산→<br>물류</th>
             <th class="py-2 px-1 text-center whitespace-nowrap border-r border-gray-100">물류 RT<br><span class="text-gray-500 font-normal">(${p.centerTotal})</span></th>
@@ -6207,6 +6308,7 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-stock], bu
     } else {
         // 나머지 필터칩: 단일선택 (하나만 활성화)
         const isActive = b.dataset.active === "1";
+        if(b.dataset.rtchance) window._rtGrade = 'ALL';
         _clearAllFilterChips();
         if (!isActive) {
             b.dataset.active = "1";
@@ -6216,8 +6318,10 @@ $$('button.chip[data-cat], button.chip[data-gender], button.chip[data-stock], bu
     visibleCount=60; render();
 }));
 
+window._setRtGrade = (g) => { window._rtGrade = (window._rtGrade === g ? 'ALL' : g); visibleCount = 60; render(); };
 $("#resetAll").onclick=()=>{
     saveHistoryState();
+    window._rtGrade = 'ALL';
     $$('button.chip[data-cat]').forEach(b=>b.dataset.active=(b.dataset.cat==="ALL"?"1":"0"));
     $$('button.chip[data-gender]').forEach(b=>b.dataset.active=(b.dataset.gender==="ALL"?"1":"0"));
     $$('button.chip[data-stock], button.chip[data-salesspeed], button.chip[data-rtchance], button.chip[data-hanger]').forEach(b=>b.dataset.active="0");
